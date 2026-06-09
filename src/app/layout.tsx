@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Archivo, Space_Grotesk, Space_Mono } from "next/font/google";
-import SmoothScroll from "./components/SmoothScroll";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
-
-const archivo = Archivo({
-  variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-});
 
 const grotesk = Space_Grotesk({
   variable: "--font-grotesk",
@@ -23,7 +16,7 @@ const mono = Space_Mono({
 
 export const metadata: Metadata = {
   title: "MECG",
-  description: "MECG",
+  description: "Michigan Engineering Consulting Group",
 };
 
 export default function RootLayout({
@@ -32,13 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${archivo.variable} ${grotesk.variable} ${mono.variable}`}
-    >
-      <body className="font-body min-h-full">
-        <SmoothScroll>{children}</SmoothScroll>
-      </body>
+    <html lang="en" className={`${grotesk.variable} ${mono.variable}`}>
+      <body className="min-h-full bg-paper font-body text-ink">{children}</body>
     </html>
   );
 }
