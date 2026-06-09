@@ -1,41 +1,142 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #0a0a0a;
-  --paper: #f2eee4;
-  --maize: #ffcb05;
-  --ink-muted: #3a3a3a;
+  --mecg-blue: #4168B1;
+  --mecg-blue-dark: #142B52;
+  --mecg-blue-deep: #081224;
+  --mecg-blue-soft: #EAF2FF;
+  --mecg-sky: #BFD7FF;
+  --mecg-orange: #F5823A;
+  --mecg-orange-dark: #D96722;
+  --paper: #F6F9FF;
+  --white: #FFFFFF;
+  --ink: #0E1A2B;
+  --muted: #5F6F86;
+  --line: rgba(65, 104, 177, 0.18);
+  --shadow-soft: 0 24px 70px rgba(20, 43, 82, 0.14);
+  --shadow-card: 0 14px 36px rgba(20, 43, 82, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--paper);
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(245, 130, 58, 0.18), transparent 22rem),
+    radial-gradient(circle at 88% 0%, rgba(191, 215, 255, 0.9), transparent 34rem),
+    linear-gradient(180deg, #F6F9FF 0%, #ECF4FF 45%, #F6F9FF 100%);
   color: var(--ink);
+  font-family: "Avenir Next", "Montserrat", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.font-display {
-  font-family: var(--font-archivo);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.font-body {
-  font-family: var(--font-grotesk);
+::selection {
+  background: var(--mecg-orange);
+  color: var(--white);
 }
 
-.font-mono {
-  font-family: var(--font-mono);
+.text-blue {
+  color: var(--mecg-blue);
 }
 
-.text-maize {
-  color: var(--maize);
+.text-navy {
+  color: var(--mecg-blue-dark);
 }
 
-.text-ink {
-  color: var(--ink);
+.text-orange {
+  color: var(--mecg-orange);
+}
+
+.text-muted {
+  color: var(--muted);
 }
 
 .bg-paper {
   background: var(--paper);
 }
 
-.bg-ink {
-  background: var(--ink);
+.border-line {
+  border-color: var(--line);
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid var(--mecg-orange);
+  outline-offset: 4px;
+}
+
+.noise {
+  position: relative;
+}
+
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.33;
+  background-image:
+    linear-gradient(rgba(65, 104, 177, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(65, 104, 177, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+.gear-mark {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  background: var(--mecg-orange);
+  color: white;
+  font-weight: 900;
+  clip-path: polygon(
+    50% 0%, 61% 20%, 84% 13%, 87% 37%, 100% 50%, 87% 63%,
+    84% 87%, 61% 80%, 50% 100%, 39% 80%, 16% 87%, 13% 63%,
+    0% 50%, 13% 37%, 16% 13%, 39% 20%
+  );
+}
+
+.gear-mark::after {
+  content: "";
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 5px solid white;
+  border-radius: 999px;
+}
+
+.glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+}
+
+.blue-panel {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(245, 130, 58, 0.22), transparent 24rem),
+    linear-gradient(135deg, var(--mecg-blue) 0%, var(--mecg-blue-dark) 100%);
+  color: white;
+}
+
+.display-tight {
+  letter-spacing: -0.075em;
+  line-height: 0.88;
+}
+
+@media (max-width: 768px) {
+  .display-tight {
+    letter-spacing: -0.055em;
+    line-height: 0.92;
+  }
 }
