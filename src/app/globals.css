@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0a0a0a;
+  --paper: #f2eee4;
+  --maize: #ffcb05;
+  --ink-muted: #3a3a3a;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: var(--font-archivo);
+}
+
+.font-body {
+  font-family: var(--font-grotesk);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-maize {
+  color: var(--maize);
+}
+
+.text-ink {
+  color: var(--ink);
+}
+
+.bg-paper {
+  background: var(--paper);
+}
+
+.bg-ink {
+  background: var(--ink);
+}
