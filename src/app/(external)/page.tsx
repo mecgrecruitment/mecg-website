@@ -1,131 +1,112 @@
-import { clients, pillars, services } from "../../lib/site-content";
+import { GearLogo } from "../../components/brand/GearLogo";
+import { clients, pillars, recruitmentEvents, services } from "../../lib/site-content";
 
-const impactStats = [
-  { value: "80+", label: "Members", detail: "across majors and class years" },
-  { value: "25+", label: "Projects Completed", detail: "with real client teams" },
-  { value: "15+", label: "Different Majors", detail: "represented in the community" },
+const stats = [
+  ["80+", "Members"],
+  ["25+", "Projects Completed"],
+  ["15+", "Majors Represented"],
 ];
 
 export default function Home() {
   return (
     <main>
-      <section className="noise relative overflow-hidden px-5 py-20 md:px-10 md:py-28">
-        <div className="absolute right-[-12rem] top-[-10rem] h-[34rem] w-[34rem] rounded-full bg-[var(--mecg-sky)] opacity-70 blur-3xl" />
-        <div className="absolute bottom-[-16rem] left-[-10rem] h-[30rem] w-[30rem] rounded-full bg-[var(--mecg-orange)] opacity-20 blur-3xl" />
+      <section className="grid-bg relative px-5 py-20 md:px-8 md:py-28">
+        <div className="orb right-[-12rem] top-[-12rem] h-[34rem] w-[34rem] bg-[var(--blue)]" />
+        <div className="orb bottom-[-12rem] left-[-12rem] h-[28rem] w-[28rem] bg-[var(--orange-dark)]" />
 
-        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div className="container relative grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
           <div>
-            <div className="inline-flex items-center gap-3 border border-[var(--line)] bg-white/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--mecg-blue)] shadow-sm backdrop-blur">
-              <span className="h-2 w-2 bg-[var(--mecg-orange)]" />
-              University of Michigan
-            </div>
+            <p className="eyebrow reveal">Michigan Engineering Consulting Group</p>
 
-            <h1 className="display-tight mt-8 text-6xl font-black uppercase text-[var(--mecg-blue-dark)] md:text-8xl xl:text-[7.8rem]">
-              Multifaceted.
-              <span className="block text-[var(--mecg-blue)]">Driven.</span>
-              <span className="block text-[var(--mecg-orange)]">Inclusive.</span>
+            <h1 className="display reveal-2 mt-8 max-w-5xl text-6xl uppercase text-white md:text-8xl xl:text-[8rem]">
+              Pro-bono consulting at Michigan.
             </h1>
 
-            <p className="mt-8 max-w-2xl text-xl leading-relaxed text-[var(--muted)] md:text-2xl">
-              Michigan Engineering Consulting Group is a pro-bono consulting group open to all majors at the University of Michigan.
+            <p className="reveal-3 mt-8 max-w-2xl text-xl leading-relaxed text-white/62 md:text-2xl">
+              MECG helps students develop consulting skills through client projects, technical education, professional development, and community.
             </p>
 
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="reveal-3 mt-10 flex flex-wrap gap-3">
               <a
                 href="/apply"
-                className="focus-ring bg-[var(--mecg-orange)] px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_38px_rgba(245,130,58,0.32)] transition hover:-translate-y-1 hover:bg-[var(--mecg-orange-dark)]"
+                className="focus-ring rounded-full bg-[var(--orange)] px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white transition hover:bg-white hover:text-[var(--navy-950)]"
               >
-                Apply Now
+                Apply to MECG
               </a>
               <a
                 href="/services"
-                className="focus-ring border border-[var(--mecg-blue)] bg-white/70 px-7 py-4 text-sm font-black uppercase tracking-[0.18em] text-[var(--mecg-blue-dark)] shadow-sm transition hover:-translate-y-1 hover:bg-[var(--mecg-blue)] hover:text-white"
+                className="focus-ring rounded-full border border-white/14 px-6 py-3.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/72 transition hover:border-white/34 hover:text-white"
               >
-                Work With Us
+                Client Services
               </a>
             </div>
           </div>
 
-          <div className="relative">
-            <div className="glass-card relative overflow-hidden p-6 md:p-8">
-              <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[var(--mecg-orange)] opacity-20 blur-2xl" />
-
-              <div className="blue-panel p-8 shadow-[0_28px_70px_rgba(20,43,82,0.24)]">
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--mecg-orange)]">
-                  MECG / Consulting
-                </p>
-                <h2 className="mt-8 text-4xl font-black uppercase leading-none tracking-[-0.055em] md:text-6xl">
-                  Student consultants. Real clients. Practical impact.
+          <aside className="panel-strong reveal-3 rounded-[2rem] p-6">
+            <div className="flex items-start justify-between gap-8">
+              <div>
+                <p className="eyebrow">Overview</p>
+                <h2 className="font-display mt-6 max-w-lg text-4xl font-bold uppercase leading-[0.95] tracking-[-0.055em] text-white md:text-5xl">
+                  Real project work for students across majors.
                 </h2>
-                <p className="mt-7 text-lg leading-relaxed text-white/78">
-                  Our members learn by doing: strategy, operations, analytics, product, and marketing work for organizations that need clear recommendations.
-                </p>
+              </div>
+              <GearLogo className="hidden h-20 w-20 shrink-0 text-[var(--orange)] opacity-80 md:block" spin />
+            </div>
 
-                <div className="mt-10 grid gap-3 sm:grid-cols-2">
-                  {["Strategy", "Analytics", "Operations", "Product"].map((item) => (
-                    <div key={item} className="border border-white/18 bg-white/8 px-4 py-3 text-sm font-black uppercase tracking-[0.13em] text-white/88">
-                      {item}
-                    </div>
-                  ))}
+            <div className="mt-10 grid gap-3">
+              {["Strategy", "Operations", "Data Analytics", "Product Development", "Marketing"].map((item, index) => (
+                <div
+                  key={item}
+                  className="grid grid-cols-[3rem_1fr] items-center border-t border-white/10 py-4"
+                >
+                  <span className="text-sm font-bold text-[var(--orange)]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-lg font-semibold text-white/80">
+                    {item}
+                  </span>
                 </div>
-              </div>
-
-              <div className="mt-5 grid grid-cols-3 gap-3">
-                <div className="h-28 bg-[var(--mecg-orange)]" />
-                <div className="h-28 bg-[var(--mecg-blue)]" />
-                <div className="h-28 bg-[var(--mecg-sky)]" />
-              </div>
+              ))}
             </div>
-          </div>
+          </aside>
         </div>
       </section>
 
-      <section className="px-5 py-14 md:px-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-4 md:grid-cols-3">
-            {impactStats.map((stat) => (
-              <article key={stat.label} className="glass-card p-7 transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(20,43,82,0.16)]">
-                <p className="text-6xl font-black tracking-[-0.07em] text-[var(--mecg-blue-dark)]">
-                  {stat.value}
-                </p>
-                <h2 className="mt-3 text-xl font-black uppercase tracking-[-0.03em] text-[var(--mecg-blue)]">
-                  {stat.label}
-                </h2>
-                <p className="mt-2 text-[var(--muted)]">{stat.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-5 py-20 md:px-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--mecg-orange)]">
-                Our Four Pillars
+      <section className="border-y border-white/10 px-5 py-8 md:px-8">
+        <div className="container grid gap-4 md:grid-cols-3">
+          {stats.map(([value, label]) => (
+            <div key={label} className="panel rounded-[1.5rem] p-6">
+              <p className="stat text-5xl font-bold text-white">{value}</p>
+              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.14em] text-white/42">
+                {label}
               </p>
-              <h2 className="display-tight mt-5 text-5xl font-black uppercase text-[var(--mecg-blue-dark)] md:text-7xl">
-                Learn. Build. Lead. Belong.
-              </h2>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <p className="max-w-2xl text-xl leading-relaxed text-[var(--muted)]">
-              MECG centers a community of diverse students who share a passion to learn more about consulting and gain experience in the field.
-            </p>
+      <section className="section">
+        <div className="container grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="eyebrow">What members build</p>
+            <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
+              A practical path into consulting.
+            </h2>
           </div>
 
-          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="border-t border-white/10">
             {pillars.map((pillar) => (
-              <article key={pillar.index} className="group relative overflow-hidden bg-white p-7 shadow-[0_14px_34px_rgba(20,43,82,0.10)] transition hover:-translate-y-1">
-                <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[var(--mecg-orange)] to-[var(--mecg-blue)]" />
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-[var(--mecg-orange)]">
+              <article
+                key={pillar.index}
+                className="card-hover grid gap-5 border-b border-white/10 py-7 md:grid-cols-[5rem_1fr_1.35fr]"
+              >
+                <p className="text-sm font-bold text-[var(--orange)]">
                   {pillar.index}
                 </p>
-                <h3 className="mt-8 text-2xl font-black uppercase leading-none tracking-[-0.045em] text-[var(--mecg-blue-dark)]">
+                <h3 className="font-display text-2xl font-bold uppercase leading-none tracking-[-0.04em] text-white">
                   {pillar.title}
                 </h3>
-                <p className="mt-5 leading-relaxed text-[var(--muted)]">
+                <p className="leading-relaxed text-white/52">
                   {pillar.body}
                 </p>
               </article>
@@ -134,97 +115,122 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="blue-panel px-5 py-20 md:px-10">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="section border-y border-white/10 bg-white/[0.025]">
+        <div className="container grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--mecg-orange)]">
-              Client Services
-            </p>
-            <h2 className="display-tight mt-5 text-5xl font-black uppercase md:text-7xl">
-              Consulting with technical range.
+            <p className="eyebrow">Client services</p>
+            <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
+              Support for strategic and technical problems.
             </h2>
-            <p className="mt-7 text-xl leading-relaxed text-white/75">
-              MECG supports a diverse mix of traditional consulting and tech consulting projects.
+            <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/56">
+              Teams scope projects, conduct research, analyze data, and present recommendations to client organizations.
             </p>
-            <a
-              href="/services"
-              className="focus-ring mt-10 inline-block bg-white px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-[var(--mecg-blue-dark)] transition hover:bg-[var(--mecg-orange)] hover:text-white"
-            >
-              Explore Services
-            </a>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {services.map((service) => (
-              <article key={service.title} className="border border-white/16 bg-white/8 p-6 backdrop-blur transition hover:-translate-y-1 hover:bg-white/12">
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-[var(--mecg-orange)]">
-                  {service.index}
-                </p>
-                <h3 className="mt-6 text-2xl font-black uppercase tracking-[-0.04em]">
+              <article key={service.title} className="card-hover panel rounded-[1.5rem] p-6">
+                <p className="text-sm font-bold text-[var(--orange)]">{service.index}</p>
+                <h3 className="font-display mt-6 text-2xl font-bold uppercase tracking-[-0.04em] text-white">
                   {service.title}
                 </h3>
-                <p className="mt-4 leading-relaxed text-white/68">{service.body}</p>
+                <p className="mt-4 leading-relaxed text-white/50">
+                  {service.body}
+                </p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-5 py-20 md:px-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <section className="section">
+        <div className="container">
+          <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[var(--mecg-orange)]">
-                Past Clients
-              </p>
-              <h2 className="display-tight mt-5 text-5xl font-black uppercase text-[var(--mecg-blue-dark)] md:text-7xl">
-                Project experience that leaves the classroom.
+              <p className="eyebrow">Project experience</p>
+              <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
+                Past client work.
               </h2>
             </div>
-            <a href="/placement" className="text-sm font-black uppercase tracking-[0.18em] text-[var(--mecg-blue)] hover:text-[var(--mecg-orange)]">
-              View project index →
+            <a
+              href="/placement"
+              className="text-sm font-bold uppercase tracking-[0.16em] text-[var(--orange)] hover:text-white"
+            >
+              View placement →
             </a>
           </div>
 
-          <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {clients.slice(0, 12).map((client) => (
-              <article key={client.name} className="min-h-32 bg-white p-5 shadow-[0_12px_28px_rgba(20,43,82,0.08)] transition hover:-translate-y-1 hover:shadow-[0_20px_44px_rgba(20,43,82,0.14)]">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--mecg-orange)]">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {clients.slice(0, 8).map((client) => (
+              <article key={client.name} className="panel rounded-[1.35rem] p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/34">
                   {client.term}
                 </p>
-                <h3 className="mt-6 text-xl font-black uppercase leading-none tracking-[-0.04em] text-[var(--mecg-blue-dark)]">
+                <h3 className="font-display mt-8 text-2xl font-bold uppercase leading-none tracking-[-0.04em] text-white">
                   {client.name}
                 </h3>
               </article>
             ))}
-        </div>
+          </div>
         </div>
       </section>
 
-      <section className="px-5 pb-24 md:px-10">
-        <div className="mx-auto max-w-7xl overflow-hidden bg-white shadow-[0_28px_80px_rgba(20,43,82,0.16)] lg:grid lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="min-h-[24rem] bg-[var(--mecg-sky)] p-8">
-            <div className="h-full border-4 border-[var(--mecg-orange)] bg-gradient-to-br from-[var(--mecg-blue)] to-[var(--mecg-blue-dark)] p-8 text-white">
-              <p className="text-sm font-black uppercase tracking-[0.22em] text-[var(--mecg-orange)]">
-                President's Welcome
-              </p>
-              <h2 className="mt-8 text-4xl font-black uppercase leading-none tracking-[-0.05em]">
-                Welcome to the MECG community.
-              </h2>
-            </div>
+      <section className="section border-y border-white/10 bg-white/[0.025]">
+        <div className="container grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+          <div>
+            <p className="eyebrow">Recruitment</p>
+            <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
+              Winter 2026 timeline.
+            </h2>
+            <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/56">
+              Learn about MECG through open events, then apply and move through invite-only stages.
+            </p>
           </div>
 
-          <div className="p-8 md:p-12">
-            <p className="text-lg leading-relaxed text-[var(--muted)]">
-              At MECG, every project is an opportunity to grow, innovate, and make a meaningful impact. Our members bring diverse backgrounds and majors, combining technical depth with business curiosity.
+          <div className="grid gap-3">
+            {recruitmentEvents.slice(0, 5).map((event) => (
+              <article
+                key={event.code}
+                className="panel card-hover grid gap-4 rounded-[1.35rem] p-5 md:grid-cols-[5rem_1fr_12rem]"
+              >
+                <p className="font-bold text-[var(--orange)]">{event.code}</p>
+                <div>
+                  <h3 className="font-display text-xl font-bold uppercase tracking-[-0.035em] text-white">
+                    {event.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-white/48">{event.body}</p>
+                </div>
+                <p className="text-sm leading-relaxed text-white/42">
+                  {event.date}<br />
+                  {event.time}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container grid gap-5 md:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-[2rem] bg-white p-8 text-[var(--navy-950)] md:p-12">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--orange-dark)]">
+              Apply
             </p>
-            <p className="mt-6 text-lg leading-relaxed text-[var(--muted)]">
-              Whether you're a potential client looking for strategic guidance or a student eager to join our community, we'd love to hear from you.
+            <h2 className="font-display mt-7 max-w-4xl text-5xl font-bold uppercase leading-[0.92] tracking-[-0.065em] md:text-7xl">
+              Join MECG this recruitment cycle.
+            </h2>
+          </div>
+
+          <div className="panel rounded-[2rem] p-8 md:p-10">
+            <p className="text-lg leading-relaxed text-white/58">
+              MECG is open to students across majors who want to learn consulting through structured education, client work, and collaboration.
             </p>
-            <div className="mt-10">
-              <p className="text-3xl font-black text-[var(--mecg-blue-dark)]">Annie Callam</p>
-              <p className="mt-1 text-[var(--muted)]">President of MECG, 2026</p>
-            </div>
+            <a
+              href="/apply"
+              className="focus-ring mt-8 inline-block rounded-full bg-[var(--orange)] px-7 py-4 text-xs font-extrabold uppercase tracking-[0.16em] text-white transition hover:bg-white hover:text-[var(--navy-950)]"
+            >
+              Start application
+            </a>
           </div>
         </div>
       </section>
