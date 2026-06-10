@@ -1,12 +1,13 @@
-import { submitMockApplication } from "./actions";
+import { submitDemoApplication } from "./actions";
 
-export default async function ApplyCreatePage({
+export default async function ApplyApplicationPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; email?: string }>;
 }) {
   const params = await searchParams;
   const error = params?.error;
+  const email = params?.email ?? "";
 
   return (
     <div className="grid gap-8">
@@ -16,7 +17,7 @@ export default async function ApplyCreatePage({
           Submit your application.
         </h2>
         <p className="mt-4 max-w-2xl text-white/54">
-          Demo mode is open. This form simulates the full applicant experience, including resume and written responses.
+          This demo saves applicant responses into Supabase demo storage.
         </p>
       </section>
 
@@ -26,7 +27,7 @@ export default async function ApplyCreatePage({
         </p>
       ) : null}
 
-      <form action={submitMockApplication} className="panel grid gap-5 rounded-[2rem] p-6 md:p-8">
+      <form action={submitDemoApplication} className="panel grid gap-5 rounded-[2rem] p-6 md:p-8">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="grid gap-2">
             <span className="text-sm font-bold">Full name</span>
@@ -35,7 +36,7 @@ export default async function ApplyCreatePage({
 
           <label className="grid gap-2">
             <span className="text-sm font-bold">Email</span>
-            <input name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+            <input defaultValue={email} name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
           </label>
 
           <label className="grid gap-2">
@@ -70,7 +71,7 @@ export default async function ApplyCreatePage({
         </label>
 
         <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
-          Submit demo application
+          Submit application
         </button>
       </form>
     </div>

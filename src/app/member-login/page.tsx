@@ -11,7 +11,7 @@ export default function MemberLoginPage() {
 
         <p className="eyebrow mt-8">Member Login</p>
         <h1 className="font-display mt-4 text-5xl font-bold uppercase tracking-[-0.06em]">
-          Internal portal.
+          Inrnal portal.
         </h1>
         <p className="mt-4 text-white/54">
           Demo login for members, recruitment team, and board.

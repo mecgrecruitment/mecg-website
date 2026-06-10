@@ -1,18 +1,21 @@
 import { submitDemoCheckin } from "./actions";
+import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
 
 export default async function ApplicantCheckinPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; email?: string }>;
 }) {
   const params = await searchParams;
   const error = params?.error;
+  const email = params?.email ?? "";
 
-  const events = [
-    ["Mass Meeting", "BLUEGEAR", "Jan 16"],
-    ["Career Panel", "PROJECT", "Jan 20"],
-    ["Meet the Members", "CLIENT", "Jan 22"],
-  ];
+  const supabase = createDemoAdminClient();
+  const { data: events } = await supabase
+    .from("demo_events")
+    .select("*")
+    .eq("active", true)
+    .order("created_at", { ascending: true });
 
   return (
     <div className="grid gap-8">
@@ -22,7 +25,7 @@ export default async function ApplicantCheckinPage({
           Event check-in.
         </h2>
         <p className="mt-4 max-w-2xl text-white/54">
-          Applicants can enter an event phrase to simulate attendance tracking.
+          Enter your email and the exact event phrase. Invalid codes will not be accepted.
         </p>
       </section>
 
@@ -36,7 +39,7 @@ export default async function ApplicantCheckinPage({
         <form action={submitDemoCheckin} className="panel grid gap-4 rounded-[2rem] p-6 md:p-8">
           <label className="grid gap-2">
             <span className="text-sm font-bold">Email</span>
-            <input name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+            <input defaultValue={email} name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
           </label>
 
           <label className="grid gap-2">
@@ -50,15 +53,19 @@ export default async function ApplicantCheckinPage({
         </form>
 
         <div className="panel rounded-[2rem] p-6 md:p-8">
-          <p className="eyebrow">Demo event codes</p>
+          <p className="eyebrow">Valid demo codes</p>
           <div className="mt-5 grid gap-3">
-            {events.map(([title, code, date]) => (
-              <article key={title} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            {(events ?? []).map((event) => (
+              <article key={event.id} className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <div>
-                  <h3 className="font-bold">{title}</h3>
-                  <p className="text-sm text-white/44">{date}</p>
+                  <h3 className="font-bold">{event.title}</h3>
+                  <p className="text-sm text-white/44">
+                    {event.event_date} · {event.location}
+                  </p>
                 </div>
-                <p className="font-mono text-sm font-bold text-[var(--orange)]">{code}</p>
+                <p className="font-mono text-sm font-bold tex-[var(--orange)]">
+                  {event.attendance_code}
+                </p>
               </article>
             ))}
           </div>

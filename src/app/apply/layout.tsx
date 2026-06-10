@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const applicantNav = [
-  { href: "/apply", label: "Overview" },
-  { href: "/apply/create", label: "Application" },
+  { href: "/apply", label: "Login" },
+  { href: "/apply/dashboard", label: "Dashboard" },
+  { href: "/apply/application", label: "Application" },
   { href: "/apply/checkin", label: "Attendance" },
-  { href: "/apply/dashboard", label: "Status" },
 ];
 
 export default function ApplicantLayout({
@@ -14,7 +14,7 @@ export default function ApplicantLayout({
 }) {
   return (
     <main className="min-h-screen bg-[var(--navy-950)] text-white">
-      <header className="border-b border-white/10 bg-[rgba(8,18,37,0.9)] px-5 py-4 backdrop-blur-xl md:px-8">
+      <header className="border-b border-white/10 bg-[rgba(8,18,37,0.92)] px-5 py-4 backdrop-blur-xl md:px-8">
         <div className="mx-auto flex max-w-[1400px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Link href="/apply">
             <p className="annotation text-white/38">MECG Applicants</p>
@@ -24,6 +24,12 @@ export default function ApplicantLayout({
           </Link>
 
           <nav className="flex gap-2 overflow-x-auto">
+            <Link
+              href="/"
+              className="shrink-0 rounded-full border border-[var(--orange)]/40 bg-[var(--orange)]/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--orange-soft)] transition hover:bg-[var(--orange)] hover:text-white"
+            >
+              Main Website
+            </Link>
             {applicantNav.map((item) => (
               <Link
                 key={item.href}

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
 
-export async function submitMockApplication(formData: FormData) {
+export async function submitDemoApplication(formData: FormData) {
   const supabase = createDemoAdminClient();
 
   const fullName = String(formData.get("full_name") || "").trim();
@@ -16,7 +16,7 @@ export async function submitMockApplication(formData: FormData) {
   const problemSolving = String(formData.get("problem_solving") || "").trim();
 
   if (!fullName || !email || !whyMecg || !teamwork || !problemSolving) {
-    redirect("/apply/create?error=Please complete the required fields.");
+    redirect("/apply/application?error=Please complete the required fields.");
   }
 
   const { error } = await supabase.from("demo_applications").insert({
@@ -32,8 +32,8 @@ export async function submitMockApplication(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/apply/create?error=${encodeURIComponent(error.message)}`);
+    redirect(`/apply/application?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect("/apply/dashboard?submitted=1");
+  redirect(`/apply/dashboard?email=${encodeURIComponent(email)}&submitted=1`);
 }

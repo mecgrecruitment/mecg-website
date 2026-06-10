@@ -1,82 +1,58 @@
-import Link from "next/link";
+import { applicantEnter } from "./actions";
 
-export default function ApplicantPortalPage() {
-  const timeline = [
-    ["Application", "Submit your resume and written responses."],
-    ["Open Rush", "Attend events and check in with event codes."],
-    ["Review", "MECG reviews applications and event attendance."],
-    ["Invite Stages", "Selected applicants move to speed dating, group case, and interview."],
-  ];
+export default async function ApplicantLoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const error = params?.error;
 
   return (
     <div className="grid gap-8">
       <section className="panel-strong rounded-[2rem] p-7 md:p-10">
-        <p className="eyebrow">Winter 2026</p>
+        <p className="eyebrow">Applicant Login</p>
         <h2 className="font-display mt-5 max-w-4xl text-5xl font-bold uppercase leading-[0.9] tracking-[-0.07em] md:text-7xl">
-          Your MECG application hub.
+          Start or continue your application.
         </h2>
         <p className="mt-6 max-w-2xl text-white/58">
-          Submit your application, check into recruitment events, and track your application status from one applicant portal.
+          Create a demo applicant account with an email and password, then return to see your submitted information.
         </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/apply/create" className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
-            Start application
-          </Link>
-          <Link href="/apply/checkin" className="rounded-full border border-white/10 px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em] text-white/70 hover:border-[var(--orange)] hover:text-white">
-            Event check-in
-          </Link>
-        </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <article className="panel rounded-[1.5rem] p-6">
-          <p className="eyebrow">Status</p>
-          <h3 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em]">
-            Open
-          </h3>
-          <p className="mt-3 text-sm text-white/48">
-            Applications are open in demo mode for presentation.
-          </p>
-        </article>
+      {error ? (
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">
+          {error}
+        </p>
+      ) : null}
 
-        <article className="panel rounded-[1.5rem] p-6">
-          <p className="eyebrow">Attendance</p>
-          <h3 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em]">
-            Codes
-          </h3>
-          <p className="mt-3 text-sm text-white/48">
-            Applicants can enter event phrases from recruiting events.
-          </p>
-        </article>
+      <form action={applicantEnter} className="panel grid max-w-xl gap-4 rounded-[2rem] p-6 md:p-8">
+        <label className="grid gap-2">
+          <span className="text-sm font-bold">Email</span>
+          <input
+            name="email"
+            type="email"
+            placeholder="applicant@umich.edu"
+            required
+            className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+          />
+        </label>
 
-        <article className="panel rounded-[1.5rem] p-6">
-          <p className="eyebrow">Next Step</p>
-          <h3 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em]">
-            Review
-          </h3>
-          <p className="mt-3 text-sm text-white/48">
-            Internal reviewers evaluate submissions after the deadline.
-          </p>
-        </article>
-      </section>
+        <label className="grid gap-2">
+          <span className="text-sm font-bold">Password</span>
+          <input
+            name="password"
+            type="password"
+            placeholder="Create or enter password"
+            required
+            className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+          />
+        </label>
 
-      <section className="panel rounded-[2rem] p-6 md:p-8">
-        <p className="eyebrow">Recruitment timeline</p>
-        <div className="mt-6 grid gap-3">
-          {timeline.map(([title, detail], index) => (
-            <article key={title} className="grid gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 md:grid-cols-[4rem_1fr]">
-              <p className="font-mono text-sm font-bold text-[var(--orange)]">
-                {String(index + 1).padStart(2, "0")}
-              </p>
-              <div>
-                <h4 className="font-bold">{title}</h4>
-                <p className="mt-1 text-sm text-white/48">{detail}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+        <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+          Enter applicant portal
+        </button>
+      </form>
     </div>
   );
 }
