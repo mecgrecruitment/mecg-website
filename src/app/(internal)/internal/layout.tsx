@@ -1,94 +1,53 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { ROLE_LABELS, type MemberRole } from "@/lib/auth";
+import Link from "next/link";
 
-// §9.0.1: navigation respects role. General members get the open-rush roster
-// and their own profile; committee adds candidates/scoring/hash; board adds
-// admin and audit. The nav is convenience — every gated page re-checks its
-// role server-side and RLS is the real boundary (SEC-16).
-const links: { label: string; href: string; roles?: MemberRole[] }[] = [
-  { label: "Dashboard", href: "/internal" },
-  { label: "Candidates", href: "/internal/candidates" },
-  {
-    label: "Hash",
-    href: "/internal/hash",
-    roles: ["board", "recruitment_committee"],
-  },
-  { label: "Calendar", href: "/internal/calendar" },
-  { label: "Members", href: "/internal/members" },
-  { label: "Admin", href: "/internal/admin", roles: ["board"] },
-  { label: "Audit", href: "/internal/audit", roles: ["board"] },
+export const dynamic = "force-dynamic";
+
+const internalNav = [
+  { href: "/internal", label: "Dashboard" },
+  { href: "/internal/candidates", label: "Applicants" },
+  { href: "/internal/score", label: "Scoring" },
+  { href: "/internal/speed-dating", label: "Speed Dating" },
+  { href: "/internal/events", label: "Events" },
+  { href: "/internal/calendar", label: "Calendar" },
+  { href: "/internal/hash", label: "Hash" },
+  { href: "/internal/members", label: "Members" },
+  { href: "/internal/admin", label: "Admin" },
+  { href: "/internal/audit", label: "Audit" },
 ];
 
-export default async function InternalLayout({
+export default function InternalZoneLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth/login?message=Member login required.");
-  }
-
-  // Authoritative gate: a live members row (RLS always allows reading your own).
-  // Applicants are not members — they get bounced to the applicant dashboard.
-  const { data: member } = await supabase
-    .from("members")
-    .select("id, full_name, email, role")
-    .eq("user_id", user.id)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!member) {
-    redirect("/apply/dashboard");
-  }
-
-  const visibleLinks = links.filter(
-    (link) => !link.roles || link.roles.includes(member.role)
-  );
-
+}) {
   return (
     <main className="min-h-screen bg-[var(--navy-950)] text-white">
-      <div className="border-b border-white/10 bg-[var(--navy-900)] px-5 py-4 md:px-8">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--orange)]">
-              MECG Internal
-            </p>
-            <h1 className="font-display mt-1 text-2xl font-bold uppercase tracking-[-0.04em]">
-              Member Portal
+      <header className="border-b border-white/10 bg-[rgba(8,18,37,0.92)] px-5 py-4 backdrop-blur-xl md:px-8">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <Link href="/internal">
+            <p className="annotation text-white/38">MECG Internal</p>
+            <h1 className="font-display mt-1 text-3xl font-bold uppercase tracking-[-0.06em] md:text-4xl">
+              Internal Command Portal
             </h1>
-            <p className="mt-1 text-xs text-white/40">
-              {member.full_name ?? member.email} · {ROLE_LABELS[member.role]}
-            </p>
-          </div>
+          </Link>
 
-          <nav className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/56">
-            {visibleLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="rounded-full border border-white/10 px-4 py-2 transition hover:border-[var(--orange)] hover:text-white"
+          <nav className="flex gap-2 overflow-x-auto pb-1 md:justify-end md:pb-0">
+            {internalNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/58 transition hover:border-[var(--orange)] hover:bg-[var(--orange)] hover:text-white"
               >
-                {link.label}
-              </a>
+                {item.label}
+              </Link>
             ))}
-            <a
-              href="/auth/logout"
-              className="rounded-full border border-white/10 px-4 py-2 transition hover:border-red-400 hover:text-white"
-            >
-              Logout
-            </a>
           </nav>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto max-w-[1600px] px-5 py-8 md:px-8">{children}</div>
+      <section className="px-5 py-8 md:px-8 md:py-10">
+        <div className="mx-auto max-w-[1600px]">{children}</div>
+      </section>
     </main>
   );
 }

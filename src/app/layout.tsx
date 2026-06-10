@@ -1,3 +1,4 @@
+import { MemberLoginFloat } from "@/components/portal/MemberLoginFloat";
 import type { Metadata } from "next";
 import { Manrope, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
@@ -41,6 +42,8 @@ export default function RootLayout({
       className={`${manrope.variable} ${grotesk.variable} ${mono.variable}`}
     >
       <body className="min-h-full bg-surface font-sans text-on-surface">
+        
+        <MemberLoginFloat />
         {children}
       </body>
     </html>

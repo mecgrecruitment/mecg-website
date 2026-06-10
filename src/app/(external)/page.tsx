@@ -65,7 +65,7 @@ export default function Home() {
             <GearLogo className="h-4 w-4 text-[var(--orange)]/70" />
           </div>
         </div>
-      </section>
+</section>
 
       {/* Stats — measured values, counted up on entry. */}
       <section className="border-y border-white/10 px-5 md:px-8">
