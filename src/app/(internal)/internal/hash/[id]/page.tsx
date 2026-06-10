@@ -1,3 +1,4 @@
+import { requireCommittee } from "@/lib/auth";
 import { hashQueue } from "../../../../../lib/internal-data";
 
 export default async function HashSessionPage({
@@ -5,6 +6,7 @@ export default async function HashSessionPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireCommittee();
   const { id } = await params;
 
   return (

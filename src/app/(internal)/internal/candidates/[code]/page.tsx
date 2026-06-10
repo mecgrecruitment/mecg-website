@@ -1,3 +1,4 @@
+import { requireCommittee } from "@/lib/auth";
 import { candidates, rubricCriteria } from "../../../../../lib/internal-data";
 
 export default async function CandidateProfilePage({
@@ -5,6 +6,9 @@ export default async function CandidateProfilePage({
 }: {
   params: Promise<{ code: string }>;
 }) {
+  // Full candidate profiles are committee+ (§9.1); general members only get
+  // the roster at /internal/candidates.
+  await requireCommittee();
   const { code } = await params;
   const candidate = candidates.find((item) => item.code === code) ?? candidates[0];
 

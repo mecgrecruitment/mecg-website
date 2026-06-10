@@ -1,6 +1,9 @@
+import { requireBoard } from "@/lib/auth";
 import { auditEvents } from "../../../../lib/internal-data";
 
-export default function AuditPage() {
+export default async function AuditPage() {
+  await requireBoard();
+
   return (
     <div className="grid gap-7">
       <section>

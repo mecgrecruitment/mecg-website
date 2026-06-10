@@ -1,6 +1,9 @@
+import { requireCommittee } from "@/lib/auth";
 import { hashQueue } from "../../../../lib/internal-data";
 
-export default function HashPage() {
+export default async function HashPage() {
+  await requireCommittee();
+
   return (
     <div className="grid gap-7">
       <section>

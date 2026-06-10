@@ -1,6 +1,9 @@
+import { requireBoard } from "@/lib/auth";
 import { stages } from "../../../../lib/internal-data";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  await requireBoard();
+
   return (
     <div className="grid gap-7">
       <section>

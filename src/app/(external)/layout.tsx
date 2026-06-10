@@ -1,5 +1,7 @@
 import { GearLogo } from "../../components/brand/GearLogo";
 import { contact, navLinks } from "../../lib/site-content";
+import MotionProvider from "./components/MotionProvider";
+import SiteHeader from "./components/SiteHeader";
 
 export default function ExternalLayout({
   children,
@@ -7,83 +9,136 @@ export default function ExternalLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[rgba(5,9,20,0.82)] px-5 py-4 backdrop-blur-xl md:px-8">
-        <div className="container flex items-center justify-between">
-          <a href="/" className="focus-ring flex items-center gap-3">
-            <GearLogo className="h-8 w-8 text-[var(--orange)]" />
-            <div>
-              <p className="font-display text-xl font-bold uppercase tracking-[0.24em] text-white">
-                MECG
-              </p>
-              <p className="text-[0.58rem] font-bold uppercase tracking-[0.34em] text-white/40">
-                Consulting
-              </p>
-            </div>
-          </a>
+    <div className="grain">
+      <MotionProvider />
+      <SiteHeader />
 
-          <nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/56 lg:flex">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="focus-ring rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <a
-            href="/apply"
-            className="focus-ring rounded-full bg-white px-4 py-2.5 text-[0.7rem] font-extrabold uppercase tracking-[0.15em] text-[var(--navy-950)] transition hover:bg-[var(--orange)] hover:text-white"
-          >
-            Apply
-          </a>
+      {/* Scroll HUD — the dial turns with page progress (MotionProvider). */}
+      <div className="hud-gear" aria-hidden="true">
+        <div data-hud-gear className="h-full w-full">
+          <GearLogo className="h-full w-full text-white/25" />
         </div>
-      </header>
+      </div>
 
       {children}
 
-      <footer className="border-t border-white/10 px-5 py-12 md:px-8">
-        <div className="container grid gap-10 md:grid-cols-[1.2fr_0.8fr_1fr]">
-          <div>
-            <div className="flex items-center gap-3">
-              <GearLogo className="h-8 w-8 text-[var(--orange)]" />
-              <p className="font-display text-2xl font-bold uppercase tracking-[0.24em] text-white">
-                MECG
+      <footer className="relative overflow-hidden border-t border-white/10">
+        {/* CTA band */}
+        <div className="px-5 pb-10 pt-16 md:px-8 md:pt-24">
+          <div className="container grid items-end gap-10 lg:grid-cols-[1.25fr_0.75fr]">
+            <div>
+              <p className="annotation annotation-accent">Next step</p>
+              <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
+                Have a problem
+                <br />
+                worth solving?
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <a
+                href="/contact"
+                data-magnetic
+                className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
+              >
+                Work with us
+              </a>
+              <a
+                href="/apply"
+                data-magnetic
+                className="focus-ring rounded-full border border-white/16 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-white/40 hover:text-white"
+              >
+                Join the team
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Link grid */}
+        <div className="px-5 py-12 md:px-8">
+          <div className="container grid gap-10 border-t border-white/10 pt-10 md:grid-cols-[1.2fr_0.8fr_1fr]">
+            <div>
+              <div className="flex items-center gap-3">
+                <GearLogo className="h-8 w-8 text-[var(--orange)]" />
+                <p className="font-display text-2xl font-bold uppercase tracking-[0.24em] text-white">
+                  MECG
+                </p>
+              </div>
+              <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/46">
+                Michigan Engineering Consulting Group — pro-bono, student-led
+                consulting at the University of Michigan.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <a
+                  href={contact.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="focus-ring annotation rounded-full border border-white/14 px-4 py-2.5 text-white/60 transition-colors hover:border-[var(--orange)]/60 hover:text-white"
+                >
+                  Instagram
+                </a>
+                <a
+                  href={contact.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="focus-ring annotation rounded-full border border-white/14 px-4 py-2.5 text-white/60 transition-colors hover:border-[var(--orange)]/60 hover:text-white"
+                >
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+
+            <nav aria-label="Footer" className="grid grid-cols-2 content-start gap-3 text-sm text-white/48">
+              {navLinks.map((link) => (
+                <a key={link.href} href={link.href} className="focus-ring hover:text-white">
+                  {link.label}
+                </a>
+              ))}
+              <a href="/apply" className="focus-ring text-[var(--orange)] hover:text-white">
+                Apply
+              </a>
+            </nav>
+
+            <div className="text-sm leading-relaxed text-white/48">
+              <a href={`mailto:${contact.email}`} className="focus-ring hover:text-white">
+                {contact.email}
+              </a>
+              <p className="mt-4">
+                College of Engineering
+                <br />
+                University of Michigan
+                <br />
+                1221 Beal Ave
+                <br />
+                Ann Arbor, MI 48109
               </p>
             </div>
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/46">
-              Michigan Engineering Consulting Group at the University of Michigan.
-            </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm text-white/48">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="hover:text-white">
-                {link.label}
-              </a>
+        {/* Drawing title block */}
+        <div className="px-5 md:px-8">
+          <div className="container grid grid-cols-2 gap-px overflow-hidden rounded-t-[0.75rem] border border-b-0 border-white/12 bg-white/12 md:grid-cols-4">
+            {[
+              ["Project", "MECG — Digital Platform"],
+              ["Sheet", "No. 001 — External"],
+              ["Scale", "1 : 1 — Ann Arbor, MI"],
+              ["Drawn by", "MECG Board — © 2026"],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-[var(--navy-950)] px-4 py-3">
+                <p className="annotation text-[0.55rem]">{label}</p>
+                <p className="mt-1 font-mono text-[0.7rem] font-bold uppercase tracking-[0.1em] text-white/65">
+                  {value}
+                </p>
+              </div>
             ))}
           </div>
-
-          <div className="text-sm leading-relaxed text-white/48">
-            <a href={`mailto:${contact.email}`} className="hover:text-white">
-              {contact.email}
-            </a>
-            <p className="mt-4">
-              College of Engineering<br />
-              University of Michigan<br />
-              1221 Beal Ave<br />
-              Ann Arbor, MI 48109
-            </p>
-          </div>
         </div>
 
-        <div className="container mt-10 border-t border-white/10 pt-5 text-xs uppercase tracking-[0.18em] text-white/28">
-          © 2026 Michigan Engineering Consulting Group
+        {/* Ghost wordmark */}
+        <div className="pointer-events-none select-none overflow-hidden" aria-hidden="true">
+          <p className="display-xl text-ghost -mb-[0.18em] text-center">MECG</p>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

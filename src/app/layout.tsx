@@ -1,17 +1,28 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Manrope, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const grotesk = Space_Grotesk({
-  variable: "--font-grotesk",
+// §7.2 font contract: next/font only (self-hosted, preloaded, fallback-adjusted);
+// weights limited to what the design actually uses.
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const grotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 const mono = Space_Mono({
-  variable: "--font-mono",
+  variable: "--font-space-mono",
   subsets: ["latin"],
   weight: ["400", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,8 +36,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${grotesk.variable} ${mono.variable}`}>
-      <body className="min-h-full bg-paper font-body text-ink">{children}</body>
+    <html
+      lang="en"
+      className={`${manrope.variable} ${grotesk.variable} ${mono.variable}`}
+    >
+      <body className="min-h-full bg-surface font-sans text-on-surface">
+        {children}
+      </body>
     </html>
   );
 }

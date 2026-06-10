@@ -1,15 +1,23 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { ROLE_LABELS, type MemberRole } from "@/lib/auth";
 
-const links = [
+// §9.0.1: navigation respects role. General members get the open-rush roster
+// and their own profile; committee adds candidates/scoring/hash; board adds
+// admin and audit. The nav is convenience — every gated page re-checks its
+// role server-side and RLS is the real boundary (SEC-16).
+const links: { label: string; href: string; roles?: MemberRole[] }[] = [
   { label: "Dashboard", href: "/internal" },
   { label: "Candidates", href: "/internal/candidates" },
-  { label: "Scoring", href: "/internal/scoring" },
+  {
+    label: "Hash",
+    href: "/internal/hash",
+    roles: ["board", "recruitment_committee"],
+  },
   { label: "Calendar", href: "/internal/calendar" },
   { label: "Members", href: "/internal/members" },
-  { label: "Hash", href: "/internal/hash" },
-  { label: "Admin", href: "/internal/admin" },
-  { label: "Audit", href: "/internal/audit" },
+  { label: "Admin", href: "/internal/admin", roles: ["board"] },
+  { label: "Audit", href: "/internal/audit", roles: ["board"] },
 ];
 
 export default async function InternalLayout({
@@ -27,17 +35,22 @@ export default async function InternalLayout({
     redirect("/auth/login?message=Member login required.");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name,email,role")
-    .eq("id", user.id)
-    .single();
+  // Authoritative gate: a live members row (RLS always allows reading your own).
+  // Applicants are not members — they get bounced to the applicant dashboard.
+  const { data: member } = await supabase
+    .from("members")
+    .select("id, full_name, email, role")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
 
-  const role = profile?.role;
-
-  if (role !== "member" && role !== "recruitment" && role !== "board") {
+  if (!member) {
     redirect("/apply/dashboard");
   }
+
+  const visibleLinks = links.filter(
+    (link) => !link.roles || link.roles.includes(member.role)
+  );
 
   return (
     <main className="min-h-screen bg-[var(--navy-950)] text-white">
@@ -51,12 +64,13 @@ export default async function InternalLayout({
               Member Portal
             </h1>
             <p className="mt-1 text-xs text-white/40">
-              {profile?.full_name ?? profile?.email} · {role}
+              {member.full_name ?? member.email} · {ROLE_LABELS[member.role]}
             </p>
           </div>
 
           <nav className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white/56">
-            {links.map((link) => (              <a
+            {visibleLinks.map((link) => (
+              <a
                 key={link.href}
                 href={link.href}
                 className="rounded-full border border-white/10 px-4 py-2 transition hover:border-[var(--orange)] hover:text-white"
@@ -74,9 +88,7 @@ export default async function InternalLayout({
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1600px] px-5 py-8 md:px-8">
-        {children}
-      </div>
+      <div className="mx-auto max-w-[1600px] px-5 py-8 md:px-8">{children}</div>
     </main>
   );
 }

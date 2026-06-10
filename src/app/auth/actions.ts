@@ -18,13 +18,10 @@ export async function login(formData: FormData) {
     redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("email", email)
-    .single();
+  // Role resolved the same way RLS resolves it: members.user_id = auth.uid().
+  const { data: role } = await supabase.rpc("current_member_role");
 
-  if (profile?.role === "member" || profile?.role === "recruitment" || profile?.role === "board") {
+  if (role) {
     redirect("/internal");
   }
 

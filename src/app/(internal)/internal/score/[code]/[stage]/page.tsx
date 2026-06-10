@@ -1,3 +1,4 @@
+import { requireCommittee } from "@/lib/auth";
 import { candidates, rubricCriteria } from "../../../../../../lib/internal-data";
 
 export default async function ScorePage({
@@ -5,6 +6,7 @@ export default async function ScorePage({
 }: {
   params: Promise<{ code: string; stage: string }>;
 }) {
+  await requireCommittee();
   const { code, stage } = await params;
   const candidate = candidates.find((item) => item.code === code) ?? candidates[0];
 
