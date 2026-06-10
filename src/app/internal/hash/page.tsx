@@ -1,3 +1,4 @@
+import React from "react";
 import { submitHashVote } from "./actions";
 import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
 

@@ -1,3 +1,4 @@
+import React from "react";
 export default function SpeedDatingPage() {
   const signups = [
     ["6:00-7:30 PM", "Sarah Wang", "Team 1"],

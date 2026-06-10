@@ -1,3 +1,4 @@
+import React from "react";
 import { faqs, recruitmentEvents } from "../../../lib/site-content";
 
 export const metadata = {

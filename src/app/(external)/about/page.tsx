@@ -1,3 +1,4 @@
+import React from "react";
 import { pillars } from "../../../lib/site-content";
 
 export const metadata = {

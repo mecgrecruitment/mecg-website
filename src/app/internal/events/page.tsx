@@ -1,3 +1,4 @@
+import React from "react";
 import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
 
 export default async function InternalEventsPage() {

@@ -1,3 +1,4 @@
+import React from "react";
 import { submitDemoApplication } from "./actions";
 
 export default async function ApplyApplicationPage({

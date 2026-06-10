@@ -1,3 +1,4 @@
+import React from "react";
 export default function MembersPage() {
   const members = [
     ["Amani Gupta", "Board", "Internal admin + demo owner"],

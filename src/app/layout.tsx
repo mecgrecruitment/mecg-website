@@ -1,3 +1,4 @@
+import React from "react";
 import { DemoTopButtons } from "@/components/portal/DemoTopButtons";
 import type { Metadata } from "next";
 import { Manrope, Space_Grotesk, Space_Mono } from "next/font/google";

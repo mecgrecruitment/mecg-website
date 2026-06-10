@@ -1,3 +1,4 @@
+import React from "react";
 import { GearLogo } from "../../components/brand/GearLogo";
 import { clients, pillars, recruitmentEvents, services } from "../../lib/site-content";
 import HeroGears from "./components/HeroGears";

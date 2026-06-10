@@ -1,3 +1,4 @@
+import React from "react";
 import { clients } from "../../../lib/site-content";
 
 export const metadata = {

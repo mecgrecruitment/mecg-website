@@ -1,3 +1,4 @@
+import React from "react";
 import { login } from "../actions";
 
 export default async function LoginPage({

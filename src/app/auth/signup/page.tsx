@@ -1,3 +1,4 @@
+import React from "react";
 import { signup } from "../actions";
 
 export default async function SignupPage({
