@@ -3,10 +3,11 @@ import Link from "next/link";
 export default async function ApplicantDashboardPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ submitted?: string }>;
+  searchParams?: Promise<{ submitted?: string; checkedin?: string }>;
 }) {
   const params = await searchParams;
   const submitted = params?.submitted === "1";
+  const checkedin = params?.checkedin === "1";
 
   return (
     <div className="grid gap-8">
@@ -22,7 +23,13 @@ export default async function ApplicantDashboardPage({
 
       {submitted ? (
         <div className="rounded-[1.5rem] border border-[var(--orange)]/40 bg-[var(--orange)]/10 p-5 text-[var(--orange-soft)]">
-          Demo application submitted successfully.
+          Application saved to Supabase demo storage.
+        </div>
+      ) : null}
+
+      {checkedin ? (
+        <div className="rounded-[1.5rem] border border-[var(--orange)]/40 bg-[var(--orange)]/10 p-5 text-[var(--orange-soft)]">
+          Attendance check-in saved to Supabase demo storage.
         </div>
       ) : null}
 
@@ -30,7 +37,7 @@ export default async function ApplicantDashboardPage({
         <article className="panel rounded-[1.5rem] p-6">
           <p className="eyebrow">Application</p>
           <h3 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em]">
-            Draft
+            {submitted ? "Submitted" : "Draft"}
           </h3>
           <p className="mt-3 text-sm text-white/48">Submit or revise your application form.</p>
         </article>
@@ -38,7 +45,7 @@ export default async function ApplicantDashboardPage({
         <article className="panel rounded-[1.5rem] p-6">
           <p className="eyebrow">Attendance</p>
           <h3 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em]">
-            0 / 3
+            {checkedin ? "1 / 3" : "0 / 3"}
           </h3>
           <p className="mt-3 text-sm text-white/48">Check in at open rush events.</p>
         </article>

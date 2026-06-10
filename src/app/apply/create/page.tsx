@@ -1,6 +1,13 @@
 import { submitMockApplication } from "./actions";
 
-export default function ApplyCreatePage() {
+export default async function ApplyCreatePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const error = params?.error;
+
   return (
     <div className="grid gap-8">
       <section>
@@ -12,6 +19,12 @@ export default function ApplyCreatePage() {
           Demo mode is open. This form simulates the full applicant experience, including resume and written responses.
         </p>
       </section>
+
+      {error ? (
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">
+          {error}
+        </p>
+      ) : null}
 
       <form action={submitMockApplication} className="panel grid gap-5 rounded-[2rem] p-6 md:p-8">
         <div className="grid gap-4 md:grid-cols-2">
@@ -39,7 +52,6 @@ export default function ApplyCreatePage() {
         <label className="grid gap-2">
           <span className="text-sm font-bold">Resume upload</span>
           <input name="resume" type="file" className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/60 outline-none file:mr-4 file:rounded-full file:border-0 file:bg-[var(--orange)] file:px-4 file:py-2 file:text-xs file:font-bold file:uppercase file:text-white" />
-          <span className="text-xs text-white/38">Demo mode only — file is not saved yet.</span>
         </label>
 
         <label className="grid gap-2">
@@ -53,7 +65,7 @@ export default function ApplyCreatePage() {
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-bold">scribe a problem you broke down and solved.</span>
+          <span className="text-sm font-bold">Describe a problem you broke down and solved.</span>
           <textarea name="problem_solving" required rows={5} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
         </label>
 

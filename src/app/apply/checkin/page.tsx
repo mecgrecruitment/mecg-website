@@ -1,4 +1,13 @@
-export default function ApplicantCheckinPage() {
+import { submitDemoCheckin } from "./actions";
+
+export default async function ApplicantCheckinPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const error = params?.error;
+
   const events = [
     ["Mass Meeting", "BLUEGEAR", "Jan 16"],
     ["Career Panel", "PROJECT", "Jan 20"],
@@ -17,16 +26,22 @@ export default function ApplicantCheckinPage() {
         </p>
       </section>
 
+      {error ? (
+        <p className="rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">
+          {error}
+        </p>
+      ) : null}
+
       <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <form className="panel grid gap-4 rounded-[2rem] p-6 md:p-8">
+        <form action={submitDemoCheckin} className="panel grid gap-4 rounded-[2rem] p-6 md:p-8">
           <label className="grid gap-2">
             <span className="text-sm font-bold">Email</span>
-            <input type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+            <input name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
           </label>
 
           <label className="grid gap-2">
             <span className="text-sm font-bold">Event phrase</span>
-            <input placeholder="BLUEGEAR" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 uppercase outline-none focus:border-[var(--orange)]" />
+            <input name="event_phrase" placeholder="BLUEGEAR" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 uppercase outline-none focus:border-[var(--orange)]" />
           </label>
 
           <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
