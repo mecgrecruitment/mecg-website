@@ -42,13 +42,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-3" data-reveal>
-              <a
-                href="/apply"
-                data-magnetic
-                className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
-              >
-                Apply to MECG
-              </a>
+              
               <a
                 href="/services"
                 data-magnetic

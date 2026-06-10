@@ -18,7 +18,7 @@ export default function MemberLoginPage() {
         </p>
 
         <form action={memberLogin} className="panel mt-8 grid gap-4 rounded-[2rem] p-6">
-          <label classNe="grid gap-2">
+          <label className="grid gap-2">
             <span className="text-sm font-bold">Email</span>
             <input defaultValue="amanigupta25@gmail.com" name="email" type="email" required className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
           </label>
