@@ -1,3 +1,4 @@
+import React from "react";
 import { GearLogo } from "../../components/brand/GearLogo";
 import { contact, navLinks } from "../../lib/site-content";
 import MotionProvider from "./components/MotionProvider";

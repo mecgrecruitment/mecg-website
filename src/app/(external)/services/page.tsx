@@ -1,3 +1,4 @@
+import React from "react";
 import { clients, projectTimeline, services } from "../../../lib/site-content";
 
 export const metadata = {

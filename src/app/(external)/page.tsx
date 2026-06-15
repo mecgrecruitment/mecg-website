@@ -1,3 +1,4 @@
+import React from "react";
 import { GearLogo } from "../../components/brand/GearLogo";
 import { clients, pillars, recruitmentEvents, services } from "../../lib/site-content";
 import HeroGears from "./components/HeroGears";
@@ -42,13 +43,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-3" data-reveal>
-              <a
-                href="/apply"
-                data-magnetic
-                className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
-              >
-                Apply to MECG
-              </a>
+              
               <a
                 href="/services"
                 data-magnetic
@@ -65,7 +60,7 @@ export default function Home() {
             <GearLogo className="h-4 w-4 text-[var(--orange)]/70" />
           </div>
         </div>
-      </section>
+</section>
 
       {/* Stats — measured values, counted up on entry. */}
       <section className="border-y border-white/10 px-5 md:px-8">

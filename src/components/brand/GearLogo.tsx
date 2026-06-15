@@ -1,3 +1,4 @@
+import React from "react";
 export function GearLogo({
   className = "",
   spin = false,
