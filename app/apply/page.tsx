@@ -1,23 +1,33 @@
 import React from "react";
-import { applicantEnter } from "./actions";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { applicantLogin } from "./actions";
+import { getApplicantSession } from "@/lib/applicant-portal/session";
+import { SubmitButton } from "./SubmitButton";
 
 export default async function ApplicantLoginPage({
   searchParams,
 }: {
   searchParams?: Promise<{ error?: string }>;
 }) {
+  const session = await getApplicantSession();
+
+  if (session) {
+    redirect("/apply/dashboard");
+  }
+
   const params = await searchParams;
   const error = params?.error;
 
   return (
     <div className="grid gap-8">
       <section className="panel-strong rounded-[2rem] p-7 md:p-10">
-        <p className="eyebrow">Applicant Login</p>
+        <p className="eyebrow">Applicant Portal</p>
         <h2 className="font-display mt-5 max-w-4xl text-5xl font-bold uppercase leading-[0.9] tracking-[-0.07em] md:text-7xl">
-          Start or continue your application.
+          Log in.
         </h2>
         <p className="mt-6 max-w-2xl text-white/58">
-          Create a demo applicant account with an email and password, then return to see your submitted information.
+          Log in with the email you used to create your applicant profile.
         </p>
       </section>
 
@@ -27,14 +37,14 @@ export default async function ApplicantLoginPage({
         </p>
       ) : null}
 
-      <form action={applicantEnter} className="panel grid max-w-xl gap-4 rounded-[2rem] p-6 md:p-8">
+      <form action={applicantLogin} className="panel grid max-w-xl gap-4 rounded-[2rem] p-6 md:p-8">
         <label className="grid gap-2">
           <span className="text-sm font-bold">Email</span>
           <input
             name="email"
             type="email"
-            placeholder="applicant@umich.edu"
             required
+            placeholder="applicant@umich.edu"
             className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
           />
         </label>
@@ -44,15 +54,19 @@ export default async function ApplicantLoginPage({
           <input
             name="password"
             type="password"
-            placeholder="Create or enter password"
             required
+            placeholder="Password"
             className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
           />
         </label>
 
-        <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
-          Enter applicant portal
-        </button>
+        <div className="flex flex-wrap items-center gap-4">
+          <SubmitButton pendingText="Logging in...">Log In</SubmitButton>
+
+          <Link href="/apply/create" className="text-sm font-bold text-white/60 hover:text-white">
+            Don&apos;t have an account? Create one.
+          </Link>
+        </div>
       </form>
     </div>
   );
