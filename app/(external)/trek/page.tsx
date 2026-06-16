@@ -1,5 +1,5 @@
 import React from "react";
-import { contact } from "../../../lib/site-content";
+import { contact } from "@/lib/site-content";
 
 export const metadata = {
   title: "Trek — MECG",

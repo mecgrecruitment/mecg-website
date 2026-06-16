@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { GearLogo } from "../../../components/brand/GearLogo";
-import { navLinks } from "../../../lib/site-content";
+import { GearLogo } from "@/components/brand/GearLogo";
+import { navLinks } from "@/lib/site-content";
 
 export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,7 +17,6 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Route changes close the menu and restore scroll.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
@@ -38,8 +37,8 @@ export default function SiteHeader() {
             : "border-b border-transparent bg-transparent py-5"
         }`}
       >
-        <div className="container flex items-center justify-between">
-          <a href="/" className="focus-ring flex items-center gap-3">
+        <div className="container flex items-center justify-between gap-5">
+          <a href="/" className="focus-ring flex shrink-0 items-center gap-3">
             <GearLogo className="h-8 w-8 text-[var(--orange)]" />
             <div>
               <p className="font-display text-lg font-bold uppercase tracking-[0.24em] text-white">
@@ -53,7 +52,7 @@ export default function SiteHeader() {
 
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-7 font-mono text-[0.68rem] font-bold uppercase tracking-[0.2em] lg:flex"
+            className="hidden items-center gap-5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] xl:flex"
           >
             {navLinks.map((link, i) => {
               const active = pathname === link.href;
@@ -71,7 +70,7 @@ export default function SiteHeader() {
                   </span>
                   {link.label}
                   <span
-                    className={`absolute -bottom-0.5 left-0 h-px bg-[var(--orange)] transition-all duration-300 ${
+                  className={`absolute -bottom-0.5 left-0 h-px bg-[var(--orange)] transition-all duration-300 ${
                       active ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
@@ -80,20 +79,29 @@ export default function SiteHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <a
               href="/apply"
               data-magnetic
-              className="focus-ring hidden rounded-full bg-[var(--orange)] px-5 py-2.5 font-mono text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
+              className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
             >
-              Apply
+              Login
             </a>
+
+            <a
+              href="/member-login"
+              data-magnetic
+              className="focus-ring hidden rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white md:inline-block"
+            >
+              Member Login
+            </a>
+
             <button
               type="button"
               aria-expanded={open}
               aria-controls="site-menu"
               onClick={() => setOpen((v) => !v)}
-              className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/15 lg:hidden"
+              className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/15 xl:hidden"
             >
               <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
               <span className="relative block h-3 w-5" aria-hidden="true">
@@ -113,10 +121,9 @@ export default function SiteHeader() {
         </div>
       </header>
 
-      {/* Full-screen drafting-sheet menu (mobile / tablet). */}
       <div
         id="site-menu"
-        className={`fixed inset-0 z-40 flex flex-col justify-end bg-[var(--navy-950)]/97 px-6 pb-12 pt-28 backdrop-blur-2xl transition-opacity duration-400 lg:hidden ${
+        className={`fixed inset-0 z-40 flex flex-col justify-end bg-[var(--navy-950)]/97 px-6 pb-12 pt-28 backdrop-blur-2xl transition-opacity duration-400 xl:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
@@ -141,17 +148,21 @@ export default function SiteHeader() {
               </span>
             </a>
           ))}
-          <a
-            href="/apply"
-            className="focus-ring mt-6 inline-block self-start rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-            style={{
-              transition: "opacity 0.5s 500ms, transform 0.5s 500ms",
-              opacity: open ? 1 : 0,
-              transform: open ? "none" : "translateY(18px)",
-            }}
-          >
-            Apply to MECG
-          </a>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href="/apply"
+              className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+            >
+              Login
+            </a>
+            <a
+              href="/member-login"
+              className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+            >
+              Member Login
+            </a>
+          </div>
         </nav>
       </div>
     </>
