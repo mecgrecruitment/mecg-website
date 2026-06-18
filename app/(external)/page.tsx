@@ -1,5 +1,6 @@
 import React from "react";
 import { faqs, pillars } from "@/lib/site-content";
+import { CommunityPhotoStrip } from "@/components/site/CommunityPhotos";
 
 export default function Home() {
   return (
@@ -47,69 +48,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sheet px-5 py-20 md:px-8 md:py-28">
-        <div className="container">
-          <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
-            Fig. 01 — Four pillars
-          </p>
+      
 
-          <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
-            What holds the machine together.
-          </h2>
+            <div className="py-10 md:py-14"><CommunityPhotoStrip /></div>
 
-          <div className="mt-12 grid gap-px overflow-hidden rounded-[1rem] border border-[var(--paper-rule)] bg-[var(--paper-rule)] md:grid-cols-2 xl:grid-cols-4" data-reveal-group>
-            {pillars.map((pillar) => (
-              <article
-                key={pillar.index}
-                className="group bg-[var(--paper)] p-7 transition-colors duration-300 hover:bg-[var(--navy-950)]"
-                data-reveal
-              >
-                <p className="font-mono text-sm font-bold text-[var(--orange-dark)] group-hover:text-[var(--orange)]">
-                  {pillar.index}
-                </p>
 
-                <h3 className="font-displamt-10 text-2xl font-bold uppercase leading-none tracking-[-0.04em] text-[var(--navy-950)] transition-colors duration-300 group-hover:text-white">
-                  {pillar.title}
-                </h3>
 
-                <p className="mt-5 leading-relaxed text-[var(--on-paper-muted)] transition-colors duration-300 group-hover:text-white/60">
-                  {pillar.body}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <p className="annotation annotation-accent" data-reveal>
-            Fig. 02 — Pictures
-          </p>
-
-          <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl" data-split>
-            Community in motion.
-          </h2>
-
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/56" data-reveal>
-            Add MECG photos here later. Put images in <code>public/images</code> and replace these placeholders.
-        </p>
-
-          <div className="mt-12 grid gap-4 md:grid-cols-3" data-reveal-group>
-            {["Picture 01", "Picture 02", "Picture 03"].map((label) => (
-              <div
-                key={label}
-                className="panel grid aspect-[4/3] place-items-center rounded-[2rem] border-dashed text-center font-mono text-xs font-bold uppercase tracking-[0.18em] text-white/35"
-                data-reveal
-              >
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-5 pb-24 md:px-8">
+<section className="px-5 pb-24 md:px-8">
         <div className="container">
           <p className="annotation annotation-accent" data-reveal>
             Fig. 03 — Q&A

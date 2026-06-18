@@ -503,3 +503,52 @@ a {
     display: none;
   }
 }
+
+/* Softer global polish — less dramatic, more refined */
+body {
+  background:
+    radial-gradient(circle at top left, rgba(197, 91, 42, 0.10), transparent 34rem),
+    radial-gradient(circle at top right, rgba(46, 88, 140, 0.22), transparent 34rem),
+    linear-gradient(180deg, #0f1b2d 0%, #101827 48%, #0f1b2d 100%);
+}
+
+.panel,
+.panel-strong {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(18, 32, 51, 0.72) !important;
+  box-shadow: 0 22px 70px rgba(4, 12, 24, 0.24) !important;
+}
+
+.card-hover {
+  transition: transform 2ms ease, border-color 220ms ease, background 220ms ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+}
+
+.eyebrow {
+  letter-spacing: 0.16em !important;
+}
+
+.font-display {
+  letter-spacing: -0.055em;
+}
+
+@keyframes mecg-photo-strip {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-mecg-photo-strip {
+  animation: mecg-photo-strip 42s linear infinite;
+}
+
+.animate-mecg-photo-strip:hover {
+  animation-play-state: paused;
+}
+

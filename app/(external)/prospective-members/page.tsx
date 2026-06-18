@@ -1,5 +1,6 @@
 import React from "react";
 import { faqs, recruitmentEvents } from "@/lib/site-content";
+import { CommunityPhotoGrid, JoinCommunityPhotos } from "@/components/site/CommunityPhotos";
 
 export const metadata = {
   title: "Prospective Members — MECG",
@@ -84,7 +85,9 @@ export default function ProspectiveMembersPage() {
               </article>
             ))}
           </div>
-        </div>
+        
+
+</div>
       </section>
     </main>
   );
