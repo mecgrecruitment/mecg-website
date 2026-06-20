@@ -24,7 +24,7 @@ type Photo = {
   alt: string;
 };
 
-const photos = ((communityPhotos.images || []) as Photo[]).slice(0, 12);
+const photos = ((communityPhotos.images || []) as Photo[]).slice(0, 18);
 const loopingPhotos = [...photos, ...photos];
 
 function SocialCard({
@@ -43,28 +43,19 @@ function SocialCard({
       href={href}
       target={href.startsWith("mailto:") ? undefined : "_blank"}
       rel={href.startsWith("mailto:") ? undefined : "noreferrer"}
-      className="group rounded-[1.25rem] border border-white/10 bg-[#122033]/75 p-6 shadow-[0_18px_55px_rgba(4,12,24,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45 hover:bg-[#172941]/80 md:p-7"
     >
-      <div className="mb-8 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--orange-soft)]">
-          MECG
+      <article className="h-full rounded-[1.5rem] border border-white/10 bg-[#122033]/72 p-7 shadow-[0_22px_70px_rgba(4,12,24,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45">
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--orange-soft)]">
+          0{index + 1} — MECG
         </p>
-        <span className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-xs font-black text-white/45 group-hover:border-[var(--orange)]/50 group-hover:text-[var(--orange-soft)]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-      </div>
-
-      <h2 className="text-3xl font-semibold uppercase tracking-[-0.055em] text-white md:text-4xl">
-        {title}
-      </h2>
-
-      <p className="mt-5 min-h-[4.5rem] text-sm leading-7 text-white/58 md:text-base">
-        {body}
-      </p>
-
-      <p className="mt-8 text-xs font-bold uppercase tracking-[0.18em] text-white/42 transition group-hover:text-white">
-        Open ↗
-      </p>
+        <h2 className="font-display mt-8 text-5xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white">
+          {title}
+        </h2>
+        <p className="mt-6 text-base leading-7 text-white/58">{body}</p>
+        <p className="mt-10 text-xs font-black uppercase tracking-[0.18em] text-white/45">
+          Open ↗
+        </p>
+      </article>
     </a>
   );
 }
@@ -73,18 +64,22 @@ function SocialPhotoRibbon() {
   if (photos.length === 0) return null;
 
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/65 py-7 shadow-[0_22px_70px_rgba(4,12,24,0.24)]">
-      <div className="mx-auto mb-5 max-w-3xl px-6 text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--orange-soft)]">
+    <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/72 py-8 shadow-[0_22px_70px_rgba(4,12,24,0.24)]">
+      <div className="px-6">
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--orange-soft)]">
           In the wild
         </p>
-        <h2 className="mt-3 text-balance text-4xl font-semibold leading-[1.03] tracking-[-0.055em] text-white md:text-5xl">
-          Little moments, big community.
+        <h2 className="font-display mt-4 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
+          Little moments,
+          <br />
+          <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)]">
+            Big community.
+          </span>
         </h2>
       </div>
 
-      <div className="relative overflow-hidden py-3">
-        <div className="pointer-events-none absolute inset-y-0 ft-0 z-10 w-24 bg-gradient-to-r from-[#122033] to-transparent" />
+      <div className="relative mt-10 overflow-hidden py-3">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#122033] to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#122033] to-transparent" />
 
         <div className="flex w-max animate-mecg-photo-strip items-center gap-4 px-8">
@@ -118,26 +113,43 @@ function SocialPhotoRibbon() {
 
 export default function SocialsPage() {
   return (
-    <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 pb-12 pt-10 md:pt-16">
-      <section className="mx-auto max-w-4xl text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--orange-soft)]">
-          Socials
-        </p>
-        <h1 className="mx-auto mt-5 max-w-3xl text-balance text-5xl font-semibold leading-[1.02] tracking-[-0.055em] text-white md:text-7xl">
-          Stay connected with MECG.
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-balance text-base leading-7 text-white/58">
-          Follow along for recruitment updates, community photos, member highlights, and project news.
-        </p>
+    <main className="grid gap-16 pb-16">
+      <section className="border-b border-white/10 px-6 py-24 md:px-16 md:py-32">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
+            Sheet 06 — Socials
+          </p>
+          <h1 className="font-display mt-8 max-w-6xl text-7xl font-black uppercase leading-[0.82] tracking-[-0.085em] text-white md:text-9xl">
+            Stay
+            <br />
+            <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)]">
+              Connected.
+            </span>
+          </h1>
+          <p className="mt-10 max-w-2xl text-lg leading-8 text-white/58">
+            Follow along for recruitment updates, community photos, member highlights, and project news.
+          </p>
+        </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {socials.map((social, index) => (
-          <SocialCard key={social.title} {...social} index={index} />
-        ))}
+      <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
+          Fig. 01 Social Channels
+        </p>
+        <h2 className="font-display mt-5 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
+          Open a channel.
+        </h2>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {socials.map((social, index) => (
+            <SocialCard key={social.title} {...social} index={index} />
+          ))}
+        </div>
       </section>
 
-      <SocialPhotoRibbon />
-    </div>
+      <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
+        <SocialPhotoRibbon />
+      </section>
+    </main>
   );
 }

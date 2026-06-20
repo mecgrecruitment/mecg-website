@@ -21,6 +21,15 @@ export default async function ApplicantCreatePage({
 
   return (
     <div className="grid gap-8">
+      <div className="mb-6">
+        <a
+          href="/"
+          className="inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/60 transition hover:border-[var(--orange)] hover:text-white"
+        >
+          ← Back to Main Website
+        </a>
+      </div>
+
       <section className="panel-strong rounded-[2rem] p-7 md:p-10">
         <p className="eyebrow">Create Account</p>
         <h2 className="font-display mt-5 max-w-4xl text-5xl font-bold uppercase leading-[0.9] tracking-[-0.07em] md:text-7xl">

@@ -14,25 +14,7 @@ export const metadata = {
 export default function ClientServicesPage() {
   return (
     <main>
-      <section className="grid-bg relative overflow-hidden px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-44">
-        <div className="orb left-[-12rem] top-[-12rem] h-[30rem] w-[30rem] bg-[var(--orange-dark)]" />
-
-        <div className="container relative">
-          <p className="annotation annotation-accent" data-reveal>
-            Sheet 03 — Client Services
-          </p>
-
-          <h1 className="display-xl mt-6 max-w-6xl text-white" data-split>
-            Consulting, <span className="text-ghost">engineered.</span>
-          </h1>
-
-          <p className="mt-8 max-w-3xl text-xl leadrelaxed text-white/62" data-reveal>
-            MECG offers a diverse mix of traditional consulting and tech consulting projects for real clients.
-          </p>
-
-          <div className="dim-rule mt-12" data-reveal />
-        </div>
-      </section>
+      
 
       <section className="section">
         <div className="container">

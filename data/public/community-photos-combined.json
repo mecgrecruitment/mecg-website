@@ -1,0 +1,265 @@
+{
+  "count": 55,
+  "local_count": 17,
+  "website_count": 38,
+  "images": [
+    {
+      "src": "/images/community/community-01.webp",
+      "alt": "MECG community photo 1"
+    },
+    {
+      "src": "/images/community/community-02.webp",
+      "alt": "MECG community photo 2"
+    },
+    {
+      "src": "/images/community/community-03.webp",
+      "alt": "MECG community photo 3"
+    },
+    {
+      "src": "/images/community/community-04.webp",
+      "alt": "MECG community photo 4"
+    },
+    {
+      "src": "/images/community/community-05.webp",
+      "alt": "MECG community photo 5"
+    },
+    {
+      "src": "/images/community/community-06.webp",
+      "alt": "MECG community photo 6"
+    },
+    {
+      "src": "/images/community/community-07.webp",
+      "alt": "MECG community photo 7"
+    },
+    {
+      "src": "/images/community/community-08.webp",
+      "alt": "MECG community photo 8"
+    },
+    {
+      "src": "/images/community/community-09.webp",
+      "alt": "MECG community photo 9"
+    },
+    {
+      "src": "/images/community/community-10.webp",
+      "alt": "MECG community photo 10"
+    },
+    {
+      "src": "/images/community/community-11.webp",
+      "alt": "MECG community photo 11"
+    },
+    {
+      "src": "/images/community/community-12.webp",
+      "alt": "MECG community photo 12"
+    },
+    {
+      "src": "/images/community/community-13.webp",
+      "alt": "MECG community photo 13"
+    },
+    {
+      "src": "/images/community/community-14.webp",
+      "alt": "MECG community photo 14"
+    },
+    {
+      "src": "/images/community/community-15.webp",
+      "alt": "MECG community photo 15"
+    },
+    {
+      "src": "/images/community/community-16.webp",
+      "alt": "MECG community photo 16"
+    },
+    {
+      "src": "/images/community/community-17.webp",
+      "alt": "MECG community photo 17"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/Gear.png",
+      "alt": "Large rotating gear",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/20251116_235836_2827D0.JPEG",
+      "alt": "Carousel image 1",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/IMG_9274.jpg",
+      "alt": "Carousel image 2",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/IMG_9278.jpg",
+      "alt": "Carousel image 3",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/IMG_9347.JPG",
+      "alt": "Carousel image 4",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/IMG_9371.jpg",
+      "alt": "Carousel image 5",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/carousel/IMG_9391.jpg",
+      "alt": "Carousel image 6",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/presidentswelcome/annie-callam.png",
+      "alt": "Annie Callam, President of MECG",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/SpeakerPanelCrowd.jpeg",
+      "alt": "MECG Speaker Panel Crowd",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/pro-dev.png",
+      "alt": "Professional Development",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/education.png",
+      "alt": "Education",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/project.png",
+      "alt": "Project Experience",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/community.png",
+      "alt": "Community",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/Jon+AaryanFootball.png",
+      "alt": "MECG Founders Jonathan Fay and Aaryan Singh",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/IMG_0087.JPG",
+      "alt": "MECG Consulting Event",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/strategy.png",
+      "alt": "Strategy",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/operations.png",
+      "alt": "Operations & Management",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/data-analytics.png",
+      "alt": "Data Analytics",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/product-dev.png",
+      "alt": "Product Development",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/marketing.png",
+      "alt": "Marketing",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/first-contact.png",
+      "alt": "Initial Contact",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/scoping.png",
+      "alt": "Scoping",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/midterm.png",
+      "alt": "Midterm Deliverable",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/final.png",
+      "alt": "Final Deliverable",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/koops-automation.png",
+      "alt": "Koops Automation",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/gypsy-spirits.png",
+      "alt": "Gypsy Spirits",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/here-here-market.png",
+      "alt": "Here Here Market",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/red-hawk.png",
+      "alt": "Red Hawk Golf Club",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/glo-skin-spa.png",
+      "alt": "Glo Skin Spa",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/legendary-sports-xperiences.png",
+      "alt": "Legendary Sports Xperiences",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/lynkr.png",
+      "alt": "Lynkr",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/frankel-jewish-academy.png",
+      "alt": "Frankel Jewish Academy",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/dani-plan.png",
+      "alt": "Dani Plan",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/fired-and-fused.png",
+      "alt": "Fired and Fused",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/probate-pro.png",
+      "alt": "The Probate Pro",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/michigan-creamery.png",
+      "alt": "Michigan Creamery",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/homeschool-connections.png",
+      "alt": "Homeschool Connections",
+      "source": "old MECG website"
+    },
+    {
+      "src": "https://www.mecgmichigan.com/images/client services/store-house.png",
+      "alt": "The Store House",
+      "source": "old MECG website"
+    }
+  ]
+}
