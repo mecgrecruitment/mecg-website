@@ -41,11 +41,11 @@ export function CommunityPhotoStrip({
         </p>
       </div>
 
-      <div className="relative overflow-hidden py-4">
+      <div className="relative overflow-x-auto overflow-y-hidden py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#122033] to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#122033] to-transparent" />
 
-        <div className="flex w-max animate-mecg-photo-strip items-center gap-5 px-8">
+        <div className="flex w-max animate-mecg-photo-strip items-center gap-5 px-8 hover:[animation-play-state:paused]">
           {loop.map((photo, index) => (
             <figure
               key={`${photo.src}-${index}`}
