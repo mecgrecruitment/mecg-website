@@ -1,39 +1,53 @@
 import React from "react";
-import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
-import { requireInternalSession } from "@/lib/internal-portal/session";
+import { createClient } from "@/lib/supabase/server";
+import { requireCommittee } from "@/lib/auth";
+
+function pretty(value: string | null | undefined) {
+  if (!value) return "—";
+  return value.replaceAll("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
+}
 
 export default async function ApplicantsPage() {
-  await requireInternalSession();
-  const supabase = createDemoAdminClient();
+  await requireCommittee();
+  const supabase = await createClient();
 
-  const { data: applications } = await supabase
-    .from("demo_applications")
-    .select("id,full_name,email,year,major,status,recruitment_status,submitted_at,created_at")
-    .order("created_at", { ascending: false });
+  const { data: cycle } = await supabase
+    .from("recruitment_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .maybeSingle();
 
-  const { data: events } = await supabase
-    .from("demo_events")
-    .select("id,title,event_type,event_date,active")
-    .eq("event_type", "Open Rush")
-    .order("created_at", { ascending: true });
+  const { data: candidates } = cycle
+    ? await supabase
+        .from("candidates")
+        .select("id, per_cycle_seq, full_name, email, year, major, current_stage, status, created_at")
+        .eq("cycle_id", cycle.id)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+    : { data: [] };
 
-  const { data: checkins } = await supabase
-    .from("demo_checkins")
-    .select("email,event_id,event_name,created_at");
+  const { data: events } = cycle
+    ? await supabase
+        .from("recruitment_events")
+        .select("id, title")
+        .eq("cycle_id", cycle.id)
+        .eq("event_type", "open_rush")
+        .order("event_date", { ascending: true })
+    : { data: [] };
+
+  const { data: checkins } = await supabase.from("event_checkins").select("email, event_id");
 
   const eventList = events ?? [];
   const checkinList = checkins ?? [];
 
-  function attended(email: string, eventId: string) {
+  function attended(email: string | null, eventId: string) {
+    if (!email) return false;
     return checkinList.some(
-      (checkin) =>
-        checkin.email?.toLowerCase() === email.toLowerCase() &&
-        checkin.event_id === eventId
+      (ck) => ck.email?.toLowerCase() === email.toLowerCase() && ck.event_id === eventId
     );
   }
-
-  function attendanceCount(email: string) {
-    return eventList.filter((event) => attended(email, event.id)).length;
+  function attendanceCount(email: string | null) {
+    return eventList.filter((e) => attended(email, e.id)).length;
   }
 
   return (
@@ -44,7 +58,7 @@ export default async function ApplicantsPage() {
           Candidate list.
         </h2>
         <p className="mt-5 text-white/58">
-          View submissions, recruitment status, and attendance for each open rush event.
+          View submissions, current stage, and attendance for each open rush event.
         </p>
       </section>
 
@@ -52,56 +66,51 @@ export default async function ApplicantsPage() {
         <table className="w-full min-w-[1100px] border-collapse text-sm">
           <thead className="text-left text-white/45">
             <tr>
+              <th className="p-3">#</th>
               <th className="p-3">Name</th>
               <th className="p-3">Email</th>
               <th className="p-3">Year</th>
               <th className="p-3">Major</th>
-              <th className="p-3">Recruitment Status</th>
+              <th className="p-3">Stage</th>
+              <th className="p-3">Status</th>
               <th className="p-3">Attendance</th>
               {eventList.map((event) => (
-                <th key={event.id} className="p-3">
-                  {event.title}
-                </th>
+                <th key={event.id} className="p-3">{event.title}</th>
               ))}
               <th className="p-3">Submitted</th>
             </tr>
           </thead>
 
           <tbody>
-            {(applications ?? []).map((app) => {
-              const count = attendanceCount(app.email);
-
+            {(candidates ?? []).map((c) => {
+              const count = attendanceCount(c.email);
               return (
-                <tr key={app.id} className="border-t border-white/10">
-                  <td className="p-3 font-bold">{app.full_name}</td>
-                  <td className="p-3 text-white/60">{app.email}</td>
-                  <td className="p-3 text-white/60">{app.year}</td>
-                  <td className="p-3 text-white/60">{app.major}</td>
+                <tr key={c.id} className="border-t border-white/10">
+                  <td className="p-3 font-mono text-white/45">C{String(c.per_cycle_seq).padStart(2, "0")}</td>
+                  <td className="p-3 font-bold">{c.full_name}</td>
+                  <td className="p-3 text-white/60">{c.email}</td>
+                  <td className="p-3 text-white/60">{c.year}</td>
+                  <td className="p-3 text-white/60">{c.major}</td>
                   <td className="p-3">
                     <span className="rounded-full border border-[var(--orange)]/30 bg-[var(--orange)]/10 px-3 py-1 text-xs font-bold text-[var(--orange-soft)]">
-                      {app.recruitment_status || app.status || "submitted"}
+                      {pretty(c.current_stage)}
                     </span>
                   </td>
-                  <td className="p-3 text-white/70">
-                    {count}/{eventList.length}
-                  </td>
+                  <td className="p-3 text-white/60">{pretty(c.status)}</td>
+                  <td className="p-3 text-white/70">{count}/{eventList.length}</td>
 
                   {eventList.map((event) => (
                     <td key={event.id} className="p-3">
-                      {attended(app.email, event.id) ? (
-                        <span className="rounded-full border border-green-300/30 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-100">
-                          Yes
-                        </span>
+                      {attended(c.email, event.id) ? (
+                        <span className="rounded-full border border-green-300/30 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-100">Yes</span>
                       ) : (
-                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-bold text-white/35">
-                          No
-                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-bold text-white/35">No</span>
                       )}
                     </td>
                   ))}
 
                   <td className="p-3 text-white/60">
-                    {app.submitted_at ? new Date(app.submitted_at).toLocaleString() : "—"}
+                    {c.created_at ? new Date(c.created_at).toLocaleString() : "—"}
                   </td>
                 </tr>
               );
@@ -109,7 +118,7 @@ export default async function ApplicantsPage() {
           </tbody>
         </table>
 
-        {(applications ?? []).length === 0 ? (
+        {(candidates ?? []).length === 0 ? (
           <p className="p-4 text-white/45">No submitted applications yet.</p>
         ) : null}
       </section>

@@ -4,6 +4,24 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import GearAssembly from "./GearAssembly";
 
+// @react-three/fiber's render loop constructs `new THREE.Clock()` internally,
+// and three@0.184 logs a one-time deprecation notice from Clock's constructor
+// ("THREE.Clock … deprecated. Please use THREE.Timer instead."). It is library
+// noise we can't reach from app code. Drop only that exact line; pass through
+// everything else.
+// ponytail: remove this shim once @react-three/fiber adopts THREE.Timer.
+if (typeof window !== "undefined") {
+  const w = window as typeof window & { __mecgClockWarnPatched?: boolean };
+  if (!w.__mecgClockWarnPatched) {
+    w.__mecgClockWarnPatched = true;
+    const originalWarn = console.warn.bind(console);
+    console.warn = (...args: unknown[]) => {
+      if (typeof args[0] === "string" && args[0].includes("THREE.Clock")) return;
+      originalWarn(...args);
+    };
+  }
+}
+
 type Frameloop = "always" | "demand" | "never";
 
 /**

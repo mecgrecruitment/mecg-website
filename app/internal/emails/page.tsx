@@ -1,22 +1,9 @@
 import React from "react";
-import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
-import { requireRole } from "@/lib/internal-portal/session";
+import { createClient } from "@/lib/supabase/server";
+import { requireBoard } from "@/lib/auth";
 
+// Keyed by real candidate_status decision outcomes (set by board in Hash).
 const templates = [
-  {
-    status: "progress_to_round_2",
-    label: "Progress to Round 2",
-    subject: "MECG Recruitment Update",
-    body:
-      "Hi,\n\nThank you again for your interest in MECG. We enjoyed getting to know you and are excited to invite you to the next round of our recruitment process.\n\nMore details will follow soon.\n\nBest,\nMECG Recruitment",
-  },
-  {
-    status: "progress_to_final_approval",
-    label: "Progress to Final Approval",
-    subject: "MECG Recruitment Update",
-    body:
-      "Hi,\n\nThank you for participating in our recruitment process. We are excited to move you forward to the final stage of consideration.\n\nMore details will follow soon.\n\nBest,\nMECG Recruitment",
-  },
   {
     status: "accepted",
     label: "Accepted",
@@ -46,13 +33,13 @@ function mailtoLink(emails: string[], subject: string, body: string) {
 }
 
 export default async function EmailCenterPage() {
-  await requireRole(["board"]);
-
-  const supabase = createDemoAdminClient();
+  await requireBoard();
+  const supabase = await createClient();
 
   const { data: candidates } = await supabase
-    .from("demo_applications")
-    .select("email,full_name,recruitment_status,status")
+    .from("candidates")
+    .select("email, full_name, status")
+    .is("deleted_at", null)
     .order("full_name", { ascending: true });
 
   const candidateList = candidates ?? [];
@@ -71,10 +58,7 @@ export default async function EmailCenterPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {templates.map((template) => {
-          const recipients = candidateList.filter((candidate) => {
-            const status = candidate.recruitment_status || candidate.status;
-            return status === template.status;
-          });
+          const recipients = candidateList.filter((c) => c.status === template.status);
 
           return (
             <article key={template.status} className="panel rounded-[2rem] p-6">
@@ -85,26 +69,24 @@ export default async function EmailCenterPage() {
 
               <div className="mt-5 max-h-40 overflow-auto rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white/55">
                 {recipients.length > 0 ? (
-                  recipients.map((candidate) => (
-                    <p key={candidate.email}>
-                      {candidate.full_name} · {candidate.email}
+                  recipients.map((c) => (
+                    <p key={c.email}>
+                      {c.full_name} · {c.email}
                     </p>
-                 ))
+                  ))
                 ) : (
                   <p>No candidates currently have this status.</p>
                 )}
               </div>
 
               <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-white/35">
-                  Subject
-                </p>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-white/35">Subject</p>
                 <p className="mt-2 text-sm text-white/70">{template.subject}</p>
               </div>
 
               <a
                 href={mailtoLink(
-                  recipients.map((recipient) => recipient.email),
+                  recipients.map((r) => r.email).filter(Boolean) as string[],
                   template.subject,
                   template.body
                 )}

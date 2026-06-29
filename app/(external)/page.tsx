@@ -1,13 +1,19 @@
 import React from "react";
 import { faqs, pillars } from "@/lib/site-content";
 import { CommunityPhotoStrip } from "@/components/site/CommunityPhotos";
+import HeroGears from "./components/HeroGears";
 
 export default function Home() {
   return (
     <main>
-      <section className="grid-bg relative overflow-hidden px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-44">
+      <section className="grid-bg relative flex min-h-svh flex-col justify-center overflow-hidden px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-44">
         <div className="orb right-[-12rem] top-[-12rem] h-[34rem] w-[34rem] bg-[var(--blue)]" />
         <div className="orb bottom-[-14rem] left-[-12rem] h-[28rem] w-[28rem] bg-[var(--orange-dark)]" />
+
+        {/* WebGL gear assembly — full-bleed stage, weighted right behind the type. */}
+        <div className="pointer-events-none absolute inset-0 lg:left-auto lg:w-[58%]">
+          <HeroGears />
+        </div>
 
         <div className="container relative">
           <p className="annotation annotation-accent" data-reveal>

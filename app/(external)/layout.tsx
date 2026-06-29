@@ -23,7 +23,7 @@ export default function ExternalLayout({
 
       {children}
 
-      <footer className="relative overflow-hidden border-t border-white/10">
+      <footer className="relative isolate overflow-hidden border-t border-white/10">
         {/* CTA band */}
         <div className="px-5 pb-10 pt-16 md:px-8 md:pt-24">
           <div className="container grid items-end gap-10 lg:grid-cols-[1.25fr_0.75fr]">
@@ -54,56 +54,91 @@ export default function ExternalLayout({
           </div>
         </div>
 
-        {/* Link grid */}
-        <div className="px-5 py-12 md:px-8">
-          <div className="container grid gap-10 border-t border-white/10 pt-10 md:grid-cols-[1.2fr_0.8fr_1fr]">
+        {/* Link grid — columns top-aligned to the orange logo icon. */}
+        <div className="relative px-5 py-12 md:px-8">
+          <div className="container grid items-start gap-12 border-t border-white/10 pt-10 md:grid-cols-[1.5fr_0.8fr_1fr]">
+            {/* Brand + description + inline socials */}
             <div>
               <div className="flex items-center gap-3">
-                <GearLogo className="h-8 w-8 text-[var(--orange)]" />
-                <p className="font-display text-2xl font-bold uppercase tracking-[0.24em] text-white">
+                <GearLogo className="h-8 w-8 shrink-0 text-[var(--orange)]" />
+                <p className="font-display text-2xl font-bold uppercase leading-none tracking-[0.24em] text-white">
                   MECG
                 </p>
               </div>
-              <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/46">
+              <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/46">
                 Michigan Engineering Consulting Group — pro-bono, student-led
                 consulting at the University of Michigan.
               </p>
-              <div className="mt-6 flex gap-3">
+              {/* Inline social list — no pills, mono, with a diagonal arrow. */}
+              <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 font-mono text-xs font-bold uppercase tracking-[0.22em]">
                 <a
                   href={contact.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-ring annotation rounded-full border border-white/14 px-4 py-2.5 text-white/60 transition-colors hover:border-[var(--orange)]/60 hover:text-white"
+                  className="focus-ring group inline-flex items-center gap-1.5 text-white/55 transition-colors hover:text-white"
                 >
                   Instagram
+                  <span
+                    aria-hidden="true"
+                    className="text-[var(--orange)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  >
+                    ↗
+                  </span>
                 </a>
                 <a
                   href={contact.linkedin}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-ring annotation rounded-full border border-white/14 px-4 py-2.5 text-white/60 transition-colors hover:border-[var(--orange)]/60 hover:text-white"
+                  className="focus-ring group inline-flex items-center gap-1.5 text-white/55 transition-colors hover:text-white"
                 >
                   LinkedIn
+                  <span
+                    aria-hidden="true"
+                    className="text-[var(--orange)] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  >
+                    ↗
+                  </span>
                 </a>
               </div>
             </div>
 
-            <nav aria-label="Footer" className="grid grid-cols-2 content-start gap-3 text-sm text-white/48">
+            {/* Navigation — all-caps mono, high tracking, single tidy column. */}
+            <nav
+              aria-label="Footer"
+              className="flex flex-col gap-3.5 font-mono text-xs font-bold uppercase leading-[1.1] tracking-[0.22em] text-white/55"
+            >
               {navLinks.map((link) => (
-                <a key={link.href} href={link.href} className="focus-ring hover:text-white">
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="focus-ring w-fit whitespace-nowrap transition-colors hover:text-white"
+                >
                   {link.label}
                 </a>
               ))}
-              <a href="/apply" className="focus-ring text-[var(--orange)] hover:text-white">
+              <a
+                href="/apply"
+                className="focus-ring w-fit whitespace-nowrap text-[var(--orange)] transition-colors hover:text-white"
+              >
                 Apply
               </a>
             </nav>
 
-            <div className="text-sm leading-relaxed text-white/48">
-              <a href={`mailto:${contact.email}`} className="focus-ring hover:text-white">
-                {contact.email}
+            {/* Contact — prominent email + secondary address metadata. */}
+            <div>
+              <a
+                href={`mailto:${contact.email}`}
+                className="focus-ring group inline-block w-fit"
+              >
+                <span className="relative inline-block text-base font-semibold tracking-tight text-white/90 transition-colors group-hover:text-white md:text-lg">
+                  {contact.email}
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-0.5 left-0 h-px w-0 bg-[var(--orange)] transition-all duration-300 ease-out group-hover:w-full"
+                  />
+                </span>
               </a>
-              <p className="mt-4">
+              <p className="mt-7 text-sm leading-relaxed text-white/60 opacity-60">
                 College of Engineering
                 <br />
                 University of Michigan
@@ -116,9 +151,9 @@ export default function ExternalLayout({
           </div>
         </div>
 
-        {/* Drawing title block */}
-        <div className="px-5 md:px-8">
-          <div className="container grid grid-cols-2 gap-px overflow-hidden rounded-t-[0.75rem] border border-b-0 border-white/12 bg-white/12 md:grid-cols-4">
+        {/* Drawing title block — metadata row. */}
+        <div className="relative z-10 px-5 md:px-8">
+          <div className="container grid grid-cols-2 gap-px overflow-hidden rounded-[0.75rem] border border-white/12 bg-white/12 md:grid-cols-4">
             {[
               ["Project", "MECG — Digital Platform"],
               ["Sheet", "No. 001 — External"],
@@ -135,9 +170,15 @@ export default function ExternalLayout({
           </div>
         </div>
 
-        {/* Ghost wordmark */}
-        <div className="pointer-events-none select-none overflow-hidden" aria-hidden="true">
-          <p className="display-xl text-ghost -mb-[0.18em] text-center">MECG</p>
+        {/* Ghost wordmark — oversized editorial finale, cropped by the bottom
+            edge so the letterforms bleed off the page. */}
+        <div
+          className="pointer-events-none relative select-none overflow-hidden pt-12 md:pt-16"
+          aria-hidden="true"
+        >
+          <p className="wordmark-bleed text-ghost block translate-y-[14%] text-center leading-[0.72]">
+            MECG
+          </p>
         </div>
       </footer>
     </div>

@@ -1,19 +1,19 @@
 import React from "react";
 import Link from "next/link";
-import { requireInternalSession } from "@/lib/internal-portal/session";
+import { requireMember } from "@/lib/auth";
 
 export default async function ScoringHomePage({
   searchParams,
 }: {
   searchParams?: Promise<{ error?: string }>;
 }) {
-  const session = await requireInternalSession();
+  const member = await requireMember();
   const params = await searchParams;
 
   const cards = [
     {
       title: "Speed Dating",
-      body: "Choose your table/team number, score assigned candidates, and save responses.",
+      body: "Score the candidates assigned to you during speed dating and save responses.",
       href: "/internal/scoring/speed-dating",
       show: true,
     },
@@ -27,7 +27,7 @@ export default async function ScoringHomePage({
       title: "Final Round",
       body: "Board-only interview scoring and notes.",
       href: "/internal/scoring/final-round",
-      show: session.role === "board",
+      show: member.role === "board",
     },
   ];
 

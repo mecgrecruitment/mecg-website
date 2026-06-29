@@ -111,21 +111,32 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
 
   return (
     <group ref={groupRef} rotation={[-0.42, 0.12, 0.08]}>
-      {/* Lighting: hot maize rim from behind-right, cold blue fill, low ambient. */}
-      <ambientLight intensity={0.18} />
-      <directionalLight position={[6, 4, 6]} intensity={1.1} color="#f5823a" />
-      <directionalLight position={[-7, -2, 4]} intensity={0.5} color="#4168b1" />
-      <pointLight position={[0, 0, 5]} intensity={9} color="#ffb072" distance={14} decay={2} />
+      {/* Lighting: a hemisphere base for soft gradient ambient, a strong warm
+          key from front-right for crisp metallic highlights, a cool blue fill,
+          an orange rim from behind to lift the gears off the dark field, and a
+          warm core glow that catches the hub. */}
+      <hemisphereLight args={["#8aa4dd", "#1a1206", 0.5]} />
+      <ambientLight intensity={0.1} />
+      <directionalLight position={[5, 6, 8]} intensity={2.6} color="#fff1dd" />
+      <directionalLight position={[-7, -1, 4]} intensity={0.7} color="#4168b1" />
+      <directionalLight position={[-5, 4, -7]} intensity={1.9} color="#f5823a" />
+      <pointLight position={[0.5, 0.5, 4.5]} intensity={6} color="#ffb072" distance={16} decay={2} />
 
       {/* A — the drive gear (the logo mark, solid machined metal). */}
       <group ref={gearARef}>
         <mesh geometry={geomA}>
-          <meshStandardMaterial color="#13233f" metalness={0.9} roughness={0.32} />
+          <meshStandardMaterial color="#16284a" metalness={0.85} roughness={0.26} />
         </mesh>
         {/* Floating hub inside the bore, like the 2D mark's center disc. */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[GEAR_A.radius * 0.34, GEAR_A.radius * 0.34, 0.62, 36]} />
-          <meshStandardMaterial color="#f5823a" metalness={0.65} roughness={0.3} />
+          <meshStandardMaterial
+            color="#f5823a"
+            metalness={0.6}
+            roughness={0.28}
+            emissive="#b84f1c"
+            emissiveIntensity={0.35}
+          />
         </mesh>
       </group>
 
@@ -143,7 +154,7 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
       {/* C — the ring gear, drawn not built: blueprint wireframe. */}
       <group ref={gearCRef} position={POS_C}>
         <lineSegments geometry={edgesC}>
-          <lineBasicMaterial color="#f5823a" transparent opacity={0.38} />
+          <lineBasicMaterial color="#ffb072" transparent opacity={0.5} />
         </lineSegments>
       </group>
     </group>

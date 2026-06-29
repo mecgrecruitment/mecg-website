@@ -1,5 +1,5 @@
-import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
-import { requireRole } from "@/lib/internal-portal/session";
+import { createClient } from "@/lib/supabase/server";
+import { requireBoard } from "@/lib/auth";
 
 function xml(value: unknown) {
   return String(value ?? "")
@@ -12,19 +12,15 @@ function xml(value: unknown) {
 function pretty(value: unknown) {
   const text = String(value ?? "");
   if (!text) return "";
-  return text
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return text.replaceAll("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
 function cell(value: unknown) {
   return `<Cell><Data ss:Type="String">${xml(value)}</Data></Cell>`;
 }
-
 function row(values: unknown[]) {
   return `<Row>${values.map(cell).join("")}</Row>`;
 }
-
 function worksheet(name: string, headers: string[], rows: unknown[][]) {
   return `
     <Worksheet ss:Name="${xml(name)}">
@@ -36,122 +32,91 @@ function worksheet(name: string, headers: string[], rows: unknown[][]) {
   `;
 }
 
-function averageScore(scores: any[]) {
-  if (scores.length === 0) return "";
-
-  const avg =
-    scores.reduce((sum, score) => {
-      const total =
-        Number(score.score_1 || 0) +
-        Number(score.score_2 || 0) +
-        Number(score.score_3 || 0) +
-        Number(score.score_4 || 0);
-
-      return sum + total / 4;
-    }, 0) / scores.length;
-
-  return avg.toFixed(2);
-}
-
 export async function GET() {
-  await requireRole(["board"]);
-  const supabase = createDemoAdminClient();
+  await requireBoard();
+  const supabase = await createClient();
 
-  const { data: candidates } = await supabase
-    .from("demo_applications")
-    .select("email,full_name,year,major,recruitment_status,status,submitted_at,created_at")
-    .order("full_name", { ascending: true });
+  const { data: cycle } = await supabase
+    .from("recruitment_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .maybeSingle();
 
-  const { data: checkins } = await supabase
-    .from("demo_checkins")
-    .select("email,event_name,event_id,created_at");
+  const { data: candidates } = cycle
+    ? await supabase
+        .from("candidates")
+        .select("id, per_cycle_seq, full_name, email, year, major, current_stage, status, created_at")
+        .eq("cycle_id", cycle.id)
+        .is("deleted_at", null)
+        .order("full_name", { ascending: true })
+    : { data: [] };
 
-  const { data: scores } = await supabase
-    .from("demo_candidate_scores")
-    .select("*")
-    .order("submitted_at", { ascending: false });
-
-  const { data: hashVotes } = await supabase
-    .from("demo_hash_votes")
-    .select("*")
+  const { data: scores } = await supabase.from("scores").select("candidate_id, stage, value");
+  const { data: decisions } = await supabase
+    .from("decisions")
+    .select("candidate_id, value, rationale, created_at")
     .order("created_at", { ascending: false });
+  const { data: checkins } = await supabase
+    .from("event_checkins")
+    .select("email, created_at, event:recruitment_events(title)");
 
   const candidateList = candidates ?? [];
   const scoreList = scores ?? [];
-  const hashList = hashVotes ?? [];
+  const decisionList = decisions ?? [];
   const checkinList = checkins ?? [];
 
-  const summaryRows = candidateList.map((candidate) => {
-    const candidateScores = scoreList.filter(
-      (score) => score.candidate_email === candidate.email
+  function avgScore(candidateId: string, stage?: string) {
+    const rows = scoreList.filter(
+      (s) => s.candidate_id === candidateId && (!stage || s.stage === stage)
     );
+    if (rows.length === 0) return "";
+    return (rows.reduce((sum, s) => sum + Number(s.value || 0), 0) / rows.length).toFixed(2);
+  }
+  function attendanceFor(email: string | null) {
+    if (!email) return 0;
+    return checkinList.filter((c) => c.email?.toLowerCase() === email.toLowerCase()).length;
+  }
+  function latestDecision(candidateId: string) {
+    return decisionList.find((d) => d.candidate_id === candidateId);
+  }
 
-    const candidateCheckins = checkinList.filter(
-      (checkin) => checkin.email?.toLowerCase() === candidate.email.toLowerCase()
-    );
-
-    const candidateHashes = hashList.filter(
-      (vote) => vote.candidate_email === candidate.email
-    );
-
-    const latestHash = candidateHashes[0];
-
+  const summaryRows = candidateList.map((c) => {
+    const decision = latestDecision(c.id);
     return [
-      candidate.full_name,
-      candidate.email,
-      candidate.year,
-      candidate.major,
-      pretty(candidate.recruitment_status || candidate.status),
-      candidateCheckins.length,
-      candidateCheckins.map((checkin) => checkin.event_name).filter(Boolean).join(", "),
-      averageScore(candidateScores),
-      candidateScores.length,
-      pretty(latestHash?.candidate_stage),
-      pretty(latestHash?.decision_status || latestHash?.final_decision || latestHash?.vote),
-      latestHash?.rationale || "",
-      latestHash?.reviewer_email || "",
-      candidate.submitted_at || candidate.created_at || "",
+      `C${String(c.per_cycle_seq).padStart(2, "0")}`,
+      c.full_name,
+      c.email,
+      c.year,
+      c.major,
+      pretty(c.current_stage),
+      pretty(c.status),
+      attendanceFor(c.email),
+      avgScore(c.id),
+      pretty(decision?.value),
+      decision?.rationale || "",
     ];
   });
 
-  const hashRows = hashList.map((vote) => [
-    vote.candidate_name,
-    vote.candidate_email,
-    pretty(vote.candidate_stage),
-    pretty(vote.vote),
-    pretty(vote.decision_status),
-    pretty(vote.final_decision),
-    vote.rationale || "",
-    vote.reviewer_email || "",
-    vote.created_at || "",
-  ]);
-
   function scoreRowsFor(stage: string) {
-    return scoreList
-      .filter((score) => score.stage === stage)
-      .map((score) => [
-        score.candidate_name,
-        score.candidate_email,
-        score.reviewer_name,
-        score.reviewer_email,
-        score.team_number || "",
-        score.score_1,
-        score.score_2,
-        score.score_3,
-        score.score_4,
-        averageScore([score]),
-        pretty(score.recommendation),
-        score.notes || "",
-        score.submitted_at || "",
-      ]);
+    return candidateList
+      .map((c) => {
+        const avg = avgScore(c.id, stage);
+        if (!avg) return null;
+        return [c.full_name, c.email, pretty(stage), avg];
+      })
+      .filter(Boolean) as unknown[][];
   }
 
-  const attendanceRows = checkinList.map((checkin) => [
-    checkin.email,
-    checkin.event_name || "",
-    checkin.event_id || "",
-    checkin.created_at || "",
-  ]);
+  const decisionRows = decisionList.map((d) => {
+    const c = candidateList.find((x) => x.id === d.candidate_id);
+    return [c?.full_name || "", c?.email || "", pretty(d.value), d.rationale || "", d.created_at || ""];
+  });
+
+  const attendanceRows = checkinList.map((c) => {
+    const event = c.event as { title?: string } | { title?: string }[] | null;
+    const title = Array.isArray(event) ? event[0]?.title : event?.title;
+    return [c.email, title || "", c.created_at || ""];
+  });
 
   const workbook = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -173,106 +138,17 @@ export async function GET() {
 
   ${worksheet(
     "Summary",
-    [
-      "Candidate",
-      "Email",
-      "Year",
-      "Major",
-      "Recruitment Status",
-      "Attendance Count",
-      "Attended Events",
-      "Average Score",
-      "Score Count",
-      "Latest Hash Round",
-      "Latest Decision",
-      "Latest Rationale",
-      "Latest Reviewer",
-      "Submitted At",
-    ],
+    ["Code", "Candidate", "Email", "Year", "Major", "Stage", "Status", "Attendance", "Avg Score", "Decision", "Rationale"],
     summaryRows
   )}
 
-  ${worksheet(
-    "Hash Votes",
-    [
-      "Candidate",
-      "Email",
-      "Round",
-      "Vote",
-      "Decision Status",
-      "Final Decision",
-      "Rationale",
-      "Reviewer",
-      "Created At",
-    ],
-    hashRows
-  )}
+  ${worksheet("Decisions", ["Candidate", "Email", "Decision", "Rationale", "Decided At"], decisionRows)}
 
-  ${worksheet(
-    "Speed Dating Scores",
-    [
-      "Candidate",
-      "Email",
-      "Reviewer",
-      "Reviewer Email",
-      "Team/Table",
-      "Score 1",
-      "Score 2",
-      "Score 3",
-      "Score 4",
-      "Average",
-      "Recommendation",
-      "Notes",
-      "Submitted At",
-    ],
-    scoreRowsFor("speed_dating")
-  )}
+  ${worksheet("Speed Dating Scores", ["Candidate", "Email", "Stage", "Avg Score"], scoreRowsFor("speed_dating"))}
+  ${worksheet("Group Case Scores", ["Candidate", "Email", "Stage", "Avg Score"], scoreRowsFor("group_case"))}
+  ${worksheet("Interview Scores", ["Candidate", "Email", "Stage", "Avg Score"], scoreRowsFor("interview"))}
 
-  ${worksheet(
-    "Group Case Scores",
-    [
-      "Candidate",
-      "Email",
-      "Reviewer",
-      "Reviewer Email",
-      "Team/Table",
-      "Score 1",
-      "Score 2",
-      "Score 3",
-      "Score 4",
-      "Average",
-      "Recommendation",
-      "Notes",
-      "Submitted At",
-    ],
-    scoreRowsFor("group_case")
-  )}
-
-  ${worksheet(
-    "Final Round Scores",
-    [
-      "Candidate",
-      "Email",
-      "Reviewer",
-      "Reviewer Email",
-      "Team/Table",
-      "Score 1",
-      "Score 2",
-      "Score 3",
-      "Score 4",
-      "Average",
-      "Recommendation",
-      "Notes",
-      "Submitted At",
-    ],
-    scoreRowsFor("final_round")
-  )}
-
-  ${worksheet(
-    "Attendance",
-    ["Email", "Event", "Event ID", "Checked In At"],
-    attendanceRows
-  )}
+  ${worksheet("Attendance", ["Email", "Event", "Checked In At"], attendanceRows)}
 </Workbook>`;
 
   return new Response(workbook, {
