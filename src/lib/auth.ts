@@ -62,3 +62,38 @@ export async function requireMember(allowed?: MemberRole[]): Promise<Member> {
 
 export const requireCommittee = () => requireMember(COMMITTEE_OR_ABOVE);
 export const requireBoard = () => requireMember(["board"]);
+
+export type Applicant = {
+  id: string;
+  email: string;
+  fullName: string | null;
+};
+
+// Applicant gate: an authenticated user with NO members row. A signed-out user
+// is sent to login; a member is routed to their own portal.
+export async function requireApplicant(): Promise<Applicant> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/auth/login?next=/apply/dashboard");
+  }
+
+  const { data: member } = await supabase
+    .from("members")
+    .select("id")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (member) {
+    redirect("/internal");
+  }
+
+  return {
+    id: user.id,
+    email: user.email ?? "",
+    fullName: (user.user_metadata?.full_name as string | undefined) ?? null,
+  };
+}

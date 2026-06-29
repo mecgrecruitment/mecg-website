@@ -375,6 +375,7 @@ export type Database = {
           evaluator_id: string
           id: string
           stage: Database["public"]["Enums"]["candidate_stage"]
+          team_label: string | null
         }
         Insert: {
           candidate_id?: string | null
@@ -383,6 +384,7 @@ export type Database = {
           evaluator_id: string
           id?: string
           stage: Database["public"]["Enums"]["candidate_stage"]
+          team_label?: string | null
         }
         Update: {
           candidate_id?: string | null
@@ -391,6 +393,7 @@ export type Database = {
           evaluator_id?: string
           id?: string
           stage?: Database["public"]["Enums"]["candidate_stage"]
+          team_label?: string | null
         }
         Relationships: [
           {
@@ -426,6 +429,45 @@ export type Database = {
             columns: ["evaluator_id"]
             isOneToOne: false
             referencedRelation: "v_team_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_checkins: {
+        Row: {
+          applicant_name: string | null
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+        }
+        Insert: {
+          applicant_name?: string | null
+          created_at?: string
+          email: string
+          event_id: string
+          id?: string
+        }
+        Update: {
+          applicant_name?: string | null
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "recruitment_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "v_open_rush_events"
             referencedColumns: ["id"]
           },
         ]
@@ -650,6 +692,60 @@ export type Database = {
           year?: string | null
         }
         Relationships: []
+      }
+      membership_requests: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          requested_role: Database["public"]["Enums"]["member_role"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["membership_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          requested_role?: Database["public"]["Enums"]["member_role"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["membership_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          requested_role?: Database["public"]["Enums"]["member_role"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["membership_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_team_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notes: {
         Row: {
@@ -886,6 +982,53 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "v_team_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruitment_events: {
+        Row: {
+          attendance_code: string | null
+          created_at: string
+          cycle_id: string
+          event_date: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          is_active: boolean
+          location: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attendance_code?: string | null
+          created_at?: string
+          cycle_id: string
+          event_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attendance_code?: string | null
+          created_at?: string
+          cycle_id?: string
+          event_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "recruitment_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -1346,6 +1489,15 @@ export type Database = {
           },
         ]
       }
+      v_open_rush_events: {
+        Row: {
+          event_date: string | null
+          id: string | null
+          location: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       v_placement_public: {
         Row: {
           company: string | null
@@ -1587,6 +1739,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_in_by_phrase: { Args: { p_phrase: string }; Returns: string }
       current_member_id: { Args: never; Returns: string }
       current_member_role: {
         Args: never
@@ -1602,7 +1755,31 @@ export type Database = {
       is_board: { Args: never; Returns: boolean }
       is_committee_or_above: { Args: never; Returns: boolean }
       is_member_or_above: { Args: never; Returns: boolean }
+      my_application: {
+        Args: never
+        Returns: {
+          display_code: string
+          stage: Database["public"]["Enums"]["candidate_stage"]
+          status: Database["public"]["Enums"]["candidate_status"]
+          submitted_at: string
+        }[]
+      }
+      my_checkins: {
+        Args: never
+        Returns: {
+          checked_in_at: string
+          event_date: string
+          event_title: string
+        }[]
+      }
       prune_apply_rate_limit: { Args: never; Returns: undefined }
+      request_membership: {
+        Args: {
+          p_full_name: string
+          p_requested_role: Database["public"]["Enums"]["member_role"]
+        }
+        Returns: undefined
+      }
       session_is_active: { Args: { p_session_id: string }; Returns: boolean }
       session_is_open: { Args: { p_session_id: string }; Returns: boolean }
       submit_application: {
@@ -1667,8 +1844,10 @@ export type Database = {
         | "accepted"
         | "rejected"
       decision_value: "accepted" | "rejected" | "waitlisted"
+      event_type: "open_rush" | "invite_only" | "internal"
       hash_visibility: "anonymous" | "open"
       member_role: "board" | "recruitment_committee" | "general_member"
+      membership_request_status: "pending" | "approved" | "denied"
       reaction_value: "strong_yes" | "yes" | "no" | "strong_no"
       vote_value: "advance" | "cut" | "discuss"
     }
@@ -1845,8 +2024,10 @@ export const Constants = {
         "rejected",
       ],
       decision_value: ["accepted", "rejected", "waitlisted"],
+      event_type: ["open_rush", "invite_only", "internal"],
       hash_visibility: ["anonymous", "open"],
       member_role: ["board", "recruitment_committee", "general_member"],
+      membership_request_status: ["pending", "approved", "denied"],
       reaction_value: ["strong_yes", "yes", "no", "strong_no"],
       vote_value: ["advance", "cut", "discuss"],
     },

@@ -131,3 +131,39 @@ from public.recruitment_cycles rc,
     ('Noah Patel',     '2026', 'Mechanical Engineering',            'noah.candidate@umich.edu')
   ) as c (full_name, year, major, email)
 where rc.name = 'Fall 2026';
+
+-- ── 8. Rubrics for the live evaluation stages (mirror the application rubric;
+--       placeholder criteria until the club supplies real ones). One active v1
+--       per stage so submitCandidateScore has criteria to write against. ──────
+insert into public.rubric_versions (cycle_id, stage, version_number, label, is_active, created_by)
+select rc.id, s.stage::public.candidate_stage, 1,
+       'Fall 2026 ' || s.stage || ' v1 (placeholder)', true, m.id
+from public.recruitment_cycles rc
+join public.members m on m.email = 'annie.callam@umich.edu'
+cross join (values ('speed_dating'), ('group_case'), ('interview')) as s (stage)
+where rc.name = 'Fall 2026';
+
+insert into public.rubric_criteria (rubric_version_id, name, description, weight, display_order)
+select rv.id, c.name, c.description, 1.0, c.display_order
+from public.rubric_versions rv
+join public.recruitment_cycles rc on rc.id = rv.cycle_id and rc.name = 'Fall 2026'
+cross join (values
+    ('Communication',   'Clear, concise, structured responses.',            1),
+    ('Problem Solving', 'Breaks ambiguous problems into logical parts.',     2),
+    ('Collaboration',   'Listens, builds on ideas, and supports teammates.', 3),
+    ('Overall Fit',     'Would strengthen the team and the cohort.',         4)
+  ) as c (name, description, display_order)
+where rv.stage in ('speed_dating', 'group_case', 'interview')
+  and rv.version_number = 1;
+
+-- ── 9. Open-rush events with attendance phrases (applicant check-in demo). ───
+insert into public.recruitment_events (cycle_id, title, event_type, event_date, location, attendance_code, is_active)
+select rc.id, e.title, 'open_rush'::public.event_type,
+       now() + e.offset_days * interval '1 day', e.location, e.code, true
+from public.recruitment_cycles rc
+cross join (values
+    ('Fall Kickoff Info Session', 'Ross B0560', 'GOBLUE',  2),
+    ('Coffee Chat & Casework',    'Ross R0210', 'CASEUP',  5),
+    ('Meet the Members Mixer',    'The Union',  'MECGMIX', 9)
+  ) as e (title, location, code, offset_days)
+where rc.name = 'Fall 2026';
