@@ -1,14 +1,14 @@
 import React from "react";
 import Link from "next/link";
-import { requireInternalSession } from "@/lib/internal-portal/session";
-import { memberLogout } from "../member-login/actions";
+import { requireMember, ROLE_LABELS } from "@/lib/auth";
+import { logout } from "../auth/actions";
 
 export default async function InternalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await requireInternalSession();
+  const member = await requireMember();
 
   const nav = [
     { href: "/internal/applicants", label: "Applicants" },
@@ -28,7 +28,7 @@ export default async function InternalLayout({
               Recruitment Portal
             </h1>
             <p className="mt-1 text-xs text-white/40">
-              {session.fullName} · {session.role}
+              {member.full_name} · {ROLE_LABELS[member.role]}
             </p>
           </Link>
 
@@ -43,8 +43,8 @@ export default async function InternalLayout({
               </Link>
             ))}
 
-            <form action={memberLogout}>
-              <button className="shrink-0 rounded-full border border-white/10 bg-whte/[0.035] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/58 transition hover:border-red-300/40 hover:bg-red-400/20 hover:text-white">
+            <form action={logout}>
+              <button className="shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/58 transition hover:border-red-300/40 hover:bg-red-400/20 hover:text-white">
                 Logout
               </button>
             </form>

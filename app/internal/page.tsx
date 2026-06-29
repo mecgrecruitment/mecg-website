@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { requireInternalSession } from "@/lib/internal-portal/session";
+import { requireMember } from "@/lib/auth";
 
 const cards = [
   {
@@ -35,7 +35,7 @@ export default async function InternalDashboardPage({
 }: {
   searchParams?: Promise<{ error?: string }>;
 }) {
-  const session = await requireInternalSession();
+  const member = await requireMember();
   const params = await searchParams;
 
   return (
@@ -49,7 +49,7 @@ export default async function InternalDashboardPage({
       <section className="panel-strong rounded-[2rem] p-7 md:p-10">
         <p className="eyebrow">Internal Portal</p>
         <h2 className="font-display mt-5 text-5xl font-bold uppercase leading-[0.9] tracking-[-0.07em] md:text-7xl">
-          Welcome, {session.fullName.split(" ")[0]}.
+          Welcome, {(member.full_name ?? "there").split(" ")[0]}.
         </h2>
         <p className="mt-6 max-w-2xl text-white/58">
           This portal is for recruitment operations: applicants, scoring, calendar, hash decisions, and members.

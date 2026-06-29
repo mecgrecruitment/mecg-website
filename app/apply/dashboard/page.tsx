@@ -1,13 +1,10 @@
 import React from "react";
-import { applicantLogout } from "../actions";
+import { createClient } from "@/lib/supabase/server";
+import { requireApplicant } from "@/lib/auth";
+import { logout } from "../../auth/actions";
 import { submitApplicantCheckin } from "../checkin/actions";
-import { submitDemoApplication } from "../application/actions";
+import { submitApplication } from "../application/actions";
 import { SubmitButton } from "../SubmitButton";
-import {
-  getSubmittedApplication,
-  requireApplicantSession,
-} from "@/lib/applicant-portal/session";
-import { createDemoAdminClient } from "@/lib/supabase/demo-admin";
 
 type SearchParams = {
   checkin_error?: string;
@@ -16,18 +13,11 @@ type SearchParams = {
   submitted?: string;
 };
 
-function Notice({
-  type,
-  children,
-}: {
-  type: "success" | "error";
-  children: React.ReactNode;
-}) {
+function Notice({ type, children }: { type: "success" | "error"; children: React.ReactNode }) {
   const classes =
     type === "success"
       ? "border-[var(--orange)]/40 bg-[var(--orange)]/10 text-[var(--orange-soft)]"
       : "border-red-400/30 bg-red-400/10 text-red-100";
-
   return <div className={`rounded-[1.5rem] border p-5 ${classes}`}>{children}</div>;
 }
 
@@ -36,21 +26,25 @@ export default async function ApplicantDashboardPage({
 }: {
   searchParams?: Promise<SearchParams>;
 }) {
-  const session = await requireApplicantSession();
+  const applicant = await requireApplicant();
   const params = await searchParams;
-  const submittedApplication = await getSubmittedApplication(session.email);
+  const supabase = await createClient();
 
-  if (submittedApplication) {
+  const { data: appRows } = await supabase.rpc("my_application");
+  const application = Array.isArray(appRows) ? appRows[0] : null;
+
+  // Locked "thank you" view once an application exists for this cycle.
+  if (application) {
     return (
       <div className="grid gap-8">
-      <div className="mb-6">
-        <a
-          href="/"
-          className="inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/60 transition hover:border-[var(--orange)] hover:text-white"
-        >
-          ← Back to Main Website
-        </a>
-      </div>
+        <div className="mb-6">
+          <a
+            href="/"
+            className="inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/60 transition hover:border-[var(--orange)] hover:text-white"
+          >
+            ← Back to Main Website
+          </a>
+        </div>
 
         <section className="panel-strong rounded-[2rem] p-7 md:p-10">
           <p className="eyebrow">Application Submitted</p>
@@ -58,13 +52,14 @@ export default async function ApplicantDashboardPage({
             Thank you.
           </h2>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/68">
-            Thank you for submitting your MECG application. Your application has been received. No further action is needed at this time.
+            Your MECG application has been received. No further action is needed at this time.
           </p>
           <p className="mt-4 text-sm text-white/45">
-            Logged in as {session.email}
+            Applicant {application.display_code} · stage: {application.stage} · status: {application.status}
           </p>
+          <p className="mt-1 text-sm text-white/45">Logged in as {applicant.email}</p>
 
-          <form action={applicantLogout} className="mt-8">
+          <form action={logout} className="mt-8">
             <button className="rounded-full border border-white/15 px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em] text-white/70 transition hover:border-[var(--orange)] hover:text-white">
               Logout
             </button>
@@ -74,29 +69,15 @@ export default async function ApplicantDashboardPage({
     );
   }
 
-  const supabase = createDemoAdminClient();
-
-  const { data: openRushEvents } = await supabase
-    .from("demo_events")
-    .select("id,title,event_date,location")
-    .eq("active", true)
-    .eq("event_type", "Open Rush")
+  const { data: events } = await supabase
+    .from("v_open_rush_events")
+    .select("id, title, event_date, location")
     .order("event_date", { ascending: true });
 
-  const openRushIds = (openRushEvents ?? []).map((event) => event.id);
-
-  const { data: checkins } = openRushIds.length
-    ? await supabase
-        .from("demo_checkins")
-        .select("id,event_id,event_name,created_at")
-        .eq("email", session.email)
-        .in("event_id", openRushIds)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const checkedEventIds = new Set((checkins ?? []).map((checkin) => checkin.event_id));
-  const attendanceCount = checkedEventIds.size;
-  const attendanceTotal = openRushEvents?.length ?? 0;
+  const { data: checkins } = await supabase.rpc("my_checkins");
+  const checkinList = Array.isArray(checkins) ? checkins : [];
+  const attendanceCount = checkinList.length;
+  const attendanceTotal = events?.length ?? 0;
 
   return (
     <div className="grid gap-8">
@@ -105,14 +86,14 @@ export default async function ApplicantDashboardPage({
           <div>
             <p className="eyebrow">Applicant Dashboard</p>
             <h2 className="font-display mt-5 max-w-4xl text-5xl font-bold uppercase leading-[0.9] tracking-[-0.07em] md:text-7xl">
-              Welcome{session.fullName ? `, ${session.fullName.split(" ")[0]}` : ""}.
+              Welcome{applicant.fullName ? `, ${applicant.fullName.split(" ")[0]}` : ""}.
             </h2>
             <p className="mt-6 max-w-2xl text-white/58">
-              Your email is saved from login and will be used automatically.
+              Your email is saved from login and is attached to your check-ins and application automatically.
             </p>
           </div>
 
-          <form action={applicantLogout}>
+          <form action={logout}>
             <button className="rounded-full border border-white/15 px-5 py-3 text-xs font-extrabold uppercase tracking-[0.16em] text-white/70 transition hover:border-[var(--orange)] hover:text-white">
               Logout
             </button>
@@ -128,9 +109,9 @@ export default async function ApplicantDashboardPage({
         <article className="panel rounded-[1.5rem] p-6">
           <p className="eyebrow">Profile</p>
           <p className="mt-5 text-sm text-white/40">Name</p>
-          <p className="mt-1 text-xl font-bold">{session.fullName || "Not added yet"}</p>
+          <p className="mt-1 text-xl font-bold">{applicant.fullName || "Not added yet"}</p>
           <p className="mt-5 text-sm text-white/40">Email</p>
-          <p className="mt-1 break-all text-xl font-bold">{session.email}</p>
+          <p className="mt-1 break-all text-xl font-bold">{applicant.email}</p>
         </article>
 
         <article className="panel rounded-[1.5rem] p-6">
@@ -138,17 +119,13 @@ export default async function ApplicantDashboardPage({
           <p className="mt-5 text-5xl font-black">
             {attendanceCount}/{attendanceTotal}
           </p>
-          <p className="mt-3 text-sm text-white/50">
-            Only open rush events count here.
-          </p>
+          <p className="mt-3 text-sm text-white/50">Only open rush events count here.</p>
         </article>
 
         <article className="panel rounded-[1.5rem] p-6">
           <p className="eyebrow">Application</p>
           <p className="mt-5 text-2xl font-black">Not submitted</p>
-          <p className="mt-3 text-sm text-white/50">
-            Once submitted, this dashboard will lock.
-          </p>
+          <p className="mt-3 text-sm text-white/50">Once submitted, this dashboard will lock.</p>
         </article>
       </section>
 
@@ -168,23 +145,21 @@ export default async function ApplicantDashboardPage({
               <input
                 name="event_phrase"
                 required
-                placeholder="Example: BLUEGEAR"
+                placeholder="Example: GOBLUE"
                 className="rounded-xl border border-white/10 bg-white/[0.04] p-4 uppercase outline-none focus:border-[var(--orange)]"
               />
             </label>
 
-            <SubmitButton pendingText="Checking in...">
-              Check In
-            </SubmitButton>
+            <SubmitButton pendingText="Checking in...">Check In</SubmitButton>
           </form>
 
           <div className="mt-8">
             <p className="text-sm font-bold text-white">Your open rush check-ins</p>
-            {(checkins ?? []).length > 0 ? (
+            {checkinList.length > 0 ? (
               <ul className="mt-3 grid gap-2 text-sm text-white/55">
-                {(checkins ?? []).map((checkin) => (
-                  <li key={checkin.id} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                    {checkin.event_name || "Open Rush Event"} · {new Date(checkin.created_at).toLocaleString()}
+                {checkinList.map((c, i) => (
+                  <li key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                    {c.event_title || "Open Rush Event"} · {new Date(c.checked_in_at).toLocaleString()}
                   </li>
                 ))}
               </ul>
@@ -203,13 +178,13 @@ export default async function ApplicantDashboardPage({
             After you submit, the portal will only show the thank you screen.
           </p>
 
-          <form action={submitDemoApplication} className="mt-6 grid gap-4">
+          <form action={submitApplication} className="mt-6 grid gap-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold">Full name</span>
               <input
                 name="full_name"
                 required
-                defaultValue={session.fullName || ""}
+                defaultValue={applicant.fullName || ""}
                 className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
               />
             </label>
@@ -217,36 +192,28 @@ export default async function ApplicantDashboardPage({
             <div className="grid gap-4 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-bold">Year</span>
-                <input
-                  name="year"
-                  required
-                  placeholder="2028"
-                  className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
-                />
+                <input name="year" required placeholder="2028" className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
               </label>
 
               <label className="grid gap-2">
                 <span className="text-sm font-bold">Major</span>
-                <input
-                  name="major"
-                  required
-                  placeholder="IOE, Data Science, etc."
-                  className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
-                />
+                <input name="major" required placeholder="IOE, Data Science, etc." className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
               </label>
             </div>
 
             <label className="grid gap-2">
-              <span className="text-sm font-bold">Resume</span>
+              <span className="text-sm font-bold">Resume (PDF, required)</span>
               <input
                 name="resume"
                 type="file"
+                accept="application/pdf"
+                required
                 className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
               />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-bold">Why MECG?</span>
+              <span className="text-sm font-bold">Why do you want to join MECG?</span>
               <textarea name="why_mecg" required rows={4} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
             </label>
 
@@ -256,13 +223,11 @@ export default async function ApplicantDashboardPage({
             </label>
 
             <label className="grid gap-2">
-              <span className="text-sm font-bold">Tell us about a time you solved a problem.</span>
+              <span className="text-sm font-bold">Describe a problem you broke down and solved.</span>
               <textarea name="problem_solving" required rows={4} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
             </label>
 
-            <SubmitButton pendingText="Submitting...">
-              Submit Application
-            </SubmitButton>
+            <SubmitButton pendingText="Submitting...">Submit Application</SubmitButton>
           </form>
         </article>
       </section>
