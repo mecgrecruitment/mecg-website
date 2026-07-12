@@ -22,8 +22,11 @@ insert into public.invite_allowlist (email, role, notes) values
 
 -- ── 2. Auth users (password: password123) ────────────────────────────────────
 -- Direct GoTrue-shaped inserts; the signup-gate trigger passes because the
--- allowlist exists, and the AFTER INSERT trigger creates public.members rows
--- with the allowlist role and consumes each allowlist entry.
+-- allowlist exists. The AFTER INSERT trigger now creates a *pending*
+-- membership_requests row per allowlist match (board approval required —
+-- see migration 12) and consumes each allowlist entry; section 3 below
+-- grants these seeded accounts member access directly instead, since seed
+-- data represents already-approved members, not a pending queue.
 -- Token columns are empty strings, not NULL — GoTrue scans crash on NULLs.
 with new_users (email, full_name) as (
   values
@@ -78,7 +81,22 @@ select
   now()
 from auth.users au;
 
--- ── 3. Board members are already public on the site ─────────────────────────
+-- ── 3. Grant seeded/test accounts member access directly ────────────────────
+-- Local seed data already bypasses normal signup (direct auth.users insert
+-- above); do the same for member grant instead of relying on the signup
+-- trigger, which now only creates a pending membership_requests row (see
+-- migration 12). These accounts represent already-approved members, so grant
+-- membership directly and drop the trigger's pending rows for them.
+insert into public.members (user_id, email, full_name, role)
+select au.id, au.email, au.raw_user_meta_data ->> 'full_name', ia.role
+from auth.users au
+join public.invite_allowlist ia on lower(ia.email) = lower(au.email);
+
+delete from public.membership_requests mr
+using public.invite_allowlist ia
+where lower(mr.email) = lower(ia.email);
+
+-- Board members are already public on the site.
 update public.members
    set is_public = true
  where role = 'board';
