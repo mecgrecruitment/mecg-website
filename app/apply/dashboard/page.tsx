@@ -34,10 +34,32 @@ export default async function ApplicantDashboardPage({
   const { data: appRows } = await supabase.rpc("my_application");
   const application = Array.isArray(appRows) ? appRows[0] : null;
 
+  const { data: membershipRequest } = await supabase
+    .from("membership_requests")
+    .select("status")
+    .eq("user_id", applicant.id)
+    .maybeSingle();
+
+  const MEMBERSHIP_STATUS_COPY: Record<string, string> = {
+    pending: "Your board membership request is pending review. We'll email you once it's decided.",
+    approved: "Your board membership request was approved — log out and back in to enter the member portal.",
+    denied: "Your board membership request wasn't approved.",
+  };
+
+  const membershipBanner = membershipRequest ? (
+    <div className="rounded-[1.5rem] border border-[var(--orange)]/40 bg-[var(--orange)]/10 p-5 text-white/80">
+      {MEMBERSHIP_STATUS_COPY[membershipRequest.status]}{" "}
+      <a href="/auth/request-access" className="underline hover:text-white">
+        View request status.
+      </a>
+    </div>
+  ) : null;
+
   // Locked "thank you" view once an application exists for this cycle.
   if (application) {
     return (
       <div className="grid gap-8">
+        {membershipBanner}
         <div className="mb-6">
           <Link
             href="/"
@@ -82,6 +104,7 @@ export default async function ApplicantDashboardPage({
 
   return (
     <div className="grid gap-8">
+      {membershipBanner}
       <section className="panel-strong rounded-[2rem] p-7 md:p-10">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
           <div>
