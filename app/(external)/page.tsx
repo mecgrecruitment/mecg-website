@@ -1,7 +1,19 @@
 import React from "react";
-import { faqs, pillars } from "@/lib/site-content";
+import type { Metadata } from "next";
+import { faqs } from "@/lib/site-content";
 import { CommunityPhotoStrip } from "@/components/site/CommunityPhotos";
 import HeroGears from "./components/HeroGears";
+
+const title = "MECG — Michigan Engineering Consulting Group";
+const description =
+  "Multifaceted. Driven. Inclusive. MECG is a pro-bono, student-led consulting organization at the University of Michigan, open to students of every major.";
+
+export const metadata: Metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: "/" },
+  openGraph: { title, description },
+};
 
 export default function Home() {
   return (

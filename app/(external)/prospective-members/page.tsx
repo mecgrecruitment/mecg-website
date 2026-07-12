@@ -1,10 +1,18 @@
 import React from "react";
+import type { Metadata } from "next";
 import { faqs, recruitmentEvents } from "@/lib/site-content";
 import { CommunityPhotoGrid, JoinCommunityPhotos } from "@/components/site/CommunityPhotos";
+import { Timeline } from "../components/Timeline";
 
-export const metadata = {
-  title: "Prospective Members — MECG",
-  description: "Recruitment information for prospective MECG members.",
+const title = "Prospective Members";
+const description =
+  "MECG recruits students of all majors. See the recruitment timeline — meet us, apply, interview — plus event dates, FAQs, and what life in the club actually looks like.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/prospective-members" },
+  openGraph: { title, description },
 };
 
 export default function ProspectiveMembersPage() {
@@ -50,22 +58,17 @@ export default function ProspectiveMembersPage() {
             Meet us. Apply. Interview.
           </h2>
 
-          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-reveal-group>
-            {recruitmentEvents.map((event) => (
-              <article key={event.code} className="rounded-[1rem] border border-[var(--paper-rule)] p-6" data-reveal>
-                <p className="font-mono text-sm font-bold text-[var(--orange-dark)]">
-                  {event.code} — {event.type}
-                </p>
-                <h3 className="font-disay mt-5 text-2xl font-bold uppercase tracking-[-0.04em] text-[var(--navy-950)]">
-                  {event.title}
-                </h3>
-                <p className="mt-3 text-sm font-bold uppercase tracking-[0.12em] text-[var(--on-paper-muted)]">
-                  {event.date} · {event.time}
-                </p>
-                <p className="mt-2 text-sm text-[var(--on-paper-muted)]">{event.location}</p>
-                <p className="mt-4 leading-relaxed text-[var(--on-paper-muted)]">{event.body}</p>
-              </article>
-            ))}
+          <div className="mt-12 max-w-3xl">
+            <Timeline
+              variant="scroll"
+              items={recruitmentEvents.map((event) => ({
+                id: event.code,
+                index: event.code,
+                title: event.title,
+                meta: `${event.type} · ${event.date} · ${event.time}`,
+                body: `${event.location}. ${event.body}`,
+              }))}
+            />
           </div>
         </div>
       </section>
@@ -85,9 +88,13 @@ export default function ProspectiveMembersPage() {
               </article>
             ))}
           </div>
-        
 
-</div>
+          <div className="py-10 md:py-14">
+            <CommunityPhotoGrid start={4} />
+          </div>
+
+          <JoinCommunityPhotos />
+        </div>
       </section>
     </main>
   );

@@ -16,8 +16,8 @@ function bail(message: string): never {
   redirect(`/apply/dashboard?application_error=${encodeURIComponent(message)}`);
 }
 
-// Authenticated applicant submission. Unlike the public /api/apply route, the
-// email is taken from the verified session (never the form), so my_application()
+// Authenticated applicant submission. The email is taken from the verified
+// session (never the form), so my_application()
 // — which matches on auth.email() — can later unlock the dashboard. The
 // service-role admin client performs the upload + transactional RPC.
 export async function submitApplication(formData: FormData) {
@@ -51,7 +51,7 @@ export async function submitApplication(formData: FormData) {
   }
 
   // Applicants can't read cycles/questions under RLS, so use the admin client
-  // for the read + the transactional submit (service-role, like /api/apply).
+  // for the read + the transactional submit (service-role).
   const admin = createAdminClient();
 
   const { data: cycle } = await admin
@@ -87,7 +87,7 @@ export async function submitApplication(formData: FormData) {
     }
   }
 
-  // Upload first, insert second (mirrors /api/apply EX-57 cleanup contract).
+  // Upload first, insert second (EX-57 cleanup contract).
   const candidateId = randomUUID();
   const resumePath = `${candidateId}/${randomUUID()}.pdf`;
   const { error: uploadError } = await admin.storage

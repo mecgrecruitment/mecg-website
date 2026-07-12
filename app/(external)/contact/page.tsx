@@ -1,13 +1,18 @@
 import React from "react";
+import type { Metadata } from "next";
 import { contact } from "@/lib/site-content";
+import { ContactForm } from "../components/ContactForm";
 
-export const metadata = {
-  title: "Contact Us — MECG",
-  description: "Reach MECG about recruitment, client projects, partnerships, or general questions.",
+const title = "Contact";
+const description =
+  "Open a channel with MECG. Reach the board about recruitment, client projects, partnerships, or general questions — we read everything.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/contact" },
+  openGraph: { title, description },
 };
-
-const inputClasses =
-  "focus-ring w-full rounded-[0.85rem] border border-white/12 bg-white/[0.045] px-5 py-4 text-base text-white placeholder:text-white/35 outline-none transition-colors cus:border-[var(--orange)]/70";
 
 export default function ContactPage() {
   return (
@@ -29,40 +34,8 @@ export default function ContactPage() {
       </section>
 
       <section className="px-5 pb-24 md:px-8">
-        <div className="container grid gap-5 lg:grid-col.15fr_0.85fr]">
-          <form
-            action={`mailto:${contact.email}`}
-            method="post"
-            encType="text/plain"
-            className="panel grid gap-4 rounded-[2rem] p-7 md:p-10"
-            data-reveal
-          >
-            <p className="annotation annotation-accent">Transmission form</p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2">
-                <span className="annotation !text-white/45">Full name</span>
-                <input name="name" required placeholder="Your name" className={inputClasses} />
-              </label>
-              <label className="grid gap-2">
-                <span className="annotation !text-white/45">Email</span>
-                <input name="email" required type="email" placeholder="you@umich.edu" className={inputClasses} />
-              </label>
-            </div>
-            <label className="grid gap-2">
-              <span className="annotation !text-white/45">Subject</span>
-              <input name="subject" required placeholder="What is this about?" className={inputClasses} />
-            </label>
-            <label className="grid gap-2">
-              <span className="annotation !text-white/45">Message</span>
-              <textarea name="message" required placeholder="Tell us about it" rows={8} className={inputClasses} />
-            </label>
-            <button
-              data-magnetic
-              className="focus-ring mt-2 justify-self-start rounded-full bg-[var(--orange)] px-8 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
-            >
-              Send message
-            </button>
-          </form>
+        <div className="container grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+          <ContactForm />
 
           <aside className="grid content-start gap-5">
             <div className="sheet rounded-[2rem] p-7 md:p-9" data-reveal="wipe">

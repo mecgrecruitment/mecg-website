@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GearLogo } from "@/components/brand/GearLogo";
 import { navLinks } from "@/lib/site-content";
@@ -10,16 +11,20 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  // Close the mobile menu on navigation by adjusting state during render
+  // (React's recommended alternative to a setState-in-effect).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setOpen(false);
+  }
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
@@ -38,7 +43,7 @@ export default function SiteHeader() {
         }`}
       >
         <div className="container flex items-center justify-between gap-5">
-          <a href="/" className="focus-ring flex shrink-0 items-center gap-3">
+          <Link href="/" className="focus-ring flex shrink-0 items-center gap-3">
             <GearLogo className="h-8 w-8 text-[var(--orange)]" />
             <div>
               <p className="font-display text-lg font-bold uppercase tracking-[0.24em] text-white">
@@ -48,7 +53,7 @@ export default function SiteHeader() {
                 EST. 2023 — ANN ARBOR
               </p>
             </div>
-          </a>
+          </Link>
 
           <nav
             aria-label="Primary"

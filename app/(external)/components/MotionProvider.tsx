@@ -198,6 +198,35 @@ export default function MotionProvider() {
         );
       });
 
+      // Interactive timeline: the marker travels down [data-timeline-track]
+      // scrubbed to the container's scroll position; each [data-timeline-node]
+      // gains .timeline-node--active as it crosses viewport center.
+      document.querySelectorAll<HTMLElement>("[data-timeline]").forEach((container) => {
+        const track = container.querySelector<HTMLElement>("[data-timeline-track]");
+        const marker = container.querySelector<HTMLElement>("[data-timeline-marker]");
+        const nodes = container.querySelectorAll<HTMLElement>("[data-timeline-node]");
+        if (!track || !marker) return;
+
+        const setY = gsap.quickSetter(marker, "y", "px");
+        ScrollTrigger.create({
+          trigger: container,
+          start: "top center",
+          end: "bottom center",
+          scrub: true,
+          onUpdate: (self) => {
+            setY(self.progress * Math.max(track.offsetHeight - marker.offsetHeight, 0));
+          },
+        });
+
+        nodes.forEach((node) => {
+          ScrollTrigger.create({
+            trigger: node,
+            start: "top center",
+            toggleClass: { targets: node, className: "timeline-node--active" },
+          });
+        });
+      });
+
       // Stat roll-ups: "80+" counts 0 → 80 keeping the suffix.
       document.querySelectorAll<HTMLElement>("[data-counter]").forEach((el) => {
         const match = (el.textContent || "").trim().match(/^([\d,]+)(.*)$/);

@@ -1,4 +1,17 @@
 import Image from "next/image";
+import { clients } from "@/lib/site-content";
+import type { Metadata } from "next";
+
+const title = "About";
+const description =
+  "The four pillars behind MECG — professional development, education, project experience, and community — plus a welcome from our president and the story of how MECG was founded at Michigan in 2023.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/about" },
+  openGraph: { title, description },
+};
 
 const pillars = [
   {
@@ -79,6 +92,25 @@ export default function AboutPage() {
               </p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
+        <div className="grid gap-8 rounded-[1.5rem] border border-white/10 bg-[#122033]/60 p-8 sm:grid-cols-2 md:p-10">
+          <div data-reveal>
+            <p className="stat text-5xl font-black text-white md:text-6xl" data-counter>
+              {clients.length}+
+            </p>
+            <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[var(--orange-soft)]">
+              Client projects delivered
+            </p>
+          </div>
+          <div data-reveal>
+            <p className="stat text-5xl font-black text-white md:text-6xl">2023</p>
+            <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[var(--orange-soft)]">
+              Founded
+            </p>
+          </div>
         </div>
       </section>
 

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireApplicant } from "@/lib/auth";
 import { logout } from "../../auth/actions";
@@ -38,12 +39,12 @@ export default async function ApplicantDashboardPage({
     return (
       <div className="grid gap-8">
         <div className="mb-6">
-          <a
+          <Link
             href="/"
             className="inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/60 transition hover:border-[var(--orange)] hover:text-white"
           >
             ← Back to Main Website
-          </a>
+          </Link>
         </div>
 
         <section className="panel-strong rounded-[2rem] p-7 md:p-10">

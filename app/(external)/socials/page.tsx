@@ -1,5 +1,17 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import communityPhotos from "@/lib/community-photos.json";
+
+const title = "Socials";
+const description =
+  "Stay connected with MECG on Instagram, LinkedIn, and email for recruitment updates, community photos, member highlights, and project news.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/socials" },
+  openGraph: { title, description },
+};
 
 const socials = [
   {

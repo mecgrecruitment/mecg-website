@@ -1,7 +1,7 @@
 import React from "react";
-import { DemoTopButtons } from "@/components/portal/DemoTopButtons";
 import type { Metadata } from "next";
 import { Manrope, Space_Grotesk, Space_Mono } from "next/font/google";
+import { siteUrl } from "./site";
 import "./globals.css";
 
 // §7.2 font contract: next/font only (self-hosted, preloaded, fallback-adjusted);
@@ -27,9 +27,29 @@ const mono = Space_Mono({
   display: "swap",
 });
 
+const description =
+  "MECG is a pro-bono, student-led consulting organization at the University of Michigan. We deliver strategy, operations, and research projects for real clients while training students of every major in consulting.";
+
 export const metadata: Metadata = {
-  title: "MECG",
-  description: "Michigan Engineering Consulting Group",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "MECG — Michigan Engineering Consulting Group",
+    template: "%s | MECG",
+  },
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "MECG",
+    title: "MECG — Michigan Engineering Consulting Group",
+    description,
+    url: "/",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: "MECG — Michigan Engineering Consulting Group",
+    description,
+  },
 };
 
 export default function RootLayout({
@@ -43,9 +63,6 @@ export default function RootLayout({
       className={`${manrope.variable} ${grotesk.variable} ${mono.variable}`}
     >
       <body className="min-h-full bg-surface font-sans text-on-surface">
-        
-        
-        <DemoTopButtons />
         {children}
       </body>
     </html>

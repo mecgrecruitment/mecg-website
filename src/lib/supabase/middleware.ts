@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Authenticated zones. Public marketing pages, /auth/*, /portal (the public
-// chooser), and /api/apply are intentionally NOT here. /apply and /apply/create
+// Authenticated zones. Public marketing pages, /auth/*, and /portal (the public
+// chooser) are intentionally NOT here. /apply and /apply/create
 // are public redirect-shims into /auth/*, so only the real applicant surfaces
 // (/apply/dashboard|application|checkin) are guarded.
 const PROTECTED_PREFIXES = [
@@ -18,16 +18,38 @@ function isProtected(pathname: string): boolean {
   );
 }
 
+function redirectToLogin(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/auth/login";
+  url.searchParams.set("next", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
 // Refreshes the Supabase auth cookies on every matched request (rotating tokens
 // so Server Components read a live session) and bounces unauthenticated users
 // away from protected zones. Mirrors src/lib/supabase/server.ts's cookie wiring
 // but writes onto the outgoing NextResponse.
+//
+// This runs on EVERY matched request, so anything thrown here 500s the whole
+// site — public marketing pages included. Missing env or a Supabase outage must
+// therefore degrade, not crash: protected zones fail closed (bounce to login),
+// public pages keep serving.
 export async function updateSession(request: NextRequest) {
+  const isProtectedPath = isProtected(request.nextUrl.pathname);
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return isProtectedPath
+      ? redirectToLogin(request)
+      : NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -48,15 +70,19 @@ export async function updateSession(request: NextRequest) {
 
   // Do not run logic between createServerClient and getUser (Supabase SSR
   // guidance): getUser revalidates the token and refreshes cookies.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    ({
+      data: { user },
+    } = await supabase.auth.getUser());
+  } catch {
+    // Auth is unreachable (outage, DNS, network). We cannot prove who this is,
+    // so a protected path must fail closed; the public site stays up.
+    return isProtectedPath ? redirectToLogin(request) : response;
+  }
 
-  if (!user && isProtected(request.nextUrl.pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+  if (!user && isProtectedPath) {
+    return redirectToLogin(request);
   }
 
   return response;

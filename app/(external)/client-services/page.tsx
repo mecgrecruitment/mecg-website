@@ -1,14 +1,23 @@
 import React from "react";
+import type { Metadata } from "next";
+import Image from "next/image";
 import {
   clients,
   projectExpectations,
   projectTimeline,
   services,
 } from "@/lib/site-content";
+import { Timeline } from "../components/Timeline";
 
-export const metadata = {
-  title: "Client Services — MECG",
-  description: "Pro-bono consulting services from MECG.",
+const title = "Client Services";
+const description =
+  "MECG delivers pro-bono consulting for startups, nonprofits, and established firms — market research, operations, strategy, and analytics — on a structured semester engagement from first call to final deliverable.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/client-services" },
+  openGraph: { title, description },
 };
 
 export default function ClientServicesPage() {
@@ -70,28 +79,16 @@ export default function ClientServicesPage() {
             From first call to final deliverable.
           </h2>
 
-          <div className="mt-14 grid gap-10 md:grid-cols-4" data-reveal-group>
-            {projectTimeline.map((item, i) => (
-              <article key={item.step} className="relative" data-reveal>
-                <div className="flex items-center gap-3">
-                  <p className="font-mono text-sm font-bold text-[var(--orange-dark)]">
-                    Step {item.step}
-                  </p>
-
-                  {i < projectTimeline.length - 1 ? (
-                    <span className="dim-rule hidden flex-1 !bg-[var(--paper-rule)] md:block" />
-                  ) : null}
-                </div>
-
-                <h3 className="font-display mt-6 text-2xl font-bold uppercase tracking-[-0.04em] text-[var(--navy-950)]">
-                  {item.title}
-              </h3>
-
-                <p className="mt-4 leading-relaxed text-[var(--on-paper-muted)]">
-                  {item.body}
-                </p>
-              </article>
-            ))}
+          <div className="mt-14">
+            <Timeline
+              variant="static"
+              items={projectTimeline.map((item) => ({
+                id: item.step,
+                index: `Step ${item.step}`,
+                title: item.title,
+                body: item.body,
+              }))}
+            />
           </div>
 
           <div className="mt-14 grid gap-4 md:grid-cols-4" data-reveal-group>
@@ -134,19 +131,31 @@ export default function ClientServicesPage() {
           </h2>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/56" data-reveal>
-            A sample of MECG client work and project experience. Logos and photos are intentionally excluded from this section for now.
+            A sample of MECG client work and project experience.
           </p>
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>
             {clients.map((client, index) => (
               <article
                 key={client.name}
-                className="panel card-hover rounded-[1.35rem] p-6"
+                className="group panel card-hover rounded-[1.35rem] p-6"
                 data-reveal
               >
-                <p className="font-mono text-sm font-bold text-[var(--orange)]">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
+                {client.logo ? (
+                  <div className="relative h-16 w-full overflow-hidden rounded-[0.85rem] bg-white/92 p-3">
+                    <Image
+                      src={client.logo}
+                      alt={`${client.name} logo`}
+                      fill
+                      sizes="200px"
+                      className="object-contain grayscale transition duration-300 group-hover:grayscale-0"
+                    />
+                  </div>
+                ) : (
+                  <p className="font-mono text-sm font-bold text-[var(--orange)]">
+                    {String(index + 1).padStart(2, "0")}
+                  </p>
+                )}
 
                 <p className="annotation mt-10">{client.term}</p>
 

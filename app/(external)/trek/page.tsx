@@ -1,9 +1,16 @@
 import React from "react";
+import type { Metadata } from "next";
 import { contact } from "@/lib/site-content";
 
-export const metadata = {
-  title: "Trek — MECG",
-  description: "The MECG industry trek — story coming soon.",
+const title = "Trek";
+const description =
+  "Every year MECG travels to meet companies and alumni where they work. Stops, photos, and member takeaways from the trek are being assembled — follow along in the meantime.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/trek" },
+  openGraph: { title, description },
 };
 
 export default function TrekPage() {

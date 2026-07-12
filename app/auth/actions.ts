@@ -210,9 +210,7 @@ export async function signInWithGoogle(formData: FormData) {
 
   if (error || !data?.url) {
     redirect(
-      `/auth/login?error=${encodeURIComponent(
-        error?.message || "Google sign-in is unavailable right now."
-      )}`
+      `/auth/login?error=${encodeURIComponent("Google sign-in is unavailable right now.")}`
     );
   }
 

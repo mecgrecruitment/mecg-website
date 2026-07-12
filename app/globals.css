@@ -275,6 +275,45 @@ a {
   }
 }
 
+/* Interactive timeline — vertical (scroll-scrubbed) or horizontal (static)
+ * rail with nodes, always rendered on `.sheet` (paper) sections. Marker
+ * travel + node fill are driven by [data-timeline] in MotionProvider.tsx.
+ * Under reduced motion / no-JS, [data-timeline]'s ScrollTriggers never run
+ * (gated the same way as every other primitive in MotionProvider), so nodes
+ * simply render in their default unfilled-ring state — never broken. */
+[data-timeline-track] {
+  background: var(--paper-rule);
+  border-radius: 1px;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-left: -0.325rem;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 14px rgba(245, 130, 58, 0.55);
+}
+
+.timeline-node-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 2px solid var(--paper-rule);
+  background: var(--paper);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.timeline-node--active .timeline-node-dot,
+.timeline-node-dot.timeline-node--active {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
 /*
  * Scroll reveals (DS-39b/c) are driven by [data-reveal] / [data-reveal-group]
  * via GSAP ScrollTrigger in MotionProvider.tsx — scroll-triggered, once:true,
