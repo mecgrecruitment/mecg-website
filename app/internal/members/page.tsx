@@ -69,6 +69,7 @@ export default async function MembersPage({
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     {[
+                      { value: "general_member", label: "General Member" },
                       { value: "recruitment_committee", label: "Committee" },
                       { value: "board", label: "Board" },
                     ].map((role) => (

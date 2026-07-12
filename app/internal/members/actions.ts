@@ -12,9 +12,9 @@ export async function approveMembership(formData: FormData) {
   const supabase = await createClient();
 
   const requestId = String(formData.get("request_id") || "");
-  const role = String(formData.get("role") || "recruitment_committee") === "board"
-    ? "board"
-    : "recruitment_committee";
+  const roleRaw = String(formData.get("role") || "recruitment_committee");
+  const role: "board" | "recruitment_committee" | "general_member" =
+    roleRaw === "board" || roleRaw === "general_member" ? roleRaw : "recruitment_committee";
 
   const { data: req } = await supabase
     .from("membership_requests")
