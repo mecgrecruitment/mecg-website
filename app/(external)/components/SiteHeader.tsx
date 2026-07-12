@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GearLogo } from "@/components/brand/GearLogo";
 import { navLinks } from "@/lib/site-content";
+import type { NavIdentity } from "@/lib/auth";
+import { logout } from "../../auth/actions";
 
-export default function SiteHeader() {
+export default function SiteHeader({ identity }: { identity: NavIdentity | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -43,7 +45,7 @@ export default function SiteHeader() {
         }`}
       >
         <div className="container flex items-center justify-between gap-5">
-          <Link href="/" className="focus-ring flex shrink-0 items-center gap-3">
+          <Link href="/" className="focus-ring flex min-h-11 shrink-0 items-center gap-3">
             <GearLogo className="h-8 w-8 text-[var(--orange)]" />
             <div>
               <p className="font-display text-lg font-bold uppercase tracking-[0.24em] text-white">
@@ -85,28 +87,51 @@ export default function SiteHeader() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
-            <a
-              href="/apply"
-              data-magnetic
-              className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
-            >
-              Login
-            </a>
+            {identity ? (
+              <>
+                <a
+                  href={identity.href}
+                  data-magnetic
+                  className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
+                >
+                  {identity.label}
+                </a>
 
-            <a
-              href="/member-login"
-              data-magnetic
-              className="focus-ring hidden rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white md:inline-block"
-            >
-              Member Login
-            </a>
+                <form action={logout} className="hidden md:inline-block">
+                  <button
+                    type="submit"
+                    className="focus-ring rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white"
+                  >
+                    Logout
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/apply"
+                  data-magnetic
+                  className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
+                >
+                  Login
+                </a>
+
+                <a
+                  href="/member-login"
+                  data-magnetic
+                  className="focus-ring hidden rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white md:inline-block"
+                >
+                  Member Login
+                </a>
+              </>
+            )}
 
             <button
               type="button"
               aria-expanded={open}
               aria-controls="site-menu"
               onClick={() => setOpen((v) => !v)}
-              className="focus-ring grid h-10 w-10 place-items-center rounded-full border border-white/15 xl:hidden"
+              className="focus-ring grid h-11 w-11 place-items-center rounded-full border border-white/15 xl:hidden"
             >
               <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
               <span className="relative block h-3 w-5" aria-hidden="true">
@@ -155,18 +180,39 @@ export default function SiteHeader() {
           ))}
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href="/apply"
-              className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-            >
-              Login
-            </a>
-            <a
-              href="/member-login"
-              className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-            >
-              Member Login
-            </a>
+            {identity ? (
+              <>
+                <a
+                  href={identity.href}
+                  className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+                >
+                  {identity.label}
+                </a>
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+                  >
+                    Logout
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/apply"
+                  className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+                >
+                  Login
+                </a>
+                <a
+                  href="/member-login"
+                  className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+                >
+                  Member Login
+                </a>
+              </>
+            )}
           </div>
         </nav>
       </div>

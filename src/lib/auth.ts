@@ -69,6 +69,36 @@ export type Applicant = {
   fullName: string | null;
 };
 
+export type NavIdentity =
+  | { kind: "member"; href: "/internal"; label: string }
+  | { kind: "applicant"; href: "/apply/dashboard"; label: string };
+
+// Non-redirecting session summary for chrome that renders on every page (the
+// public site header): who's logged in, and where their "you" link should
+// go. Returns null for a signed-out visitor — unlike requireMember/
+// requireApplicant, this never redirects.
+export async function getNavIdentity(): Promise<NavIdentity | null> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: member } = await supabase
+    .from("members")
+    .select("role")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (member) {
+    return { kind: "member", href: "/internal", label: "Portal" };
+  }
+
+  return { kind: "applicant", href: "/apply/dashboard", label: "Dashboard" };
+}
+
 // Applicant gate: an authenticated user with NO members row. A signed-out user
 // is sent to login; a member is routed to their own portal.
 export async function requireApplicant(): Promise<Applicant> {

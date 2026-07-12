@@ -1,18 +1,21 @@
 import React from "react";
 import { GearLogo } from "@/components/brand/GearLogo";
 import { contact, navLinks } from "@/lib/site-content";
+import { getNavIdentity } from "@/lib/auth";
 import MotionProvider from "./components/MotionProvider";
 import SiteHeader from "./components/SiteHeader";
 
-export default function ExternalLayout({
+export default async function ExternalLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const identity = await getNavIdentity();
+
   return (
     <div className="grain">
       <MotionProvider />
-      <SiteHeader />
+      <SiteHeader identity={identity} />
 
       {/* Scroll HUD — the dial turns with page progress (MotionProvider). */}
       <div className="hud-gear" aria-hidden="true">
@@ -75,7 +78,7 @@ export default function ExternalLayout({
                   href={contact.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-ring group inline-flex items-center gap-1.5 text-white/55 transition-colors hover:text-white"
+                  className="focus-ring group -my-3.5 inline-flex items-center gap-1.5 py-3.5 text-white/55 transition-colors hover:text-white"
                 >
                   Instagram
                   <span
@@ -89,7 +92,7 @@ export default function ExternalLayout({
                   href={contact.linkedin}
                   target="_blank"
                   rel="noreferrer"
-                  className="focus-ring group inline-flex items-center gap-1.5 text-white/55 transition-colors hover:text-white"
+                  className="focus-ring group -my-3.5 inline-flex items-center gap-1.5 py-3.5 text-white/55 transition-colors hover:text-white"
                 >
                   LinkedIn
                   <span
@@ -111,14 +114,14 @@ export default function ExternalLayout({
                 <a
                   key={link.href}
                   href={link.href}
-                  className="focus-ring w-fit whitespace-nowrap transition-colors hover:text-white"
+                  className="focus-ring -my-3.5 w-fit whitespace-nowrap py-3.5 transition-colors hover:text-white"
                 >
                   {link.label}
                 </a>
               ))}
               <a
                 href="/apply"
-                className="focus-ring w-fit whitespace-nowrap text-[var(--orange)] transition-colors hover:text-white"
+                className="focus-ring -my-3.5 w-fit whitespace-nowrap py-3.5 text-[var(--orange)] transition-colors hover:text-white"
               >
                 Apply
               </a>
@@ -128,7 +131,7 @@ export default function ExternalLayout({
             <div>
               <a
                 href={`mailto:${contact.email}`}
-                className="focus-ring group inline-block w-fit"
+                className="focus-ring group -my-3 inline-block w-fit py-3"
               >
                 <span className="relative inline-block text-base font-semibold tracking-tight text-white/90 transition-colors group-hover:text-white md:text-lg">
                   {contact.email}
