@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CommunityPhotoStrip } from "@/components/site/CommunityPhotos";
+import { CommunityStory } from "@/components/site/CommunityStory";
 import {
   clients,
   faqs,
@@ -26,6 +26,54 @@ const proof = [
   { value: `${services.length}`, label: "Consulting capabilities" },
   { value: "10–12", label: "Weeks per engagement" },
   { value: "All", label: "Majors welcome" },
+];
+
+const communityStory = [
+  {
+    src: "/images/community/community-12.jpg",
+    alt: "Three MECG members taking a selfie while walking through Chicago",
+    label: "Beyond campus",
+    title: "Experiences, shared.",
+    description:
+      "The relationships built on project teams extend into trips, professional exploration, and the moments between the itinerary.",
+    position: "center 44%",
+  },
+  {
+    src: "/images/community/community-52.jpg",
+    alt: "Two MECG members wearing club hoodies outdoors at night",
+    label: "Identity",
+    title: "A team you carry with you.",
+    description:
+      "A shared standard of curiosity, generosity, and follow-through gives MECG its identity long after a project ends.",
+    position: "center 56%",
+  },
+  {
+    src: "/images/community/community-32.jpg",
+    alt: "MECG members gathered outdoors in Michigan colors",
+    label: "Campus life",
+    title: "Rooted at Michigan.",
+    description:
+      "Members bring different majors, experiences, and perspectives together—and still make time to enjoy campus as one community.",
+    position: "center 58%",
+  },
+  {
+    src: "/images/community/community-40.jpg",
+    alt: "A large group of MECG members dressed for a formal social gathering",
+    label: "Community",
+    title: "A network that feels human.",
+    description:
+      "MECG pairs professional ambition with the kind of friendships and shared memories that make an organization worth returning to.",
+    position: "center 48%",
+  },
+  {
+    src: "/images/community/community-16.jpg",
+    alt: "Three MECG members spending time together in a campus study space",
+    label: "Everyday moments",
+    title: "Built between meetings.",
+    description:
+      "Some of the strongest connections happen informally: studying, catching up, and making room for each other in a busy week.",
+    position: "center 55%",
+  },
 ];
 
 export default function Home() {
@@ -178,16 +226,15 @@ export default function Home() {
       </section>
 
       <div className="px-5 pb-12 md:px-8 md:pb-20">
-        <CommunityPhotoStrip
-          title="Built by the people in it"
-          subtitle="Projects are the work. Mentorship, friendships, firm visits, and shared ambition are what make the organization last."
-        />
+        <div className="container">
+          <CommunityStory frames={communityStory} />
+        </div>
       </div>
 
       <section className="section pt-12">
         <div className="container">
           <SectionHeading
-            eyebrow="Fig. 04 — Quick answers"
+            eyebrow="Fig. 05 — Quick answers"
             title={<>Know before you start.</>}
           />
           <div className="mt-10 grid gap-4" data-reveal-group>

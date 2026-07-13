@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { faqs, recruitmentCycle, recruitmentEvents } from "@/lib/site-content";
 import { Timeline } from "../components/Timeline";
+import { PageHero } from "../components/PageHero";
 
 const title = "Prospective Members";
 const description =
@@ -14,36 +15,60 @@ export const metadata: Metadata = {
   openGraph: { title, description },
 };
 
+const memberSignals = [
+  {
+    index: "01",
+    title: "Any major",
+    body: "MECG is interdisciplinary by design. Technical, creative, and analytical perspectives all strengthen the work.",
+  },
+  {
+    index: "02",
+    title: "No consulting prerequisite",
+    body: "Recruitment looks for curiosity, collaboration, and follow-through—not a pre-existing consulting vocabulary.",
+  },
+  {
+    index: "03",
+    title: "Learn through practice",
+    body: "Members build skills through education, mentorship, and semester-long client engagements.",
+  },
+  {
+    index: "04",
+    title: "Join a community",
+    body: "Project work is one part of MECG. Coffee chats, social events, and shared campus life matter too.",
+  },
+];
+
 export default function ProspectiveMembersPage() {
   return (
     <main>
-      <section className="grid-bg relative overflow-hidden px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-44">
-        <div className="orb right-[-10rem] top-[-12rem] h-[30rem] w-[30rem] bg-[var(--orange-dark)]" />
-        <div className="container relative">
-          <p className="annotation annotation-accent" data-reveal>
-            Sheet 05 — Prospective Members
-          </p>
-          <h1 className="display-xl mt-6 max-w-6xl text-white" data-split>
-            Join the <span className="text-ghost">machine.</span>
-          </h1>
-          <p className="mt-8 max-w-3xl text-xl leading-relaxed text-white/62" data-reveal>
-            MECG is open to students of all majors who want to explore consulting, gain client experience, and build community.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3" data-reveal>
-            <a
-              href="/apply"
-              data-magnetic
-              className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
-            >
-              Login / Apply
-            </a>
-            <a
-              href="/apply/checkin"
-              data-magnetic
-              className="focus-ring rounded-full border border-white/16 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-white/40 hover:text-white"
-            >
-              Event Check-In
-            </a>
+      <PageHero
+        eyebrow="Sheet 05 — Prospective Members"
+        title={<>Bring your perspective.<br /> <span className="text-ghost">Build new range.</span></>}
+        description="MECG is open to students of every major who want to explore consulting, contribute to client work, and join an ambitious, supportive community."
+        tone="orange"
+      >
+        <div className="flex flex-wrap gap-3">
+          <a href="/apply" data-magnetic className="button-primary focus-ring">Login / Apply</a>
+          <a href="/apply/checkin" className="button-secondary focus-ring">Event check-in</a>
+        </div>
+      </PageHero>
+
+      <section className="section">
+        <div className="container">
+          <p className="annotation annotation-accent">Fig. 05.1 — Is MECG for me?</p>
+          <h2 className="display mt-5 max-w-5xl text-5xl uppercase text-white md:text-7xl">
+            Start with curiosity.
+          </h2>
+          <div className="mt-12 grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
+            {memberSignals.map((item) => (
+              <article key={item.index} className="bg-[var(--navy-900)] p-7 lg:min-h-72">
+                <p className="font-mono text-sm font-bold text-[var(--orange)]">{item.index}</p>
+                <h3 className="font-display mt-10 text-3xl font-bold uppercase leading-[0.95] tracking-[-0.05em] text-white">
+                  {item.title}
+                </h3>
+                <p className="mt-5 text-sm leading-7 text-white/56">{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -67,7 +92,7 @@ export default function ProspectiveMembersPage() {
             </div>
           </div>
           <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
-            {recruitmentCycle.archiveLabel}
+            Fig. 05.2 — {recruitmentCycle.archiveLabel}
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
             What to expect.
@@ -91,16 +116,22 @@ export default function ProspectiveMembersPage() {
       <section className="section">
         <div className="container">
           <p className="annotation annotation-accent" data-reveal>
-            Q&A
+            Fig. 05.3 — Questions before applying
           </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-2" data-reveal-group>
+          <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl">
+            Know what to expect.
+          </h2>
+          <div className="mt-10 grid gap-4" data-reveal-group>
             {faqs.map((faq) => (
-              <article key={faq.question} className="panel card-hover rounded-[1.35rem] p-6" data-reveal>
-                <h3 className="font-diplay text-2xl font-bold uppercase tracking-[-0.04em] text-white">
-                  {faq.question}
-                </h3>
-                <p className="mt-4 leading-relaxed text-white/56">{faq.answer}</p>
-              </article>
+              <details key={faq.question} className="group panel card-hover rounded-[1.35rem]" data-reveal>
+                <summary className="flex min-h-20 cursor-pointer list-none items-center justify-between gap-6 p-6">
+                  <h3 className="font-display text-2xl font-bold uppercase tracking-[-0.04em] text-white md:text-3xl">
+                    {faq.question}
+                  </h3>
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/15 font-mono text-lg font-bold text-[var(--orange)] transition group-open:rotate-45" aria-hidden="true">+</span>
+                </summary>
+                <p className="border-t border-white/10 px-6 pb-6 pt-5 leading-relaxed text-white/56">{faq.answer}</p>
+              </details>
             ))}
           </div>
         </div>

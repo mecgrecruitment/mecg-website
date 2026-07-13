@@ -1,6 +1,7 @@
 import React from "react";
 import { signup } from "../actions";
 import { GoogleButton } from "../GoogleButton";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 export default async function SignupPage({
   searchParams,
@@ -10,10 +11,13 @@ export default async function SignupPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <AuthShell
+      eyebrow="New account"
+      title="Start here."
+      description="Create one secure MECG account. Prospective members use it for applications; approved members use the same login for internal tools."
+    >
         <p className="eyebrow">Create account</p>
-        <h1 className="display mt-5 text-6xl uppercase">Join MECG.</h1>
+        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">Create your workspace.</h2>
         <p className="mt-4 text-white/55">
           Applicants and prospective members start here. We&apos;ll email you a link
           to confirm your address.
@@ -41,7 +45,7 @@ export default async function SignupPage({
                 name="full_name"
                 required
                 autoComplete="name"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
@@ -52,7 +56,7 @@ export default async function SignupPage({
                 type="email"
                 required
                 autoComplete="email"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
@@ -64,12 +68,12 @@ export default async function SignupPage({
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
               <span className="text-xs text-white/40">At least 8 characters.</span>
             </label>
 
-            <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+            <button className="button-primary focus-ring cursor-pointer">
               Create account
             </button>
           </form>
@@ -78,7 +82,6 @@ export default async function SignupPage({
             Already have an account? Log in.
           </a>
         </div>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

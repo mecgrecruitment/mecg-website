@@ -1,6 +1,7 @@
 import React from "react";
 import { login } from "../actions";
 import { GoogleButton } from "../GoogleButton";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 export default async function LoginPage({
   searchParams,
@@ -11,11 +12,13 @@ export default async function LoginPage({
   const next = params.next?.startsWith("/") && !params.next.startsWith("//") ? params.next : "";
 
   return (
-    <main className="portal-shell grid min-h-screen place-items-center px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl rounded-[2rem] border border-white/10 bg-[rgba(8,18,37,0.78)] p-6 shadow-[var(--shadow-card)] md:p-9">
-        <p className="eyebrow">Login</p>
-        <h1 className="display mt-5 text-6xl uppercase">MECG account.</h1>
-
+    <AuthShell
+      eyebrow="Account access"
+      title="Welcome back."
+      description="Sign in once. MECG will route you to the applicant dashboard or the internal member workspace based on your account."
+    >
+      <p className="eyebrow">Login</p>
+      <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">Continue to your workspace.</h2>
         {params.message && (
           <p className="mt-6 rounded-[1rem] border border-white/10 bg-white/[0.05] p-4 text-white/70">
             {params.message}
@@ -47,7 +50,7 @@ export default async function LoginPage({
                 type="email"
                 required
                 autoComplete="email"
-                className="focus-ring min-h-12 rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
@@ -63,7 +66,7 @@ export default async function LoginPage({
                 type="password"
                 required
                 autoComplete="current-password"
-                className="focus-ring min-h-12 rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
@@ -76,7 +79,6 @@ export default async function LoginPage({
             Need an account? Create one.
           </a>
         </div>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

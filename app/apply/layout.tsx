@@ -1,5 +1,11 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Applicant Portal",
+  robots: { index: false, follow: false },
+};
 
 export default function ApplicantLayout({
   children,
@@ -15,7 +21,11 @@ export default function ApplicantLayout({
             <p className="annotation text-white/38">MECG · Application system</p>
             <h1 className="font-display mt-1 text-2xl font-bold uppercase tracking-[-0.05em] md:text-3xl">Applicant Portal</h1>
           </Link>
-          <Link href="/prospective-members" className="portal-nav-link focus-ring">Recruitment information</Link>
+          <nav className="flex gap-2 overflow-x-auto pb-1 sm:justify-end sm:pb-0" aria-label="Applicant portal">
+            <Link href="/apply/dashboard" className="portal-nav-link focus-ring">Dashboard</Link>
+            <Link href="/prospective-members" className="portal-nav-link focus-ring">Recruitment info</Link>
+            <Link href="/" className="portal-nav-link focus-ring">Website ↗</Link>
+          </nav>
         </div>
       </header>
 

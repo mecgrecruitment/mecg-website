@@ -1,5 +1,6 @@
 import React from "react";
 import { updatePassword } from "../actions";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 // Reached after the recovery link hits /auth/callback (which exchanges the code
 // and forwards here with a live recovery session). updatePassword verifies the
@@ -12,10 +13,13 @@ export default async function ResetPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <AuthShell
+      eyebrow="Account recovery"
+      title="Choose a new key."
+      description="Set a new password for the account connected to this verified recovery session."
+    >
         <p className="eyebrow">Reset password</p>
-        <h1 className="display mt-5 text-6xl uppercase">New password.</h1>
+        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">New password.</h2>
         <p className="mt-4 text-white/55">Choose a new password for your account.</p>
 
         {params.error && (
@@ -33,16 +37,15 @@ export default async function ResetPage({
               required
               minLength={8}
               autoComplete="new-password"
-              className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+              className="portal-field focus-ring"
             />
             <span className="text-xs text-white/40">At least 8 characters.</span>
           </label>
 
-          <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+          <button className="button-primary focus-ring cursor-pointer">
             Update password
           </button>
         </form>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

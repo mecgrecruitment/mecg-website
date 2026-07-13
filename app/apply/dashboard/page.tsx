@@ -101,6 +101,26 @@ export default async function ApplicantDashboardPage({
   const checkinList = Array.isArray(checkins) ? checkins : [];
   const attendanceCount = checkinList.length;
   const attendanceTotal = events?.length ?? 0;
+  const applicantSteps = [
+    {
+      index: "01",
+      label: "Profile",
+      value: applicant.fullName ? "Ready" : "Add your name",
+      complete: Boolean(applicant.fullName),
+    },
+    {
+      index: "02",
+      label: "Open rush",
+      value: `${attendanceCount}/${attendanceTotal} check-ins`,
+      complete: attendanceCount > 0,
+    },
+    {
+      index: "03",
+      label: "Application",
+      value: "Not submitted",
+      complete: false,
+    },
+  ];
 
   return (
     <div className="grid gap-8">
@@ -128,6 +148,25 @@ export default async function ApplicantDashboardPage({
       {params?.checkin_success ? <Notice type="success">{params.checkin_success}</Notice> : null}
       {params?.checkin_error ? <Notice type="error">{params.checkin_error}</Notice> : null}
       {params?.application_error ? <Notice type="error">{params.application_error}</Notice> : null}
+
+      <section aria-label="Application progress" className="grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-3">
+        {applicantSteps.map((step) => (
+          <article key={step.index} className="bg-[var(--navy-900)] p-5 md:p-6">
+            <div className="flex items-center justify-between gap-4">
+              <p className="font-mono text-xs font-bold text-[var(--orange)]">{step.index}</p>
+              <span className={`rounded-full border px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.12em] ${
+                step.complete
+                  ? "border-green-300/25 bg-green-400/10 text-green-100"
+                  : "border-white/10 bg-white/[0.03] text-white/38"
+              }`}>
+                {step.complete ? "Recorded" : "Open"}
+              </span>
+            </div>
+            <h3 className="font-display mt-6 text-2xl font-bold uppercase tracking-[-0.04em]">{step.label}</h3>
+            <p className="mt-2 text-sm text-white/48">{step.value}</p>
+          </article>
+        ))}
+      </section>
 
       <section className="grid gap-5 md:grid-cols-3">
         <article className="panel rounded-[1.5rem] p-6">
@@ -170,7 +209,7 @@ export default async function ApplicantDashboardPage({
                 name="event_phrase"
                 required
                 placeholder="Example: GOBLUE"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 uppercase outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring uppercase"
               />
             </label>
 
@@ -209,19 +248,19 @@ export default async function ApplicantDashboardPage({
                 name="full_name"
                 required
                 defaultValue={applicant.fullName || ""}
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-bold">Year</span>
-                <input name="year" required placeholder="2028" className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+                <input name="year" required placeholder="2028" className="portal-field focus-ring" />
               </label>
 
               <label className="grid gap-2">
                 <span className="text-sm font-bold">Major</span>
-                <input name="major" required placeholder="IOE, Data Science, etc." className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+                <input name="major" required placeholder="IOE, Data Science, etc." className="portal-field focus-ring" />
               </label>
             </div>
 
@@ -232,23 +271,23 @@ export default async function ApplicantDashboardPage({
                 type="file"
                 accept="application/pdf"
                 required
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
             <label className="grid gap-2">
               <span className="text-sm font-bold">Why do you want to join MECG?</span>
-              <textarea name="why_mecg" required rows={4} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+              <textarea name="why_mecg" required rows={4} className="portal-field focus-ring" />
             </label>
 
             <label className="grid gap-2">
               <span className="text-sm font-bold">Tell us about a time you worked on a team.</span>
-              <textarea name="teamwork" required rows={4} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+              <textarea name="teamwork" required rows={4} className="portal-field focus-ring" />
             </label>
 
             <label className="grid gap-2">
               <span className="text-sm font-bold">Describe a problem you broke down and solved.</span>
-              <textarea name="problem_solving" required rows={4} className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]" />
+              <textarea name="problem_solving" required rows={4} className="portal-field focus-ring" />
             </label>
 
             <SubmitButton pendingText="Submitting...">Submit Application</SubmitButton>

@@ -1,5 +1,6 @@
 import React from "react";
 import { resendVerification } from "../actions";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 export default async function VerifyPage({
   searchParams,
@@ -10,10 +11,13 @@ export default async function VerifyPage({
   const email = params.email ?? "";
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <AuthShell
+      eyebrow="Email verification"
+      title="Check your inbox."
+      description="Verify the email connected to your MECG account before continuing to the applicant or member workspace."
+    >
         <p className="eyebrow">Verify email</p>
-        <h1 className="display mt-5 text-6xl uppercase">Check your inbox.</h1>
+        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">One step left.</h2>
         <p className="mt-4 text-white/55">
           {email ? (
             <>
@@ -47,7 +51,7 @@ export default async function VerifyPage({
                 required
                 defaultValue={email}
                 autoComplete="email"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
             <button className="rounded-full border border-white/15 px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em] hover:border-[var(--orange)]">
@@ -59,7 +63,6 @@ export default async function VerifyPage({
             Back to log in.
           </a>
         </div>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { requestPasswordReset } from "../actions";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 export default async function ForgotPage({
   searchParams,
@@ -9,10 +10,13 @@ export default async function ForgotPage({
   const params = await searchParams;
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <AuthShell
+      eyebrow="Account recovery"
+      title="Reset access."
+      description="Enter the email connected to your MECG account. The reset link returns you to the same applicant or member workspace."
+    >
         <p className="eyebrow">Reset password</p>
-        <h1 className="display mt-5 text-6xl uppercase">Forgot it?</h1>
+        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">Request a secure link.</h2>
         <p className="mt-4 text-white/55">
           Enter your email and we&apos;ll send a link to set a new password.
         </p>
@@ -37,11 +41,11 @@ export default async function ForgotPage({
               type="email"
               required
               autoComplete="email"
-              className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+              className="portal-field focus-ring"
             />
           </label>
 
-          <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+          <button className="button-primary focus-ring cursor-pointer">
             Send reset link
           </button>
 
@@ -49,7 +53,6 @@ export default async function ForgotPage({
             Back to log in.
           </a>
         </form>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

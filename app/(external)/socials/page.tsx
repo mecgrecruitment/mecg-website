@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import communityPhotos from "@/lib/community-photos.json";
 import { contact } from "@/lib/site-content";
 import { PageHero } from "../components/PageHero";
 
@@ -33,13 +32,33 @@ const socials = [
   },
 ];
 
-type Photo = {
-  src: string;
-  alt: string;
-};
-
-const photos = ((communityPhotos.images || []) as Photo[]).slice(0, 18);
-const loopingPhotos = [...photos, ...photos];
+const photos = [
+  {
+    src: "/images/community/community-56.jpg",
+    alt: "Five MECG members gathered outdoors near campus",
+    className: "md:col-span-2 md:row-span-2",
+  },
+  {
+    src: "/images/community/community-28.jpg",
+    alt: "Four MECG members dressed for a formal gathering",
+    className: "md:col-span-1",
+  },
+  {
+    src: "/images/community/community-44.jpg",
+    alt: "MECG members gathered outdoors in Michigan colors",
+    className: "md:col-span-1",
+  },
+  {
+    src: "/images/community/community-60.jpg",
+    alt: "Three MECG members spending time together indoors",
+    className: "md:col-span-1",
+  },
+  {
+    src: "/images/community/community-52.jpg",
+    alt: "Two MECG members wearing club hoodies outdoors at night",
+    className: "md:col-span-1",
+  },
+];
 
 function SocialCard({
   title,
@@ -74,14 +93,12 @@ function SocialCard({
   );
 }
 
-function SocialPhotoRibbon() {
-  if (photos.length === 0) return null;
-
+function SocialPhotoGrid() {
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/72 py-8 shadow-[0_22px_70px_rgba(4,12,24,0.24)]">
-      <div className="px-6">
+    <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/72 p-4 shadow-[0_22px_70px_rgba(4,12,24,0.24)] md:p-8">
+      <div className="px-2 pb-8 md:px-0">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--orange-soft)]">
-          In the wild
+          Fig. 02 — In the wild
         </p>
         <h2 className="font-display mt-4 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
           Little moments,
@@ -92,34 +109,19 @@ function SocialPhotoRibbon() {
         </h2>
       </div>
 
-      <div className="relative mt-10 overflow-hidden py-3">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#122033] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#122033] to-transparent" />
-
-        <div className="flex w-max animate-mecg-photo-strip items-center gap-4 px-8">
-          {loopingPhotos.map((photo, index) => (
-            <figure
-              key={`${photo.src}-${index}`}
-              className={`relative shrink-0 overflow-hidden rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-2 shadow-[0_16px_40px_rgba(0,0,0,0.22)] ${
-                index % 3 === 0
-                  ? "h-64 w-48"
-                  : index % 3 === 1
-                    ? "h-48 w-72"
-                    : "h-56 w-56"
-              }`}
-            >
-              <div className="relative h-full w-full overflow-hidden rounded-[0.85rem]">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  sizes="320px"
-                  className="object-cover"
-                />
-              </div>
-            </figure>
-          ))}
-        </div>
+      <div className="grid auto-rows-[15rem] gap-3 md:grid-cols-4 md:auto-rows-[13rem]">
+        {photos.map((photo) => (
+          <figure key={photo.src} className={`group relative overflow-hidden rounded-[1.15rem] border border-white/10 bg-white/[0.04] ${photo.className}`}>
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover transition duration-700 group-hover:scale-[1.025]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,13,24,0.4)] via-transparent to-transparent" aria-hidden="true" />
+          </figure>
+        ))}
       </div>
     </section>
   );
@@ -151,7 +153,7 @@ export default function SocialsPage() {
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
-        <SocialPhotoRibbon />
+        <SocialPhotoGrid />
       </section>
     </main>
   );

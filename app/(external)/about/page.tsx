@@ -7,6 +7,24 @@ const title = "About";
 const description =
   "The four pillars behind MECG — professional development, education, project experience, and community — plus a welcome from our president and the story of how MECG was founded at Michigan in 2023.";
 
+const principles = [
+  {
+    index: "01",
+    title: "Open by design",
+    body: "Consulting should not be limited by major, prior experience, or familiarity with business language.",
+  },
+  {
+    index: "02",
+    title: "Learn by doing",
+    body: "Education becomes more useful when members can apply it to a real question with a real client.",
+  },
+  {
+    index: "03",
+    title: "Grow together",
+    body: "Strong work comes from people who challenge, support, and genuinely know one another.",
+  },
+];
+
 export const metadata: Metadata = {
   title,
   description,
@@ -55,9 +73,36 @@ export default function AboutPage() {
         description="MECG was created to make consulting education, meaningful project work, and a close interdisciplinary community accessible to students across Michigan."
         tone="blue"
       />
+
+      <section className="mx-auto grid w-full max-w-7xl gap-8 px-6 md:px-16 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+        <div>
+          <p className="annotation annotation-accent">Fig. 01 — Why MECG exists</p>
+          <h2 className="display mt-5 max-w-5xl text-5xl uppercase text-white md:text-7xl">
+            More ways in.<br />More range at the table.
+          </h2>
+        </div>
+        <p className="max-w-xl text-lg leading-8 text-white/58">
+          MECG gives students across Michigan a practical entry point into consulting:
+          learn the craft, contribute to client work, and grow alongside an
+          interdisciplinary team.
+        </p>
+      </section>
+
+      <section className="mx-auto grid w-[calc(100%-3rem)] max-w-7xl gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:w-[calc(100%-8rem)] md:grid-cols-3">
+        {principles.map((principle) => (
+          <article key={principle.index} className="bg-[var(--navy-900)] p-7 md:min-h-64 md:p-9">
+            <p className="font-mono text-sm font-bold text-[var(--orange)]">{principle.index}</p>
+            <h3 className="font-display mt-10 text-3xl font-bold uppercase tracking-[-0.05em] text-white">
+              {principle.title}
+            </h3>
+            <p className="mt-5 leading-7 text-white/56">{principle.body}</p>
+          </article>
+        ))}
+      </section>
+
       <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
-          Fig. 01 — Four Pillars
+          Fig. 02 — Four Pillars
         </p>
         <h2 className="font-display mt-5 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
          WHAT SHAPES
@@ -104,21 +149,20 @@ export default function AboutPage() {
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 md:px-16 lg:grid-cols-[0.95fr_1.05fr]">
         <ImagePanel src="/images/about/president-welcome.png" alt="Annie Callam, President of MECG" />
         <TextPanel label="President's Welcome" title="President's Welcome">
-          <p>Welcome to the Michigan Engineering Consulting Group! I&apos;m thrilled to introduce you to our dynamic community of passionate students and professionals.</p>
-          <p>At MECG, we believe in delivering high-impact solutions to real-world challenges. Our diverse team of consultants works with clients across all industries, from startups to Fortune 500 companies, providing strategic insights and actionable recommendations.</p>
-          <p>What sets MECG apart is our commitment to excellence and our eagerness to learn. Every project is an opportunity to grow, innovate, and make a meaningful impact. Whether you&apos;re interested in strategy, operations, technology, or any other consulting domain, MECG provides the platform to develop your skills and build your network.</p>
-          <p>Our members come from various backgrounds and majors, bringing unique perspectives to every engagement. This diversity of thought, combined with our rigorous training and mentorship programs, enables us to tackle complex business challenges with creativity and precision.</p>
-          <p>I invite you to explore our website, attend our events, and connect with our team. Whether you&apos;re a potential client looking for strategic guidance or a student eager to join our community, we&apos;d love to hear from you.</p>
+          <p>Welcome to the Michigan Engineering Consulting Group. MECG brings together students who are curious about difficult problems, eager to learn, and generous with one another.</p>
+          <p>Members build practical skills through education, mentorship, and client engagements spanning strategy, operations, analytics, product development, and marketing. Just as importantly, they learn how to listen, collaborate, and communicate across disciplines.</p>
+          <p>That range of perspectives is central to who we are. Students do not need a particular major or a pre-existing consulting vocabulary to contribute; they need curiosity, follow-through, and a willingness to grow with the team.</p>
+          <p>Whether you are considering membership or looking for a thoughtful student team to support your organization, I hope this site gives you a clear sense of how MECG works. We would be glad to hear from you.</p>
           <p className="pt-2 text-white/78">Best,<br />Annie Callam<br />President of MECG, 2026</p>
         </TextPanel>
       </section>
 
       <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 md:px-16 lg:grid-cols-[1.05fr_0.95fr]">
         <TextPanel label="Our History" title="Our History">
-          <p>Michigan Engineering Consulting Group (MECG) was founded in 2023 by Jonathan Fay (Mechanical Engineering, Class of 2026) and Aaryan Singh (Industrial and Operations Engineering, Class of 2026) with the vision of creating a space where students could grow personally, professionally, and socially. What began as an idea between two students quickly took shape, and by Winter 2024, MECG welcomed its first cohort of members.</p>
-          <p>When MECG was founded, the University of Michigan lacked strong opportunities for non-business students to explore consulting. MECG filled that gap, offering students of all majors a chance to acquire business acumen, gain project experience, and collaborate regardless of their prior background or academic level.</p>
-          <p>As the club expanded, so did the opportunities. Members began taking on technical and business-focused projects, connecting through coffee chats, building cross-disciplinary teams, and touring top firms. With each semester, MECG has evolved into more than just a consulting club, it has become a place where students can create their own paths while contributing to meaningful work and building a closer community.</p>
-          <p>Today, MECG reflects both the growth of its members and the rapid changes of the world around us. By meeting the growing demand to combine both hard and soft skills, MECG continues to prepare students to thrive in consulting and beyond, carrying forward the founding vision to cultivate students growth for a successful career.</p>
+          <p>Michigan Engineering Consulting Group was founded in 2023 by Jonathan Fay, a Mechanical Engineering student, and Aaryan Singh, an Industrial and Operations Engineering student. Their goal was to create a place where students could explore consulting while growing professionally, personally, and socially.</p>
+          <p>MECG welcomed its first member cohort in Winter 2024. From the beginning, the organization was designed for students across majors and experience levels—not only those who already knew the language of business.</p>
+          <p>As MECG grew, members began working on technical and business-focused client questions, learning through workshops and mentorship, visiting firms, and building cross-disciplinary teams.</p>
+          <p>That founding idea still guides the organization today: combine analytical range with human connection, and give students room to build a path that feels like their own.</p>
         </TextPanel>
         <ImagePanel src="/images/about/founders-history.png" alt="MECG Founders Jonathan Fay and Aaryan Singh" />
       </section>

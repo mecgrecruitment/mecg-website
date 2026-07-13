@@ -16,7 +16,7 @@ export function GoogleButton({
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <button
         type="submit"
-        className="flex w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/[0.03] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em] text-white/85 transition-colors hover:border-[var(--orange)] hover:text-white"
+        className="focus-ring flex w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/[0.03] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em] text-white/85 transition-colors hover:border-[var(--orange)] hover:text-white"
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
