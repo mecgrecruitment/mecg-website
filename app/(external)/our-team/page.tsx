@@ -5,7 +5,7 @@ import { PageHero } from "../components/PageHero";
 
 const title = "Our Team";
 const description =
-  "Meet the people behind MECG — the executive board, project managers, strategic leads, and analysts who run our client engagements at the University of Michigan.";
+  "Meet MECG's current executive board—the student leaders responsible for consulting, education, recruitment, community, finance, marketing, and external relationships.";
 
 export const metadata: Metadata = {
   title,

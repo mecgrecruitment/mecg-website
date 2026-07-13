@@ -14,6 +14,18 @@ const title = "Client Services";
 const description =
   "MECG delivers pro-bono consulting for startups, nonprofits, and established firms — market research, operations, strategy, and analytics — on a structured semester engagement from first call to final deliverable.";
 
+const fitSignals = [
+  "A focused question that benefits from research, analysis, or outside perspective",
+  "A point person who can meet regularly and provide context to the student team",
+  "A 10–12 week window for collaboration, feedback, and a final handoff",
+];
+
+const clientOutputs = [
+  "A clearly defined scope and working timeline",
+  "Regular progress updates and opportunities to redirect the work",
+  "A final presentation, supporting analysis, and practical next steps",
+];
+
 export const metadata: Metadata = {
   title,
   description,
@@ -35,10 +47,39 @@ export default function ClientServicesPage() {
         </a>
       </PageHero>
 
+      <section className="section pb-0">
+        <div className="container grid gap-5 lg:grid-cols-2">
+          <article className="panel rounded-[1.5rem] p-7 md:p-10">
+            <p className="annotation annotation-accent">Before we begin</p>
+            <h2 className="display mt-5 text-4xl uppercase text-white md:text-5xl">A good engagement fit.</h2>
+            <ul className="mt-8 grid gap-5">
+              {fitSignals.map((item, index) => (
+                <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5 text-white/62">
+                  <span className="font-mono text-xs font-bold text-[var(--orange)]">0{index + 1}</span>
+                  <span className="leading-7">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+          <article className="sheet rounded-[1.5rem] p-7 md:p-10">
+            <p className="annotation !text-[var(--orange-dark)]">What clients receive</p>
+            <h2 className="display mt-5 text-4xl uppercase text-[var(--navy-950)] md:text-5xl">Clear work. Clear handoff.</h2>
+            <ul className="mt-8 grid gap-5">
+              {clientOutputs.map((item, index) => (
+                <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-[var(--paper-rule)] pt-5 text-[var(--on-paper-muted)]">
+                  <span className="font-mono text-xs font-bold text-[var(--orange-dark)]">0{index + 1}</span>
+                  <span className="leading-7">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
       <section className="section">
         <div className="container">
           <p className="annotation annotation-accent" data-reveal>
-            Fig. 03.1 — Click a service to learn more
+            Fig. 03.1 — Capabilities
           </p>
 
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl" data-split>
@@ -62,11 +103,11 @@ export default function ClientServicesPage() {
                   </h3>
 
                   <p className="annotation mt-6 text-white/35 group-open:hidden">
-                    Tap to open +
+                    Open details +
                   </p>
 
                   <p className="annotation mt-6 hidden text-[var(--orange)] group-open:block">
-                    Tap to close —
+                    Close details —
                   </p>
                 </summary>
 
@@ -141,7 +182,7 @@ export default function ClientServicesPage() {
           </h2>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/56" data-reveal>
-            A sample of MECG client work and project experience.
+            Organizations MECG teams have supported across recent semesters.
           </p>
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>

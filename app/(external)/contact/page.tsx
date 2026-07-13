@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { contact } from "@/lib/site-content";
 import { ContactForm } from "../components/ContactForm";
+import { PageHero } from "../components/PageHero";
 
 const title = "Contact";
 const description =
@@ -14,30 +15,43 @@ export const metadata: Metadata = {
   openGraph: { title, description },
 };
 
+const contactTopics = [
+  ["Student questions", "Recruitment, eligibility, events, and the application process."],
+  ["Client inquiries", "Potential project questions, timing, scope, and engagement fit."],
+  ["Partnerships", "Firm visits, workshops, sponsorships, and community opportunities."],
+];
+
 export default function ContactPage() {
   return (
     <main>
-      <section className="grid-bg relative overflow-hidden px-5 pb-16 pt-36 md:px-8 md:pb-24 md:pt-44">
-        <div className="orb right-[-12rem] top-[-10rem] h-[28rem] w-[28rem] bg-[var(--blue)]" />
-        <div className="container relative">
-          <p className="annotation annotation-accent" data-reveal>
-            Sheet 07 — Contact Us
-          </p>
-          <h1 className="display-xl mt-6 max-w-6xl text-white" data-split>
-            Open a <span className="text-ghost">channel.</span>
-          </h1>
-          <p className="mt-8 max-w-3xl text-xl leading-relaxed text-white/62" data-reveal>
-            Recruitment, client projects, partnerships, or general questions — the board reads everything.
-          </p>
-          <div className="dim-rule mt-12" data-reveal />
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Sheet 07 — Contact Us"
+        title={<>Start with a question.<br /> <span className="text-ghost">We’ll find the path.</span></>}
+        description="Recruitment, client projects, partnerships, or general questions—the MECG board reads every message and routes it to the right person."
+        tone="blue"
+        compact
+      />
 
-      <section className="px-5 pb-24 md:px-8">
+      <section className="px-5 pb-24 pt-12 md:px-8 md:pt-16">
         <div className="container grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
           <ContactForm />
 
           <aside className="grid content-start gap-5">
+            <div className="panel rounded-[2rem] p-7 md:p-9" data-reveal>
+              <p className="annotation annotation-accent">Choose the closest topic</p>
+              <div className="mt-6 grid gap-5">
+                {contactTopics.map(([title, body], index) => (
+                  <div key={title} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5">
+                    <span className="font-mono text-xs font-bold text-[var(--orange)]">0{index + 1}</span>
+                    <div>
+                      <h2 className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white">{title}</h2>
+                      <p className="mt-2 text-sm leading-6 text-white/52">{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="sheet rounded-[2rem] p-7 md:p-9" data-reveal="wipe">
               <p className="annotation !text-[var(--orange-dark)]">Direct line</p>
               <a
