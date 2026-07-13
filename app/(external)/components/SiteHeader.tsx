@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GearLogo } from "@/components/brand/GearLogo";
@@ -11,6 +11,8 @@ import { logout } from "../../auth/actions";
 export default function SiteHeader({ identity }: { identity: NavIdentity | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
   const pathname = usePathname();
 
   // Close the mobile menu on navigation by adjusting state during render
@@ -33,6 +35,22 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
     return () => {
       document.documentElement.style.overflow = "";
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    firstMenuLinkRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   return (
@@ -127,6 +145,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
             )}
 
             <button
+              ref={menuButtonRef}
               type="button"
               aria-expanded={open}
               aria-controls="site-menu"
@@ -153,6 +172,8 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
 
       <div
         id="site-menu"
+        aria-hidden={!open}
+        inert={!open}
         className={`fixed inset-0 z-40 flex flex-col justify-end bg-[var(--navy-950)]/97 px-6 pb-12 pt-28 backdrop-blur-2xl transition-opacity duration-400 xl:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -161,6 +182,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
         <nav aria-label="Mobile" className="relative grid gap-1">
           {navLinks.map((link, i) => (
             <a
+              ref={i === 0 ? firstMenuLinkRef : undefined}
               key={link.href}
               href={link.href}
               className="focus-ring group flex items-baseline gap-4 border-t border-white/10 py-4"
