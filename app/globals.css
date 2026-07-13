@@ -572,6 +572,56 @@ a {
   color: white;
 }
 
+.auth-shell {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(245, 130, 58, 0.12), transparent 24rem),
+    radial-gradient(circle at 88% 12%, rgba(65, 104, 177, 0.2), transparent 28rem),
+    var(--navy-950);
+}
+
+.auth-shell-intro {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    rgba(255, 255, 255, 0.018);
+  background-size: 36px 36px;
+}
+
+.auth-shell-glow {
+  position: absolute;
+  width: 22rem;
+  height: 22rem;
+  right: -11rem;
+  bottom: -9rem;
+  border-radius: 999px;
+  background: var(--orange-dark);
+  filter: blur(90px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.portal-field {
+  min-height: 3.25rem;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.9rem 1rem;
+  color: white;
+  outline: none;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-field:focus {
+  border-color: rgba(245, 130, 58, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(245, 130, 58, 0.12);
+}
+
+.portal-field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
 @media (min-width: 768px) {
   .process-map {
     grid-template-columns: repeat(4, minmax(0, 1fr));

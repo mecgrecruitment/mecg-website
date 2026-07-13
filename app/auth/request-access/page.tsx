@@ -2,6 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requestMembership } from "../actions";
+import { AuthShell } from "@/components/portal/AuthShell";
 
 const STATUS_COPY: Record<string, string> = {
   pending: "Your request is pending board review. We'll email you once it's decided.",
@@ -15,6 +16,12 @@ export default async function RequestAccessPage({
   searchParams: Promise<{ error?: string; message?: string }>;
 }) {
   const params = await searchParams;
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    redirect("/auth/login?next=/auth/request-access&message=Member access requires the configured account service.");
+  }
   const supabase = await createClient();
 
   const {
@@ -46,10 +53,13 @@ export default async function RequestAccessPage({
   const defaultName = (user.user_metadata?.full_name as string | undefined) ?? "";
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <AuthShell
+      eyebrow="Internal membership"
+      title="Request access."
+      description="Internal recruitment tools are limited to current MECG members. A board member verifies each request before access is activated."
+    >
         <p className="eyebrow">Member access</p>
-        <h1 className="display mt-5 text-6xl uppercase">Request access.</h1>
+        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">Confirm your role.</h2>
         <p className="mt-4 text-white/55">
           Current members and board can request access to the internal recruitment portal.
           A board member reviews every request.
@@ -81,7 +91,7 @@ export default async function RequestAccessPage({
                 name="full_name"
                 required
                 defaultValue={defaultName}
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring"
               />
             </label>
 
@@ -90,14 +100,14 @@ export default async function RequestAccessPage({
               <select
                 name="requested_role"
                 defaultValue="member"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="portal-field focus-ring bg-[var(--navy-900)]"
               >
                 <option value="member">Recruitment Committee Member</option>
                 <option value="board">Board</option>
               </select>
             </label>
 
-            <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+            <button className="button-primary focus-ring cursor-pointer">
               Submit request
             </button>
           </form>
@@ -106,7 +116,6 @@ export default async function RequestAccessPage({
         <a href="/apply/dashboard" className="mt-6 inline-block text-sm text-white/54 hover:text-white">
           Back to your dashboard.
         </a>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

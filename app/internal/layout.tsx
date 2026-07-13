@@ -1,7 +1,13 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { requireMember, ROLE_LABELS } from "@/lib/auth";
 import { logout } from "../auth/actions";
+
+export const metadata: Metadata = {
+  title: "Internal Portal",
+  robots: { index: false, follow: false },
+};
 
 export default async function InternalLayout({
   children,
@@ -9,26 +15,31 @@ export default async function InternalLayout({
   children: React.ReactNode;
 }) {
   const member = await requireMember();
+  const canRecruit = member.role === "recruitment_committee" || member.role === "board";
+  const isBoard = member.role === "board";
 
   const nav = [
-    { href: "/internal/applicants", label: "Applicants" },
-    { href: "/internal/scoring", label: "Scoring" },
-    { href: "/internal/calendar", label: "Calendar" },
-    { href: "/internal/hash", label: "Hash Decisions" },
-    { href: "/internal/members", label: "Members" },
-  ];
+    { href: "/internal", label: "Overview", show: true },
+    { href: "/internal/scoring", label: "Scoring", show: true },
+    { href: "/internal/applicants", label: "Applicants", show: canRecruit },
+    { href: "/internal/calendar", label: "Calendar", show: canRecruit },
+    { href: "/internal/events", label: "Check-ins", show: canRecruit },
+    { href: "/internal/hash", label: "Hash", show: canRecruit },
+    { href: "/internal/members", label: "Members", show: true },
+    { href: "/internal/emails", label: "Emails", show: isBoard },
+  ].filter((item) => item.show);
 
   return (
     <main className="portal-shell">
       <a href="#portal-content" className="skip-link">Skip to portal content</a>
       <header className="portal-header px-5 py-4 md:px-8">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-5 md:flex-row md:items-center md:justify-between">
-          <Link href="/internal">
+          <Link href="/internal" className="focus-ring rounded-sm">
             <p className="annotation text-white/38">MECG Internal</p>
             <h1 className="font-display mt-1 text-3xl font-bold uppercase tracking-[-0.06em] md:text-4xl">
               Recruitment Portal
             </h1>
-            <p className="mt-1 text-xs text-white/40">
+            <p className="mt-2 inline-flex rounded-full border border-[var(--orange)]/30 bg-[var(--orange)]/10 px-3 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-[0.12em] text-[var(--orange-soft)]">
               {member.full_name} · {ROLE_LABELS[member.role]}
             </p>
           </Link>
@@ -49,6 +60,8 @@ export default async function InternalLayout({
                 Logout
               </button>
             </form>
+
+            <Link href="/" className="portal-nav-link focus-ring">Website ↗</Link>
           </nav>
         </div>
       </header>
