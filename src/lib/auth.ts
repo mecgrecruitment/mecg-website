@@ -93,7 +93,7 @@ export async function getNavIdentity(): Promise<NavIdentity | null> {
     .maybeSingle();
 
   if (member) {
-    return { kind: "member", href: "/internal", label: "Portal" };
+    return { kind: "member", href: "/internal", label: ROLE_LABELS[member.role] };
   }
 
   return { kind: "applicant", href: "/apply/dashboard", label: "Dashboard" };
