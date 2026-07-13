@@ -131,12 +131,10 @@ export default function SocialsPage() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
             Sheet 06 — Socials
           </p>
-          <h1 className="font-display mt-8 max-w-6xl text-7xl font-black uppercase leading-[0.82] tracking-[-0.085em] text-white md:text-9xl">
+          <h1 className="display-xl mt-8 max-w-6xl text-white">
             Stay
             <br />
-            <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)]">
-              Connected.
-            </span>
+            <span className="text-ghost">Connected.</span>
           </h1>
           <p className="mt-10 max-w-2xl text-lg leading-8 text-white/58">
             Follow along for recruitment updates, community photos, member highlights, and project news.

@@ -52,13 +52,13 @@ export default function ContactPage() {
             <div className="panel rounded-[2rem] p-7 md:p-9" data-reveal>
               <p className="annotation annotation-accent">Elsewhere</p>
               <div className="mt-6 grid gap-3">
-                <a href={contact.instagram} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between border-b border-white/10 pb-4">
+                <a href={contact.instagram} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between border-b border-white/10 py-3">
                   <span className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white group-hover:text-[var(--orange)]">
                     Instagram
                   </span>
                   <span className="annotation">@mecgmichigan ↗</span>
                 </a>
-              <a href={contact.linkedin} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between pb-1">
+                <a href={contact.linkedin} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between py-3">
                   <span className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white group-hover:text-[var(--orange)]">
                     LinkedIn
                   </span>

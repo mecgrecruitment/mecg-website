@@ -44,7 +44,7 @@ export function Timeline({
         {items.map((item) => (
           <li key={item.id} data-timeline-node data-reveal>
             <details className="group">
-              <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-3">
+              <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-3 py-2">
                 <span className="timeline-node-dot" aria-hidden="true" />
                 <span className="font-mono text-sm font-bold text-[var(--orange-dark)]">
                   {item.index}

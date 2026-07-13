@@ -57,6 +57,13 @@ const sections = [
   },
 ];
 
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return `${first}${last}`.toUpperCase();
+}
+
 function MemberCard({ member }: { member: TeamMember }) {
   return (
     <article className="group overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/72 shadow-[0_22px_70px_rgba(4,12,24,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45">
@@ -64,7 +71,11 @@ function MemberCard({ member }: { member: TeamMember }) {
         {member.image ? (
           <Image src={member.image} alt={member.name} fill sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.035]" />
         ) : (
-          <div className="grid h-full place-items-center text-white/35">No photo</div>
+          <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.06),transparent_65%)]">
+            <span className="font-display text-5xl font-black uppercase tracking-[-0.05em] text-white/20 transition duration-500 group-hover:text-[var(--orange-soft)]/40">
+              {initials(member.name)}
+            </span>
+          </div>
         )}
       </div>
 
@@ -74,10 +85,10 @@ function MemberCard({ member }: { member: TeamMember }) {
 
         <div className="mt-5 flex flex-wrap gap-2">
           {member.linkedin ? (
-            <a href={member.linkedin} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">LinkedIn</a>
+            <a href={member.linkedin} target="_blank" rel="noreferrer" className="focus-ring inline-flex min-h-11 items-center rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">LinkedIn</a>
           ) : null}
           {member.email ? (
-            <a href={`mailto:${member.email}`} className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">Email</a>
+            <a href={`mailto:${member.email}`} className="focus-ring inline-flex min-h-11 items-center rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">Email</a>
           ) : null}
         </div>
       </div>
@@ -99,7 +110,7 @@ export default function OurTeamPage() {
             <a
               key={section.slug}
               href={`#${section.slug}`}
-              className="focus-ring rounded-full border border-white/10 bg-[#0c1626]/85 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/60 backdrop-blur-md transition hover:border-[var(--orange)]/45 hover:text-white"
+              className="focus-ring inline-flex min-h-11 items-center rounded-full border border-white/10 bg-[#0c1626]/85 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/60 backdrop-blur-md transition hover:border-[var(--orange)]/45 hover:text-white"
             >
               {section.title}
             </a>

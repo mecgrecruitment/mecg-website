@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
 import { faqs, recruitmentEvents } from "@/lib/site-content";
-import { CommunityPhotoGrid, JoinCommunityPhotos } from "@/components/site/CommunityPhotos";
 import { Timeline } from "../components/Timeline";
 
 const title = "Prospective Members";
@@ -88,12 +87,6 @@ export default function ProspectiveMembersPage() {
               </article>
             ))}
           </div>
-
-          <div className="py-10 md:py-14">
-            <CommunityPhotoGrid start={4} />
-          </div>
-
-          <JoinCommunityPhotos />
         </div>
       </section>
     </main>

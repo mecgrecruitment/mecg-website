@@ -66,13 +66,11 @@ export default function Home() {
         </div>
       </section>
 
-      
+      <div className="px-5 py-10 md:px-8 md:py-14">
+        <CommunityPhotoStrip />
+      </div>
 
-            <div className="py-10 md:py-14"><CommunityPhotoStrip /></div>
-
-
-
-<section className="px-5 pb-24 md:px-8">
+      <section className="px-5 pb-24 md:px-8">
         <div className="container">
           <p className="annotation annotation-accent" data-reveal>
             Fig. 03 — Q&A
