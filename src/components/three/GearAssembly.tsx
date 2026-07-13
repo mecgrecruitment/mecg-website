@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { createGearGeometry } from "./gearGeometry";
+import type { GearFocus } from "./types";
 
 // Shared tooth pitch so all gears mesh: pitch = 2πr / N must match.
 const PITCH = (Math.PI * 2 * 1.7) / 12;
@@ -40,6 +41,7 @@ function meshedRotation(thetaDriver: number, nDriver: number, nDriven: number, p
 
 type GearAssemblyProps = {
   animated: boolean;
+  focus: GearFocus;
 };
 
 /**
@@ -48,7 +50,7 @@ type GearAssemblyProps = {
  * drivetrain; the pointer tilts the whole assembly like a part under
  * inspection. With `animated=false` the assembly holds a composed static pose.
  */
-export default function GearAssembly({ animated }: GearAssemblyProps) {
+export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
   const groupRef = useRef<THREE.Group>(null);
   const gearARef = useRef<THREE.Group>(null);
   const gearBRef = useRef<THREE.Group>(null);
@@ -106,6 +108,9 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
         (targetY - groupRef.current.rotation.y) * Math.min(1, delta * 3);
       groupRef.current.rotation.x +=
         (targetX - groupRef.current.rotation.x) * Math.min(1, delta * 3);
+      const targetScale = focus === "strategy" ? 1 : focus === "analysis" ? 1.04 : 0.96;
+      const nextScale = THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, Math.min(1, delta * 4));
+      groupRef.current.scale.setScalar(nextScale);
     }
   });
 
@@ -125,7 +130,13 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
       {/* A — the drive gear (the logo mark, solid machined metal). */}
       <group ref={gearARef}>
         <mesh geometry={geomA}>
-          <meshStandardMaterial color="#16284a" metalness={0.85} roughness={0.26} />
+          <meshStandardMaterial
+            color="#16284a"
+            metalness={0.85}
+            roughness={0.26}
+            emissive="#f5823a"
+            emissiveIntensity={focus === "strategy" ? 0.18 : 0.015}
+          />
         </mesh>
         {/* Floating hub inside the bore, like the 2D mark's center disc. */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -143,7 +154,13 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
       {/* B — the pinion (small, fast, solid). */}
       <group ref={gearBRef} position={POS_B}>
         <mesh geometry={geomB}>
-          <meshStandardMaterial color="#1b3257" metalness={0.88} roughness={0.36} />
+          <meshStandardMaterial
+            color="#1b3257"
+            metalness={0.88}
+            roughness={0.36}
+            emissive="#9dbdfa"
+            emissiveIntensity={focus === "analysis" ? 0.34 : 0.015}
+          />
         </mesh>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[GEAR_B.radius * 0.26, GEAR_B.radius * 0.26, 0.54, 28]} />
@@ -154,7 +171,11 @@ export default function GearAssembly({ animated }: GearAssemblyProps) {
       {/* C — the ring gear, drawn not built: blueprint wireframe. */}
       <group ref={gearCRef} position={POS_C}>
         <lineSegments geometry={edgesC}>
-          <lineBasicMaterial color="#ffb072" transparent opacity={0.5} />
+          <lineBasicMaterial
+            color="#ffb072"
+            transparent
+            opacity={focus === "delivery" ? 0.95 : 0.42}
+          />
         </lineSegments>
       </group>
     </group>

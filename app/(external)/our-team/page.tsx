@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import teamData from "@/lib/team-members.json";
+import { PageHero } from "../components/PageHero";
 
 const title = "Our Team";
 const description =
@@ -100,7 +101,13 @@ export default function OurTeamPage() {
   const visibleSections = sections.filter((section) => section.people.length > 0);
 
   return (
-    <main className="grid gap-16 pb-16 pt-24 md:pt-32">
+    <main className="grid gap-16 pb-16">
+      <PageHero
+        eyebrow="Sheet 03 — Our Team"
+        title={<>Many disciplines.<br />{" "}<span className="text-ghost">One working team.</span></>}
+        description="Meet the students who lead MECG, manage client engagements, build recommendations, and create the community around the work."
+        tone="orange"
+      />
       {visibleSections.length > 1 ? (
         <nav
           aria-label="Jump to section"

@@ -15,6 +15,13 @@ export const contact = {
   linkedin: "https://www.linkedin.com/company/michigan-engineering-consulting-group",
 };
 
+export const recruitmentCycle = {
+  status: "Schedule in progress",
+  title: "The next recruitment cycle is being planned.",
+  body: "Follow MECG on Instagram and LinkedIn for the next event schedule and application window. The timeline below is preserved as a guide to how a typical cycle works.",
+  archiveLabel: "Winter 2026 example timeline",
+};
+
 export const pillars = [
   {
     index: "01",

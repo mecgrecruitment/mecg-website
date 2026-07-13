@@ -19,8 +19,9 @@ export default async function InternalLayout({
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--navy-950)] text-white">
-      <header className="border-b border-white/10 bg-[rgba(8,18,37,0.92)] px-5 py-4 backdrop-blur-xl md:px-8">
+    <main className="portal-shell">
+      <a href="#portal-content" className="skip-link">Skip to portal content</a>
+      <header className="portal-header px-5 py-4 md:px-8">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <Link href="/internal">
             <p className="annotation text-white/38">MECG Internal</p>
@@ -37,14 +38,14 @@ export default async function InternalLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/58 transition hover:border-[var(--orange)] hover:bg-[var(--orange)] hover:text-white"
+                className="portal-nav-link focus-ring"
               >
                 {item.label}
               </Link>
             ))}
 
             <form action={logout}>
-              <button className="shrink-0 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white/58 transition hover:border-red-300/40 hover:bg-red-400/20 hover:text-white">
+              <button className="portal-nav-link focus-ring cursor-pointer hover:!border-red-300/40 hover:!bg-red-400/15">
                 Logout
               </button>
             </form>
@@ -52,7 +53,7 @@ export default async function InternalLayout({
         </div>
       </header>
 
-      <section className="px-5 py-8 md:px-8 md:py-10">
+      <section id="portal-content" tabIndex={-1} className="px-5 py-8 md:px-8 md:py-10">
         <div className="mx-auto max-w-[1600px]">{children}</div>
       </section>
     </main>

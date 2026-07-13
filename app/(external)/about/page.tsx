@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { clients } from "@/lib/site-content";
+import { clients, pillars } from "@/lib/site-content";
 import type { Metadata } from "next";
+import { PageHero } from "../components/PageHero";
 
 const title = "About";
 const description =
@@ -12,26 +13,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
   openGraph: { title, description },
 };
-
-const pillars = [
-  {
-    title: "Professional Development",
-    body: "MECG is dedicated to professional growth through resources, workshops, office visits, and networking, aiming to prepare members for consulting roles and long-term career success.",
-  },
-  {
-    title: "Education",
-    body: "MECG's educational initiatives equip members with technical and analytical skills through hands-on learning, client projects, software tools, and case workshops, bridging the gap between engineering expertise and business acumen.",
-  },
-  {
-    title: "Project Experience",
-    body: "MECG takes pride in delivering impactful solutions for clients, working on diverse projects like optimizing schedules, market research, and business strategies, providing real-world consulting experience, and fostering collaboration.",
-  },
-  {
-    title: "Community",
-    body: "MECG values community and collaboration, achieved through social events and mentorship programs, fostering a supportive environment, and creating an inclusive space for people of all majors to explore consulting and build relationships.",
-  },
-];
-
 
 function TextPanel({
   label,
@@ -67,7 +48,13 @@ function ImagePanel({ src, alt }: { src: string; alt: string }) {
 
 export default function AboutPage() {
   return (
-    <main className="grid gap-16 pb-16 pt-24 md:pt-32">
+    <main className="grid gap-16 pb-16">
+      <PageHero
+        eyebrow="Sheet 02 — About MECG"
+        title={<>An engineering mindset.<br />{" "}<span className="text-ghost">A human organization.</span></>}
+        description="MECG was created to make consulting education, meaningful project work, and a close interdisciplinary community accessible to students across Michigan."
+        tone="blue"
+      />
       <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
           Fig. 01 — Four Pillars

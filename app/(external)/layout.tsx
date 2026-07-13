@@ -14,6 +14,9 @@ export default async function ExternalLayout({
 
   return (
     <div className="grain">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <MotionProvider />
       <SiteHeader identity={identity} />
 
@@ -24,7 +27,9 @@ export default async function ExternalLayout({
         </div>
       </div>
 
-      {children}
+      <div id="main-content" tabIndex={-1}>
+        {children}
+      </div>
 
       <footer className="relative isolate overflow-hidden border-t border-white/10">
         {/* CTA band */}
@@ -35,6 +40,7 @@ export default async function ExternalLayout({
               <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
                 Have a problem
                 <br />
+                {" "}
                 worth solving?
               </h2>
             </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { faqs, recruitmentEvents } from "@/lib/site-content";
+import { faqs, recruitmentCycle, recruitmentEvents } from "@/lib/site-content";
 import { Timeline } from "../components/Timeline";
 
 const title = "Prospective Members";
@@ -50,11 +50,27 @@ export default function ProspectiveMembersPage() {
 
       <section className="sheet px-5 py-20 md:px-8 md:py-28">
         <div className="container">
+          <div className="mb-16 grid gap-6 rounded-[1.5rem] border border-[var(--paper-rule)] p-6 md:grid-cols-[0.35fr_1fr] md:p-8">
+            <div>
+              <p className="annotation !text-[var(--orange-dark)]">Current status</p>
+              <p className="mt-3 font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--navy-950)]">
+                {recruitmentCycle.status}
+              </p>
+            </div>
+            <div>
+              <h2 className="font-display text-3xl font-bold uppercase tracking-[-0.05em] text-[var(--navy-950)]">
+                {recruitmentCycle.title}
+              </h2>
+              <p className="mt-4 max-w-3xl leading-relaxed text-[var(--on-paper-muted)]">
+                {recruitmentCycle.body}
+              </p>
+            </div>
+          </div>
           <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
-            Recruitment Timeline
+            {recruitmentCycle.archiveLabel}
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
-            Meet us. Apply. Interview.
+            What to expect.
           </h2>
 
           <div className="mt-12 max-w-3xl">

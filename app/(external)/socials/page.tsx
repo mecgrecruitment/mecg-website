@@ -1,6 +1,8 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import communityPhotos from "@/lib/community-photos.json";
+import { contact } from "@/lib/site-content";
+import { PageHero } from "../components/PageHero";
 
 const title = "Socials";
 const description =
@@ -17,17 +19,17 @@ const socials = [
   {
     title: "Instagram",
     body: "Recruitment reminders, event photos, member highlights, and a look at the community.",
-    href: "https://www.instagram.com/mecg.umich/",
+    href: contact.instagram,
   },
   {
     title: "LinkedIn",
     body: "Project updates, professional news, and ways to stay connected with MECG.",
-    href: "https://www.linkedin.com/company/michigan-engineering-consulting-group/",
+    href: contact.linkedin,
   },
   {
     title: "Email",
     body: "Questions about recruitment, client work, partnerships, or anything else.",
-    href: "mailto:mecg-board@umich.edu",
+    href: `mailto:${contact.email}`,
   },
 ];
 
@@ -126,21 +128,12 @@ function SocialPhotoRibbon() {
 export default function SocialsPage() {
   return (
     <main className="grid gap-16 pb-16">
-      <section className="border-b border-white/10 px-6 py-24 md:px-16 md:py-32">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
-            Sheet 06 — Socials
-          </p>
-          <h1 className="display-xl mt-8 max-w-6xl text-white">
-            Stay
-            <br />
-            <span className="text-ghost">Connected.</span>
-          </h1>
-          <p className="mt-10 max-w-2xl text-lg leading-8 text-white/58">
-            Follow along for recruitment updates, community photos, member highlights, and project news.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Sheet 06 — Socials"
+        title={<>Stay<br />{" "}<span className="text-ghost">connected.</span></>}
+        description="Follow along for recruitment updates, community photos, member highlights, and project news."
+        tone="orange"
+      />
 
       <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
