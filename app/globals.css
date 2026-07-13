@@ -935,3 +935,194 @@ body {
 .animate-mecg-photo-strip:hover {
   animation-play-state: paused;
 }
+
+/* Homepage community story */
+.community-story {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(245, 130, 58, 0.13), transparent 20rem),
+    linear-gradient(135deg, rgba(18, 32, 51, 0.96), rgba(10, 20, 34, 0.98));
+  box-shadow: 0 32px 100px rgba(2, 10, 22, 0.34);
+  padding: 1rem;
+}
+
+.community-story-copy {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.75rem 0.5rem;
+}
+
+.community-story-status {
+  min-height: 11rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.community-story-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+.community-story-arrow {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 255, 255, 0.045);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.community-story-arrow:hover {
+  border-color: rgba(245, 130, 58, 0.72);
+  background: rgba(245, 130, 58, 0.12);
+  transform: translateY(-2px);
+}
+
+.community-story-visual {
+  min-width: 0;
+}
+
+.community-story-image-wrap {
+  position: relative;
+  min-height: 31rem;
+  overflow: hidden;
+  border-radius: 1.2rem;
+  background: var(--navy-950);
+  isolation: isolate;
+}
+
+.community-story-image {
+  object-fit: cover;
+  animation: community-story-enter 520ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  filter: saturate(0.86) contrast(1.04);
+}
+
+.community-story-image-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 55%, rgba(5, 13, 24, 0.52)),
+    linear-gradient(90deg, rgba(11, 25, 43, 0.12), transparent 40%);
+  mix-blend-mode: multiply;
+}
+
+.community-story-figure {
+  position: absolute;
+  z-index: 2;
+  right: 1.25rem;
+  bottom: 1rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.community-story-thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.community-story-thumb {
+  position: relative;
+  min-height: 5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  background: var(--navy-950);
+  opacity: 0.52;
+  transition: opacity 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.community-story-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 17, 31, 0.2);
+}
+
+.community-story-thumb span {
+  position: absolute;
+  z-index: 1;
+  right: 0.5rem;
+  bottom: 0.35rem;
+  color: white;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.community-story-thumb:hover,
+.community-story-thumb[data-active="true"] {
+  border-color: rgba(245, 130, 58, 0.72);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+@keyframes community-story-enter {
+  from {
+    opacity: 0.4;
+    transform: scale(1.025);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (min-width: 1024px) {
+  .community-story {
+    grid-template-columns: minmax(19rem, 0.72fr) minmax(0, 1.28fr);
+    min-height: 45rem;
+    padding: 1rem;
+  }
+
+  .community-story-copy {
+    padding: 3rem 2.25rem 2.25rem;
+  }
+
+  .community-story-image-wrap {
+    min-height: 39rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .community-story {
+    border-radius: 1.3rem;
+    padding: 0.65rem;
+  }
+
+  .community-story-copy {
+    padding: 1.25rem 0.65rem 0.5rem;
+  }
+
+  .community-story-image-wrap {
+    min-height: 25rem;
+  }
+
+  .community-story-thumbs {
+    gap: 0.35rem;
+  }
+
+  .community-story-thumb {
+    min-height: 3.8rem;
+    border-radius: 0.6rem;
+  }
+}
