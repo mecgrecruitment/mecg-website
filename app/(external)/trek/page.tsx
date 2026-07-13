@@ -27,6 +27,7 @@ export default function TrekPage() {
           <h1 className="display-xl mt-6 text-white" data-split>
             The road trip
             <br />
+            {" "}
             <span className="text-ghost">is being drawn.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-xl leading-relaxed text-white/62" data-reveal>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import GearAssembly from "./GearAssembly";
+import type { GearFocus } from "./types";
 
 // @react-three/fiber's render loop constructs `new THREE.Clock()` internally,
 // and three@0.184 logs a one-time deprecation notice from Clock's constructor
@@ -32,7 +33,7 @@ type Frameloop = "always" | "demand" | "never";
  * - prefers-reduced-motion renders a single static frame, no loop.
  * - Fades in once the first frame is committed, so there is no pop.
  */
-export default function GearCanvas() {
+export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
@@ -83,7 +84,7 @@ export default function GearCanvas() {
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         onCreated={() => setReady(true)}
       >
-        <GearAssembly animated={!reduced} />
+        <GearAssembly animated={!reduced} focus={focus} />
       </Canvas>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   services,
 } from "@/lib/site-content";
 import { Timeline } from "../components/Timeline";
+import { PageHero } from "../components/PageHero";
 
 const title = "Client Services";
 const description =
@@ -23,7 +24,16 @@ export const metadata: Metadata = {
 export default function ClientServicesPage() {
   return (
     <main>
-      
+      <PageHero
+        eyebrow="Sheet 04 — Client Services"
+        title={<>Useful thinking.<br />{" "}<span className="text-ghost">Built to be used.</span></>}
+        description="MECG partners with organizations on focused, pro-bono consulting engagements that turn complex questions into research, recommendations, and concrete next steps."
+        tone="mixed"
+      >
+        <a href="/contact" className="button-primary focus-ring" data-magnetic>
+          Start a project
+        </a>
+      </PageHero>
 
       <section className="section">
         <div className="container">
@@ -71,7 +81,7 @@ export default function ClientServicesPage() {
 
       <section className="sheet px-5 py-20 md:px-8 md:py-28">
         <div className="container">
-          <p className="annotation !text-[rgba(5,9,20,0.45)]" da-reveal>
+          <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
             Fig. 03.2 — Engagement structure
           </p>
 

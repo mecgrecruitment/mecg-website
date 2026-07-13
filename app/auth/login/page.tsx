@@ -11,8 +11,8 @@ export default async function LoginPage({
   const next = params.next?.startsWith("/") && !params.next.startsWith("//") ? params.next : "";
 
   return (
-    <main className="min-h-screen px-5 py-20 text-white md:px-8">
-      <section className="container max-w-xl">
+    <main className="portal-shell grid min-h-screen place-items-center px-5 py-20 text-white md:px-8">
+      <section className="container max-w-xl rounded-[2rem] border border-white/10 bg-[rgba(8,18,37,0.78)] p-6 shadow-[var(--shadow-card)] md:p-9">
         <p className="eyebrow">Login</p>
         <h1 className="display mt-5 text-6xl uppercase">MECG account.</h1>
 
@@ -28,7 +28,7 @@ export default async function LoginPage({
           </p>
         )}
 
-        <div className="panel mt-8 grid gap-5 rounded-[2rem] p-7">
+        <div className="mt-8 grid gap-5 border-t border-white/10 pt-7">
           <GoogleButton next={next || undefined} />
 
           <div className="flex items-center gap-3 text-[0.6rem] uppercase tracking-[0.2em] text-white/35">
@@ -47,7 +47,7 @@ export default async function LoginPage({
                 type="email"
                 required
                 autoComplete="email"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="focus-ring min-h-12 rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
               />
             </label>
 
@@ -63,11 +63,11 @@ export default async function LoginPage({
                 type="password"
                 required
                 autoComplete="current-password"
-                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
+                className="focus-ring min-h-12 rounded-xl border border-white/10 bg-white/[0.04] p-4 outline-none focus:border-[var(--orange)]"
               />
             </label>
 
-            <button className="rounded-full bg-[var(--orange)] px-6 py-4 text-xs font-extrabold uppercase tracking-[0.16em]">
+            <button className="button-primary focus-ring cursor-pointer">
               Log in
             </button>
           </form>

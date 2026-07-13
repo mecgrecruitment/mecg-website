@@ -78,6 +78,17 @@ export type NavIdentity =
 // go. Returns null for a signed-out visitor — unlike requireMember/
 // requireApplicant, this never redirects.
 export async function getNavIdentity(): Promise<NavIdentity | null> {
+  // Public marketing pages must remain available during static previews and
+  // content QA even when the authenticated portal has not been configured.
+  // Gated helpers still fail closed through createClient(); only the optional
+  // identity affordance in the public header degrades to its signed-out state.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return null;
+  }
+
   const supabase = await createClient();
 
   const {
