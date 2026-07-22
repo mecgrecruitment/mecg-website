@@ -2,6 +2,59 @@ import Image from "next/image";
 import { clients, pillars } from "@/lib/site-content";
 import type { Metadata } from "next";
 import { PageHero } from "../components/PageHero";
+import { PhotoStrip } from "@/components/site/PhotoStrip";
+import { SectionHeading } from "../components/SectionHeading";
+
+const lifeAtMecgPhotos = [
+  {
+    src: "/images/community/community-64.jpg",
+    alt: "MECG members posing together in downtown Chicago during the annual trek",
+  },
+  {
+    src: "/images/community/community-65.jpg",
+    alt: "MECG members gathered together at a local pub",
+  },
+  {
+    src: "/images/community/community-66.jpg",
+    alt: "MECG members outdoors together near central campus",
+  },
+  {
+    src: "/images/community/community-67.jpg",
+    alt: "Three MECG members posing together indoors",
+  },
+  {
+    src: "/images/community/community-68.jpg",
+    alt: "Three MECG members dressed up together for a night out",
+  },
+  {
+    src: "/images/community/community-69.jpg",
+    alt: "MECG members posing together at a social gathering, one wearing a club sweatshirt",
+  },
+  {
+    src: "/images/community/community-71.jpg",
+    alt: "MECG members dressed up together for a semi-formal event",
+  },
+  {
+    src: "/images/community/community-72.jpg",
+    alt: "Three MECG members posing together in blazers",
+  },
+  {
+    src: "/images/community/community-74.jpg",
+    alt: "A large group of MECG members dressed up together at a formal social event",
+  },
+  {
+    src: "/images/community/community-75.jpg",
+    alt: "MECG members embracing at a social gathering, one wearing a club hoodie with the gear logo",
+  },
+  {
+    src: "/images/community/community-77.jpg",
+    alt: "MECG members celebrating St. Patrick's Day together outdoors",
+  },
+  {
+    src: "/images/community/community-78.jpg",
+    alt: "MECG members in costume together at a Halloween party",
+  },
+];
 
 const title = "About";
 const description =
@@ -165,6 +218,17 @@ export default function AboutPage() {
           <p>That founding idea still guides the organization today: combine analytical range with human connection, and give students room to build a path that feels like their own.</p>
         </TextPanel>
         <ImagePanel src="/images/about/founders-history.png" alt="MECG Founders Jonathan Fay and Aaryan Singh" />
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
+        <SectionHeading
+          eyebrow="Fig. 03 — Life at MECG"
+          title="On the record, and off it."
+          description="Treks, retreats, formals, and everything between—the parts of MECG that don't show up in a client deliverable."
+        />
+        <div className="mt-10">
+          <PhotoStrip photos={lifeAtMecgPhotos} />
+        </div>
       </section>
     </main>
   );

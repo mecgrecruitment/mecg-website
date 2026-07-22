@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { faqs, recruitmentCycle, recruitmentEvents } from "@/lib/site-content";
 import { Timeline } from "../components/Timeline";
@@ -73,6 +74,30 @@ export default function ProspectiveMembersPage() {
         </div>
       </section>
 
+      <section className="section">
+        <div className="container">
+          <p className="annotation annotation-accent" data-reveal>
+            Fig. 05.2 — Where our alumni work
+          </p>
+          <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl">
+            The work carries beyond MECG.
+          </h2>
+          <p className="mt-6 max-w-2xl text-white/58">
+            Members have gone on to internships and full-time roles at firms across consulting,
+            tech, finance, and engineering.
+          </p>
+          <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white p-6 md:p-10">
+            <Image
+              src="/images/placement/alumni-employers.jpg"
+              alt="Logos of employers where MECG alumni have interned or worked full-time, including Microsoft, Goldman Sachs, Meta, Tesla, Citadel, Deloitte, Capital One, IBM, JPMorganChase, BlackRock, BCG, Disney, United Airlines, Jane Street, EY, and others"
+              width={1800}
+              height={1013}
+              className="h-auto w-full"
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="sheet px-5 py-20 md:px-8 md:py-28">
         <div className="container">
           <div className="mb-16 grid gap-6 rounded-[1.5rem] border border-[var(--paper-rule)] p-6 md:grid-cols-[0.35fr_1fr] md:p-8">
@@ -92,7 +117,7 @@ export default function ProspectiveMembersPage() {
             </div>
           </div>
           <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
-            Fig. 05.2 — {recruitmentCycle.archiveLabel}
+            Fig. 05.3 — {recruitmentCycle.archiveLabel}
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
             What to expect.
@@ -116,7 +141,7 @@ export default function ProspectiveMembersPage() {
       <section className="section">
         <div className="container">
           <p className="annotation annotation-accent" data-reveal>
-            Fig. 05.3 — Questions before applying
+            Fig. 05.4 — Questions before applying
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl">
             Know what to expect.
