@@ -35,7 +35,21 @@ function redirectToLogin(request: NextRequest) {
 // therefore degrade, not crash: protected zones fail closed (bounce to login),
 // public pages keep serving.
 export async function updateSession(request: NextRequest) {
-  const isProtectedPath = isProtected(request.nextUrl.pathname);
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Defensive: Supabase's OAuth callback is expected to land on /auth/callback
+  // with a `code` param, but if its redirect_to allow-list ever falls back to
+  // the bare Site URL instead (misconfiguration, propagation delay, whatever),
+  // the `code` still shows up as a query param on wherever it lands. Catch it
+  // here and route it into the real exchange handler so login doesn't silently
+  // no-op on the homepage.
+  if (searchParams.has("code") && pathname !== "/auth/callback") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
+  const isProtectedPath = isProtected(pathname);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
