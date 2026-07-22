@@ -135,7 +135,7 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
             metalness={0.85}
             roughness={0.26}
             emissive="#f5823a"
-            emissiveIntensity={focus === "strategy" ? 0.18 : 0.015}
+            emissiveIntensity={0.18}
           />
         </mesh>
         {/* Floating hub inside the bore, like the 2D mark's center disc. */}
@@ -159,7 +159,7 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
             metalness={0.88}
             roughness={0.36}
             emissive="#9dbdfa"
-            emissiveIntensity={focus === "analysis" ? 0.34 : 0.015}
+            emissiveIntensity={0.34}
           />
         </mesh>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -171,11 +171,7 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
       {/* C — the ring gear, drawn not built: blueprint wireframe. */}
       <group ref={gearCRef} position={POS_C}>
         <lineSegments geometry={edgesC}>
-          <lineBasicMaterial
-            color="#ffb072"
-            transparent
-            opacity={focus === "delivery" ? 0.95 : 0.42}
-          />
+          <lineBasicMaterial color="#ffb072" transparent opacity={0.95} />
         </lineSegments>
       </group>
     </group>
