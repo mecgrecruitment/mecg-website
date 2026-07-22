@@ -74,6 +74,51 @@ const communityStory = [
       "Some of the strongest connections happen informally: studying, catching up, and making room for each other in a busy week.",
     position: "center 55%",
   },
+  {
+    src: "/images/community/community-63.jpg",
+    alt: "MECG members posing in front of the McKinsey & Company sign during a firm visit",
+    label: "Industry exposure",
+    title: "Real firms, real access.",
+    description:
+      "Treks put members face to face with the firms they're aiming for—asking real questions, in the room, well before recruiting season.",
+    position: "center 42%",
+  },
+  {
+    src: "/images/community/community-62.jpg",
+    alt: "A large group of MECG members in business attire posing in front of Cloud Gate in Chicago",
+    label: "On the road",
+    title: "Chicago, in blazers.",
+    description:
+      "The annual trek turns a weekend into a crash course: office visits, alumni conversations, and a city's worth of shared memories.",
+    position: "center 50%",
+  },
+  {
+    src: "/images/community/community-73.jpg",
+    alt: "The incoming MECG board standing together as their names are introduced on screen",
+    label: "Leadership",
+    title: "A new board, sworn in.",
+    description:
+      "Every year, a new slate of members steps up to run the organization—and inherits the responsibility of keeping it worth joining.",
+    position: "center 40%",
+  },
+  {
+    src: "/images/community/community-70.jpg",
+    alt: "MECG members gathered around a firepit under string lights at night",
+    label: "Off the clock",
+    title: "Firelight, not fluorescents.",
+    description:
+      "Retreats and off-campus nights are where the titles fall away and the friendships that outlast any one project actually form.",
+    position: "center 55%",
+  },
+  {
+    src: "/images/community/community-76.jpg",
+    alt: "A large group of MECG members seated together at a restaurant dinner",
+    label: "Celebrating together",
+    title: "Every year ends with dinner.",
+    description:
+      "Formals, banquets, and end-of-cycle dinners give the whole org a reason to sit down together and mark how far the year came.",
+    position: "center 45%",
+  },
 ];
 
 export default function Home() {

@@ -186,28 +186,31 @@ begin
   raise notice 'PASS: append-only — score_submissions UPDATE/DELETE blocked';
 end $$;
 
--- ── 6. signup gate: non-umich and non-allowlisted emails rejected ────────────
+-- ── 6. signup gate: open signup (migration 10); only an invite_allowlist
+--    match creates a pending membership_requests row (migration 12) — nobody
+--    gets an instant `members` row from signup alone ─────────────────────────
 do $$
+declare
+  v_gmail_id uuid := gen_random_uuid();
+  v_umich_id uuid := gen_random_uuid();
 begin
-  begin
-    insert into auth.users (id, instance_id, aud, role, email)
-    values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000',
-            'authenticated', 'authenticated', 'intruder@gmail.com');
-    raise exception 'FAIL: gmail signup was allowed';
-  exception when raise_exception then
-    if sqlerrm like 'FAIL%' then raise; end if;
-  end;
+  insert into auth.users (id, instance_id, aud, role, email)
+  values (v_gmail_id, '00000000-0000-0000-0000-000000000000',
+          'authenticated', 'authenticated', 'intruder@gmail.com');
 
-  begin
-    insert into auth.users (id, instance_id, aud, role, email)
-    values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000',
-            'authenticated', 'authenticated', 'not.invited@umich.edu');
-    raise exception 'FAIL: non-allowlisted umich signup was allowed';
-  exception when raise_exception then
-    if sqlerrm like 'FAIL%' then raise; end if;
-  end;
+  insert into auth.users (id, instance_id, aud, role, email)
+  values (v_umich_id, '00000000-0000-0000-0000-000000000000',
+          'authenticated', 'authenticated', 'not.invited@umich.edu');
 
-  raise notice 'PASS: signup gate — gmail and non-allowlisted umich rejected';
+  if exists (select 1 from public.members where user_id in (v_gmail_id, v_umich_id)) then
+    raise exception 'FAIL: non-allowlisted signup got an instant members row';
+  end if;
+
+  if exists (select 1 from public.membership_requests where user_id in (v_gmail_id, v_umich_id)) then
+    raise exception 'FAIL: non-allowlisted signup created a membership request';
+  end if;
+
+  raise notice 'PASS: signup gate — open signup, no members row or membership request without an allowlist match';
 end $$;
 
 rollback;

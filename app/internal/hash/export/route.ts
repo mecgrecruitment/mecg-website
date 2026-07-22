@@ -36,29 +36,40 @@ export async function GET() {
   await requireBoard();
   const supabase = await createClient();
 
-  const { data: cycle } = await supabase
+  const { data: cycle, error: cycleError } = await supabase
     .from("recruitment_cycles")
     .select("id")
     .eq("is_active", true)
     .maybeSingle();
 
-  const { data: candidates } = cycle
+  const { data: candidates, error: candidatesError } = cycle
     ? await supabase
         .from("candidates")
         .select("id, per_cycle_seq, full_name, email, year, major, current_stage, status, created_at")
         .eq("cycle_id", cycle.id)
         .is("deleted_at", null)
         .order("full_name", { ascending: true })
-    : { data: [] };
+    : { data: [], error: null };
 
-  const { data: scores } = await supabase.from("scores").select("candidate_id, stage, value");
-  const { data: decisions } = await supabase
+  const { data: scores, error: scoresError } = await supabase
+    .from("scores")
+    .select("candidate_id, stage, value");
+  const { data: decisions, error: decisionsError } = await supabase
     .from("decisions")
     .select("candidate_id, value, rationale, created_at")
     .order("created_at", { ascending: false });
-  const { data: checkins } = await supabase
+  const { data: checkins, error: checkinsError } = await supabase
     .from("event_checkins")
     .select("email, created_at, event:recruitment_events(title)");
+
+  const queryError =
+    cycleError || candidatesError || scoresError || decisionsError || checkinsError;
+  if (queryError) {
+    return new Response(`Export failed: ${queryError.message}. Try again in a moment.`, {
+      status: 500,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
 
   const candidateList = candidates ?? [];
   const scoreList = scores ?? [];

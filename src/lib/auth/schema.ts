@@ -57,3 +57,13 @@ export const requestAccessSchema = z.object({
 export function firstError(result: { success: false; error: z.ZodError }): string {
   return result.error.issues[0]?.message ?? "Please check your input and try again.";
 }
+
+// Only allow same-origin absolute paths as a post-login destination. Rejects
+// protocol-relative ("//host") AND backslash-based ("/\host") redirect
+// targets — browsers resolve a leading backslash exactly like a second slash
+// (WHATWG URL parsing), so "/\\evil.com" would otherwise resolve cross-origin
+// despite passing a naive `startsWith("/") && !startsWith("//")` check.
+export function safeNextPath(value: FormDataEntryValue | string | null | undefined): string {
+  const n = String(value ?? "").replace(/\\/g, "/");
+  return n.startsWith("/") && !n.startsWith("//") ? n : "";
+}

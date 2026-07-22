@@ -30,6 +30,18 @@ export async function submitCandidateScore(formData: FormData) {
     redirect("/internal?error=Final round scoring is board only.");
   }
 
+  // Range/integer enforcement lives here per the criteria table's own comment
+  // ("range vs criterion enforced at API layer") — the client <input min/max>
+  // is a UX hint only and is trivially bypassed.
+  const { data: criteria, error: criteriaError } = await supabase
+    .from("rubric_criteria")
+    .select("id, min_score, max_score")
+    .eq("rubric_version_id", rubricVersionId);
+  if (criteriaError || !criteria || criteria.length === 0) {
+    redirect(`/internal/scoring/${route}?error=Could not load the rubric for this stage.`);
+  }
+  const criteriaById = new Map(criteria!.map((c) => [c.id, c]));
+
   const rows: {
     candidate_id: string;
     rubric_criterion_id: string;
@@ -40,11 +52,26 @@ export async function submitCandidateScore(formData: FormData) {
   }[] = [];
   for (const [key, raw] of formData.entries()) {
     if (!key.startsWith("criterion_")) continue;
+    const criterionId = key.slice("criterion_".length);
+    const criterion = criteriaById.get(criterionId);
+    if (!criterion) {
+      redirect(`/internal/scoring/${route}?error=Unknown rubric criterion.`);
+    }
     const value = Number(raw);
-    if (!Number.isFinite(value)) continue;
+    if (
+      !Number.isInteger(value) ||
+      value < criterion.min_score ||
+      value > criterion.max_score
+    ) {
+      redirect(
+        `/internal/scoring/${route}?error=${encodeURIComponent(
+          `Scores must be whole numbers between ${criterion.min_score} and ${criterion.max_score}.`
+        )}`
+      );
+    }
     rows.push({
       candidate_id: candidateId,
-      rubric_criterion_id: key.slice("criterion_".length),
+      rubric_criterion_id: criterionId,
       rubric_version_id: rubricVersionId,
       evaluator_id: member.id,
       stage,

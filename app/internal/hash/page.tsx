@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireCommittee } from "@/lib/auth";
 import { recordDecision, startHashSession, submitHashVote } from "./actions";
+import { SubmitButton } from "../../apply/SubmitButton";
 
 function pretty(value: string | null | undefined) {
   if (!value) return "—";
@@ -121,9 +122,7 @@ export default async function HashPage({
           <p className="text-white/55">No active hash session.</p>
           {isBoard ? (
             <form action={startHashSession} className="mt-4">
-              <button className="rounded-full bg-[var(--orange)] px-5 py-3 text-xs font-black uppercase tracking-[0.14em]">
-                Start hash session
-              </button>
+              <SubmitButton pendingText="Starting...">Start hash session</SubmitButton>
             </form>
           ) : (
             <p className="mt-2 text-sm text-white/40">Voting opens when the board starts the session.</p>
@@ -189,7 +188,9 @@ export default async function HashPage({
                         ))}
                       </select>
                     </label>
-                    <button className="mt-4 rounded-full bg-[var(--orange)] px-5 py-3 text-xs font-black uppercase tracking-[0.14em]">Submit vote</button>
+                    <div className="mt-4">
+                      <SubmitButton pendingText="Submitting...">Submit vote</SubmitButton>
+                    </div>
                   </form>
 
                   {isBoard ? (
@@ -204,9 +205,11 @@ export default async function HashPage({
                           ))}
                         </select>
                       </label>
-                      <textarea name="rationale" rows={2} placeholder="Optional rationale" className="mt-3 w-full rounded-xl border border-white/10 bg-white/[0.04] p-3 outline-none focus:border-[var(--orange)]" />
+                      <textarea name="rationale" rows={2} placeholder="Optional rationale" className="focus-ring mt-3 w-full rounded-xl border border-white/10 bg-white/[0.04] p-3 outline-none focus:border-[var(--orange)]" />
                       <span className="mt-2 block text-xs text-white/40">Sets the candidate&apos;s status and moves them to decided.</span>
-                      <button className="mt-4 rounded-full bg-white/10 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] hover:bg-[var(--orange)]">Record decision</button>
+                      <div className="mt-4">
+                        <SubmitButton pendingText="Recording...">Record decision</SubmitButton>
+                      </div>
                     </form>
                   ) : null}
                 </article>

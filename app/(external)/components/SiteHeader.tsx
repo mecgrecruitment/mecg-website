@@ -32,8 +32,19 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";
+
+    // Make the page content behind the mobile menu overlay unreachable by Tab
+    // while it's open — otherwise focus can leave the visible menu and land on
+    // controls hidden behind the opaque overlay.
+    const main = document.getElementById("main-content");
+    const footer = document.querySelector("footer");
+    main?.toggleAttribute("inert", open);
+    footer?.toggleAttribute("inert", open);
+
     return () => {
       document.documentElement.style.overflow = "";
+      main?.removeAttribute("inert");
+      footer?.removeAttribute("inert");
     };
   }, [open]);
 

@@ -2,6 +2,7 @@ import React from "react";
 import { signup } from "../actions";
 import { GoogleButton } from "../GoogleButton";
 import { AuthShell } from "@/components/portal/AuthShell";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 
 export default async function SignupPage({
   searchParams,
@@ -72,6 +73,8 @@ export default async function SignupPage({
               />
               <span className="text-xs text-white/40">At least 8 characters.</span>
             </label>
+
+            <TurnstileWidget />
 
             <button className="button-primary focus-ring cursor-pointer">
               Create account

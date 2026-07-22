@@ -2,6 +2,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireCommittee } from "@/lib/auth";
 import { submitCandidateScore } from "./actions";
+import { SubmitButton } from "../../apply/SubmitButton";
 
 type Stage = "speed_dating" | "group_case" | "interview";
 
@@ -137,14 +138,14 @@ export async function ScoringStage({
                       min={criterion.min_score}
                       max={criterion.max_score}
                       required
-                      className="rounded-xl border border-white/10 bg-white/[0.04] p-3 outline-none focus:border-[var(--orange)]"
+                      className="focus-ring rounded-xl border border-white/10 bg-white/[0.04] p-3 outline-none focus:border-[var(--orange)]"
                     />
                   </label>
                 ))}
 
-                <button className="rounded-full bg-[var(--orange)] px-5 py-3 text-xs font-black uppercase tracking-[0.14em]">
+                <SubmitButton pendingText="Saving...">
                   {scored.has(candidate.id) ? "Update score" : "Submit score"}
-                </button>
+                </SubmitButton>
               </form>
             </article>
           ))}

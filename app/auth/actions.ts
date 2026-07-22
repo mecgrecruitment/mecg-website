@@ -11,7 +11,9 @@ import {
   resendSchema,
   requestAccessSchema,
   firstError,
+  safeNextPath,
 } from "@/lib/auth/schema";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 // Absolute site origin for auth email/OAuth redirects. Prefer an explicit
 // NEXT_PUBLIC_SITE_URL (keeps redirects on the URL Supabase allow-lists);
@@ -27,15 +29,8 @@ async function siteOrigin(): Promise<string> {
   return `${proto}://${host}`;
 }
 
-// Only allow internal absolute paths as a post-login destination (no
-// protocol-relative // or external URLs — open-redirect guard).
-function safeNext(value: FormDataEntryValue | null): string {
-  const n = String(value || "");
-  return n.startsWith("/") && !n.startsWith("//") ? n : "";
-}
-
 export async function login(formData: FormData) {
-  const next = safeNext(formData.get("next"));
+  const next = safeNextPath(formData.get("next"));
   const nextQ = next ? `&next=${encodeURIComponent(next)}` : "";
 
   const parsed = loginSchema.safeParse({
@@ -67,6 +62,11 @@ export async function signup(formData: FormData) {
   });
   if (!parsed.success) {
     redirect(`/auth/signup?error=${encodeURIComponent(firstError(parsed))}`);
+  }
+
+  const humanVerified = await verifyTurnstile(formData.get("cf-turnstile-response"));
+  if (!humanVerified) {
+    redirect(`/auth/signup?error=${encodeURIComponent("Verification failed. Please try again.")}`);
   }
 
   const supabase = await createClient();
@@ -197,7 +197,7 @@ export async function requestMembership(formData: FormData) {
 }
 
 export async function signInWithGoogle(formData: FormData) {
-  const next = safeNext(formData.get("next"));
+  const next = safeNextPath(formData.get("next"));
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

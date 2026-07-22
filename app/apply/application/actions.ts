@@ -2,8 +2,10 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireApplicant } from "@/lib/auth";
+import { verifyTurnstile } from "@/lib/turnstile";
 import {
   applyFieldsSchema,
   responseSchemaFor,
@@ -37,6 +39,11 @@ export async function submitApplication(formData: FormData) {
   }
   const fields = parsed.data;
 
+  const humanVerified = await verifyTurnstile(formData.get("cf-turnstile-response"));
+  if (!humanVerified) {
+    bail("Verification failed. Please try again.");
+  }
+
   const resume = formData.get("resume");
   if (
     !(resume instanceof File) ||
@@ -68,11 +75,14 @@ export async function submitApplication(formData: FormData) {
     bail("Applications are not open right now.");
   }
 
-  const { data: questionRows } = await admin
+  const { data: questionRows, error: questionsError } = await admin
     .from("application_questions")
     .select("key, prompt, required")
     .eq("cycle_id", cycle.id)
     .order("sort_order");
+  if (questionsError) {
+    bail("Something went wrong submitting your application. Try again in a moment.");
+  }
   const questions: ApplyQuestion[] = questionRows ?? [];
 
   const responses: { key: string; question: string; response: string }[] = [];
@@ -97,7 +107,13 @@ export async function submitApplication(formData: FormData) {
     bail("Could not save your resume. Try again in a moment.");
   }
 
-  const ipHash = createHash("sha256").update(`applicant:${applicant.id}`).digest("hex");
+  // Real client IP (not the applicant id — that's per-account, not per-device,
+  // and is trivially reset by creating a new account, defeating the per-IP
+  // rate limit the RPC enforces).
+  const h = await headers();
+  const clientIp =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  const ipHash = createHash("sha256").update(clientIp).digest("hex");
   const { data: outcome, error: rpcError } = await admin.rpc("submit_application", {
     p_candidate_id: candidateId,
     p_ip_hash: ipHash,

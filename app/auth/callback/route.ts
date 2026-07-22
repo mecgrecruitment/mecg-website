@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-// Only allow internal absolute paths (open-redirect guard).
-function safeNext(value: string | null): string {
-  return value && value.startsWith("/") && !value.startsWith("//") ? value : "";
-}
+import { safeNextPath } from "@/lib/auth/schema";
 
 // Shared callback for email confirmation, OAuth, and password recovery.
 // Exchanges the PKCE code for a session, then forwards to an explicit ?next
@@ -12,7 +8,7 @@ function safeNext(value: string | null): string {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = safeNext(url.searchParams.get("next"));
+  const next = safeNextPath(url.searchParams.get("next"));
 
   if (!code) {
     return NextResponse.redirect(
