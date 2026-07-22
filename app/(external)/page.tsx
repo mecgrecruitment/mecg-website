@@ -256,7 +256,7 @@ export default function Home() {
             title={<>Different problems. One rigorous approach.</>}
             description="Our teams combine structured thinking with the technical and creative range of students across the University of Michigan."
           />
-          <div className="mt-14 grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-5">
+          <div className="mt-14 grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-5">
             {services.map((service) => (
               <article key={service.index} className="bg-[var(--navy-900)] p-6 md:min-h-72" data-reveal>
                 <p className="font-mono text-sm font-bold text-[var(--orange)]">{service.index}</p>

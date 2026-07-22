@@ -92,6 +92,7 @@ export default function ProspectiveMembersPage() {
               alt="Logos of employers where MECG alumni have interned or worked full-time, including Microsoft, Goldman Sachs, Meta, Tesla, Citadel, Deloitte, Capital One, IBM, JPMorganChase, BlackRock, BCG, Disney, United Airlines, Jane Street, EY, and others"
               width={1800}
               height={1013}
+              sizes="(min-width: 1024px) 1400px, 100vw"
               className="h-auto w-full"
             />
           </div>

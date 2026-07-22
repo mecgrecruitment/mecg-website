@@ -107,7 +107,7 @@ export function CommunityStory({ frames }: { frames: StoryFrame[] }) {
                 src={frame.src}
                 alt=""
                 fill
-                sizes="(min-width: 768px) 128px, 22vw"
+                sizes="(min-width: 768px) 176px, 22vw"
                 className="object-cover"
                 style={{ objectPosition: frame.position ?? "center" }}
               />

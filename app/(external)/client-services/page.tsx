@@ -198,7 +198,7 @@ export default function ClientServicesPage() {
                       src={client.logo}
                       alt={`${client.name} logo`}
                       fill
-                      sizes="200px"
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                       className="object-contain grayscale transition duration-300 group-hover:grayscale-0"
                     />
                   </div>

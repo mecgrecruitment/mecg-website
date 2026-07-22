@@ -67,7 +67,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 px-5 transition-all duration-500 md:px-8 ${
+        className={`fixed inset-x-0 top-0 z-50 px-5 transition-[background-color,border-color,backdrop-filter] duration-500 md:px-8 ${
           scrolled
             ? "border-b border-white/10 bg-[rgba(5,9,20,0.85)] py-3 backdrop-blur-xl"
             : "border-b border-transparent bg-transparent py-5"
@@ -80,7 +80,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
               <p className="font-display text-lg font-bold uppercase tracking-[0.24em] text-white">
                 MECG
               </p>
-              <p className="annotation text-[0.55rem] tracking-[0.34em]">
+              <p className="annotation text-[0.55rem]! tracking-[0.34em]!">
                 EST. 2023 — ANN ARBOR
               </p>
             </div>
@@ -106,8 +106,8 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
                   </span>
                   {link.label}
                   <span
-                  className={`absolute -bottom-0.5 left-0 h-px bg-[var(--orange)] transition-all duration-300 ${
-                      active ? "w-full" : "w-0 group-hover:w-full"
+                    className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-[var(--orange)] transition-transform duration-300 ${
+                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                     }`}
                   />
                 </a>

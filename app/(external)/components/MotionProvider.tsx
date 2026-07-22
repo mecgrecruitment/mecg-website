@@ -72,43 +72,65 @@ export default function MotionProvider() {
 
     const fine = window.matchMedia("(pointer: fine)");
     const noRM = window.matchMedia("(prefers-reduced-motion: no-preference)");
-    if (!fine.matches || !noRM.matches) return;
 
-    const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
-    const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
-    const ringX = gsap.quickTo(ring, "x", { duration: 0.35, ease: "power3.out" });
-    const ringY = gsap.quickTo(ring, "y", { duration: 0.35, ease: "power3.out" });
+    let teardown: (() => void) | null = null;
 
-    gsap.set([dot, ring], { xPercent: -50, yPercent: -50, x: -100, y: -100 });
+    const start = () => {
+      if (teardown) return;
 
-    const onMove = (e: PointerEvent) => {
-      dotX(e.clientX);
-      dotY(e.clientY);
-      ringX(e.clientX);
-      ringY(e.clientY);
-    };
+      const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
+      const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
+      const ringX = gsap.quickTo(ring, "x", { duration: 0.35, ease: "power3.out" });
+      const ringY = gsap.quickTo(ring, "y", { duration: 0.35, ease: "power3.out" });
 
-    const HOT = "a, button, [data-magnetic], input, textarea, select, label";
-    const onOver = (e: PointerEvent) => {
-      if ((e.target as Element | null)?.closest?.(HOT)) {
-        document.body.classList.add("cursor-hot");
-      }
-    };
-    const onOut = (e: PointerEvent) => {
-      if ((e.target as Element | null)?.closest?.(HOT)) {
+      gsap.set([dot, ring], { xPercent: -50, yPercent: -50, x: -100, y: -100 });
+
+      const onMove = (e: PointerEvent) => {
+        dotX(e.clientX);
+        dotY(e.clientY);
+        ringX(e.clientX);
+        ringY(e.clientY);
+      };
+
+      const HOT = "a, button, [data-magnetic], input, textarea, select, label";
+      const onOver = (e: PointerEvent) => {
+        if ((e.target as Element | null)?.closest?.(HOT)) {
+          document.body.classList.add("cursor-hot");
+        }
+      };
+      const onOut = (e: PointerEvent) => {
+        if ((e.target as Element | null)?.closest?.(HOT)) {
+          document.body.classList.remove("cursor-hot");
+        }
+      };
+
+      window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerover", onOver, { passive: true });
+      window.addEventListener("pointerout", onOut, { passive: true });
+
+      teardown = () => {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerover", onOver);
+        window.removeEventListener("pointerout", onOut);
         document.body.classList.remove("cursor-hot");
-      }
+      };
     };
 
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerover", onOver, { passive: true });
-    window.addEventListener("pointerout", onOut, { passive: true });
+    const stop = () => {
+      teardown?.();
+      teardown = null;
+    };
+
+    const apply = () => (fine.matches && noRM.matches ? start() : stop());
+
+    apply();
+    fine.addEventListener("change", apply);
+    noRM.addEventListener("change", apply);
 
     return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerover", onOver);
-      window.removeEventListener("pointerout", onOut);
-      document.body.classList.remove("cursor-hot");
+      fine.removeEventListener("change", apply);
+      noRM.removeEventListener("change", apply);
+      stop();
     };
   }, []);
 

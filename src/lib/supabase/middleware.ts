@@ -40,10 +40,11 @@ export async function updateSession(request: NextRequest) {
   // Defensive: Supabase's OAuth callback is expected to land on /auth/callback
   // with a `code` param, but if its redirect_to allow-list ever falls back to
   // the bare Site URL instead (misconfiguration, propagation delay, whatever),
-  // the `code` still shows up as a query param on wherever it lands. Catch it
-  // here and route it into the real exchange handler so login doesn't silently
-  // no-op on the homepage.
-  if (searchParams.has("code") && pathname !== "/auth/callback") {
+  // the `code` shows up as a query param on the homepage. Catch it there and
+  // route it into the real exchange handler so login doesn't silently no-op.
+  // Scoped to "/" (the only fallback target) so an unrelated `?code=` on some
+  // other page is never hijacked into the auth flow.
+  if (pathname === "/" && searchParams.has("code")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/callback";
     return NextResponse.redirect(url);

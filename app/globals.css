@@ -267,7 +267,7 @@ a {
 }
 
 .card-hover:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   border-color: rgba(245, 130, 58, 0.45);
   background: rgba(255, 255, 255, 0.085);
 }
@@ -600,16 +600,18 @@ a {
   pointer-events: none;
 }
 
-.portal-field {
-  min-height: 3.25rem;
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.8rem;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 0.9rem 1rem;
-  color: white;
-  outline: none;
-  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+@layer components {
+  .portal-field {
+    min-height: 3.25rem;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.9rem 1rem;
+    color: white;
+    outline: none;
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  }
 }
 
 .portal-field:focus {
@@ -889,7 +891,9 @@ a {
   position: fixed;
   right: 1.4rem;
   bottom: 1.4rem;
-  z-index: 60;
+  /* Below SiteHeader's full-screen mobile nav overlay (z-40) so the dial
+     doesn't float on top of the open menu. */
+  z-index: 30;
   width: 3rem;
   height: 3rem;
   opacity: 0.85;
@@ -946,27 +950,17 @@ body {
     linear-gradient(180deg, #0f1b2d 0%, #101827 48%, #0f1b2d 100%);
 }
 
-.panel,
-.panel-strong {
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  background: rgba(18, 32, 51, 0.72) !important;
-  box-shadow: 0 22px 70px rgba(4, 12, 24, 0.24) !important;
-}
-
-.card-hover {
-  transition: transform 2ms ease, border-color 220ms ease, background 220ms ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-3px);
+@layer components {
+  .panel,
+  .panel-strong {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(18, 32, 51, 0.72);
+    box-shadow: 0 22px 70px rgba(4, 12, 24, 0.24);
+  }
 }
 
 .eyebrow {
   letter-spacing: 0.16em !important;
-}
-
-.font-display {
-  letter-spacing: -0.055em;
 }
 
 @keyframes mecg-photo-strip {

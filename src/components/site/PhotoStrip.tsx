@@ -11,7 +11,7 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
 
   return (
     <section className="mx-auto w-full max-w-7xl overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#122033]/75 py-7 shadow-[0_22px_70px_rgba(4,12,24,0.24)]">
-      <div className="relative overflow-x-auto overflow-y-hidden py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="relative overflow-hidden py-4">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#122033] to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#122033] to-transparent" />
 
