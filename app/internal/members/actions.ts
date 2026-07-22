@@ -35,10 +35,17 @@ export async function approveMembership(formData: FormData) {
     redirect(`/internal/members?error=${encodeURIComponent(insErr.message)}`);
   }
 
-  await supabase
+  const { error: statusErr } = await supabase
     .from("membership_requests")
     .update({ status: "approved", reviewed_by: board.id, reviewed_at: new Date().toISOString() })
     .eq("id", requestId);
+  if (statusErr) {
+    redirect(
+      `/internal/members?error=${encodeURIComponent(
+        `Member created, but the request could not be marked approved: ${statusErr.message}`
+      )}`
+    );
+  }
 
   redirect("/internal/members?success=Member approved.");
 }
@@ -48,10 +55,13 @@ export async function denyMembership(formData: FormData) {
   const supabase = await createClient();
 
   const requestId = String(formData.get("request_id") || "");
-  await supabase
+  const { error } = await supabase
     .from("membership_requests")
     .update({ status: "denied", reviewed_by: board.id, reviewed_at: new Date().toISOString() })
     .eq("id", requestId);
+  if (error) {
+    redirect(`/internal/members?error=${encodeURIComponent(error.message)}`);
+  }
 
   redirect("/internal/members?success=Request denied.");
 }

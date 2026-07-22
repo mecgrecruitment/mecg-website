@@ -39,12 +39,30 @@ export async function startHashSession() {
     redirect(`/internal/hash?error=${encodeURIComponent(error?.message ?? "Could not start session.")}`);
   }
 
-  const { data: members } = await supabase.from("members").select("id").is("deleted_at", null);
+  const { data: members, error: membersError } = await supabase
+    .from("members")
+    .select("id")
+    .is("deleted_at", null);
+  if (membersError) {
+    redirect(
+      `/internal/hash?error=${encodeURIComponent(
+        `Session started, but could not enroll voters: ${membersError.message}`
+      )}`
+    );
+  }
+
   const rows = (members ?? []).map((m) => ({ session_id: session.id, member_id: m.id }));
   if (rows.length) {
-    await supabase
+    const { error: participantsError } = await supabase
       .from("hash_session_participants")
       .upsert(rows, { onConflict: "session_id,member_id", ignoreDuplicates: true });
+    if (participantsError) {
+      redirect(
+        `/internal/hash?error=${encodeURIComponent(
+          `Session started, but could not enroll voters: ${participantsError.message}`
+        )}`
+      );
+    }
   }
 
   redirect("/internal/hash?success=Hash session started.");
@@ -89,12 +107,15 @@ export async function recordDecision(formData: FormData) {
   const decision = value as DecisionValue;
 
   // Latest vote per voter → tally snapshot.
-  const { data: votes } = await supabase
+  const { data: votes, error: votesError } = await supabase
     .from("votes")
     .select("voter_id, value, created_at")
     .eq("session_id", sessionId)
     .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
+  if (votesError) {
+    redirect(`/internal/hash?error=${encodeURIComponent(votesError.message)}`);
+  }
   const latest = new Map<string, string>();
   for (const v of votes ?? []) {
     if (!latest.has(v.voter_id)) latest.set(v.voter_id, v.value);
@@ -124,14 +145,32 @@ export async function recordDecision(formData: FormData) {
     .eq("id", candidateId)
     .maybeSingle();
 
-  await supabase.from("candidates").update({ status: decision, current_stage: "decided" }).eq("id", candidateId);
-  await supabase.from("stage_transitions").insert({
+  const { error: statusError } = await supabase
+    .from("candidates")
+    .update({ status: decision, current_stage: "decided" })
+    .eq("id", candidateId);
+  if (statusError) {
+    redirect(
+      `/internal/hash?error=${encodeURIComponent(
+        `Decision recorded, but the candidate's status was not updated: ${statusError.message}`
+      )}`
+    );
+  }
+
+  const { error: transitionError } = await supabase.from("stage_transitions").insert({
     candidate_id: candidateId,
     from_stage: candidate?.current_stage ?? null,
     to_stage: "decided",
     actor_id: board.id,
     reason: `Hash decision: ${decision}`,
   });
+  if (transitionError) {
+    redirect(
+      `/internal/hash?error=${encodeURIComponent(
+        `Decision recorded, but the audit trail entry failed: ${transitionError.message}`
+      )}`
+    );
+  }
 
   redirect("/internal/hash?success=Decision recorded.");
 }

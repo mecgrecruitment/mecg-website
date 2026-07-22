@@ -2,6 +2,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireMember, ROLE_LABELS } from "@/lib/auth";
 import { approveMembership, createScoringAssignment, denyMembership } from "./actions";
+import { SubmitButton } from "../../apply/SubmitButton";
 
 export default async function MembersPage({
   searchParams,
@@ -75,17 +76,13 @@ export default async function MembersPage({
                       <form key={role.value} action={approveMembership}>
                         <input type="hidden" name="request_id" value={req.id} />
                         <input type="hidden" name="role" value={role.value} />
-                        <button className="rounded-full bg-[var(--orange)] px-4 py-2 text-xs font-black uppercase tracking-[0.12em]">
-                          Approve {role.label}
-                        </button>
+                        <SubmitButton pendingText="Approving...">Approve {role.label}</SubmitButton>
                       </form>
                     ))}
 
                     <form action={denyMembership}>
                       <input type="hidden" name="request_id" value={req.id} />
-                      <button className="rounded-full border border-red-300/30 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-red-100">
-                        Deny
-                      </button>
+                      <SubmitButton pendingText="Denying...">Deny</SubmitButton>
                     </form>
                   </div>
                 </div>
@@ -124,9 +121,7 @@ export default async function MembersPage({
 
               <input name="team_label" placeholder="Team/table label, optional" className="rounded-xl border border-white/10 bg-white/[0.04] p-3" />
 
-              <button className="rounded-full bg-[var(--orange)] px-5 py-3 text-xs font-black uppercase tracking-[0.14em]">
-                Save assignment
-              </button>
+              <SubmitButton pendingText="Saving...">Save assignment</SubmitButton>
             </form>
           </article>
         </section>

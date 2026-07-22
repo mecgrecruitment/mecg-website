@@ -6,6 +6,8 @@ import { logout } from "../../auth/actions";
 import { submitApplicantCheckin } from "../checkin/actions";
 import { submitApplication } from "../application/actions";
 import { SubmitButton } from "../SubmitButton";
+import { GRAD_YEARS } from "@/lib/apply/schema";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 
 type SearchParams = {
   checkin_error?: string;
@@ -255,7 +257,16 @@ export default async function ApplicantDashboardPage({
             <div className="grid gap-4 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-bold">Year</span>
-                <input name="year" required placeholder="2028" className="portal-field focus-ring" />
+                <select name="year" required defaultValue="" className="portal-field focus-ring">
+                  <option value="" disabled>
+                    Select your graduation year
+                  </option>
+                  {GRAD_YEARS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="grid gap-2">
@@ -289,6 +300,8 @@ export default async function ApplicantDashboardPage({
               <span className="text-sm font-bold">Describe a problem you broke down and solved.</span>
               <textarea name="problem_solving" required rows={4} className="portal-field focus-ring" />
             </label>
+
+            <TurnstileWidget />
 
             <SubmitButton pendingText="Submitting...">Submit Application</SubmitButton>
           </form>

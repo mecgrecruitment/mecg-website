@@ -2,6 +2,7 @@ import React from "react";
 import { login } from "../actions";
 import { GoogleButton } from "../GoogleButton";
 import { AuthShell } from "@/components/portal/AuthShell";
+import { safeNextPath } from "@/lib/auth/schema";
 
 export default async function LoginPage({
   searchParams,
@@ -9,7 +10,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; message?: string; next?: string }>;
 }) {
   const params = await searchParams;
-  const next = params.next?.startsWith("/") && !params.next.startsWith("//") ? params.next : "";
+  const next = safeNextPath(params.next);
 
   return (
     <AuthShell

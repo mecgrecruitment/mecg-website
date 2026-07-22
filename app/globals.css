@@ -17,12 +17,12 @@
   --blue-soft: #9dbdfa;
 
   --orange: #f5823a;
-  --orange-dark: #b84f1c;
+  --orange-dark: #9c4118;
   --orange-soft: #ffb072;
 
   --text: #f7f9ff;
   --muted: rgba(247, 249, 255, 0.62);
-  --faint: rgba(247, 249, 255, 0.38);
+  --faint: rgba(247, 249, 255, 0.5);
   --line: rgba(255, 255, 255, 0.12);
   --panel: rgba(255, 255, 255, 0.055);
   --panel-strong: rgba(255, 255, 255, 0.085);
