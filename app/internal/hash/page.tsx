@@ -32,44 +32,48 @@ export default async function HashPage({
   const params = await searchParams;
   const supabase = await createClient();
 
-  const { data: session } = await supabase
-    .from("hash_sessions")
-    .select("id, name, stage, started_at")
-    .eq("is_active", true)
-    .maybeSingle();
+  const [{ data: session }, { data: cycle }] = await Promise.all([
+    supabase
+      .from("hash_sessions")
+      .select("id, name, stage, started_at")
+      .eq("is_active", true)
+      .maybeSingle(),
+    supabase
+      .from("recruitment_cycles")
+      .select("id")
+      .eq("is_active", true)
+      .maybeSingle(),
+  ]);
 
-  const { data: cycle } = await supabase
-    .from("recruitment_cycles")
-    .select("id")
-    .eq("is_active", true)
-    .maybeSingle();
-
-  const { data: candidates } = session && cycle
-    ? await supabase
-        .from("candidates")
-        .select("id, full_name, email, year, major, current_stage, status")
-        .eq("cycle_id", cycle.id)
-        .in("current_stage", ["interview", "hash"])
-        .eq("status", "active")
-        .is("deleted_at", null)
-        .order("full_name", { ascending: true })
-    : { data: [] };
-
-  const { data: votes } = session
-    ? await supabase
-        .from("votes")
-        .select("candidate_id, voter_id, value, created_at")
-        .eq("session_id", session.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const { data: decisions } = session
-    ? await supabase
-        .from("decisions")
-        .select("candidate_id, value, created_at")
-        .eq("session_id", session.id)
-        .order("created_at", { ascending: false })
-    : { data: [] };
+  const [candidateResult, voteResult, decisionResult] = await Promise.all([
+    session && cycle
+      ? supabase
+          .from("candidates")
+          .select("id, full_name, email, year, major, current_stage, status")
+          .eq("cycle_id", cycle.id)
+          .eq("current_stage", session.stage)
+          .eq("status", "active")
+          .is("deleted_at", null)
+          .order("full_name", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    session
+      ? supabase
+          .from("votes")
+          .select("candidate_id, voter_id, value, created_at")
+          .eq("session_id", session.id)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    session
+      ? supabase
+          .from("decisions")
+          .select("candidate_id, value, created_at")
+          .eq("session_id", session.id)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
+  const candidates = candidateResult.data;
+  const votes = voteResult.data;
+  const decisions = decisionResult.data;
 
   // latest vote per (candidate, voter) → per-candidate tally
   function tallyFor(candidateId: string) {

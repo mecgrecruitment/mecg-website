@@ -56,6 +56,13 @@ export default async function InternalDashboardPage({
       href: "/internal/emails",
       show: isBoard,
     },
+    {
+      index: "07",
+      title: "Audit log",
+      body: "Review the append-only history of recruitment and access changes.",
+      href: "/internal/audit",
+      show: isBoard,
+    },
   ].filter((card) => card.show);
 
   return (

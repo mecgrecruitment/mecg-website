@@ -42,14 +42,7 @@ export async function submitCandidateScore(formData: FormData) {
   }
   const criteriaById = new Map(criteria!.map((c) => [c.id, c]));
 
-  const rows: {
-    candidate_id: string;
-    rubric_criterion_id: string;
-    rubric_version_id: string;
-    evaluator_id: string;
-    stage: Stage;
-    value: number;
-  }[] = [];
+  const scores: { criterion_id: string; value: number }[] = [];
   for (const [key, raw] of formData.entries()) {
     if (!key.startsWith("criterion_")) continue;
     const criterionId = key.slice("criterion_".length);
@@ -69,34 +62,22 @@ export async function submitCandidateScore(formData: FormData) {
         )}`
       );
     }
-    rows.push({
-      candidate_id: candidateId,
-      rubric_criterion_id: criterionId,
-      rubric_version_id: rubricVersionId,
-      evaluator_id: member.id,
-      stage,
-      value,
-    });
+    scores.push({ criterion_id: criterionId, value });
   }
-  if (rows.length === 0) {
+  if (scores.length === 0) {
     redirect(`/internal/scoring/${route}?error=Enter at least one score.`);
   }
 
-  // Header is append-only (trigger blocks UPDATE/DELETE) → insert-or-ignore.
-  const { error: headerError } = await supabase.from("score_submissions").upsert(
-    { candidate_id: candidateId, evaluator_id: member.id, stage, rubric_version_id: rubricVersionId },
-    { onConflict: "candidate_id,evaluator_id,stage", ignoreDuplicates: true }
-  );
-  if (headerError) {
-    redirect(`/internal/scoring/${route}?error=${encodeURIComponent(headerError.message)}`);
-  }
-
-  // Criterion values are editable until the stage locks.
-  const { error: scoresError } = await supabase
-    .from("scores")
-    .upsert(rows, { onConflict: "candidate_id,rubric_criterion_id,evaluator_id" });
-  if (scoresError) {
-    redirect(`/internal/scoring/${route}?error=${encodeURIComponent(scoresError.message)}`);
+  // The RPC validates the active cycle, candidate stage, rubric, assignment,
+  // complete scorecard, and ranges before committing the scorecard atomically.
+  const { error } = await supabase.rpc("submit_candidate_score", {
+    p_candidate_id: candidateId,
+    p_stage: stage,
+    p_rubric_version_id: rubricVersionId,
+    p_scores: scores,
+  });
+  if (error) {
+    redirect(`/internal/scoring/${route}?error=${encodeURIComponent(error.message)}`);
   }
 
   redirect(`/internal/scoring/${route}?success=Score saved.`);

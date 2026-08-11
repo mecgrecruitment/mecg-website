@@ -1,6 +1,5 @@
 import React from "react";
 import { signup } from "../actions";
-import { GoogleButton } from "../GoogleButton";
 import { AuthShell } from "@/components/portal/AuthShell";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 
@@ -31,14 +30,6 @@ export default async function SignupPage({
         )}
 
         <div className="panel mt-8 grid gap-5 rounded-[2rem] p-7">
-          <GoogleButton label="Sign up with Google" />
-
-          <div className="flex items-center gap-3 text-[0.6rem] uppercase tracking-[0.2em] text-white/35">
-            <span className="h-px flex-1 bg-white/10" />
-            or
-            <span className="h-px flex-1 bg-white/10" />
-          </div>
-
           <form action={signup} className="grid gap-4">
             <label className="grid gap-2">
               <span className="text-sm font-bold">Full name</span>

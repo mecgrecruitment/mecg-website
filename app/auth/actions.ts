@@ -15,7 +15,7 @@ import {
 } from "@/lib/auth/schema";
 import { verifyTurnstile } from "@/lib/turnstile";
 
-// Absolute site origin for auth email/OAuth redirects. Prefer an explicit
+// Absolute site origin for auth email redirects. Prefer an explicit
 // NEXT_PUBLIC_SITE_URL (keeps redirects on the URL Supabase allow-lists);
 // otherwise derive from the request host.
 async function siteOrigin(): Promise<string> {
@@ -194,25 +194,4 @@ export async function requestMembership(formData: FormData) {
       "Request submitted. A board member will review it shortly."
     )}`
   );
-}
-
-export async function signInWithGoogle(formData: FormData) {
-  const next = safeNextPath(formData.get("next"));
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${await siteOrigin()}/auth/callback${
-        next ? `?next=${encodeURIComponent(next)}` : ""
-      }`,
-    },
-  });
-
-  if (error || !data?.url) {
-    redirect(
-      `/auth/login?error=${encodeURIComponent("Google sign-in is unavailable right now.")}`
-    );
-  }
-
-  redirect(data.url);
 }

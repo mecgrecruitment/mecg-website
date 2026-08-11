@@ -1,24 +1,21 @@
 import React from "react";
 import { GearLogo } from "@/components/brand/GearLogo";
 import { contact, navLinks } from "@/lib/site-content";
-import { getNavIdentity } from "@/lib/auth";
 import MotionProvider from "./components/MotionProvider";
 import SiteHeader from "./components/SiteHeader";
 
-export default async function ExternalLayout({
+export default function ExternalLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const identity = await getNavIdentity();
-
   return (
     <div className="grain">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
       <MotionProvider />
-      <SiteHeader identity={identity} />
+      <SiteHeader />
 
       {/* Scroll HUD — the dial turns with page progress (MotionProvider). */}
       <div className="hud-gear" aria-hidden="true">

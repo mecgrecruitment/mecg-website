@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/auth/schema";
 
-// Shared callback for email confirmation, OAuth, and password recovery.
+// Shared callback for email confirmation and password recovery.
 // Exchanges the PKCE code for a session, then forwards to an explicit ?next
 // (e.g. recovery → /auth/reset) or routes by member role.
 export async function GET(request: Request) {

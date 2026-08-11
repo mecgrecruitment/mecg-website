@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GearLogo } from "@/components/brand/GearLogo";
 import { navLinks } from "@/lib/site-content";
-import type { NavIdentity } from "@/lib/auth";
-import { logout } from "../../auth/actions";
 
-export default function SiteHeader({ identity }: { identity: NavIdentity | null }) {
+export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -69,7 +67,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
       <header
         className={`fixed inset-x-0 top-0 z-50 px-5 transition-[background-color,border-color,backdrop-filter] duration-500 md:px-8 ${
           scrolled
-            ? "border-b border-white/10 bg-[rgba(5,9,20,0.85)] py-3 backdrop-blur-xl"
+            ? "border-b border-white/10 bg-[rgba(5,9,20,0.96)] py-3 md:bg-[rgba(5,9,20,0.85)] md:backdrop-blur-xl"
             : "border-b border-transparent bg-transparent py-5"
         }`}
       >
@@ -116,44 +114,21 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
-            {identity ? (
-              <>
-                <a
-                  href={identity.href}
-                  data-magnetic
-                  className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
-                >
-                  {identity.label}
-                </a>
+            <a
+              href="/portal"
+              data-magnetic
+              className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
+            >
+              Portal
+            </a>
 
-                <form action={logout} className="hidden md:inline-block">
-                  <button
-                    type="submit"
-                    className="focus-ring rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white"
-                  >
-                    Logout
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <a
-                  href="/apply"
-                  data-magnetic
-                  className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
-                >
-                  Login
-                </a>
-
-                <a
-                  href="/member-login"
-                  data-magnetic
-                  className="focus-ring hidden rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white md:inline-block"
-                >
-                  Member Login
-                </a>
-              </>
-            )}
+            <a
+              href="/apply"
+              data-magnetic
+              className="focus-ring hidden rounded-full border border-white/15 px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-[var(--orange)] hover:text-white md:inline-block"
+            >
+              Apply
+            </a>
 
             <button
               ref={menuButtonRef}
@@ -185,7 +160,7 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
         id="site-menu"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed inset-0 z-40 flex flex-col justify-end bg-[var(--navy-950)]/97 px-6 pb-12 pt-28 backdrop-blur-2xl transition-opacity duration-400 xl:hidden ${
+        className={`fixed inset-0 z-40 flex flex-col justify-end bg-[var(--navy-950)]/97 px-6 pb-12 pt-28 transition-opacity duration-400 xl:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
@@ -213,39 +188,18 @@ export default function SiteHeader({ identity }: { identity: NavIdentity | null 
           ))}
 
           <div className="mt-6 flex flex-wrap gap-3">
-            {identity ? (
-              <>
-                <a
-                  href={identity.href}
-                  className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-                >
-                  {identity.label}
-                </a>
-                <form action={logout}>
-                  <button
-                    type="submit"
-                    className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-                  >
-                    Logout
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <a
-                  href="/apply"
-                  className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-                >
-                  Login
-                </a>
-                <a
-                  href="/member-login"
-                  className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
-                >
-                  Member Login
-                </a>
-              </>
-            )}
+            <a
+              href="/portal"
+              className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+            >
+              Portal
+            </a>
+            <a
+              href="/apply"
+              className="focus-ring inline-block rounded-full border border-white/15 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
+            >
+              Apply
+            </a>
           </div>
         </nav>
       </div>

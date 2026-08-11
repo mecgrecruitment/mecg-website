@@ -27,6 +27,7 @@ export default async function InternalLayout({
     { href: "/internal/hash", label: "Hash", show: canRecruit },
     { href: "/internal/members", label: "Members", show: true },
     { href: "/internal/emails", label: "Emails", show: isBoard },
+    { href: "/internal/audit", label: "Audit", show: isBoard },
   ].filter((item) => item.show);
 
   return (

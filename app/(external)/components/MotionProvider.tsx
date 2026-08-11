@@ -2,320 +2,198 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+type Cleanup = () => void;
 
-// A1/A2 — the external-zone motion system.
-//
-// One Lenis instance driven by the GSAP ticker and synced to ScrollTrigger;
-// never instantiated under prefers-reduced-motion (torn down live on change).
-//
-// Declarative motion contract (all hiding happens inside gsap.matchMedia, so
-// reduced-motion and no-JS users always see final, static content):
-//   [data-reveal]            scroll-in reveal (y + fade), once
-//   [data-reveal="wipe"]     clip-path wipe instead
-//   [data-reveal-group]      children with [data-reveal] stagger as a unit
-//   [data-split]             SplitText masked line reveal (kinetic type)
-//   [data-parallax="0.2"]    scrubbed vertical drift, fraction of viewport
-//   [data-counter]           numeric text rolls up from 0 when scrolled in
-//   [data-magnetic]          element eases toward the pointer on hover
-//   [data-hud-gear]          fixed dial rotated by overall scroll progress
-// Plus a drafting-cursor (dot + ring) on fine pointers.
+function observeOnce(
+  targets: Element[],
+  onEnter: (target: Element) => void,
+  threshold = 0.12
+): Cleanup {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        onEnter(entry.target);
+      });
+    },
+    { threshold, rootMargin: "0px 0px -6%" }
+  );
+  targets.forEach((target) => observer.observe(target));
+  return () => observer.disconnect();
+}
+
+function reveal(element: HTMLElement, delay = 0) {
+  const wipe = element.dataset.reveal === "wipe";
+  const animation = element.animate(
+    wipe
+      ? [
+          { clipPath: "inset(0 0 100% 0)", opacity: 0.75 },
+          { clipPath: "inset(0 0 0 0)", opacity: 1 },
+        ]
+      : [
+          { transform: "translate3d(0, 24px, 0)", opacity: 0 },
+          { transform: "translate3d(0, 0, 0)", opacity: 1 },
+        ],
+    {
+      duration: wipe ? 800 : 620,
+      delay,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "both",
+    }
+  );
+  return () => animation.cancel();
+}
+
 export default function MotionProvider() {
   const pathname = usePathname();
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduced.matches) return;
 
-    let lenis: Lenis | null = null;
-    let tick: ((time: number) => void) | null = null;
+    const cleanups: Cleanup[] = [];
+    const animated = new Set<HTMLElement>();
 
-    const start = () => {
-      if (lenis) return;
-      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
-      lenis.on("scroll", ScrollTrigger.update);
-      tick = (time) => lenis?.raf(time * 1000);
-      gsap.ticker.add(tick);
-      gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll<HTMLElement>("[data-reveal-group]").forEach((group) => {
+      const items = Array.from(group.querySelectorAll<HTMLElement>("[data-reveal]"));
+      items.forEach((item) => animated.add(item));
+      cleanups.push(
+        observeOnce([group], () => {
+          items.forEach((item, index) => cleanups.push(reveal(item, index * 55)));
+        })
+      );
+    });
+
+    const reveals = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-reveal], [data-split]")
+    ).filter((element) => !animated.has(element));
+    cleanups.push(
+      observeOnce(reveals, (target) => {
+        cleanups.push(reveal(target as HTMLElement));
+      })
+    );
+
+    document.querySelectorAll<HTMLElement>("[data-counter]").forEach((element) => {
+      const match = (element.textContent ?? "").trim().match(/^([\d,]+)(.*)$/);
+      if (!match) return;
+      const target = Number.parseInt(match[1].replaceAll(",", ""), 10);
+      const suffix = match[2] ?? "";
+      cleanups.push(
+        observeOnce([element], () => {
+          const started = performance.now();
+          let frame = 0;
+          const tick = (now: number) => {
+            const progress = Math.min((now - started) / 1100, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            element.textContent = `${Math.round(target * eased).toLocaleString("en-US")}${suffix}`;
+            if (progress < 1) frame = requestAnimationFrame(tick);
+          };
+          frame = requestAnimationFrame(tick);
+          cleanups.push(() => cancelAnimationFrame(frame));
+        })
+      );
+    });
+
+    document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((element) => {
+      const onMove = (event: PointerEvent) => {
+        const rect = element.getBoundingClientRect();
+        const x = (event.clientX - rect.left - rect.width / 2) * 0.22;
+        const y = (event.clientY - rect.top - rect.height / 2) * 0.22;
+        element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      };
+      const onLeave = () => {
+        element.style.transform = "translate3d(0, 0, 0)";
+      };
+      element.addEventListener("pointermove", onMove, { passive: true });
+      element.addEventListener("pointerleave", onLeave, { passive: true });
+      cleanups.push(() => {
+        element.removeEventListener("pointermove", onMove);
+        element.removeEventListener("pointerleave", onLeave);
+        element.style.transform = "";
+      });
+    });
+
+    const timelines = Array.from(document.querySelectorAll<HTMLElement>("[data-timeline]"));
+    const hud = document.querySelector<HTMLElement>("[data-hud-gear]");
+    let scrollFrame = 0;
+    const updateScrollEffects = () => {
+      scrollFrame = 0;
+      const viewportCenter = window.innerHeight / 2;
+
+      timelines.forEach((container) => {
+        const track = container.querySelector<HTMLElement>("[data-timeline-track]");
+        const marker = container.querySelector<HTMLElement>("[data-timeline-marker]");
+        if (!track || !marker) return;
+        const rect = container.getBoundingClientRect();
+        const range = Math.max(rect.height, 1);
+        const progress = Math.min(Math.max((viewportCenter - rect.top) / range, 0), 1);
+        marker.style.transform = `translate3d(0, ${progress * Math.max(track.offsetHeight - marker.offsetHeight, 0)}px, 0)`;
+        container.querySelectorAll<HTMLElement>("[data-timeline-node]").forEach((node) => {
+          node.classList.toggle("timeline-node--active", node.getBoundingClientRect().top <= viewportCenter);
+        });
+      });
+
+      if (hud) {
+        const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+        hud.style.transform = `rotate(${(window.scrollY / maxScroll) * 720}deg)`;
+      }
     };
-
-    const stop = () => {
-      if (tick) gsap.ticker.remove(tick);
-      tick = null;
-      lenis?.destroy();
-      lenis = null;
+    const queueScrollEffects = () => {
+      if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollEffects);
     };
+    window.addEventListener("scroll", queueScrollEffects, { passive: true });
+    window.addEventListener("resize", queueScrollEffects, { passive: true });
+    queueScrollEffects();
+    cleanups.push(() => {
+      window.removeEventListener("scroll", queueScrollEffects);
+      window.removeEventListener("resize", queueScrollEffects);
+      cancelAnimationFrame(scrollFrame);
+    });
 
-    const apply = () => (media.matches ? stop() : start());
+    return () => cleanups.splice(0).forEach((cleanup) => cleanup());
+  }, [pathname]);
 
-    apply();
-    media.addEventListener("change", apply);
-
-    return () => {
-      media.removeEventListener("change", apply);
-      stop();
-    };
-  }, []);
-
-  // Drafting cursor — fine pointers, motion allowed. Outside matchMedia so it
-  // tracks its own media queries; CSS hides it for coarse pointers/RM anyway.
   useEffect(() => {
     const dot = dotRef.current;
     const ring = ringRef.current;
-    if (!dot || !ring) return;
-
     const fine = window.matchMedia("(pointer: fine)");
-    const noRM = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!dot || !ring || !fine.matches || reduced.matches) return;
 
-    let teardown: (() => void) | null = null;
-
-    const start = () => {
-      if (teardown) return;
-
-      const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
-      const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
-      const ringX = gsap.quickTo(ring, "x", { duration: 0.35, ease: "power3.out" });
-      const ringY = gsap.quickTo(ring, "y", { duration: 0.35, ease: "power3.out" });
-
-      gsap.set([dot, ring], { xPercent: -50, yPercent: -50, x: -100, y: -100 });
-
-      const onMove = (e: PointerEvent) => {
-        dotX(e.clientX);
-        dotY(e.clientY);
-        ringX(e.clientX);
-        ringY(e.clientY);
-      };
-
-      const HOT = "a, button, [data-magnetic], input, textarea, select, label";
-      const onOver = (e: PointerEvent) => {
-        if ((e.target as Element | null)?.closest?.(HOT)) {
-          document.body.classList.add("cursor-hot");
-        }
-      };
-      const onOut = (e: PointerEvent) => {
-        if ((e.target as Element | null)?.closest?.(HOT)) {
-          document.body.classList.remove("cursor-hot");
-        }
-      };
-
-      window.addEventListener("pointermove", onMove, { passive: true });
-      window.addEventListener("pointerover", onOver, { passive: true });
-      window.addEventListener("pointerout", onOut, { passive: true });
-
-      teardown = () => {
-        window.removeEventListener("pointermove", onMove);
-        window.removeEventListener("pointerover", onOver);
-        window.removeEventListener("pointerout", onOut);
-        document.body.classList.remove("cursor-hot");
-      };
+    let frame = 0;
+    let x = -100;
+    let y = -100;
+    const render = () => {
+      frame = 0;
+      const transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+      dot.style.transform = transform;
+      ring.style.transform = transform;
     };
-
-    const stop = () => {
-      teardown?.();
-      teardown = null;
+    const onMove = (event: PointerEvent) => {
+      x = event.clientX;
+      y = event.clientY;
+      if (!frame) frame = requestAnimationFrame(render);
     };
-
-    const apply = () => (fine.matches && noRM.matches ? start() : stop());
-
-    apply();
-    fine.addEventListener("change", apply);
-    noRM.addEventListener("change", apply);
-
+    const onOver = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      document.body.classList.toggle(
+        "cursor-hot",
+        Boolean(target?.closest("a, button, [data-magnetic], input, textarea, select, label"))
+      );
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerover", onOver, { passive: true });
     return () => {
-      fine.removeEventListener("change", apply);
-      noRM.removeEventListener("change", apply);
-      stop();
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerover", onOver);
+      cancelAnimationFrame(frame);
+      document.body.classList.remove("cursor-hot");
     };
   }, []);
-
-  useEffect(() => {
-    const mm = gsap.matchMedia();
-    const splits: SplitText[] = [];
-    const magneticCleanups: Array<() => void> = [];
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const seen = new Set<Element>();
-
-      // Kinetic type: masked line reveals. autoSplit re-splits after font
-      // load so line boxes are final; SplitText preserves accessibility via
-      // aria-label on the split element.
-      document.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
-        seen.add(el);
-        el.classList.add("split-mask");
-        const split = SplitText.create(el, {
-          type: "lines",
-          mask: "lines",
-          linesClass: "split-line",
-          autoSplit: true,
-          onSplit: (self) =>
-            gsap.from(self.lines, {
-              yPercent: 112,
-              duration: 1.1,
-              ease: "power4.out",
-              stagger: 0.09,
-              scrollTrigger: { trigger: el, start: "top 88%", once: true },
-            }),
-        });
-        splits.push(split);
-      });
-
-      // Grouped reveals stagger together, triggered by the group container.
-      document
-        .querySelectorAll<HTMLElement>("[data-reveal-group]")
-        .forEach((group) => {
-          const items = Array.from(
-            group.querySelectorAll<HTMLElement>("[data-reveal]")
-          );
-          if (items.length === 0) return;
-          items.forEach((el) => seen.add(el));
-
-          gsap.from(items, {
-            y: 28,
-            autoAlpha: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            stagger: 0.06,
-            scrollTrigger: { trigger: group, start: "top 85%", once: true },
-          });
-        });
-
-      document.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
-        if (seen.has(el)) return;
-
-        const wipe = el.dataset.reveal === "wipe";
-        gsap.from(el, {
-          ...(wipe
-            ? {
-                clipPath: "inset(0 0 100% 0)",
-                duration: 1.0,
-                ease: "power4.out",
-              }
-            : { y: 28, autoAlpha: 0, duration: 0.8, ease: "power3.out" }),
-          scrollTrigger: { trigger: el, start: "top 85%", once: true },
-        });
-      });
-
-      // Parallax drift — scrubbed, fraction of viewport height.
-      document.querySelectorAll<HTMLElement>("[data-parallax]").forEach((el) => {
-        const amount = parseFloat(el.dataset.parallax || "0.15");
-        gsap.fromTo(
-          el,
-          { y: () => amount * window.innerHeight * 0.5 },
-          {
-            y: () => -amount * window.innerHeight * 0.5,
-            ease: "none",
-            scrollTrigger: {
-              trigger: el,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          }
-        );
-      });
-
-      // Interactive timeline: the marker travels down [data-timeline-track]
-      // scrubbed to the container's scroll position; each [data-timeline-node]
-      // gains .timeline-node--active as it crosses viewport center.
-      document.querySelectorAll<HTMLElement>("[data-timeline]").forEach((container) => {
-        const track = container.querySelector<HTMLElement>("[data-timeline-track]");
-        const marker = container.querySelector<HTMLElement>("[data-timeline-marker]");
-        const nodes = container.querySelectorAll<HTMLElement>("[data-timeline-node]");
-        if (!track || !marker) return;
-
-        const setY = gsap.quickSetter(marker, "y", "px");
-        ScrollTrigger.create({
-          trigger: container,
-          start: "top center",
-          end: "bottom center",
-          scrub: true,
-          onUpdate: (self) => {
-            setY(self.progress * Math.max(track.offsetHeight - marker.offsetHeight, 0));
-          },
-        });
-
-        nodes.forEach((node) => {
-          ScrollTrigger.create({
-            trigger: node,
-            start: "top center",
-            toggleClass: { targets: node, className: "timeline-node--active" },
-          });
-        });
-      });
-
-      // Stat roll-ups: "80+" counts 0 → 80 keeping the suffix.
-      document.querySelectorAll<HTMLElement>("[data-counter]").forEach((el) => {
-        const match = (el.textContent || "").trim().match(/^([\d,]+)(.*)$/);
-        if (!match) return;
-        const target = parseInt(match[1].replace(/,/g, ""), 10);
-        const suffix = match[2] || "";
-        const state = { value: 0 };
-
-        gsap.to(state, {
-          value: target,
-          duration: 1.6,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 88%", once: true },
-          onUpdate: () => {
-            el.textContent = `${Math.round(state.value).toLocaleString("en-US")}${suffix}`;
-          },
-        });
-      });
-
-      // Magnetic pulls — buttons lean toward the pointer.
-      document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((el) => {
-        const xTo = gsap.quickTo(el, "x", { duration: 0.4, ease: "power3.out" });
-        const yTo = gsap.quickTo(el, "y", { duration: 0.4, ease: "power3.out" });
-
-        const onMove = (e: PointerEvent) => {
-          const rect = el.getBoundingClientRect();
-          xTo((e.clientX - rect.left - rect.width / 2) * 0.32);
-          yTo((e.clientY - rect.top - rect.height / 2) * 0.32);
-        };
-        const onLeave = () => {
-          xTo(0);
-          yTo(0);
-        };
-
-        el.addEventListener("pointermove", onMove, { passive: true });
-        el.addEventListener("pointerleave", onLeave, { passive: true });
-        magneticCleanups.push(() => {
-          el.removeEventListener("pointermove", onMove);
-          el.removeEventListener("pointerleave", onLeave);
-        });
-      });
-
-      // Scroll HUD: the corner gear turns with overall page progress.
-      const hud = document.querySelector<HTMLElement>("[data-hud-gear]");
-      if (hud) {
-        const setRotation = gsap.quickSetter(hud, "rotation", "deg");
-        const st = ScrollTrigger.create({
-          start: 0,
-          end: () => ScrollTrigger.maxScroll(window),
-          onUpdate: (self) => setRotation(self.progress * 720),
-        });
-        return () => st.kill();
-      }
-    });
-
-    // Late layout shifts (fonts, images) move trigger positions.
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refresh);
-    ScrollTrigger.refresh();
-
-    return () => {
-      window.removeEventListener("load", refresh);
-      magneticCleanups.forEach((fn) => fn());
-      splits.forEach((s) => s.revert());
-      mm.revert();
-    };
-  }, [pathname]);
 
   return (
     <>

@@ -1,6 +1,5 @@
 import React from "react";
 import { login } from "../actions";
-import { GoogleButton } from "../GoogleButton";
 import { AuthShell } from "@/components/portal/AuthShell";
 import { safeNextPath } from "@/lib/auth/schema";
 
@@ -33,14 +32,6 @@ export default async function LoginPage({
         )}
 
         <div className="mt-8 grid gap-5 border-t border-white/10 pt-7">
-          <GoogleButton next={next || undefined} />
-
-          <div className="flex items-center gap-3 text-[0.6rem] uppercase tracking-[0.2em] text-white/35">
-            <span className="h-px flex-1 bg-white/10" />
-            or
-            <span className="h-px flex-1 bg-white/10" />
-          </div>
-
           <form action={login} className="grid gap-4">
             {next ? <input type="hidden" name="next" value={next} /> : null}
 

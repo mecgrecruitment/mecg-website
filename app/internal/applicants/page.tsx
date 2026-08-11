@@ -17,25 +17,28 @@ export default async function ApplicantsPage() {
     .eq("is_active", true)
     .maybeSingle();
 
-  const { data: candidates } = cycle
-    ? await supabase
-        .from("candidates")
-        .select("id, per_cycle_seq, full_name, email, year, major, current_stage, status, created_at")
-        .eq("cycle_id", cycle.id)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const { data: events } = cycle
-    ? await supabase
-        .from("recruitment_events")
-        .select("id, title")
-        .eq("cycle_id", cycle.id)
-        .eq("event_type", "open_rush")
-        .order("event_date", { ascending: true })
-    : { data: [] };
-
-  const { data: checkins } = await supabase.from("event_checkins").select("email, event_id");
+  const [candidateResult, eventResult, checkinResult] = await Promise.all([
+    cycle
+      ? supabase
+          .from("candidates")
+          .select("id, per_cycle_seq, full_name, email, year, major, current_stage, status, created_at")
+          .eq("cycle_id", cycle.id)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    cycle
+      ? supabase
+          .from("recruitment_events")
+          .select("id, title")
+          .eq("cycle_id", cycle.id)
+          .eq("event_type", "open_rush")
+          .order("event_date", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    supabase.from("event_checkins").select("email, event_id"),
+  ]);
+  const candidates = candidateResult.data;
+  const events = eventResult.data;
+  const checkins = checkinResult.data;
 
   const eventList = events ?? [];
   const checkinList = checkins ?? [];

@@ -209,7 +209,7 @@ export default function AboutPage() {
 
       <section className="px-5 md:px-8">
         <div className="container grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <ImagePanel src="/images/about/president-welcome.png" alt="Annie Callam, President of MECG" />
+          <ImagePanel src="/images/about/president-welcome.webp" alt="Annie Callam, President of MECG" />
           <TextPanel label="President's Welcome" title="President's Welcome">
             <p>Welcome to the Michigan Engineering Consulting Group. MECG brings together students who are curious about difficult problems, eager to learn, and generous with one another.</p>
             <p>Members build practical skills through education, mentorship, and client engagements spanning strategy, operations, analytics, product development, and marketing. Just as importantly, they learn how to listen, collaborate, and communicate across disciplines.</p>
@@ -228,7 +228,7 @@ export default function AboutPage() {
             <p>As MECG grew, members began working on technical and business-focused client questions, learning through workshops and mentorship, visiting firms, and building cross-disciplinary teams.</p>
             <p>That founding idea still guides the organization today: combine analytical range with human connection, and give students room to build a path that feels like their own.</p>
           </TextPanel>
-          <ImagePanel src="/images/about/founders-history.png" alt="MECG Founders Jonathan Fay and Aaryan Singh" />
+          <ImagePanel src="/images/about/founders-history.webp" alt="MECG Founders Jonathan Fay and Aaryan Singh" />
         </div>
       </section>
 

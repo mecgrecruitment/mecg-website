@@ -297,6 +297,12 @@ a {
   opacity: 0.38;
 }
 
+[data-magnetic] {
+  transition-property: color, background-color, border-color, transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-out-expo);
+}
+
 .button-primary,
 .button-secondary,
 .button-dark,
@@ -545,7 +551,12 @@ a {
   z-index: 40;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(8, 18, 37, 0.94);
-  backdrop-filter: blur(18px);
+}
+
+@media (min-width: 768px) {
+  .portal-header {
+    backdrop-filter: blur(18px);
+  }
 }
 
 .portal-nav-link {
@@ -907,6 +918,11 @@ a {
 }
 
 @media (max-width: 768px) {
+  .orb,
+  .auth-shell-glow {
+    filter: blur(56px);
+  }
+
   .display {
     letter-spacing: -0.052em;
     line-height: 0.96;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import GearAssembly from "./GearAssembly";
 import type { GearFocus } from "./types";
 
@@ -23,19 +23,31 @@ if (typeof window !== "undefined") {
   }
 }
 
-type Frameloop = "always" | "demand" | "never";
+function FrameDriver({ active }: { active: boolean }) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    invalidate();
+    if (!active) return;
+    const interval = window.setInterval(invalidate, 1000 / 30);
+    return () => window.clearInterval(interval);
+  }, [active, invalidate]);
+
+  return null;
+}
 
 /**
  * Performance-guarded WebGL stage for the gear assembly.
- * - DPR clamped to 1.75 (retina text stays sharp, fill rate stays sane).
- * - Render loop runs only while the canvas is on screen (IntersectionObserver)
- *   and the tab is visible.
+ * - DPR clamped to 1.5.
+ * - Demand rendering is invalidated at 30fps only while the canvas is on screen
+ *   and the tab is visible, instead of running a permanent 60fps loop.
  * - prefers-reduced-motion renders a single static frame, no loop.
  * - Fades in once the first frame is committed, so there is no pop.
  */
 export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(true);
+  const [inViewport, setInViewport] = useState(true);
+  const [tabVisible, setTabVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -49,13 +61,13 @@ export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }
     let io: IntersectionObserver | null = null;
     if (host) {
       io = new IntersectionObserver(
-        ([entry]) => setVisible(entry.isIntersecting),
+        ([entry]) => setInViewport(entry.isIntersecting),
         { rootMargin: "120px" }
       );
       io.observe(host);
     }
 
-    const onVisibility = () => setVisible(document.visibilityState === "visible");
+    const onVisibility = () => setTabVisible(document.visibilityState === "visible");
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
@@ -65,7 +77,7 @@ export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }
     };
   }, []);
 
-  const frameloop: Frameloop = reduced ? "demand" : visible ? "always" : "never";
+  const active = !reduced && inViewport && tabVisible;
 
   return (
     <div
@@ -78,12 +90,13 @@ export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }
       }}
     >
       <Canvas
-        frameloop={frameloop}
-        dpr={[1, 1.75]}
+        frameloop="demand"
+        dpr={[1, 1.5]}
         camera={{ position: [0, 0, 7.2], fov: 42 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         onCreated={() => setReady(true)}
       >
+        <FrameDriver active={active} />
         <GearAssembly animated={!reduced} focus={focus} />
       </Canvas>
     </div>

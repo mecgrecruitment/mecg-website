@@ -14,24 +14,27 @@ export default async function MembersPage({
   const supabase = await createClient();
   const isBoard = member.role === "board";
 
-  const { data: members } = await supabase
-    .from("members")
-    .select("id, full_name, email, role")
-    .is("deleted_at", null)
-    .order("full_name", { ascending: true });
-
-  // Board-only data (RLS would deny these for non-board anyway).
-  const { data: pending } = isBoard
-    ? await supabase
-        .from("membership_requests")
-        .select("id, full_name, email, requested_role")
-        .eq("status", "pending")
-        .order("created_at", { ascending: true })
-    : { data: [] };
-
-  const { data: cycle } = isBoard
-    ? await supabase.from("recruitment_cycles").select("id").eq("is_active", true).maybeSingle()
-    : { data: null };
+  // Board-only reads remain protected by RLS and can run alongside the member list.
+  const [memberResult, pendingResult, cycleResult] = await Promise.all([
+    supabase
+      .from("members")
+      .select("id, full_name, email, role")
+      .is("deleted_at", null)
+      .order("full_name", { ascending: true }),
+    isBoard
+      ? supabase
+          .from("membership_requests")
+          .select("id, full_name, email, requested_role")
+          .eq("status", "pending")
+          .order("created_at", { ascending: true })
+      : Promise.resolve({ data: [] }),
+    isBoard
+      ? supabase.from("recruitment_cycles").select("id").eq("is_active", true).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const members = memberResult.data;
+  const pending = pendingResult.data;
+  const cycle = cycleResult.data;
 
   const { data: candidates } = isBoard && cycle
     ? await supabase

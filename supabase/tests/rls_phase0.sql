@@ -124,20 +124,44 @@ begin
   select count(*) into n from public.audit_log;
   assert n = 0, format('FAIL: committee sees %s audit rows (expected 0)', n);
 
-  -- Submit own scorecard for (C01, applied) → unlocks peers.
-  insert into public.score_submissions (candidate_id, evaluator_id, stage, rubric_version_id)
-  values (
-    current_setting('test.cand_id')::uuid,
-    public.current_member_id(),
-    'applied',
-    current_setting('test.rubric_id')::uuid
-  );
+  -- Integrity-sensitive writes are RPC-only; a direct forged insert is denied.
+  begin
+    insert into public.score_submissions (candidate_id, evaluator_id, stage, rubric_version_id)
+    values (
+      current_setting('test.cand_id')::uuid,
+      public.current_member_id(),
+      'applied',
+      current_setting('test.rubric_id')::uuid
+    );
+    raise exception 'FAIL: committee directly inserted a score submission';
+  exception when insufficient_privilege then null;
+  end;
 
+  raise notice 'PASS: committee — 4 candidates, blind before submission, audit denied, direct score insert denied';
+end $$;
+
+reset role;
+
+-- Simulate a trusted submitted scorecard, then verify the blind gate unlocks.
+insert into public.score_submissions (candidate_id, evaluator_id, stage, rubric_version_id)
+values (
+  current_setting('test.cand_id')::uuid,
+  (select id from public.members where user_id = current_setting('test.committee_uid')::uuid),
+  'applied',
+  current_setting('test.rubric_id')::uuid
+);
+
+set local role authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', current_setting('test.committee_uid'), 'role', 'authenticated')::text, true);
+
+do $$
+declare n int;
+begin
   select count(*) into n from public.scores
    where candidate_id = current_setting('test.cand_id')::uuid;
   assert n = 4, format('FAIL: committee sees %s peer scores AFTER submitting (expected 4)', n);
-
-  raise notice 'PASS: committee — 4 candidates, blind until submitted (0 → 4 scores), audit denied';
+  raise notice 'PASS: committee — peer scores unlock after trusted submission (0 → 4)';
 end $$;
 
 reset role;

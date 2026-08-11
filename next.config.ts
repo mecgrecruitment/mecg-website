@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
+const isLocalHttpE2E = process.env.E2E_LOCAL_HTTP === "1";
 
 // ponytail: no nonce/strict-dynamic — that requires forcing every page to
 // render dynamically (kills static generation for this marketing site).
@@ -18,7 +19,7 @@ const cspHeader = `
   base-uri 'self';
   form-action 'self';
   frame-ancestors 'none';
-  upgrade-insecure-requests;
+  ${isLocalHttpE2E ? "" : "upgrade-insecure-requests;"}
 `
   .replace(/\s{2,}/g, " ")
   .trim();
@@ -40,6 +41,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  allowedDevOrigins: ["127.0.0.1"],
   async headers() {
     return [
       {

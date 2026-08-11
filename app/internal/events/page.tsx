@@ -12,15 +12,16 @@ export default async function InternalEventsPage() {
   await requireCommittee();
   const supabase = await createClient();
 
-  const { data: events } = await supabase
-    .from("recruitment_events")
-    .select("id, title, event_type, event_date, location, attendance_code")
-    .order("event_date", { ascending: true });
-
-  const { data: checkins } = await supabase
-    .from("event_checkins")
-    .select("id, email, applicant_name, created_at, event:recruitment_events(title)")
-    .order("created_at", { ascending: false });
+  const [{ data: events }, { data: checkins }] = await Promise.all([
+    supabase
+      .from("recruitment_events")
+      .select("id, title, event_type, event_date, location, attendance_code")
+      .order("event_date", { ascending: true }),
+    supabase
+      .from("event_checkins")
+      .select("id, email, applicant_name, created_at, event:recruitment_events(title)")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <div className="grid gap-7">

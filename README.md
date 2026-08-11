@@ -10,7 +10,7 @@ The website and recruitment system for the Michigan Economics Consulting Group. 
 | Styling | Tailwind CSS v4 |
 | Backend | Supabase — Postgres + Auth + Storage |
 | Validation | Zod |
-| Marketing visuals | GSAP, Three.js (`@react-three/fiber` + `drei`), Lenis smooth scroll |
+| Marketing visuals | Native Web Animations API, Three.js (`@react-three/fiber` + `drei`) |
 
 ## Prerequisites
 
@@ -38,8 +38,6 @@ npm run dev
 
 Open http://127.0.0.1:3000. (Use `127.0.0.1`, not `localhost` — it's what `NEXT_PUBLIC_SITE_URL` and the Supabase redirect allow-list default to.)
 
-The Google OAuth vars can be left blank locally; the "Continue with Google" button is the only thing that needs them.
-
 `supabase/seed.sql` creates local test logins (password `password123`), including `committee.test@umich.edu` (recruitment committee) and `member.test@umich.edu` (general member), plus placeholder board accounts.
 
 ### Scripts
@@ -50,6 +48,11 @@ The Google OAuth vars can be left blank locally; the "Continue with Google" butt
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript without emitting files |
+| `npm run audit` | Run lint, typecheck, and a production build once |
+| `npm run audit:loop` | Repeat the audit every 30 seconds (`AUDIT_INTERVAL_SECONDS=60 npm run audit:loop` to change the interval) |
+| `npm run test:e2e` | Build and run Playwright smoke tests locally |
+| `E2E_BASE_URL=https://example.com npm run test:e2e:live` | Run the same smoke tests against a deployment |
 | `npm run db:reset` | Drop + re-apply all migrations and the seed |
 | `npm run db:types` | Regenerate `src/lib/database.types.ts` from the local DB |
 
@@ -60,7 +63,7 @@ app/                      <- the live App Router tree (repo root, NOT src/app)
   (external)/             <- public marketing site (about, team, services, recruitment, ...)
   apply/                  <- applicant portal (dashboard, application, checkin) — self-signup
   internal/               <- internal portal (applicants, scoring, hash, decisions, audit) — members only
-  auth/                   <- login, signup, verify, forgot/reset, OAuth callback
+  auth/                   <- login, signup, verify, forgot/reset, email callback
   portal/                 <- public "which portal?" chooser
 proxy.ts                  <- Next 16's middleware; refreshes the session, guards protected routes
 src/lib/                  <- auth helpers, Supabase clients, generated DB types, static content
@@ -82,7 +85,7 @@ Supabase clients: `src/lib/supabase/server.ts` (Server Components / Actions), `c
 
 ## Database
 
-The schema lives in `supabase/migrations/` as ordered SQL files — 11 of them, applied in filename order. Never edit an applied migration; add a new one (`supabase migration new <name>`).
+The schema lives in `supabase/migrations/` as ordered SQL files, applied in filename order. Never edit an applied migration; add a new one (`supabase migration new <name>`).
 
 ```bash
 npm run db:reset   # wipe local DB, re-run every migration, re-seed
@@ -100,11 +103,11 @@ Deployed on Vercel. Set these in the Vercel project's environment variables (sam
 | `NEXT_PUBLIC_SUPABASE_URL` | Hosted project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-only.** Never expose. |
-| `NEXT_PUBLIC_SITE_URL` | The production origin, e.g. `https://mecg.org` — auth emails and OAuth redirects are built from this |
-| `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` | Optional; enables "Continue with Google" |
-| `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` | Optional |
+| `NEXT_PUBLIC_SITE_URL` | The production origin, e.g. `https://mecg.org` — auth email redirects are built from this |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile widget key |
+| `TURNSTILE_SECRET_KEY` | **Server-only.** Required for signup and application submission in production. |
 
-In the Supabase dashboard, add the production origin to **Auth → URL Configuration** (Site URL + redirect allow-list) so it matches `NEXT_PUBLIC_SITE_URL` — otherwise magic links and OAuth callbacks bounce. Locally that list lives in `supabase/config.toml` (`site_url` / `additional_redirect_urls`).
+In the Supabase dashboard, add the production origin to **Auth → URL Configuration** (Site URL + redirect allow-list) so it matches `NEXT_PUBLIC_SITE_URL` — otherwise confirmation and password-reset links bounce. Locally that list lives in `supabase/config.toml` (`site_url` / `additional_redirect_urls`).
 
 > **The app 500s on every route if the Supabase env vars are missing.** `proxy.ts` builds a Supabase client on every request, so a deploy with an empty `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` fails at the door — not just on the pages that read the DB. Set the env vars **before** the first deploy.
 
@@ -145,7 +148,7 @@ Every board member must appear with `role = 'board'`. If someone is missing, or 
 ### 3. Environment
 
 - Set **every** var in `.env.example` in the Vercel project (see [Deployment](#deployment)).
-- `NEXT_PUBLIC_SITE_URL` must be the production origin — auth emails and OAuth redirects are built from it.
+- `NEXT_PUBLIC_SITE_URL` must be the production origin — auth email redirects are built from it.
 - Add that same origin to the Supabase **Auth → URL Configuration** redirect allow-list.
 
 ## Gotchas

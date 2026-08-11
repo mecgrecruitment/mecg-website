@@ -1773,6 +1773,15 @@ export type Database = {
         }[]
       }
       prune_apply_rate_limit: { Args: never; Returns: undefined }
+      record_hash_decision: {
+        Args: {
+          p_candidate_id: string
+          p_rationale?: string
+          p_session_id: string
+          p_value: Database["public"]["Enums"]["decision_value"]
+        }
+        Returns: undefined
+      }
       request_membership: {
         Args: {
           p_full_name: string
@@ -1797,6 +1806,23 @@ export type Database = {
           p_year: string
         }
         Returns: string
+      }
+      submit_candidate_score: {
+        Args: {
+          p_candidate_id: string
+          p_rubric_version_id: string
+          p_scores: Json
+          p_stage: Database["public"]["Enums"]["candidate_stage"]
+        }
+        Returns: undefined
+      }
+      submit_hash_vote: {
+        Args: {
+          p_candidate_id: string
+          p_session_id: string
+          p_value: Database["public"]["Enums"]["vote_value"]
+        }
+        Returns: undefined
       }
     }
     Enums: {

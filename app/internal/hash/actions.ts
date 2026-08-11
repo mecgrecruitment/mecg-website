@@ -4,9 +4,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireBoard, requireCommittee } from "@/lib/auth";
 
-type VoteValue = "advance" | "cut" | "discuss";
-type DecisionValue = "accepted" | "rejected" | "waitlisted";
-
 // Board opens the cycle's hash session and enrolls every member as a participant
 // so committee can vote (votes RLS requires participant + active session).
 export async function startHashSession() {
@@ -26,7 +23,7 @@ export async function startHashSession() {
     .from("hash_sessions")
     .insert({
       cycle_id: cycle.id,
-      stage: "hash",
+      stage: "interview",
       name: "Hash Room",
       visibility: "anonymous",
       is_active: true,
@@ -69,7 +66,7 @@ export async function startHashSession() {
 }
 
 export async function submitHashVote(formData: FormData) {
-  const member = await requireCommittee();
+  await requireCommittee();
   const supabase = await createClient();
 
   const sessionId = String(formData.get("session_id") || "");
@@ -79,11 +76,10 @@ export async function submitHashVote(formData: FormData) {
     redirect("/internal/hash?error=Candidate and vote are required.");
   }
 
-  const { error } = await supabase.from("votes").insert({
-    session_id: sessionId,
-    candidate_id: candidateId,
-    voter_id: member.id,
-    value: value as VoteValue,
+  const { error } = await supabase.rpc("submit_hash_vote", {
+    p_session_id: sessionId,
+    p_candidate_id: candidateId,
+    p_value: value as "advance" | "cut" | "discuss",
   });
   if (error) {
     redirect(`/internal/hash?error=${encodeURIComponent(error.message)}`);
@@ -94,7 +90,7 @@ export async function submitHashVote(formData: FormData) {
 // Board records the authoritative decision: append a decisions row (with a tally
 // snapshot), set the candidate's status, and log the move to 'decided'.
 export async function recordDecision(formData: FormData) {
-  const board = await requireBoard();
+  await requireBoard();
   const supabase = await createClient();
 
   const sessionId = String(formData.get("session_id") || "");
@@ -104,72 +100,16 @@ export async function recordDecision(formData: FormData) {
   if (!sessionId || !candidateId || !["accepted", "rejected", "waitlisted"].includes(value)) {
     redirect("/internal/hash?error=Pick a decision.");
   }
-  const decision = value as DecisionValue;
-
-  // Latest vote per voter → tally snapshot.
-  const { data: votes, error: votesError } = await supabase
-    .from("votes")
-    .select("voter_id, value, created_at")
-    .eq("session_id", sessionId)
-    .eq("candidate_id", candidateId)
-    .order("created_at", { ascending: false });
-  if (votesError) {
-    redirect(`/internal/hash?error=${encodeURIComponent(votesError.message)}`);
-  }
-  const latest = new Map<string, string>();
-  for (const v of votes ?? []) {
-    if (!latest.has(v.voter_id)) latest.set(v.voter_id, v.value);
-  }
-  const tally = { advance: 0, cut: 0, discuss: 0, total_voters: latest.size };
-  for (const val of latest.values()) {
-    if (val === "advance") tally.advance++;
-    else if (val === "cut") tally.cut++;
-    else if (val === "discuss") tally.discuss++;
-  }
-
-  const { error: decisionError } = await supabase.from("decisions").insert({
-    session_id: sessionId,
-    candidate_id: candidateId,
-    value: decision,
-    decided_by: board.id,
-    rationale: rationale || null,
-    voter_tally: tally,
+  // The RPC validates session/candidate eligibility, snapshots the latest
+  // votes, updates the candidate, and appends the transition in one transaction.
+  const { error } = await supabase.rpc("record_hash_decision", {
+    p_session_id: sessionId,
+    p_candidate_id: candidateId,
+    p_value: value as "accepted" | "rejected" | "waitlisted",
+    p_rationale: rationale || undefined,
   });
-  if (decisionError) {
-    redirect(`/internal/hash?error=${encodeURIComponent(decisionError.message)}`);
-  }
-
-  const { data: candidate } = await supabase
-    .from("candidates")
-    .select("current_stage")
-    .eq("id", candidateId)
-    .maybeSingle();
-
-  const { error: statusError } = await supabase
-    .from("candidates")
-    .update({ status: decision, current_stage: "decided" })
-    .eq("id", candidateId);
-  if (statusError) {
-    redirect(
-      `/internal/hash?error=${encodeURIComponent(
-        `Decision recorded, but the candidate's status was not updated: ${statusError.message}`
-      )}`
-    );
-  }
-
-  const { error: transitionError } = await supabase.from("stage_transitions").insert({
-    candidate_id: candidateId,
-    from_stage: candidate?.current_stage ?? null,
-    to_stage: "decided",
-    actor_id: board.id,
-    reason: `Hash decision: ${decision}`,
-  });
-  if (transitionError) {
-    redirect(
-      `/internal/hash?error=${encodeURIComponent(
-        `Decision recorded, but the audit trail entry failed: ${transitionError.message}`
-      )}`
-    );
+  if (error) {
+    redirect(`/internal/hash?error=${encodeURIComponent(error.message)}`);
   }
 
   redirect("/internal/hash?success=Decision recorded.");

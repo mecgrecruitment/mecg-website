@@ -33,14 +33,15 @@ export default async function ApplicantDashboardPage({
   const params = await searchParams;
   const supabase = await createClient();
 
-  const { data: appRows } = await supabase.rpc("my_application");
+  const [{ data: appRows }, { data: membershipRequest }] = await Promise.all([
+    supabase.rpc("my_application"),
+    supabase
+      .from("membership_requests")
+      .select("status")
+      .eq("user_id", applicant.id)
+      .maybeSingle(),
+  ]);
   const application = Array.isArray(appRows) ? appRows[0] : null;
-
-  const { data: membershipRequest } = await supabase
-    .from("membership_requests")
-    .select("status")
-    .eq("user_id", applicant.id)
-    .maybeSingle();
 
   const MEMBERSHIP_STATUS_COPY: Record<string, string> = {
     pending: "Your board membership request is pending review. We'll email you once it's decided.",
@@ -94,12 +95,13 @@ export default async function ApplicantDashboardPage({
     );
   }
 
-  const { data: events } = await supabase
-    .from("v_open_rush_events")
-    .select("id, title, event_date, location")
-    .order("event_date", { ascending: true });
-
-  const { data: checkins } = await supabase.rpc("my_checkins");
+  const [{ data: events }, { data: checkins }] = await Promise.all([
+    supabase
+      .from("v_open_rush_events")
+      .select("id, title, event_date, location")
+      .order("event_date", { ascending: true }),
+    supabase.rpc("my_checkins"),
+  ]);
   const checkinList = Array.isArray(checkins) ? checkins : [];
   const attendanceCount = checkinList.length;
   const attendanceTotal = events?.length ?? 0;
