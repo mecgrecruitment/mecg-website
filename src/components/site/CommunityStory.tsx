@@ -100,7 +100,7 @@ export function CommunityStory({ frames }: { frames: StoryFrame[] }) {
               className="community-story-thumb focus-ring"
               data-active={index === activeIndex}
               onClick={() => setActiveIndex(index)}
-              aria-label={`Show ${frame.title}`}
+              aria-label={`${String(index + 1).padStart(2, "0")} — Show ${frame.title}`}
               aria-pressed={index === activeIndex}
             >
               <Image

@@ -45,7 +45,7 @@ export default function ExternalLayout({
               <a
                 href="/contact"
                 data-magnetic
-                className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)]"
+                className="focus-ring rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--navy-950)] transition-colors hover:bg-white"
               >
                 Work with us
               </a>
