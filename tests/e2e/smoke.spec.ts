@@ -87,6 +87,25 @@ test("authentication uses email and password without OAuth controls", async ({ p
   await expect(page.getByText(/Google|OAuth/i)).toHaveCount(0);
 });
 
+test("account creation reaches email verification when Turnstile is not configured", async ({
+  page,
+}, testInfo) => {
+  const email = `signup-${testInfo.project.name}-${Date.now()}@umich.edu`;
+  await page.goto("/auth/signup");
+
+  await page.getByLabel("Full name").fill("Signup Test");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("password123");
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  await expect(page).toHaveURL(
+    `/auth/verify?email=${encodeURIComponent(email)}`
+  );
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Check your inbox." })
+  ).toBeVisible();
+});
+
 test("public pages omit private hash details and individual email addresses", async ({ page }) => {
   await page.goto("/prospective-members");
   await expect(page.getByText(/App Hash|Group Hash/i)).toHaveCount(0);

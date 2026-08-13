@@ -1,11 +1,12 @@
 import Script from "next/script";
+import { isTurnstileConfigured } from "@/lib/turnstile";
 
 // Cloudflare Turnstile challenge for public write endpoints (signup,
-// application submit — SEC-23/EX-61). Renders nothing if no site key is
-// configured yet (see NEXT_PUBLIC_TURNSTILE_SITE_KEY in .env.example).
+// application submit — SEC-23/EX-61). It is optional, but both halves of the
+// key pair must be configured before the widget and server check are enabled.
 export function TurnstileWidget() {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  if (!siteKey) return null;
+  if (!siteKey || !isTurnstileConfigured()) return null;
 
   return (
     <>

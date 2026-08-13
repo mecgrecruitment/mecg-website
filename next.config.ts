@@ -10,11 +10,12 @@ const isLocalHttpE2E = process.env.E2E_LOCAL_HTTP === "1";
 // in layouts if this ever needs a stricter policy.
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
+  script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob:;
   font-src 'self';
   connect-src 'self' https://*.supabase.co wss://*.supabase.co;
+  frame-src 'self' https://challenges.cloudflare.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

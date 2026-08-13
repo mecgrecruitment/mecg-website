@@ -1,12 +1,21 @@
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
+export function isTurnstileConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+      process.env.TURNSTILE_SECRET_KEY
+  );
+}
+
 // Server-side verification for the Cloudflare Turnstile widget (SEC-23/EX-61).
-// Fails closed in production if TURNSTILE_SECRET_KEY isn't set — a real
-// deploy must configure it. In development an unconfigured key just skips
-// the check so local work isn't blocked on setting up a Cloudflare account.
+// Turnstile is enabled only when the matching public and private keys are both
+// configured. Supabase still applies its own signup rate limits when this
+// optional defense-in-depth check is disabled.
 export async function verifyTurnstile(token: FormDataEntryValue | null): Promise<boolean> {
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return process.env.NODE_ENV !== "production";
+  if (!siteKey && !secret) return true;
+  if (!siteKey || !secret) return false;
   if (typeof token !== "string" || !token) return false;
 
   try {

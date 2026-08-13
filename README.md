@@ -104,8 +104,8 @@ Deployed on Vercel. Set these in the Vercel project's environment variables (sam
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-only.** Never expose. |
 | `NEXT_PUBLIC_SITE_URL` | The production origin, e.g. `https://mecg.org` — auth email redirects are built from this |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile widget key |
-| `TURNSTILE_SECRET_KEY` | **Server-only.** Required for signup and application submission in production. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Optional Cloudflare Turnstile widget key; enable together with the secret key |
+| `TURNSTILE_SECRET_KEY` | **Server-only.** Optional Turnstile verification key; enable together with the site key |
 
 In the Supabase dashboard, add the production origin to **Auth → URL Configuration** (Site URL + redirect allow-list) so it matches `NEXT_PUBLIC_SITE_URL` — otherwise confirmation and password-reset links bounce. Locally that list lives in `supabase/config.toml` (`site_url` / `additional_redirect_urls`).
 
