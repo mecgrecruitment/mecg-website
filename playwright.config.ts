@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const liveBaseUrl = process.env.E2E_BASE_URL?.replace(/\/$/, "");
-const localBaseUrl = "http://127.0.0.1:3100";
+const localBaseUrl = "http://127.0.0.1:3210";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -17,9 +17,9 @@ export default defineConfig({
   webServer: liveBaseUrl
     ? undefined
     : {
-        command: "npm run start -- -p 3100",
+        command: "npm run start -- -p 3210",
         url: localBaseUrl,
-        reuseExistingServer: true,
+        reuseExistingServer: false,
         timeout: 30_000,
       },
   projects: [

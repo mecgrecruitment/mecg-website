@@ -22,6 +22,11 @@ run_audit() {
 
   echo "[$started_at] Starting project audit"
 
+  if ! bash scripts/audit-sensitive.sh; then
+    echo "Audit failed: sensitive information" >&2
+    return 1
+  fi
+
   if ! npm run lint; then
     echo "Audit failed: lint" >&2
     return 1
@@ -37,7 +42,7 @@ run_audit() {
     return 1
   fi
 
-  echo "Audit passed: lint, typecheck, and build"
+  echo "Audit passed: sensitive information, lint, typecheck, and build"
 }
 
 while true; do

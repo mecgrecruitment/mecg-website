@@ -38,7 +38,7 @@ npm run dev
 
 Open http://127.0.0.1:3000. (Use `127.0.0.1`, not `localhost` — it's what `NEXT_PUBLIC_SITE_URL` and the Supabase redirect allow-list default to.)
 
-`supabase/seed.sql` creates local test logins (password `password123`), including `committee.test@umich.edu` (recruitment committee) and `member.test@umich.edu` (general member), plus placeholder board accounts.
+`supabase/seed.sql` creates synthetic local test logins (password `password123`), including `board01.test@umich.edu` (board), `committee.test@umich.edu` (recruitment committee), and `member.test@umich.edu` (general member).
 
 ### Scripts
 
@@ -109,18 +109,18 @@ Deployed on Vercel. Set these in the Vercel project's environment variables (sam
 
 In the Supabase dashboard, add the production origin to **Auth → URL Configuration** (Site URL + redirect allow-list) so it matches `NEXT_PUBLIC_SITE_URL` — otherwise confirmation and password-reset links bounce. Locally that list lives in `supabase/config.toml` (`site_url` / `additional_redirect_urls`).
 
-> **The app 500s on every route if the Supabase env vars are missing.** `proxy.ts` builds a Supabase client on every request, so a deploy with an empty `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` fails at the door — not just on the pages that read the DB. Set the env vars **before** the first deploy.
+> **Authentication requires the Supabase environment variables.** Public pages degrade to signed-out mode when they are absent, but login and authenticated data cannot work. Set the variables **before** the first deploy.
 
 ## Production go-live
 
-**Do this before a single person signs up in production.** It is not optional and it cannot be done later without manual cleanup.
+**Do this before opening member access in production.**
 
-Signup is open: anyone can create an account. What that account *becomes* is decided by `public.invite_allowlist` (see `fn_handle_new_auth_user` in `supabase/migrations/20260610000010_demo_convergence.sql`):
+Signup is open: anyone can create an account. The current approval migration intentionally does not grant member access at signup:
 
-- email **matches** an unconsumed allowlist row ⇒ a `members` row is created with that row's `role`
-- **no match** ⇒ no `members` row at all ⇒ the user is an *applicant*
+- email **matches** an unconsumed allowlist row ⇒ a pending `membership_requests` row is created with that row's requested role;
+- **no match** ⇒ no member or membership-request row is created, so the user remains an applicant unless they request access later.
 
-Approving anything (membership requests included) requires `is_board()`, which reads the `members` table. So on a **fresh prod database** `members` is empty ⇒ nobody is board ⇒ nobody can approve anyone ⇒ every person who signs up is a permanently unapprovable applicant. Seeding the allowlist is the **only** bootstrap out of that. Today it only happens in `supabase/seed.sql`, which is local-dev-only ("Never apply to a hosted project") and whose board emails are explicit placeholders.
+Approving requests requires an existing board member. A fresh production database therefore needs one explicit first-board bootstrap in the SQL editor; after that, the first board member approves every other request through `/internal/members`.
 
 ### 1. Insert the real board roster
 
@@ -133,17 +133,39 @@ insert into public.invite_allowlist (email, role, notes) values
   ('replace-me-2@umich.edu', 'board', 'VP Recruitment');
 ```
 
-### 2. Have the board sign up, then verify
+### 2. Bootstrap the first board member
 
-Once they've each created an account at `/auth/signup`:
+Have the first board member create and confirm their account at `/auth/signup`. Then run this transaction in the Supabase SQL editor, replacing the address with that exact account email:
 
 ```sql
-select email, role from public.members;
+begin;
+
+insert into public.members (user_id, email, full_name, role)
+select user_id, email, full_name, 'board'::public.member_role
+from public.membership_requests
+where lower(email) = lower('replace-me@umich.edu')
+  and requested_role = 'board'
+  and status = 'pending';
+
+update public.membership_requests
+set status = 'approved',
+    reviewed_by = (select id from public.members where lower(email) = lower('replace-me@umich.edu')),
+    reviewed_at = now()
+where lower(email) = lower('replace-me@umich.edu')
+  and status = 'pending';
+
+commit;
 ```
 
-Every board member must appear with `role = 'board'`. If someone is missing, or shows up as anything else, stop and fix it before opening signup to applicants.
+Verify that exactly one active board member now exists:
 
-> **The trap:** the allowlist is only consulted **at signup**, and the matched row is consumed. If someone signs up *before* they're allowlisted, they get **no `members` row** — and inserting them into the allowlist afterwards will **not** retroactively fix them, because the trigger already ran. They must be allowlisted first and then sign up (delete the stray user in Supabase → Auth → Users and have them re-register).
+```sql
+select email, role from public.members where deleted_at is null;
+```
+
+Log in as that account and approve the remaining board/member requests at `/internal/members`.
+
+> **Allowlist timing:** the allowlist is consulted at signup. Someone who signs up first can still submit a request at `/auth/request-access`, but it will use the role they select there rather than a later allowlist entry. Review the requested role carefully before approval.
 
 ### 3. Environment
 

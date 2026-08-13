@@ -18,7 +18,7 @@ export const contact = {
 export const recruitmentCycle = {
   status: "Applications open",
   title: "Fall 2026 recruitment is here.",
-  body: "Follow MECG on Instagram and LinkedIn for updates, and check the schedule below for every event through Bid Night.",
+  body: "Follow MECG on Instagram and LinkedIn for updates, and check the schedule below for public and applicant-facing events.",
   archiveLabel: "Fall 2026 recruitment timeline",
 };
 
@@ -204,15 +204,6 @@ export const recruitmentEvents = [
     body: "Ask questions about the application, events, interviews, or whether MECG is right for you. Submit your application before the deadline.",
   },
   {
-    code: "E07",
-    title: "App Hash",
-    type: "Invite Only",
-    date: "Saturday, September 12",
-    time: "TBD",
-    location: "Mason Hall",
-    body: "An invite-only activity as part of the application review process.",
-  },
-  {
     code: "E08",
     title: "Speed Dating",
     type: "Invite Only",
@@ -229,15 +220,6 @@ export const recruitmentEvents = [
     time: "6:00 - 7:30 PM",
     location: "CCCB 2460",
     body: "Work with others on a simple consulting-style problem. We care about how you think and collaborate.",
-  },
-  {
-    code: "E10",
-    title: "Group Hash",
-    type: "Invite Only",
-    date: "Monday, September 14",
-    time: "7:30 - 9:30 PM",
-    location: "Mason Hall 1449",
-    body: "An invite-only group activity as part of the application review process.",
   },
   {
     code: "E11",

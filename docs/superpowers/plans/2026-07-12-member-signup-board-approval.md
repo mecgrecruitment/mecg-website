@@ -247,12 +247,12 @@ update public.members
 - [ ] **Step 3: Reset the local database and verify seeding succeeds**
 
 Run: `npm run db:reset`
-Expected: completes without error, ending with the standard `supabase db reset` success output (seed script runs to completion, including the later sections that join on `public.members` for `annie.callam@umich.edu`, e.g. `recruitment_cycles`, `application_questions`, `candidates` — these would silently no-op or fail if the members grant above didn't work, so a clean full-success run is the signal here).
+Expected: completes without error, ending with the standard `supabase db reset` success output (seed script runs to completion, including the later sections that join on `public.members` for `board01.test@umich.edu`, e.g. `recruitment_cycles`, `application_questions`, `candidates` — these would silently no-op or fail if the members grant above didn't work, so a clean full-success run is the signal here).
 
 - [ ] **Step 4: Run the existing RLS smoke test and verify it still passes**
 
 Run: `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/tests/rls_phase0.sql`
-Expected: prints its `PASS` lines through to the end, no `FAIL` exception, no `ERROR` (this file reads `public.members` for `annie.callam@umich.edu`, `committee.test@umich.edu`, `member.test@umich.edu` — proving the seeded accounts are still real members, not stuck pending).
+Expected: prints its `PASS` lines through to the end, no `FAIL` exception, no `ERROR` (this file reads `public.members` for `board01.test@umich.edu`, `committee.test@umich.edu`, `member.test@umich.edu` — proving the seeded accounts are still real members, not stuck pending).
 
 - [ ] **Step 5: Commit**
 
@@ -368,7 +368,7 @@ With the local stack running (`npm run dev` + `supabase start`, DB already reset
 1. Sign up a fresh account (`/auth/signup`) with an email you've added to `invite_allowlist` locally (e.g. `insert into public.invite_allowlist (email, role) values ('manual-check@umich.edu', 'recruitment_committee');` via psql, then confirm the account's email — local Supabase auto-confirms or use the Inbucket/mail trap at `http://127.0.0.1:54324`).
 2. Log in as that account. Expect: redirected to `/apply/dashboard` (not `/internal`), with the orange "Your board membership request is pending review..." banner visible above the dashboard content.
 3. Click "View request status." — lands on `/auth/request-access` showing the same pending status (existing page, unmodified).
-4. Log in as a seeded board account (`annie.callam@umich.edu` / `password123`) at `/internal/members`, approve the pending request for `manual-check@umich.edu`.
+4. Log in as a seeded board account (`board01.test@umich.edu` / `password123`) at `/internal/members`, approve the pending request for `manual-check@umich.edu`.
 5. Log out, log back in as `manual-check@umich.edu`. Expect: redirected to `/internal` (now a real member), dashboard banner no longer applicable.
 
 - [ ] **Step 6: Commit**

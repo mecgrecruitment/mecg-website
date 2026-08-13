@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "audit:sensitive": "bash scripts/audit-sensitive.sh",
     "audit": "bash scripts/audit-loop.sh --once",
     "audit:loop": "bash scripts/audit-loop.sh",
     "test:e2e": "E2E_LOCAL_HTTP=1 npm run build && E2E_LOCAL_HTTP=1 playwright test",

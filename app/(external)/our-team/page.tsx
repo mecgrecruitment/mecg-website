@@ -19,7 +19,6 @@ type TeamMember = {
   role: string;
   image?: string | null;
   linkedin?: string | null;
-  email?: string | null;
 };
 
 const people = (teamData.people || []) as TeamMember[];
@@ -87,9 +86,6 @@ function MemberCard({ member }: { member: TeamMember }) {
         <div className="mt-5 flex flex-wrap gap-2">
           {member.linkedin ? (
             <a href={member.linkedin} target="_blank" rel="noreferrer" className="focus-ring inline-flex min-h-11 items-center rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">LinkedIn</a>
-          ) : null}
-          {member.email ? (
-            <a href={`mailto:${member.email}`} className="focus-ring inline-flex min-h-11 items-center rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-[var(--orange)] hover:text-white">Email</a>
           ) : null}
         </div>
       </div>

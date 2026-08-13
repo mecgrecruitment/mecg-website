@@ -51,10 +51,30 @@ test("all public routes render without HTTP or horizontal-overflow failures", as
     expect(response?.status(), `${route} returned an error`).toBeLessThan(400);
     await expect(page.locator("body"), `${route} rendered no content`).not.toBeEmpty();
 
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-    );
-    expect(overflow, `${route} overflows the viewport`).toBeLessThanOrEqual(1);
+    const { overflow, offenders } = await page.evaluate(() => {
+      const viewportWidth = document.documentElement.clientWidth;
+      return {
+        overflow: document.documentElement.scrollWidth - viewportWidth,
+        offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${
+                element.classList.length ? `.${Array.from(element.classList).join(".")}` : ""
+              }`,
+              left: Math.round(rect.left),
+              right: Math.round(rect.right),
+              width: Math.round(rect.width),
+            };
+          })
+          .filter(({ left, right }) => left < -1 || right > viewportWidth + 1)
+          .slice(0, 8),
+      };
+    });
+    expect(
+      overflow,
+      `${route} overflows the viewport; offenders: ${JSON.stringify(offenders)}`
+    ).toBeLessThanOrEqual(1);
   }
 });
 
@@ -65,6 +85,16 @@ test("authentication uses email and password without OAuth controls", async ({ p
   await expect(page.getByLabel("Password")).toBeVisible();
   await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
   await expect(page.getByText(/Google|OAuth/i)).toHaveCount(0);
+});
+
+test("public pages omit private hash details and individual email addresses", async ({ page }) => {
+  await page.goto("/prospective-members");
+  await expect(page.getByText(/App Hash|Group Hash/i)).toHaveCount(0);
+
+  await page.goto("/our-team");
+  const emailLinks = page.locator('a[href^="mailto:"]');
+  await expect(emailLinks).toHaveCount(1);
+  await expect(emailLinks).toHaveAttribute("href", "mailto:mecg-board@umich.edu");
 });
 
 test("signed-out visitors cannot open protected workspaces", async ({ page }) => {

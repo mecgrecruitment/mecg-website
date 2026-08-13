@@ -5,7 +5,7 @@
 
 begin;
 
-select set_config('test.board_uid', (select id::text from auth.users where email = 'annie.callam@umich.edu'), false);
+select set_config('test.board_uid', (select id::text from auth.users where email = 'board01.test@umich.edu'), false);
 select set_config('test.committee_uid', (select id::text from auth.users where email = 'committee.test@umich.edu'), false);
 select set_config('test.committee_mid', (select id::text from public.members where email = 'committee.test@umich.edu'), false);
 select set_config('test.cand_id', (select id::text from public.candidates where per_cycle_seq = 1), false);

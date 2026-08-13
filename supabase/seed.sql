@@ -7,16 +7,16 @@
 
 -- ── 1. Invite allowlist (gate for the auth.users inserts below) ──────────────
 insert into public.invite_allowlist (email, role, notes) values
-  ('annie.callam@umich.edu',      'board', 'PLACEHOLDER EMAIL — replace per CON-8 · President'),
-  ('nandini.tatiwala@umich.edu',  'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP External'),
-  ('abby.osterhart@umich.edu',    'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Internal'),
-  ('jandy.arias@umich.edu',       'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Recruitment'),
-  ('blake.stark@umich.edu',       'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Consulting'),
-  ('sumedha.katti@umich.edu',     'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Consulting'),
-  ('maya.menon@umich.edu',        'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Education'),
-  ('luciano.delcarpio@umich.edu', 'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Education'),
-  ('selena.cooper@umich.edu',     'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Finance'),
-  ('angela.yang@umich.edu',       'board', 'PLACEHOLDER EMAIL — replace per CON-8 · VP Marketing'),
+  ('board01.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · President'),
+  ('board02.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP External'),
+  ('board03.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Internal'),
+  ('board04.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Recruitment'),
+  ('board05.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Consulting'),
+  ('board06.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Consulting'),
+  ('board07.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Education'),
+  ('board08.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Education'),
+  ('board09.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Finance'),
+  ('board10.test@umich.edu', 'board', 'SYNTHETIC TEST ACCOUNT · VP Marketing'),
   ('committee.test@umich.edu',    'recruitment_committee', 'Local test account'),
   ('member.test@umich.edu',       'general_member',        'Local test account');
 
@@ -30,16 +30,16 @@ insert into public.invite_allowlist (email, role, notes) values
 -- Token columns are empty strings, not NULL — GoTrue scans crash on NULLs.
 with new_users (email, full_name) as (
   values
-    ('annie.callam@umich.edu',      'Annie Callam'),
-    ('nandini.tatiwala@umich.edu',  'Nandini Tatiwala'),
-    ('abby.osterhart@umich.edu',    'Abby Osterhart'),
-    ('jandy.arias@umich.edu',       'Jandy Arias'),
-    ('blake.stark@umich.edu',       'Blake Stark'),
-    ('sumedha.katti@umich.edu',     'Sumedha Katti'),
-    ('maya.menon@umich.edu',        'Maya Menon'),
-    ('luciano.delcarpio@umich.edu', 'Luciano del Carpio'),
-    ('selena.cooper@umich.edu',     'Selena Cooper'),
-    ('angela.yang@umich.edu',       'Angela Yang'),
+    ('board01.test@umich.edu', 'Annie Callam'),
+    ('board02.test@umich.edu', 'Nandini Tatiwala'),
+    ('board03.test@umich.edu', 'Abby Osterhart'),
+    ('board04.test@umich.edu', 'Jandy Arias'),
+    ('board05.test@umich.edu', 'Blake Stark'),
+    ('board06.test@umich.edu', 'Sumedha Katti'),
+    ('board07.test@umich.edu', 'Maya Menon'),
+    ('board08.test@umich.edu', 'Luciano del Carpio'),
+    ('board09.test@umich.edu', 'Selena Cooper'),
+    ('board10.test@umich.edu', 'Angela Yang'),
     ('committee.test@umich.edu',    'Committee Test'),
     ('member.test@umich.edu',       'Member Test')
 )
@@ -105,7 +105,7 @@ update public.members
 insert into public.recruitment_cycles (name, is_active, is_open_rush, created_by)
 select 'Fall 2026', true, false, m.id
 from public.members m
-where m.email = 'annie.callam@umich.edu';
+where m.email = 'board01.test@umich.edu';
 
 -- ── 5. Application questions (prompts from the current /apply form) ──────────
 insert into public.application_questions (cycle_id, key, prompt, input_type, required, sort_order)
@@ -124,7 +124,7 @@ where rc.name = 'Fall 2026';
 insert into public.rubric_versions (cycle_id, stage, version_number, label, is_active, created_by)
 select rc.id, 'applied', 1, 'Fall 2026 Application v1 (placeholder)', true, m.id
 from public.recruitment_cycles rc
-join public.members m on m.email = 'annie.callam@umich.edu'
+join public.members m on m.email = 'board01.test@umich.edu'
 where rc.name = 'Fall 2026';
 
 insert into public.rubric_criteria (rubric_version_id, name, description, weight, display_order)
@@ -157,7 +157,7 @@ insert into public.rubric_versions (cycle_id, stage, version_number, label, is_a
 select rc.id, s.stage::public.candidate_stage, 1,
        'Fall 2026 ' || s.stage || ' v1 (placeholder)', true, m.id
 from public.recruitment_cycles rc
-join public.members m on m.email = 'annie.callam@umich.edu'
+join public.members m on m.email = 'board01.test@umich.edu'
 cross join (values ('speed_dating'), ('group_case'), ('interview')) as s (stage)
 where rc.name = 'Fall 2026';
 

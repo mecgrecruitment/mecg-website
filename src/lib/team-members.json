@@ -3,77 +3,66 @@
   "people_count": 10,
   "image_count": 12,
   "linkedin_count": 10,
-  "email_count": 11,
   "people": [
     {
       "name": "Annie Callam",
       "role": "President",
       "image": "/images/team/annie-callam.webp",
-      "linkedin": "https://www.linkedin.com/in/ana-callam-413bb5274/",
-      "email": "aicallam@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/ana-callam-413bb5274/"
     },
     {
       "name": "Nandini Tatiwala",
       "role": "VP External",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/nandini-tatiwala/",
-      "email": "tnandini@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/nandini-tatiwala/"
     },
     {
       "name": "Abby Osterhart",
       "role": "VP Internal",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/abigailosterhart/",
-      "email": "aoste@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/abigailosterhart/"
     },
     {
       "name": "Jandy Arias",
       "role": "VP Recruitment",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/jandy-arias/",
-      "email": "jandyari@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/jandy-arias/"
     },
     {
       "name": "Blake Stark",
       "role": "VP Consulting",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/blakeastark",
-      "email": "starkb@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/blakeastark"
     },
     {
       "name": "Sumedha Katti",
       "role": "VP Consulting",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/sumedha-katti/",
-      "email": "skatti@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/sumedha-katti/"
     },
     {
       "name": "Maya Menon",
       "role": "VP Education",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/mayamenon28",
-      "email": "mayameno@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/mayamenon28"
     },
     {
       "name": "Luciano del Carpio",
       "role": "VP Education",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/luciano-del-carpio/",
-      "email": "ldelcarp@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/luciano-del-carpio/"
     },
     {
       "name": "Selena Cooper",
       "role": "VP Finance",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/selena-cooper/",
-      "email": "selenaco@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/selena-cooper/"
     },
     {
       "name": "Angela Yang",
       "role": "VP Marketing",
       "image": null,
-      "linkedin": "https://www.linkedin.com/in/anngelayang/",
-      "email": "angely@umich.edu"
+      "linkedin": "https://www.linkedin.com/in/anngelayang/"
     }
   ]
 }

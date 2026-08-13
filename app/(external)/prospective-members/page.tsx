@@ -94,6 +94,7 @@ export default function ProspectiveMembersPage() {
               height={1013}
               sizes="(min-width: 1024px) 1400px, 100vw"
               className="h-auto w-full"
+              style={{ width: "100%", height: "auto" }}
             />
           </div>
         </div>

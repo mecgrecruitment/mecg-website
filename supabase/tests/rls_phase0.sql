@@ -9,12 +9,12 @@
 begin;
 
 -- Stash seeded identities in GUCs (psql vars don't interpolate into DO blocks).
-select set_config('test.board_uid',     (select id::text from auth.users where email = 'annie.callam@umich.edu'), false);
+select set_config('test.board_uid',     (select id::text from auth.users where email = 'board01.test@umich.edu'), false);
 select set_config('test.committee_uid', (select id::text from auth.users where email = 'committee.test@umich.edu'), false);
 select set_config('test.member_uid',    (select id::text from auth.users where email = 'member.test@umich.edu'), false);
 select set_config('test.cand_id',       (select id::text from public.candidates where per_cycle_seq = 1), false);
 select set_config('test.rubric_id',     (select id::text from public.rubric_versions limit 1), false);
-select set_config('test.board_mid',     (select id::text from public.members where email = 'annie.callam@umich.edu'), false);
+select set_config('test.board_mid',     (select id::text from public.members where email = 'board01.test@umich.edu'), false);
 
 -- Setup: a submitted scorecard by the board member on C01 (as superuser).
 insert into public.score_submissions (candidate_id, evaluator_id, stage, rubric_version_id)
