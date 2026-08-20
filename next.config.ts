@@ -57,6 +57,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/team", destination: "/our-team", permanent: true },
       { source: "/services", destination: "/client-services", permanent: true },
+      { source: "/about", destination: "/#who-we-are", permanent: true },
+      { source: "/socials", destination: "/contact", permanent: true },
       {
         source: "/recruitment",
         destination: "/prospective-members",

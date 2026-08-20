@@ -1,11 +1,9 @@
 export const navLinks = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
   { label: "Our Team", href: "/our-team" },
   { label: "Client Services", href: "/client-services" },
   { label: "Prospective Members", href: "/prospective-members" },
-  { label: "Socials", href: "/socials" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export const contact = {
@@ -16,9 +14,9 @@ export const contact = {
 };
 
 export const recruitmentCycle = {
-  status: "Applications open",
+  status: "Schedule coming soon",
   title: "Fall 2026 recruitment",
-  body: "Event dates and locations are listed below. Follow Instagram or LinkedIn for schedule changes.",
+  body: "Dates, times, and locations will be published here once they are confirmed. Follow Instagram or LinkedIn for announcements.",
   archiveLabel: "Fall 2026 recruitment timeline",
 };
 

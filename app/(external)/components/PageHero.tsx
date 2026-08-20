@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 type PageHeroProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: ReactNode;
   description: string;
   children?: ReactNode;
@@ -19,19 +19,17 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section
-      className={`page-hero grid-bg relative isolate overflow-hidden px-5 md:px-8 ${
-        compact ? "pb-16 pt-36 md:pb-24 md:pt-44" : "flex min-h-[78svh] items-end pb-20 pt-40 md:pb-28 md:pt-48"
+      className={`page-hero relative isolate overflow-hidden border-b border-white/10 px-5 md:px-8 ${
+        compact ? "pb-14 pt-32 md:pb-20 md:pt-40" : "flex min-h-[58svh] items-end pb-16 pt-36 md:pb-24 md:pt-44"
       }`}
     >
       <div className={`page-hero-glow page-hero-glow--${tone}`} aria-hidden="true" />
       <div className="container relative z-10">
-        <p className="annotation annotation-accent" data-reveal>
-          {eyebrow}
-        </p>
-        <h1 className="display-xl mt-6 max-w-7xl text-white" data-split>
+        {eyebrow ? <p className="text-sm font-semibold text-[var(--orange-soft)]" data-reveal>{eyebrow}</p> : null}
+        <h1 className="font-display max-w-5xl text-5xl font-semibold tracking-[-0.045em] text-white md:text-7xl" data-split>
           {title}
         </h1>
-        <div className="mt-8 grid max-w-5xl gap-8 border-t border-white/12 pt-7 md:grid-cols-[1fr_auto] md:items-end">
+        <div className="mt-7 grid max-w-5xl gap-8 md:grid-cols-[1fr_auto] md:items-end">
           <p className="max-w-3xl text-lg leading-relaxed text-white/62 md:text-xl" data-reveal>
             {description}
           </p>
@@ -41,4 +39,3 @@ export function PageHero({
     </section>
   );
 }
-

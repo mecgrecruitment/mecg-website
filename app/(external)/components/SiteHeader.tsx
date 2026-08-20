@@ -75,20 +75,17 @@ export default function SiteHeader() {
           <Link href="/" className="focus-ring flex min-h-11 shrink-0 items-center gap-3">
             <GearLogo className="h-8 w-8 text-[var(--orange)]" />
             <div>
-              <p className="font-display text-lg font-bold uppercase tracking-[0.24em] text-white">
+              <p className="font-display text-lg font-semibold tracking-[0.14em] text-white">
                 MECG
-              </p>
-              <p className="annotation text-[0.55rem]! tracking-[0.34em]!">
-                EST. 2023 — ANN ARBOR
               </p>
             </div>
           </Link>
 
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] xl:flex"
+            className="hidden items-center gap-7 text-sm font-medium xl:flex"
           >
-            {navLinks.map((link, i) => {
+            {navLinks.map((link) => {
               const active = pathname === link.href;
               return (
                 <a
@@ -99,9 +96,6 @@ export default function SiteHeader() {
                     active ? "text-white" : "text-white/55 hover:text-white"
                   }`}
                 >
-                  <span className="mr-1.5 text-[0.55rem] text-[var(--orange)]/70">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
                   {link.label}
                   <span
                     className={`absolute -bottom-0.5 left-0 h-px w-full origin-left bg-[var(--orange)] transition-transform duration-300 ${
@@ -178,10 +172,7 @@ export default function SiteHeader() {
                 transform: open ? "none" : "translateY(18px)",
               }}
             >
-              <span className="annotation annotation-accent">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="font-display text-4xl font-bold uppercase tracking-[-0.04em] text-white group-hover:text-[var(--orange)]">
+              <span className="font-display text-4xl font-semibold tracking-[-0.04em] text-white group-hover:text-[var(--orange)]">
                 {link.label}
               </span>
             </a>

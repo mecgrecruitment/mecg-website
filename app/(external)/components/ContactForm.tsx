@@ -57,6 +57,7 @@ export function ContactForm() {
       >
         Send message
       </button>
+      <p className="text-sm text-white/45">This opens your email app with the message filled in.</p>
     </form>
   );
 }

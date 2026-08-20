@@ -7,12 +7,10 @@ import { siteUrl } from "./site";
 // stays out until consent-backed content ships.
 const routes: Array<[path: string, priority: number]> = [
   ["/", 1],
-  ["/about", 0.8],
   ["/client-services", 0.8],
   ["/prospective-members", 0.8],
   ["/our-team", 0.7],
   ["/contact", 0.7],
-  ["/socials", 0.5],
   ["/trek", 0.4],
 ];
 
