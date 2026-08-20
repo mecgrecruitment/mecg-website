@@ -18,16 +18,18 @@ export default async function InternalLayout({
   const canRecruit = member.role === "recruitment_committee" || member.role === "board";
   const isBoard = member.role === "board";
 
+  // Ordered by daily operator frequency (applicants → scoring → hash → …).
+  // Scoring is committee+ only (blind scorecards); general members stay on Members.
+  // /internal/calendar, /speed-dating, /candidates, /admin redirect into these.
   const nav = [
     { href: "/internal", label: "Overview", show: true },
-    { href: "/internal/scoring", label: "Scoring", show: true },
     { href: "/internal/applicants", label: "Applicants", show: canRecruit },
-    { href: "/internal/calendar", label: "Calendar", show: canRecruit },
-    { href: "/internal/events", label: "Check-ins", show: canRecruit },
+    { href: "/internal/scoring", label: "Scoring", show: canRecruit },
     { href: "/internal/hash", label: "Hash", show: canRecruit },
     { href: "/internal/members", label: "Members", show: true },
-    { href: "/internal/emails", label: "Emails", show: isBoard },
+    { href: "/internal/events", label: "Events", show: canRecruit },
     { href: "/internal/audit", label: "Audit", show: isBoard },
+    { href: "/internal/emails", label: "Emails", show: isBoard },
   ].filter((item) => item.show);
 
   return (

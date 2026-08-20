@@ -32,7 +32,7 @@ export function ContactForm() {
       className="panel grid gap-4 rounded-[2rem] p-7 md:p-10"
       data-reveal
     >
-      <p className="annotation annotation-accent">Transmission form</p>
+      <p className="annotation annotation-accent">Message the board</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
           <span className="annotation !text-white/45">Full name</span>

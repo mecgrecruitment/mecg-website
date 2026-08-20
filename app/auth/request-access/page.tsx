@@ -6,7 +6,7 @@ import { AuthShell } from "@/components/portal/AuthShell";
 
 const STATUS_COPY: Record<string, string> = {
   pending: "Your request is pending board review. We'll email you once it's decided.",
-  approved: "You're approved. Log out and back in to enter the member portal.",
+  approved: "You're approved. Log out and back in to open the member workspace.",
   denied: "Your previous request wasn't approved. You can submit a new one below.",
 };
 
@@ -20,7 +20,9 @@ export default async function RequestAccessPage({
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
-    redirect("/auth/login?next=/auth/request-access&message=Member access requires the configured account service.");
+    redirect(
+      "/auth/login?next=/auth/request-access&message=Member+access+needs+the+account+service+configured."
+    );
   }
   const supabase = await createClient();
 
@@ -55,67 +57,72 @@ export default async function RequestAccessPage({
   return (
     <AuthShell
       eyebrow="Internal membership"
-      title="Request access."
-      description="Internal recruitment tools are limited to current MECG members. A board member verifies each request before access is activated."
+      title="Request member access."
+      description="You're already signed in with your @umich.edu account. Board reviews each request before internal tools unlock."
     >
-        <p className="eyebrow">Member access</p>
-        <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">Confirm your role.</h2>
-        <p className="mt-4 text-white/55">
-          Current members and board can request access to the internal recruitment portal.
-          A board member reviews every request.
+      <p className="eyebrow">Member access</p>
+      <h2 className="font-display mt-4 text-4xl font-bold uppercase tracking-[-0.05em] md:text-5xl">
+        Ask the board.
+      </h2>
+      <p className="mt-4 text-white/55">
+        Signed in as <strong className="text-white">{user.email}</strong>. Pick the
+        role you need; a board member approves or denies.
+      </p>
+
+      {params.message && (
+        <p className="mt-6 rounded-[1rem] border border-white/10 bg-white/[0.05] p-4 text-white/70">
+          {params.message}
         </p>
+      )}
 
-        {params.message && (
-          <p className="mt-6 rounded-[1rem] border border-white/10 bg-white/[0.05] p-4 text-white/70">
-            {params.message}
-          </p>
-        )}
+      {params.error && (
+        <p className="mt-6 rounded-[1rem] border border-red-400/40 bg-red-500/10 p-4 text-red-100">
+          {params.error}
+        </p>
+      )}
 
-        {params.error && (
-          <p className="mt-6 rounded-[1rem] border border-red-400/40 bg-red-500/10 p-4 text-red-100">
-            {params.error}
-          </p>
-        )}
+      {status && (
+        <p className="mt-6 rounded-[1rem] border border-[var(--orange)]/40 bg-[var(--orange)]/10 p-4 text-white/80">
+          {STATUS_COPY[status]}
+        </p>
+      )}
 
-        {status && (
-          <p className="mt-6 rounded-[1rem] border border-[var(--orange)]/40 bg-[var(--orange)]/10 p-4 text-white/80">
-            {STATUS_COPY[status]}
-          </p>
-        )}
+      {showForm && (
+        <form action={requestMembership} className="panel mt-8 grid gap-4 rounded-[2rem] p-7">
+          <label className="grid gap-2">
+            <span className="text-sm font-bold">Full name</span>
+            <input
+              name="full_name"
+              required
+              defaultValue={defaultName}
+              className="portal-field focus-ring"
+            />
+          </label>
 
-        {showForm && (
-          <form action={requestMembership} className="panel mt-8 grid gap-4 rounded-[2rem] p-7">
-            <label className="grid gap-2">
-              <span className="text-sm font-bold">Full name</span>
-              <input
-                name="full_name"
-                required
-                defaultValue={defaultName}
-                className="portal-field focus-ring"
-              />
-            </label>
+          <label className="grid gap-2">
+            <span className="text-sm font-bold">Requested role</span>
+            <select
+              name="requested_role"
+              defaultValue="member"
+              className="portal-field focus-ring bg-[var(--navy-900)]"
+            >
+              <option value="member">Recruitment Committee Member</option>
+              <option value="board">Board</option>
+            </select>
+          </label>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-bold">Requested role</span>
-              <select
-                name="requested_role"
-                defaultValue="member"
-                className="portal-field focus-ring bg-[var(--navy-900)]"
-              >
-                <option value="member">Recruitment Committee Member</option>
-                <option value="board">Board</option>
-              </select>
-            </label>
+          <button className="button-primary focus-ring cursor-pointer">
+            Submit request
+          </button>
+        </form>
+      )}
 
-            <button className="button-primary focus-ring cursor-pointer">
-              Submit request
-            </button>
-          </form>
-        )}
-
-        <a href="/apply/dashboard" className="mt-6 inline-block text-sm text-white/54 hover:text-white">
-          Back to your dashboard.
-        </a>
+      <a
+        href="/apply/dashboard"
+        className="mt-6 inline-block text-sm text-white/54 hover:text-white"
+      >
+        Back to applicant dashboard.
+      </a>
     </AuthShell>
   );
 }

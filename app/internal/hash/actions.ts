@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireBoard, requireCommittee } from "@/lib/auth";
+import { firstError } from "@/lib/auth/schema";
+import { recordHashDecisionSchema, submitHashVoteSchema } from "@/lib/internal/schema";
 
 // Board opens the cycle's hash session and enrolls every member as a participant
 // so committee can vote (votes RLS requires participant + active session).
@@ -19,6 +21,17 @@ export async function startHashSession() {
     redirect("/internal/hash?error=No active recruitment cycle.");
   }
 
+  // One live session at a time — avoid a second insert that looks like it worked.
+  const { data: existing } = await supabase
+    .from("hash_sessions")
+    .select("id")
+    .eq("is_active", true)
+    .maybeSingle();
+  if (existing) {
+    redirect("/internal/hash?error=A hash session is already active.");
+  }
+
+  // Anonymous-by-default (PRD ATS-45). Do not flip visibility here.
   const { data: session, error } = await supabase
     .from("hash_sessions")
     .insert({
@@ -67,19 +80,21 @@ export async function startHashSession() {
 
 export async function submitHashVote(formData: FormData) {
   await requireCommittee();
-  const supabase = await createClient();
-
-  const sessionId = String(formData.get("session_id") || "");
-  const candidateId = String(formData.get("candidate_id") || "");
-  const value = String(formData.get("vote") || "");
-  if (!sessionId || !candidateId || !["advance", "cut", "discuss"].includes(value)) {
-    redirect("/internal/hash?error=Candidate and vote are required.");
+  const parsed = submitHashVoteSchema.safeParse({
+    session_id: formData.get("session_id"),
+    candidate_id: formData.get("candidate_id"),
+    vote: formData.get("vote"),
+  });
+  if (!parsed.success) {
+    redirect(`/internal/hash?error=${encodeURIComponent(firstError(parsed))}`);
   }
 
+  const supabase = await createClient();
+
   const { error } = await supabase.rpc("submit_hash_vote", {
-    p_session_id: sessionId,
-    p_candidate_id: candidateId,
-    p_value: value as "advance" | "cut" | "discuss",
+    p_session_id: parsed.data.session_id,
+    p_candidate_id: parsed.data.candidate_id,
+    p_value: parsed.data.vote,
   });
   if (error) {
     redirect(`/internal/hash?error=${encodeURIComponent(error.message)}`);
@@ -91,22 +106,25 @@ export async function submitHashVote(formData: FormData) {
 // snapshot), set the candidate's status, and log the move to 'decided'.
 export async function recordDecision(formData: FormData) {
   await requireBoard();
+  const parsed = recordHashDecisionSchema.safeParse({
+    session_id: formData.get("session_id"),
+    candidate_id: formData.get("candidate_id"),
+    decision: formData.get("decision"),
+    rationale: formData.get("rationale"),
+  });
+  if (!parsed.success) {
+    redirect(`/internal/hash?error=${encodeURIComponent(firstError(parsed))}`);
+  }
+
   const supabase = await createClient();
 
-  const sessionId = String(formData.get("session_id") || "");
-  const candidateId = String(formData.get("candidate_id") || "");
-  const value = String(formData.get("decision") || "");
-  const rationale = String(formData.get("rationale") || "").trim();
-  if (!sessionId || !candidateId || !["accepted", "rejected", "waitlisted"].includes(value)) {
-    redirect("/internal/hash?error=Pick a decision.");
-  }
   // The RPC validates session/candidate eligibility, snapshots the latest
   // votes, updates the candidate, and appends the transition in one transaction.
   const { error } = await supabase.rpc("record_hash_decision", {
-    p_session_id: sessionId,
-    p_candidate_id: candidateId,
-    p_value: value as "accepted" | "rejected" | "waitlisted",
-    p_rationale: rationale || undefined,
+    p_session_id: parsed.data.session_id,
+    p_candidate_id: parsed.data.candidate_id,
+    p_value: parsed.data.decision,
+    p_rationale: parsed.data.rationale,
   });
   if (error) {
     redirect(`/internal/hash?error=${encodeURIComponent(error.message)}`);

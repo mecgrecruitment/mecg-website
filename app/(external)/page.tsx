@@ -10,9 +10,9 @@ import {
 import HeroGears from "./components/HeroGears";
 import { SectionHeading } from "./components/SectionHeading";
 
-const title = "MECG — Michigan Engineering Consulting Group";
+const title = "MECG | Michigan Engineering Consulting Group";
 const description =
-  "Multifaceted. Driven. Inclusive. MECG is a pro-bono, student-led consulting organization at the University of Michigan, open to students of every major.";
+  "Pro-bono, student-led consulting at the University of Michigan. Open to every major.";
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -24,99 +24,81 @@ export const metadata: Metadata = {
 const proof = [
   { value: `${clients.length}+`, label: "Client engagements" },
   { value: `${services.length}`, label: "Consulting capabilities" },
-  { value: "10–12", label: "Weeks per engagement" },
+  { value: "10-12", label: "Weeks per engagement" },
   { value: "All", label: "Majors welcome" },
 ];
 
 const communityStory = [
   {
-    src: "/images/community/community-12.jpg",
-    alt: "Three MECG members taking a selfie while walking through Chicago",
-    label: "Beyond campus",
-    title: "Experiences, shared.",
-    description:
-      "The relationships built on project teams extend into trips, professional exploration, and the moments between the itinerary.",
-    position: "center 44%",
-  },
-  {
     src: "/images/community/community-52.jpg",
     alt: "Two MECG members wearing club hoodies outdoors at night",
     label: "Identity",
-    title: "A team you carry with you.",
+    title: "Club gear, same standard.",
     description:
-      "A shared standard of curiosity, generosity, and follow-through gives MECG its identity long after a project ends.",
+      "Show up, help each other, follow through. That holds after a project ends.",
     position: "center 56%",
   },
   {
     src: "/images/community/community-32.jpg",
     alt: "MECG members gathered outdoors in Michigan colors",
     label: "Campus life",
-    title: "Rooted at Michigan.",
+    title: "Different majors, same roster.",
     description:
-      "Members bring different majors, experiences, and perspectives together—and still make time to enjoy campus as one community.",
+      "Members study across campus and still make time to meet.",
     position: "center 58%",
   },
   {
     src: "/images/community/community-40.jpg",
     alt: "A large group of MECG members dressed for a formal social gathering",
     label: "Community",
-    title: "A network that feels human.",
+    title: "Outside the project room.",
     description:
-      "MECG pairs professional ambition with the kind of friendships and shared memories that make an organization worth returning to.",
+      "Socials and formals sit next to client work on the calendar.",
     position: "center 48%",
-  },
-  {
-    src: "/images/community/community-16.jpg",
-    alt: "Three MECG members spending time together in a campus study space",
-    label: "Everyday moments",
-    title: "Built between meetings.",
-    description:
-      "Some of the strongest connections happen informally: studying, catching up, and making room for each other in a busy week.",
-    position: "center 55%",
   },
   {
     src: "/images/community/community-63.jpg",
     alt: "MECG members posing in front of the McKinsey & Company sign during a firm visit",
     label: "Industry exposure",
-    title: "Real firms, real access.",
+    title: "Firm visits before recruiting.",
     description:
-      "Treks put members face to face with the firms they're aiming for—asking real questions, in the room, well before recruiting season.",
+      "Treks put members in offices they care about, with time to ask questions in the room.",
     position: "center 42%",
   },
   {
     src: "/images/community/community-62.jpg",
     alt: "A large group of MECG members in business attire posing in front of Cloud Gate in Chicago",
     label: "On the road",
-    title: "Chicago, in blazers.",
+    title: "Chicago trek photo.",
     description:
-      "The annual trek turns a weekend into a crash course: office visits, alumni conversations, and a city's worth of shared memories.",
+      "Past trek weekend: office visits and alumni conversations. Future dates publish when confirmed.",
     position: "center 50%",
   },
   {
     src: "/images/community/community-73.jpg",
     alt: "The incoming MECG board standing together as their names are introduced on screen",
     label: "Leadership",
-    title: "A new board, sworn in.",
+    title: "Board transition each year.",
     description:
-      "Every year, a new slate of members steps up to run the organization—and inherits the responsibility of keeping it worth joining.",
+      "A new board takes responsibility for the next cycle of projects and recruitment.",
     position: "center 40%",
   },
   {
     src: "/images/community/community-70.jpg",
     alt: "MECG members gathered around a firepit under string lights at night",
     label: "Off the clock",
-    title: "Firelight, not fluorescents.",
+    title: "Retreat nights.",
     description:
-      "Retreats and off-campus nights are where the titles fall away and the friendships that outlast any one project actually form.",
+      "Off-campus time without a deliverable agenda.",
     position: "center 55%",
   },
   {
     src: "/images/community/community-76.jpg",
     alt: "A large group of MECG members seated together at a restaurant dinner",
     label: "Celebrating together",
-    title: "Every year ends with dinner.",
+    title: "End-of-cycle dinners.",
     description:
-      "Formals, banquets, and end-of-cycle dinners give the whole org a reason to sit down together and mark how far the year came.",
+      "Formals and banquets when a cycle closes.",
     position: "center 45%",
   },
 ];
@@ -138,30 +120,27 @@ export default function Home() {
           </p>
 
           <h1 className="display-xl mt-6 max-w-6xl text-white" data-split>
-            Multifaceted.
+            Pro-bono.
             <br />
-            <span className="text-ghost">Driven.</span>
+            <span className="text-ghost">Student-led.</span>
             <br />
-            Inclusive.
+            Open to every major.
           </h1>
 
           <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/68 md:text-xl" data-reveal>
-            An interdisciplinary team turning open-ended questions into useful,
-            actionable work—for clients and for the students doing it.
+            University of Michigan students deliver semester consulting for
+            real clients. Members get project experience. Clients get research,
+            recommendations, and a usable handoff.
           </p>
 
+          {/* Hero budget: brand + headline + one support line + one CTA group only. */}
           <div className="pointer-events-auto mt-10 flex flex-wrap gap-3" data-reveal>
             <a href="/prospective-members" data-magnetic className="button-primary focus-ring">
-              Explore membership
+              Prospective members
             </a>
             <a href="/client-services" data-magnetic className="button-secondary focus-ring">
-              Work with MECG
+              Client services
             </a>
-          </div>
-
-          <div className="mt-12 flex items-center gap-4" data-reveal>
-            <span className="annotation text-white/42">Scroll to inspect</span>
-            <span className="h-px w-20 bg-white/18" aria-hidden="true" />
           </div>
         </div>
       </section>
@@ -189,8 +168,8 @@ export default function Home() {
         <div className="container">
           <SectionHeading
             eyebrow="Fig. 01 — One organization, four forms"
-            title={<>Built to compound.</>}
-            description="MECG connects learning, real project work, professional growth, and community. Each part makes the others stronger."
+            title={<>Four pillars.</>}
+            description="Professional development, education, client projects, and community. Same roster for each."
           />
 
           <div className="mt-14 grid gap-3 lg:grid-cols-4" data-reveal-group>
@@ -215,8 +194,8 @@ export default function Home() {
         <div className="container">
           <SectionHeading
             eyebrow="Fig. 02 — Engagement model"
-            title={<>From ambiguity to action.</>}
-            description="A semester-long consulting process with a clear scope, close client collaboration, and deliverables designed to be used after the final presentation."
+            title={<>Meet, scope, build, share.</>}
+            description="A 10-12 week engagement with a defined scope, client check-ins, and deliverables meant for use after the final presentation."
             inverted
           />
 
@@ -240,10 +219,10 @@ export default function Home() {
 
           <div className="mt-14 flex flex-wrap gap-3">
             <a href="/client-services" className="button-dark focus-ring" data-magnetic>
-              See how projects work
+              Client services
             </a>
             <a href="/contact" className="button-paper focus-ring">
-              Start a conversation
+              Contact
             </a>
           </div>
         </div>
@@ -253,8 +232,8 @@ export default function Home() {
         <div className="container">
           <SectionHeading
             eyebrow="Fig. 03 — Consulting capabilities"
-            title={<>Different problems. One rigorous approach.</>}
-            description="Our teams combine structured thinking with the technical and creative range of students across the University of Michigan."
+            title={<>Five service areas.</>}
+            description="Strategy, operations, analytics, product, and marketing. Teams draw on students across UMich."
           />
           <div className="mt-14 grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-5">
             {services.map((service) => (
@@ -280,7 +259,7 @@ export default function Home() {
         <div className="container">
           <SectionHeading
             eyebrow="Fig. 05 — Quick answers"
-            title={<>Know before you start.</>}
+            title={<>FAQs.</>}
           />
           <div className="mt-10 grid gap-4" data-reveal-group>
             {faqs.map((faq) => (

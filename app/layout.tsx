@@ -28,26 +28,26 @@ const mono = Space_Mono({
 });
 
 const description =
-  "MECG is a pro-bono, student-led consulting organization at the University of Michigan. We deliver strategy, operations, and research projects for real clients while training students of every major in consulting.";
+  "MECG is a pro-bono, student-led consulting group at the University of Michigan. Open to every major. Strategy, operations, analytics, product, and marketing for real clients.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "MECG — Michigan Engineering Consulting Group",
+    default: "MECG | Michigan Engineering Consulting Group",
     template: "%s | MECG",
   },
   description,
   openGraph: {
     type: "website",
     siteName: "MECG",
-    title: "MECG — Michigan Engineering Consulting Group",
+    title: "MECG | Michigan Engineering Consulting Group",
     description,
     url: "/",
     locale: "en_US",
   },
   twitter: {
     card: "summary",
-    title: "MECG — Michigan Engineering Consulting Group",
+    title: "MECG | Michigan Engineering Consulting Group",
     description,
   },
 };

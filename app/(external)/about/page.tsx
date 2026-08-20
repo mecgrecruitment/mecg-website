@@ -58,23 +58,23 @@ const lifeAtMecgPhotos = [
 
 const title = "About";
 const description =
-  "The four pillars behind MECG — professional development, education, project experience, and community — plus a welcome from our president and the story of how MECG was founded at Michigan in 2023.";
+  "MECG is a pro-bono, student-led consulting group founded at UMich in 2023. Four pillars: professional development, education, project experience, and community.";
 
 const principles = [
   {
     index: "01",
     title: "Open by design",
-    body: "Consulting should not be limited by major, prior experience, or familiarity with business language.",
+    body: "Any major. Prior consulting experience is not required.",
   },
   {
     index: "02",
     title: "Learn by doing",
-    body: "Education becomes more useful when members can apply it to a real question with a real client.",
+    body: "Education sticks when it meets a real client question.",
   },
   {
     index: "03",
     title: "Grow together",
-    body: "Strong work comes from people who challenge, support, and genuinely know one another.",
+    body: "Teams challenge and support each other on and off projects.",
   },
 ];
 
@@ -122,8 +122,14 @@ export default function AboutPage() {
     <main className="grid gap-16 pb-16">
       <PageHero
         eyebrow="Sheet 02 — About MECG"
-        title={<>An engineering mindset.<br />{" "}<span className="text-ghost">A human organization.</span></>}
-        description="MECG was created to make consulting education, meaningful project work, and a close interdisciplinary community accessible to students across Michigan."
+        title={
+          <>
+            About MECG.
+            <br />{" "}
+            <span className="text-ghost">Student-led at Michigan.</span>
+          </>
+        }
+        description="Founded in 2023 at the University of Michigan. Pro-bono consulting, open to every major."
         tone="blue"
       />
 
@@ -132,13 +138,14 @@ export default function AboutPage() {
           <div>
             <p className="annotation annotation-accent">Fig. 01 — Why MECG exists</p>
             <h2 className="display mt-5 max-w-5xl text-5xl uppercase text-white md:text-7xl">
-              More ways in.<br />More range at the table.
+              Consulting practice
+              <br />
+              without a major gate.
             </h2>
           </div>
           <p className="max-w-xl text-lg leading-8 text-white/58">
-            MECG gives students across Michigan a practical entry point into consulting:
-            learn the craft, contribute to client work, and grow alongside an
-            interdisciplinary team.
+            Learn the craft, staff client projects, and work with students from
+            across campus.
           </p>
         </div>
       </section>
@@ -163,7 +170,7 @@ export default function AboutPage() {
             Fig. 02 — Four Pillars
           </p>
           <h2 className="font-display mt-5 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
-           WHAT SHAPES
+            WHAT SHAPES
             <br />
             MECG.
           </h2>
@@ -194,7 +201,7 @@ export default function AboutPage() {
                 {clients.length}+
               </p>
               <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[var(--orange-soft)]">
-                Client projects delivered
+                Client projects listed
               </p>
             </div>
             <div data-reveal>
@@ -211,11 +218,28 @@ export default function AboutPage() {
         <div className="container grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <ImagePanel src="/images/about/president-welcome.webp" alt="Annie Callam, President of MECG" />
           <TextPanel label="President's Welcome" title="President's Welcome">
-            <p>Welcome to the Michigan Engineering Consulting Group. MECG brings together students who are curious about difficult problems, eager to learn, and generous with one another.</p>
-            <p>Members build practical skills through education, mentorship, and client engagements spanning strategy, operations, analytics, product development, and marketing. Just as importantly, they learn how to listen, collaborate, and communicate across disciplines.</p>
-            <p>That range of perspectives is central to who we are. Students do not need a particular major or a pre-existing consulting vocabulary to contribute; they need curiosity, follow-through, and a willingness to grow with the team.</p>
-            <p>Whether you are considering membership or looking for a thoughtful student team to support your organization, I hope this site gives you a clear sense of how MECG works. We would be glad to hear from you.</p>
-            <p className="pt-2 text-white/78">Best,<br />Annie Callam<br />President of MECG, 2026</p>
+            <p>
+              Michigan Engineering Consulting Group is a student-led, pro-bono
+              consulting organization at UMich. Members work client problems and
+              learn how to listen, collaborate, and communicate across majors.
+            </p>
+            <p>
+              Project work covers strategy, operations, analytics, product, and
+              marketing. Education and mentorship sit alongside those engagements.
+            </p>
+            <p>
+              You do not need a particular major or consulting vocabulary to
+              contribute. Curiosity and follow-through matter more.
+            </p>
+            <p>
+              For membership or a client engagement, use Contact. The board reads
+              every message.
+            </p>
+            <p className="pt-2 text-white/78">
+              Annie Callam
+              <br />
+              President of MECG, 2026
+            </p>
           </TextPanel>
         </div>
       </section>
@@ -223,10 +247,20 @@ export default function AboutPage() {
       <section className="px-5 md:px-8">
         <div className="container grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <TextPanel label="Our History" title="Our History">
-            <p>Michigan Engineering Consulting Group was founded in 2023 by Jonathan Fay, a Mechanical Engineering student, and Aaryan Singh, an Industrial and Operations Engineering student. Their goal was to create a place where students could explore consulting while growing professionally, personally, and socially.</p>
-            <p>MECG welcomed its first member cohort in Winter 2024. From the beginning, the organization was designed for students across majors and experience levels—not only those who already knew the language of business.</p>
-            <p>As MECG grew, members began working on technical and business-focused client questions, learning through workshops and mentorship, visiting firms, and building cross-disciplinary teams.</p>
-            <p>That founding idea still guides the organization today: combine analytical range with human connection, and give students room to build a path that feels like their own.</p>
+            <p>
+              Jonathan Fay (Mechanical Engineering) and Aaryan Singh (Industrial
+              and Operations Engineering) founded MECG in 2023 so students could
+              practice consulting while growing professionally and socially.
+            </p>
+            <p>
+              The first member cohort started in Winter 2024. The org was built
+              for students across majors and experience levels, not only people
+              who already spoke business language.
+            </p>
+            <p>
+              Since then, members have staffed client projects, run workshops,
+              visited firms, and built cross-disciplinary teams.
+            </p>
           </TextPanel>
           <ImagePanel src="/images/about/founders-history.webp" alt="MECG Founders Jonathan Fay and Aaryan Singh" />
         </div>
@@ -236,8 +270,8 @@ export default function AboutPage() {
         <div className="container">
           <SectionHeading
             eyebrow="Fig. 03 — Life at MECG"
-            title="On the record, and off it."
-            description="Treks, retreats, formals, and everything between—the parts of MECG that don't show up in a client deliverable."
+            title="Photos from the roster."
+            description="Treks, retreats, formals, and socials. The parts that sit next to client deliverables."
           />
           <div className="mt-10">
             <PhotoStrip photos={lifeAtMecgPhotos} />

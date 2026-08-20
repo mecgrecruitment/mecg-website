@@ -4,12 +4,14 @@ import { createHash, randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { requireApplicant } from "@/lib/auth";
+import { firstError } from "@/lib/auth/schema";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
   applyFieldsSchema,
+  parseResumeFile,
   responseSchemaFor,
-  RESUME_MAX_BYTES,
   RESUME_MIME,
   type ApplyQuestion,
 } from "@/lib/apply/schema";
@@ -20,8 +22,9 @@ function bail(message: string): never {
 
 // Authenticated applicant submission. The email is taken from the verified
 // session (never the form), so my_application()
-// — which matches on auth.email() — can later unlock the dashboard. The
-// service-role admin client performs the upload + transactional RPC.
+// — which matches on auth.email() — can later unlock the dashboard.
+// Cycle/question reads use user-scoped SECURITY DEFINER RPCs; service-role
+// is reserved for resume Storage + submit_application only.
 export async function submitApplication(formData: FormData) {
   const applicant = await requireApplicant(); // signed-in non-member
   const email = applicant.email;
@@ -35,53 +38,34 @@ export async function submitApplication(formData: FormData) {
     linkedin_url: formData.get("linkedin_url") ?? "",
   });
   if (!parsed.success) {
-    bail(parsed.error.issues[0]?.message ?? "Fix the highlighted fields and resubmit.");
+    bail(firstError(parsed));
   }
   const fields = parsed.data;
 
   const humanVerified = await verifyTurnstile(formData.get("cf-turnstile-response"));
   if (!humanVerified) {
-    bail("Verification failed. Please try again.");
+    bail("Verification failed. Refresh the page, complete the check, and try again.");
   }
 
-  const resume = formData.get("resume");
-  if (
-    !(resume instanceof File) ||
-    resume.size === 0 ||
-    resume.type !== RESUME_MIME ||
-    !resume.name.toLowerCase().endsWith(".pdf")
-  ) {
-    bail("Upload your resume as a PDF.");
+  const resumeResult = parseResumeFile(formData.get("resume"));
+  if (!resumeResult.ok) {
+    bail(resumeResult.message);
   }
-  if (resume.size > RESUME_MAX_BYTES) {
-    bail("Resume must be 10MB or smaller.");
-  }
+  const resume = resumeResult.file;
 
-  // Applicants can't read cycles/questions under RLS, so use the admin client
-  // for the read + the transactional submit (service-role).
-  const admin = createAdminClient();
-
-  const { data: cycle } = await admin
-    .from("recruitment_cycles")
-    .select("id, applications_open_at, applications_close_at")
-    .eq("is_active", true)
-    .maybeSingle();
-  const now = new Date();
-  const open =
-    cycle &&
-    (!cycle.applications_open_at || new Date(cycle.applications_open_at) <= now) &&
-    (!cycle.applications_close_at || new Date(cycle.applications_close_at) > now);
-  if (!open) {
-    bail("Applications are not open right now.");
+  // Least-privilege reads: JWT session client + DEFINER RPCs (not service-role).
+  const supabase = await createClient();
+  const { data: cycleId, error: cycleError } = await supabase.rpc("get_open_apply_cycle");
+  if (cycleError || !cycleId) {
+    bail("Applications are not open right now. Check prospective-members for dates.");
   }
 
-  const { data: questionRows, error: questionsError } = await admin
-    .from("application_questions")
-    .select("key, prompt, required")
-    .eq("cycle_id", cycle.id)
-    .order("sort_order");
+  const { data: questionRows, error: questionsError } = await supabase.rpc(
+    "list_apply_questions",
+    { p_cycle_id: cycleId }
+  );
   if (questionsError) {
-    bail("Something went wrong submitting your application. Try again in a moment.");
+    bail("Something went wrong loading the application questions. Try again in a moment.");
   }
   const questions: ApplyQuestion[] = questionRows ?? [];
 
@@ -97,6 +81,10 @@ export async function submitApplication(formData: FormData) {
     }
   }
 
+  // Service-role only past this point: Storage has no authenticated write
+  // policies, and submit_application is revoked from authenticated.
+  const admin = createAdminClient();
+
   // Upload first, insert second (EX-57 cleanup contract).
   const candidateId = randomUUID();
   const resumePath = `${candidateId}/${randomUUID()}.pdf`;
@@ -104,7 +92,7 @@ export async function submitApplication(formData: FormData) {
     .from("resumes")
     .upload(resumePath, resume, { contentType: RESUME_MIME });
   if (uploadError) {
-    bail("Could not save your resume. Try again in a moment.");
+    bail("Could not save your resume. Use a PDF under 10MB and try again.");
   }
 
   // Real client IP (not the applicant id — that's per-account, not per-device,
@@ -117,7 +105,7 @@ export async function submitApplication(formData: FormData) {
   const { data: outcome, error: rpcError } = await admin.rpc("submit_application", {
     p_candidate_id: candidateId,
     p_ip_hash: ipHash,
-    p_cycle_id: cycle.id,
+    p_cycle_id: cycleId,
     p_full_name: fields.full_name,
     p_email: email,
     p_phone: fields.phone || "",
@@ -128,7 +116,15 @@ export async function submitApplication(formData: FormData) {
     p_responses: responses,
   });
 
-  if (rpcError || (outcome !== "ok" && outcome !== "duplicate")) {
+  if (rpcError) {
+    await admin.storage.from("resumes").remove([resumePath]);
+    if (rpcError.message.includes("rate_limited")) {
+      bail("Too many submissions from your network today. Try again tomorrow.");
+    }
+    bail("Something went wrong submitting your application. Try again in a moment.");
+  }
+
+  if (outcome !== "ok" && outcome !== "duplicate") {
     await admin.storage.from("resumes").remove([resumePath]);
     bail("Something went wrong submitting your application. Try again in a moment.");
   }

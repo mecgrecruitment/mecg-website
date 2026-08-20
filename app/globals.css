@@ -192,6 +192,12 @@ summary {
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Paper surfaces: accent orange alone is ~2.3:1 on --paper (fails non-text 3:1).
+ * Use orange-dark so focus remains visible on light sections. */
+.sheet .focus-ring:focus-visible {
+  outline-color: var(--orange-dark);
+}
+
 .skip-link {
   position: fixed;
   left: 1rem;
@@ -688,9 +694,9 @@ summary {
 /* Interactive timeline — vertical (scroll-scrubbed) or horizontal (static)
  * rail with nodes, always rendered on `.sheet` (paper) sections. Marker
  * travel + node fill are driven by [data-timeline] in MotionProvider.tsx.
- * Under reduced motion / no-JS, [data-timeline]'s ScrollTriggers never run
- * (gated the same way as every other primitive in MotionProvider), so nodes
- * simply render in their default unfilled-ring state — never broken. */
+ * Under reduced motion / no-JS, scroll scrubbing never runs (same gate as
+ * every other primitive in MotionProvider), so nodes stay in their default
+ * unfilled-ring state — never broken. */
 [data-timeline-track] {
   background: var(--paper-rule);
   border-radius: 1px;
@@ -725,10 +731,10 @@ summary {
 }
 
 /*
- * Scroll reveals (DS-39b/c) are driven by [data-reveal] / [data-reveal-group]
- * via GSAP ScrollTrigger in MotionProvider.tsx — scroll-triggered, once:true,
- * Lenis-synced. No CSS keyframe reveals: elements stay visible by default and
- * are only hidden inside a reduced-motion-guarded gsap.matchMedia scope.
+ * Scroll reveals (DS-39b/c): WAAPI via MotionProvider ([data-reveal],
+ * [data-reveal-group], [data-split]). Elements stay visible by default (SSR /
+ * no-JS / reduced-motion). Above-fold targets are not animated so LCP text is
+ * never opacity-hidden after hydration. See MotionProvider attribute guide.
  */
 
 /* ---------------------------------------------------------------------------
@@ -738,7 +744,8 @@ summary {
  * and disabled or static under reduced motion / print.
  * ------------------------------------------------------------------------- */
 
-/* Film grain — SVG turbulence tile, fixed over everything, barely-there. */
+/* Film grain — SVG turbulence tile, fixed over everything, barely-there.
+ * Animation is decorative; static grain remains on coarse / reduced-motion. */
 .grain::after {
   content: "";
   position: fixed;
@@ -747,7 +754,12 @@ summary {
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: 0.05;
-  animation: grain-shift 0.9s steps(2) infinite;
+}
+
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .grain::after {
+    animation: grain-shift 0.9s steps(2) infinite;
+  }
 }
 
 @keyframes grain-shift {
@@ -802,15 +814,16 @@ summary {
   font-size: clamp(3.4rem, 11.5vw, 11.5rem);
 }
 
-/* Ghost type — stroked, unfilled display lines for depth layers. */
+/* Ghost type — stroked, unfilled display lines for depth layers.
+ * Stroke ~0.48 composites ≈4.8:1 on navy (large-text AA). Decorative only. */
 .text-ghost {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(247, 249, 255, 0.4);
+  -webkit-text-stroke: 1px rgba(247, 249, 255, 0.48);
 }
 
 .text-ghost-accent {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(245, 130, 58, 0.5);
+  -webkit-text-stroke: 1px rgba(245, 130, 58, 0.62);
 }
 
 /* Paper sheet — the inverted light section ("drawing sheet"). */
@@ -824,8 +837,16 @@ summary {
   color: var(--paper);
 }
 
-/* Kinetic type lines (data-split) — masked while GSAP owns them. JS adds the
- * class, so no-JS and reduced-motion users always see static type. */
+/* Annotations on paper must use on-paper tokens (light faint fails on --paper). */
+.sheet .annotation {
+  color: var(--on-paper-muted);
+}
+
+.sheet .annotation-accent {
+  color: var(--orange-dark);
+}
+
+/* data-split is a reveal alias — no SplitText masking in the current provider. */
 .split-mask .split-line-wrap {
   overflow: hidden;
   display: block;
@@ -899,8 +920,10 @@ summary {
   }
 }
 
-/* Scroll-HUD gear — fixed bottom-right progress dial (rotated by JS). */
+/* Scroll-HUD gear — fixed bottom-right progress dial (rotated by JS).
+ * Desktop + fine pointer only: on phones it steals attention and scroll work. */
 .hud-gear {
+  display: none;
   position: fixed;
   right: 1.4rem;
   bottom: 1.4rem;
@@ -911,6 +934,12 @@ summary {
   height: 3rem;
   opacity: 0.85;
   pointer-events: none;
+}
+
+@media (min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hud-gear {
+    display: block;
+  }
 }
 
 @media (min-width: 768px) {
@@ -932,9 +961,8 @@ summary {
 }
 
 /*
- * Reduced motion (PRD §7.7 / NFR-12): every effect resolves instantly to its
- * final visible state. Lenis is additionally never instantiated under reduced
- * motion (see SmoothScroll.tsx).
+ * Reduced motion (PRD §7.7 / NFR-12): CSS animations/transitions collapse.
+ * MotionProvider also early-returns so WAAPI reveals / magnetic / HUD never run.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -955,9 +983,7 @@ summary {
     animation: none;
   }
 
-  .hud-gear {
-    display: none;
-  }
+  /* .hud-gear already gated off under reduced motion via the display media query */
 }
 
 /* Softer global polish — less dramatic, more refined */

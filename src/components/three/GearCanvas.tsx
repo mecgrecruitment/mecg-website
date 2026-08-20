@@ -38,11 +38,12 @@ function FrameDriver({ active }: { active: boolean }) {
 
 /**
  * Performance-guarded WebGL stage for the gear assembly.
- * - DPR clamped to 1.5.
- * - Demand rendering is invalidated at 30fps only while the canvas is on screen
- *   and the tab is visible, instead of running a permanent 60fps loop.
- * - prefers-reduced-motion renders a single static frame, no loop.
- * - Fades in once the first frame is committed, so there is no pop.
+ * - DPR clamped to [1, 1.5].
+ * - frameloop="demand" + FrameDriver @ 30fps only while in-viewport AND tab
+ *   visible; IntersectionObserver + visibilitychange pause offscreen/hidden.
+ * - prefers-reduced-motion: one static pose (GearAssembly animated=false).
+ * - Host fades in on Canvas onCreated; parent HeroGears keeps a sized fallback
+ *   so mount cannot shift layout / block hero text LCP.
  */
 export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }) {
   const hostRef = useRef<HTMLDivElement>(null);

@@ -1745,6 +1745,15 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["member_role"]
       }
+      get_open_apply_cycle: { Args: never; Returns: string }
+      grant_membership_by_email: {
+        Args: {
+          p_email: string
+          p_full_name?: string
+          p_role: Database["public"]["Enums"]["member_role"]
+        }
+        Returns: string
+      }
       has_submitted_for: {
         Args: {
           p_candidate_id: string
@@ -1755,6 +1764,15 @@ export type Database = {
       is_board: { Args: never; Returns: boolean }
       is_committee_or_above: { Args: never; Returns: boolean }
       is_member_or_above: { Args: never; Returns: boolean }
+      list_apply_questions: {
+        Args: { p_cycle_id: string }
+        Returns: {
+          key: string
+          prompt: string
+          required: boolean
+          sort_order: number
+        }[]
+      }
       my_application: {
         Args: never
         Returns: {

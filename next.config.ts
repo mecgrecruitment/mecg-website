@@ -51,6 +51,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Old public aliases → one canonical URL each (308). Soft page redirects
+  // were temporary and left competing bookmarks / SEO signals.
+  async redirects() {
+    return [
+      { source: "/team", destination: "/our-team", permanent: true },
+      { source: "/services", destination: "/client-services", permanent: true },
+      {
+        source: "/recruitment",
+        destination: "/prospective-members",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

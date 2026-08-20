@@ -7,7 +7,7 @@ import { PageHero } from "../components/PageHero";
 
 const title = "Prospective Members";
 const description =
-  "MECG recruits students of all majors. See the recruitment timeline — meet us, apply, interview — plus event dates, FAQs, and what life in the club actually looks like.";
+  "MECG recruitment for UMich students of every major. Timeline, event dates, FAQs, and how to apply through the applicant portal.";
 
 export const metadata: Metadata = {
   title,
@@ -20,22 +20,22 @@ const memberSignals = [
   {
     index: "01",
     title: "Any major",
-    body: "MECG is interdisciplinary by design. Technical, creative, and analytical perspectives all strengthen the work.",
+    body: "Technical, creative, and analytical backgrounds all show up on project teams.",
   },
   {
     index: "02",
     title: "No consulting prerequisite",
-    body: "Recruitment looks for curiosity, collaboration, and follow-through—not a pre-existing consulting vocabulary.",
+    body: "Recruitment looks for curiosity, collaboration, and follow-through.",
   },
   {
     index: "03",
     title: "Learn through practice",
-    body: "Members build skills through education, mentorship, and semester-long client engagements.",
+    body: "Education, mentorship, and semester client engagements.",
   },
   {
     index: "04",
-    title: "Join a community",
-    body: "Project work is one part of MECG. Coffee chats, social events, and shared campus life matter too.",
+    title: "Community calendar",
+    body: "Coffee chats, socials, and shared campus time sit next to project work.",
   },
 ];
 
@@ -44,21 +44,25 @@ export default function ProspectiveMembersPage() {
     <main>
       <PageHero
         eyebrow="Sheet 05 — Prospective Members"
-        title={<>Bring your perspective.<br /> <span className="text-ghost">Build new range.</span></>}
-        description="MECG is open to students of every major who want to explore consulting, contribute to client work, and join an ambitious, supportive community."
+        title={
+          <>
+            Prospective Members.
+            <br /> <span className="text-ghost">Open to every major.</span>
+          </>
+        }
+        description="Explore consulting, staff client work, and join the roster. Fall 2026 recruitment dates are below."
         tone="orange"
       >
-        <div className="flex flex-wrap gap-3">
-          <a href="/apply" data-magnetic className="button-primary focus-ring">Login / Apply</a>
-          <a href="/apply/checkin" className="button-secondary focus-ring">Event check-in</a>
-        </div>
+        <a href="/apply" data-magnetic className="button-primary focus-ring">
+          Login / Apply
+        </a>
       </PageHero>
 
       <section className="section">
         <div className="container">
           <p className="annotation annotation-accent">Fig. 05.1 — Is MECG for me?</p>
           <h2 className="display mt-5 max-w-5xl text-5xl uppercase text-white md:text-7xl">
-            Start with curiosity.
+            What we look for.
           </h2>
           <div className="mt-12 grid gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
             {memberSignals.map((item) => (
@@ -80,16 +84,16 @@ export default function ProspectiveMembersPage() {
             Fig. 05.2 — Where our alumni work
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl">
-            The work carries beyond MECG.
+            Alumni employers collage.
           </h2>
           <p className="mt-6 max-w-2xl text-white/58">
-            Members have gone on to internships and full-time roles at firms across consulting,
-            tech, finance, and engineering.
+            Logos shown with member permission. This is not a placement rate or ranking.
+            A consent-backed placement page is still in progress.
           </p>
           <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white p-6 md:p-10">
             <Image
               src="/images/placement/alumni-employers.jpg"
-              alt="Logos of employers where MECG alumni have interned or worked full-time, including Microsoft, Goldman Sachs, Meta, Tesla, Citadel, Deloitte, Capital One, IBM, JPMorganChase, BlackRock, BCG, Disney, United Airlines, Jane Street, EY, and others"
+              alt="Collage of employer logos shared by MECG alumni with permission"
               width={1800}
               height={1013}
               sizes="(min-width: 1024px) 1400px, 100vw"
@@ -122,7 +126,7 @@ export default function ProspectiveMembersPage() {
             Fig. 05.3 — {recruitmentCycle.archiveLabel}
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
-            What to expect.
+            Recruitment timeline.
           </h2>
 
           <div className="mt-12 max-w-3xl">
@@ -146,7 +150,7 @@ export default function ProspectiveMembersPage() {
             Fig. 05.4 — Questions before applying
           </p>
           <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl">
-            Know what to expect.
+            FAQs.
           </h2>
           <div className="mt-10 grid gap-4" data-reveal-group>
             {faqs.map((faq) => (

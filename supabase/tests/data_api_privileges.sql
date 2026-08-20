@@ -34,6 +34,26 @@ begin
     'public.submit_application(uuid,text,uuid,text,text,text,text,text,text,text,jsonb)',
     'EXECUTE'
   ), 'FAIL: service_role cannot execute submit_application';
+  assert has_function_privilege(
+    'authenticated',
+    'public.get_open_apply_cycle()',
+    'EXECUTE'
+  ), 'FAIL: authenticated cannot execute get_open_apply_cycle';
+  assert has_function_privilege(
+    'authenticated',
+    'public.list_apply_questions(uuid)',
+    'EXECUTE'
+  ), 'FAIL: authenticated cannot execute list_apply_questions';
+  assert not has_function_privilege(
+    'anon',
+    'public.get_open_apply_cycle()',
+    'EXECUTE'
+  ), 'FAIL: anon must not execute get_open_apply_cycle';
+  assert not has_function_privilege(
+    'anon',
+    'public.list_apply_questions(uuid)',
+    'EXECUTE'
+  ), 'FAIL: anon must not execute list_apply_questions';
 
   raise notice 'PASS: Data API relation and function privileges are present';
 end $$;

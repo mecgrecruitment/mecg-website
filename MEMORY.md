@@ -2,6 +2,36 @@
 
 Decision log for the MECG website. Read at the start of every session; never contradict a logged decision without flagging it first.
 
+## Hard stops (open — do not bypass)
+
+These are standing owner constraints. Agents must flag and stop, not improvise around them:
+
+1. **Production Supabase push** — local-first; do not `supabase db push` / apply migrations to hosted/prod without an explicit owner request.
+2. **Trek content** — `/trek` stays an honest "in drafting" surface; do not invent itinerary, dates, or photos.
+3. **Outbound email** — applicant confirmation / transactional send is an external hard stop; do not wire a real ESP or spam club inboxes from local/dev.
+4. **Package manager** — npm + `package-lock.json` only (no Bun/pnpm/yarn migration).
+5. **Art direction** — elevate the locked aesthetic; do not start a new brand system.
+
+## 2026-08-20 — Applicant portal friction cut (apply/check-in)
+What: Mapped create→apply→submit→dashboard→check-in; removed fake progress strip; keep check-in after submit; resume PDF/10MB Zod+client UX; dynamic cycle questions via admin read; human stage/status from `my_application`; next-step check-in errors; surfaced Auth email + post-apply receipt gaps. Turnstile/RLS untouched. typecheck green. No commit.
+Why: Cut apply/check-in friction without inventing backend behavior.
+Rejected: Wiring applicant confirmation email (hard stop); inventing stage timelines beyond DB enums.
+
+## 2026-08-20 — DevX daily-loop hardening
+What: Mapped scripts; added `seed:users`, `db:test`/`test:rls` (SQL runner via **docker exec psql** — `supabase db query` rejects `\set`), `test:role-smoke` (signed-out redirect curl), `verify`; strengthened `check-env.mjs` (CI/process mode, reject localhost URLs, Turnstile pair + refuse public service-role); CI fails on env contract + optional e2e when `E2E_BASE_URL` secret set; Playwright covers `/placement`, canonical aliases, all protected redirect prefixes, signup gated behind `E2E_ALLOW_SIGNUP`/`E2E_BASE_URL`; README 10-minute setup + seed table + 127.0.0.1 callout. Verified: `npm run db:test` → 5/5 PASS on seeded local DB.
+Why: Make the daily loop boring and reliable; cut agent friction on env/auth/RLS discovery.
+Rejected: Bun migration; committing secrets; inventing trek/email/prod push.
+
+## 2026-08-20 — Production readiness checklist (prep only)
+What: Added `docs/LAUNCH-CHECKLIST.md` (Owner/Eng + blocked-on), aligned `.env.example` + `scripts/check-env.mjs` with real required keys and Turnstile pair-on/off rule, README link + Turnstile half-config note, `.gitignore` `!.env.example`. Did not run remote `db push`; did not invent email provider (gap documented).
+Why: Remove launch friction without violating hard stops.
+Rejected: remote migration apply; wiring Resend/Postmark/etc.
+
+## 2026-08-20 — Codebase audit + unslop + QoL pass
+What: Audited against `/Users/rbhavan/projects/mecg-website` (Documents/mecgwebsite was empty). Applied grant_membership_by_email migration, env guards (`src/lib/env.ts`), Zod on internal/checkin FormData actions, portal→/auth/login, calendar→events redirect, homepage/trek/site-content unslop, CI workflow, check-env script, e2e hero/canonical route updates. Verified: lint/typecheck/build green; board login to /internal + members grant UI; public routes 200; protected routes 307→login.
+Why: Full-repo quality pass with computer-use proof and decision trail under `.audit/` (gitignored).
+Rejected: Bun (repo is npm-lockfile); new art direction; production Supabase push; inventing Trek itinerary.
+
 ## 2026-06-10 — Track A2–A3 executed: "Precision Blueprint" redesign with 3D (✅ build green, all routes QA'd)
 What: Full external-site redesign on top of the A1 motion foundation, concept "Precision Blueprint" (site as a living engineering drawing). (1) 3D: three 0.184 + R3F 9.6 + drei 10.7; procedural gear geometry (`src/components/three/gearGeometry.ts`), hero scene = 12-tooth logo gear driving a solid pinion + a wireframe "drawn" ring gear (`GearAssembly.tsx`), scroll advances the drivetrain, pointer tilts it; perf-guarded canvas (`GearCanvas.tsx`: dpr≤1.75, IO+visibility pause, RM static pose) mounted via client-side ssr:false wrapper (`HeroGears.tsx`). (2) MotionProvider v2: SplitText masked line reveals ([data-split], free since GSAP 3.13), [data-parallax], [data-counter] roll-ups, [data-magnetic] CTAs, drafting cursor (dot+ring, fine-pointer only), scroll-HUD gear ([data-hud-gear]); existing [data-reveal] API kept; all inside gsap.matchMedia RM guard. (3) Design system additions in globals.css: film grain (.grain), .annotation/.dim-rule drafting voice, .display-xl (11.5vw), .text-ghost stroke type (opacity 0.4 — 0.22 was illegible over canvas), paper "sheet" tokens (--paper/--on-paper) for inverted sections, marquee, cursor + HUD CSS, all RM-safe. (4) Layout: fixed scroll-aware SiteHeader (client) with mono-numbered nav + full-screen mobile menu; footer = CTA band + link grid + engineering title block + ghost MECG wordmark. (5) All external pages rebuilt to the system (home w/ 3D hero + client marquee + sheet sections; about/services/team/recruitment/placement/contact; trek = designed "in drafting" page since content is still an open input). /apply flow untouched (Turnstile+schema contract preserved); contact form still plain mailto.
 Why: /goal directive "complete redesign, world-class, 3D, awwwards-tier" executed as Track A elevation per the locked no-new-art-direction decision. Verified: tsc clean, `npm run build` green, Playwright screenshots of 9 routes × 2 viewports × 3 scroll states, zero console errors.

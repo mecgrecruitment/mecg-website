@@ -21,12 +21,11 @@ insert into public.invite_allowlist (email, role, notes) values
   ('member.test@umich.edu',       'general_member',        'Local test account');
 
 -- ── 2. Auth users (password: password123) ────────────────────────────────────
--- Direct GoTrue-shaped inserts; the signup-gate trigger passes because the
--- allowlist exists. The AFTER INSERT trigger now creates a *pending*
--- membership_requests row per allowlist match (board approval required —
--- see migration 12) and consumes each allowlist entry; section 3 below
--- grants these seeded accounts member access directly instead, since seed
--- data represents already-approved members, not a pending queue.
+-- Direct GoTrue-shaped inserts; allowlisted emails pass the signup-gate and
+-- get a pending membership_requests row (board approval required — see
+-- migration 12). The applicant account is NOT allowlisted: gate allows any
+-- @umich.edu, and the AFTER INSERT trigger creates no members row — so they
+-- exercise the apply path as a signed-in non-member.
 -- Token columns are empty strings, not NULL — GoTrue scans crash on NULLs.
 with new_users (email, full_name) as (
   values
@@ -41,7 +40,8 @@ with new_users (email, full_name) as (
     ('board09.test@umich.edu', 'Selena Cooper'),
     ('board10.test@umich.edu', 'Angela Yang'),
     ('committee.test@umich.edu',    'Committee Test'),
-    ('member.test@umich.edu',       'Member Test')
+    ('member.test@umich.edu',       'Member Test'),
+    ('applicant.test@umich.edu',    'Applicant Test')
 )
 insert into auth.users (
   id, instance_id, aud, role, email, encrypted_password,

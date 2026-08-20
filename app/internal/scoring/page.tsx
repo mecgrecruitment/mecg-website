@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { requireMember } from "@/lib/auth";
+import { requireCommittee } from "@/lib/auth";
 
 export default async function ScoringHomePage({
   searchParams,
 }: {
   searchParams?: Promise<{ error?: string }>;
 }) {
-  const member = await requireMember();
+  const member = await requireCommittee();
   const params = await searchParams;
 
   const cards = [
@@ -25,7 +25,7 @@ export default async function ScoringHomePage({
     },
     {
       title: "Final Round",
-      body: "Board-only interview scoring and notes.",
+      body: "Board-only interview scoring. Peer scores stay blind until each board member submits.",
       href: "/internal/scoring/final-round",
       show: member.role === "board",
     },
@@ -45,19 +45,27 @@ export default async function ScoringHomePage({
           Select a scoring event.
         </h2>
         <p className="mt-5 max-w-2xl text-white/58">
-          Members only see scoring flows they need. Board can see final round and centralized summaries in Hash Decisions.
+          Each scorecard shows <span className="text-white/80">Not yet submitted</span> or{" "}
+          <span className="text-white/80">Submitted</span>. Peer scores stay blind until you
+          submit that candidate. Board records official outcomes in Hash — not here.
         </p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {cards.filter((card) => card.show).map((card) => (
-          <Link key={card.href} href={card.href} className="panel card-hover rounded-[1.5rem] p-6">
-            <h3 className="font-display text-3xl font-bold uppercase tracking-[-0.05em]">
-              {card.title}
-            </h3>
-            <p className="mt-4 leading-6 text-white/55">{card.body}</p>
-          </Link>
-        ))}
+        {cards
+          .filter((card) => card.show)
+          .map((card) => (
+            <Link
+              key={card.href}
+              href={card.href}
+              className="panel card-hover rounded-[1.5rem] p-6"
+            >
+              <h3 className="font-display text-3xl font-bold uppercase tracking-[-0.05em]">
+                {card.title}
+              </h3>
+              <p className="mt-4 leading-6 text-white/55">{card.body}</p>
+            </Link>
+          ))}
       </section>
     </div>
   );

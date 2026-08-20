@@ -12,6 +12,14 @@ export const emailSchema = z
   .refine((v) => emailPattern.test(v), "Enter a valid email address.")
   .transform((v) => v.toLowerCase());
 
+// Club accounts are @umich.edu (matches apply intake + PRD SEC-4). Used on
+// signup; login/forgot accept any well-formed address so existing sessions
+// still recover if the address was ever non-UMich in a local seed.
+export const umichEmailSchema = emailSchema.refine(
+  (v) => v.endsWith("@umich.edu"),
+  "Use your @umich.edu email."
+);
+
 export const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters.")
@@ -30,7 +38,7 @@ export const loginSchema = z.object({
 
 export const signupSchema = z.object({
   full_name: fullNameSchema,
-  email: emailSchema,
+  email: umichEmailSchema,
   password: passwordSchema,
 });
 

@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireCommittee } from "@/lib/auth";
-
-type Stage = "speed_dating" | "group_case" | "interview";
+import { firstError } from "@/lib/auth/schema";
+import { scoreInputSchema, submitCandidateScoreSchema } from "@/lib/internal/schema";
 
 const STAGE_ROUTE: Record<string, string> = {
   speed_dating: "speed-dating",
@@ -16,18 +16,24 @@ const STAGE_ROUTE: Record<string, string> = {
 // scores row per rubric criterion. RLS requires evaluator_id = me + committee+.
 export async function submitCandidateScore(formData: FormData) {
   const member = await requireCommittee();
+  const parsed = submitCandidateScoreSchema.safeParse({
+    stage: formData.get("stage"),
+    candidate_id: formData.get("candidate_id"),
+    rubric_version_id: formData.get("rubric_version_id"),
+  });
+  if (!parsed.success) {
+    redirect(`/internal/scoring?error=${encodeURIComponent(firstError(parsed))}`);
+  }
+
   const supabase = await createClient();
 
-  const stage = String(formData.get("stage") || "") as Stage;
-  const candidateId = String(formData.get("candidate_id") || "");
-  const rubricVersionId = String(formData.get("rubric_version_id") || "");
-  const route = STAGE_ROUTE[stage] || "";
+  const { stage, candidate_id: candidateId, rubric_version_id: rubricVersionId } = parsed.data;
+  const route = STAGE_ROUTE[stage];
 
-  if (!["speed_dating", "group_case", "interview"].includes(stage) || !candidateId || !rubricVersionId) {
-    redirect("/internal/scoring?error=Missing candidate or rubric.");
-  }
   if (stage === "interview" && member.role !== "board") {
-    redirect("/internal?error=Final round scoring is board only.");
+    redirect(
+      `/internal/scoring?error=${encodeURIComponent("Final round scoring is board only.")}`
+    );
   }
 
   // Range/integer enforcement lives here per the criteria table's own comment
@@ -45,24 +51,26 @@ export async function submitCandidateScore(formData: FormData) {
   const scores: { criterion_id: string; value: number }[] = [];
   for (const [key, raw] of formData.entries()) {
     if (!key.startsWith("criterion_")) continue;
-    const criterionId = key.slice("criterion_".length);
-    const criterion = criteriaById.get(criterionId);
+    const score = scoreInputSchema.safeParse({
+      criterion_id: key.slice("criterion_".length),
+      value: raw,
+    });
+    if (!score.success) {
+      redirect(`/internal/scoring/${route}?error=${encodeURIComponent(firstError(score))}`);
+    }
+
+    const criterion = criteriaById.get(score.data.criterion_id);
     if (!criterion) {
       redirect(`/internal/scoring/${route}?error=Unknown rubric criterion.`);
     }
-    const value = Number(raw);
-    if (
-      !Number.isInteger(value) ||
-      value < criterion.min_score ||
-      value > criterion.max_score
-    ) {
+    if (score.data.value < criterion.min_score || score.data.value > criterion.max_score) {
       redirect(
         `/internal/scoring/${route}?error=${encodeURIComponent(
           `Scores must be whole numbers between ${criterion.min_score} and ${criterion.max_score}.`
         )}`
       );
     }
-    scores.push({ criterion_id: criterionId, value });
+    scores.push(score.data);
   }
   if (scores.length === 0) {
     redirect(`/internal/scoring/${route}?error=Enter at least one score.`);
@@ -80,5 +88,5 @@ export async function submitCandidateScore(formData: FormData) {
     redirect(`/internal/scoring/${route}?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect(`/internal/scoring/${route}?success=Score saved.`);
+  redirect(`/internal/scoring/${route}?success=Scorecard submitted.`);
 }

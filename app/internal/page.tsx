@@ -11,59 +11,66 @@ export default async function InternalDashboardPage({
   const params = await searchParams;
   const canRecruit = member.role === "recruitment_committee" || member.role === "board";
   const isBoard = member.role === "board";
+  // Same frequency order as the header nav so operators land on hot paths first.
   const cards = [
     {
       index: "01",
-      title: "Scoring",
-      body: "Open your assigned speed dating, group case, or final-round scoring work.",
-      href: "/internal/scoring",
-      show: true,
-    },
-    {
-      index: "02",
       title: "Applicants",
-      body: "Review submissions, profile information, current stage, and open-rush attendance.",
+      body: "Review submissions, current stage, and open-rush attendance.",
       href: "/internal/applicants",
       show: canRecruit,
     },
     {
-      index: "03",
-      title: "Calendar & check-ins",
-      body: "See recruitment timing, event codes, and the live attendance feed.",
-      href: "/internal/calendar",
+      index: "02",
+      title: "Scoring",
+      body: "Open assigned speed dating, group case, or final-round scorecards.",
+      href: "/internal/scoring",
       show: canRecruit,
     },
     {
-      index: "04",
-      title: "Hash decisions",
-      body: "Vote on candidates and centralize final board decisions.",
+      index: "03",
+      title: "Hash",
+      body: "Anonymous Advance / Cut / Discuss votes, then board records official decisions.",
       href: "/internal/hash",
       show: canRecruit,
     },
     {
-      index: "05",
+      index: "04",
       title: "Members",
       body: isBoard
-        ? "Approve access requests, review the roster, and assign scorers."
+        ? "Approve access, grant roles, and assign scorers."
         : "View the current internal member roster.",
       href: "/internal/members",
       show: true,
     },
     {
+      index: "05",
+      title: "Events & check-ins",
+      body: "Event schedule, attendance codes, and the live check-in feed.",
+      href: "/internal/events",
+      show: canRecruit,
+    },
+    {
       index: "06",
-      title: "Decision emails",
-      body: "Review recipient groups and open ready-to-send decision drafts.",
-      href: "/internal/emails",
+      title: "Audit log",
+      body: "Append-only history of recruitment and access changes.",
+      href: "/internal/audit",
       show: isBoard,
     },
     {
       index: "07",
-      title: "Audit log",
-      body: "Review the append-only history of recruitment and access changes.",
-      href: "/internal/audit",
+      title: "Decision emails",
+      body: "Build mailto drafts from accepted / waitlisted / rejected groups. Nothing is sent here.",
+      href: "/internal/emails",
       show: isBoard,
     },
   ].filter((card) => card.show);
+
+  // Re-number after role filtering so general members don't see "04" as their only card.
+  const visibleCards = cards.map((card, index) => ({
+    ...card,
+    index: String(index + 1).padStart(2, "0"),
+  }));
 
   return (
     <div className="grid gap-8">
@@ -84,7 +91,7 @@ export default async function InternalDashboardPage({
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card) => (
+        {visibleCards.map((card) => (
           <Link key={card.href} href={card.href} className="panel card-hover rounded-[1.5rem] p-6">
             <p className="font-mono text-sm font-bold text-[var(--orange)]">{card.index}</p>
             <h3 className="font-display mt-8 text-2xl font-bold uppercase tracking-[-0.04em]">

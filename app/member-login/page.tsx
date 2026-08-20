@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
-// Members log in through the unified Supabase auth; login role-routes to /internal.
+// Legacy member-login URL. Deep-link into the unified login with the
+// internal workspace as the post-auth destination.
 export default function MemberLoginEntry() {
-  redirect("/auth/login");
+  redirect("/auth/login?next=/internal");
 }

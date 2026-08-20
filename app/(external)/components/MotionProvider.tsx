@@ -3,6 +3,33 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+/**
+ * Motion attribute guide — when to use which:
+ *
+ * [data-reveal]         One-shot enter (fade/rise). Use on blocks, cards, copy.
+ *                       Optional value "wipe" for a clip wipe. Skip on LCP/hero
+ *                       text that is already above the fold (this provider
+ *                       auto-skips above-fold targets so paint is not delayed).
+ * [data-reveal-group]   Parent of staggered [data-reveal] children (55ms steps).
+ * [data-split]          Alias of [data-reveal] for display headlines. Does NOT
+ *                       split glyphs/lines — keep content SSR-visible; do not
+ *                       expect SplitText masking.
+ * [data-counter]        Numeric roll-up from 0 → parsed text (suffix kept).
+ *                       Quantities only (e.g. "17+"); never years like "2023"
+ *                       (toLocaleString would insert a comma).
+ * [data-magnetic]       Fine-pointer CTA tug only. Never on touch targets as the
+ *                       sole affordance; always pair with a real link/button.
+ * [data-timeline]       Scroll-scrubbed vertical rail: needs track / marker /
+ *                       node children. Static horizontal timelines omit this.
+ * [data-hud-gear]       Fixed progress dial. Desktop-only in CSS; do not reuse
+ *                       for content.
+ *
+ * Not implemented (do not add markup for these): [data-parallax].
+ *
+ * Global gates: prefers-reduced-motion disables all of the above. Magnetic and
+ * the drafting cursor also require (pointer: fine). No-JS = static content.
+ */
+
 type Cleanup = () => void;
 
 function observeOnce(
@@ -24,8 +51,16 @@ function observeOnce(
   return () => observer.disconnect();
 }
 
+/** True when the element is already in the first viewport (protect LCP paint). */
+function isAboveFold(element: Element): boolean {
+  const rect = element.getBoundingClientRect();
+  return rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
+}
+
 function reveal(element: HTMLElement, delay = 0) {
   const wipe = element.dataset.reveal === "wipe";
+  // fill: "forwards" only — avoid fill:"both", which applies opacity:0 before
+  // the first frame and can flash-hide above-fold copy after hydration.
   const animation = element.animate(
     wipe
       ? [
@@ -40,7 +75,7 @@ function reveal(element: HTMLElement, delay = 0) {
       duration: wipe ? 800 : 620,
       delay,
       easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-      fill: "both",
+      fill: "forwards",
     }
   );
   return () => animation.cancel();
@@ -55,12 +90,15 @@ export default function MotionProvider() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reduced.matches) return;
 
+    const finePointer = window.matchMedia("(pointer: fine)");
     const cleanups: Cleanup[] = [];
     const animated = new Set<HTMLElement>();
 
     document.querySelectorAll<HTMLElement>("[data-reveal-group]").forEach((group) => {
       const items = Array.from(group.querySelectorAll<HTMLElement>("[data-reveal]"));
       items.forEach((item) => animated.add(item));
+      // Above-fold groups stay painted; stagger only kicks in on scroll-in.
+      if (isAboveFold(group)) return;
       cleanups.push(
         observeOnce([group], () => {
           items.forEach((item, index) => cleanups.push(reveal(item, index * 55)));
@@ -70,7 +108,7 @@ export default function MotionProvider() {
 
     const reveals = Array.from(
       document.querySelectorAll<HTMLElement>("[data-reveal], [data-split]")
-    ).filter((element) => !animated.has(element));
+    ).filter((element) => !animated.has(element) && !isAboveFold(element));
     cleanups.push(
       observeOnce(reveals, (target) => {
         cleanups.push(reveal(target as HTMLElement));
@@ -98,61 +136,78 @@ export default function MotionProvider() {
       );
     });
 
-    document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((element) => {
-      const onMove = (event: PointerEvent) => {
-        const rect = element.getBoundingClientRect();
-        const x = (event.clientX - rect.left - rect.width / 2) * 0.22;
-        const y = (event.clientY - rect.top - rect.height / 2) * 0.22;
-        element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      };
-      const onLeave = () => {
-        element.style.transform = "translate3d(0, 0, 0)";
-      };
-      element.addEventListener("pointermove", onMove, { passive: true });
-      element.addEventListener("pointerleave", onLeave, { passive: true });
-      cleanups.push(() => {
-        element.removeEventListener("pointermove", onMove);
-        element.removeEventListener("pointerleave", onLeave);
-        element.style.transform = "";
-      });
-    });
-
-    const timelines = Array.from(document.querySelectorAll<HTMLElement>("[data-timeline]"));
-    const hud = document.querySelector<HTMLElement>("[data-hud-gear]");
-    let scrollFrame = 0;
-    const updateScrollEffects = () => {
-      scrollFrame = 0;
-      const viewportCenter = window.innerHeight / 2;
-
-      timelines.forEach((container) => {
-        const track = container.querySelector<HTMLElement>("[data-timeline-track]");
-        const marker = container.querySelector<HTMLElement>("[data-timeline-marker]");
-        if (!track || !marker) return;
-        const rect = container.getBoundingClientRect();
-        const range = Math.max(rect.height, 1);
-        const progress = Math.min(Math.max((viewportCenter - rect.top) / range, 0), 1);
-        marker.style.transform = `translate3d(0, ${progress * Math.max(track.offsetHeight - marker.offsetHeight, 0)}px, 0)`;
-        container.querySelectorAll<HTMLElement>("[data-timeline-node]").forEach((node) => {
-          node.classList.toggle("timeline-node--active", node.getBoundingClientRect().top <= viewportCenter);
+    // Magnetic tug is desktop-pointer only — on touch it fights scroll/tap.
+    if (finePointer.matches) {
+      document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((element) => {
+        const onMove = (event: PointerEvent) => {
+          const rect = element.getBoundingClientRect();
+          const x = (event.clientX - rect.left - rect.width / 2) * 0.22;
+          const y = (event.clientY - rect.top - rect.height / 2) * 0.22;
+          element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        };
+        const onLeave = () => {
+          element.style.transform = "translate3d(0, 0, 0)";
+        };
+        element.addEventListener("pointermove", onMove, { passive: true });
+        element.addEventListener("pointerleave", onLeave, { passive: true });
+        cleanups.push(() => {
+          element.removeEventListener("pointermove", onMove);
+          element.removeEventListener("pointerleave", onLeave);
+          element.style.transform = "";
         });
       });
+    }
 
-      if (hud) {
-        const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-        hud.style.transform = `rotate(${(window.scrollY / maxScroll) * 720}deg)`;
-      }
-    };
-    const queueScrollEffects = () => {
-      if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollEffects);
-    };
-    window.addEventListener("scroll", queueScrollEffects, { passive: true });
-    window.addEventListener("resize", queueScrollEffects, { passive: true });
-    queueScrollEffects();
-    cleanups.push(() => {
-      window.removeEventListener("scroll", queueScrollEffects);
-      window.removeEventListener("resize", queueScrollEffects);
-      cancelAnimationFrame(scrollFrame);
-    });
+    const timelines = Array.from(document.querySelectorAll<HTMLElement>("[data-timeline]"));
+    // HUD is CSS-hidden on small viewports / reduced motion — skip work if absent.
+    const hud = document.querySelector<HTMLElement>("[data-hud-gear]");
+    const hudVisible =
+      Boolean(hud) &&
+      window.matchMedia("(min-width: 768px)").matches &&
+      finePointer.matches;
+
+    if (timelines.length > 0 || hudVisible) {
+      let scrollFrame = 0;
+      const updateScrollEffects = () => {
+        scrollFrame = 0;
+        const viewportCenter = window.innerHeight / 2;
+
+        timelines.forEach((container) => {
+          const track = container.querySelector<HTMLElement>("[data-timeline-track]");
+          const marker = container.querySelector<HTMLElement>("[data-timeline-marker]");
+          if (!track || !marker) return;
+          const rect = container.getBoundingClientRect();
+          const range = Math.max(rect.height, 1);
+          const progress = Math.min(Math.max((viewportCenter - rect.top) / range, 0), 1);
+          marker.style.transform = `translate3d(0, ${progress * Math.max(track.offsetHeight - marker.offsetHeight, 0)}px, 0)`;
+          container.querySelectorAll<HTMLElement>("[data-timeline-node]").forEach((node) => {
+            node.classList.toggle(
+              "timeline-node--active",
+              node.getBoundingClientRect().top <= viewportCenter
+            );
+          });
+        });
+
+        if (hud && hudVisible) {
+          const maxScroll = Math.max(
+            document.documentElement.scrollHeight - window.innerHeight,
+            1
+          );
+          hud.style.transform = `rotate(${(window.scrollY / maxScroll) * 720}deg)`;
+        }
+      };
+      const queueScrollEffects = () => {
+        if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollEffects);
+      };
+      window.addEventListener("scroll", queueScrollEffects, { passive: true });
+      window.addEventListener("resize", queueScrollEffects, { passive: true });
+      queueScrollEffects();
+      cleanups.push(() => {
+        window.removeEventListener("scroll", queueScrollEffects);
+        window.removeEventListener("resize", queueScrollEffects);
+        cancelAnimationFrame(scrollFrame);
+      });
+    }
 
     return () => cleanups.splice(0).forEach((cleanup) => cleanup());
   }, [pathname]);

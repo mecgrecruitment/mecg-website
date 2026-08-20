@@ -6,7 +6,7 @@ import { PageHero } from "../components/PageHero";
 
 const title = "Contact";
 const description =
-  "Open a channel with MECG. Reach the board about recruitment, client projects, partnerships, or general questions — we read everything.";
+  "Contact MECG at mecg-board@umich.edu for recruitment, client projects, or partnerships. One path: the form or that board email.";
 
 export const metadata: Metadata = {
   title,
@@ -16,18 +16,23 @@ export const metadata: Metadata = {
 };
 
 const contactTopics = [
-  ["Student questions", "Recruitment, eligibility, events, and the application process."],
-  ["Client inquiries", "Potential project questions, timing, scope, and engagement fit."],
-  ["Partnerships", "Firm visits, workshops, sponsorships, and community opportunities."],
+  ["Students", "Recruitment, eligibility, events, and the application process."],
+  ["Clients", "Project timing, scope, and engagement fit."],
+  ["Partnerships", "Firm visits, workshops, and sponsorships."],
 ];
 
 export default function ContactPage() {
   return (
     <main>
       <PageHero
-        eyebrow="Sheet 07 — Contact Us"
-        title={<>Start with a question.<br /> <span className="text-ghost">We’ll find the path.</span></>}
-        description="Recruitment, client projects, partnerships, or general questions—the MECG board reads every message and routes it to the right person."
+        eyebrow="Sheet 07 — Contact"
+        title={
+          <>
+            Contact.
+            <br /> <span className="text-ghost">Board email.</span>
+          </>
+        }
+        description="Recruitment, client work, or partnerships. Use the form or email the board. Same inbox."
         tone="blue"
         compact
       />
@@ -38,13 +43,13 @@ export default function ContactPage() {
 
           <aside className="grid content-start gap-5">
             <div className="panel rounded-[2rem] p-7 md:p-9" data-reveal>
-              <p className="annotation annotation-accent">Choose the closest topic</p>
+              <p className="annotation annotation-accent">What to include</p>
               <div className="mt-6 grid gap-5">
-                {contactTopics.map(([title, body], index) => (
-                  <div key={title} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5">
+                {contactTopics.map(([topicTitle, body], index) => (
+                  <div key={topicTitle} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5">
                     <span className="font-mono text-xs font-bold text-[var(--orange)]">0{index + 1}</span>
                     <div>
-                      <h2 className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white">{title}</h2>
+                      <h2 className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white">{topicTitle}</h2>
                       <p className="mt-2 text-sm leading-6 text-white/52">{body}</p>
                     </div>
                   </div>
@@ -61,24 +66,6 @@ export default function ContactPage() {
                 {contact.email}
               </a>
               <p className="mt-6 leading-relaxed text-[var(--on-paper-muted)]">{contact.location}</p>
-            </div>
-
-            <div className="panel rounded-[2rem] p-7 md:p-9" data-reveal>
-              <p className="annotation annotation-accent">Elsewhere</p>
-              <div className="mt-6 grid gap-3">
-                <a href={contact.instagram} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between border-b border-white/10 py-3">
-                  <span className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white group-hover:text-[var(--orange)]">
-                    Instagram
-                  </span>
-                  <span className="annotation">@mecgmichigan ↗</span>
-                </a>
-                <a href={contact.linkedin} target="_blank" rel="noreferrer" className="focus-ring group flex items-center justify-between py-3">
-                  <span className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white group-hover:text-[var(--orange)]">
-                    LinkedIn
-                  </span>
-                  <span className="annotation">MECG ↗</span>
-                </a>
-              </div>
             </div>
           </aside>
         </div>

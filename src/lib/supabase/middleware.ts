@@ -1,10 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Authenticated zones. Public marketing pages, /auth/*, and /portal (the public
-// chooser) are intentionally NOT here. /apply and /apply/create
-// are public redirect-shims into /auth/*, so only the real applicant surfaces
-// (/apply/dashboard|application|checkin) are guarded.
+// Authenticated zones. Public marketing pages, /auth/*, and redirect-shims
+// (/portal, /member-login, /apply, /apply/create) are intentionally NOT here.
+// Only the real authenticated surfaces are guarded; shims bounce into /auth/*
+// or into a guarded path that then sets ?next=.
 const PROTECTED_PREFIXES = [
   "/internal",
   "/apply/dashboard",
@@ -21,8 +21,19 @@ function isProtected(pathname: string): boolean {
 function redirectToLogin(request: NextRequest) {
   const url = request.nextUrl.clone();
   url.pathname = "/auth/login";
+  // Preserve the intended destination so login can return the user there.
   url.searchParams.set("next", request.nextUrl.pathname);
   return NextResponse.redirect(url);
+}
+
+// Forward the matched pathname to Server Components so role gates can build
+// an accurate /auth/login?next=… when middleware did not already bounce.
+function nextWithPathname(request: NextRequest, pathname: string) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 // Refreshes the Supabase auth cookies on every matched request (rotating tokens
@@ -44,10 +55,10 @@ export async function updateSession(request: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) {
     return isProtectedPath
       ? redirectToLogin(request)
-      : NextResponse.next({ request });
+      : nextWithPathname(request, pathname);
   }
 
-  let response = NextResponse.next({ request });
+  let response = nextWithPathname(request, pathname);
 
   const supabase = createServerClient(
     supabaseUrl,
@@ -61,7 +72,9 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request });
+          // Rebuild the response so refreshed cookies land on the outgoing
+          // response while preserving the x-pathname request header.
+          response = nextWithPathname(request, pathname);
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );

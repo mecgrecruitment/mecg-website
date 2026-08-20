@@ -15,10 +15,11 @@ The website and recruitment system for the Michigan Economics Consulting Group. 
 ## Prerequisites
 
 - **Node.js ≥ 20.9** (Next 16's minimum; 22 LTS is fine)
+- **npm** (this repo uses `package-lock.json` — do not switch to Bun/pnpm/yarn)
 - **Supabase CLI** — `brew install supabase/tap/supabase`
 - **Docker** running — the local Supabase stack (Postgres, Auth, Storage) runs in containers
 
-## Local setup
+## 10-minute setup
 
 ```bash
 git clone <this repo> && cd mecg-website
@@ -32,29 +33,71 @@ supabase start
 #   anon key    -> NEXT_PUBLIC_SUPABASE_ANON_KEY
 #   service_role-> SUPABASE_SERVICE_ROLE_KEY
 cp .env.example .env.local
+# Edit .env.local — paste the three keys above. Keep SITE_URL as http://127.0.0.1:3000.
 
+npm run check:env   # fails loudly on missing keys or localhost vs 127.0.0.1 mistakes
+npm run seed:users  # prints every synthetic login
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. (Use `127.0.0.1`, not `localhost` — it's what `NEXT_PUBLIC_SITE_URL` and the Supabase redirect allow-list default to.)
+Open **http://127.0.0.1:3000** — not `http://localhost:3000`.
 
-`supabase/seed.sql` creates synthetic local test logins (password `password123`), including `board01.test@umich.edu` (board), `committee.test@umich.edu` (recruitment committee), and `member.test@umich.edu` (general member).
+### Why `127.0.0.1`, not `localhost`
+
+`NEXT_PUBLIC_SITE_URL` and the Supabase redirect allow-list in `supabase/config.toml` default to `127.0.0.1`. Mixing `localhost` and `127.0.0.1` breaks auth email redirects and cookie host matching. `npm run check:env` rejects `localhost` URLs on purpose.
+
+### Seed users (password `password123` for all)
+
+Created by `supabase start` / `npm run db:reset` via `supabase/seed.sql`. Print anytime with `npm run seed:users`.
+
+| Email | Role |
+| --- | --- |
+| `board01.test@umich.edu` … `board10.test@umich.edu` | board |
+| `committee.test@umich.edu` | recruitment_committee |
+| `member.test@umich.edu` | general_member |
+
+Typical smoke: log in as `board01.test@umich.edu` → `/internal`.
 
 ### Scripts
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Dev server |
+| `npm run check:env` | Verify required keys (`.env.local`, or process env when `CI=true` / `CHECK_ENV_MODE=process`) |
+| `npm run seed:users` | Print synthetic seed logins + role-smoke checklist |
+| `npm run dev` | Dev server (runs `check:env` first) |
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript without emitting files |
-| `npm run audit` | Run lint, typecheck, and a production build once |
-| `npm run audit:loop` | Repeat the audit every 30 seconds (`AUDIT_INTERVAL_SECONDS=60 npm run audit:loop` to change the interval) |
-| `npm run test:e2e` | Build and run Playwright smoke tests locally |
-| `E2E_BASE_URL=https://example.com npm run test:e2e:live` | Run the same smoke tests against a deployment |
+| `npm run verify` | `check:env` + lint + typecheck + build (daily confidence loop) |
+| `npm run audit` | Sensitive scan + lint + typecheck + build once |
+| `npm run audit:loop` | Repeat the audit every 30 seconds (`AUDIT_INTERVAL_SECONDS=60 …`) |
+| `npm run audit:sensitive` | Scan for leaked keys / personal emails |
+| `npm run test:e2e` | Build with `E2E_LOCAL_HTTP=1` and run Playwright against `127.0.0.1:3210` |
+| `npm run test:e2e:live` | Playwright against `E2E_BASE_URL` (no local server) |
+| `npm run test:role-smoke` | curl signed-out redirects for protected prefixes (app must be running) |
 | `npm run db:reset` | Drop + re-apply all migrations and the seed |
 | `npm run db:types` | Regenerate `src/lib/database.types.ts` from the local DB |
+| `npm run db:test` | Run every `supabase/tests/*.sql` against local Supabase |
+| `npm run test:rls` | Run `supabase/tests/rls_phase0.sql` only |
+
+### Database smoke tests (RLS + integrity)
+
+SQL files under `supabase/tests/` are transactional and roll back. They need a **seeded** local Postgres (host `psql` is optional — the runner uses `psql` inside the `supabase_db_*` container because the files use `\set` meta-commands that `supabase db query` rejects):
+
+```bash
+supabase db start       # enough for SQL smokes; or full: supabase start
+npm run db:reset        # if you need a clean re-seed
+npm run db:test         # all SQL smokes
+npm run test:rls        # Phase 0 RLS only
+```
+
+Or one file: `bash scripts/run-db-tests.sh member_signup_approval.sql`.
+
+### Role smoke
+
+1. **Signed-out redirects** (no login): with `npm run dev` up, `npm run test:role-smoke`.
+2. **Logged-in roles** (manual / Playwright later): `npm run seed:users`, then log in as board / committee / member and hit `/internal`.
 
 ## Architecture
 
@@ -69,14 +112,15 @@ proxy.ts                  <- Next 16's middleware; refreshes the session, guards
 src/lib/                  <- auth helpers, Supabase clients, generated DB types, static content
 src/components/
 supabase/migrations/      <- ordered SQL migrations (the schema source of truth)
+supabase/tests/           <- SQL smoke tests (RLS, signup approval, write integrity, privileges)
 ```
 
 ### Auth
 
 Three layers, in order:
 
-1. **`proxy.ts`** (root) — runs on every non-API request. Calls `updateSession()` in `src/lib/supabase/middleware.ts`, which refreshes the Supabase auth cookies and redirects signed-out users away from the protected prefixes (`/internal`, `/apply/dashboard`, `/apply/application`, `/apply/checkin`) to `/auth/login`.
-2. **Role gates** — `requireMember()`, `requireCommittee()`, `requireBoard()` in `src/lib/auth.ts`, called at the top of internal pages/actions. Roles (`board` / `recruitment_committee` / `general_member`) are read from the caller's row in the **`members` table**, never from the JWT. `requireApplicant()` is the applicant-side equivalent (authenticated user with *no* `members` row).
+1. **`proxy.ts`** (root) — runs on every non-API request. Calls `updateSession()` in `src/lib/supabase/middleware.ts`, which refreshes the Supabase auth cookies and redirects signed-out users away from the protected prefixes (`/internal`, `/apply/dashboard`, `/apply/application`, `/apply/checkin`) to `/auth/login?next=<path>`. Legacy entry URLs (`/portal`, `/member-login`, `/apply/create`) are redirect shims into `/auth/login` or `/auth/signup`, not separate auth systems.
+2. **Role gates** — `requireMember()`, `requireCommittee()`, `requireBoard()` in `src/lib/auth.ts`, called at the top of internal pages/actions. Roles (`board` / `recruitment_committee` / `general_member`) are read from the caller's row in the **`members` table**, never from the JWT. `requireApplicant()` is the applicant-side equivalent (authenticated user with *no* `members` row). Signed-in non-members who hit `/internal` go to `/auth/request-access`, not a second login.
 3. **Postgres RLS — this is the actual security boundary.** Layers 1 and 2 only decide routing and rendering; a bug there is a UX bug, a bug in RLS is a breach. All 25 tables have RLS enabled, with policies in `supabase/migrations/20260610000007_rls.sql`.
 
 > **When you add a table, you MUST add RLS policies for it.** A table with RLS enabled and no policy denies everything; a table without RLS is readable by anyone with the anon key.
@@ -87,12 +131,19 @@ Supabase clients: `src/lib/supabase/server.ts` (Server Components / Actions), `c
 
 The schema lives in `supabase/migrations/` as ordered SQL files, applied in filename order. Never edit an applied migration; add a new one (`supabase migration new <name>`).
 
+**Safe local schema loop** (after any migration or seed change — local only; never `db push` to production from this loop):
+
 ```bash
-npm run db:reset   # wipe local DB, re-run every migration, re-seed
-npm run db:types   # regenerate src/lib/database.types.ts (run after any schema change)
+supabase start         # if the local stack is down
+npm run db:reset       # wipe local DB, re-run every migration, re-seed
+npm run db:types       # regenerate src/lib/database.types.ts from --local
+npm run typecheck      # catch drift before you commit
+npm run db:test        # optional: SQL smokes (RLS, privileges, intake reads)
 ```
 
 Storage buckets (`resumes`, `member-photos`) are created in `20260610000008_storage.sql` and are RLS-governed too.
+
+`/apply` intake: cycle + question prompts go through `get_open_apply_cycle` / `list_apply_questions` (authenticated SECURITY DEFINER). The service-role client is only used for resume Storage and `submit_application`.
 
 ## Deployment
 
@@ -110,6 +161,10 @@ Deployed on Vercel. Set these in the Vercel project's environment variables (sam
 In the Supabase dashboard, add the production origin to **Auth → URL Configuration** (Site URL + redirect allow-list) so it matches `NEXT_PUBLIC_SITE_URL` — otherwise confirmation and password-reset links bounce. Locally that list lives in `supabase/config.toml` (`site_url` / `additional_redirect_urls`).
 
 > **Authentication requires the Supabase environment variables.** Public pages degrade to signed-out mode when they are absent, but login and authenticated data cannot work. Set the variables **before** the first deploy.
+
+CI runs lint, typecheck, and build on every PR. Optional Playwright against a deployment runs when the repo secret `E2E_BASE_URL` is set.
+
+Production cutover steps (allowlist, first-board bootstrap, Turnstile, email gap): see `docs/LAUNCH-CHECKLIST.md`.
 
 ## Production go-live
 
@@ -182,3 +237,8 @@ Log in as that account and approve the remaining board/member requests at `/inte
 - **Roles come from the `members` table, not the JWT.** Don't read a role claim off the session.
 - **Run `npm run db:types` after every schema change**, or TypeScript will be quietly lying to you.
 - **Next 16 has breaking changes** vs. what you may know (and vs. what an LLM may confidently tell you). The docs for the installed version ship in `node_modules/next/dist/docs/` — read those.
+- **Hard stops (do not “just do it”):** push migrations to production Supabase without an explicit owner ask; invent Trek itinerary/content; send real outbound email from local/dev.
+
+## Agent / maintainer notes
+
+Read `MEMORY.md` at session start. Honor logged decisions. Open hard stops are also summarized there (prod DB push, trek content, outbound email). Prefer `npm run verify` before handing work back.

@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/auth/schema";
 
 // B1 (PRD §9.1/§11.1): role resolution for the internal zone. RLS is the
 // security boundary (SEC-16) — these helpers only decide routing/rendering.
@@ -26,6 +28,17 @@ export const COMMITTEE_OR_ABOVE: MemberRole[] = [
   "recruitment_committee",
 ];
 
+// Prefer the pathname forwarded by proxy/updateSession; fall back to a
+// sensible default when the header is missing (e.g. direct server-action call).
+async function loginNext(fallback: string): Promise<string> {
+  const h = await headers();
+  return safeNextPath(h.get("x-pathname")) || fallback;
+}
+
+function loginRedirect(next: string): never {
+  redirect(`/auth/login?next=${encodeURIComponent(next)}`);
+}
+
 export async function getMember(): Promise<Member | null> {
   const supabase = await createClient();
 
@@ -48,13 +61,34 @@ export async function getMember(): Promise<Member | null> {
 // member's role must be in the list (pass COMMITTEE_OR_ABOVE for committee
 // surfaces, ["board"] for board-only).
 export async function requireMember(allowed?: MemberRole[]): Promise<Member> {
-  const member = await getMember();
+  const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    loginRedirect(await loginNext("/internal"));
+  }
+
+  const { data: member } = await supabase
+    .from("members")
+    .select("id, full_name, email, role")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  // Signed in but not a member — one account system, no second "member login".
+  // Request access (or use the applicant dashboard) instead of re-authing.
   if (!member) {
-    redirect("/auth/login?message=Member login required.");
+    redirect("/auth/request-access");
   }
   if (allowed && !allowed.includes(member.role)) {
-    redirect("/internal");
+    // Never bounce without a reason — silent /internal redirects look like a broken link.
+    const needed =
+      allowed.length === 1 && allowed[0] === "board"
+        ? "Board access is required for that page."
+        : "Recruitment committee or board access is required for that page.";
+    redirect(`/internal?error=${encodeURIComponent(needed)}`);
   }
 
   return member;
@@ -111,7 +145,8 @@ export async function getNavIdentity(): Promise<NavIdentity | null> {
 }
 
 // Applicant gate: an authenticated user with NO members row. A signed-out user
-// is sent to login; a member is routed to their own portal.
+// is sent to login (with ?next= back to the page they wanted); a member is
+// routed to their own workspace.
 export async function requireApplicant(): Promise<Applicant> {
   const supabase = await createClient();
 
@@ -119,7 +154,7 @@ export async function requireApplicant(): Promise<Applicant> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect("/auth/login?next=/apply/dashboard");
+    loginRedirect(await loginNext("/apply/dashboard"));
   }
 
   const { data: member } = await supabase

@@ -6,7 +6,8 @@ import type { GearFocus } from "@/components/three/types";
 
 // ssr:false must live inside a client boundary in Next 16. The WebGL stage is
 // pure enhancement: nothing is rendered on the server, and the hero reads
-// fully without it (no-JS, slow networks, WebGL-less browsers).
+// fully without it (no-JS, slow networks, WebGL-less browsers). Absolute
+// fallback + delayed enable keep LCP on the SSR headline, not the canvas.
 const GearCanvas = dynamic(() => import("@/components/three/GearCanvas"), {
   ssr: false,
   loading: () => <div className="gear-stage-fallback" aria-hidden="true" />,

@@ -5,7 +5,7 @@ export const navLinks = [
   { label: "Client Services", href: "/client-services" },
   { label: "Prospective Members", href: "/prospective-members" },
   { label: "Socials", href: "/socials" },
-  { label: "Contact Us", href: "/contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export const contact = {
@@ -17,8 +17,8 @@ export const contact = {
 
 export const recruitmentCycle = {
   status: "Applications open",
-  title: "Fall 2026 recruitment is here.",
-  body: "Follow MECG on Instagram and LinkedIn for updates, and check the schedule below for public and applicant-facing events.",
+  title: "Fall 2026 recruitment",
+  body: "Event dates and locations are listed below. Follow Instagram or LinkedIn for schedule changes.",
   archiveLabel: "Fall 2026 recruitment timeline",
 };
 
@@ -26,22 +26,22 @@ export const pillars = [
   {
     index: "01",
     title: "Professional Development",
-    body: "We help members build confidence in consulting, communication, networking, and recruiting through workshops, mentorship, and hands-on practice.",
+    body: "Workshops, mentorship, and practice for consulting skills, communication, networking, and recruiting.",
   },
   {
     index: "02",
     title: "Education",
-    body: "Members learn the basics of consulting, problem solving, analysis, and presentation in a way that is approachable no matter their major or background.",
+    body: "Members learn consulting basics: problem solving, analysis, and presentation. No major prerequisite.",
   },
   {
     index: "03",
     title: "Project Experience",
-    body: "Our teams work with real clients during the semester, turning open-ended questions into research, recommendations, and clear next steps.",
+    body: "Semester teams work with real clients on research, recommendations, and handoff materials.",
   },
   {
     index: "04",
     title: "Community",
-    body: "MECG is also a group of people who want to know each other well. We make space for mentorship, social events, and friendships outside of project work.",
+    body: "Mentorship, social events, and time together outside project work.",
   },
 ];
 
@@ -49,27 +49,27 @@ export const services = [
   {
     index: "01",
     title: "Strategy",
-    body: "We help clients think through growth, positioning, competitors, customers, and practical next steps.",
+    body: "Growth, positioning, competitors, customers, and practical next steps.",
   },
   {
     index: "02",
     title: "Operations & Management",
-    body: "We look at how work gets done and recommend ways to make processes clearer, smoother, or easier to manage.",
+    body: "Process review and recommendations that make work clearer or easier to run.",
   },
   {
     index: "03",
     title: "Data Analytics",
-    body: "We organize information, look for patterns, and turn data into insights that clients can actually use.",
+    body: "Organize data, find patterns, and translate findings into decisions clients can act on.",
   },
   {
     index: "04",
     title: "Product Development",
-    body: "We support early product thinking through user research, feature ideas, customer needs, and launch planning.",
+    body: "Early product work: user research, feature ideas, customer needs, and launch planning.",
   },
   {
     index: "05",
     title: "Marketing",
-    body: "We help clients better understand their audience, refine messaging, and improve how they show up online or in the market.",
+    body: "Audience research, messaging, and how the organization shows up online or in market.",
   },
 ];
 
@@ -77,41 +77,41 @@ export const projectTimeline = [
   {
     step: "01",
     title: "Meet",
-    body: "We start by learning about the client, the organization, and the question they want help answering.",
+    body: "Learn the client, the organization, and the question they want answered.",
   },
   {
     step: "02",
     title: "Scope",
-    body: "Together, we narrow the project into a clear goal, timeline, and set of deliverables.",
+    body: "Agree on a goal, timeline, and deliverables.",
   },
   {
     step: "03",
     title: "Build",
-    body: "The team researches, analyzes, tests ideas, and checks in with the client throughout the semester.",
+    body: "Research, analyze, test ideas, and check in with the client through the semester.",
   },
   {
     step: "04",
     title: "Share",
-    body: "At the end, we present findings, recommendations, and materials the client can use moving forward.",
+    body: "Present findings, recommendations, and materials the client can use after the engagement.",
   },
 ];
 
 export const projectExpectations = [
   {
     title: "Semester-long projects",
-    body: "Most projects run for 10–12 weeks, with regular meetings and check-ins along the way.",
+    body: "Most projects run 10-12 weeks with regular meetings and check-ins.",
   },
   {
     title: "Small project teams",
-    body: "Each project is staffed by a focused team of student consultants with project leadership support.",
+    body: "Each project has a focused student consultant team with project leadership support.",
   },
   {
     title: "Clear deliverables",
-    body: "Clients receive a final presentation, supporting analysis, and recommendations written in plain language.",
+    body: "Clients receive a final presentation, supporting analysis, and plain-language recommendations.",
   },
   {
     title: "Useful next steps",
-    body: "Our goal is not just to make a slide deck. We want clients to leave with ideas they can act on.",
+    body: "The handoff is meant to be used. Clients leave with ideas they can act on.",
   },
 ];
 
@@ -135,19 +135,6 @@ export const clients = [
   { name: "The Store House", term: "Fall 2024", logo: "/images/clients/the-store-house.png" },
 ];
 
-export const teamMembers = [
-  { name: "Annie Callam", role: "President", group: "Executive Board" },
-  { name: "Nandini Tatiwala", role: "VP External", group: "Executive Board" },
-  { name: "Abigail Osterhart", role: "VP Internal", group: "Executive Board" },
-  { name: "Jandy Arias", role: "VP Recruitment", group: "Executive Board" },
-  { name: "Blake Stark", role: "VP Consulting", group: "Executive Board" },
-  { name: "Sumedha Katti", role: "VP Consulting", group: "Executive Board" },
-  { name: "Maya Menon", role: "VP Education", group: "Executive Board" },
-  { name: "Luciano Del Carpio", role: "VP Education", group: "Executive Board" },
-  { name: "Selena Cooper", role: "VP Finance", group: "Executive Board" },
-  { name: "Angela Yang", role: "VP Marketing", group: "Executive Board" },
-];
-
 export const recruitmentEvents = [
   {
     code: "E01",
@@ -156,7 +143,7 @@ export const recruitmentEvents = [
     date: "Tuesday, September 1",
     time: "7:00 - 8:30 PM",
     location: "TBD",
-    body: "Learn what MECG does, how projects work, and what recruitment looks like.",
+    body: "What MECG does, how projects work, and how recruitment runs.",
   },
   {
     code: "E02",
@@ -165,7 +152,7 @@ export const recruitmentEvents = [
     date: "Wednesday, September 2",
     time: "TBD",
     location: "Central Campus",
-    body: "Stop by, meet a few members, and ask anything about MECG.",
+    body: "Meet members and ask questions at the booth.",
   },
   {
     code: "E03",
@@ -174,7 +161,7 @@ export const recruitmentEvents = [
     date: "Tuesday, September 8",
     time: "7:30 PM",
     location: "CCCB 0420",
-    body: "Learn what MECG does, how projects work, and what recruitment looks like.",
+    body: "What MECG does, how projects work, and how recruitment runs.",
   },
   {
     code: "E04",
@@ -183,7 +170,7 @@ export const recruitmentEvents = [
     date: "Wednesday, September 9",
     time: "7:00 - 8:30 PM",
     location: "CCCB 3420",
-    body: "Hear how members have explored consulting, engineering, business, tech, and other paths.",
+    body: "Members discuss paths in consulting, engineering, business, tech, and related fields.",
   },
   {
     code: "E05",
@@ -192,7 +179,7 @@ export const recruitmentEvents = [
     date: "Thursday, September 10",
     time: "6:00 - 7:30 PM",
     location: "CCCB 3420",
-    body: "A casual chance to meet current members and get a better feel for the community.",
+    body: "Informal time with current members.",
   },
   {
     code: "E06",
@@ -201,7 +188,7 @@ export const recruitmentEvents = [
     date: "Friday, September 11",
     time: "TBD",
     location: "TBD",
-    body: "Ask questions about the application, events, interviews, or whether MECG is right for you. Submit your application before the deadline.",
+    body: "Questions on the application, events, or interviews. Submit before the deadline.",
   },
   {
     code: "E08",
@@ -210,7 +197,7 @@ export const recruitmentEvents = [
     date: "Sunday, September 13",
     time: "TBD",
     location: "CCCB 3460",
-    body: "Short conversations with members so we can get to know you beyond your application.",
+    body: "Short conversations with members beyond the written application.",
   },
   {
     code: "E09",
@@ -219,7 +206,7 @@ export const recruitmentEvents = [
     date: "Monday, September 14",
     time: "6:00 - 7:30 PM",
     location: "CCCB 2460",
-    body: "Work with others on a simple consulting-style problem. We care about how you think and collaborate.",
+    body: "A consulting-style problem in a small group. We watch how you think and collaborate.",
   },
   {
     code: "E11",
@@ -228,7 +215,7 @@ export const recruitmentEvents = [
     date: "Tuesday, September 15",
     time: "7:00 - 8:30 PM",
     location: "TBD",
-    body: "Learn what MECG does, how projects work, and what recruitment looks like.",
+    body: "What MECG does, how projects work, and how recruitment runs.",
   },
   {
     code: "E12",
@@ -237,7 +224,7 @@ export const recruitmentEvents = [
     date: "Wednesday, September 16",
     time: "11:00 AM - 8:00 PM",
     location: "Blagdon",
-    body: "A final conversation about your interests, experiences, and fit with MECG.",
+    body: "A final conversation on interests, experience, and fit.",
   },
   {
     code: "E13",
@@ -246,7 +233,7 @@ export const recruitmentEvents = [
     date: "Thursday, September 17",
     time: "11:00 AM - 8:00 PM",
     location: "Blagdon",
-    body: "A final conversation about your interests, experiences, and fit with MECG.",
+    body: "A final conversation on interests, experience, and fit.",
   },
   {
     code: "E14",
@@ -255,47 +242,44 @@ export const recruitmentEvents = [
     date: "Friday, September 18",
     time: "TBD",
     location: "TBD",
-    body: "Find out if you've received a bid to join MECG.",
+    body: "Bids to join MECG are released.",
   },
 ];
 
 export const faqs = [
   {
     question: "Who can join MECG?",
-    answer: "Students from any major are welcome to apply. You do not need to be in engineering or business to be a strong applicant.",
+    answer: "Any UMich student can apply. Engineering or business majors are not required.",
   },
   {
     question: "Do I need consulting experience?",
-    answer: "No. Most people join to learn. We care more about curiosity, communication, teamwork, and how you approach problems.",
+    answer: "No. Most members join to learn. We look for curiosity, communication, teamwork, and how you approach problems.",
   },
   {
     question: "What do members actually do?",
-    answer: "Members work on client projects, attend workshops, meet mentors, prepare for recruiting, and spend time with the community outside of formal meetings.",
+    answer: "Client projects, workshops, mentorship, recruiting prep, and community events outside formal meetings.",
   },
   {
     question: "What kind of clients does MECG work with?",
-    answer: "We work with a range of organizations, from local businesses and startups to larger companies. Projects can involve strategy, operations, analytics, product, or marketing.",
+    answer: "Local businesses, startups, and larger companies. Project topics include strategy, operations, analytics, product, and marketing.",
   },
   {
     question: "Where do I apply?",
-    answer: "Use the Login button during recruitment to access the applicant portal. Recruitment events are the best way to learn more before applying.",
+    answer:
+      "Open Apply during recruitment, or start on Prospective Members for the timeline and events first.",
   },
 ];
 
+// Public social channels only. Questions belong on /contact.
 export const socials = [
   {
     title: "Instagram",
     href: "https://www.instagram.com/mecgmichigan",
-    body: "Recruitment reminders, event photos, member highlights, and a look at the community.",
+    body: "Recruitment reminders, event photos, and community posts.",
   },
   {
     title: "LinkedIn",
     href: "https://www.linkedin.com/company/michigan-engineering-consulting-group",
-    body: "Project updates, professional news, and ways to stay connected with MECG.",
-  },
-  {
-    title: "Email",
-    href: "mailto:mecg-board@umich.edu",
-    body: "Questions about recruitment, client work, partnerships, or anything else.",
+    body: "Project updates and professional news.",
   },
 ];

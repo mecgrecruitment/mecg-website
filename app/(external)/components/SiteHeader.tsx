@@ -115,11 +115,11 @@ export default function SiteHeader() {
 
           <div className="flex shrink-0 items-center gap-2">
             <a
-              href="/portal"
+              href="/auth/login"
               data-magnetic
               className="focus-ring hidden rounded-full bg-[var(--orange)] px-4 py-2.5 font-mono text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[var(--navy-950)] sm:inline-block"
             >
-              Portal
+              Log in
             </a>
 
             <a
@@ -189,10 +189,10 @@ export default function SiteHeader() {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <a
-              href="/portal"
+              href="/auth/login"
               className="focus-ring inline-block rounded-full bg-[var(--orange)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-white"
             >
-              Portal
+              Log in
             </a>
             <a
               href="/apply"

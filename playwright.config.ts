@@ -17,10 +17,16 @@ export default defineConfig({
   webServer: liveBaseUrl
     ? undefined
     : {
+        // Local smoke uses plain HTTP; next.config.ts drops upgrade-insecure-requests
+        // when E2E_LOCAL_HTTP=1 (set by `npm run test:e2e`).
         command: "npm run start -- -p 3210",
         url: localBaseUrl,
         reuseExistingServer: false,
         timeout: 30_000,
+        env: {
+          ...process.env,
+          E2E_LOCAL_HTTP: process.env.E2E_LOCAL_HTTP ?? "1",
+        },
       },
   projects: [
     {

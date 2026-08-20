@@ -46,7 +46,8 @@ export default async function AuditPage({
           Recruitment history.
         </h2>
         <p className="mt-5 max-w-2xl text-white/58">
-          Read-only history of access, scoring, voting, decisions, and candidate changes.
+          Append-only, read-only history of access, scoring, voting, decisions, and candidate
+          changes. Entries cannot be edited or deleted from this UI.
         </p>
       </section>
 
@@ -116,7 +117,13 @@ export default async function AuditPage({
               })}
             </tbody>
           </table>
-          {rows.length === 0 ? <p className="p-4 text-white/45">No matching audit entries.</p> : null}
+          {rows.length === 0 ? (
+            <p className="p-4 text-white/45">
+              {(data ?? []).length === 0
+                ? "No audit entries yet. Actions like grants, scores, votes, and decisions will appear here."
+                : "No entries match these filters. Clear the filters to see the full log."}
+            </p>
+          ) : null}
         </section>
       )}
     </div>

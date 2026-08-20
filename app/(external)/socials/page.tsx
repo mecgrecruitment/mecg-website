@@ -1,11 +1,11 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { contact } from "@/lib/site-content";
+import { socials as socialChannels } from "@/lib/site-content";
 import { PageHero } from "../components/PageHero";
 
 const title = "Socials";
 const description =
-  "Stay connected with MECG on Instagram, LinkedIn, and email for recruitment updates, community photos, member highlights, and project news.";
+  "MECG on Instagram and LinkedIn for recruitment reminders, event photos, and project updates. Questions go to Contact.";
 
 export const metadata: Metadata = {
   title,
@@ -14,23 +14,7 @@ export const metadata: Metadata = {
   openGraph: { title, description },
 };
 
-const socials = [
-  {
-    title: "Instagram",
-    body: "Recruitment reminders, event photos, member highlights, and a look at the community.",
-    href: contact.instagram,
-  },
-  {
-    title: "LinkedIn",
-    body: "Project updates, professional news, and ways to stay connected with MECG.",
-    href: contact.linkedin,
-  },
-  {
-    title: "Email",
-    body: "Questions about recruitment, client work, partnerships, or anything else.",
-    href: `mailto:${contact.email}`,
-  },
-];
+const socials = socialChannels;
 
 const photos = [
   {
@@ -72,11 +56,7 @@ function SocialCard({
   index: number;
 }) {
   return (
-    <a
-      href={href}
-      target={href.startsWith("mailto:") ? undefined : "_blank"}
-      rel={href.startsWith("mailto:") ? undefined : "noreferrer"}
-    >
+    <a href={href} target="_blank" rel="noreferrer">
       <article className="h-full rounded-[1.5rem] border border-white/10 bg-[#122033]/72 p-7 shadow-[0_22px_70px_rgba(4,12,24,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--orange-soft)]">
           0{index + 1} — MECG
@@ -101,11 +81,7 @@ function SocialPhotoGrid() {
           Fig. 02 — In the wild
         </p>
         <h2 className="font-display mt-4 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
-          Little moments,
-          <br />
-          <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)]">
-            Big community.
-          </span>
+          Recent photos.
         </h2>
       </div>
 
@@ -132,20 +108,30 @@ export default function SocialsPage() {
     <main className="grid gap-16 pb-16">
       <PageHero
         eyebrow="Sheet 06 — Socials"
-        title={<>Stay<br />{" "}<span className="text-ghost">connected.</span></>}
-        description="Follow along for recruitment updates, community photos, member highlights, and project news."
+        title={
+          <>
+            Socials.
+            <br />{" "}
+            <span className="text-ghost">Instagram and LinkedIn.</span>
+          </>
+        }
+        description="Recruitment reminders, event photos, and project updates. For questions, use Contact."
         tone="orange"
-      />
+      >
+        <a href="/contact" className="button-secondary focus-ring">
+          Contact
+        </a>
+      </PageHero>
 
       <section className="mx-auto w-full max-w-7xl px-6 md:px-16">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
           Fig. 01 Social Channels
         </p>
         <h2 className="font-display mt-5 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
-          Open a channel.
+          Two channels.
         </h2>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 md:grid-cols-2">
           {socials.map((social, index) => (
             <SocialCard key={social.title} {...social} index={index} />
           ))}

@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "./site";
 
-// Public (external) pages only — /internal, /apply, /portal, /auth and
-// /member-login are authenticated and stay out of the index. The redirect-only
-// routes (/team, /recruitment, /services, /placement) are omitted too: a
-// sitemap should list canonical URLs, not 307s.
+// Public (external) pages only. Authenticated zones (/internal, /apply,
+// /portal, /auth, /member-login) stay out. Redirect aliases (/team,
+// /recruitment, /services) stay out. /placement is a thin placeholder and
+// stays out until consent-backed content ships.
 const routes: Array<[path: string, priority: number]> = [
   ["/", 1],
   ["/about", 0.8],

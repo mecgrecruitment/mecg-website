@@ -5,7 +5,7 @@ import { PageHero } from "../components/PageHero";
 
 const title = "Our Team";
 const description =
-  "Meet MECG's current executive board—the student leaders responsible for consulting, education, recruitment, community, finance, marketing, and external relationships.";
+  "MECG executive board and project teams: student leaders for consulting, education, recruitment, community, finance, marketing, and external relationships.";
 
 export const metadata: Metadata = {
   title,
@@ -124,8 +124,14 @@ export default function OurTeamPage() {
     <main className="grid gap-16 pb-16">
       <PageHero
         eyebrow="Sheet 03 — Our Team"
-        title={<>Many disciplines.<br />{" "}<span className="text-ghost">One working team.</span></>}
-        description="Meet the students who lead MECG, manage client engagements, build recommendations, and create the community around the work."
+        title={
+          <>
+            Our Team.
+            <br />{" "}
+            <span className="text-ghost">Current roster.</span>
+          </>
+        }
+        description="Students who lead MECG, run client engagements, and organize community around the work."
         tone="orange"
       />
 
@@ -146,8 +152,8 @@ export default function OurTeamPage() {
             </h2>
           </div>
           <p className="max-w-md text-sm leading-6 text-white/55 sm:text-right">
-            From firm visits to the moments between meetings, MECG is built by
-            people who learn and work together.
+            Firm visits and the time between meetings. Same people as the
+            directory below.
           </p>
         </div>
 

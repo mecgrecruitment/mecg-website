@@ -12,17 +12,18 @@ import { PageHero } from "../components/PageHero";
 
 const title = "Client Services";
 const description =
-  "MECG delivers pro-bono consulting for startups, nonprofits, and established firms — market research, operations, strategy, and analytics — on a structured semester engagement from first call to final deliverable.";
+  "Pro-bono consulting from MECG at UMich. Semester engagements covering strategy, operations, analytics, product, and marketing. " +
+  `${clients.length}+ listed past clients.`;
 
 const fitSignals = [
-  "A focused question that benefits from research, analysis, or outside perspective",
-  "A point person who can meet regularly and provide context to the student team",
-  "A 10–12 week window for collaboration, feedback, and a final handoff",
+  "A focused question that needs research, analysis, or an outside view",
+  "A point person who can meet regularly and give the team context",
+  "A 10-12 week window for collaboration, feedback, and final handoff",
 ];
 
 const clientOutputs = [
-  "A clearly defined scope and working timeline",
-  "Regular progress updates and opportunities to redirect the work",
+  "A defined scope and working timeline",
+  "Regular progress updates and chances to redirect the work",
   "A final presentation, supporting analysis, and practical next steps",
 ];
 
@@ -38,12 +39,18 @@ export default function ClientServicesPage() {
     <main>
       <PageHero
         eyebrow="Sheet 04 — Client Services"
-        title={<>Useful thinking.<br />{" "}<span className="text-ghost">Built to be used.</span></>}
-        description="MECG partners with organizations on focused, pro-bono consulting engagements that turn complex questions into research, recommendations, and concrete next steps."
+        title={
+          <>
+            Client Services.
+            <br />{" "}
+            <span className="text-ghost">Pro-bono engagements.</span>
+          </>
+        }
+        description="Semester consulting for organizations. Research, recommendations, and a handoff clients can use."
         tone="mixed"
       >
         <a href="/contact" className="button-primary focus-ring" data-magnetic>
-          Start a project
+          Contact
         </a>
       </PageHero>
 
@@ -51,7 +58,7 @@ export default function ClientServicesPage() {
         <div className="container grid gap-5 lg:grid-cols-2">
           <article className="panel rounded-[1.5rem] p-7 md:p-10">
             <p className="annotation annotation-accent">Before we begin</p>
-            <h2 className="display mt-5 text-4xl uppercase text-white md:text-5xl">A good engagement fit.</h2>
+            <h2 className="display mt-5 text-4xl uppercase text-white md:text-5xl">Engagement fit.</h2>
             <ul className="mt-8 grid gap-5">
               {fitSignals.map((item, index) => (
                 <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5 text-white/62">
@@ -63,7 +70,7 @@ export default function ClientServicesPage() {
           </article>
           <article className="sheet rounded-[1.5rem] p-7 md:p-10">
             <p className="annotation !text-[var(--orange-dark)]">What clients receive</p>
-            <h2 className="display mt-5 text-4xl uppercase text-[var(--navy-950)] md:text-5xl">Clear work. Clear handoff.</h2>
+            <h2 className="display mt-5 text-4xl uppercase text-[var(--navy-950)] md:text-5xl">Scope, updates, handoff.</h2>
             <ul className="mt-8 grid gap-5">
               {clientOutputs.map((item, index) => (
                 <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-[var(--paper-rule)] pt-5 text-[var(--on-paper-muted)]">
@@ -107,7 +114,7 @@ export default function ClientServicesPage() {
                   </p>
 
                   <p className="annotation mt-6 hidden text-[var(--orange)] group-open:block">
-                    Close details —
+                    Close details
                   </p>
                 </summary>
 
@@ -166,7 +173,7 @@ export default function ClientServicesPage() {
             className="focus-ring mt-14 inline-block rounded-full bg-[var(--navy-950)] px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[var(--orange)]"
             data-reveal
           >
-            Start a project
+            Contact
           </a>
         </div>
       </section>
@@ -178,11 +185,11 @@ export default function ClientServicesPage() {
           </p>
 
           <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl" data-split>
-            Client-facing experience.
+            Listed clients.
           </h2>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/56" data-reveal>
-            Organizations MECG teams have supported across recent semesters.
+            {clients.length} organizations from recent semesters. Logos appear only when we have permission to show them.
           </p>
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>

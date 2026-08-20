@@ -50,7 +50,7 @@ export default function ExternalLayout({
                 Work with us
               </a>
               <a
-                href="/apply"
+                href="/prospective-members"
                 data-magnetic
                 className="focus-ring rounded-full border border-white/16 px-7 py-4 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white/75 transition-colors hover:border-white/40 hover:text-white"
               >
@@ -72,7 +72,7 @@ export default function ExternalLayout({
                 </p>
               </div>
               <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/46">
-                Michigan Engineering Consulting Group — pro-bono, student-led
+                Michigan Engineering Consulting Group. Pro-bono, student-led
                 consulting at the University of Michigan.
               </p>
               {/* Inline social list — no pills, mono, with a diagonal arrow. */}
