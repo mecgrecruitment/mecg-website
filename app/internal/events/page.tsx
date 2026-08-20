@@ -1,6 +1,8 @@
 import React from "react";
+import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { requireCommittee } from "@/lib/auth";
+import { siteUrl } from "../../site";
 
 const TYPE_LABEL: Record<string, string> = {
   open_rush: "Open Rush",
@@ -26,6 +28,18 @@ export default async function InternalEventsPage() {
   const events = eventsResult.data;
   const checkins = checkinsResult.data;
   const loadError = eventsResult.error?.message || checkinsResult.error?.message;
+
+  // Pre-render a scan-to-check-in QR per event alongside the plaintext code —
+  // committee members can still read the code aloud/type it as a fallback.
+  const qrByEventId = new Map<string, string>();
+  await Promise.all(
+    (events ?? [])
+      .filter((event) => event.attendance_code)
+      .map(async (event) => {
+        const url = `${siteUrl}/apply/checkin/${encodeURIComponent(event.attendance_code!)}`;
+        qrByEventId.set(event.id, await QRCode.toDataURL(url));
+      })
+  );
 
   return (
     <div className="grid gap-7">
@@ -69,9 +83,19 @@ export default async function InternalEventsPage() {
                   {event.event_date ? new Date(event.event_date).toLocaleString() : "Date TBD"}
                 </p>
                 <p className="text-white/58">{event.location || "Location TBD"}</p>
-                <p className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--orange)]">
-                  {event.attendance_code || "—"}
-                </p>
+                <div className="grid gap-2 justify-items-center">
+                  <p className="w-full rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-center font-mono text-xs font-bold uppercase tracking-[0.14em] text-[var(--orange)]">
+                    {event.attendance_code || "—"}
+                  </p>
+                  {qrByEventId.has(event.id) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={qrByEventId.get(event.id)}
+                      alt={`QR code to check in for ${event.title}`}
+                      className="h-24 w-24 rounded-lg border border-white/10 bg-white p-1"
+                    />
+                  ) : null}
+                </div>
               </div>
             </article>
           ))
