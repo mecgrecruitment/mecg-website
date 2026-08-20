@@ -72,6 +72,31 @@ export async function ScoringStage({
     .eq("is_active", true)
     .maybeSingle();
 
+  // Open-rush attendance, for informational display only (see attended()/
+  // attendanceCount() below) — mirrors app/internal/applicants/page.tsx.
+  const [{ data: openRushEvents }, { data: checkins }] = await Promise.all([
+    cycle
+      ? supabase
+          .from("recruitment_events")
+          .select("id, title")
+          .eq("cycle_id", cycle.id)
+          .eq("event_type", "open_rush")
+          .order("event_date", { ascending: true })
+      : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    supabase.from("event_checkins").select("email, event_id"),
+  ]);
+  const eventList = openRushEvents ?? [];
+  const checkinList = checkins ?? [];
+  function attended(email: string | null | undefined, eventId: string) {
+    if (!email) return false;
+    return checkinList.some(
+      (ck) => ck.email?.toLowerCase() === email.toLowerCase() && ck.event_id === eventId
+    );
+  }
+  function attendanceCount(email: string | null | undefined) {
+    return eventList.filter((e) => attended(email, e.id)).length;
+  }
+
   const { data: rubric } = cycle
     ? await supabase
         .from("rubric_versions")
@@ -203,7 +228,14 @@ export async function ScoringStage({
                     </h3>
                     <p className="mt-1 text-sm text-white/45">{candidate.email}</p>
                   </div>
-                  <StatusBadge submitted={isSubmitted} />
+                  <div className="flex flex-col items-end gap-2">
+                    <StatusBadge submitted={isSubmitted} />
+                    {eventList.length > 0 ? (
+                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-bold text-white/60">
+                        Open rush: {attendanceCount(candidate.email)}/{eventList.length}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
                 {isSubmitted ? (
