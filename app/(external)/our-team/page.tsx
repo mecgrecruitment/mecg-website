@@ -23,30 +23,6 @@ type TeamMember = {
 
 const people = (teamData.people || []) as TeamMember[];
 
-const teamMoments = [
-  {
-    src: "/images/community/community-70.jpg",
-    alt: "MECG members together during a consulting firm visit",
-    label: "Learning together",
-    className: "lg:col-span-8 lg:row-span-2",
-    imageClassName: "object-cover object-center",
-  },
-  {
-    src: "/images/community/community-56.jpg",
-    alt: "Five MECG members gathered outdoors",
-    label: "Community beyond projects",
-    className: "lg:col-span-4",
-    imageClassName: "object-cover object-center",
-  },
-  {
-    src: "/images/community/community-60.jpg",
-    alt: "Two MECG members wearing club sweatshirts in Ann Arbor",
-    label: "Built at Michigan",
-    className: "lg:col-span-4",
-    imageClassName: "object-cover object-[center_62%]",
-  },
-];
-
 const sections = [
   {
     title: "Executive Board",
@@ -90,7 +66,7 @@ function initials(name: string) {
 
 function MemberCard({ member }: { member: TeamMember }) {
   return (
-    <article className="group overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033]/72 shadow-[0_22px_70px_rgba(4,12,24,0.24)] transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45">
+    <article className="group overflow-hidden rounded-2xl border border-white/10 bg-[#122033]/72 transition duration-300 hover:-translate-y-1 hover:border-[var(--orange)]/45">
       <div className="relative aspect-[4/5] bg-white/[0.04]">
         {member.image ? (
           <Image src={member.image} alt={member.name} fill sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-[1.035]" />
@@ -104,8 +80,8 @@ function MemberCard({ member }: { member: TeamMember }) {
       </div>
 
       <div className="p-5">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--orange-soft)]">{member.role}</p>
-        <h3 className="mt-3 text-3xl font-black uppercase leading-[0.9] tracking-[-0.07em] text-white">{member.name}</h3>
+        <p className="text-sm font-semibold text-[var(--orange-soft)]">{member.role}</p>
+        <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">{member.name}</h3>
 
         <div className="mt-5 flex flex-wrap gap-2">
           {member.linkedin ? (
@@ -121,68 +97,13 @@ export default function OurTeamPage() {
   const visibleSections = sections.filter((section) => section.people.length > 0);
 
   return (
-    <main className="grid gap-16 pb-16">
+    <main className="grid gap-14 pb-20">
       <PageHero
-        eyebrow="Sheet 03 — Our Team"
-        title={
-          <>
-            Our Team.
-            <br />{" "}
-            <span className="text-ghost">Current roster.</span>
-          </>
-        }
-        description="Students who lead MECG, run client engagements, and organize community around the work."
+        title="Our Team"
+        description="Meet the students who lead MECG and support our client engagements, member education, and recruitment."
         tone="orange"
+        compact
       />
-
-      <section
-        aria-labelledby="team-in-action"
-        className="mx-auto w-full max-w-7xl px-6 md:px-16"
-      >
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
-              In the room
-            </p>
-            <h2
-              id="team-in-action"
-              className="font-display mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.07em] text-white md:text-6xl"
-            >
-              The team in action.
-            </h2>
-          </div>
-          <p className="max-w-md text-sm leading-6 text-white/55 sm:text-right">
-            Firm visits and the time between meetings. Same people as the
-            directory below.
-          </p>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-12 lg:grid-rows-2">
-          {teamMoments.map((moment, index) => (
-            <figure
-              key={moment.src}
-              className={`group relative min-h-72 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#122033] shadow-[0_22px_70px_rgba(4,12,24,0.24)] ${moment.className}`}
-            >
-              <Image
-                src={moment.src}
-                alt={moment.alt}
-                fill
-                sizes={
-                  index === 0
-                    ? "(min-width: 1024px) 66vw, 100vw"
-                    : "(min-width: 1024px) 33vw, 100vw"
-                }
-                className={`${moment.imageClassName} transition duration-500 group-hover:scale-[1.02]`}
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#07111f] via-[#07111f]/70 to-transparent px-5 pb-5 pt-16">
-                <figcaption className="text-xs font-black uppercase tracking-[0.18em] text-white">
-                  {moment.label}
-                </figcaption>
-              </div>
-            </figure>
-          ))}
-        </div>
-      </section>
 
       {visibleSections.length > 1 ? (
         <nav
@@ -201,16 +122,13 @@ export default function OurTeamPage() {
         </nav>
       ) : null}
 
-      {visibleSections.map((section, index) => (
+      {visibleSections.map((section) => (
         <section
           key={section.title}
           id={section.slug}
           className="mx-auto w-full max-w-7xl scroll-mt-28 px-6 md:px-16"
         >
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--orange-soft)]">
-            Fig. {String(index + 1).padStart(2, "0")} — {section.title}
-          </p>
-          <h2 className="font-display mt-5 max-w-5xl text-6xl font-black uppercase leading-[0.86] tracking-[-0.08em] text-white md:text-8xl">
+          <h2 className="font-display max-w-5xl text-4xl font-semibold tracking-[-0.04em] text-white md:text-5xl">
             {section.title}
           </h2>
 

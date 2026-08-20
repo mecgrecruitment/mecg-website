@@ -38,14 +38,7 @@ export default function ClientServicesPage() {
   return (
     <main>
       <PageHero
-        eyebrow="Sheet 04 — Client Services"
-        title={
-          <>
-            Client Services.
-            <br />{" "}
-            <span className="text-ghost">Pro-bono engagements.</span>
-          </>
-        }
+        title="Client Services"
         description="Semester consulting for organizations. Research, recommendations, and a handoff clients can use."
         tone="mixed"
       >
@@ -57,8 +50,8 @@ export default function ClientServicesPage() {
       <section className="section pb-0">
         <div className="container grid gap-5 lg:grid-cols-2">
           <article className="panel rounded-[1.5rem] p-7 md:p-10">
-            <p className="annotation annotation-accent">Before we begin</p>
-            <h2 className="display mt-5 text-4xl uppercase text-white md:text-5xl">Engagement fit.</h2>
+            <p className="text-sm font-semibold text-[var(--orange-soft)]">Before we begin</p>
+            <h2 className="font-display mt-4 text-4xl font-semibold tracking-[-0.04em] text-white md:text-5xl">A good engagement fit</h2>
             <ul className="mt-8 grid gap-5">
               {fitSignals.map((item, index) => (
                 <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5 text-white/62">
@@ -69,8 +62,8 @@ export default function ClientServicesPage() {
             </ul>
           </article>
           <article className="sheet rounded-[1.5rem] p-7 md:p-10">
-            <p className="annotation !text-[var(--orange-dark)]">What clients receive</p>
-            <h2 className="display mt-5 text-4xl uppercase text-[var(--navy-950)] md:text-5xl">Scope, updates, handoff.</h2>
+            <p className="text-sm font-semibold text-[var(--orange-dark)]">What clients receive</p>
+            <h2 className="font-display mt-4 text-4xl font-semibold tracking-[-0.04em] text-[var(--navy-950)] md:text-5xl">Clear work and practical next steps</h2>
             <ul className="mt-8 grid gap-5">
               {clientOutputs.map((item, index) => (
                 <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-[var(--paper-rule)] pt-5 text-[var(--on-paper-muted)]">
@@ -85,12 +78,8 @@ export default function ClientServicesPage() {
 
       <section className="section">
         <div className="container">
-          <p className="annotation annotation-accent" data-reveal>
-            Fig. 03.1 — Capabilities
-          </p>
-
-          <h2 className="display mt-5 max-w-4xl text-5xl uppercase text-white md:text-7xl" data-split>
-            What we help with.
+          <h2 className="font-display max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl" data-split>
+            What we help with
           </h2>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-5" data-reveal-group>
@@ -105,7 +94,7 @@ export default function ClientServicesPage() {
                     {service.index}
                   </p>
 
-                  <h3 className="font-display mt-8 text-3xl font-bold uppercase leading-none tracking-[-0.045em] text-white">
+                  <h3 className="font-display mt-8 text-2xl font-semibold tracking-[-0.035em] text-white">
                     {service.title}
                   </h3>
 
@@ -129,12 +118,8 @@ export default function ClientServicesPage() {
 
       <section className="sheet px-5 py-20 md:px-8 md:py-28">
         <div className="container">
-          <p className="annotation !text-[rgba(5,9,20,0.45)]" data-reveal>
-            Fig. 03.2 — Engagement structure
-          </p>
-
-          <h2 className="display mt-5 max-w-3xl text-5xl uppercase text-[var(--navy-950)] md:text-7xl" data-split>
-            From first call to final deliverable.
+          <h2 className="font-display max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-[var(--navy-950)] md:text-6xl" data-split>
+            From first call to final deliverable
           </h2>
 
           <div className="mt-14">
@@ -156,7 +141,7 @@ export default function ClientServicesPage() {
                 className="rounded-[1rem] border border-[var(--paper-rule)] p-6"
                 data-reveal
               >
-                <h3 className="font-display text-2xl font-bold uppercase tracking-[-0.04em] text-[var(--navy-950)]">
+                <h3 className="font-display text-2xl font-semibold tracking-[-0.03em] text-[var(--navy-950)]">
                   {item.title}
                 </h3>
 
@@ -180,12 +165,8 @@ export default function ClientServicesPage() {
 
       <section className="section">
         <div className="container">
-          <p className="annotation annotation-accent" data-reveal>
-            Fig. 03.3 — Past Projects
-          </p>
-
-          <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl" data-split>
-            Listed clients.
+          <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl" data-split>
+            Past clients
           </h2>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/56" data-reveal>
@@ -217,7 +198,7 @@ export default function ClientServicesPage() {
 
                 <p className="annotation mt-10">{client.term}</p>
 
-                <h3 className="font-display mt-3 text-2xl font-bold uppercase leading-none tracking-[-0.04em] text-white">
+                <h3 className="font-display mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
                   {client.name}
                 </h3>
               </article>

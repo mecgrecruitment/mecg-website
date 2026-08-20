@@ -4,7 +4,7 @@ import { contact } from "@/lib/site-content";
 import { ContactForm } from "../components/ContactForm";
 import { PageHero } from "../components/PageHero";
 
-const title = "Contact";
+const title = "Contact Us";
 const description =
   "Contact MECG at mecg-board@umich.edu for recruitment, client projects, or partnerships. One path: the form or that board email.";
 
@@ -25,14 +25,8 @@ export default function ContactPage() {
   return (
     <main>
       <PageHero
-        eyebrow="Sheet 07 — Contact"
-        title={
-          <>
-            Contact.
-            <br /> <span className="text-ghost">Board email.</span>
-          </>
-        }
-        description="Recruitment, client work, or partnerships. Use the form or email the board. Same inbox."
+        title="Contact Us"
+        description="Reach out about recruitment, client work, partnerships, or general questions."
         tone="blue"
         compact
       />
@@ -49,7 +43,7 @@ export default function ContactPage() {
                   <div key={topicTitle} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/10 pt-5">
                     <span className="font-mono text-xs font-bold text-[var(--orange)]">0{index + 1}</span>
                     <div>
-                      <h2 className="font-display text-xl font-bold uppercase tracking-[-0.03em] text-white">{topicTitle}</h2>
+                      <h2 className="font-display text-xl font-semibold tracking-[-0.03em] text-white">{topicTitle}</h2>
                       <p className="mt-2 text-sm leading-6 text-white/52">{body}</p>
                     </div>
                   </div>
@@ -66,6 +60,10 @@ export default function ContactPage() {
                 {contact.email}
               </a>
               <p className="mt-6 leading-relaxed text-[var(--on-paper-muted)]">{contact.location}</p>
+              <div className="mt-7 flex gap-5 text-sm font-semibold text-[var(--navy-950)]">
+                <a href={contact.instagram} target="_blank" rel="noreferrer" className="focus-ring hover:text-[var(--orange-dark)]">Instagram</a>
+                <a href={contact.linkedin} target="_blank" rel="noreferrer" className="focus-ring hover:text-[var(--orange-dark)]">LinkedIn</a>
+              </div>
             </div>
           </aside>
         </div>

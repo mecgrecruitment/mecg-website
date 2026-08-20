@@ -10,19 +10,12 @@ export default function ExternalLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="grain">
+    <div>
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
       <MotionProvider />
       <SiteHeader />
-
-      {/* Scroll HUD — the dial turns with page progress (MotionProvider). */}
-      <div className="hud-gear" aria-hidden="true">
-        <div data-hud-gear className="h-full w-full">
-          <GearLogo className="h-full w-full text-white/25" />
-        </div>
-      </div>
 
       <div id="main-content" tabIndex={-1}>
         {children}
@@ -33,12 +26,9 @@ export default function ExternalLayout({
         <div className="px-5 pb-10 pt-16 md:px-8 md:pt-24">
           <div className="container grid items-end gap-10 lg:grid-cols-[1.25fr_0.75fr]">
             <div>
-              <p className="annotation annotation-accent">Next step</p>
-              <h2 className="display mt-5 text-5xl uppercase text-white md:text-7xl">
-                Have a problem
-                <br />
-                {" "}
-                worth solving?
+              <p className="text-sm font-semibold text-[var(--orange-soft)]">Next step</p>
+              <h2 className="mt-4 font-display text-4xl font-semibold tracking-[-0.04em] text-white md:text-6xl">
+                Have a problem worth solving?
               </h2>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -67,7 +57,7 @@ export default function ExternalLayout({
             <div>
               <div className="flex items-center gap-3">
                 <GearLogo className="h-8 w-8 shrink-0 text-[var(--orange)]" />
-                <p className="font-display text-2xl font-bold uppercase leading-none tracking-[0.24em] text-white">
+                <p className="font-display text-2xl font-semibold tracking-[0.12em] text-white">
                   MECG
                 </p>
               </div>
@@ -111,7 +101,7 @@ export default function ExternalLayout({
             {/* Navigation — all-caps mono, high tracking, single tidy column. */}
             <nav
               aria-label="Footer"
-              className="flex flex-col gap-3.5 font-mono text-xs font-bold uppercase leading-[1.1] tracking-[0.22em] text-white/55"
+              className="flex flex-col gap-3 text-sm font-medium text-white/55"
             >
               {navLinks.map((link) => (
                 <a
@@ -157,34 +147,8 @@ export default function ExternalLayout({
           </div>
         </div>
 
-        {/* Drawing title block — metadata row. */}
-        <div className="relative z-10 px-5 md:px-8">
-          <div className="container grid grid-cols-2 gap-px overflow-hidden rounded-[0.75rem] border border-white/12 bg-white/12 md:grid-cols-4">
-            {[
-              ["Project", "MECG — Digital Platform"],
-              ["Sheet", "No. 001 — External"],
-              ["Scale", "1 : 1 — Ann Arbor, MI"],
-              ["Drawn by", "MECG Board — © 2026"],
-            ].map(([label, value]) => (
-              <div key={label} className="bg-[var(--navy-950)] px-4 py-3">
-                <p className="annotation text-[0.55rem]">{label}</p>
-                <p className="mt-1 font-mono text-[0.7rem] font-bold uppercase tracking-[0.1em] text-white/65">
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Ghost wordmark — oversized editorial finale, cropped by the bottom
-            edge so the letterforms bleed off the page. */}
-        <div
-          className="pointer-events-none relative select-none overflow-hidden pt-12 md:pt-16"
-          aria-hidden="true"
-        >
-          <p className="wordmark-bleed text-ghost block translate-y-[14%] text-center leading-[0.72]">
-            MECG
-          </p>
+        <div className="px-5 pb-8 md:px-8">
+          <p className="container border-t border-white/10 pt-6 text-sm text-white/35">© 2026 Michigan Engineering Consulting Group</p>
         </div>
       </footer>
     </div>

@@ -6,22 +6,17 @@ export function SectionHeading({
   description,
   inverted = false,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: ReactNode;
   description?: string;
   inverted?: boolean;
 }) {
   return (
     <div className="section-heading">
-      <p
-        className={`annotation ${inverted ? "!text-[var(--orange-dark)]" : "annotation-accent"}`}
-        data-reveal
-      >
-        {eyebrow}
-      </p>
-      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.4fr)] lg:items-end">
+      {eyebrow ? <p className={`text-sm font-semibold ${inverted ? "text-[var(--orange-dark)]" : "text-[var(--orange-soft)]"}`} data-reveal>{eyebrow}</p> : null}
+      <div className={`${eyebrow ? "mt-4" : ""} grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.45fr)] lg:items-end`}>
         <h2
-          className={`display text-5xl uppercase md:text-7xl ${
+          className={`font-display text-4xl font-semibold tracking-[-0.04em] md:text-6xl ${
             inverted ? "text-[var(--navy-950)]" : "text-white"
           }`}
           data-split
@@ -42,4 +37,3 @@ export function SectionHeading({
     </div>
   );
 }
-
