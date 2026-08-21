@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import EvaluationForm from "./evaluation-form";
 import ConflictForm from "./conflict-form";
 import PasswordForm from "./password-form";
+import LogoutButton from "@/components/logout-button";
 
 export default async function MemberPage() {
-  const user = await requireUser();
+  const user = await requireMember();
   const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(membership.role));
-  if (!cycleMembership) return <main className="mx-auto max-w-3xl p-8"><h1 className="text-2xl font-semibold">No active membership</h1><p className="mt-2 text-gray-600">A Board Member must add you to the current rush cycle.</p></main>;
+  if (!cycleMembership) return null;
 
   const supabase = await createClient();
   const [{ data: assignments, error }, { data: applications, error: applicantsError }] = await Promise.all([
@@ -20,7 +21,7 @@ export default async function MemberPage() {
   const isPanel = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["PANEL", "OWNER"].includes(membership.role));
 
   return <main className="mx-auto flex max-w-5xl flex-col gap-8 p-6 sm:p-10">
-    <header className="flex items-start justify-between gap-4"><div><p className="text-sm text-gray-500">{cycleMembership.cycle.name}</p><h1 className="text-3xl font-semibold">Evaluation Hub</h1><p className="mt-2 text-gray-600">Signed in as {user.name}</p></div>{isPanel && <Link href="/admin" className="rounded border px-3 py-2 text-sm">Board dashboard</Link>}</header>
+    <header className="flex items-start justify-between gap-4"><div><p className="text-sm text-gray-500">{cycleMembership.cycle.name}</p><h1 className="text-3xl font-semibold">Evaluation Hub</h1><p className="mt-2 text-gray-600">Signed in as {user.name}</p></div><div className="flex items-center gap-3">{isPanel && <Link href="/admin" className="rounded border px-3 py-2 text-sm">Board dashboard</Link>}<LogoutButton /></div></header>
     <nav aria-label="Rush workspaces" className="grid gap-3 sm:grid-cols-3">{[["Speed Dating", "Structured conversations and assigned forms"], ["Group Case", "Individual behavior during team problem solving"], ["Hash", isPanel ? "Locked evidence and deliberation are on the Board dashboard" : "Instructions and your submitted evidence only"]].map(([name, description]) => <section key={name} className="rounded-xl border p-4"><h2 className="font-semibold">{name}</h2><p className="mt-1 text-sm text-gray-600">{description}</p></section>)}</nav>
     <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />
     <PasswordForm />

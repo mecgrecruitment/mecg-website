@@ -12,7 +12,7 @@ npm run supabase:verify-project
 npm run dev
 ```
 
-Open `http://localhost:3000/admin/login` and sign in with a Supabase Auth account. The first cycle can only be created by the existing MECG Recruitment board account. Later accounts are created from the Board dashboard.
+Open `http://localhost:3000/login` and sign in with a Supabase Auth account. The first cycle can only be created by the existing MECG Recruitment board account. Later internal accounts are created from the Board dashboard. Applicants create their own accounts at `/apply`.
 
 ## Roles and access
 

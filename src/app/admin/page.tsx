@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
-import LogoutButton from "./logout-button";
+import LogoutButton from "@/components/logout-button";
 import SetupForm from "./setup-form";
 import RushControls from "./rush-controls";
 import DecisionForm, { ApprovalButton, ReleaseButton } from "./decision-form";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 
 export default async function AdminDashboard() {
-  const user = await requireUser();
+  const user = await requireAdmin();
   const supabase = await createClient();
   const { count: cycleCount, error: countError } = await supabase.from("rush_cycles").select("id", { count: "exact", head: true });
   if (countError) throw countError;

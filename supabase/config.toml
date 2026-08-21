@@ -4,8 +4,10 @@ project_id = "mecgwebsite"
 schemas = ["public", "graphql_public", "rush"]
 
 [auth]
-site_url = "https://mecg-website-mecg-recruitment.vercel.app"
+site_url = "https://mecgmichigan.com"
 additional_redirect_urls = [
+  "https://mecgmichigan.com/**",
+  "https://www.mecgmichigan.com/**",
   "https://mecg-website-mecg-recruitment.vercel.app/**",
   "https://mecg-website-three.vercel.app/**",
   "https://mecg-website-git-main-mecg-recruitment.vercel.app/**",

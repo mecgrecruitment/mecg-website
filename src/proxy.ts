@@ -4,7 +4,14 @@ import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const { response, user } = await refreshSupabaseSession(req);
-  if (pathname === "/admin/login" || pathname === "/api/admin/login") return response;
+  if (
+    pathname === "/login" ||
+    pathname === "/admin/login" ||
+    pathname.startsWith("/api/auth/") ||
+    pathname === "/api/admin/login" ||
+    pathname === "/auth/callback" ||
+    pathname === "/apply"
+  ) return response;
   if (user) return response;
 
   const isApi =
@@ -12,13 +19,18 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/api/member") ||
     pathname.startsWith("/api/account");
   if (isApi) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.redirect(new URL("/admin/login", req.url));
+  return NextResponse.redirect(new URL("/login", req.url));
 }
 
 export const config = {
   matcher: [
     "/admin/:path*",
     "/member/:path*",
+    "/applicant/:path*",
+    "/login",
+    "/apply",
+    "/auth/callback",
+    "/api/auth/:path*",
     "/api/admin/:path*",
     "/api/member/:path*",
     "/api/account/:path*",
