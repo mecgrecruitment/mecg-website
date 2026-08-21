@@ -6,8 +6,8 @@ import type { Database } from "@/lib/supabase/database.types";
 export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient<Database, "rush">(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    process.env.NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY ?? requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
     {
       db: { schema: "rush" },
       cookies: {

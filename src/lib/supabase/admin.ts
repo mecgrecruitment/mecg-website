@@ -6,8 +6,8 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export function createAdminClient() {
   return createClient<Database, "rush">(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    process.env.MECG_SUPABASE_SERVICE_ROLE_KEY ?? requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
     {
       auth: { persistSession: false, autoRefreshToken: false },
       db: { schema: "rush" },
