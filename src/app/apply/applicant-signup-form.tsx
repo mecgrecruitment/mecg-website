@@ -7,7 +7,7 @@ import { useState } from "react";
 const errorMessages: Record<string, string> = {
   INVALID_NAME: "Enter your full name.",
   INVALID_EMAIL: "Enter a valid email address.",
-  INVALID_PASSWORD: "Use a password with at least 12 characters.",
+  INVALID_PASSWORD: "Use a password with at least 8 characters.",
   RATE_LIMITED: "Too many signup attempts. Wait a minute and try again.",
   SIGNUP_FAILED: "The account could not be created. Try signing in if you already have an account.",
   ROUTING_UNAVAILABLE: "The account was created, but the application page could not be loaded. Sign in to continue.",
@@ -61,9 +61,9 @@ export default function ApplicantSignupForm() {
         <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
       </label>
       <label className="block text-sm font-medium">Create a password
-        <input type="password" minLength={12} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+        <input type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
       </label>
-      <p className="text-xs leading-5 text-mecg-navy/50">Use at least 12 characters. You will verify the email before submitting an application.</p>
+      <p className="text-xs leading-5 text-mecg-navy/50">Use at least 8 characters. You will verify the email before submitting an application.</p>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}
       {message && <p role="status" className="rounded-xl bg-mecg-blue/10 p-4 text-sm text-mecg-navy">{message}</p>}
       <button type="submit" disabled={pending || Boolean(message)} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">

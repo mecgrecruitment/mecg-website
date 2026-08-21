@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   if (!email || email.length > 254 || !email.includes("@")) {
     return NextResponse.json({ code: "INVALID_EMAIL" }, { status: 400 });
   }
-  if (password.length < 12 || password.length > 1024) {
+  if (password.length < 8 || password.length > 1024) {
     return NextResponse.json({ code: "INVALID_PASSWORD" }, { status: 400 });
   }
 

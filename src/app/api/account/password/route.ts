@@ -8,8 +8,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const currentPassword = typeof body?.currentPassword === "string" ? body.currentPassword : "";
   const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
-  if (newPassword.length < 12 || newPassword.length > 1024) {
-    return NextResponse.json({ error: "New password must be between 12 and 1024 characters" }, { status: 400 });
+  if (newPassword.length < 8 || newPassword.length > 1024) {
+    return NextResponse.json({ error: "New password must be between 8 and 1024 characters" }, { status: 400 });
   }
   if (currentPassword === newPassword) {
     return NextResponse.json({ error: "New password must be different" }, { status: 400 });

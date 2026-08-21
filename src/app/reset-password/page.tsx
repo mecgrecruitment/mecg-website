@@ -37,9 +37,9 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <PortalShell eyebrow="Account recovery" title="Choose a new password." description="Use at least 12 characters.">
+    <PortalShell eyebrow="Account recovery" title="Choose a new password." description="Use at least 8 characters.">
       <form onSubmit={submit} className="space-y-4">
-        <FormField label="New password" type="password" required minLength={12} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} />
+        <FormField label="New password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} />
         {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-800">{error}</p>}
         <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Updating..." : "Update password"}</button>
       </form>

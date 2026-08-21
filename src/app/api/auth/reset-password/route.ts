@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const password = typeof body?.password === "string" ? body.password : "";
-  if (password.length < 12 || password.length > 1024) {
+  if (password.length < 8 || password.length > 1024) {
     return NextResponse.json({ code: "INVALID_PASSWORD" }, { status: 400 });
   }
 
