@@ -1,283 +1,64 @@
-export const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Our Team", href: "/our-team" },
-  { label: "Client Services", href: "/client-services" },
-  { label: "Prospective Members", href: "/prospective-members" },
-  { label: "Contact Us", href: "/contact" },
+export const STATS = [
+  { value: "70+", label: "Members" },
+  { value: "30+", label: "Organizations served" },
+  { value: "2023", label: "Founded at Michigan" },
+  { value: "All", label: "Majors welcome" },
 ];
 
-export const contact = {
-  email: "mecg-board@umich.edu",
-  location: "College of Engineering, University of Michigan, 1221 Beal Ave, Ann Arbor, MI 48109",
-  instagram: "https://www.instagram.com/mecgmichigan",
-  linkedin: "https://www.linkedin.com/company/michigan-engineering-consulting-group",
-};
-
-export const recruitmentCycle = {
-  status: "Schedule coming soon",
-  title: "Fall 2026 recruitment",
-  body: "Dates, times, and locations will be published here once they are confirmed. Follow Instagram or LinkedIn for announcements.",
-  archiveLabel: "Fall 2026 recruitment timeline",
-};
-
-export const pillars = [
-  {
-    index: "01",
-    title: "Professional Development",
-    body: "Workshops, mentorship, and practice for consulting skills, communication, networking, and recruiting.",
-  },
-  {
-    index: "02",
-    title: "Education",
-    body: "Members learn consulting basics: problem solving, analysis, and presentation. No major prerequisite.",
-  },
-  {
-    index: "03",
-    title: "Project Experience",
-    body: "Semester teams work with real clients on research, recommendations, and handoff materials.",
-  },
-  {
-    index: "04",
-    title: "Community",
-    body: "Mentorship, social events, and time together outside project work.",
-  },
+export const BOARD = [
+  { name: "Annie Callam", role: "President", src: "/board/annie.jpeg", linkedin: "https://www.linkedin.com/in/ana-callam-413bb5274/" },
+  { name: "Nandini Tatiwala", role: "VP External", src: "/board/nandini.jpeg", linkedin: "https://www.linkedin.com/in/nandini-tatiwala/" },
+  { name: "Abby Osterhart", role: "VP Internal", src: "/board/abby.jpeg", linkedin: "https://www.linkedin.com/in/abigailosterhart/" },
+  { name: "Jandy Arias", role: "VP Recruitment", src: "/board/jandy.jpeg", linkedin: "https://www.linkedin.com/in/jandy-arias/" },
+  { name: "Blake Stark", role: "VP Consulting", src: "/board/blake.jpeg", linkedin: "https://www.linkedin.com/in/blakeastark" },
+  { name: "Sumedha Katti", role: "VP Consulting", src: "/board/sumedha.jpeg", linkedin: "https://www.linkedin.com/in/sumedha-katti/" },
+  { name: "Maya Menon", role: "VP Education", src: "/board/maya.jpeg", linkedin: "https://www.linkedin.com/in/mayamenon28" },
+  { name: "Luciano del Carpio", role: "VP Education", src: "/board/luciano.jpeg", linkedin: "https://www.linkedin.com/in/luciano-del-carpio/" },
+  { name: "Selena Cooper", role: "VP Finance", src: "/board/selena.png", linkedin: "https://www.linkedin.com/in/selena-cooper/" },
+  { name: "Angela Yang", role: "VP Marketing", src: "/board/angela.png", linkedin: "https://www.linkedin.com/in/anngelayang/" },
 ];
 
-export const services = [
+export const PROJECTS = [
   {
-    index: "01",
-    title: "Strategy",
-    body: "Growth, positioning, competitors, customers, and practical next steps.",
+    number: "001",
+    eyebrow: "Research and strategy",
+    title: "Find the decision hiding inside the data.",
+    summary: "A home for work that turns customer interviews, market research, and raw data into a choice a client can act on.",
+    details: [
+      ["Challenge", "Define the question before collecting more information."],
+      ["Approach", "Combine primary research with a clear analytical model."],
+      ["Deliverable", "A recommendation with evidence, limits, and next steps."],
+    ],
+    tone: "from-mecg-blue/55 to-mecg-navy",
   },
   {
-    index: "02",
-    title: "Operations & Management",
-    body: "Process review and recommendations that make work clearer or easier to run.",
+    number: "002",
+    eyebrow: "Operations and growth",
+    title: "Make a good process easier to run.",
+    summary: "This slot is for a project that maps how work moves today, finds the expensive friction, and proposes a practical operating plan.",
+    details: [
+      ["Challenge", "Locate delays, repeated work, and unclear ownership."],
+      ["Approach", "Map the process and test changes against real constraints."],
+      ["Deliverable", "A prioritized plan the client can use after the semester."],
+    ],
+    tone: "from-mecg-orange/45 to-mecg-navy",
   },
   {
-    index: "03",
-    title: "Data Analytics",
-    body: "Organize data, find patterns, and translate findings into decisions clients can act on.",
+    number: "003",
+    eyebrow: "Technical and product",
+    title: "Connect the business case to the build.",
+    summary: "A future case study for technical evaluation, product planning, or an engineering problem where feasibility matters as much as the idea.",
+    details: [
+      ["Challenge", "Separate useful requirements from a long wish list."],
+      ["Approach", "Compare options through cost, risk, and implementation effort."],
+      ["Deliverable", "A scoped recommendation with a credible path to execution."],
+    ],
+    tone: "from-mecg-blue/45 to-mecg-navy",
   },
-  {
-    index: "04",
-    title: "Product Development",
-    body: "Early product work: user research, feature ideas, customer needs, and launch planning.",
-  },
-  {
-    index: "05",
-    title: "Marketing",
-    body: "Audience research, messaging, and how the organization shows up online or in market.",
-  },
-];
+] as const;
 
-export const projectTimeline = [
-  {
-    step: "01",
-    title: "Meet",
-    body: "Learn the client, the organization, and the question they want answered.",
-  },
-  {
-    step: "02",
-    title: "Scope",
-    body: "Agree on a goal, timeline, and deliverables.",
-  },
-  {
-    step: "03",
-    title: "Build",
-    body: "Research, analyze, test ideas, and check in with the client through the semester.",
-  },
-  {
-    step: "04",
-    title: "Share",
-    body: "Present findings, recommendations, and materials the client can use after the engagement.",
-  },
-];
-
-export const projectExpectations = [
-  {
-    title: "Semester-long projects",
-    body: "Most projects run 10-12 weeks with regular meetings and check-ins.",
-  },
-  {
-    title: "Small project teams",
-    body: "Each project has a focused student consultant team with project leadership support.",
-  },
-  {
-    title: "Clear deliverables",
-    body: "Clients receive a final presentation, supporting analysis, and plain-language recommendations.",
-  },
-  {
-    title: "Useful next steps",
-    body: "The handoff is meant to be used. Clients leave with ideas they can act on.",
-  },
-];
-
-export const clients = [
-  { name: "Amstron", term: "Past Project" },
-  { name: "General Motors", term: "Past Project", logo: "/images/clients/general-motors.svg" },
-  { name: "LSX", term: "Past Project" },
-  { name: "Koops Automation", term: "Fall 2025", logo: "/images/clients/koops-automation.jpg" },
-  { name: "Gypsy Spirits", term: "Fall 2025", logo: "/images/clients/gypsy-spirits.jpg" },
-  { name: "Here Here Market", term: "Fall 2025", logo: "/images/clients/here-here-market.jpg" },
-  { name: "Red Hawk Golf Club", term: "Fall 2025", logo: "/images/clients/red-hawk-golf-club.png" },
-  { name: "Glo Skin Spa", term: "Fall 2025", logo: "/images/clients/glo-skin-spa.png" },
-  { name: "Legendary Sports Xperiences", term: "Winter 2025", logo: "/images/clients/legendary-sports-xperiences.png" },
-  { name: "Lynkr", term: "Winter 2025 & Fall 2024", logo: "/images/clients/lynkr.png" },
-  { name: "Frankel Jewish Academy", term: "Winter 2025", logo: "/images/clients/frankel-jewish-academy.png" },
-  { name: "Dani Plan", term: "Winter 2025", logo: "/images/clients/dani-plan.png" },
-  { name: "Fired and Fused", term: "Winter 2025", logo: "/images/clients/fired-and-fused.png" },
-  { name: "The Probate Pro", term: "Winter 2025", logo: "/images/clients/the-probate-pro.png" },
-  { name: "Michigan Creamery", term: "Fall 2024", logo: "/images/clients/michigan-creamery.png" },
-  { name: "Homeschool Connections", term: "Fall 2024", logo: "/images/clients/homeschool-connections.png" },
-  { name: "The Store House", term: "Fall 2024", logo: "/images/clients/the-store-house.png" },
-];
-
-export const recruitmentEvents = [
-  {
-    code: "E01",
-    title: "Club-Wide Meeting",
-    type: "Open Rush",
-    date: "Tuesday, September 1",
-    time: "7:00 - 8:30 PM",
-    location: "TBD",
-    body: "What MECG does, how projects work, and how recruitment runs.",
-  },
-  {
-    code: "E02",
-    title: "Festifall on Central",
-    type: "Open Rush",
-    date: "Wednesday, September 2",
-    time: "TBD",
-    location: "Central Campus",
-    body: "Meet members and ask questions at the booth.",
-  },
-  {
-    code: "E03",
-    title: "Mass Meeting",
-    type: "Open Rush",
-    date: "Tuesday, September 8",
-    time: "7:30 PM",
-    location: "CCCB 0420",
-    body: "What MECG does, how projects work, and how recruitment runs.",
-  },
-  {
-    code: "E04",
-    title: "Career Panel",
-    type: "Open Rush",
-    date: "Wednesday, September 9",
-    time: "7:00 - 8:30 PM",
-    location: "CCCB 3420",
-    body: "Members discuss paths in consulting, engineering, business, tech, and related fields.",
-  },
-  {
-    code: "E05",
-    title: "Meet the Members",
-    type: "Open Rush",
-    date: "Thursday, September 10",
-    time: "6:00 - 7:30 PM",
-    location: "CCCB 3420",
-    body: "Informal time with current members.",
-  },
-  {
-    code: "E06",
-    title: "Office Hours / Applications Due",
-    type: "Closed Rush",
-    date: "Friday, September 11",
-    time: "TBD",
-    location: "TBD",
-    body: "Questions on the application, events, or interviews. Submit before the deadline.",
-  },
-  {
-    code: "E08",
-    title: "Speed Dating",
-    type: "Invite Only",
-    date: "Sunday, September 13",
-    time: "TBD",
-    location: "CCCB 3460",
-    body: "Short conversations with members beyond the written application.",
-  },
-  {
-    code: "E09",
-    title: "Group Case",
-    type: "Invite Only",
-    date: "Monday, September 14",
-    time: "6:00 - 7:30 PM",
-    location: "CCCB 2460",
-    body: "A consulting-style problem in a small group. We watch how you think and collaborate.",
-  },
-  {
-    code: "E11",
-    title: "Club-Wide Meeting",
-    type: "Open Rush",
-    date: "Tuesday, September 15",
-    time: "7:00 - 8:30 PM",
-    location: "TBD",
-    body: "What MECG does, how projects work, and how recruitment runs.",
-  },
-  {
-    code: "E12",
-    title: "Blagdon Interviews",
-    type: "Invite Only",
-    date: "Wednesday, September 16",
-    time: "11:00 AM - 8:00 PM",
-    location: "Blagdon",
-    body: "A final conversation on interests, experience, and fit.",
-  },
-  {
-    code: "E13",
-    title: "Blagdon Interviews",
-    type: "Invite Only",
-    date: "Thursday, September 17",
-    time: "11:00 AM - 8:00 PM",
-    location: "Blagdon",
-    body: "A final conversation on interests, experience, and fit.",
-  },
-  {
-    code: "E14",
-    title: "Bid Night",
-    type: "Invite Only",
-    date: "Friday, September 18",
-    time: "TBD",
-    location: "TBD",
-    body: "Bids to join MECG are released.",
-  },
-];
-
-export const faqs = [
-  {
-    question: "Who can join MECG?",
-    answer: "Any UMich student can apply. Engineering or business majors are not required.",
-  },
-  {
-    question: "Do I need consulting experience?",
-    answer: "No. Most members join to learn. We look for curiosity, communication, teamwork, and how you approach problems.",
-  },
-  {
-    question: "What do members actually do?",
-    answer: "Client projects, workshops, mentorship, recruiting prep, and community events outside formal meetings.",
-  },
-  {
-    question: "What kind of clients does MECG work with?",
-    answer: "Local businesses, startups, and larger companies. Project topics include strategy, operations, analytics, product, and marketing.",
-  },
-  {
-    question: "Where do I apply?",
-    answer:
-      "Open Apply during recruitment, or start on Prospective Members for the timeline and events first.",
-  },
-];
-
-// Public social channels only. Questions belong on /contact.
-export const socials = [
-  {
-    title: "Instagram",
-    href: "https://www.instagram.com/mecgmichigan",
-    body: "Recruitment reminders, event photos, and community posts.",
-  },
-  {
-    title: "LinkedIn",
-    href: "https://www.linkedin.com/company/michigan-engineering-consulting-group",
-    body: "Project updates and professional news.",
-  },
-];
+export const ENGAGEMENT_STEPS = [
+  ["01", "Frame the question", "We agree on the decision the project needs to support, the people involved, and what a useful answer looks like."],
+  ["02", "Build the evidence", "A student team researches, interviews, analyzes, and checks its assumptions with the client throughout the semester."],
+  ["03", "Hand off the work", "The final recommendation includes the reasoning and materials the client needs to take the next step."],
+] as const;

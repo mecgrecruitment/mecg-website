@@ -1,0 +1,269 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pnm {
+  id           String        @id @default(cuid())
+  name         String
+  contact      String        @unique // email or phone, normalized lowercase/trimmed before write
+  createdAt    DateTime      @default(now())
+  checkins     Checkin[]
+  applications Application[]
+}
+
+model Event {
+  id              String     @id @default(cuid())
+  name            String
+  date            DateTime
+  weight          Int        @default(1)
+  checkinToken    String     @unique @default(cuid()) // part of the public check-in URL; rotating this invalidates old QR codes
+  checkinOpensAt  DateTime
+  checkinClosesAt DateTime
+  createdAt       DateTime   @default(now())
+  checkins        Checkin[]
+  cycleId         String?
+  kind            String     @default("GENERAL")
+  status          String     @default("DRAFT")
+  cycle           RushCycle? @relation(fields: [cycleId], references: [id])
+}
+
+model Checkin {
+  id        String   @id @default(cuid())
+  pnmId     String
+  eventId   String
+  createdAt DateTime @default(now())
+  pnm       Pnm      @relation(fields: [pnmId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  @@unique([pnmId, eventId])
+}
+
+model User {
+  id             String                 @id @default(cuid())
+  email          String                 @unique
+  name           String
+  passwordHash   String
+  active         Boolean                @default(true)
+  sessionVersion Int                    @default(1)
+  createdAt      DateTime               @default(now())
+  memberships    Membership[]
+  assignments    EvaluationAssignment[] @relation("EvaluatorAssignments")
+  evaluations    Evaluation[]           @relation("EvaluatorEvaluations")
+  conflicts      ConflictDeclaration[]  @relation("ConflictDeclarer")
+  decisions      Decision[]             @relation("DecisionCreator")
+  approvals      DecisionApproval[]
+  auditEvents    AuditEvent[]
+}
+
+model RushCycle {
+  id           String        @id @default(cuid())
+  name         String
+  status       String        @default("DRAFT")
+  opensAt      DateTime?
+  closesAt     DateTime?
+  createdAt    DateTime      @default(now())
+  memberships  Membership[]
+  applications Application[]
+  rounds       Round[]
+  events       Event[]
+  decisions    Decision[]
+  auditEvents  AuditEvent[]
+}
+
+model Membership {
+  id        String    @id @default(cuid())
+  userId    String
+  cycleId   String
+  role      String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cycle     RushCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cycleId, role])
+  @@index([cycleId, role, active])
+}
+
+model Application {
+  id          String                 @id @default(cuid())
+  portalToken String                 @unique @default(cuid())
+  pnmId       String
+  cycleId     String
+  status      String                 @default("SUBMITTED")
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  pnm         Pnm                    @relation(fields: [pnmId], references: [id])
+  cycle       RushCycle              @relation(fields: [cycleId], references: [id])
+  assignments EvaluationAssignment[]
+  conflicts   ConflictDeclaration[]
+  decisions   Decision[]
+
+  @@unique([pnmId, cycleId])
+  @@index([cycleId, status])
+}
+
+model Round {
+  id          String                 @id @default(cuid())
+  cycleId     String
+  kind        String
+  name        String
+  status      String                 @default("DRAFT")
+  weight      Int
+  opensAt     DateTime?
+  closesAt    DateTime?
+  createdAt   DateTime               @default(now())
+  cycle       RushCycle              @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  rubric      Rubric?
+  assignments EvaluationAssignment[]
+
+  @@unique([cycleId, kind])
+}
+
+model Rubric {
+  id          String            @id @default(cuid())
+  roundId     String            @unique
+  version     Int               @default(1)
+  frozenAt    DateTime?
+  round       Round             @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  criteria    RubricCriterion[]
+  evaluations Evaluation[]
+}
+
+model RubricCriterion {
+  id          String            @id @default(cuid())
+  rubricId    String
+  key         String
+  name        String
+  description String
+  weight      Int
+  required    Boolean           @default(false)
+  position    Int
+  rubric      Rubric            @relation(fields: [rubricId], references: [id], onDelete: Cascade)
+  ratings     CriterionRating[]
+
+  @@unique([rubricId, key])
+  @@unique([rubricId, position])
+}
+
+model EvaluationAssignment {
+  id            String       @id @default(cuid())
+  roundId       String
+  applicationId String
+  evaluatorId   String
+  status        String       @default("ASSIGNED")
+  createdAt     DateTime     @default(now())
+  round         Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  evaluator     User         @relation("EvaluatorAssignments", fields: [evaluatorId], references: [id])
+  evaluations   Evaluation[]
+
+  @@unique([roundId, applicationId, evaluatorId])
+  @@index([evaluatorId, status])
+}
+
+model Evaluation {
+  id           String               @id @default(cuid())
+  assignmentId String
+  evaluatorId  String
+  rubricId     String
+  version      Int                  @default(1)
+  status       String               @default("DRAFT")
+  evidence     String?
+  submittedAt  DateTime?
+  supersedesId String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  assignment   EvaluationAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  evaluator    User                 @relation("EvaluatorEvaluations", fields: [evaluatorId], references: [id])
+  rubric       Rubric               @relation(fields: [rubricId], references: [id])
+  ratings      CriterionRating[]
+
+  @@unique([assignmentId, version])
+  @@index([assignmentId, status])
+}
+
+model CriterionRating {
+  id           String          @id @default(cuid())
+  evaluationId String
+  criterionId  String
+  score        Int?
+  note         String?
+  evaluation   Evaluation      @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criterion    RubricCriterion @relation(fields: [criterionId], references: [id])
+
+  @@unique([evaluationId, criterionId])
+}
+
+model ConflictDeclaration {
+  id            String      @id @default(cuid())
+  applicationId String
+  declarerId    String
+  reason        String
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  declarer      User        @relation("ConflictDeclarer", fields: [declarerId], references: [id])
+
+  @@unique([applicationId, declarerId])
+}
+
+model Decision {
+  id            String             @id @default(cuid())
+  cycleId       String
+  applicationId String
+  outcome       String
+  status        String             @default("PENDING")
+  reason        String
+  createdById   String
+  supersedesId  String?
+  createdAt     DateTime           @default(now())
+  lockedAt      DateTime?
+  releasedAt    DateTime?
+  cycle         RushCycle          @relation(fields: [cycleId], references: [id])
+  application   Application        @relation(fields: [applicationId], references: [id])
+  createdBy     User               @relation("DecisionCreator", fields: [createdById], references: [id])
+  approvals     DecisionApproval[]
+
+  @@index([cycleId, status])
+}
+
+model DecisionApproval {
+  id         String   @id @default(cuid())
+  decisionId String
+  approverId String
+  createdAt  DateTime @default(now())
+  decision   Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  approver   User     @relation(fields: [approverId], references: [id])
+
+  @@unique([decisionId, approverId])
+}
+
+model AuditEvent {
+  id         String     @id @default(cuid())
+  actorId    String?
+  cycleId    String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   String?
+  createdAt  DateTime   @default(now())
+  actor      User?      @relation(fields: [actorId], references: [id])
+  cycle      RushCycle? @relation(fields: [cycleId], references: [id])
+
+  @@index([cycleId, createdAt])
+}
+
+model LoginThrottle {
+  key             String   @id
+  failures        Int      @default(0)
+  windowStartedAt DateTime @default(now())
+  blockedUntil    DateTime?
+  updatedAt       DateTime @updatedAt
+}

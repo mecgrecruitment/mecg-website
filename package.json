@@ -1,52 +1,38 @@
 {
-  "name": "mecg-website",
+  "name": "mecgwebsite",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "predev": "node scripts/check-env.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "check:env": "node scripts/check-env.mjs",
-    "verify": "npm run check:env && npm run lint && npm run typecheck && npm run build",
-    "audit:sensitive": "bash scripts/audit-sensitive.sh",
-    "audit": "bash scripts/audit-loop.sh --once",
-    "audit:loop": "bash scripts/audit-loop.sh",
-    "test:e2e": "E2E_LOCAL_HTTP=1 npm run build && E2E_LOCAL_HTTP=1 playwright test",
-    "test:e2e:live": "playwright test",
-    "test:role-smoke": "bash scripts/role-smoke.sh",
-    "seed:users": "node scripts/print-seed-users.mjs",
-    "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
-    "db:test": "bash scripts/run-db-tests.sh",
-    "test:rls": "bash scripts/run-db-tests.sh rls_phase0.sql"
+    "test": "node --test src/lib/rush.test.js src/lib/evaluation.test.js && node --experimental-strip-types --test src/lib/authorization.test.ts src/lib/cycles.test.ts src/lib/workflow.test.ts",
+    "verify:backend": "node scripts/verify-backend.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.6.1",
-    "@supabase/ssr": "^0.12.0",
-    "@supabase/supabase-js": "^2.108.1",
-    "next": "16.3.0",
+    "@prisma/client": "^6.19.3",
+    "@react-three/fiber": "^9.7.0",
+    "next": "16.3.1",
     "qrcode": "^1.5.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "server-only": "^0.0.1",
-    "three": "^0.184.0",
-    "zod": "^4.4.3"
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "^0.185.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.184.1",
+    "@types/three": "^0.185.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.3.1",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.1"
   }
 }
