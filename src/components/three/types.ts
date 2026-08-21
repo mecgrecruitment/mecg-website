@@ -1,1 +1,1 @@
-export type GearFocus = "strategy" | "analysis" | "delivery";
+export type GearFocus = "question" | "evidence" | "recommendation";

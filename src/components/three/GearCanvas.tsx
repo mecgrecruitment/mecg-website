@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import GearAssembly from "./GearAssembly";
 import type { GearFocus } from "./types";
@@ -36,6 +36,23 @@ function FrameDriver({ active }: { active: boolean }) {
   return null;
 }
 
+function ContextGuard({ onUnavailable }: { onUnavailable: () => void }) {
+  const gl = useThree((state) => state.gl);
+  const handleUnavailable = useEffectEvent(onUnavailable);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handleContextLoss = (event: Event) => {
+      event.preventDefault();
+      handleUnavailable();
+    };
+    canvas.addEventListener("webglcontextlost", handleContextLoss);
+    return () => canvas.removeEventListener("webglcontextlost", handleContextLoss);
+  }, [gl]);
+
+  return null;
+}
+
 /**
  * Performance-guarded WebGL stage for the gear assembly.
  * - DPR clamped to [1, 1.5].
@@ -45,7 +62,13 @@ function FrameDriver({ active }: { active: boolean }) {
  * - Host fades in on Canvas onCreated; parent HeroGears keeps a sized fallback
  *   so mount cannot shift layout / block hero text LCP.
  */
-export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }) {
+export default function GearCanvas({
+  focus = "question",
+  onUnavailable,
+}: {
+  focus?: GearFocus;
+  onUnavailable: () => void;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [inViewport, setInViewport] = useState(true);
   const [tabVisible, setTabVisible] = useState(true);
@@ -87,7 +110,7 @@ export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }
       className="h-full w-full"
       style={{
         opacity: ready ? 1 : 0,
-        transition: "opacity 1.2s var(--ease-out-expo)",
+        transition: "opacity 700ms var(--ease-out-expo)",
       }}
     >
       <Canvas
@@ -98,6 +121,7 @@ export default function GearCanvas({ focus = "strategy" }: { focus?: GearFocus }
         onCreated={() => setReady(true)}
       >
         <FrameDriver active={active} />
+        <ContextGuard onUnavailable={onUnavailable} />
         <GearAssembly animated={!reduced} focus={focus} />
       </Canvas>
     </div>

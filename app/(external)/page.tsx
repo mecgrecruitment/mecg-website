@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
+import HeroGears from "./components/HeroGears";
 import { SectionHeading } from "./components/SectionHeading";
 
 const title = "MECG | Michigan Engineering Consulting Group";
@@ -30,21 +32,26 @@ const photos = [
 export default function Home() {
   return (
     <main>
-      <section className="relative flex min-h-[72svh] items-center overflow-hidden border-b border-white/10 px-5 pb-20 pt-36 md:px-8 md:pb-28 md:pt-44">
+      <section className="relative flex min-h-[82svh] items-center overflow-hidden border-b border-white/10 px-5 pb-16 pt-32 md:px-8 md:pb-20 md:pt-40">
         <div className="page-hero-glow page-hero-glow--mixed" aria-hidden="true" />
-        <div className="container relative z-10">
-          <p className="text-sm font-semibold text-[var(--orange-soft)]" data-reveal>
-            Michigan Engineering Consulting Group
-          </p>
-          <h1 className="mt-5 max-w-5xl font-display text-5xl font-semibold leading-[1.02] tracking-[-0.05em] text-white md:text-7xl lg:text-8xl" data-split>
-            Students solving real business challenges
-          </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-white/65 md:text-xl" data-reveal>
-            MECG brings University of Michigan students together to deliver thoughtful, data-driven work for organizations across the country.
-          </p>
-          <div className="mt-9 flex flex-wrap gap-3" data-reveal>
-            <a href="/prospective-members" className="button-primary focus-ring">Join MECG</a>
-            <a href="/client-services" className="button-secondary focus-ring">Work with us</a>
+        <div className="container relative z-10 grid items-center gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:gap-4">
+          <div className="relative z-10">
+            <p className="text-sm font-semibold text-[var(--orange-soft)]" data-reveal>
+              Michigan Engineering Consulting Group
+            </p>
+            <h1 className="mt-5 max-w-3xl text-balance font-display text-5xl font-semibold leading-[1.02] tracking-[-0.05em] text-white md:text-7xl lg:text-[5.5rem]" data-split>
+              One problem. A lot of ways in.
+            </h1>
+            <p className="mt-7 max-w-xl text-pretty text-lg leading-8 text-white/65 md:text-xl" data-reveal>
+              Students across disciplines work as one team to answer real client questions with clear, evidence-backed recommendations.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3" data-reveal>
+              <Link href="/client-services" className="button-primary focus-ring">Work with MECG</Link>
+              <Link href="/prospective-members" className="button-secondary focus-ring">Join MECG</Link>
+            </div>
+          </div>
+          <div className="h-[34rem] min-w-0 lg:h-[42rem]" data-reveal>
+            <HeroGears />
           </div>
         </div>
       </section>
@@ -118,8 +125,8 @@ export default function Home() {
           <div className="mt-12 flex flex-wrap items-center justify-between gap-6 border-t border-white/10 pt-8">
             <p className="max-w-xl text-lg text-white/60">Interested in joining MECG or working with one of our project teams?</p>
             <div className="flex gap-3">
-              <a href="/prospective-members" className="button-primary focus-ring">Prospective members</a>
-              <a href="/contact" className="button-secondary focus-ring">Contact us</a>
+              <Link href="/prospective-members" className="button-primary focus-ring">Prospective members</Link>
+              <Link href="/contact" className="button-secondary focus-ring">Contact us</Link>
             </div>
           </div>
         </div>

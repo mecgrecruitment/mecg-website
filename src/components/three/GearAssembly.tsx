@@ -55,6 +55,7 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
   const gearARef = useRef<THREE.Group>(null);
   const gearBRef = useRef<THREE.Group>(null);
   const gearCRef = useRef<THREE.Group>(null);
+  const segmentRefs = useRef<Array<THREE.Mesh | null>>([]);
 
   const geomA = useMemo(
     () =>
@@ -101,6 +102,16 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
     if (gearCRef.current)
       gearCRef.current.rotation.z = meshedRotation(theta, GEAR_A.teeth, GEAR_C.teeth, PHI_C);
 
+    const stageOffset = focus === "question" ? 0.34 : focus === "evidence" ? 0.14 : 0;
+    segmentRefs.current.forEach((segment, index) => {
+      if (!segment) return;
+      const angle = (index / 6) * Math.PI * 2;
+      const introOffset = Math.max(0, 1 - state.clock.elapsedTime / 1.25) * 0.58;
+      const offset = stageOffset + introOffset;
+      segment.position.x = THREE.MathUtils.lerp(segment.position.x, Math.cos(angle) * offset, Math.min(1, delta * 4));
+      segment.position.y = THREE.MathUtils.lerp(segment.position.y, Math.sin(angle) * offset, Math.min(1, delta * 4));
+    });
+
     if (groupRef.current) {
       const targetY = state.pointer.x * 0.22;
       const targetX = -0.42 - state.pointer.y * 0.14;
@@ -108,7 +119,7 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
         (targetY - groupRef.current.rotation.y) * Math.min(1, delta * 3);
       groupRef.current.rotation.x +=
         (targetX - groupRef.current.rotation.x) * Math.min(1, delta * 3);
-      const targetScale = focus === "strategy" ? 1 : focus === "analysis" ? 1.04 : 0.96;
+      const targetScale = focus === "question" ? 0.96 : focus === "evidence" ? 1.03 : 1;
       const nextScale = THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, Math.min(1, delta * 4));
       groupRef.current.scale.setScalar(nextScale);
     }
@@ -138,6 +149,19 @@ export default function GearAssembly({ animated, focus }: GearAssemblyProps) {
             emissiveIntensity={0.18}
           />
         </mesh>
+        {Array.from({ length: 6 }, (_, index) => {
+          const angle = (index / 6) * Math.PI * 2;
+          return (
+            <mesh
+              key={index}
+              ref={(node) => { segmentRefs.current[index] = node; }}
+              position={animated ? [Math.cos(angle) * 0.58, Math.sin(angle) * 0.58, 0.31] : [0, 0, 0.31]}
+            >
+              <ringGeometry args={[GEAR_A.radius * 0.68, GEAR_A.radius * 0.84, 24, 1, angle + 0.035, Math.PI / 3 - 0.07]} />
+              <meshStandardMaterial color="#f5823a" metalness={0.72} roughness={0.3} emissive="#9c4118" emissiveIntensity={0.24} />
+            </mesh>
+          );
+        })}
         {/* Floating hub inside the bore, like the 2D mark's center disc. */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[GEAR_A.radius * 0.34, GEAR_A.radius * 0.34, 0.62, 36]} />
