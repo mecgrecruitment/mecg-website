@@ -8,11 +8,19 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test src/lib/rush.test.js src/lib/evaluation.test.js && node --experimental-strip-types --test src/lib/authorization.test.ts src/lib/cycles.test.ts src/lib/workflow.test.ts",
-    "verify:backend": "node scripts/verify-backend.mjs"
+    "verify:backend": "node scripts/verify-backend.mjs",
+    "verify:workflow": "node scripts/verify-full-workflow.mjs",
+    "test:supabase": "supabase test db --linked supabase/tests/rush_foundation.sql",
+    "supabase:link": "supabase link --project-ref chrxtsohxazngabdcpzb",
+    "supabase:sync-env": "node scripts/sync-supabase-public-key.mjs",
+    "supabase:verify-project": "node scripts/verify-supabase-project.mjs",
+    "supabase:types": "supabase gen types typescript --linked --schema rush > src/lib/supabase/database.types.ts",
+    "supabase:lint": "supabase db lint --linked --schema rush --level error --fail-on error"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3",
     "@react-three/fiber": "^9.7.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
     "next": "16.3.1",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
@@ -28,7 +36,6 @@
     "@types/three": "^0.185.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

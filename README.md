@@ -7,11 +7,12 @@ A cycle-based rush system for applications, event attendance, structured Member 
 ```bash
 npm install
 cp .env.example .env
-npx prisma migrate dev
+npm run supabase:link
+npm run supabase:verify-project
 npm run dev
 ```
 
-Open `http://localhost:3000/admin/login`. When the user table is empty, signing in with `OWNER_EMAIL` and `ADMIN_PASSWORD` creates the first named owner account. The Board dashboard then creates the first rush cycle and its versioned Speed Dating and Group Case rubrics.
+Open `http://localhost:3000/admin/login` and sign in with a Supabase Auth account. The first cycle can only be created by the existing MECG Recruitment board account. Later accounts are created from the Board dashboard.
 
 ## Roles and access
 
@@ -37,13 +38,12 @@ Attendance is operational only. It does not contribute to evaluation rankings or
 
 ## Environment variables
 
-- `DATABASE_URL` points to the Prisma database.
-- `OWNER_EMAIL` is the bootstrap owner's email when no users exist.
-- `ADMIN_PASSWORD` is used once to create the bootstrap owner.
-- `SESSION_SECRET` signs expiring user sessions.
+- `NEXT_PUBLIC_SUPABASE_URL` is the MECG Recruitment project URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is the project's publishable browser key.
+- `SUPABASE_SERVICE_ROLE_KEY` is server-only and is used for account administration and project verification.
 - `BASE_URL` optionally sets the host encoded in check-in QR codes.
 
-Use a long random `SESSION_SECRET` and replace the bootstrap password before deployment.
+Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or prefix it with `NEXT_PUBLIC_`.
 
 ## Verification
 
@@ -52,8 +52,15 @@ npm test
 npx tsc --noEmit
 npm run lint
 npm run build
+npm run supabase:verify-project
+npm run verify:backend
 ```
+
+`supabase:verify-project` fails unless both `.env.local` and the Supabase CLI
+link point to the healthy MECG Recruitment project. Run `npm run supabase:link`
+to repair a missing or incorrect local CLI link. Run `npm run supabase:sync-env`
+to replace a stale browser key with MECG Recruitment's publishable key.
 
 For the full HTTP state-machine check, start the development server and run `npm run verify:backend` in another terminal. The verifier creates uniquely named records, checks privacy and authorization failures as well as the successful path, and removes its records afterward.
 
-The scoring functions are pure and tested independently from Prisma. The implementation plan and remaining policy decisions are documented in `docs/RUSH_PLATFORM_PLAN.md`.
+The scoring functions are pure and tested independently from Supabase. Database migrations and RLS policies live in `supabase/migrations`.

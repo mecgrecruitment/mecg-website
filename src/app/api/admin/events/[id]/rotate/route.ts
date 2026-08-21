@@ -1,23 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
-import { hasPermission } from "@/lib/authorization";
+import { createClient } from "@/lib/supabase/server";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const user = await currentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await currentUser())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const existing = await prisma.event.findUnique({ where: { id } });
-  if (!existing?.cycleId || !hasPermission(user.memberships, existing.cycleId, "MANAGE_CYCLE")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-  const event = await prisma.$transaction(async (tx) => {
-    const updated = await tx.event.update({ where: { id }, data: { checkinToken: crypto.randomUUID() } });
-    await tx.auditEvent.create({ data: { actorId: user.id, cycleId: existing.cycleId, action: "CHECKIN_TOKEN_ROTATED", resource: "Event", resourceId: id } });
-    return updated;
-  });
-
-  return NextResponse.json({ checkinToken: event.checkinToken });
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("rotate_event_token", { target_event_id: id });
+  if (error) return NextResponse.json({ error: error.message }, { status: error.code === "42501" ? 403 : 400 });
+  return NextResponse.json({ checkinToken: data });
 }

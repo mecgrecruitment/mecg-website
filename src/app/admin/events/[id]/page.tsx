@@ -1,47 +1,23 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import QRCode from "qrcode";
-import { prisma } from "@/lib/db";
+import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
 import RotateButton from "./rotate-button";
 import { requireBoard } from "@/lib/auth";
 
-export default async function EventDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   await requireBoard();
   const { id } = await params;
-  const event = await prisma.event.findUnique({ where: { id } });
+  const { token } = await searchParams;
+  const supabase = await createClient();
+  const { data: event } = await supabase.from("events").select("id,name,starts_at,checkin_opens_at,checkin_closes_at,checkins(count)").eq("id", id).maybeSingle();
   if (!event) notFound();
-
-  const checkinCount = await prisma.checkin.count({ where: { eventId: id } });
-
   const headerList = await headers();
   const host = headerList.get("host");
   const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
   const baseUrl = process.env.BASE_URL ?? `${protocol}://${host}`;
-  const checkinUrl = `${baseUrl}/checkin/${event.checkinToken}`;
-  const qrDataUrl = await QRCode.toDataURL(checkinUrl);
-
-  return (
-    <main className="flex-1 p-8 max-w-md mx-auto w-full flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">{event.name}</h1>
-      <p className="text-sm text-gray-500">{event.date.toLocaleString()}</p>
-      <p className="text-sm text-gray-500">Operational attendance only</p>
-      <p className="text-sm text-gray-500">
-        Check-in window: {event.checkinOpensAt.toLocaleString()} –{" "}
-        {event.checkinClosesAt.toLocaleString()}
-      </p>
-      <p className="text-sm">
-        Check-ins so far: <strong>{checkinCount}</strong>
-      </p>
-
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={qrDataUrl} alt="Check-in QR code" width={256} height={256} />
-      <p className="text-xs break-all text-gray-500">{checkinUrl}</p>
-
-      <RotateButton eventId={event.id} />
-    </main>
-  );
+  const checkinUrl = token ? `${baseUrl}/checkin/${token}` : null;
+  const qrDataUrl = checkinUrl ? await QRCode.toDataURL(checkinUrl) : null;
+  return <main className="flex-1 p-8 max-w-md mx-auto w-full flex flex-col gap-4"><h1 className="text-xl font-semibold">{event.name}</h1><p className="text-sm text-gray-500">{new Date(event.starts_at).toLocaleString()}</p><p className="text-sm text-gray-500">Operational attendance only</p><p className="text-sm text-gray-500">Check-in window: {new Date(event.checkin_opens_at).toLocaleString()} – {new Date(event.checkin_closes_at).toLocaleString()}</p><p className="text-sm">Check-ins so far: <strong>{event.checkins[0]?.count ?? 0}</strong></p>{qrDataUrl && <><Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} /><p className="text-xs break-all text-gray-500">{checkinUrl}</p></>}{!qrDataUrl && <p className="rounded bg-amber-50 p-3 text-sm text-amber-900">For security, the raw check-in token is shown only when created or rotated. Rotate it to display a new QR code.</p>}<RotateButton eventId={event.id} /></main>;
 }

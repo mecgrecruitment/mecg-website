@@ -4,11 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ApplyPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
+  const [password, setPassword] = useState("");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -18,23 +20,56 @@ export default function ApplyPage() {
     event.preventDefault();
     setError("");
     setPending(true);
-    const response = await fetch("/api/apply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, contact, consent }),
-    });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) {
-      setError(body?.error ?? "Could not submit application");
+    try {
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email: contact.trim(), password });
+        if (signInError) {
+          setError("Sign in failed. Create an account first if you have not applied before.");
+          return;
+        }
+      }
+      const response = await fetch("/api/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, contact, consent }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Could not submit application");
+        return;
+      }
+      if (response.status === 202) {
+        setAccepted(true);
+        return;
+      }
+      router.push("/applicant");
+    } catch {
+      setError("Could not submit application. Try again.");
+    } finally {
       setPending(false);
-      return;
     }
-    if (response.status === 202) {
-      setAccepted(true);
+  }
+
+  async function createAccount() {
+    setError("");
+    setPending(true);
+    try {
+      const supabase = createClient();
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: contact.trim(),
+        password,
+        options: { data: { display_name: name.trim() }, emailRedirectTo: `${window.location.origin}/auth/callback?next=/apply` },
+      });
+      if (signUpError) return setError(signUpError.message);
+      if (!data.session) return setError("Check your email to verify the account, then return here and submit.");
+      setError("Account created. Submit the application now.");
+    } catch {
+      setError("Could not create the account. Try again.");
+    } finally {
       setPending(false);
-      return;
     }
-    router.push(`/applicant/${body.portalToken}`);
   }
 
   return (
@@ -71,17 +106,21 @@ export default function ApplyPage() {
               <label className="block text-sm font-medium">Full name
                 <input value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
               </label>
-              <label className="block text-sm font-medium">Email or phone
-                <input value={contact} onChange={(event) => setContact(event.target.value)} required autoComplete="email" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+              <label className="block text-sm font-medium">Verified email
+                <input type="email" value={contact} onChange={(event) => setContact(event.target.value)} required autoComplete="email" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+              </label>
+              <label className="block text-sm font-medium">Account password
+                <input type="password" minLength={12} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
               </label>
               <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-mecg-navy/65">
                 <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required className="mt-1 h-4 w-4 accent-mecg-orange" />
                 <span>I consent to MECG using this information to administer the current rush cycle.</span>
               </label>
               {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-              <button disabled={pending} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="submit" disabled={pending} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
                 {pending ? "Submitting..." : "Submit application"}
               </button>
+              <button type="button" onClick={createAccount} disabled={pending || !name || !contact || password.length < 12} className="w-full rounded-xl border border-mecg-navy/15 px-4 py-3 text-sm font-semibold disabled:opacity-50">Create applicant account</button>
             </form>
           )}
           <p className="mt-6 text-center text-xs leading-5 text-mecg-navy/40">Questions? Email <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a>.</p>

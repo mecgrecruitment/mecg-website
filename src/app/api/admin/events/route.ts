@@ -1,50 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
-import { hasPermission } from "@/lib/authorization";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json().catch(() => null);
-  const { name, date, checkinOpensAt, checkinClosesAt } = body ?? {};
-  const requestedCycleId = typeof body?.cycleId === "string" ? body.cycleId : null;
-  const cycleId = selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE", requestedCycleId);
-  if (!cycleId || !hasPermission(user.memberships, cycleId, "MANAGE_CYCLE")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const cycle = await prisma.rushCycle.findUnique({ where: { id: cycleId } });
-  if (!cycle || ["CLOSED", "ARCHIVED"].includes(cycle.status)) return NextResponse.json({ error: "This cycle no longer accepts events" }, { status: 409 });
-
-  if (
-    typeof name !== "string" ||
-    !name.trim() ||
-    name.trim().length > 160 ||
-    !date ||
-    !checkinOpensAt ||
-    !checkinClosesAt
-  ) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-  const eventDate = new Date(date);
-  const opensAt = new Date(checkinOpensAt);
-  const closesAt = new Date(checkinClosesAt);
-  if ([eventDate, opensAt, closesAt].some((value) => Number.isNaN(value.getTime())) || opensAt > closesAt) {
-    return NextResponse.json({ error: "Invalid event dates" }, { status: 400 });
-  }
-
-  const event = await prisma.$transaction(async (tx) => {
-    const created = await tx.event.create({ data: {
-      name: name.trim(),
-      date: eventDate,
-      weight: 0,
-      checkinOpensAt: opensAt,
-      checkinClosesAt: closesAt,
-      cycleId: cycle.id,
-      status: "PUBLISHED",
-    }});
-    await tx.auditEvent.create({ data: { actorId: user.id, cycleId: cycle.id, action: "EVENT_CREATED", resource: "Event", resourceId: created.id } });
-    return created;
-  });
-
-  return NextResponse.json({ id: event.id }, { status: 201 });
+  const cycleId = selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE", typeof body?.cycleId === "string" ? body.cycleId : null);
+  if (!cycleId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const dates = [body?.date, body?.checkinOpensAt, body?.checkinClosesAt].map((value) => new Date(value));
+  if (typeof body?.name !== "string" || !body.name.trim() || dates.some((date) => Number.isNaN(date.getTime()))) return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("create_event", { target_cycle_id: cycleId, event_name: body.name, event_starts_at: dates[0].toISOString(), opens_at: dates[1].toISOString(), closes_at: dates[2].toISOString() });
+  if (error) return NextResponse.json({ error: error.message }, { status: error.code === "42501" ? 403 : error.code === "55000" ? 409 : 400 });
+  return NextResponse.json(data, { status: 201 });
 }

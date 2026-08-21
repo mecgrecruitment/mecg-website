@@ -5,19 +5,17 @@ import { useState } from "react";
 type Status = "idle" | "submitting" | "success" | "already" | "error";
 
 export default function CheckinForm({ token }: { token: string }) {
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (status === "submitting") return;
     setStatus("submitting");
     try {
       const res = await fetch(`/api/checkin/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, contact }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -33,35 +31,20 @@ export default function CheckinForm({ token }: { token: string }) {
   }
 
   if (status === "success") {
-    return <p className="text-green-700">You&apos;re checked in. See you there!</p>;
+    return <p className="rounded-xl bg-green-50 p-5 text-sm text-green-800">You&apos;re checked in. See you there!</p>;
   }
   if (status === "already") {
-    return <p className="text-blue-700">You&apos;re already checked in for this event.</p>;
+    return <p className="rounded-xl bg-mecg-blue/10 p-5 text-sm text-mecg-navy">You&apos;re already checked in for this event.</p>;
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-xs">
-      <input
-        type="text"
-        placeholder="Full name"
-        required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      <input
-        type="text"
-        placeholder="Email or phone"
-        required
-        value={contact}
-        onChange={(e) => setContact(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      {status === "error" && <p className="text-red-600 text-sm">{errorMessage}</p>}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <p className="text-sm text-mecg-navy/60">Check-in uses your signed-in applicant account.</p>
+      {status === "error" && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{errorMessage}</p>}
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="bg-black text-white rounded px-3 py-2 disabled:opacity-50"
+        className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
       >
         {status === "submitting" ? "Checking in..." : "Check in"}
       </button>

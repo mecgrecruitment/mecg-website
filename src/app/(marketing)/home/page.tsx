@@ -5,6 +5,7 @@ import SectionLabel from "@/components/section-label";
 import MiniSymbol from "@/components/mini-symbol";
 import { MemberCollage, MemberFaces } from "@/components/member-collage";
 import StatsBand from "@/components/stats-band";
+import { PROJECTS } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title: "Michigan Engineering Consulting Group",
@@ -24,8 +25,8 @@ export default function HomePage() {
               <span className="block">business challenges.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/65 sm:text-xl">
-              MECG brings University of Michigan students together to deliver
-              thoughtful, data-driven work for organizations across the country.
+              MECG brings University of Michigan students together for
+              semester-long research and analysis with organizations across the country.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/work" className="button-primary">Explore our work <span aria-hidden="true">→</span></Link>
@@ -37,10 +38,48 @@ export default function HomePage() {
         <StatsBand />
       </div>
 
+      <section className="border-b border-mecg-navy/10 px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <SectionLabel number="01">Project work</SectionLabel>
+              <h2 className="mt-5 max-w-xl text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+                Start with the decision.
+              </h2>
+            </div>
+            <div>
+              <p className="max-w-xl text-pretty text-lg leading-8 text-mecg-navy/60">
+                MECG teams shape each engagement around one question, then build the evidence and working materials needed to answer it.
+              </p>
+              <Link href="/work" className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-mecg-blue hover:text-mecg-navy">
+                See the full engagement <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+          <div className="mt-9 grid gap-5 lg:grid-cols-3">
+            {PROJECTS.map((project) => (
+              <article key={project.number} className="flex min-h-80 flex-col justify-between overflow-hidden rounded-[2rem] bg-mecg-navy p-7 text-white sm:p-8">
+                <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange">{project.eyebrow}</p>
+                    <span className="font-mono text-xs text-white/35">{project.number}</span>
+                  </div>
+                  <h3 className="mt-8 text-balance text-3xl font-semibold tracking-[-0.04em]">{project.title}</h3>
+                </div>
+                <p className="mt-8 text-sm leading-6 text-white/50">{project.summary}</p>
+              </article>
+            ))}
+          </div>
+          <p className="mt-5 max-w-3xl text-sm leading-6 text-mecg-navy/45">
+            These examples describe the kinds of questions MECG can support. Client-approved case studies and results will be published separately as they become available.
+          </p>
+        </div>
+      </section>
+
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <div>
-            <SectionLabel number="01">Inside MECG</SectionLabel>
+            <SectionLabel number="02">Inside MECG</SectionLabel>
             <h2 className="mt-5 max-w-xl text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
               Real teams. Real deadlines.
             </h2>
@@ -72,7 +111,7 @@ export default function HomePage() {
       <section className="overflow-hidden bg-mecg-navy px-6 py-16 text-white sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <div>
-            <SectionLabel number="02">Alumni</SectionLabel>
+            <SectionLabel number="03">Alumni</SectionLabel>
             <MiniSymbol name="orbit" className="mt-7 h-8 w-8 text-mecg-orange" />
             <h2 className="mt-5 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
               The work travels with them.
@@ -100,9 +139,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="px-6 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <SectionLabel number="04">What you leave with</SectionLabel>
+          <div className="mt-8 grid gap-px overflow-hidden rounded-[2rem] bg-mecg-navy/10 lg:grid-cols-3">
+            {[
+              ["For clients", "A recommendation tied to the decision, plus the research and working files behind it.", "/work", "See the engagement"],
+              ["For members", "Repeated practice with research, analysis, client communication, and team accountability.", "/join", "See member experience"],
+              ["For campus", "A place where students across majors solve problems together and learn from different ways of thinking.", "/about", "Read about MECG"],
+            ].map(([title, copy, href, link]) => (
+              <article key={title} className="flex min-h-64 flex-col justify-between bg-white p-7 sm:p-8">
+                <div><p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange">{title}</p><p className="mt-5 text-xl leading-8 text-mecg-navy/65">{copy}</p></div>
+                <Link href={href} className="mt-7 text-sm font-semibold text-mecg-blue">{link} <span aria-hidden="true">→</span></Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-mecg-navy/10 px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
-          <SectionLabel number="03">Choose your path</SectionLabel>
+          <SectionLabel number="05">Choose your path</SectionLabel>
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             <Link href="/contact" className="group relative overflow-hidden rounded-[2rem] bg-mecg-navy p-7 text-white sm:p-9">
               <MiniSymbol name="axis" className="absolute bottom-9 right-9 h-20 w-20 text-mecg-blue/35" />

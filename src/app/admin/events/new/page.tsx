@@ -16,24 +16,28 @@ export default function NewEventPage() {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-    const res = await fetch("/api/admin/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        date,
-        checkinOpensAt: opensAt,
-        checkinClosesAt: closesAt,
-      }),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Something went wrong");
+    try {
+      const res = await fetch("/api/admin/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          date,
+          checkinOpensAt: opensAt,
+          checkinClosesAt: closesAt,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.id || !data?.checkinToken) {
+        setError(data?.error ?? "Something went wrong");
+        return;
+      }
+      router.push(`/admin/events/${data.id}?token=${encodeURIComponent(data.checkinToken)}`);
+    } catch {
+      setError("Something went wrong");
+    } finally {
       setSubmitting(false);
-      return;
     }
-    const data = await res.json();
-    router.push(`/admin/events/${data.id}`);
   }
 
   return (

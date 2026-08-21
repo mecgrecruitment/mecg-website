@@ -24,7 +24,7 @@ export default function ProjectCarousel() {
 
   return (
     <div>
-      <div ref={trackRef} onScroll={updateActive} className="project-track flex snap-x snap-mandatory overflow-x-auto rounded-[2rem] bg-mecg-navy shadow-[0_24px_70px_rgba(7,13,31,0.15)]" aria-label="Case study concepts">
+      <div ref={trackRef} onScroll={updateActive} className="project-track flex snap-x snap-mandatory overflow-x-auto rounded-[2rem] bg-mecg-navy shadow-[0_24px_70px_rgba(7,13,31,0.15)]" aria-label="Examples of project types">
         {PROJECTS.map((project, projectIndex) => (
           <article key={project.number} className="grid min-w-full snap-start text-white lg:grid-cols-[1.15fr_0.85fr]">
             <div className={`relative min-h-72 overflow-hidden bg-gradient-to-br ${project.tone} p-7 sm:p-9 lg:min-h-[28rem]`}>
@@ -37,7 +37,7 @@ export default function ProjectCarousel() {
                 />
               ) : null}
               <div className="relative flex h-full flex-col justify-between">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/60">Case study / {project.number}</p>
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/60">Project example / {project.number}</p>
                 <div>
                   <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange">{project.eyebrow}</p>
                   <h3 className="mt-4 max-w-xl text-balance text-3xl font-medium tracking-[-0.03em] sm:text-5xl">{project.title}</h3>
@@ -46,7 +46,7 @@ export default function ProjectCarousel() {
             </div>
             <div className="flex flex-col justify-between border-t border-white/10 p-7 sm:p-9 lg:border-l lg:border-t-0">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/45">Content direction</p>
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/45">How the work takes shape</p>
                 <div className="mt-6 divide-y divide-white/10 border-y border-white/10">
                   {project.details.map(([label, copy], index) => (
                     <div key={label} className="grid gap-2 py-4 sm:grid-cols-[2.25rem_7rem_1fr] sm:gap-4">

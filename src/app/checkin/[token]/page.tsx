@@ -1,36 +1,14 @@
-import { prisma } from "@/lib/db";
-import { isCheckinWindowOpen } from "@/lib/rush.js";
+import { createClient } from "@/lib/supabase/server";
 import CheckinForm from "./checkin-form";
+import PortalShell from "@/components/portal-shell";
 
-export default async function CheckinPage({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+export default async function CheckinPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const event = await prisma.event.findUnique({ where: { checkinToken: token } });
-
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("event_for_token", { raw_token: token });
+  const event = data?.[0];
   if (!event) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-        <p>This check-in link isn&apos;t valid.</p>
-      </main>
-    );
+    return <PortalShell eyebrow="Event check-in" title="This link is not valid." description="Ask an MECG Board Member for the current event check-in link."><p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">The event may have ended or its check-in link may have been replaced.</p></PortalShell>;
   }
-
-  const open = isCheckinWindowOpen(event, new Date());
-
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-      <h1 className="text-xl font-semibold">{event.name}</h1>
-      <p className="text-sm text-gray-500">
-        {event.date.toLocaleString()}
-      </p>
-      {open ? (
-        <CheckinForm token={token} />
-      ) : (
-        <p className="text-gray-600">Check-in is not open for this event right now.</p>
-      )}
-    </main>
-  );
+  return <PortalShell eyebrow="Event check-in" title={event.name} description={new Date(event.starts_at).toLocaleString()}>{event.is_open ? <CheckinForm token={token} /> : <p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">Check-in is not open for this event right now.</p>}</PortalShell>;
 }
