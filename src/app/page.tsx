@@ -40,10 +40,24 @@ export default function Splash() {
         }`}
       >
         <div className="fade-up" style={{ animationDelay: "0ms" }}>
-          <Image src="/logos/mecg-color.svg" alt="MECG Consulting" width={240} height={72} priority />
+          <Image
+            src="/logos/mecg-color.svg"
+            alt="MECG Consulting"
+            width={220}
+            height={66}
+            priority
+            className="h-12 w-auto sm:h-14"
+            style={{ width: "auto" }}
+          />
         </div>
+        <p
+          className="fade-up mt-10 text-[0.72rem] font-medium uppercase tracking-[0.22em] text-mecg-navy/45"
+          style={{ animationDelay: "40ms" }}
+        >
+          University of Michigan · Ann Arbor
+        </p>
         <h1
-          className="hero-title fade-up mt-9 max-w-4xl text-balance text-5xl font-semibold leading-[0.92] tracking-[-0.06em] text-mecg-navy sm:text-7xl lg:text-[6rem]"
+          className="hero-title fade-up mt-4 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-mecg-navy sm:text-6xl"
           style={{ animationDelay: "50ms" }}
         >
           Engineering ideas
@@ -54,7 +68,7 @@ export default function Splash() {
           <button
             type="button"
             onClick={enter}
-            className="button-primary"
+            className="button-editorial"
           >
             Explore MECG <span className="translate-x-0.5" aria-hidden="true">→</span>
           </button>

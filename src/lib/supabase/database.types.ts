@@ -20,6 +20,7 @@ export type Database = {
           cycle_id: string
           id: string
           pnm_id: string
+          resume_storage_path: string | null
           status: Database["rush"]["Enums"]["application_status"]
           submitted_at: string | null
           updated_at: string
@@ -29,6 +30,7 @@ export type Database = {
           cycle_id: string
           id?: string
           pnm_id: string
+          resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
           updated_at?: string
@@ -38,6 +40,7 @@ export type Database = {
           cycle_id?: string
           id?: string
           pnm_id?: string
+          resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
           updated_at?: string
@@ -57,7 +60,118 @@ export type Database = {
             referencedRelation: "pnms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "application_responses_application_id_fkey"
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "application_responses"
+            referencedColumns: ["application_id"]
+          },
         ]
+      }
+      application_questions: {
+        Row: {
+          cycle_id: string
+          id: string
+          input_type: string
+          key: string
+          options: Json
+          prompt: string
+          required: boolean
+          sort_order: number
+        }
+        Insert: {
+          cycle_id: string
+          id?: string
+          input_type?: string
+          key: string
+          options?: Json
+          prompt: string
+          required?: boolean
+          sort_order?: number
+        }
+        Update: {
+          cycle_id?: string
+          id?: string
+          input_type?: string
+          key?: string
+          options?: Json
+          prompt?: string
+          required?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      application_responses: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          question_key: string
+          question_text: string
+          response_text: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          question_key: string
+          question_text: string
+          response_text: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          question_key?: string
+          question_text?: string
+          response_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_responses_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buddy_slots: {
+        Row: { cycle_id: string; ends_at: string; id: string; member_id: string; starts_at: string }
+        Insert: { cycle_id: string; ends_at: string; id?: string; member_id: string; starts_at: string }
+        Update: { cycle_id?: string; ends_at?: string; id?: string; member_id?: string; starts_at?: string }
+        Relationships: []
+      }
+      case_groups: {
+        Row: { cycle_id: string; id: string; name: string; prompt: string }
+        Insert: { cycle_id: string; id?: string; name: string; prompt?: string }
+        Update: { cycle_id?: string; id?: string; name?: string; prompt?: string }
+        Relationships: []
+      }
+      case_group_members: {
+        Row: { application_id: string; group_id: string }
+        Insert: { application_id: string; group_id: string }
+        Update: { application_id?: string; group_id?: string }
+        Relationships: []
+      }
+      event_slots: {
+        Row: { capacity: number; ends_at: string; event_id: string; id: string; starts_at: string }
+        Insert: { capacity?: number; ends_at: string; event_id: string; id?: string; starts_at: string }
+        Update: { capacity?: number; ends_at?: string; event_id?: string; id?: string; starts_at?: string }
+        Relationships: []
+      }
+      interest_signups: {
+        Row: { class_year: string | null; cycle_id: string; email: string; how_heard: string | null; id: string; name: string; uniqname: string | null }
+        Insert: { class_year?: string | null; cycle_id: string; email: string; how_heard?: string | null; id?: string; name: string; uniqname?: string | null }
+        Update: { class_year?: string | null; cycle_id?: string; email?: string; how_heard?: string | null; id?: string; name?: string; uniqname?: string | null }
+        Relationships: []
+      }
+      slot_rsvps: {
+        Row: { application_id: string; created_at: string; id: string; slot_id: string }
+        Insert: { application_id: string; created_at?: string; id?: string; slot_id: string }
+        Update: { application_id?: string; created_at?: string; id?: string; slot_id?: string }
+        Relationships: []
       }
       audit_events: {
         Row: {
@@ -293,6 +407,7 @@ export type Database = {
           cycle_id: string
           id: string
           locked_at: string | null
+          communication_preview: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
           released_at: string | null
@@ -306,6 +421,7 @@ export type Database = {
           cycle_id: string
           id?: string
           locked_at?: string | null
+          communication_preview?: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
           released_at?: string | null
@@ -319,6 +435,7 @@ export type Database = {
           cycle_id?: string
           id?: string
           locked_at?: string | null
+          communication_preview?: string | null
           outcome?: Database["rush"]["Enums"]["decision_outcome"]
           reason?: string
           released_at?: string | null
@@ -489,12 +606,15 @@ export type Database = {
           checkin_token_digest: string
           created_at: string
           cycle_id: string | null
+          ends_at: string | null
           id: string
           kind: string
+          location: string | null
           name: string
           starts_at: string
           status: Database["rush"]["Enums"]["event_status"]
           updated_at: string
+          visibility: string
         }
         Insert: {
           checkin_closes_at: string
@@ -502,12 +622,15 @@ export type Database = {
           checkin_token_digest: string
           created_at?: string
           cycle_id?: string | null
+          ends_at?: string | null
           id?: string
           kind?: string
+          location?: string | null
           name: string
           starts_at: string
           status?: Database["rush"]["Enums"]["event_status"]
           updated_at?: string
+          visibility?: string
         }
         Update: {
           checkin_closes_at?: string
@@ -515,12 +638,15 @@ export type Database = {
           checkin_token_digest?: string
           created_at?: string
           cycle_id?: string | null
+          ends_at?: string | null
           id?: string
           kind?: string
+          location?: string | null
           name?: string
           starts_at?: string
           status?: Database["rush"]["Enums"]["event_status"]
           updated_at?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -604,29 +730,44 @@ export type Database = {
       pnms: {
         Row: {
           auth_user_id: string | null
+          class_year: string | null
           contact: string
           created_at: string
           id: string
+          linkedin_url: string | null
+          major: string | null
           name: string
           normalized_contact: string
+          phone: string | null
+          preferred_name: string | null
           updated_at: string
         }
         Insert: {
           auth_user_id?: string | null
+          class_year?: string | null
           contact: string
           created_at?: string
           id?: string
+          linkedin_url?: string | null
+          major?: string | null
           name: string
           normalized_contact: string
+          phone?: string | null
+          preferred_name?: string | null
           updated_at?: string
         }
         Update: {
           auth_user_id?: string | null
+          class_year?: string | null
           contact?: string
           created_at?: string
           id?: string
+          linkedin_url?: string | null
+          major?: string | null
           name?: string
           normalized_contact?: string
+          phone?: string | null
+          preferred_name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -825,8 +966,10 @@ export type Database = {
           application_id: string
           cycle_name: string
           display_status: string
+          has_resume: boolean
           released_at: string
           released_outcome: Database["rush"]["Enums"]["decision_outcome"]
+          responses: Json
         }[]
       }
       approve_decision: {
@@ -847,6 +990,8 @@ export type Database = {
       }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       create_cycle: { Args: { cycle_name: string }; Returns: string }
+      create_resume_upload: { Args: never; Returns: string }
+      intake_schema: { Args: never; Returns: Json }
       create_decision: {
         Args: {
           decision_reason: string
@@ -859,13 +1004,71 @@ export type Database = {
       create_event: {
         Args: {
           closes_at: string
+          event_ends_at?: string
+          event_kind?: string
+          event_location?: string
           event_name: string
           event_starts_at: string
+          event_visibility?: string
           opens_at: string
           target_cycle_id: string
         }
         Returns: Json
       }
+      public_recruitment: { Args: never; Returns: Json }
+      submit_interest: {
+        Args: {
+          class_year?: string
+          email: string
+          full_name: string
+          how_heard?: string
+          uniqname?: string
+        }
+        Returns: string
+      }
+      save_application_draft: { Args: { payload: Json }; Returns: string }
+      create_event_slot: {
+        Args: {
+          slot_capacity?: number
+          slot_ends_at: string
+          slot_starts_at: string
+          target_event_id: string
+        }
+        Returns: string
+      }
+      rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
+      create_case_group: {
+        Args: { group_name: string; group_prompt?: string; target_cycle_id: string }
+        Returns: string
+      }
+      assign_case_group: {
+        Args: { target_application_id: string; target_group_id: string }
+        Returns: undefined
+      }
+      create_buddy_slot: {
+        Args: { slot_ends_at: string; slot_starts_at: string; target_cycle_id: string }
+        Returns: string
+      }
+      book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
+      respond_to_offer: { Args: { accept: boolean }; Returns: undefined }
+      set_decision_preview: {
+        Args: { preview_text: string; target_decision_id: string }
+        Returns: undefined
+      }
+      submit_process_survey: {
+        Args: { score: number; survey_note?: string }
+        Returns: undefined
+      }
+      set_applicant_profile: {
+        Args: {
+          accessibility_notes?: string
+          college?: string
+          grad_term?: string
+          uniqname?: string
+        }
+        Returns: undefined
+      }
+      applicant_schedule: { Args: never; Returns: Json }
       declare_conflict: {
         Args: { conflict_reason: string; target_application_id: string }
         Returns: undefined
@@ -935,8 +1138,26 @@ export type Database = {
         Returns: undefined
       }
       submit_application: {
-        Args: { applicant_contact: string; applicant_name: string }
+        Args: {
+          answers?: Json
+          applicant_contact: string
+          applicant_name: string
+          class_year?: string
+          consent?: boolean
+          linkedin_url?: string
+          major?: string
+          phone?: string
+          preferred_name?: string
+          resume_storage_path?: string
+        }
         Returns: string
+      }
+      set_application_status: {
+        Args: {
+          next_status: Database["rush"]["Enums"]["application_status"]
+          target_application_id: string
+        }
+        Returns: undefined
       }
       submit_evaluation: {
         Args: {

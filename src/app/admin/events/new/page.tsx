@@ -3,9 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { EVENT_KINDS } from "@/lib/workflow";
+
 export default function NewEventPage() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [kind, setKind] = useState("MIXER");
+  const [visibility, setVisibility] = useState("PUBLIC");
+  const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [opensAt, setOpensAt] = useState("");
   const [closesAt, setClosesAt] = useState("");
@@ -25,6 +30,9 @@ export default function NewEventPage() {
           date,
           checkinOpensAt: opensAt,
           checkinClosesAt: closesAt,
+          kind,
+          location,
+          visibility,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -53,6 +61,24 @@ export default function NewEventPage() {
             onChange={(e) => setName(e.target.value)}
             className="border rounded px-3 py-2"
           />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Kind
+          <select value={kind} onChange={(e) => setKind(e.target.value)} className="border rounded px-3 py-2">
+            {EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Visibility
+          <select value={visibility} onChange={(e) => setVisibility(e.target.value)} className="border rounded px-3 py-2">
+            <option value="PUBLIC">Public (shows on /join)</option>
+            <option value="INVITE">Invite only</option>
+            <option value="INTERNAL">Internal / check-in only</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Location
+          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="border rounded px-3 py-2" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Date

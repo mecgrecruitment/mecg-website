@@ -31,6 +31,16 @@ export function ApprovalButton({ decisionId }: { decisionId: string }) {
   return <div><button onClick={approve} className="rounded border px-2 py-1 text-xs">Approve</button>{error && <p className="text-xs text-red-700">{error}</p>}</div>;
 }
 
+export function PreviewForm({ decisionId, current }: { decisionId: string; current?: string | null }) {
+  const router = useRouter();
+  return (
+    <form className="mt-2" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "PREVIEW", decisionId, preview: data.get("preview") }) }).then(() => router.refresh()); }}>
+      <textarea name="preview" defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="w-full rounded border p-2 text-xs" />
+      <button className="mt-1 rounded border px-2 py-1 text-xs">Save preview</button>
+    </form>
+  );
+}
+
 export function ReleaseButton({ decisionId }: { decisionId: string }) {
   const router = useRouter();
   const [error, setError] = useState("");

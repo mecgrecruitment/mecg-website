@@ -1,14 +1,16 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(12);
+select extensions.plan(14);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
 select extensions.has_table('rush','applications','applications table exists');
 select extensions.has_table('rush','evaluations','evaluations table exists');
 select extensions.has_table('rush','audit_events','audit table exists');
-select extensions.has_function('rush','submit_application',array['text','text'],'application function exists');
+select extensions.has_table('rush','application_questions','intake questions exist');
+select extensions.has_table('rush','application_responses','intake responses exist');
+select extensions.has_function('rush','submit_application',array['text','text','text','text','text','text','text','text','jsonb','boolean'],'application function exists');
 select extensions.has_function('rush','submit_evaluation',array['text','jsonb','text'],'evaluation function exists');
 select extensions.has_function('rush','declare_conflict',array['text','text'],'conflict function exists');
 select extensions.has_function('rush','create_decision',array['text','text','rush.decision_outcome','text'],'decision function exists');

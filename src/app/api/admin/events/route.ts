@@ -12,7 +12,16 @@ export async function POST(req: NextRequest) {
   const dates = [body?.date, body?.checkinOpensAt, body?.checkinClosesAt].map((value) => new Date(value));
   if (typeof body?.name !== "string" || !body.name.trim() || dates.some((date) => Number.isNaN(date.getTime()))) return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("create_event", { target_cycle_id: cycleId, event_name: body.name, event_starts_at: dates[0].toISOString(), opens_at: dates[1].toISOString(), closes_at: dates[2].toISOString() });
+  const { data, error } = await supabase.rpc("create_event", {
+    target_cycle_id: cycleId,
+    event_name: body.name,
+    event_starts_at: dates[0].toISOString(),
+    opens_at: dates[1].toISOString(),
+    closes_at: dates[2].toISOString(),
+    event_kind: typeof body?.kind === "string" ? body.kind : "GENERAL",
+    event_location: typeof body?.location === "string" ? body.location : undefined,
+    event_visibility: typeof body?.visibility === "string" ? body.visibility : "INTERNAL",
+  });
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "42501" ? 403 : error.code === "55000" ? 409 : 400 });
   return NextResponse.json(data, { status: 201 });
 }

@@ -14,15 +14,22 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-sans);
+  --color-paper: #f4f1ec;
+  --font-sans: var(--font-montserrat);
+  --font-serif: var(--font-montserrat);
+  --font-mono: var(--font-montserrat);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Labels stay Montserrat, not a third family. */
+.font-mono {
+  font-family: var(--font-montserrat), sans-serif;
 }
 
 button,
@@ -52,13 +59,33 @@ input:focus-visible {
   transition-duration: 150ms;
 }
 
-.button-primary { background: var(--color-mecg-orange); color: white; }
+.button-primary { background: var(--color-mecg-orange); color: var(--color-mecg-navy); }
 .button-primary:hover { filter: brightness(1.08); }
 .button-secondary { box-shadow: inset 0 0 0 1px rgb(7 13 31 / 18%); color: var(--color-mecg-navy); }
 .button-secondary:hover { background: rgb(63 99 175 / 12%); }
 .button-dark { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 24%); color: white; }
 .button-dark:hover { background: rgb(255 255 255 / 8%); }
 .button-primary:active, .button-secondary:active, .button-dark:active { transform: scale(0.96); }
+
+/* Homepage: square consulting actions instead of pill CTAs */
+.button-editorial {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 2px;
+  padding: 0.7rem 1.35rem;
+  font-weight: 600;
+  background: var(--color-mecg-orange);
+  color: var(--color-mecg-navy);
+  transition: filter 150ms;
+}
+.button-editorial:hover { filter: brightness(1.08); }
+
+.paper-band {
+  background: var(--color-paper);
+}
 
 .hero-grid {
   background-image: linear-gradient(rgb(7 13 31 / 7%) 1px, transparent 1px), linear-gradient(90deg, rgb(7 13 31 / 7%) 1px, transparent 1px);
@@ -73,7 +100,7 @@ input:focus-visible {
 }
 
 .hero-title {
-  text-shadow: 0 1px 18px rgb(255 255 255 / 92%), 0 0 42px rgb(255 255 255 / 72%);
+  text-shadow: 0 0 28px rgb(255 255 255 / 80%);
 }
 
 .project-blueprint {

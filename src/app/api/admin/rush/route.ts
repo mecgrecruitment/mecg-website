@@ -33,6 +33,16 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("set_round_status", { target_round_id: String(body.roundId ?? ""), next_status: body.status }));
   } else if (body.action === "SET_CYCLE_STATUS") {
     ({ data, error } = await supabase.rpc("set_cycle_status", { target_cycle_id: cycleId, next_status: body.status }));
+  } else if (body.action === "SET_APPLICATION_STATUS") {
+    ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: body.status }));
+  } else if (body.action === "CREATE_SLOT") {
+    ({ data, error } = await supabase.rpc("create_event_slot", { target_event_id: String(body.eventId ?? ""), slot_starts_at: String(body.startsAt ?? ""), slot_ends_at: String(body.endsAt ?? ""), slot_capacity: Number(body.capacity ?? 8) }));
+  } else if (body.action === "CREATE_GROUP") {
+    ({ data, error } = await supabase.rpc("create_case_group", { target_cycle_id: cycleId, group_name: String(body.name ?? ""), group_prompt: String(body.prompt ?? "") }));
+  } else if (body.action === "ASSIGN_GROUP") {
+    ({ data, error } = await supabase.rpc("assign_case_group", { target_group_id: String(body.groupId ?? ""), target_application_id: String(body.applicationId ?? "") }));
+  } else if (body.action === "SET_PREVIEW") {
+    ({ data, error } = await supabase.rpc("set_decision_preview", { target_decision_id: String(body.decisionId ?? ""), preview_text: String(body.preview ?? "") }));
   } else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 
   if (error) {

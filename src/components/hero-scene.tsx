@@ -197,7 +197,7 @@ function Gear({
 
     attr.needsUpdate = true;
     const material = points.material as THREE.PointsMaterial;
-    material.opacity = Math.max(0, 1 - exitAmount * 0.4);
+    material.opacity = Math.max(0, 0.55 - exitAmount * 0.4);
   });
 
   return (
@@ -210,7 +210,7 @@ function Gear({
           color={color}
           size={0.055}
           transparent
-          opacity={1}
+          opacity={0.55}
           depthWrite={false}
           sizeAttenuation
         />
@@ -289,9 +289,9 @@ function ParticleBridge({
 }
 
 const WIDE_POSITIONS = {
-  large: [-3, 1.35, -1.2] as [number, number, number],
-  medium: [2.8, -1.55, -1.35] as [number, number, number],
-  small: [2, 2.1, -2.1] as [number, number, number],
+  large: [-3.35, 1.55, -1.4] as [number, number, number],
+  medium: [3.15, -1.7, -1.5] as [number, number, number],
+  small: [2.35, 2.25, -2.2] as [number, number, number],
 };
 
 const COMPACT_POSITIONS = {

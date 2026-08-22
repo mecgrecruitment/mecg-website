@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentDestination, currentUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "@/components/logout-button";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
@@ -10,6 +11,9 @@ export default async function ApplyPage() {
   const destination = await currentDestination();
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
+  const supabase = user ? await createClient() : null;
+  const { data: intake } = supabase ? await supabase.rpc("intake_schema") : { data: null };
+  const schema = intake && typeof intake === "object" ? intake as { open?: boolean; cycleName?: string | null; questions?: { key: string; prompt: string; inputType: string; required: boolean }[] } : null;
 
   return (
     <main className="grid min-h-dvh bg-mecg-navy text-white lg:grid-cols-[0.85fr_1.15fr]">
@@ -35,9 +39,9 @@ export default async function ApplyPage() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">Application intake</p>
           <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Apply to MECG.</h2>
           <p className="mt-5 max-w-lg text-pretty leading-7 text-mecg-navy/60">
-            {user ? "Your email is verified. Review your name and submit the application." : "Create an applicant account first. We will send an email verification link before opening the application."}
+            {user ? "Your email is verified. Complete the questions, upload a PDF resume, and submit." : "Create an applicant account first. We will send an email verification link before opening the application."}
           </p>
-          {user ? <><ApplicationForm initialName={user.name} email={user.email} /><div className="mt-5 text-center"><LogoutButton /></div></> : <ApplicantSignupForm />}
+          {user ? <><ApplicationForm initialName={user.name} email={user.email} cycleOpen={schema?.open === true} cycleName={schema?.cycleName ?? null} questions={schema?.questions ?? []} /><div className="mt-5 text-center"><LogoutButton /></div></> : <ApplicantSignupForm />}
           <p className="mt-6 text-center text-xs leading-5 text-mecg-navy/40">Questions? Email <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a>.</p>
         </div>
       </section>

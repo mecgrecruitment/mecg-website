@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
   if (body?.action === "CREATE") ({ data, error } = await supabase.rpc("create_decision", { target_cycle_id: String(body.cycleId ?? ""), target_application_id: String(body.applicationId ?? ""), target_outcome: body.outcome, decision_reason: String(body.reason ?? "") }));
   else if (body?.action === "APPROVE") ({ data, error } = await supabase.rpc("approve_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE") ({ data, error } = await supabase.rpc("release_decision", { target_decision_id: String(body.decisionId ?? "") }));
+  else if (body?.action === "PREVIEW") ({ data, error } = await supabase.rpc("set_decision_preview", { target_decision_id: String(body.decisionId ?? ""), preview_text: String(body.preview ?? "") }));
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   if (error) {
     const status = error.code === "42501" ? 403 : error.code === "P0002" ? 404 : error.code === "55000" || error.code === "23505" ? 409 : 400;
