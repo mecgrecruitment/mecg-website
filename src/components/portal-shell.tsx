@@ -55,7 +55,7 @@ export default function PortalShell({
               Back to site
             </Link>
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">{eyebrow}</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{eyebrow}</p>
           <h1 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
           <p className="mt-5 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
           <div className="mt-8">{children}</div>

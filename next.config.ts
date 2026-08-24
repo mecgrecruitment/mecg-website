@@ -2,24 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
-  images: {
-    remotePatterns: [
+  async headers() {
+    const securityHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+    ];
+    return [
+      { source: "/:path*", headers: securityHeaders },
       {
-        protocol: "https",
-        hostname: "media.gm.com",
-        pathname: "/content/dam/Shared/Images/Logos/gm/**",
+        source: "/:workspace(admin|member|applicant)/:path*",
+        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
       },
-      {
-        protocol: "https",
-        hostname: "static.wixstatic.com",
-        pathname: "/media/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.gloskinbeauty.com",
-        pathname: "/cdn/shop/files/**",
-      },
-    ],
+    ];
   },
 };
 

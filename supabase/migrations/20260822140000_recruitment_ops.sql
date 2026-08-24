@@ -9,6 +9,51 @@ alter table rush.applications
   add column if not exists offer_response text check (offer_response is null or offer_response in ('ACCEPTED','DECLINED')),
   add column if not exists offer_responded_at timestamptz;
 
+create or replace function rush.intake_schema()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  actor uuid := auth.uid();
+  cycle_row rush.rush_cycles%rowtype;
+  draft jsonb;
+begin
+  if actor is null then raise exception 'unauthorized' using errcode = '42501'; end if;
+  select * into cycle_row from rush.rush_cycles
+  where status = 'OPEN' and (opens_at is null or opens_at <= now()) and (closes_at is null or closes_at >= now())
+  order by created_at desc limit 1;
+  if cycle_row.id is null then
+    return jsonb_build_object('open', false, 'cycleId', null, 'cycleName', null, 'questions', '[]'::jsonb, 'draft', null);
+  end if;
+
+  select a.draft_payload into draft
+  from rush.applications a
+  join rush.pnms p on p.id = a.pnm_id
+  where p.auth_user_id = actor and a.cycle_id = cycle_row.id and a.status in ('DRAFT', 'NEEDS_INFO');
+
+  return jsonb_build_object(
+    'open', true,
+    'cycleId', cycle_row.id,
+    'cycleName', cycle_row.name,
+    'draft', draft,
+    'questions', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'key', q.key,
+        'prompt', q.prompt,
+        'inputType', q.input_type,
+        'required', q.required,
+        'sortOrder', q.sort_order,
+        'options', q.options
+      ) order by q.sort_order)
+      from rush.application_questions q where q.cycle_id = cycle_row.id
+    ), '[]'::jsonb)
+  );
+end;
+$$;
+
 alter table rush.events
   add column if not exists location text check (location is null or char_length(trim(location)) between 1 and 200),
   add column if not exists visibility text not null default 'INTERNAL' check (visibility in ('PUBLIC','INVITE','INTERNAL')),

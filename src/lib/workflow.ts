@@ -135,6 +135,53 @@ export function parseApplicationIntake(body: unknown, email: string) {
   };
 }
 
+export type ApplicationDraft = {
+  name: string;
+  preferredName: string;
+  phone: string;
+  classYear: string;
+  major: string;
+  college: string;
+  uniqname: string;
+  gradTerm: string;
+  accessibilityNotes: string;
+  linkedinUrl: string;
+  answers: Record<string, string>;
+  resumeStoragePath: string;
+};
+
+export function parseApplicationDraft(value: unknown): ApplicationDraft | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const input = value as Record<string, unknown>;
+  const text = (key: string, max: number) => {
+    const field = input[key];
+    return typeof field === "string" ? field.slice(0, max) : "";
+  };
+  const answers =
+    input.answers && typeof input.answers === "object" && !Array.isArray(input.answers)
+      ? Object.fromEntries(
+          Object.entries(input.answers as Record<string, unknown>)
+            .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+            .map(([key, answer]) => [key, answer.slice(0, 8000)]),
+        )
+      : {};
+
+  return {
+    name: text("name", 120),
+    preferredName: text("preferredName", 80),
+    phone: text("phone", 32),
+    classYear: CLASS_YEARS.includes(input.classYear as ClassYear) ? String(input.classYear) : "",
+    major: text("major", 120),
+    college: text("college", 80),
+    uniqname: text("uniqname", 16),
+    gradTerm: text("gradTerm", 40),
+    accessibilityNotes: text("accessibilityNotes", 2000),
+    linkedinUrl: text("linkedinUrl", 400),
+    answers,
+    resumeStoragePath: text("resumeStoragePath", 240),
+  };
+}
+
 export function hasExactCriterionSet(
   expectedIds: string[],
   submittedIds: string[],

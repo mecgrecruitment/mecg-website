@@ -34,11 +34,12 @@ export default function ApplicantSignupForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
-      const body = await response.json().catch(() => null);
       if (!response.ok) {
+        const body = await response.json().catch(() => null);
         setError(errorMessages[body?.code] ?? "Account creation is temporarily unavailable.");
         return;
       }
+      const body = await response.json().catch(() => null);
       if (body?.verificationRequired) {
         setMessage("Check your email and open the verification link. You will return here to finish the application.");
         return;
@@ -55,13 +56,13 @@ export default function ApplicantSignupForm() {
   return (
     <form onSubmit={submit} className="mt-7 space-y-5">
       <label className="block text-sm font-medium">Full name
-        <input value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+        <input value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] focus-visible:outline-2 focus-visible:outline-mecg-orange focus-visible:outline-offset-2" />
       </label>
       <label className="block text-sm font-medium">Email
-        <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+        <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] focus-visible:outline-2 focus-visible:outline-mecg-orange focus-visible:outline-offset-2" />
       </label>
       <label className="block text-sm font-medium">Create a password
-        <input type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#fe904d]" />
+        <input type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] focus-visible:outline-2 focus-visible:outline-mecg-orange focus-visible:outline-offset-2" />
       </label>
       <p className="text-xs leading-5 text-mecg-navy/50">Use at least 8 characters. You will verify the email before submitting an application.</p>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}

@@ -3,11 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #070d1f;
+  --t-detent: 150ms;
+  --t-shift: 420ms;
+  --t-seat: 700ms;
+  --ease-seat: cubic-bezier(0.2, 0, 0.1, 1);
+  --ease-detent: cubic-bezier(0.4, 0, 0, 1);
 }
 
 @theme {
   --color-mecg-blue: #3f63af;
   --color-mecg-orange: #fe904d;
+  --color-mecg-orange-ink: #a83e0b;
   --color-mecg-navy: #070d1f;
 }
 
@@ -17,7 +23,7 @@
   --color-paper: #f4f1ec;
   --font-sans: var(--font-montserrat);
   --font-serif: var(--font-montserrat);
-  --font-mono: var(--font-montserrat);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
@@ -25,11 +31,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-montserrat), sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Labels stay Montserrat, not a third family. */
-.font-mono {
-  font-family: var(--font-montserrat), sans-serif;
 }
 
 button,
@@ -51,12 +52,13 @@ input:focus-visible {
   min-height: 44px;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  border-radius: 9999px;
-  padding: 0.75rem 1.5rem;
+  gap: 0.5rem;
+  border-radius: 2px;
+  padding: 0.7rem 1.35rem;
   font-weight: 600;
   transition-property: transform, filter, background-color, color;
-  transition-duration: 150ms;
+  transition-duration: var(--t-detent);
+  transition-timing-function: var(--ease-detent);
 }
 
 .button-primary { background: var(--color-mecg-orange); color: var(--color-mecg-navy); }
@@ -67,30 +69,8 @@ input:focus-visible {
 .button-dark:hover { background: rgb(255 255 255 / 8%); }
 .button-primary:active, .button-secondary:active, .button-dark:active { transform: scale(0.96); }
 
-/* Homepage: square consulting actions instead of pill CTAs */
-.button-editorial {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 2px;
-  padding: 0.7rem 1.35rem;
-  font-weight: 600;
-  background: var(--color-mecg-orange);
-  color: var(--color-mecg-navy);
-  transition: filter 150ms;
-}
-.button-editorial:hover { filter: brightness(1.08); }
-
 .paper-band {
   background: var(--color-paper);
-}
-
-.hero-grid {
-  background-image: linear-gradient(rgb(7 13 31 / 7%) 1px, transparent 1px), linear-gradient(90deg, rgb(7 13 31 / 7%) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(to right, black, transparent 78%);
 }
 
 .splash-grid {
@@ -99,44 +79,11 @@ input:focus-visible {
   mask-image: radial-gradient(circle at center, black, transparent 72%);
 }
 
-.hero-title {
-  text-shadow: 0 0 28px rgb(255 255 255 / 80%);
-}
-
 .project-blueprint {
   background-color: var(--color-mecg-navy);
   background-image: linear-gradient(rgb(63 99 175 / 10%) 1px, transparent 1px), linear-gradient(90deg, rgb(63 99 175 / 10%) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-
-.project-grid {
-  background-image: linear-gradient(rgb(63 99 175 / 10%) 1px, transparent 1px), linear-gradient(90deg, rgb(63 99 175 / 10%) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.project-track {
-  scrollbar-width: none;
-  overscroll-behavior-inline: contain;
-}
-
-.project-track::-webkit-scrollbar { display: none; }
-
-.carousel-button {
-  display: inline-flex;
-  min-height: 44px;
-  min-width: 44px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  box-shadow: inset 0 0 0 1px rgb(7 13 31 / 18%);
-  color: var(--color-mecg-navy);
-  transition-property: transform, background-color, opacity;
-  transition-duration: 150ms;
-}
-
-.carousel-button:hover:not(:disabled) { background: rgb(63 99 175 / 15%); }
-.carousel-button:active:not(:disabled) { transform: scale(0.96); }
-.carousel-button:disabled { cursor: not-allowed; opacity: 0.3; }
 
 @media (prefers-reduced-motion: no-preference) {
   @keyframes fade-up {
@@ -151,6 +98,10 @@ input:focus-visible {
   }
 
   .fade-up {
-    animation: fade-up 700ms ease-out both;
+    animation: fade-up var(--t-seat) var(--ease-seat) both;
+  }
+
+  .pre-reveal {
+    opacity: 0;
   }
 }

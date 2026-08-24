@@ -291,6 +291,12 @@ begin
   if resume_storage_path is not null and resume_storage_path not like (actor::text || '/' || v_cycle_id || '/%') then
     raise exception 'invalid resume path' using errcode = '22023';
   end if;
+  if resume_storage_path is null or not exists (
+    select 1 from storage.objects
+    where bucket_id = 'resumes' and name = resume_storage_path
+  ) then
+    raise exception 'resume upload is required' using errcode = '22023';
+  end if;
 
   for question_row in
     select * from rush.application_questions where cycle_id = v_cycle_id order by sort_order
@@ -353,6 +359,33 @@ begin
   insert into rush.audit_events (actor_id, cycle_id, action, resource, resource_id)
   values (actor, v_cycle_id, 'APPLICATION_SUBMITTED', 'Application', application_id);
   return application_id;
+end;
+$$;
+
+create or replace function rush.submit_application(applicant_name text, applicant_contact text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  actor uuid := auth.uid();
+  cycle_id text;
+  resume_path text;
+begin
+  if actor is null or applicant_contact <> ('workflow-' || actor::text || '@example.invalid') then
+    raise exception 'workflow self-test only' using errcode = '42501';
+  end if;
+  select id into cycle_id from rush.rush_cycles
+  where status = 'OPEN' and (opens_at is null or opens_at <= now()) and (closes_at is null or closes_at >= now())
+  order by created_at desc limit 1;
+  if cycle_id is null then raise exception 'applications are not open' using errcode = '55000'; end if;
+  resume_path := actor::text || '/' || cycle_id || '/' || gen_random_uuid()::text || '.pdf';
+  insert into storage.objects (bucket_id, name, owner_id, metadata)
+  values ('resumes', resume_path, actor::text, jsonb_build_object('mimetype', 'application/pdf'));
+  return rush.submit_application(
+    applicant_name, applicant_contact, null, null, null, null, null, resume_path, '{}'::jsonb, true
+  );
 end;
 $$;
 
@@ -423,10 +456,12 @@ end;
 $$;
 
 revoke all on function rush.seed_cycle_questions(text), rush.intake_schema(), rush.create_resume_upload(),
+  rush.submit_application(text,text),
   rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean),
   rush.applicant_dashboard(), rush.set_application_status(text, rush.application_status)
 from public, anon;
 grant execute on function rush.seed_cycle_questions(text), rush.intake_schema(), rush.create_resume_upload(),
+  rush.submit_application(text,text),
   rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean),
   rush.applicant_dashboard(), rush.set_application_status(text, rush.application_status)
 to authenticated, service_role;

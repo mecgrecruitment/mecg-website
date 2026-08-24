@@ -7,19 +7,23 @@ import PasswordForm from "./password-form";
 import BuddySlotForm from "./buddy-slot-form";
 import LogoutButton from "@/components/logout-button";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
+import { screeningRpc } from "@/lib/screening-rpc";
 
 export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string }> }) {
-  const user = await requireMember();
+  const [user, { round: roundFilter }] = await Promise.all([requireMember(), searchParams]);
   const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(membership.role));
   if (!cycleMembership) return null;
-  const { round: roundFilter } = await searchParams;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, { data: applications, error: applicantsError }] = await Promise.all([
+  const [{ data: assignments, error }, screeningReviewer] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
-    supabase.rpc("member_applicants", { target_cycle_id: cycleMembership.cycleId }),
+    screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
   ]);
   if (error) throw error;
+  const { data: applications, error: applicantsError } = screeningReviewer.data
+    ? { data: [], error: null }
+    : await supabase.rpc("member_applicants", { target_cycle_id: cycleMembership.cycleId });
+  if (screeningReviewer.error) throw new Error(screeningReviewer.error.message);
   if (applicantsError) throw applicantsError;
   const isPanel = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["PANEL", "OWNER"].includes(membership.role));
   const canBoard = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["BOARD", "PANEL", "OWNER"].includes(membership.role));
@@ -35,7 +39,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="flex items-center gap-3">{canBoard && <Link href="/admin" className="rounded border px-3 py-2 text-sm">Board dashboard</Link>}<LogoutButton /></div>
       </header>
-      <nav aria-label="Rush workspaces" className="grid gap-3 sm:grid-cols-3">
+      <nav aria-label="Rush workspaces" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {screeningReviewer.data && <Link href="/member/screening" className="rounded-xl border p-4"><h2 className="font-semibold">Blind screening</h2><p className="mt-1 text-sm text-gray-600">Anonymous first-pass application reviews</p></Link>}
         <Link href="/member?round=SPEED_DATING" className="rounded-xl border p-4">
           <h2 className="font-semibold">Speed Dating</h2>
           <p className="mt-1 text-sm text-gray-600">Structured conversations and assigned forms</p>
@@ -63,7 +68,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <p className="mt-1 text-sm text-gray-600">Use these before live Speed Dating or Group Case. They do not change scores.</p>
         <ul className="mt-3 space-y-1 text-sm">{Object.entries(SCORE_ANCHORS).map(([score, meaning]) => <li key={score}><span className="font-medium">{score}.</span> {meaning}</li>)}</ul>
       </section>
-      <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />
+      {!screeningReviewer.data && <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />}
       <PasswordForm />
       <section>
         <h2 className="text-xl font-semibold">Your assignments</h2>

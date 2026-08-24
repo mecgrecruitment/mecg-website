@@ -5,6 +5,7 @@ import {
   canTransitionRound,
   hasExactCriterionSet,
   normalizePersonInput,
+  parseApplicationDraft,
   parseApplicationIntake,
 } from "./workflow.ts";
 
@@ -51,4 +52,32 @@ test("application intake requires consent, name, and a resume path", () => {
   assert.equal(parsed?.major, "ME");
   assert.equal(parseApplicationIntake({ name: "Ada", consent: false, resumeStoragePath: "a/b/c.pdf" }, "ada@umich.edu"), null);
   assert.equal(parseApplicationIntake({ name: "Ada", consent: true }, "ada@umich.edu"), null);
+});
+
+test("application drafts restore safe fields and ignore malformed values", () => {
+  assert.deepEqual(
+    parseApplicationDraft({
+      name: "Ada Lovelace",
+      classYear: "JUNIOR",
+      major: "Mechanical Engineering",
+      answers: { why_mecg: "Client work", invalid: 42 },
+      resumeStoragePath: "user/cycle/resume.pdf",
+    }),
+    {
+      name: "Ada Lovelace",
+      preferredName: "",
+      phone: "",
+      classYear: "JUNIOR",
+      major: "Mechanical Engineering",
+      college: "",
+      uniqname: "",
+      gradTerm: "",
+      accessibilityNotes: "",
+      linkedinUrl: "",
+      answers: { why_mecg: "Client work" },
+      resumeStoragePath: "user/cycle/resume.pdf",
+    },
+  );
+  assert.equal(parseApplicationDraft(null), null);
+  assert.equal(parseApplicationDraft([]), null);
 });

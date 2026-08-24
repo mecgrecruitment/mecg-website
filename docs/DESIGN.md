@@ -1,77 +1,65 @@
-# MECG Design Philosophy
+# MECG Design Philosophy — Precision Instrument
 
-The single sentence: **a student consulting group that presents like a professional firm, with one engineering-native signature (the particle gears) and zero decoration beyond it.**
+The single sentence: **the site is an engineering document — numbered sections, mono-set data, hairline structure, one accent used surgically — because a mechanical engineering consulting group should demonstrate rigor, not assert it.**
 
-Reference set studied: Apex Consulting (Michigan), 180 Degrees Consulting, UMich Solar Car, Instrument, IDEO, Linear, Stripe. The traits below are the ones that consistently separated professional sites from student-made ones.
+Decision record (2026-08-22): three directions were evaluated — precision spec-sheet, work-first editorial, kinetic motion. Precision Instrument won because it finishes what the work page already started and it is the one aesthetic business clubs (Apex, 180DC) structurally cannot claim. Work-first editorial lost because the photo inventory has zero project artifacts today (see §7). Kinetic lost as a base for maintenance risk, but its zero-cost details were grafted in (gear ratios, motion tokens, unified splash exit).
 
 ## 1. Principles
 
-1. **Neutrals everywhere, orange as the only accent.** Near-black (`--foreground` / navy `#070d1f`) text on white. `mecg-orange #fe904d` appears only on CTAs, active states, and the gear scene. `mecg-blue #3f63af` is for headings and the logo, never for large fills. `mecg-sky #90b7fc` only as sub-10% opacity tints and in the particle scene. Using the whole palette on everything is the #1 student-site tell.
-2. **Numbers over adjectives.** Every credibility claim is a specific figure ("40+ members, 25+ projects") or a named client. No "passionate", no "excellence", no "Welcome to".
-3. **Declarative one-line hero.** "Engineering ideas into impact." already fits. Keep copy verb-led (Stripe/Linear style: "Turn", "Build", "Deliver").
-4. **Proof before people.** Section order: hero, stats, projects/case studies, clients/testimonials, team, dual CTA, footer. Apex leads with its presidents; Instrument and IDEO lead with work. Lead with work.
-5. **Two audiences, one CTA each.** "Work With Us" (clients) and "Rush MECG" (students). Never more than these two actions on screen.
-6. **Case study card formula.** Image or CAD screenshot + client name + one problem/result line + link. Three real projects in this format beat ten described in prose. (IDEO's pattern.)
-7. **Animation moves content, not decoration.** The gear scene is the one flourish. Everything else: opacity/position reveals on scroll (`whileInView`), nothing that loops. Never animate stat counters from 0 (Apex renders "0" before JS loads); render real numbers, animate only their entrance.
-8. **Real artifacts, never stock.** Project photos, CAD screenshots, prototypes, the headshots we have. The particle gears count as a real artifact; a stock handshake photo would undo them.
-9. **One typeface, big scale jumps.** Geist Sans only for prose. Hero ~64-80px, section headings ~36-40px, body 16-18px, heavy weight contrast. Geist Mono (already loaded, currently unused) gets a job: section numbers, stat labels, technical badges.
-10. **Engineering-native structure as identity.** Numbered sections ("01 About", "02 Projects"), spec-sheet style stats, mono labels. This is what differentiates a *mechanical engineering* consulting group from business clubs like Apex, and it costs nothing. (Linear's numbered-document homepage is the model.)
+1. **If it's data, it's mono; if it's prose, it's sans.** Montserrat for everything readable. Geist Mono (`font-mono`) only for machine-ish text: section numbers, stat values, labels, metadata, statuses, captions. Never mono body copy.
+2. **One accent, two inks.** `mecg-orange #fe904d` for fills and for text on navy. `mecg-orange-ink #a83e0b` for orange text on white/paper (6.2:1, WCAG AA). Never raw orange text on a light background — it fails contrast at 2.25:1.
+3. **Numbers over adjectives.** Every credibility claim is a figure or a named client. No "passionate", no "excellence", no "Welcome to".
+4. **Proof before people.** Home order: hero, stats, clients, featured engagement, semester spec, people, alumni, CTA.
+5. **Two audiences, one CTA each.** "Discuss a project" (clients) and "Join MECG" (students). Never more than these two actions per view.
+6. **One label grammar.** `NN[.N] / LABEL` — Geist Mono, ~11px, uppercase, tracking 0.16em, number in orange (ink on light, orange on dark). Every section on every page is numbered, including home. `SectionLabel` is the only way to write one.
+7. **Motion seats content, never decorates.** Named tokens only: `--t-detent 150ms` (hover/press), `--t-shift 420ms` (state/page transitions), `--t-seat 700ms` (viewport reveals), eases `--ease-seat` / `--ease-detent`. Reveals are opacity + small translate, staggered 60ms in DOM order. Nothing loops, nothing counts up from zero, real numbers render server-side.
+8. **Real artifacts, never stock.** Photos get a hairline frame (`outline-mecg-navy/10` on light, `outline-white/12` on dark) and a mono figure caption: `FIG. NN — PLACE, CONTEXT`. Empty proof gets a status line (`STATUS / CASE STUDY PENDING CLIENT APPROVAL`), never an apology sentence.
+9. **Square, not pill.** Buttons are 2px radius: `.button-primary` (filled orange, navy text), `.button-secondary` (outline on light), `.button-dark` (outline on dark). Cards square or `rounded-2xl` max; nothing at `rounded-[2rem]`.
+10. **Hairlines are the structure.** `border-mecg-navy/10` on light, `border-white/12` on dark, `gap-px` grids on tinted backgrounds. No shadows for structure.
 
-## 2. Tokens (current, keep)
+## 2. Tokens
 
 | Token | Value | Role |
 |---|---|---|
 | `mecg-navy` | `#070d1f` | Primary text, dark surfaces |
-| `mecg-blue` | `#3f63af` | Headings, logo |
-| `mecg-sky` | `#90b7fc` | Tints (max 10% opacity), particles |
-| `mecg-orange` | `#fe904d` | CTAs, accents, particles. The only accent. |
+| `mecg-blue` | `#3f63af` | Headings, logo, ≤12% tints |
+| `mecg-orange` | `#fe904d` | Fills; text on dark only |
+| `mecg-orange-ink` | `#a83e0b` | Orange text on light surfaces |
+| `paper` | `#f4f1ec` | Mats behind logos/images |
 
-Rules: orange CTAs are always `bg-mecg-orange text-white` (currently inconsistent between splash and home). Containers `max-w-6xl px-6`, sections `py-24`, pills `rounded-full`, cards `rounded-2xl`. Light theme only; delete the dark-mode variables.
+Type scale: display `text-5xl sm:text-7xl` weight 600 tight tracking; section head `text-4xl sm:text-5xl`; body 16–18px `text-mecg-navy/60`+; mono label 11–12px uppercase tracking `0.16em`; all numerals `tabular-nums`. Containers `max-w-6xl px-6`; sections `py-16 sm:py-20`; bands `py-10`.
 
-## 3. Homepage section order (target)
+Accessibility floors (audited): text on white ≥ `text-mecg-navy/60`; text on navy ≥ `text-white/55`; interactive targets ≥ 44px; every field carries its own `focus-visible` ring.
 
-1. Splash `/` — particle gears + one-line hero + Enter (exists, keep)
-2. `/home` hero — declarative line + dual CTA (Work With Us / Rush MECG)
-3. Stats band — mono-labeled, spec-sheet style
-4. Projects — 3+ case study cards (missing entirely; we claim 25+ projects and show none)
-5. Clients / testimonials — logo row + one attributed quote (180DC pattern)
-6. Team — headshots **with full names and roles** (currently first names, no roles)
-7. Rush — timeline/FAQ, links to `/apply` (link currently missing; the conversion path is broken)
-8. Footer — real contact email + socials (currently just "University of Michigan"), no Admin link
+## 3. Signature details
 
-## 4. Known fixes (from audit)
+- **Title-block footer**: the footer reads like an engineering drawing title block (org / location / contact / rev cells in a hairline grid).
+- **Figure captions** under real photos (`FIG. 01 — 2026 COHORT, ANN ARBOR MI`).
+- **Status lines** instead of apologies for pending case studies.
+- **Row hover**: index number shifts to orange ink over `--t-detent`; no card scale, no shadow.
+- **True gear ratios** in the hero scene: meshing gears obey `ωB = -ωA × (teethA/teethB)` for teeth 11/9/7.
 
-- [ ] Orange CTA text color mismatch (splash `text-white` vs home `text-mecg-navy`)
-- [ ] `/apply` is off-brand (slate/gray generic Tailwind, no logo/nav); restyle with brand tokens
-- [ ] Rush section and nav pill must link to `/apply`
-- [ ] Hero and About paragraphs are duplicated verbatim
-- [ ] Team grid: add roles + last names, normalize headshot crops
-- [ ] Remove Admin from public nav/footer
-- [ ] Delete Next.js starter SVGs and dead dark-mode CSS
-- [ ] Wire the brand favicon from the logo kit
+## 4. Content rules
 
-## 5. Toolbox (all free; add only when a section needs it)
+- Case study formula: client + one real question + one result line + status. Three real ones beat ten described in prose.
+- Client logos are self-hosted in `public/clients/` — never hotlinked.
+- No internal jargon on public pages ("hash reviews", "locked evidence").
+- Copy is verb-led and declarative.
 
-- **motion (framer-motion)**, MIT — all DOM reveals and micro-interactions (`whileInView`)
-- **GSAP + ScrollTrigger**, free since 2025 (incl. SplitText) — only if we add scroll-pinned choreography
-- **lenis**, MIT — smooth scroll, pairs with ScrollTrigger; skip until scroll choreography exists
-- **@react-three/drei**, MIT — `Environment preset="warehouse"` + `metalness 1 / roughness 0.25` is the whole metallic-gear trick if we ever move from particles to meshes; `ContactShadows`, `Float`
-- **@react-three/postprocessing**, MIT — Bloom + Vignette for the cheap expensive look
-- **shadcn/ui**, MIT — forms/dialogs base; **Magic UI**, MIT — marquee (client logos), bento, number ticker; **Aceternity UI** — free tier only, one hero effect max
+## 5. Anti-patterns (never)
 
-Stealable reference code:
-- [basementstudio/scrollytelling](https://github.com/basementstudio/scrollytelling) (MIT) — pinned-section scrollytelling pattern
-- [brunosimon/folio-2025](https://github.com/brunosimon/folio-2025) (MIT) — scene structure, camera choreography; steal techniques, not the look
-- [wass08 r3f scroll tutorials](https://github.com/wass08/r3f-scrolling-animation-tutorial) (MIT) — scroll-driven R3F wiring
-- [Codrops dissolve effect](https://tympanus.net/codrops/2025/02/17/implementing-a-dissolve-effect-with-shaders-and-particles-in-three-js/) + [emissive-dissolve-effect](https://github.com/JatinChopra/emissive-dissolve-effect) — upgrade path for the gear explode
-- Gear physics, if meshes ever replace particles: `gearB.rotation = -gearA.rotation * (teethA/teethB)`; that ratio is what makes it feel mechanical
-- [gsimone/awesome-react-three-fiber](https://github.com/gsimone/awesome-react-three-fiber) — index for further R3F tricks
+- "Welcome to…" copy; presidents' letter on the homepage
+- Stat counters animating from 0; looping decorative animation
+- Raw `text-mecg-orange` on white; any hardcoded hex outside `globals.css`
+- More than one accent per view; stock photography; carousels of people
+- A new section without a `SectionLabel` number; a new button style
 
-## 6. Anti-patterns (never)
+## 6. Toolbox
 
-- "Welcome to…" copy, presidents' letter on the homepage
-- Stat counters animating from 0
-- More than one accent color per view
-- Stock photography
-- Carousels of people
-- Decorative animation that loops forever
+Installed: three + @react-three/fiber (splash scene only). Motion is CSS + a small IntersectionObserver reveal — no animation library until a section genuinely needs scroll-pinned choreography (then GSAP/lenis, per the old doc's research). shadcn/ui remains the fallback base for complex form UI.
+
+## 7. Open debt (owner: board, not code)
+
+- **Artifact sprint**: the site has zero project artifacts (no CAD, deliverable spreads, on-site photos). ~10 frames per semester — redacted decision-brief covers, two slide spreads per approvable client, one working-session shoot — would unlock the work-first proof layer. Until then, the question is the artifact (typographic case rows).
+- Client approval for publishing case-study results (Legendary Sports, Glo realistic; GM unlikely).
+- `mecg-pictures/` is a culture archive, not a portfolio: ~6–8 of ~60 frames are publishable (join/team culture strip only).

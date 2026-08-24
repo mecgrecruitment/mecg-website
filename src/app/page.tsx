@@ -35,7 +35,7 @@ export default function Splash() {
       <HeroScene exiting={exiting} />
 
       <div
-        className={`relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-20 text-center transition-[opacity,transform,filter] duration-200 ease-in ${
+        className={`relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-20 text-center transition-[opacity,transform,filter] duration-[var(--t-shift)] ease-in ${
           exiting ? "scale-[0.98] opacity-0 blur-sm" : ""
         }`}
       >
@@ -51,24 +51,24 @@ export default function Splash() {
           />
         </div>
         <p
-          className="fade-up mt-10 text-[0.72rem] font-medium uppercase tracking-[0.22em] text-mecg-navy/45"
+          className="fade-up mt-10 text-[0.72rem] font-medium uppercase tracking-[0.22em] text-mecg-navy/60"
           style={{ animationDelay: "40ms" }}
         >
           University of Michigan · Ann Arbor
         </p>
         <h1
-          className="hero-title fade-up mt-4 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-mecg-navy sm:text-6xl"
+          className="fade-up mt-4 max-w-3xl text-balance text-4xl font-semibold tracking-tight text-mecg-navy sm:text-6xl"
           style={{ animationDelay: "50ms" }}
         >
           Engineering ideas
           <br />
-          <span className="text-mecg-orange">into impact.</span>
+          <span className="text-mecg-orange-ink">into impact.</span>
         </h1>
         <div className="fade-up mt-10" style={{ animationDelay: "100ms" }}>
           <button
             type="button"
             onClick={enter}
-            className="button-editorial"
+            className="button-primary"
           >
             Explore MECG <span className="translate-x-0.5" aria-hidden="true">→</span>
           </button>

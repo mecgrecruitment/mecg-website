@@ -2,6 +2,7 @@ import Link from "next/link";
 
   const LINKS = [
   ["/admin", "Pipeline"],
+  ["/admin/screening", "Blind screening"],
   ["/admin/speed-dating", "Speed Dating"],
   ["/admin/group-case", "Group Case"],
   ["/admin/groups", "Case teams"],

@@ -32,10 +32,10 @@ export default function ProjectInquiryForm() {
     window.location.href = `mailto:${BOARD_EMAIL}?subject=${encodeURIComponent(`Project inquiry from ${value("organization")}`)}&body=${encodeURIComponent(body)}`;
   }
 
-  const inputClass = "mt-2 min-h-12 w-full rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_#3f63af]";
+  const inputClass = "mt-2 min-h-12 w-full rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-blue)] focus-visible:outline-2 focus-visible:outline-mecg-orange focus-visible:outline-offset-2";
 
   return (
-    <form onSubmit={prepareEmail} className="rounded-[2rem] bg-mecg-blue/[0.08] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.07)] sm:p-8">
+    <form onSubmit={prepareEmail} className="rounded-sm bg-mecg-blue/[0.08] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.07)] sm:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="text-sm font-medium">
           Your name
@@ -73,8 +73,8 @@ export default function ProjectInquiryForm() {
         <textarea name="confidentiality" rows={2} className={`${inputClass} py-3`} />
       </label>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <button type="submit" className="button-primary whitespace-nowrap text-mecg-navy">Prepare inquiry email <span aria-hidden="true">→</span></button>
-        <p className="text-sm leading-6 text-mecg-navy/55">This opens a complete draft in your email app. The board replies within one week.</p>
+        <button type="submit" className="button-primary whitespace-nowrap">Prepare inquiry email <span aria-hidden="true">→</span></button>
+        <p className="text-sm leading-6 text-mecg-navy/60">This opens a complete draft in your email app. The board replies within one week.</p>
       </div>
     </form>
   );

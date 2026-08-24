@@ -142,8 +142,9 @@ function Gear({
     const interactionTarget = pointer.active && !exiting ? 1 : 0;
     interaction.current +=
       (interactionTarget - interaction.current) * (1 - Math.exp(-12 * delta));
+    // Rate 9 lands the exit settle at ~98% by 420ms (--t-shift), matching the DOM fade and router timeout.
     exitProgress.current +=
-      ((exiting ? 1 : 0) - exitProgress.current) * (1 - Math.exp(-18 * delta));
+      ((exiting ? 1 : 0) - exitProgress.current) * (1 - Math.exp(-9 * delta));
 
     const entranceProgress = THREE.MathUtils.clamp(
       (clock.getElapsedTime() - entranceDelay) / 0.9,
@@ -288,6 +289,11 @@ function ParticleBridge({
   );
 }
 
+// Meshing law: ωB = -ωA × (teethA / teethB); driven from the 11-tooth gear.
+const SPEED_11 = -0.075;
+const SPEED_9 = -SPEED_11 * (11 / 9);
+const SPEED_7 = -SPEED_9 * (9 / 7);
+
 const WIDE_POSITIONS = {
   large: [-3.35, 1.55, -1.4] as [number, number, number],
   medium: [3.15, -1.7, -1.5] as [number, number, number],
@@ -351,7 +357,7 @@ function Scene({
         teeth={11}
         color="#fe904d"
         position={positions.large}
-        speed={-0.075}
+        speed={SPEED_11}
         entranceDelay={0.05}
         reducedMotion={reducedMotion}
         pointerState={pointerState}
@@ -363,7 +369,7 @@ function Scene({
         teeth={9}
         color="#3f63af"
         position={positions.medium}
-        speed={0.11}
+        speed={SPEED_9}
         entranceDelay={0.1}
         reducedMotion={reducedMotion}
         pointerState={pointerState}
@@ -375,7 +381,7 @@ function Scene({
         teeth={7}
         color="#3f63af"
         position={positions.small}
-        speed={-0.16}
+        speed={SPEED_7}
         entranceDelay={0.15}
         reducedMotion={reducedMotion}
         pointerState={pointerState}
