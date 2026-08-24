@@ -29,7 +29,7 @@ export default async function ScreeningAdminPage() {
       <section className="grid gap-5 lg:grid-cols-2">
         {(overview?.packets ?? []).map((packet) => (
           <article key={packet.id} className="rounded-2xl border border-mecg-navy/10 p-5">
-            <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.14em] text-mecg-navy/45">{packet.code}</p><h2 className="mt-1 font-semibold">Identity steward: {packet.applicantName}</h2></div><span className="rounded-full bg-mecg-navy/5 px-3 py-1 text-xs">{packet.status}</span></div>
+            <div className="flex items-start justify-between gap-3"><div><p className="font-mono text-xs uppercase tracking-[0.14em] text-mecg-navy/45">{packet.code}</p><h2 className="mt-1 font-semibold">Identity steward: {packet.applicantName}</h2></div><span className="inline-flex items-center rounded-full bg-mecg-orange/15 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-orange-ink">{packet.status}</span></div>
             <div className="mt-4 space-y-4">{(packet.content.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
             {overview?.status === "DRAFT" && <PacketAction cycleId={cycleId} packetId={packet.id} status={packet.status} responses={packet.content.responses ?? []} />}
           </article>

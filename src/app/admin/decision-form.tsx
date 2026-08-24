@@ -17,7 +17,19 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
     else router.refresh();
     setPending(false);
   }
-  return <form onSubmit={submit} className="mt-3 flex flex-wrap gap-2"><select name="outcome" className="rounded border px-2 py-1 text-sm"><option>OFFER</option><option>WAITLIST</option><option>REJECT</option><option>PROCEDURAL_REVIEW</option></select><input name="reason" required placeholder="Evidence-based reason" className="min-w-52 flex-1 rounded border px-2 py-1 text-sm" /><button disabled={pending} className="rounded bg-slate-950 px-3 py-1 text-sm text-white">Recommend</button>{error && <p className="w-full text-xs text-red-700">{error}</p>}</form>;
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-2">
+      <select name="outcome" className="min-h-[30px] rounded-full bg-mecg-navy/[0.035] px-3 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]">
+        <option>OFFER</option>
+        <option>WAITLIST</option>
+        <option>REJECT</option>
+        <option>PROCEDURAL_REVIEW</option>
+      </select>
+      <input name="reason" required placeholder="Evidence-based reason" className="min-h-[30px] w-full rounded-full bg-mecg-navy/[0.035] px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
+      <button disabled={pending} className="self-start rounded-full bg-mecg-navy px-3 py-1 text-xs font-semibold text-white hover:bg-mecg-navy/90 disabled:opacity-50">Recommend</button>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+    </form>
+  );
 }
 
 export function ApprovalButton({ decisionId }: { decisionId: string }) {
@@ -28,15 +40,23 @@ export function ApprovalButton({ decisionId }: { decisionId: string }) {
     const body = await response.json().catch(() => null);
     if (!response.ok) setError(body?.error ?? "Could not approve"); else router.refresh();
   }
-  return <div><button onClick={approve} className="rounded border px-2 py-1 text-xs">Approve</button>{error && <p className="text-xs text-red-700">{error}</p>}</div>;
+  return (
+    <div className="flex items-center gap-2">
+      <button onClick={approve} className="rounded-full px-3 py-1 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]">Approve</button>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+    </div>
+  );
 }
 
 export function PreviewForm({ decisionId, current }: { decisionId: string; current?: string | null }) {
   const router = useRouter();
   return (
-    <form className="mt-2" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "PREVIEW", decisionId, preview: data.get("preview") }) }).then(() => router.refresh()); }}>
-      <textarea name="preview" defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="w-full rounded border p-2 text-xs" />
-      <button className="mt-1 rounded border px-2 py-1 text-xs">Save preview</button>
+    <form
+      className="flex flex-col gap-1.5"
+      onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "PREVIEW", decisionId, preview: data.get("preview") }) }).then(() => router.refresh()); }}
+    >
+      <textarea name="preview" defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-16 w-full rounded-xl bg-mecg-navy/[0.035] p-2.5 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
+      <button className="self-start rounded-full px-3 py-1 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]">Save preview</button>
     </form>
   );
 }
@@ -49,5 +69,10 @@ export function ReleaseButton({ decisionId }: { decisionId: string }) {
     const body = await response.json().catch(() => null);
     if (!response.ok) setError(body?.error ?? "Could not release"); else router.refresh();
   }
-  return <div><button onClick={release} className="rounded bg-slate-950 px-2 py-1 text-xs text-white">Release outcome</button>{error && <p className="text-xs text-red-700">{error}</p>}</div>;
+  return (
+    <div className="flex items-center gap-2">
+      <button onClick={release} className="rounded-full bg-mecg-navy px-3 py-1 text-xs font-semibold text-white hover:bg-mecg-navy/90">Release outcome</button>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+    </div>
+  );
 }

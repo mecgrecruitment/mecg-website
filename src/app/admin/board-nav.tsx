@@ -16,7 +16,7 @@ export default function BoardNav({ current }: { current: string }) {
         <Link
           key={href}
           href={href}
-          className={`rounded-full px-3 py-2 text-sm ${current === href ? "bg-mecg-navy text-white" : "border border-mecg-navy/15"}`}
+          className={`inline-flex min-h-10 items-center rounded-full px-4 text-sm font-medium ${current === href ? "bg-mecg-navy text-white" : "border border-mecg-navy/15"}`}
         >
           {label}
         </Link>

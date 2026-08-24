@@ -38,13 +38,28 @@ export default function ScreeningControls({
       <section className="rounded-2xl border border-mecg-navy/10 p-6">
         <h2 className="text-xl font-semibold">Choose blind reviewers</h2>
         <p className="mt-2 text-sm text-mecg-navy/60">Only ordinary Members can review. Board, Panel, and Owner accounts remain identity stewards.</p>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2">
-          {members.map((member) => (
-            <label key={member.id} className="flex items-center gap-3 rounded-xl border p-3 text-sm">
-              <input type="checkbox" checked={reviewerIds.includes(member.id)} onChange={(event) => setReviewerIds((current) => event.target.checked ? [...current, member.id] : current.filter((id) => id !== member.id))} />
-              {member.name}
-            </label>
-          ))}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {members.map((member) => {
+            const checked = reviewerIds.includes(member.id);
+            return (
+              <label
+                key={member.id}
+                className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  checked
+                    ? "bg-mecg-orange/15 text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(168,62,11,0.35)]"
+                    : "text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(event) => setReviewerIds((current) => event.target.checked ? [...current, member.id] : current.filter((id) => id !== member.id))}
+                  className="sr-only"
+                />
+                {member.name}
+              </label>
+            );
+          })}
         </div>
         <button type="button" disabled={pending || reviewerIds.length < 3} onClick={() => void act({ action: "CREATE", reviewerIds })} className="button-primary mt-5 disabled:opacity-50">Create packets for {reviewerIds.length} reviewers</button>
         {error && <p role="alert" className="mt-4 text-sm text-red-700">{error}</p>}

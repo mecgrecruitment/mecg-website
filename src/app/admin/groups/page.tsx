@@ -19,7 +19,16 @@ export default async function GroupsPage() {
   ]);
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 p-6 sm:p-10">
-      <header className="flex justify-between"><h1 className="text-3xl font-semibold">Group Case teams</h1><div className="flex gap-2"><Link href="/admin" className="rounded border px-3 py-2 text-sm">Pipeline</Link><LogoutButton /></div></header>
+      <header className="flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Case teams</p>
+          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Group case teams</h1>
+        </div>
+        <div className="flex items-center gap-5">
+          <Link href="/admin" className="button-secondary text-sm">Pipeline</Link>
+          <LogoutButton />
+        </div>
+      </header>
       <BoardNav current="/admin/groups" />
       <GroupForms
         cycleId={cycleId}

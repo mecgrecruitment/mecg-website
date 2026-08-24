@@ -15,7 +15,7 @@ export default function PipelineStatusForm({
   const router = useRouter();
   return (
     <form
-      className="mt-2"
+      className="mt-1 flex items-center gap-1.5"
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -31,12 +31,18 @@ export default function PipelineStatusForm({
         }).then(() => router.refresh());
       }}
     >
-      <select name="status" defaultValue={status} className="rounded border px-2 py-1 text-xs">
+      <select
+        name="status"
+        defaultValue={status}
+        className="h-6 rounded-md bg-mecg-navy/[0.035] px-1.5 text-[10px] font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+      >
         {PIPELINE_STATUSES.filter((item) => !["OFFERED", "WAITLISTED", "REJECTED"].includes(item)).map((item) => (
           <option key={item}>{item}</option>
         ))}
       </select>
-      <button className="ml-2 rounded border px-2 py-1 text-xs">Move</button>
+      <button className="h-6 rounded-md px-2 text-[10px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]">
+        Move
+      </button>
     </form>
   );
 }

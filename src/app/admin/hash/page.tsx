@@ -43,61 +43,86 @@ export default async function HashBoard() {
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+      <header className="flex flex-wrap items-start justify-between gap-6">
         <div>
-          <p className="text-sm text-orange-700">{cycle.name} · {cycle.status}</p>
-          <h1 className="text-3xl font-semibold">Hash</h1>
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.name} · {cycle.status}</p>
+          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Hash</h1>
         </div>
-        <div className="flex gap-2">
-          <Link href="/member" className="rounded border px-3 py-2 text-sm">Evaluation Hub</Link>
+        <div className="flex items-center gap-5">
+          <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
           <LogoutButton />
         </div>
       </header>
       <BoardNav current="/admin/hash" />
       <section>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">Aggregates appear only after every evaluated round is frozen. Hash does not add a numeric score.</p>
-          <span className={`rounded-full px-3 py-1 text-sm ${hashOpen ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>{hashOpen ? "Open" : "Locked"}</span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-mecg-navy/55">Aggregates appear only after every evaluated round is frozen. Hash does not add a numeric score.</p>
+          <span className={`inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${hashOpen ? "bg-mecg-navy text-white" : "text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.15)]"}`}>
+            {hashOpen ? "Open" : "Locked"}
+          </span>
         </div>
         {hashOpen ? (
-          <div className="mt-4 overflow-x-auto rounded-xl border">
+          <div className="mt-4 overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50">
+              <thead className="bg-mecg-navy/[0.03]">
                 <tr>
-                  <th className="p-3">Applicant</th>
-                  {rounds.map((round) => <th key={round.id} className="p-3">{round.name}</th>)}
-                  <th className="p-3">Combined</th>
-                  <th className="p-3">Decision</th>
+                  <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Applicant</th>
+                  {rounds.map((round) => (
+                    <th key={round.id} className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">{round.name}</th>
+                  ))}
+                  <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Combined</th>
+                  <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Decision</th>
                 </tr>
               </thead>
               <tbody>
                 {rankings.map(({ application, rounds: results, finalScore }) => {
                   const decision = decisionByApplication.get(application.id);
                   return (
-                    <tr key={application.id} className="border-t align-top">
+                    <tr key={application.id} className="border-t border-mecg-navy/[0.08] align-top">
                       <td className="p-3 font-medium">
-                        <Link href={`/admin/applications/${application.id}`} className="underline">{application.pnms.name}</Link>
-                        <span className="block text-xs font-normal text-gray-500">{application.status}</span>
+                        <Link href={`/admin/applications/${application.id}`} className="text-mecg-navy underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy">{application.pnms.name}</Link>
+                        <span className="block text-xs font-normal text-mecg-navy/45">{application.status}</span>
                       </td>
                       {results.map(({ round, aggregate }) => (
-                        <td key={round.id} className="p-3">
+                        <td key={round.id} className="p-3 text-xs text-mecg-navy/55">
                           {aggregate.score === null ? (aggregate.status === "PENDING" ? "Pending" : "—") : aggregate.score.toFixed(1)}
-                          <span className="block text-xs text-gray-500">{aggregate.count} ratings{aggregate.spread != null ? ` · spread ${aggregate.spread.toFixed(0)}` : ""}{aggregate.status === "REVIEW" ? " · review" : ""}</span>
+                          <span className="block text-[11px] text-mecg-navy/40">{aggregate.count} ratings{aggregate.spread != null ? ` · spread ${aggregate.spread.toFixed(0)}` : ""}{aggregate.status === "REVIEW" ? " · review" : ""}</span>
                         </td>
                       ))}
-                      <td className="p-3 font-semibold">{finalScore === null ? "Pending" : finalScore.toFixed(1)}</td>
+                      <td className="p-3 font-mono text-lg font-bold tabular-nums text-mecg-navy">
+                        {finalScore === null ? <span className="text-sm font-normal text-mecg-navy/50">Pending</span> : finalScore.toFixed(1)}
+                      </td>
                       <td className="min-w-72 p-3">
                         {decision ? (
-                          <div>
-                            <p className="font-medium">{decision.outcome} · {decision.status}</p>
-                            <p className="text-xs text-gray-600">{decision.reason}</p>
-                            <p className="mt-1 text-xs">{decision.decision_approvals.length}/2 approvals</p>
-                            {!["LOCKED", "RELEASED"].includes(decision.status) && <ApprovalButton decisionId={decision.id} />}
-                            {decision.status === "LOCKED" && <ReleaseButton decisionId={decision.id} />}
-                            <PreviewForm decisionId={decision.id} current={decision.communication_preview} />
-                          </div>
+                          <details className="group rounded-xl">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
+                              <span>
+                                <span className="text-xs font-semibold text-mecg-navy">{decision.outcome} · {decision.status}</span>
+                                <span className="block text-[11px] text-mecg-navy/45">{decision.decision_approvals.length}/2 approvals</span>
+                              </span>
+                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/40 transition-transform group-open:rotate-180">
+                                <path d="M5 8l5 5 5-5" />
+                              </svg>
+                            </summary>
+                            <div className="mt-2.5 flex flex-col gap-2.5 px-1">
+                              <p className="text-xs text-mecg-navy/55">{decision.reason}</p>
+                              {!["LOCKED", "RELEASED"].includes(decision.status) && <ApprovalButton decisionId={decision.id} />}
+                              {decision.status === "LOCKED" && <ReleaseButton decisionId={decision.id} />}
+                              <PreviewForm decisionId={decision.id} current={decision.communication_preview} />
+                            </div>
+                          </details>
                         ) : (
-                          <DecisionForm cycleId={cycle.id} applicationId={application.id} />
+                          <details className="group rounded-xl">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
+                              No decision yet
+                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/40 transition-transform group-open:rotate-180">
+                                <path d="M5 8l5 5 5-5" />
+                              </svg>
+                            </summary>
+                            <div className="mt-2.5 px-1">
+                              <DecisionForm cycleId={cycle.id} applicationId={application.id} />
+                            </div>
+                          </details>
                         )}
                       </td>
                     </tr>
@@ -107,7 +132,7 @@ export default async function HashBoard() {
             </table>
           </div>
         ) : (
-          <p className="mt-4 rounded-xl border border-dashed p-6 text-gray-600">Freeze every round and enter decision lock to reveal panel data.</p>
+          <p className="mt-4 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Freeze every round and enter decision lock to reveal panel data.</p>
         )}
       </section>
     </main>
