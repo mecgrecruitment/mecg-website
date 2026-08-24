@@ -8,45 +8,42 @@ import LogoutButton from "@/components/logout-button";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
 
+type IntakeSchema = { open?: boolean; cycleName?: string | null; questions?: { key: string; prompt: string; inputType: string; required: boolean }[]; draft?: unknown };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseIntakeSchema(value: unknown): IntakeSchema | null {
+  if (!isRecord(value)) return null;
+  const questions = Array.isArray(value.questions)
+    ? value.questions.flatMap((question) => {
+        if (!isRecord(question) || typeof question.key !== "string" || typeof question.prompt !== "string") return [];
+        return [{ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true }];
+      })
+    : [];
+  return {
+    open: value.open === true,
+    cycleName: typeof value.cycleName === "string" ? value.cycleName : null,
+    questions,
+    draft: value.draft,
+  };
+}
+
 export default async function ApplyPage() {
   const destination = await currentDestination();
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
   const supabase = user ? await createClient() : null;
   const { data: intake } = supabase ? await supabase.rpc("intake_schema") : { data: null };
-  const schema = intake && typeof intake === "object" ? intake as { open?: boolean; cycleName?: string | null; questions?: { key: string; prompt: string; inputType: string; required: boolean }[]; draft?: unknown } : null;
+  const schema = parseIntakeSchema(intake);
   const draft = parseApplicationDraft(schema?.draft);
 
-  return (
-    <main className="grid min-h-dvh bg-mecg-navy text-white lg:grid-cols-[0.85fr_1.15fr]">
-      <aside className="relative hidden overflow-hidden border-r border-white/10 p-10 lg:flex lg:flex-col lg:justify-between">
-        <div className="project-blueprint absolute inset-0 opacity-60" aria-hidden="true" />
-        <Link href="/home" className="relative w-fit rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange">
-          <Image src="/logos/mecg-white.svg" alt="MECG home" width={150} height={40} priority className="h-10 w-auto" style={{ width: "auto" }} />
-        </Link>
-        <div className="relative max-w-lg">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">Rush / 2026</p>
-          <h1 className="mt-6 text-balance text-6xl font-semibold leading-[0.98] tracking-[-0.055em]">Your next project starts here.</h1>
-          <p className="mt-6 text-pretty text-lg leading-8 text-white/60">Create an account, verify your email, and submit one application for the current rush cycle.</p>
-        </div>
-        <p className="relative font-mono text-xs uppercase tracking-[0.15em] text-white/35">Michigan Engineering Consulting Group</p>
-      </aside>
-
-      <section className="flex min-h-dvh items-center bg-white px-6 py-8 text-mecg-navy sm:px-10 lg:px-16">
-        <div className="mx-auto w-full max-w-xl">
-          <div className="mb-8 flex items-center justify-between lg:hidden">
-            <Link href="/home" className="rounded-xl bg-mecg-navy px-3 py-2"><Image src="/logos/mecg-white.svg" alt="MECG home" width={107} height={32} priority /></Link>
-            <Link href="/home" className="text-sm text-mecg-navy/55">Back to site</Link>
-          </div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Application intake</p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Apply to MECG.</h2>
-          <p className="mt-5 max-w-lg text-pretty leading-7 text-mecg-navy/60">
-            {user ? "Your email is verified. Complete the questions, upload a PDF resume, and submit." : "Create an applicant account first. We will send an email verification link before opening the application."}
-          </p>
-          {user ? <><ApplicationForm initialName={user.name} email={user.email} cycleOpen={schema?.open === true} cycleName={schema?.cycleName ?? null} questions={schema?.questions ?? []} initialDraft={draft} /><div className="mt-5 text-center"><LogoutButton /></div></> : <ApplicantSignupForm />}
-          <p className="mt-6 text-center text-xs leading-5 text-mecg-navy/60">Questions? Email <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a>.</p>
-        </div>
-      </section>
-    </main>
-  );
+  return <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
+    <header className="border-b border-mecg-navy/8 bg-white px-6 py-4 sm:px-10"><div className="mx-auto flex max-w-7xl items-center justify-between gap-4"><Link href="/home" className="rounded bg-mecg-navy px-3 py-2"><Image src="/logos/mecg-white.svg" alt="MECG home" width={112} height={32} priority /></Link><div className="flex items-center gap-4 text-sm"><span className="hidden text-mecg-navy/45 sm:inline">{user ? user.email : "Applicant portal"}</span>{user ? <LogoutButton /> : <Link href="/login" className="font-semibold underline underline-offset-4">Sign in</Link>}</div></div></header>
+    <div className="mx-auto max-w-7xl px-6 py-10 sm:px-10 sm:py-14">
+      <div className="flex flex-wrap items-end justify-between gap-5"><div><p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Application intake</p><h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1><p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">{user ? "Your work saves automatically. Take your time, review everything, then submit once." : "Create an account and verify your email to begin the application."}</p></div>{user && <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Applications open · About 15 minutes</div>}</div>
+      {user ? <ApplicationForm initialName={user.name} email={user.email} cycleOpen={schema?.open === true} cycleName={schema?.cycleName ?? null} questions={schema?.questions ?? []} initialDraft={draft} /> : <div className="mt-8 max-w-xl rounded-[28px] bg-white p-7 shadow-[0_24px_80px_rgba(7,13,31,0.09)] sm:p-9"><ApplicantSignupForm /></div>}
+    </div>
+  </main>;
 }

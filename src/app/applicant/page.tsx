@@ -5,7 +5,8 @@ import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
 import { BuddyButton, OfferButtons, SlotButton, SurveyForm } from "./actions";
 
-export default async function ApplicantDashboard() {
+export default async function ApplicantDashboard({ searchParams }: { searchParams: Promise<{ submitted?: string }> }) {
+  const { submitted } = await searchParams;
   await requireUser();
   const destination = await currentDestination();
   if (destination !== "/applicant") redirect(destination ?? "/login");
@@ -28,6 +29,13 @@ export default async function ApplicantDashboard() {
   return (
     <PortalShell eyebrow="Applicant portal" title={`Welcome, ${applications[0].applicant_name}.`} description="Only outcomes released by MECG appear here. Attendance and coffee chats are never scores.">
       <div className="space-y-4">
+        {submitted === "1" && (
+          <section role="status" className="rounded-2xl bg-emerald-50 p-6 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-emerald-700">Application received</p>
+            <h2 className="mt-3 text-2xl font-semibold">You are all set.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written responses will enter anonymous first-pass review, and any released updates will appear on this page.</p>
+          </section>
+        )}
         {applications.map((application) => {
           const responses = Array.isArray(application.responses) ? application.responses as { prompt?: string; answer?: string }[] : [];
           return (
