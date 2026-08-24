@@ -53,12 +53,12 @@ export default function LoginForm() {
           {submitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <div className="mt-6 flex flex-col gap-2 text-center text-sm">
-        <Link href="/forgot-password" className="underline">Forgot your password?</Link>
-        <Link href="/apply" className="text-mecg-navy/60 underline">New applicant? Create an account</Link>
+      <div className="mt-5 flex flex-col text-center text-sm">
+        <Link href="/forgot-password" className="flex min-h-11 items-center justify-center underline">Forgot your password?</Link>
+        <Link href="/apply" className="flex min-h-11 items-center justify-center text-mecg-navy/60 underline">New applicant? Create an account</Link>
       </div>
-      <p className="mt-6 text-center text-xs leading-5 text-mecg-navy/40">
-        Internal access is assigned by the MECG Board. Contact <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a> for help.
+      <p className="mt-4 text-center text-xs leading-5 text-mecg-navy/40">
+        Internal access is assigned by the MECG Board. Contact <a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 items-center underline">mecg-board@umich.edu</a> for help.
       </p>
     </>
   );

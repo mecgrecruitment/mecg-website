@@ -70,7 +70,7 @@ export default function ApplicantSignupForm() {
       <button type="submit" disabled={pending || Boolean(message)} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
         {pending ? "Creating account..." : "Create applicant account"}
       </button>
-      <p className="text-center text-sm text-mecg-navy/55">Already have an account? <Link href="/login" className="font-semibold underline">Sign in</Link></p>
+      <p className="flex min-h-11 items-center justify-center text-center text-sm text-mecg-navy/55">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
     </form>
   );
 }

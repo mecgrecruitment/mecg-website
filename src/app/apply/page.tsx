@@ -39,11 +39,67 @@ export default async function ApplyPage() {
   const schema = parseIntakeSchema(intake);
   const draft = parseApplicationDraft(schema?.draft);
 
-  return <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
-    <header className="border-b border-mecg-navy/8 bg-white px-6 py-4 sm:px-10"><div className="mx-auto flex max-w-7xl items-center justify-between gap-4"><Link href="/home" className="rounded bg-mecg-navy px-3 py-2"><Image src="/logos/mecg-white.svg" alt="MECG home" width={112} height={32} priority /></Link><div className="flex items-center gap-4 text-sm"><span className="hidden text-mecg-navy/45 sm:inline">{user ? user.email : "Applicant portal"}</span>{user ? <LogoutButton /> : <Link href="/login" className="font-semibold underline underline-offset-4">Sign in</Link>}</div></div></header>
-    <div className="mx-auto max-w-7xl px-6 py-10 sm:px-10 sm:py-14">
-      <div className="flex flex-wrap items-end justify-between gap-5"><div><p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Application intake</p><h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1><p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">{user ? "Your work saves automatically. Take your time, review everything, then submit once." : "Create an account and verify your email to begin the application."}</p></div>{user && <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Applications open · About 15 minutes</div>}</div>
-      {user ? <ApplicationForm initialName={user.name} email={user.email} cycleOpen={schema?.open === true} cycleName={schema?.cycleName ?? null} questions={schema?.questions ?? []} initialDraft={draft} /> : <div className="mt-8 max-w-xl rounded-[28px] bg-white p-7 shadow-[0_24px_80px_rgba(7,13,31,0.09)] sm:p-9"><ApplicantSignupForm /></div>}
-    </div>
-  </main>;
+  return (
+    <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
+      <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
+        <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-4">
+          <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
+            <Image
+              src="/logos/mecg-color.svg"
+              alt="MECG"
+              width={150}
+              height={45}
+              priority
+              className="h-10 w-auto"
+              style={{ width: "auto" }}
+            />
+          </Link>
+          <div className="flex min-h-11 items-center gap-4 text-sm">
+            <span className="hidden text-mecg-navy/45 sm:inline">{user ? user.email : "Applicant portal"}</span>
+            {user ? (
+              <LogoutButton />
+            ) : (
+              <Link href="/login" className="flex min-h-11 items-center font-semibold underline underline-offset-4">
+                Sign in
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className={`mx-auto px-6 py-10 sm:px-10 sm:py-14 ${user ? "max-w-7xl" : "max-w-2xl"}`}>
+        <div className={`flex flex-wrap items-end justify-between gap-5 ${user ? "" : "text-center"}`}>
+          <div className={user ? "" : "mx-auto"}>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Application intake</p>
+            <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
+            <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">
+              {user
+                ? "Your work saves automatically. Take your time, review everything, then submit once."
+                : "Create an account and verify your email to begin the application."}
+            </p>
+          </div>
+          {user && (
+            <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
+              Applications open · About 15 minutes
+            </div>
+          )}
+        </div>
+
+        {user ? (
+          <ApplicationForm
+            initialName={user.name}
+            email={user.email}
+            cycleOpen={schema?.open === true}
+            cycleName={schema?.cycleName ?? null}
+            questions={schema?.questions ?? []}
+            initialDraft={draft}
+          />
+        ) : (
+          <div className="mx-auto mt-8 max-w-xl rounded-[28px] bg-white p-7 text-left shadow-[0_24px_80px_rgba(7,13,31,0.09)] sm:p-9">
+            <ApplicantSignupForm />
+          </div>
+        )}
+      </div>
+    </main>
+  );
 }

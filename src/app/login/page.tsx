@@ -12,6 +12,7 @@ export default async function LoginPage() {
       eyebrow="Account access"
       title="Sign in to MECG."
       description="Applicants, members, Board operators, and Hash panelists use one account. MECG sends you to the workspace assigned to that account."
+      centered
     >
       <LoginForm />
     </PortalShell>
