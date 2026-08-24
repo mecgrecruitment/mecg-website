@@ -20,7 +20,7 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-mecg-navy/95 text-white backdrop-blur">
       <div className="mx-auto flex min-h-18 max-w-[90rem] items-center justify-between px-6 sm:px-10 xl:px-24">
-        <Link href="/home" className="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange" aria-label="MECG home">
+        <Link href="/home" className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange" aria-label="MECG home">
           <Image src="/logos/mecg-white.svg" alt="MECG" width={168} height={44} priority className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
         </Link>
         <nav aria-label="Main navigation" className="hidden items-center gap-7 text-sm font-medium md:flex">

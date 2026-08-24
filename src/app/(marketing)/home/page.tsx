@@ -115,7 +115,7 @@ export default function HomePage() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={`${project.name}, past MECG partner, opens in a new tab`}
-                className={`group flex min-h-40 items-center justify-center px-8 py-10 transition-colors duration-150 hover:bg-white/60 ${index > 0 ? "border-t border-mecg-navy/12 sm:border-l sm:border-t-0" : ""}`}
+                className={`group flex min-h-32 items-center justify-center px-8 py-8 transition-colors duration-150 hover:bg-white/60 sm:min-h-40 sm:py-10 ${index > 0 ? "border-t border-mecg-navy/12 sm:border-l sm:border-t-0" : ""}`}
               >
                 <Image
                   src={project.logo}
@@ -131,7 +131,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-6 py-16 sm:px-10 sm:py-24">
+      <section className="px-6 py-16 sm:px-10 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <Reveal className="relative min-h-[25rem] overflow-hidden bg-mecg-navy sm:min-h-[34rem]">
             <Image
@@ -149,7 +149,7 @@ export default function HomePage() {
           <Reveal delay={80}>
             <SectionLabel number="02">Featured engagement</SectionLabel>
             <p className="mt-6 font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange-ink">{FEATURED_ENGAGEMENT.location}</p>
-            <h2 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+            <h2 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-[2.75rem]">
               {FEATURED_ENGAGEMENT.client}
             </h2>
             <p className="mt-7 text-pretty text-2xl leading-snug text-mecg-navy/86">
@@ -174,12 +174,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-mecg-navy px-6 py-16 text-white sm:px-10 sm:py-24">
+      <section className="bg-mecg-navy px-6 py-16 text-white sm:px-10 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-end">
             <div>
               <SectionLabel number="03" className="text-mecg-orange">How the work moves</SectionLabel>
-              <h2 className="mt-5 max-w-lg text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
+              <h2 className="mt-5 max-w-lg text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-[2.75rem]">
                 One semester. One useful answer.
               </h2>
             </div>
@@ -189,9 +189,9 @@ export default function HomePage() {
           </div>
           <ol className="mt-12 grid gap-px bg-white/12 lg:grid-cols-3">
             {PROCESS_STEPS.map(([number, title, body], index) => (
-              <Reveal key={number} delay={index * 70} className="bg-mecg-navy px-6 py-8 sm:px-8 sm:py-10">
+              <Reveal key={number} delay={index * 70} className="bg-mecg-navy px-6 py-7 sm:px-8 sm:py-9">
                 <p className="font-mono text-xs text-mecg-orange">{number}</p>
-                <h3 className="mt-10 text-2xl font-semibold tracking-tight">{title}</h3>
+                <h3 className="mt-7 text-2xl font-semibold tracking-tight sm:mt-8">{title}</h3>
                 <p className="mt-4 text-pretty text-sm leading-6 text-white/58">{body}</p>
               </Reveal>
             ))}
@@ -199,12 +199,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-paper px-6 py-16 sm:px-10 sm:py-24">
+      <section className="bg-paper px-6 py-16 sm:px-10 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
           <div>
             <SectionLabel number="04">Built at Michigan</SectionLabel>
-            <h2 className="mt-5 max-w-lg text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-              Serious about the work. Still a student organization.
+            <h2 className="mt-5 max-w-lg text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-[2.75rem]">
+              Serious work. Real student life.
             </h2>
             <p className="mt-6 max-w-lg text-pretty text-base leading-7 text-mecg-navy/60">
               MECG brings together students across Michigan who want to learn by doing. Members lead client work, teach each other, and build the organization together.
@@ -225,9 +225,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-6 py-16 sm:px-10 sm:py-24">
+      <section className="px-6 py-10 sm:px-10 sm:py-16">
         <div className="mx-auto grid max-w-6xl overflow-hidden bg-mecg-blue text-white lg:grid-cols-2">
-          <div className="px-7 py-10 sm:px-12 sm:py-14">
+          <div className="px-7 py-8 sm:px-10 sm:py-11">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-white/60">For organizations</p>
             <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Bring us the decision that keeps getting pushed.</h2>
             <Link href="/work" className="button-light group mt-7">
@@ -235,7 +235,7 @@ export default function HomePage() {
               <span className="transition-transform duration-150 group-hover:translate-x-0.5"><ArrowIcon /></span>
             </Link>
           </div>
-          <div className="border-t border-white/20 px-7 py-10 sm:px-12 sm:py-14 lg:border-l lg:border-t-0">
+          <div className="border-t border-white/20 px-7 py-8 sm:px-10 sm:py-11 lg:border-l lg:border-t-0">
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-white/60">For students</p>
             <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Learn consulting by doing the work.</h2>
             <Link href="/join" className="button-ghost-light group mt-7">
