@@ -6,7 +6,7 @@ export const STATS = [
 ];
 
 export const BOARD = [
-  { name: "Annie Callam", role: "President", src: "/board/annie.jpeg", linkedin: "https://www.linkedin.com/in/ana-callam-413bb5274/" },
+  { name: "Annie Callam", role: "President", src: "/board/annie-2026.jpg", linkedin: "https://www.linkedin.com/in/ana-callam-413bb5274/" },
   { name: "Nandini Tatiwala", role: "VP External", src: "/board/nandini.jpeg", linkedin: "https://www.linkedin.com/in/nandini-tatiwala/" },
   { name: "Abby Osterhart", role: "VP Internal", src: "/board/abby.jpeg", linkedin: "https://www.linkedin.com/in/abigailosterhart/" },
   { name: "Jandy Arias", role: "VP Recruitment", src: "/board/jandy.jpeg", linkedin: "https://www.linkedin.com/in/jandy-arias/" },
