@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test src/lib/rush.test.js src/lib/evaluation.test.js && node --experimental-strip-types --test src/lib/auth-destination.test.ts src/lib/authorization.test.ts src/lib/cycles.test.ts src/lib/pdf-validation.test.ts src/lib/workflow.test.ts src/lib/screening.test.ts && node --experimental-strip-types --experimental-test-module-mocks --import ./scripts/test-esm-loader.mjs --test src/app/api/apply/route.test.ts src/app/api/apply/resume/resume-routes.test.ts src/app/api/contact/route.test.ts",
+    "test": "node --test scripts/export-public-projects.test.mjs src/lib/rush.test.js src/lib/evaluation.test.js && node --experimental-strip-types --test src/lib/auth-destination.test.ts src/lib/authorization.test.ts src/lib/cycles.test.ts src/lib/pdf-validation.test.ts src/lib/workflow.test.ts src/lib/screening.test.ts && node --experimental-strip-types --experimental-test-module-mocks --import ./scripts/test-esm-loader.mjs --test src/app/api/apply/route.test.ts src/app/api/apply/resume/resume-routes.test.ts src/app/api/contact/route.test.ts",
     "verify:backend": "node scripts/verify-backend.mjs",
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
     "verify:auth": "node scripts/verify-auth-routing.mjs",
