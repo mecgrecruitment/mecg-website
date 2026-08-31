@@ -54,26 +54,26 @@ export default function RoundAssignmentForm({
 
   return (
     <form onSubmit={submit} className="rounded-2xl bg-paper p-4 sm:p-5">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="min-w-52 flex-1 text-sm font-medium">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end lg:gap-3">
+        <label className="min-w-0 text-sm font-medium">
           Applicant
           <select name="applicationId" required defaultValue="" className="mt-2 min-h-11 w-full rounded-xl bg-white px-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none">
             <option value="" disabled>Select an applicant</option>
             {applicants.map((applicant) => <option key={applicant.id} value={applicant.id}>{applicant.label}</option>)}
           </select>
         </label>
-        <label className="min-w-52 flex-1 text-sm font-medium">
+        <label className="min-w-0 text-sm font-medium">
           Evaluator
           <select name="evaluatorId" required defaultValue="" className="mt-2 min-h-11 w-full rounded-xl bg-white px-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none">
             <option value="" disabled>Select an evaluator</option>
             {evaluators.map((evaluator) => <option key={evaluator.id} value={evaluator.id}>{evaluator.label}</option>)}
           </select>
         </label>
-        <button type="submit" disabled={pending || !applicants.length || !evaluators.length} className="button-primary min-h-11 disabled:opacity-50">
+        <button type="submit" disabled={pending || !applicants.length || !evaluators.length} className="button-primary min-h-11 w-full sm:col-span-2 lg:col-span-1 lg:w-auto disabled:opacity-50">
           {pending ? "Assigning..." : "Add assignment"}
         </button>
       </div>
-      <p className="mt-2 text-xs text-mecg-navy/45">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
+      <p className="mt-3 text-pretty text-xs leading-5 text-mecg-navy/45">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </form>
   );

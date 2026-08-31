@@ -67,14 +67,14 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
   const submittedAssignments = assignments.filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.name} · {cycle.status}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{title}</h1>
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink sm:text-xs sm:tracking-[0.2em]">{cycle.name} · {cycle.status}</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] sm:mt-2.5 sm:text-[34px]">{title}</h1>
         </div>
-        <div className="flex items-center gap-5">
-          <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
+        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start sm:gap-5">
+          <Link href="/member" className="button-secondary flex-1 text-sm sm:flex-none">Evaluation Hub</Link>
           <LogoutButton />
         </div>
       </header>
@@ -85,8 +85,8 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
         </div>
       ) : (
         <section className="flex flex-col gap-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <p className="text-sm text-mecg-navy/55">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+            <p className="text-pretty text-sm leading-6 text-mecg-navy/55">
               Round status: {round.status}. {canManage ? "Use Pipeline operations to publish, activate, and freeze it." : null}
             </p>
             {canOperate ? (
@@ -96,14 +96,14 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
             ) : null}
           </div>
           {canOperate && (
-            <div className="grid gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
               {[
                 [String(activeApplications.length), "applicants"],
                 [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
                 [String(assignments.length - submittedAssignments), "open forms"],
                 [String(submittedAssignments), "submitted"],
               ].map(([value, label]) => (
-                <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3 text-white">
+                <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 text-white sm:py-3">
                   <p className="font-mono text-2xl font-semibold tabular-nums">{value}</p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">{label}</p>
                 </div>
@@ -123,15 +123,16 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
               <p className="text-[13px] text-mecg-navy/40">No assignments yet</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+              <div className="min-w-[42rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-mecg-navy/10">
-                  <th className="py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Applicant</th>
-                  {kind === "GROUP_CASE" && <th className="py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Case team</th>}
-                  <th className="py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Evaluator</th>
-                  <th className="py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Assignment</th>
-                  <th className="py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Evaluation</th>
+                  <th className="px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Applicant</th>
+                  {kind === "GROUP_CASE" && <th className="px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Case team</th>}
+                  <th className="px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Evaluator</th>
+                  <th className="px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Assignment</th>
+                  <th className="px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Evaluation</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,7 +143,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                   const submitted = ["SUBMITTED", "LOCKED"].includes(assignment.status);
                   return (
                     <tr key={assignment.id} className="border-b border-mecg-navy/10">
-                      <td className="py-2.5">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
                             {initials(applicantName)}
@@ -150,10 +151,10 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                           <span className="text-[13px] font-semibold text-mecg-navy">{applicantName}</span>
                         </div>
                       </td>
-                      {kind === "GROUP_CASE" && <td className="py-2.5 text-[13px] text-mecg-navy/55">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
-                      <td className="py-2.5 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
-                      <td className="py-2.5 text-[13px] text-mecg-navy/55">{assignment.status}</td>
-                      <td className="py-2.5">
+                      {kind === "GROUP_CASE" && <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
+                      <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
+                      <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{assignment.status}</td>
+                      <td className="px-4 py-3">
                         <span
                           className={
                             submitted
@@ -169,6 +170,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                 })}
               </tbody>
               </table>
+              </div>
             </div>
           )}
         </section>
