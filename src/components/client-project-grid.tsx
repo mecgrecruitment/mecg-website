@@ -17,13 +17,13 @@ export default function ClientProjectGrid({
 }: {
   readonly projects: readonly ClientProjectProfile[];
 }) {
-  const [selectedName, setSelectedName] = useState(projects[0]?.name ?? "");
+  const [selectedName, setSelectedName] = useState("");
   const selectedProject = useMemo(
-    () => projects.find((project) => project.name === selectedName) ?? projects[0],
+    () => projects.find((project) => project.name === selectedName),
     [projects, selectedName],
   );
 
-  if (!selectedProject) return null;
+  if (!projects.length) return null;
 
   return (
     <div className="mt-8">
@@ -33,14 +33,14 @@ export default function ClientProjectGrid({
 
       <div className="grid gap-px overflow-hidden rounded-2xl bg-mecg-navy/10 sm:grid-cols-3 lg:grid-cols-5">
         {projects.map((project) => {
-          const selected = project.name === selectedProject.name;
+          const selected = project.name === selectedName;
 
           return (
             <button
               key={project.name}
               type="button"
-              aria-controls="selected-client-profile"
-              aria-expanded={selected}
+              aria-controls={selected ? "selected-client-profile" : undefined}
+              aria-pressed={selected}
               aria-label={`View information about ${project.name}`}
               onClick={() => setSelectedName(project.name)}
               className={`group relative flex min-h-36 cursor-pointer flex-col items-center justify-center overflow-hidden bg-white p-5 text-center transition-colors duration-150 hover:bg-mecg-blue/[0.045] ${
@@ -64,11 +64,12 @@ export default function ClientProjectGrid({
         })}
       </div>
 
-      <article
-        id="selected-client-profile"
-        aria-live="polite"
-        className="mt-5 grid overflow-hidden rounded-2xl bg-mecg-blue/[0.07] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] lg:grid-cols-[0.72fr_1.28fr]"
-      >
+      {selectedProject ? (
+        <article
+          id="selected-client-profile"
+          aria-live="polite"
+          className="mt-5 grid overflow-hidden rounded-2xl bg-mecg-blue/[0.07] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] lg:grid-cols-[0.72fr_1.28fr]"
+        >
         <div className="flex min-h-52 items-center justify-center bg-white/75 p-8 lg:min-h-72">
           <div className="relative h-28 w-full max-w-56 sm:h-36">
             <Image
@@ -112,7 +113,8 @@ export default function ClientProjectGrid({
             {selectedProject.websiteLabel ?? `Visit ${selectedProject.name}`} <span aria-hidden="true">↗</span>
           </a>
         </div>
-      </article>
+        </article>
+      ) : null}
     </div>
   );
 }
