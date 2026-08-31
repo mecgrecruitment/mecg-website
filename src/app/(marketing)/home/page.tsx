@@ -62,7 +62,7 @@ export default function HomePage() {
             <p className="mt-1 text-sm text-mecg-navy/60">President of MECG, 2026</p>
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-            <Image src="/board/annie-2026.jpg" alt="Annie Callam, President of MECG" fill className="object-cover object-top" sizes="(min-width: 1024px) 36rem, 100vw" />
+            <Image src="/about/president-2026.jpg" alt="Annie Callam, President of MECG" fill className="object-cover object-center" sizes="(min-width: 1024px) 36rem, 100vw" />
           </div>
       </MarketingSection>
 
