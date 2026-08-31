@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS", typeof body?.cycleId === "string" ? body.cycleId : null);
   if (!cycleId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const dates = [body?.date, body?.endsAt, body?.checkinOpensAt, body?.checkinClosesAt].map((value) => new Date(value));
+  // Reject offset-less date-times: they parse as the server's local zone (UTC), not the
+  // admin's, which silently shifts the event. Clients send UTC ISO strings.
+  const dates = [body?.date, body?.endsAt, body?.checkinOpensAt, body?.checkinClosesAt].map((value) =>
+    typeof value === "string" && /(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? new Date(value) : new Date(NaN),
+  );
   if (typeof body?.name !== "string" || !body.name.trim() || dates.some((date) => Number.isNaN(date.getTime())) || dates[1] <= dates[0]) return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_event", {

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
+import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
 
 type Option = { id: string; label: string };
 type MemberRole = "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTEE";
@@ -270,7 +271,7 @@ export default function RushControls({
                 defaultValue={cycleStatus}
                 className="min-h-10 flex-1 rounded-full bg-white px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
               >
-                {CYCLE_STATUSES.map((status) => <option key={status}>{status}</option>)}
+                {CYCLE_STATUSES.filter((status) => canTransitionCycle(cycleStatus, status)).map((status) => <option key={status}>{status}</option>)}
               </select>
               <button
                 type="submit"
@@ -303,7 +304,7 @@ export default function RushControls({
                       defaultValue={round.status}
                       className="h-[30px] rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
                     >
-                      {ROUND_STATUSES.map((status) => <option key={status}>{status}</option>)}
+                      {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status}>{status}</option>)}
                     </select>
                     <button
                       type="submit"

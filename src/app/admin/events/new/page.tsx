@@ -65,15 +65,20 @@ export default function NewEventPage() {
     setSubmitting(true);
     setError("");
     try {
+      // ponytail: all event times cross the wire as UTC ISO strings, converted here in the
+      // browser so the admin's zone wins (same as slot-form.tsx). Never send the raw
+      // datetime-local value and never re-parse it with new Date() on the server: an
+      // offset-less string parses as the server's local zone (UTC) and shifts the event.
+      const utc = (value: string) => new Date(value).toISOString();
       const res = await fetch("/api/admin/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          date,
-          endsAt,
-          checkinOpensAt: opensAt,
-          checkinClosesAt: closesAt,
+          date: utc(date),
+          endsAt: utc(endsAt),
+          checkinOpensAt: utc(opensAt),
+          checkinClosesAt: utc(closesAt),
           kind,
           location,
           visibility,
