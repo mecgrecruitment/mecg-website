@@ -91,6 +91,13 @@ export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidatio
     if (error instanceof Error && error.name === "PasswordException") {
       return { ok: false, message: "Password-protected PDFs are not supported." };
     }
+    // Never swallow this again. A bundling fault here (the pdfjs worker failing
+    // to resolve) is indistinguishable from a genuinely corrupt upload without
+    // the underlying error, and it silently rejected every resume in production.
+    console.error("pdf validation failed", {
+      name: error instanceof Error ? error.name : typeof error,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return { ok: false, message: "The uploaded file is not a valid PDF." };
   } finally {
     await loadingTask.destroy();

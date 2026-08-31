@@ -35,6 +35,12 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
+  // pdfjs-dist loads its worker as a real file at runtime. Bundled into a server
+  // chunk that file does not exist, so every resume upload died with
+  // "Setting up fake worker failed: Cannot find module .../pdf.worker.mjs",
+  // surfaced to applicants as "The uploaded file is not a valid PDF."
+  // Keeping it external makes Node resolve it from node_modules as it expects.
+  serverExternalPackages: ["pdfjs-dist"],
   deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
   poweredByHeader: false,
   async redirects() {
