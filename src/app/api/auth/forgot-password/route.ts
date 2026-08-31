@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp, emailBucket } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -10,10 +10,10 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(request);
   const [ipOk, emailOk] = await Promise.all([
     checkRateLimit(`forgot-password:${ip}`),
-    checkRateLimit(`forgot-password-email:${email}`),
+    checkRateLimit(emailBucket("forgot-password-email", email)),
   ]);
   if (!ipOk || !emailOk) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });

@@ -1,4 +1,28 @@
+import { createHash } from "node:crypto";
 import { screeningRpc } from "@/lib/screening-rpc";
+
+// `x-forwarded-for` is client-controlled at its leftmost entry, so keying a
+// bucket on it hands an attacker a fresh bucket per request. Prefer the headers
+// only the platform can set (`x-vercel-forwarded-for` is stripped from inbound
+// requests and rewritten by Vercel's edge; `x-real-ip` is the single
+// platform-observed peer), and fall back to the *rightmost* XFF entry, which is
+// the hop appended by the nearest trusted proxy rather than whatever the client
+// typed. Local dev sends none of these and collapses to "unknown", which is the
+// safe direction: one shared bucket, not unlimited buckets.
+export function clientIp(req: { headers: Headers }): string {
+  const platform = req.headers.get("x-vercel-forwarded-for") ?? req.headers.get("x-real-ip");
+  if (platform?.trim()) return platform.split(",")[0]!.trim();
+  const forwarded = req.headers.get("x-forwarded-for")?.split(",") ?? [];
+  return forwarded[forwarded.length - 1]?.trim() || "unknown";
+}
+
+// The bucket name is the primary key of rush.rate_limits, so a raw email would
+// park every address anyone types into the login or forgot-password form in the
+// table in plaintext. The prefix stays readable so buckets remain telling apart
+// in the DB; only the address is digested.
+export function emailBucket(prefix: string, email: string): string {
+  return `${prefix}:${createHash("sha256").update(email).digest("hex")}`;
+}
 
 // check_rate_limit isn't in the generated Database types yet (added in the same
 // migration batch as this file) — route through the untyped RPC helper like
@@ -16,15 +40,23 @@ import { screeningRpc } from "@/lib/screening-rpc";
 // module's real body regardless of the mock, which would otherwise crash
 // any plain-Node test (e.g. route.test.ts) that merely imports a route
 // using checkRateLimit.
-export async function checkRateLimit(bucket: string): Promise<boolean> {
+//
+// `onError` defaults to "deny" (fail closed): if the limiter itself errors we
+// deny rather than silently disabling abuse protection during an incident. Pass
+// "allow" only where locking everyone out is worse than losing the limit for the
+// duration of an outage -- login is the one such path, since failing closed
+// there 429s the whole site including the board members trying to fix it.
+export async function checkRateLimit(bucket: string, onError: "deny" | "allow" = "deny"): Promise<boolean> {
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const { data, error } = await screeningRpc<boolean>(createAdminClient(), "check_rate_limit", {
     p_bucket: bucket,
   });
   if (error) {
-    // Fail closed: deny the request if the rate limiter itself errors, rather than
-    // silently disabling abuse protection during an incident.
     console.error("check_rate_limit failed", error);
+    if (onError === "allow") {
+      console.error(`rate limit failing open for ${bucket.split(":")[0]} -- abuse protection is OFF until the limiter recovers`);
+      return true;
+    }
     return false;
   }
   return data === true;

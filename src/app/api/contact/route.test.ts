@@ -27,7 +27,7 @@ async function importRoute(testCase: string) {
 }
 
 function mockDependencies(t: test.TestContext, options: { allowed?: boolean; delivered?: boolean; onSend?: (params: Record<string, unknown>) => void } = {}) {
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => options.allowed ?? true } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => options.allowed ?? true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/email", {
     namedExports: {
       escapeHtml,

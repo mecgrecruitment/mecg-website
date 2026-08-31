@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { destinationForUser } from "@/lib/auth";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp, emailBucket } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -12,10 +12,11 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(request);
+  // Fails open on limiter errors: a Supabase hiccup must not 429 every login site-wide.
   const [ipOk, emailOk] = await Promise.all([
-    checkRateLimit(`login:${ip}`),
-    checkRateLimit(`login-email:${email}`),
+    checkRateLimit(`login:${ip}`, "allow"),
+    checkRateLimit(emailBucket("login-email", email), "allow"),
   ]);
   if (!ipOk || !emailOk) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });

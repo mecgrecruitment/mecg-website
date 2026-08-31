@@ -53,7 +53,7 @@ function fakeSupabaseClient(handlers: RpcHandlers) {
 function mockCommon(t: test.TestContext, client: unknown, options: { rateLimited?: boolean; sendEmail?: () => Promise<void> } = {}) {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => FAKE_USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => !options.rateLimited } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => !options.rateLimited, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/email", {
     namedExports: {
       sendEmail: options.sendEmail ?? (async () => undefined),

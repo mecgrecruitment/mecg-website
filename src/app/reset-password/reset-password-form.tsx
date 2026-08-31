@@ -24,7 +24,12 @@ export default function ResetPasswordForm() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        setError(body?.code === "RECOVERY_SESSION_REQUIRED" ? "Open the password-reset link from your email again." : "The password could not be updated.");
+        const messages: Record<string, string> = {
+          RECOVERY_SESSION_REQUIRED: "Open the password-reset link from your email again.",
+          RATE_LIMITED: "Too many attempts. Wait a few minutes and try again.",
+          INVALID_PASSWORD: "Use a password between 8 and 1024 characters.",
+        };
+        setError(messages[body?.code] ?? "The password could not be updated.");
         return;
       }
       router.replace("/login");

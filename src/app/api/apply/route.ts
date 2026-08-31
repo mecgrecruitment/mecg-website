@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { sendEmail, wrapEmail } from "@/lib/email";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { parseApplicationIntake } from "@/lib/workflow";
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "A valid name, resume, answers, and consent are required" }, { status: 400 });
   }
   const supabase = await createClient();
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(req);
   if (!(await checkRateLimit(`apply:${ip}`))) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
   }

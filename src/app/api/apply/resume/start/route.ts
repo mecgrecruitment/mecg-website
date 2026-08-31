@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { MAX_RESUME_BYTES } from "@/lib/pdf-validation";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Choose a PDF smaller than 10 MB" }, { status: 400 });
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(req);
   if (!(await checkRateLimit(`resume-upload:${user.id}:${ip}`))) {
     return NextResponse.json({ error: "Too many resume uploads. Wait a few minutes and try again." }, { status: 429 });
   }

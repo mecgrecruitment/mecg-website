@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonBody } from "@/lib/api-route";
 import { escapeHtml, sendEmail, wrapEmail } from "@/lib/email";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 
 const MAX_BODY_BYTES = 16 * 1024;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     || message.length < 10 || message.length > 5000;
   if (invalid) return NextResponse.json({ error: "Check the form fields and try again" }, { status: 400 });
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(request);
   if (!(await checkRateLimit(`contact:${ip}`))) {
     return NextResponse.json({ error: "Too many messages. Try again later." }, { status: 429 });
   }

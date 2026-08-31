@@ -55,7 +55,7 @@ test("resume start creates a server-controlled upload target", async (t) => {
     },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importStartRoute("success");
   const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
@@ -66,7 +66,7 @@ test("resume start creates a server-controlled upload target", async (t) => {
 
 test("resume start rejects invalid files before creating an upload", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("should not connect"); } } });
   const { POST } = await importStartRoute("invalid");
   const response = await POST(request("/api/apply/resume/start", { filename: "resume.docx", size: 26 }));
@@ -97,6 +97,7 @@ test("resume finalize verifies bytes and records the digest", async (t) => {
     },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => adminClient } });
   const { POST } = await importFinalizeRoute("success");
@@ -127,6 +128,7 @@ test("resume finalize rejects and removes non-PDF content", async (t) => {
     },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
   const { POST } = await importFinalizeRoute("invalid");
@@ -150,6 +152,7 @@ test("resume finalize never deletes content when rejection loses a race", async 
     }) },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importFinalizeRoute("rejection-race");
   const response = await POST(request("/api/apply/resume/finalize", { documentId: DOCUMENT_ID }));
@@ -173,6 +176,7 @@ test("resume finalize removes files superseded by a successful replacement", asy
     error: null,
   }) };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => adminClient } });
   const { POST } = await importFinalizeRoute("replacement-cleanup");
@@ -188,6 +192,7 @@ test("resume cancel does not remove a document the database refuses to reject", 
     storage: { from: () => ({ remove: async () => { removed = true; return { data: [], error: null }; } }) },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importCancelRoute("ready-document");
   const response = await POST(request("/api/apply/resume/cancel", { documentId: DOCUMENT_ID }));

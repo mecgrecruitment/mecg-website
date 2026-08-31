@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { destinationForUser } from "@/lib/auth";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(request);
   if (!(await checkRateLimit(`signup:${ip}`))) {
     return NextResponse.json({ code: "RATE_LIMITED" }, { status: 429 });
   }

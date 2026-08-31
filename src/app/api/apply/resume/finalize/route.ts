@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { validateResumePdf } from "@/lib/pdf-validation";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_REQUEST_BYTES = 2 * 1024;
+const PARSE_TIMEOUT_MS = 15_000;
+const PARSE_TIMEOUT_MESSAGE = "The PDF took too long to check. Re-export it and try again.";
 
 type PendingUpload = { documentId: string; path: string; declaredSize: number; filename: string };
 type ReadyUpload = {
@@ -43,6 +46,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid upload request" }, { status: 400 });
   }
 
+  if (!(await checkRateLimit(`resume-finalize:${user.id}:${clientIp(req)}`))) {
+    return NextResponse.json({ error: "Too many resume uploads. Wait a few minutes and try again." }, { status: 429 });
+  }
+
   const supabase = await createClient();
   const { data: pending, error: pendingError } = await screeningRpc<PendingUpload>(supabase, "pending_resume_upload", {
     target_document_id: documentId,
@@ -59,7 +66,16 @@ export async function POST(req: NextRequest) {
   }
 
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  const validation = await validateResumePdf(bytes);
+  // A crafted PDF can keep pdfjs-dist busy indefinitely, and validateResumePdf
+  // owns the loading task, so the handler can only bound its own wait here.
+  // ponytail: the parse keeps burning CPU in the background after this fires --
+  // the real cancel (loadingTask.destroy() on expiry) belongs in pdf-validation.ts.
+  const validation = await Promise.race([
+    validateResumePdf(bytes),
+    new Promise<{ ok: false; message: string }>((resolve) =>
+      setTimeout(() => resolve({ ok: false, message: PARSE_TIMEOUT_MESSAGE }), PARSE_TIMEOUT_MS).unref?.(),
+    ),
+  ]);
   if (!validation.ok) {
     await rejectUpload(supabase, documentId, pending.path, validation.message);
     return NextResponse.json({ error: validation.message }, { status: 400 });
