@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { AnnotationType, getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 export const MAX_RESUME_PAGES = 20;
@@ -15,7 +16,16 @@ const ACTIVE_CONTENT_MARKERS = [
   /\/RichMedia\b/i,
 ];
 
-export function validateResumePdf(bytes: Uint8Array): PdfValidationResult {
+const ACTIVE_ANNOTATION_TYPES = new Set([
+  AnnotationType.FILEATTACHMENT,
+  AnnotationType.MOVIE,
+  AnnotationType.SOUND,
+  AnnotationType.SCREEN,
+  AnnotationType.RICHMEDIA,
+  AnnotationType.THREED,
+]);
+
+export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidationResult> {
   if (bytes.byteLength === 0 || bytes.byteLength > MAX_RESUME_BYTES) {
     return { ok: false, message: "The PDF must be smaller than 10 MB." };
   }
@@ -38,15 +48,51 @@ export function validateResumePdf(bytes: Uint8Array): PdfValidationResult {
     return { ok: false, message: "PDFs containing scripts or embedded files are not supported." };
   }
 
-  const detectedPages = source.match(/\/Type\s*\/Page\b/g)?.length ?? 0;
-  if (detectedPages > MAX_RESUME_PAGES) {
-    return { ok: false, message: `The PDF must be ${MAX_RESUME_PAGES} pages or fewer.` };
-  }
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  const loadingTask = getDocument({
+    data: bytes.slice(),
+    disableFontFace: true,
+    stopAtErrors: true,
+    useSystemFonts: false,
+    useWasm: false,
+    useWorkerFetch: false,
+    verbosity: 0,
+  });
 
-  return {
-    ok: true,
-    byteSize: bytes.byteLength,
-    pageCount: Math.max(1, detectedPages),
-    sha256: createHash("sha256").update(bytes).digest("hex"),
-  };
+  try {
+    const document = await loadingTask.promise;
+    if (document.numPages < 1) {
+      return { ok: false, message: "The PDF does not contain any pages." };
+    }
+    if (document.numPages > MAX_RESUME_PAGES) {
+      return { ok: false, message: `The PDF must be ${MAX_RESUME_PAGES} pages or fewer.` };
+    }
+
+    const [attachments, documentActions, openAction, activeAnnotations] = await Promise.all([
+      document.getAttachments(),
+      document.getJSActions(),
+      document.getOpenAction(),
+      document.getAnnotationsByType(ACTIVE_ANNOTATION_TYPES, new Set()),
+    ]);
+    if (attachments?.size || documentActions?.size || openAction || activeAnnotations.length) {
+      return { ok: false, message: "PDFs containing scripts, actions, or embedded files are not supported." };
+    }
+
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      if ((await page.getJSActions())?.size) {
+        return { ok: false, message: "PDFs containing scripts, actions, or embedded files are not supported." };
+      }
+      page.cleanup();
+    }
+
+    return { ok: true, byteSize: bytes.byteLength, pageCount: document.numPages, sha256 };
+  } catch (error) {
+    if (error instanceof Error && error.name === "PasswordException") {
+      return { ok: false, message: "Password-protected PDFs are not supported." };
+    }
+    return { ok: false, message: "The uploaded file is not a valid PDF." };
+  } finally {
+    await loadingTask.destroy();
+  }
 }

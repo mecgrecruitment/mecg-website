@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
   }
 
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  const validation = validateResumePdf(bytes);
+  const validation = await validateResumePdf(bytes);
   if (!validation.ok) {
     await rejectUpload(supabase, documentId, pending.path, validation.message);
     return NextResponse.json({ error: validation.message }, { status: 400 });
