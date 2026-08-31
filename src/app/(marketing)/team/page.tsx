@@ -23,7 +23,7 @@ export default function TeamPage() {
               <article key={name}>
                 <a href={linkedin} target="_blank" rel="noreferrer" aria-label={`${name} on LinkedIn, opens in a new tab`} className="group block">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-                    <Image src={src} alt="" fill loading={index === 0 ? "eager" : "lazy"} style={{ objectPosition: imagePosition, transformOrigin: imageOrigin ?? imagePosition }} className={`object-cover transition duration-300 group-hover:brightness-[1.03] ${imageClass}`} sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw" />
+                    <Image src={src} alt="" fill loading={index < 5 ? "eager" : "lazy"} style={{ objectPosition: imagePosition, transformOrigin: imageOrigin ?? imagePosition }} className={`object-cover transition duration-300 group-hover:brightness-[1.03] ${imageClass}`} sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold tracking-[-0.02em]">{name}</h3>
                   <p className="mt-1 text-sm text-mecg-navy/60">{role}</p>
