@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(80);
+select extensions.plan(87);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -24,6 +24,13 @@ select extensions.has_function('rush','rotate_event_token',array['text'],'token 
 select extensions.has_function('rush','create_case_group',array['text','text','text'],'case group function exists');
 select extensions.has_function('rush','assign_case_group',array['text','text'],'case assignment function exists');
 select extensions.has_function('rush','set_decision_preview',array['text','text'],'decision preview function exists');
+select extensions.has_table('rush','application_documents','resume document lifecycle table exists');
+select extensions.has_function('rush','begin_resume_upload',array['text','integer'],'resume upload start function exists');
+select extensions.has_function('rush','pending_resume_upload',array['text'],'pending resume lookup exists');
+select extensions.has_function('rush','finalize_resume_upload',array['text','integer','text','integer'],'resume finalization function exists');
+select extensions.has_function('rush','reject_resume_upload',array['text','text'],'resume rejection function exists');
+select extensions.has_function('rush','my_ready_resume',array['text'],'applicant ready-resume lookup exists');
+select extensions.has_function('rush','authorize_resume_access',array['text'],'internal resume authorization exists');
 select extensions.has_function('rush','create_screening_batch',array['text','uuid[]'],'screening batch function exists');
 select extensions.has_function('rush','screening_admin_overview',array['text'],'screening overview function exists');
 select extensions.has_function('rush','freeze_screening_batch',array['text'],'screening freeze function exists');

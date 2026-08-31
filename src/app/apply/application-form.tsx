@@ -8,7 +8,11 @@ import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, type ApplicationDraft } from 
 type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean };
 type Step = "details" | "responses" | "materials" | "review";
 type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; label: string } | { kind: "error"; message: string };
-type UploadState = { kind: "idle" } | { kind: "uploading" } | { kind: "uploaded"; label: string } | { kind: "error"; message: string };
+type UploadState =
+  | { kind: "idle" }
+  | { kind: "uploading"; label: string }
+  | { kind: "uploaded"; label: string; size?: number; pageCount?: number }
+  | { kind: "error"; message: string };
 type SubmitState = { kind: "idle" } | { kind: "submitting" } | { kind: "error"; message: string };
 
 const STEPS: { id: Step; label: string; shortLabel: string }[] = [
@@ -58,6 +62,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   const [uploadState, setUploadState] = useState<UploadState>(initialDraft?.resumeStoragePath ? { kind: "uploaded", label: "Previously uploaded PDF" } : { kind: "idle" });
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
   const initialized = useRef(false);
+  const uploadSequence = useRef(0);
 
   const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath]);
 
@@ -81,25 +86,52 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   }, [cycleOpen, draftPayload]);
 
   async function uploadResume(file: File) {
+    const sequence = ++uploadSequence.current;
     if (file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
       setUploadState({ kind: "error", message: "Choose a PDF smaller than 10 MB." });
       return;
     }
-    setUploadState({ kind: "uploading" });
-    const supabase = createClient();
-    const { data: path, error: pathError } = await supabase.rpc("create_resume_upload");
-    if (pathError || !path) {
-      setUploadState({ kind: "error", message: pathError?.message ?? "Resume upload is unavailable." });
-      return;
+    setUploadState({ kind: "uploading", label: file.name });
+    let documentId = "";
+    try {
+      const startResponse = await fetch("/api/apply/resume/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, size: file.size }),
+      });
+      const startBody = await startResponse.json().catch(() => null);
+      if (!startResponse.ok || typeof startBody?.documentId !== "string" || typeof startBody?.path !== "string") {
+        throw new Error(startBody?.error ?? "We could not start the resume upload.");
+      }
+      documentId = startBody.documentId;
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage.from("resumes").upload(startBody.path, file, { contentType: "application/pdf", upsert: false });
+      if (uploadError) throw new Error("We could not upload your resume. Please try again.");
+      const finalizeResponse = await fetch("/api/apply/resume/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId }),
+      });
+      const finalized = await finalizeResponse.json().catch(() => null);
+      if (!finalizeResponse.ok || typeof finalized?.path !== "string") {
+        throw new Error(finalized?.error ?? "We could not verify your resume. Please try again.");
+      }
+      if (sequence !== uploadSequence.current) return;
+      setResumePath(finalized.path);
+      setUploadState({ kind: "uploaded", label: finalized.filename ?? file.name, size: finalized.size, pageCount: finalized.pageCount });
+      setErrors((current) => ({ ...current, resume: "" }));
+    } catch (error) {
+      if (documentId) {
+        void fetch("/api/apply/resume/cancel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId }),
+        });
+      }
+      if (sequence === uploadSequence.current) {
+        setUploadState({ kind: "error", message: error instanceof Error ? error.message : "We could not upload your resume. Please try again." });
+      }
     }
-    const { error: uploadError } = await supabase.storage.from("resumes").upload(path, file, { contentType: "application/pdf", upsert: true });
-    if (uploadError) {
-      setUploadState({ kind: "error", message: uploadError.message });
-      return;
-    }
-    setResumePath(path);
-    setUploadState({ kind: "uploaded", label: file.name });
-    setErrors((current) => ({ ...current, resume: "" }));
   }
 
   function validate(target: Step) {
@@ -202,8 +234,8 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
 
 function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string }) {
   return <><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">Add your materials.</h2><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/55">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
-    <label className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/8"><input type="file" accept="application/pdf" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume"}</span><span className="mt-1 block text-sm text-mecg-navy/50">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
-    {uploadState.kind === "error" && <FieldError>{uploadState.message}</FieldError>}<FieldError>{error}</FieldError>
+    <label className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/8"><input type="file" accept="application/pdf" disabled={uploadState.kind === "uploading"} className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading and checking resume..." : resumePath ? "Replace your resume" : "Upload your resume"}</span><span className="mt-1 block text-sm text-mecg-navy/50">PDF only, up to 10 MB and 20 pages</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
+    {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/55" role="status">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError>{uploadState.message}</FieldError>}<FieldError>{error}</FieldError>
     <label className={labelClass}>LinkedIn profile <span className="font-normal text-mecg-navy/40">Optional</span><input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} type="url" placeholder="https://linkedin.com/in/..." className={fieldClass} /></label>
     <label className={labelClass}>Scheduling or access needs <span className="font-normal text-mecg-navy/40">Optional and never scored</span><textarea value={accessibilityNotes} onChange={(e) => setAccessibilityNotes(e.target.value)} rows={4} className={`${fieldClass} py-3`} /><span className="mt-2 block text-xs font-normal leading-5 text-mecg-navy/45">Only the operations team uses this information to arrange an accessible recruitment process.</span></label>
   </div></>;
