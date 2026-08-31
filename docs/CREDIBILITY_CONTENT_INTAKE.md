@@ -8,8 +8,12 @@ Complete one copy of this section for each project.
 
 - Project title:
 - Client name:
+- Source files used:
+- Canonical final deliverable:
+- Superseded files:
 - May MECG name the client publicly? Yes / No
 - Anonymous client description if needed:
+- Could the anonymous description still identify the client? Yes / No
 - Semester and year:
 - Industry:
 - Project manager:
@@ -25,8 +29,17 @@ Complete one copy of this section for each project.
 - Limits or context the public description should include:
 - Approved project image or redacted artifact path:
 - Image caption and alt text:
-- Client approval date:
+- Client approval for name: Yes / No / Withheld
+- Client approval for logo and website link: Yes / No / Withheld
+- Client approval for project scope: Yes / No / Withheld
+- Client approval for each published method: Yes / No / Withheld
+- Client approval for each published deliverable: Yes / No / Withheld
+- Client approval for each result or outcome: Yes / No / Withheld
+- Client approval for quote and attribution: Yes / No / Withheld
+- Client approval for each image or artifact: Yes / No / Withheld
+- Client approval date and approver:
 - MECG board approval date:
+- Public preview checked in a production build: Yes / No
 
 ## Client testimonial
 
@@ -68,6 +81,9 @@ Record the source and date for every public number.
 - Every named person approved their quote and headshot.
 - Every named client approved its name, logo, results, and artifacts.
 - Anonymous case studies do not reveal the client through filenames, screenshots, or metadata.
+- Draft, internal, and withheld fields do not appear in HTML, metadata, route parameters, or client bundles.
 - Results describe what the team measured. They do not imply outcomes MECG could not verify.
+- Forecasts, targets, recommendations, and midpoint progress figures are not described as results.
+- Raw decks, documents, spreadsheets, emails, forms, and contact lists are not stored under `public/`.
 - Images have useful captions and alt text.
 - One board member owns future corrections.

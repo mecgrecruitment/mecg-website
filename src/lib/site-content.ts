@@ -6,16 +6,16 @@ export const STATS = [
 ];
 
 export const BOARD = [
-  { name: "Annie Callam", role: "President", src: "/board/annie-2026.jpg", imageClass: "scale-[1.02]", imagePosition: "50% 18%", linkedin: "https://www.linkedin.com/in/ana-callam-413bb5274/" },
-  { name: "Nandini Tatiwala", role: "VP External", src: "/board/nandini.jpeg", imageClass: "scale-[1.18]", imagePosition: "50% 24%", linkedin: "https://www.linkedin.com/in/nandini-tatiwala/" },
-  { name: "Abby Osterhart", role: "VP Internal", src: "/board/abby.jpeg", imageClass: "scale-[1.18]", imagePosition: "50% 24%", linkedin: "https://www.linkedin.com/in/abigailosterhart/" },
-  { name: "Jandy Arias", role: "VP Recruitment", src: "/board/jandy.jpeg", imageClass: "scale-[1.16]", imagePosition: "50% 22%", linkedin: "https://www.linkedin.com/in/jandy-arias/" },
-  { name: "Blake Stark", role: "VP Consulting", src: "/board/blake.jpeg", imageClass: "scale-[1.18]", imagePosition: "50% 22%", linkedin: "https://www.linkedin.com/in/blakeastark" },
-  { name: "Sumedha Katti", role: "VP Consulting", src: "/board/sumedha.jpeg", imageClass: "scale-[1.32]", imagePosition: "50% 22%", imageOrigin: "50% 30%", linkedin: "https://www.linkedin.com/in/sumedha-katti/" },
-  { name: "Maya Menon", role: "VP Education", src: "/board/maya.jpeg", imageClass: "scale-[1.06]", imagePosition: "50% 18%", linkedin: "https://www.linkedin.com/in/mayamenon28" },
-  { name: "Luciano del Carpio", role: "VP Education", src: "/board/luciano.jpeg", imageClass: "scale-[1.3]", imagePosition: "50% 22%", imageOrigin: "50% 28%", linkedin: "https://www.linkedin.com/in/luciano-del-carpio/" },
-  { name: "Selena Cooper", role: "VP Finance", src: "/board/selena.png", imageClass: "scale-[1.06]", imagePosition: "50% 18%", linkedin: "https://www.linkedin.com/in/selena-cooper/" },
-  { name: "Angela Yang", role: "VP Marketing", src: "/board/angela.png", imageClass: "scale-[1.5]", imagePosition: "50% 24%", imageOrigin: "50% 42%", linkedin: "https://www.linkedin.com/in/anngelayang/" },
+  { name: "Annie Callam", role: "President", src: "/board/annie.jpeg", linkedin: "https://www.linkedin.com/in/ana-callam-413bb5274/" },
+  { name: "Nandini Tatiwala", role: "VP External", src: "/board/nandini.jpeg", linkedin: "https://www.linkedin.com/in/nandini-tatiwala/" },
+  { name: "Abby Osterhart", role: "VP Internal", src: "/board/abby.jpeg", linkedin: "https://www.linkedin.com/in/abigailosterhart/" },
+  { name: "Jandy Arias", role: "VP Recruitment", src: "/board/jandy.jpeg", linkedin: "https://www.linkedin.com/in/jandy-arias/" },
+  { name: "Blake Stark", role: "VP Consulting", src: "/board/blake.jpeg", linkedin: "https://www.linkedin.com/in/blakeastark" },
+  { name: "Sumedha Katti", role: "VP Consulting", src: "/board/sumedha.jpeg", linkedin: "https://www.linkedin.com/in/sumedha-katti/" },
+  { name: "Maya Menon", role: "VP Education", src: "/board/maya.jpeg", linkedin: "https://www.linkedin.com/in/mayamenon28" },
+  { name: "Luciano del Carpio", role: "VP Education", src: "/board/luciano.jpeg", linkedin: "https://www.linkedin.com/in/luciano-del-carpio/" },
+  { name: "Selena Cooper", role: "VP Finance", src: "/board/selena.png", linkedin: "https://www.linkedin.com/in/selena-cooper/" },
+  { name: "Angela Yang", role: "VP Marketing", src: "/board/angela.png", linkedin: "https://www.linkedin.com/in/anngelayang/" },
 ];
 
 export const PAST_PROJECTS = [

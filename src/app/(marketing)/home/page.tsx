@@ -62,24 +62,16 @@ export default function HomePage() {
             <p className="mt-1 text-sm text-mecg-navy/60">President of MECG, 2026</p>
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-            <Image src="/about/president-2026.jpg" alt="Annie Callam, President of MECG" fill className="object-cover object-center" sizes="(min-width: 1024px) 36rem, 100vw" />
+            <Image src="/about/president.jpg" alt="Annie Callam, President of MECG" fill className="object-cover object-center" sizes="(min-width: 1024px) 36rem, 100vw" />
           </div>
       </MarketingSection>
 
       <MarketingSection id="our-history" className="scroll-mt-24" innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
           <SectionHeading>Our history</SectionHeading>
-          <div className="grid gap-7 sm:grid-cols-[0.9fr_1.1fr] sm:items-start">
-            <figure>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-                <Image src="/about/founders.jpg" alt="MECG founders Aaryan Singh and Jonny Fay at Michigan's 2024 national championship" fill className="object-cover object-center" sizes="(min-width: 1024px) 24rem, (min-width: 640px) 42vw, 100vw" />
-              </div>
-              <figcaption className="mt-3 text-sm leading-6 text-mecg-navy/55">Founders Aaryan Singh and Jonny Fay</figcaption>
-            </figure>
-            <div className="space-y-4 text-pretty leading-7 text-mecg-navy/70">
-              <p>Jonny Fay and Aaryan Singh founded MECG in 2023 to give students across the University of Michigan a place to practice consulting while growing professionally and personally.</p>
-              <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
-              <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
-            </div>
+          <div className="space-y-4 text-pretty leading-7 text-mecg-navy/70">
+            <p>Jonny Fay and Aaryan Singh founded MECG in 2023 to give students across the University of Michigan a place to practice consulting while growing professionally and personally.</p>
+            <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
+            <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
           </div>
       </MarketingSection>
 
