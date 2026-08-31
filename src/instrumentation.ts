@@ -2,6 +2,11 @@
 // letting `requireEnv` throw deep inside the first request. See
 // src/lib/supabase/{admin,client,server,proxy}.ts for the MECG_-prefixed
 // fallback pattern this mirrors.
+//
+// Only the two NEXT_PUBLIC_ vars are fatal: without them nothing renders.
+// The service-role key and the Resend vars are needed by the admin routes
+// and by outbound email, so a missing one is logged loudly and the server
+// keeps serving the public marketing site.
 export function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
@@ -15,11 +20,25 @@ export function register() {
   ) {
     missing.push("set NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
-  if (!process.env.MECG_SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    missing.push("set MECG_SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_ROLE_KEY");
-  }
 
   if (missing.length > 0) {
     throw new Error(`Missing required env var: ${missing.join("; ")}`);
+  }
+
+  const degraded: string[] = [];
+  if (!process.env.MECG_SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    degraded.push(
+      "MECG_SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_ROLE_KEY is missing: every admin route that needs the service-role client will fail",
+    );
+  }
+  if (!process.env.RESEND_API_KEY) {
+    degraded.push("RESEND_API_KEY is missing: no applicant email will be sent");
+  }
+  if (!process.env.RESEND_FROM_EMAIL) {
+    degraded.push("RESEND_FROM_EMAIL is missing: no applicant email will be sent");
+  }
+
+  for (const problem of degraded) {
+    console.error(`[boot] DEGRADED: ${problem}`);
   }
 }

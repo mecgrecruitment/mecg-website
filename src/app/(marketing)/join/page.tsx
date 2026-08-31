@@ -1,12 +1,20 @@
+import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import Link from "next/link";
 import MarketingSection from "@/components/marketing-section";
 import PageIntro from "@/components/page-intro";
 import PhotoCarousel from "@/components/photo-carousel";
 import SectionHeading from "@/components/section-heading";
+import { requireEnv } from "@/lib/env";
 import { JOIN_FAQS, JOIN_REASONS } from "@/lib/join-content";
-import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 import InterestForm from "./interest-form";
+
+// This page reads one public RPC and no session, so it is served from the
+// ISR cache instead of rendering cold on every visit. The Supabase client is
+// built here rather than via lib/supabase/server so it never touches
+// cookies(), which is the only thing that was forcing dynamic rendering.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Join Our Team",
@@ -59,7 +67,11 @@ function cycleStatus(cycle: NonNullable<Recruitment["cycle"]>) {
 }
 
 export default async function JoinPage() {
-  const supabase = await createClient();
+  const supabase = createClient<Database, "rush">(
+    process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    process.env.NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY ?? requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "rush" } },
+  );
   const { data } = await supabase.rpc("public_recruitment");
   const recruitment = data && typeof data === "object" ? data as Recruitment : { cycle: null, events: [] };
   const events = recruitment.events ?? [];
