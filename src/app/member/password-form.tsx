@@ -17,13 +17,21 @@ export default function PasswordForm() {
     else { form.reset(); setMessage("Password changed. Other sessions are now signed out."); }
   }
   return (
-    <details className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-      <summary className="cursor-pointer font-semibold">Account security</summary>
-      <form onSubmit={submit} className="mt-4 flex max-w-md flex-col gap-3">
+    <details className="group rounded-2xl bg-mecg-navy/[0.025] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 marker:content-none">
+        <span>
+          <span className="block text-sm font-semibold text-mecg-navy">Account security</span>
+          <span className="mt-0.5 block text-xs text-mecg-navy/45">Change your password and sign out other sessions.</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/45 transition-transform group-open:rotate-180" aria-hidden="true">
+          <path d="M5 8l5 5 5-5" />
+        </svg>
+      </summary>
+      <form onSubmit={submit} className="flex max-w-md flex-col gap-3 border-t border-mecg-navy/10 p-5">
         <label className="sr-only" htmlFor="password-current">Current password</label>
-        <input id="password-current" name="currentPassword" type="password" autoComplete="current-password" required placeholder="Current password" className="min-h-11 rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
+        <input id="password-current" name="currentPassword" type="password" autoComplete="current-password" required placeholder="Current password" className="field-control" />
         <label className="sr-only" htmlFor="password-new">New password, at least 8 characters</label>
-        <input id="password-new" name="newPassword" type="password" autoComplete="new-password" minLength={8} required placeholder="New password, at least 8 characters" className="min-h-11 rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
+        <input id="password-new" name="newPassword" type="password" autoComplete="new-password" minLength={8} required placeholder="New password, at least 8 characters" className="field-control" />
         <button className="button-primary">Change password</button>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         {message && <p className="text-sm text-green-700">{message}</p>}

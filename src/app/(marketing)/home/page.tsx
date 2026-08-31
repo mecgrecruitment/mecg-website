@@ -13,10 +13,13 @@ export const metadata: Metadata = {
 };
 
 const HOME_PHOTOS = [
-  { src: "/mecg/members-formal.jpg", alt: "MECG members together at a formal event" },
-  { src: "/mecg/members-outdoors.jpg", alt: "MECG members together outdoors" },
-  { src: "/mecg/members-in-chicago.jpg", alt: "MECG members during a visit to Chicago" },
-  { src: "/mecg/members-together.jpg", alt: "MECG members spending time together" },
+  { src: "/mecg/members-board-professional.jpeg", alt: "MECG executive board in a professional group portrait" },
+  { src: "/mecg/members-chicago-professional.jpeg", alt: "MECG members on a professional visit to Chicago" },
+  { src: "/mecg/members-professional.jpeg", alt: "MECG members visiting PwC in Chicago" },
+  { src: "/mecg/community-formal-group.jpeg", alt: "MECG members dressed for a formal event" },
+  { src: "/mecg/community-maize-day.jpeg", alt: "MECG members celebrating in Michigan colors" },
+  { src: "/mecg/community-formal-pair.jpeg", alt: "Two MECG members dressed for a formal event" },
+  { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
 export default function HomePage() {
@@ -66,12 +69,23 @@ export default function HomePage() {
           </div>
       </MarketingSection>
 
-      <MarketingSection id="our-history" className="scroll-mt-24" innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
+      <MarketingSection id="our-history" className="scroll-mt-24" innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
           <SectionHeading>Our history</SectionHeading>
-          <div className="space-y-4 text-pretty leading-7 text-mecg-navy/70">
-            <p>Jonny Fay and Aaryan Singh founded MECG in 2023 to give students across the University of Michigan a place to practice consulting while growing professionally and personally.</p>
-            <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
-            <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
+          <div className="grid gap-6 md:grid-cols-[1fr_0.95fr] md:items-center">
+            <div className="space-y-4 text-pretty leading-7 text-mecg-navy/70">
+              <p>Jonny Fay and Aaryan Singh founded MECG in 2023 to give students across the University of Michigan a place to practice consulting while growing professionally and personally.</p>
+              <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
+              <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
+            </div>
+            <div className="relative aspect-[9/7] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
+              <Image
+                src="/mecg/community-formal-pair.jpeg"
+                alt="MECG founders Jonny Fay and Aaryan Singh"
+                fill
+                className="object-cover object-center"
+                sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, 100vw"
+              />
+            </div>
           </div>
       </MarketingSection>
 

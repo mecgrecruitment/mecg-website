@@ -45,10 +45,13 @@ const TIME_FORMAT = new Intl.DateTimeFormat("en-US", {
 });
 
 const JOIN_PHOTOS = [
-  { src: "/mecg/members-together.jpg", alt: "MECG members spending time together" },
-  { src: "/mecg/members-outdoors.jpg", alt: "MECG members together outdoors" },
-  { src: "/mecg/members-in-chicago.jpg", alt: "MECG members during a visit to Chicago" },
-  { src: "/mecg/members-formal.jpg", alt: "MECG members at a formal event" },
+  { src: "/mecg/members-board-professional.jpeg", alt: "MECG executive board in a professional group portrait" },
+  { src: "/mecg/members-chicago-professional.jpeg", alt: "MECG members on a professional visit to Chicago" },
+  { src: "/mecg/members-professional.jpeg", alt: "MECG members visiting PwC in Chicago" },
+  { src: "/mecg/community-formal-group.jpeg", alt: "MECG members dressed for a formal event" },
+  { src: "/mecg/community-maize-day.jpeg", alt: "MECG members celebrating in Michigan colors" },
+  { src: "/mecg/community-formal-pair.jpeg", alt: "Two MECG members dressed for a formal event" },
+  { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
 function formatDate(value: string) {

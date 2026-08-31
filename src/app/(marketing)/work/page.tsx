@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import ClientProjectGrid from "@/components/client-project-grid";
 import MarketingSection from "@/components/marketing-section";
 import PageIntro from "@/components/page-intro";
 import ProjectCard from "@/components/project-card";
@@ -28,15 +28,7 @@ export default function WorkPage() {
 
       <MarketingSection>
           <SectionHeading>Organizations we have worked with</SectionHeading>
-          <div className="mt-8 grid gap-px overflow-hidden rounded-2xl bg-mecg-navy/10 sm:grid-cols-3 lg:grid-cols-5">
-            {PAST_PROJECTS.map((project) => (
-              <div key={project.name} className="flex min-h-32 items-center justify-center bg-white p-5">
-                <div className="relative h-16 w-full max-w-40">
-                  <Image src={project.logo} alt={`${project.name} logo`} fill className="object-contain" sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ClientProjectGrid projects={PAST_PROJECTS} />
       </MarketingSection>
 
       <MarketingSection tone="paper">

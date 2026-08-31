@@ -78,7 +78,7 @@ export default function EvaluationForm({
                     type="button"
                     aria-pressed={selected}
                     onClick={() => setScores((current) => ({ ...current, [criterion.id]: value }))}
-                    className={`min-h-11 rounded-xl text-sm font-semibold transition ${
+                    className={`min-h-11 rounded-xl text-sm font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                       selected
                         ? "bg-mecg-navy text-white"
                         : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
