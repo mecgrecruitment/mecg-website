@@ -35,10 +35,11 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }] = await Promise.all([
+  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
+    supabase.rpc("my_grading_events"),
   ]);
   if (error) throw error;
   if (buddySlotsError) throw buddySlotsError;
@@ -76,9 +77,11 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
   const screeningOpenCount = (screeningQueue.data ?? []).filter((item) => item.assignment_status === "ASSIGNED").length;
+  const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const navLinks: Array<readonly [string, string]> = [
     ["/member", "All work"],
     ...(screeningReviewer.data ? [["/member/screening", `Blind screening${screeningOpenCount ? ` · ${screeningOpenCount}` : ""}`] as const] : []),
+    ...(gradingEvent ? [["/member/event", "Live event"] as const] : []),
     ["/member?round=SPEED_DATING", "Speed Dating"],
     ["/member?round=GROUP_CASE", "Group Case"],
     ...(isPanel ? [["/admin/hash", "Hash"] as const] : []),
@@ -219,6 +222,16 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <section>
         <SectionLabel number="03">Member tools</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
+        {gradingEvent && (
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-[22px] bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)] sm:p-6">
+            <div>
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Live event</p>
+              <h3 className="mt-2 text-lg font-semibold">{gradingEvent.event_name}</h3>
+              <p className="mt-1 text-sm text-white/55">{gradingEvent.grading_open ? "Grading is open" : "Grading closed"}</p>
+            </div>
+            <Link href="/member/event" className="button-primary">Grade applicants</Link>
+          </div>
+        )}
         <div className="mt-3.5 grid gap-4 lg:grid-cols-2">
           <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
           <section className="rounded-2xl bg-paper p-5 sm:p-6">

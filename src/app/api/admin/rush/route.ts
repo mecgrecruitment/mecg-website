@@ -25,6 +25,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   ASSIGN: "RECRUITMENT_OPERATIONS",
   SET_APPLICATION_STATUS: "RECRUITMENT_OPERATIONS",
   CREATE_SLOT: "RECRUITMENT_OPERATIONS",
+  SET_EVENT_GRADING: "RECRUITMENT_OPERATIONS",
   CREATE_GROUP: "RECRUITMENT_OPERATIONS",
   ASSIGN_GROUP: "RECRUITMENT_OPERATIONS",
   UNASSIGN_GROUP: "RECRUITMENT_OPERATIONS",
@@ -104,6 +105,8 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
   } else if (action === "CREATE_SLOT") {
     ({ data, error } = await supabase.rpc("create_event_slot", { target_event_id: String(body.eventId ?? ""), slot_starts_at: String(body.startsAt ?? ""), slot_ends_at: String(body.endsAt ?? ""), slot_capacity: Number(body.capacity ?? 8) }));
+  } else if (action === "SET_EVENT_GRADING") {
+    ({ data, error } = await supabase.rpc("set_event_grading", { target_event_id: String(body.eventId ?? ""), enabled: Boolean(body.enabled) }));
   } else if (action === "CREATE_GROUP") {
     ({ data, error } = await supabase.rpc("create_case_group", { target_cycle_id: cycleId, group_name: String(body.name ?? ""), group_prompt: String(body.prompt ?? "") }));
   } else if (action === "ASSIGN_GROUP") {

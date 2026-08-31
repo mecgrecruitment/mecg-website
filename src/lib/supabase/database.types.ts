@@ -774,6 +774,57 @@ export type Database = {
           },
         ]
       }
+      event_impressions: {
+        Row: {
+          application_id: string
+          created_at: string
+          event_id: string
+          id: string
+          member_id: string
+          note: string
+          score: number
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+          member_id: string
+          note?: string
+          score: number
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          member_id?: string
+          note?: string
+          score?: number
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_impressions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_impressions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_slots: {
         Row: {
           capacity: number
@@ -817,6 +868,7 @@ export type Database = {
           id: string
           kind: string
           location: string | null
+          member_grading: boolean
           name: string
           starts_at: string
           status: Database["rush"]["Enums"]["event_status"]
@@ -833,6 +885,7 @@ export type Database = {
           id?: string
           kind?: string
           location?: string | null
+          member_grading?: boolean
           name: string
           starts_at: string
           status?: Database["rush"]["Enums"]["event_status"]
@@ -849,6 +902,7 @@ export type Database = {
           id?: string
           kind?: string
           location?: string | null
+          member_grading?: boolean
           name?: string
           starts_at?: string
           status?: Database["rush"]["Enums"]["event_status"]
@@ -902,6 +956,35 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_checkins: {
+        Row: {
+          checked_in_at: string
+          event_id: string
+          id: string
+          member_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          event_id: string
+          id?: string
+          member_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          event_id?: string
+          id?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -1635,6 +1718,14 @@ export type Database = {
         Args: { target_cycle_id: string }
         Returns: boolean
       }
+      actor_is_assigned_evaluator: {
+        Args: { target_application_id: string }
+        Returns: boolean
+      }
+      actor_manages_application_cycle: {
+        Args: { target_application_id: string }
+        Returns: boolean
+      }
       add_applicant: {
         Args: {
           applicant_contact: string
@@ -1722,10 +1813,6 @@ export type Database = {
         Returns: string
       }
       create_cycle: { Args: { cycle_name: string }; Returns: string }
-      delete_case_group: {
-        Args: { target_group_id: string }
-        Returns: undefined
-      }
       create_decision: {
         Args: {
           decision_reason: string
@@ -1767,6 +1854,11 @@ export type Database = {
         Args: { conflict_reason: string; target_application_id: string }
         Returns: undefined
       }
+      delete_case_group: {
+        Args: { target_group_id: string }
+        Returns: undefined
+      }
+      event_cycle_id: { Args: { target_event_id: string }; Returns: string }
       event_for_token: {
         Args: { raw_token: string }
         Returns: {
@@ -1774,6 +1866,17 @@ export type Database = {
           is_open: boolean
           name: string
           starts_at: string
+        }[]
+      }
+      event_grading_roster: {
+        Args: { target_event_id: string }
+        Returns: {
+          applicant_name: string
+          application_id: string
+          impression_id: string
+          note: string
+          score: number
+          tags: string[]
         }[]
       }
       export_attendance: {
@@ -1832,6 +1935,15 @@ export type Database = {
         Returns: {
           id: string
           name: string
+        }[]
+      }
+      my_grading_events: {
+        Args: never
+        Returns: {
+          event_id: string
+          event_name: string
+          grading_open: boolean
+          starts_at: string
         }[]
       }
       my_ready_resume: { Args: { target_path?: string }; Returns: Json }
@@ -1920,6 +2032,10 @@ export type Database = {
         Args: { preview_text: string; target_decision_id: string }
         Returns: undefined
       }
+      set_event_grading: {
+        Args: { enabled: boolean; target_event_id: string }
+        Returns: undefined
+      }
       set_membership_role: {
         Args: {
           target_cycle_id: string
@@ -1975,6 +2091,16 @@ export type Database = {
           evaluation_id: string
           score: number
         }[]
+      }
+      submit_event_impression: {
+        Args: {
+          impression_note: string
+          impression_score: number
+          impression_tags: string[]
+          target_application_id: string
+          target_event_id: string
+        }
+        Returns: string
       }
       submit_interest: {
         Args: {

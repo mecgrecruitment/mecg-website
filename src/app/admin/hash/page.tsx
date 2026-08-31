@@ -19,13 +19,14 @@ export default async function HashBoard() {
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   if (!canPanel) redirect("/access-denied");
   const supabase = await createClient();
-  const [cycleResult, roundsResult, appsResult, decisionsResult] = await Promise.all([
+  const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status,reason,communication_preview,decision_approvals(id)").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
+    supabase.from("event_impressions").select("application_id, score, tags, events!inner(cycle_id)").eq("events.cycle_id", cycleId),
   ]);
-  for (const result of [cycleResult, roundsResult, appsResult, decisionsResult]) if (result.error) throw result.error;
+  for (const result of [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
   const rounds = (roundsResult.data ?? []).flatMap((round) =>
@@ -42,6 +43,22 @@ export default async function HashBoard() {
     if (!decisionByApplication.has(decision.application_id)) decisionByApplication.set(decision.application_id, decision);
   }
   const hashOpen = canPanel && cycle.status === "DECISION_LOCK" && rounds.length >= 2 && rounds.every((round) => ["FROZEN", "FINALIZED"].includes(round.status));
+  const impressionGroups = new Map<string, { total: number; count: number; tagCounts: Map<string, number> }>();
+  for (const impression of impressionsResult.data ?? []) {
+    const group = impressionGroups.get(impression.application_id) ?? { total: 0, count: 0, tagCounts: new Map() };
+    group.total += impression.score;
+    group.count += 1;
+    for (const tag of impression.tags) group.tagCounts.set(tag, (group.tagCounts.get(tag) ?? 0) + 1);
+    impressionGroups.set(impression.application_id, group);
+  }
+  const impressionsByApplication = new Map<string, { count: number; avg: number; topTags: string[] }>();
+  for (const [applicationId, group] of impressionGroups) {
+    impressionsByApplication.set(applicationId, {
+      count: group.count,
+      avg: group.total / group.count,
+      topTags: [...group.tagCounts].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([tag]) => tag),
+    });
+  }
   const rankings = applications.map((application) => {
     const byRound = rounds.map((round) => {
       const criteria = round.rubric?.rubric_criteria ?? [];
@@ -79,6 +96,7 @@ export default async function HashBoard() {
           <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Hash</h1>
         </div>
         <div className="flex items-center gap-5">
+          {hashOpen && <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Deliberation mode</Link>}
           <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
           <LogoutButton />
         </div>
@@ -124,6 +142,7 @@ export default async function HashBoard() {
                   {rounds.map((round) => (
                     <th key={round.id} className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">{round.name}</th>
                   ))}
+                  <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Impressions</th>
                   <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Combined</th>
                   <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Decision</th>
                 </tr>
@@ -131,6 +150,7 @@ export default async function HashBoard() {
               <tbody>
                 {rankings.map(({ application, rounds: results, finalScore }) => {
                   const decision = decisionByApplication.get(application.id);
+                  const impressions = impressionsByApplication.get(application.id);
                   return (
                     <tr key={application.id} className="border-t border-mecg-navy/[0.08] align-top">
                       <td className="p-3 font-medium">
@@ -143,6 +163,16 @@ export default async function HashBoard() {
                           <span className="block text-[11px] text-mecg-navy/40">{aggregate.count} ratings{aggregate.spread != null ? ` · spread ${aggregate.spread.toFixed(0)}` : ""}{aggregate.status === "REVIEW" ? " · review" : ""}</span>
                         </td>
                       ))}
+                      <td className="p-3 text-xs text-mecg-navy/55">
+                        {impressions ? (
+                          <>
+                            <span className="font-mono text-base font-semibold tabular-nums text-mecg-navy">{impressions.avg.toFixed(1)}</span>
+                            <span className="block text-[11px] text-mecg-navy/40">{impressions.count} impressions{impressions.topTags.length > 0 ? ` · ${impressions.topTags.join(", ")}` : ""}</span>
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                       <td className="p-3 font-mono text-lg font-bold tabular-nums text-mecg-navy">
                         {finalScore === null ? <span className="text-sm font-normal text-mecg-navy/50">Pending</span> : finalScore.toFixed(1)}
                       </td>
