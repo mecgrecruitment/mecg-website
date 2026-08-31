@@ -12,21 +12,6 @@ Supabase becomes the only production authority for authentication, recruitment d
 
 The migration must preserve the stronger behavior in the current application. The existing cloud tables remain read-only during the transition because their global member roles and cycle-scoped `candidates` rows do not match the current domain.
 
-## Repository audit, August 21, 2026
-
-The application has a complete Prisma and SQLite recruitment workflow, but Supabase is not yet a business-data backend. The four helpers in `src/lib/supabase` create browser, server, proxy, and service-role clients. Only the proxy client runs in the application, and it only calls `auth.getUser()` to refresh a possible Supabase session. Every page, API route, authorization check, transaction, audit write, and backend verification still imports Prisma.
-
-The missing foundation is concrete:
-
-- `supabase/` contains only `config.toml`. It has no SQL migrations, seed file, RLS policies, grants, functions, triggers, storage policies, or SQL tests.
-- The repository has no generated Supabase database types.
-- Authentication still uses scrypt password hashes and the custom `mecg_session` cookie. There are no signup, callback, verification, recovery, invitation, or MFA flows.
-- Public application and check-in endpoints write through a server-wide database identity. Applicant status uses a permanent bearer token rather than an authenticated owner relationship.
-- Sensitive rules live in Next.js route handlers. Postgres cannot enforce cycle transitions, evaluation immutability, conflict consequences, approval counts, or audit insertion yet.
-- No current test exercises Supabase Auth, RLS, Postgres functions, storage isolation, or a migration from SQLite.
-
-The existing baseline is healthy. On August 21, 2026, `npm test`, `npx tsc --noEmit`, and `npm run lint` all exited successfully. Preserve that baseline while replacing one complete workflow slice at a time.
-
 ## What "ultra functional" means here
 
 The target is not to use every Supabase feature. It is to make the recruitment system safe to operate for a full cycle without Prisma or manual database work.
@@ -39,22 +24,6 @@ The target is not to use every Supabase feature. It is to make the recruitment s
 6. Operators can see failed Auth calls, RLS denials, function errors, latency, and missing audit writes, and they have a tested restore procedure.
 
 Realtime, Edge Functions, cron jobs, and public object storage are out of scope until a named workflow needs them. Live dashboards can use server refreshes first. This keeps authorization in one place and avoids adding another execution path during the migration.
-
-## Execution board
-
-Work in vertical slices. Do not point a page at Supabase while its writes still depend on a Prisma transaction or its authorization still comes from `mecg_session`.
-
-| Order | Deliverable | Main repository changes | Exit test |
-| --- | --- | --- | --- |
-| 1 | Local Supabase foundation | Add `supabase/migrations/*.sql`, `supabase/seed.sql`, SQL tests, generated `src/lib/supabase/database.types.ts`, and reset/type-generation scripts. | Two clean resets produce the same schema and seed counts. Anonymous base-table access is denied. |
-| 2 | Identity and capability layer | Replace `src/lib/auth.ts`, `src/lib/session.ts`, admin login, password routes, and proxy authorization with Supabase Auth plus `rush.profiles` and cycle memberships. Add callback, recovery, invitation, and safe redirect handling. | Login, refresh, logout, recovery, revocation, wrong-role denial, and role routing pass in browser tests. |
-| 3 | Applicant slice | Move `/apply`, applicant status, and check-in to owned rows and transactional Postgres functions. Convert legacy portal tokens into expiring, hashed claim tokens. | Two applicants cannot read each other. Duplicate application and check-in requests are idempotent. Unreleased decisions stay hidden. |
-| 4 | Member slice | Add assignment views and `submit_evaluation` and `declare_conflict` functions. Move `/member` and its API routes. | Cross-member reads fail. Stale, duplicate, conflicted, late, and incomplete submissions fail without partial writes. |
-| 5 | Board and panel slice | Add cycle, round, membership, event, assignment, decision, approval, release, export, and audit functions. Move `/admin` and all admin APIs. | Permission, transition, approval-race, conflict-race, score-secrecy, export, and audit tests pass. |
-| 6 | Data rehearsal and cutover | Add an idempotent SQLite importer, reconciliation report, environment runbook, smoke tests, monitoring, and rollback procedure. | Repeated staging imports have identical counts and checksums, then every role completes a mock cycle. |
-| 7 | Legacy removal | Remove Prisma, SQLite migrations, password hashing, custom sessions, temporary compatibility routes, and unused environment variables after the observation window. | `rg` finds no runtime Prisma or custom-session imports, and the production-backup restore rehearsal passes. |
-
-The first implementation milestone should be deliverable 1 plus the identity read path from deliverable 2. That creates a real security boundary and a repeatable database before business routes start moving.
 
 ## Planned module ownership
 

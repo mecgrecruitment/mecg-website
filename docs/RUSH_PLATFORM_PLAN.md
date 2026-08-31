@@ -1,5 +1,7 @@
 # MECG rush platform plan
 
+> Historical. This is the original build plan, written in future tense; the work it describes has shipped. Read it as a record of intent, not as a backlog.
+
 ## Product decision
 
 Build one cycle-based rush system with three distinct user experiences:
