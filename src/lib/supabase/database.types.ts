@@ -89,6 +89,24 @@ export type Database = {
           },
         ]
       }
+      application_portal_allowlist: {
+        Row: {
+          created_at: string
+          email: string
+          note: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          note?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       application_questions: {
         Row: {
           cycle_id: string
@@ -1641,6 +1659,7 @@ export type Database = {
         }[]
       }
       applicant_schedule: { Args: never; Returns: Json }
+      application_portal_allows: { Args: { actor: string }; Returns: boolean }
       approve_decision: {
         Args: { target_decision_id: string }
         Returns: {
