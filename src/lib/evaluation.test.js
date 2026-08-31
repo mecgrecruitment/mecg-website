@@ -60,3 +60,55 @@ test("combineRoundScores requires every configured round", () => {
     null,
   );
 });
+
+test("aggregateRound treats a 25-point spread as disagreement and nothing narrower", () => {
+  assert.equal(
+    aggregateRound([
+      { valid: true, score: 50 },
+      { valid: true, score: 75 },
+    ]).status,
+    "REVIEW",
+  );
+  assert.equal(
+    aggregateRound([
+      { valid: true, score: 50 },
+      { valid: true, score: 74 },
+    ]).status,
+    "COMPLETE",
+  );
+  assert.deepEqual(aggregateRound([]), {
+    status: "PENDING",
+    score: null,
+    count: 0,
+    spread: null,
+  });
+});
+
+test("combineRoundScores ignores weight-0 rounds such as blind screening", () => {
+  assert.equal(
+    combineRoundScores([
+      { score: 75, weight: 40 },
+      { score: 85, weight: 60 },
+      { score: null, weight: 0 },
+    ]),
+    81,
+  );
+  assert.equal(
+    combineRoundScores([
+      { score: 75, weight: 40 },
+      { score: 85, weight: 60 },
+      { score: 10, weight: 0 },
+    ]),
+    81,
+  );
+  assert.equal(
+    combineRoundScores([
+      { score: 75, weight: 40 },
+      { score: null, weight: 60 },
+      { score: 90, weight: 0 },
+    ]),
+    null,
+  );
+  assert.equal(combineRoundScores([{ score: 90, weight: 0 }]), null);
+  assert.equal(combineRoundScores([]), null);
+});

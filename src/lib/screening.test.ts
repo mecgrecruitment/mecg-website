@@ -52,3 +52,15 @@ test("screening distribution respects a low reviewer capacity without overloadin
   assert.equal(result.loads.r1, 0);
   assert.deepEqual([result.loads.r2, result.loads.r3, result.loads.r4].sort(), [2, 2, 2]);
 });
+
+test("screening distribution reports a shortage when reviewers cannot cover the required reviews", () => {
+  const result = distributeScreeningReviews({
+    packets: [{ packetId: "p1", eligibleReviewerIds: ["r1", "r2"] }],
+    reviewers: ["r1", "r2"].map((reviewerId) => ({ reviewerId })),
+    reviewsPerPacket: 3,
+    seed: "short-bench",
+  });
+  assert.equal(result.feasible, false);
+  assert.deepEqual(result.shortages, ["p1"]);
+  assert.equal(result.assignments.length, 2);
+});

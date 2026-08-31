@@ -46,10 +46,9 @@ export function aggregateRound(evaluations) {
 }
 
 export function combineRoundScores(rounds) {
-  const complete = rounds.filter(
-    (round) => typeof round.score === "number" && round.weight > 0,
-  );
-  if (complete.length !== rounds.length || complete.length === 0) return null;
+  const scored = rounds.filter((round) => round.weight > 0);
+  const complete = scored.filter((round) => typeof round.score === "number");
+  if (complete.length !== scored.length || complete.length === 0) return null;
   const weight = complete.reduce((sum, round) => sum + round.weight, 0);
   return complete.reduce((sum, round) => sum + round.score * round.weight, 0) / weight;
 }
