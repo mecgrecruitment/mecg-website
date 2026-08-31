@@ -18,7 +18,7 @@ const HOME_PHOTOS = [
   { src: "/mecg/members-professional.jpeg", alt: "MECG members visiting PwC in Chicago" },
   { src: "/mecg/community-formal-group.jpeg", alt: "MECG members dressed for a formal event" },
   { src: "/mecg/community-maize-day.jpeg", alt: "MECG members celebrating in Michigan colors" },
-  { src: "/mecg/community-formal-pair.jpeg", alt: "Two MECG members dressed for a formal event" },
+  { src: "/mecg/community-formal-pair.jpeg", alt: "MECG members celebrating Michigan's national championship" },
   { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
@@ -80,7 +80,7 @@ export default function HomePage() {
             <div className="relative aspect-[9/7] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
               <Image
                 src="/mecg/community-formal-pair.jpeg"
-                alt="MECG founders Jonny Fay and Aaryan Singh"
+                alt="MECG members celebrating Michigan's national championship"
                 fill
                 className="object-cover object-center"
                 sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, 100vw"
