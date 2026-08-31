@@ -82,6 +82,9 @@ test("application intake rejects invalid or oversized answer maps", () => {
   assert.equal(parseApplicationIntake({ ...validIntake, answers: Object.fromEntries(Array.from({ length: 51 }, (_, index) => [`q${index}`, "x"])) }, "ada@umich.edu"), null);
   assert.equal(parseApplicationIntake({ ...validIntake, answers: Object.fromEntries(Array.from({ length: 6 }, (_, index) => [`q${index}`, "x".repeat(7000)])) }, "ada@umich.edu"), null);
   assert.equal(parseApplicationIntake({ ...validIntake, answers: { [`q${"x".repeat(80)}`]: "x" } }, "ada@umich.edu"), null);
+  // An empty map used to pass: parseAnswers returned {}, which is truthy, so an
+  // application with zero written responses reached the board with no error.
+  assert.equal(parseApplicationIntake({ ...validIntake, answers: {} }, "ada@umich.edu"), null);
 });
 
 test("application drafts restore safe fields and ignore malformed values", () => {

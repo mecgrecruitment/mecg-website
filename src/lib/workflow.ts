@@ -127,7 +127,7 @@ function validUrl(value: string | null) {
 function parseAnswers(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const entries = Object.entries(value as Record<string, unknown>);
-  if (entries.length > MAX_ANSWERS) return null;
+  if (entries.length === 0 || entries.length > MAX_ANSWERS) return null;
   let total = 0;
   const answers: Record<string, string> = {};
   for (const [key, value] of entries) {

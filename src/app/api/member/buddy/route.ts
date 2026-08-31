@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +15,8 @@ export async function POST(req: NextRequest) {
   });
   if (error) {
     console.error("create_buddy_slot failed", error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    const { body: errorBody, status } = mapRpcError(error);
+    return NextResponse.json(errorBody, { status });
   }
   return NextResponse.json({ ok: true });
 }

@@ -4,7 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase.rpc("public_recruitment");
+  const { data, error } = await supabase.rpc("public_recruitment");
+  if (error) {
+    console.error("public_recruitment failed", error);
+    return NextResponse.json({ error: "Calendar is unavailable, try again" }, { status: 503 });
+  }
   const events = data && typeof data === "object" ? (data as { events?: { id: string; name: string; startsAt: string; endsAt?: string | null; location?: string | null }[] }).events ?? [] : [];
   const event = events.find((item) => item.id === id);
   if (!event) return NextResponse.json({ error: "Not found" }, { status: 404 });

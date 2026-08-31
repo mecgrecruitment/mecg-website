@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
       try {
         const destination = await destinationForUser(supabase, data.user.id);
         return NextResponse.redirect(new URL(destination, request.url));
-      } catch {
+      } catch (routingError) {
+        console.error("auth callback routing failed", routingError);
         return NextResponse.redirect(new URL("/login?error=routing", request.url));
       }
     }

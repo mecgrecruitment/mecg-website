@@ -23,7 +23,8 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const supabase = await createClient();
-  const { data: cycle } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
+  const { data: cycle, error: cycleError } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
+  if (cycleError) throw cycleError;
   if (!cycle) redirect("/member");
   const { data: round, error } = await supabase
     .from("rounds")

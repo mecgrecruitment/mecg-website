@@ -8,7 +8,11 @@ export const metadata: Metadata = { title: "Check in" };
 export default async function CheckinPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   const supabase = await createClient();
-  const { data } = await supabase.rpc("event_for_token", { raw_token: token });
+  const { data, error } = await supabase.rpc("event_for_token", { raw_token: token });
+  if (error) {
+    console.error("event_for_token failed", error);
+    return <PortalShell eyebrow="Event check-in" title="Check-in is temporarily unavailable." description="This is not a problem with your link."><p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">Try again in a moment, or ask an MECG Board Member to check you in manually.</p></PortalShell>;
+  }
   const event = data?.[0];
   if (!event) {
     return <PortalShell eyebrow="Event check-in" title="This link is not valid." description="Ask an MECG Board Member for the current event check-in link."><p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">The event may have ended or its check-in link may have been replaced.</p></PortalShell>;

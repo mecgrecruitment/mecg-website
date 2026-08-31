@@ -28,14 +28,18 @@ function parseOptions(value: unknown) {
   return options;
 }
 
+// Returns null for anything malformed. A dropped question row would let an applicant submit with no
+// written responses at all, so a bad row fails the whole page loudly instead.
 function parseIntakeSchema(value: unknown): IntakeSchema | null {
   if (!isRecord(value)) return null;
-  const questions = Array.isArray(value.questions)
-    ? value.questions.flatMap((question) => {
-        if (!isRecord(question) || typeof question.key !== "string" || typeof question.prompt !== "string") return [];
-        return [{ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true, options: parseOptions(question.options) }];
-      })
-    : [];
+  const questions: IntakeQuestion[] = [];
+  if (value.questions !== undefined) {
+    if (!Array.isArray(value.questions)) return null;
+    for (const question of value.questions) {
+      if (!isRecord(question) || typeof question.key !== "string" || !question.key || typeof question.prompt !== "string" || !question.prompt) return null;
+      questions.push({ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true, options: parseOptions(question.options) });
+    }
+  }
   return {
     open: typeof value.open === "boolean" ? value.open : undefined,
     needsInfo: value.needsInfo === true,
@@ -50,8 +54,12 @@ export default async function ApplyPage() {
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
   const supabase = user ? await createClient() : null;
-  const { data: intake } = supabase ? await supabase.rpc("intake_schema") : { data: null };
-  const schema = parseIntakeSchema(intake);
+  const { data: intake, error: intakeError } = supabase ? await supabase.rpc("intake_schema") : { data: null, error: null };
+  if (intakeError) console.error("intake_schema failed", intakeError);
+  const schema = intakeError ? null : parseIntakeSchema(intake);
+  // A failed or malformed schema is not the same thing as a closed cycle; never say "closed" for it.
+  const schemaUnavailable = Boolean(user) && !schema;
+  if (schemaUnavailable && !intakeError) console.error("intake_schema returned an unusable payload", intake);
   const draft = parseApplicationDraft(schema?.draft);
 
   return (
@@ -93,7 +101,7 @@ export default async function ApplyPage() {
                 : "Create an account and verify your email to begin the application."}
             </p>
           </div>
-          {user && typeof schema?.open === "boolean" && (
+          {user && !schemaUnavailable && typeof schema?.open === "boolean" && (
             <div className={`rounded-full px-4 py-2 text-sm font-semibold ${schema.open ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
               {schema.open ? "Applications open · About 15 minutes" : "Applications closed"}
             </div>
@@ -106,7 +114,12 @@ export default async function ApplyPage() {
           </div>
         )}
 
-        {user ? (
+        {user && schemaUnavailable ? (
+          <div className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-900" role="alert">
+            The application could not be loaded right now. This is not the same as applications being closed. Reload in
+            a moment, and email mecg-board@umich.edu if it keeps happening.
+          </div>
+        ) : user ? (
           <ApplicationForm
             initialName={user.name}
             email={user.email}

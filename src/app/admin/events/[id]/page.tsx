@@ -13,14 +13,16 @@ export default async function EventDetailPage({ params, searchParams }: { params
   const { id } = await params;
   const { token } = await searchParams;
   const supabase = await createClient();
-  const { data: event } = await supabase.from("events").select("id,name,cycle_id,starts_at,checkin_opens_at,checkin_closes_at,checkins(count)").eq("id", id).maybeSingle();
+  const { data: event, error: eventError } = await supabase.from("events").select("id,name,cycle_id,starts_at,checkin_opens_at,checkin_closes_at,checkins(count)").eq("id", id).maybeSingle();
+  if (eventError) throw eventError;
   if (!event) notFound();
   if (
     !event.cycle_id
     || (!hasPermission(user.memberships, event.cycle_id, "MANAGE_CYCLE")
       && !hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS"))
   ) redirect("/access-denied");
-  const { data: slots } = await supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id);
+  const { data: slots, error: slotsError } = await supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id);
+  if (slotsError) console.error("event slot list failed", slotsError);
   const headerList = await headers();
   const host = headerList.get("host");
   const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
@@ -74,7 +76,9 @@ export default async function EventDetailPage({ params, searchParams }: { params
             </li>
           ))}
         </ul>
-        {!slots?.length && <p className="text-sm text-mecg-navy/45">No slots yet.</p>}
+        {slotsError
+          ? <p className="text-sm text-mecg-orange-ink">Slots could not be loaded. Reload before adding one, this list may be incomplete.</p>
+          : !slots?.length && <p className="text-sm text-mecg-navy/45">No slots yet.</p>}
       </section>
     </main>
   );

@@ -45,6 +45,7 @@ export async function readJsonBody(
 
 const RPC_ERROR_STATUSES: Record<string, number> = {
   "22023": 400,
+  "22P02": 400,
   "42501": 403,
   P0002: 404,
   "55000": 409,

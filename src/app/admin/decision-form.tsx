@@ -89,7 +89,13 @@ export function ReleaseButton({ decisionId }: { decisionId: string }) {
   async function release() {
     const response = await fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "RELEASE", decisionId }) });
     const body = await response.json().catch(() => null);
-    if (!response.ok) setError(body?.error ?? "Could not release"); else router.refresh();
+    // A 502 with released:true means the outcome IS released and only the
+    // applicant email failed. Refresh anyway, or the board sees a stale LOCKED
+    // row and clicks Release a second time.
+    if (!response.ok) {
+      setError(body?.error ?? "Could not release");
+      if (body?.released === true) router.refresh();
+    } else router.refresh();
   }
   return (
     <div className="flex items-center gap-2">

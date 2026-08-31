@@ -7,6 +7,31 @@ import { distributeScreeningReviews, type ScreeningPacketInput, type ScreeningRe
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 
+const MAX_PACKET_QUESTION_LENGTH = 2000;
+const MAX_PACKET_ANSWER_LENGTH = 8000;
+const MAX_PACKET_RESPONSES = 50;
+const MAX_PACKET_TOTAL_LENGTH = 40000;
+
+// Mirrors the shape update_screening_packet_content enforces, so a malformed body is a 400 and not a 500.
+function parsePacketContent(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const responses = (value as Record<string, unknown>).responses;
+  if (!Array.isArray(responses) || responses.length === 0 || responses.length > MAX_PACKET_RESPONSES) return null;
+  let total = 0;
+  const parsed: Array<{ question: string; answer: string }> = [];
+  for (const entry of responses) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+    const { question, answer } = entry as Record<string, unknown>;
+    if (typeof question !== "string" || typeof answer !== "string") return null;
+    if (!question.trim() || !answer.trim()) return null;
+    if (question.length > MAX_PACKET_QUESTION_LENGTH || answer.length > MAX_PACKET_ANSWER_LENGTH) return null;
+    total += question.length + answer.length;
+    if (total > MAX_PACKET_TOTAL_LENGTH) return null;
+    parsed.push({ question, answer });
+  }
+  return { responses: parsed };
+}
+
 export async function POST(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,9 +54,11 @@ export async function POST(request: NextRequest) {
       approved: body.approved === true,
     });
   } else if (body.action === "UPDATE_PACKET") {
+    const content = parsePacketContent(body.content);
+    if (!content) return NextResponse.json({ error: "Every redacted response needs a question and an answer" }, { status: 400 });
     result = await screeningRpc(supabase, "update_screening_packet_content", {
       target_packet_id: String(body.packetId ?? ""),
-      revised_content: body.content,
+      revised_content: content,
     });
   } else if (body.action === "DISTRIBUTE") {
     const batchId = String(body.batchId ?? "");

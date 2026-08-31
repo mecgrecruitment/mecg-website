@@ -64,12 +64,17 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const committeeOnly = canOperate && !canManageCycle && !canPanel;
   if (!canManageCycle && !canPanel && !canOperate) redirect("/member");
 
-  const { data: conflict } = await supabase.from("conflict_declarations").select("id").eq("application_id", id).eq("declarer_id", user.id).maybeSingle();
-  if (conflict) {
+  // Fail closed: a failed lookup is indistinguishable from "no conflict declared", so it must not
+  // fall through to the dossier.
+  const { data: conflict, error: conflictError } = await supabase.from("conflict_declarations").select("id").eq("application_id", id).eq("declarer_id", user.id).maybeSingle();
+  if (conflictError) console.error("conflict declaration lookup failed", conflictError);
+  if (conflictError || conflict) {
     return (
       <main className="mx-auto flex max-w-3xl flex-col gap-6 p-6 sm:p-10">
         <p className="rounded-2xl bg-mecg-navy/[0.035] p-5 text-sm leading-6 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
-          You have declared a conflict of interest on this applicant and are recused from viewing their file.
+          {conflictError
+            ? "Your conflict-of-interest status for this applicant could not be verified, so their file is withheld. Try again in a moment."
+            : "You have declared a conflict of interest on this applicant and are recused from viewing their file."}
         </p>
         <Link href="/admin" className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink underline underline-offset-4">
           Back to pipeline
@@ -170,8 +175,12 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const auditEvents = [...(applicationAuditResult.data ?? []), ...(decisionAuditResult.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+  if (applicationAuditResult.error) console.error("application audit lookup failed", applicationAuditResult.error);
+  if (decisionAuditResult.error) console.error("decision audit lookup failed", decisionAuditResult.error);
+  const auditUnavailable = Boolean(applicationAuditResult.error || decisionAuditResult.error);
   const actorIds = [...new Set(auditEvents.map((event) => event.actor_id).filter((actorId): actorId is string => Boolean(actorId)))];
-  const { data: actorProfiles } = actorIds.length ? await supabase.from("profiles").select("id,display_name").in("id", actorIds) : { data: [] };
+  const { data: actorProfiles, error: actorProfilesError } = actorIds.length ? await supabase.from("profiles").select("id,display_name").in("id", actorIds) : { data: [], error: null };
+  if (actorProfilesError) console.error("audit actor lookup failed", actorProfilesError);
   const actorNameById = new Map((actorProfiles ?? []).map((profile) => [profile.id, profile.display_name]));
 
   return (
@@ -282,7 +291,11 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                   ))}
                 </div>
               ),
-              evaluations: (
+              evaluations: !canPanel ? (
+                <p className="rounded-2xl bg-mecg-navy/[0.035] p-5 text-sm leading-6 text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+                  Round scores and evaluator ratings are visible to the Hash panel only, so nothing is shown here for your role.
+                </p>
+              ) : (
                 <div className="flex flex-col gap-5">
                   {finalScore !== null && (
                     <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-navy/55">
@@ -352,7 +365,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               ),
               activity: (
                 <div className="flex flex-col gap-2">
-                  {auditEvents.length === 0 && <p className="text-sm text-mecg-navy/45">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
+                  {auditUnavailable && <p className="text-sm text-mecg-orange-ink">The audit log could not be loaded. What is shown here may be incomplete.</p>}
+                  {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/45">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
                   {auditEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                       <div>
