@@ -27,6 +27,8 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   CREATE_SLOT: "RECRUITMENT_OPERATIONS",
   CREATE_GROUP: "RECRUITMENT_OPERATIONS",
   ASSIGN_GROUP: "RECRUITMENT_OPERATIONS",
+  UNASSIGN_GROUP: "RECRUITMENT_OPERATIONS",
+  DELETE_GROUP: "RECRUITMENT_OPERATIONS",
   SET_ROUND_STATUS: "MANAGE_CYCLE",
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
 };
@@ -106,6 +108,10 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("create_case_group", { target_cycle_id: cycleId, group_name: String(body.name ?? ""), group_prompt: String(body.prompt ?? "") }));
   } else if (action === "ASSIGN_GROUP") {
     ({ data, error } = await supabase.rpc("assign_case_group", { target_group_id: String(body.groupId ?? ""), target_application_id: String(body.applicationId ?? "") }));
+  } else if (action === "UNASSIGN_GROUP") {
+    ({ data, error } = await supabase.rpc("unassign_case_group", { target_group_id: String(body.groupId ?? ""), target_application_id: String(body.applicationId ?? "") }));
+  } else if (action === "DELETE_GROUP") {
+    ({ data, error } = await supabase.rpc("delete_case_group", { target_group_id: String(body.groupId ?? "") }));
   }
 
   if (error) {

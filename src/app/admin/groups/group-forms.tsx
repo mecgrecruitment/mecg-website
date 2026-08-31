@@ -15,19 +15,24 @@ function initials(name: string) {
 }
 
 async function act(payload: Record<string, unknown>) {
-  const response = await fetch("/api/admin/rush", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-  const body = await response.json().catch(() => null);
-  return { ok: response.ok, error: body?.error as string | undefined };
+  try {
+    const response = await fetch("/api/admin/rush", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if (response.ok) return { ok: true };
+    const body = await response.json().catch(() => null);
+    return { ok: false, error: body?.error as string | undefined };
+  } catch {
+    return { ok: false, error: "Request failed" };
+  }
 }
 
-function ChevronSelect({ name, label, children }: { name: string; label: string; children: ReactNode }) {
+function ChevronSelect({ id, name, label, children }: { id: string; name: string; label: string; children: ReactNode }) {
   return (
     <div className="relative flex-1">
-      <label className="sr-only" htmlFor={`${name}-select`}>
+      <label className="sr-only" htmlFor={id}>
         {label}
       </label>
       <select
-        id={`${name}-select`}
+        id={id}
         name={name}
         className="min-h-10 w-full appearance-none rounded-xl bg-mecg-navy/[0.035] px-3.5 pr-9 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
       >
@@ -57,28 +62,71 @@ function AssignForm({ cycleId, group, applications }: { cycleId: string; group: 
     event.preventDefault();
     setPending(true);
     setError("");
-    const data = new FormData(event.currentTarget);
-    const result = await act({ cycleId, action: "ASSIGN_GROUP", groupId: group.id, applicationId: data.get("applicationId") });
-    setPending(false);
-    if (!result.ok) {
-      setError(result.error ?? "Could not assign applicant");
-    } else {
-      router.refresh();
+    try {
+      const data = new FormData(event.currentTarget);
+      const result = await act({ cycleId, action: "ASSIGN_GROUP", groupId: group.id, applicationId: data.get("applicationId") });
+      if (!result.ok) setError(result.error ?? "Could not assign applicant");
+      else router.refresh();
+    } finally {
+      setPending(false);
     }
   }
 
   return (
     <form className="mt-3.5 flex flex-col gap-2" onSubmit={submit}>
       <div className="flex gap-2">
-        <ChevronSelect name={`applicationId-${group.id}`} label={`Assign applicant to ${group.name}`}>
+        <ChevronSelect id={`application-${group.id}`} name="applicationId" label={`Assign applicant to ${group.name}`}>
           {applications.map((application) => <option key={application.id} value={application.id}>{application.name}</option>)}
         </ChevronSelect>
-        <button disabled={pending} className="button-secondary text-sm disabled:opacity-50">
+        <button type="submit" disabled={pending} className="button-secondary text-sm disabled:opacity-50">
           {pending ? "Assigning…" : "Assign"}
         </button>
       </div>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </form>
+  );
+}
+
+function GroupActionButton({
+  cycleId,
+  payload,
+  children,
+  danger = false,
+}: {
+  cycleId: string;
+  payload: Record<string, unknown>;
+  children: ReactNode;
+  danger?: boolean;
+}) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function run() {
+    if (danger && !window.confirm("Delete this empty team?")) return;
+    setPending(true);
+    setError("");
+    try {
+      const result = await act({ cycleId, ...payload });
+      if (!result.ok) setError(result.error ?? "Could not update the team");
+      else router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <span className="flex flex-col items-end">
+      <button
+        type="button"
+        disabled={pending}
+        onClick={run}
+        className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-red-700" : "text-mecg-navy/45 hover:text-mecg-orange-ink"}`}
+      >
+        {pending ? "Working..." : children}
+      </button>
+      {error && <span role="alert" className="mt-1 text-right text-[11px] text-red-700">{error}</span>}
+    </span>
   );
 }
 
@@ -101,20 +149,34 @@ export default function GroupForms({
     event.preventDefault();
     setPending(true);
     setError("");
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const result = await act({ cycleId, action: "CREATE_GROUP", name: data.get("name"), prompt: data.get("prompt") });
-    setPending(false);
-    if (!result.ok) {
-      setError(result.error ?? "Could not create team");
-    } else {
-      form.reset();
-      router.refresh();
+    try {
+      const form = event.currentTarget;
+      const data = new FormData(form);
+      const result = await act({ cycleId, action: "CREATE_GROUP", name: data.get("name"), prompt: data.get("prompt") });
+      if (!result.ok) setError(result.error ?? "Could not create team");
+      else {
+        form.reset();
+        router.refresh();
+      }
+    } finally {
+      setPending(false);
     }
   }
 
   return (
     <div className="grid gap-6">
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          [String(groups.length), "teams"],
+          [String(members.length), "assigned applicants"],
+          [String(Math.max(0, applications.length - new Set(members.map((member) => member.application_id)).size)), "unassigned applicants"],
+        ].map(([value, label]) => (
+          <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3 text-white">
+            <p className="font-mono text-2xl font-semibold tabular-nums">{value}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">{label}</p>
+          </div>
+        ))}
+      </div>
       <form
         className="rounded-2xl p-[18px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]"
         onSubmit={submit}
@@ -131,7 +193,7 @@ export default function GroupForms({
               className="mt-2 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
             />
           </label>
-          <button disabled={pending} className="button-primary mt-1 w-full disabled:opacity-50">
+          <button type="submit" disabled={pending} className="button-primary mt-1 w-full disabled:opacity-50">
             {pending ? "Creating…" : "Create"}
           </button>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
@@ -144,9 +206,14 @@ export default function GroupForms({
             <section key={group.id} className="rounded-2xl bg-mecg-navy/[0.025] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-[17px] font-semibold tracking-[-0.01em]">{group.name}</h3>
-                <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">
-                  {groupMembers.length}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">
+                    {groupMembers.length}
+                  </span>
+                  {groupMembers.length === 0 && (
+                    <GroupActionButton cycleId={cycleId} payload={{ action: "DELETE_GROUP", groupId: group.id }} danger>Delete</GroupActionButton>
+                  )}
+                </div>
               </div>
               {group.prompt && <p className="mt-1.5 text-sm text-mecg-navy/55">{group.prompt}</p>}
               <div className="mt-3 flex flex-col gap-1.5">
@@ -156,11 +223,14 @@ export default function GroupForms({
                   groupMembers.map((member) => {
                     const applicant = applications.find((application) => application.id === member.application_id);
                     return (
-                      <div key={member.application_id} className="flex items-center gap-2">
-                        <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
-                          {initials(applicant?.name ?? member.application_id)}
-                        </span>
-                        <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>
+                      <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+                            {initials(applicant?.name ?? member.application_id)}
+                          </span>
+                          <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>
+                        </div>
+                        <GroupActionButton cycleId={cycleId} payload={{ action: "UNASSIGN_GROUP", groupId: group.id, applicationId: member.application_id }}>Remove</GroupActionButton>
                       </div>
                     );
                   })

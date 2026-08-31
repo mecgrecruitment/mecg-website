@@ -15,11 +15,15 @@ export default async function GroupsPage() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
   if (!cycleId) redirect("/admin");
   const supabase = await createClient();
-  const [{ data: groups }, { data: applications }, { data: members }] = await Promise.all([
+  const [groupsResult, applicationsResult, membersResult] = await Promise.all([
     supabase.from("case_groups").select("id,name,prompt").eq("cycle_id", cycleId),
     supabase.from("applications").select("id,pnms!inner(name)").eq("cycle_id", cycleId),
-    supabase.from("case_group_members").select("group_id,application_id"),
+    supabase.from("case_group_members").select("group_id,application_id,case_groups!inner(cycle_id)").eq("case_groups.cycle_id", cycleId),
   ]);
+  for (const result of [groupsResult, applicationsResult, membersResult]) if (result.error) throw result.error;
+  const groups = groupsResult.data;
+  const applications = applicationsResult.data;
+  const members = membersResult.data;
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 p-6 sm:p-10">
       <header className="flex flex-wrap items-start justify-between gap-6">

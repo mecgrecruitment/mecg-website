@@ -1722,6 +1722,10 @@ export type Database = {
         Returns: string
       }
       create_cycle: { Args: { cycle_name: string }; Returns: string }
+      delete_case_group: {
+        Args: { target_group_id: string }
+        Returns: undefined
+      }
       create_decision: {
         Args: {
           decision_reason: string
@@ -1998,6 +2002,10 @@ export type Database = {
           target_assignment_id: string
         }
         Returns: number
+      }
+      unassign_case_group: {
+        Args: { target_application_id: string; target_group_id: string }
+        Returns: undefined
       }
       update_screening_packet_content: {
         Args: { revised_content: Json; target_packet_id: string }

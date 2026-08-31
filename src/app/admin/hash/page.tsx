@@ -28,22 +28,48 @@ export default async function HashBoard() {
   for (const result of [cycleResult, roundsResult, appsResult, decisionsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
-  const rounds = (roundsResult.data ?? []).map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
-  const applications = (appsResult.data ?? []).sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
-  const decisionByApplication = new Map((decisionsResult.data ?? []).map((decision) => [decision.application_id, decision]));
+  const rounds = (roundsResult.data ?? []).flatMap((round) =>
+    ["SPEED_DATING", "GROUP_CASE"].includes(round.kind)
+      ? [{ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }]
+      : [],
+  );
+  const applications = (appsResult.data ?? [])
+    .filter((application) => !["DRAFT", "WITHDRAWN"].includes(application.status))
+    .sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
+  const allDecisions = decisionsResult.data ?? [];
+  const decisionByApplication = new Map<string, (typeof allDecisions)[number]>();
+  for (const decision of allDecisions) {
+    if (!decisionByApplication.has(decision.application_id)) decisionByApplication.set(decision.application_id, decision);
+  }
   const hashOpen = canPanel && cycle.status === "DECISION_LOCK" && rounds.length >= 2 && rounds.every((round) => ["FROZEN", "FINALIZED"].includes(round.status));
   const rankings = applications.map((application) => {
     const byRound = rounds.map((round) => {
       const criteria = round.rubric?.rubric_criteria ?? [];
-      const scored = application.evaluation_assignments
-        .filter((assignment) => assignment.round_id === round.id)
-        .flatMap((assignment) => assignment.evaluations)
-        .filter((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status))
-        .map((evaluation) => scoreEvaluation(criteria, evaluation.criterion_ratings.map((rating) => ({ criterionId: rating.criterion_id, score: rating.score }))));
+      const scored: ReturnType<typeof scoreEvaluation>[] = [];
+      for (const assignment of application.evaluation_assignments) {
+        if (assignment.round_id !== round.id) continue;
+        for (const evaluation of assignment.evaluations) {
+          if (!["SUBMITTED", "LOCKED"].includes(evaluation.status)) continue;
+          scored.push(scoreEvaluation(criteria, evaluation.criterion_ratings.map((rating) => ({ criterionId: rating.criterion_id, score: rating.score }))));
+        }
+      }
       return { round, aggregate: aggregateRound(scored) };
     });
     return { application, rounds: byRound, finalScore: combineRoundScores(byRound.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight }))) };
   }).sort((a, b) => (b.finalScore ?? -1) - (a.finalScore ?? -1));
+  const roundReadiness = rounds.map((round) => {
+    const assignments = applications.flatMap((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id));
+    const submitted = assignments.filter((assignment) => assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status))).length;
+    const covered = applications.filter((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id && assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status))).length >= 2).length;
+    return { ...round, assignmentCount: assignments.length, submitted, covered };
+  });
+  const decisions = [...decisionByApplication.values()];
+  const decisionStats = [
+    [String(applications.length), "applicants"],
+    [String(applications.filter((application) => decisionByApplication.has(application.id)).length), "decisions drafted"],
+    [String(decisions.filter((decision) => decision.status === "LOCKED").length), "locked"],
+    [String(decisions.filter((decision) => decision.status === "RELEASED").length), "released"],
+  ] as const;
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
@@ -65,9 +91,33 @@ export default async function HashBoard() {
             {hashOpen ? "Open" : "Locked"}
           </span>
         </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {roundReadiness.map((round) => (
+            <div key={round.id} className="rounded-2xl bg-paper p-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-semibold text-mecg-navy">{round.name}</h2>
+                <span className="rounded-full bg-white px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">{round.status}</span>
+              </div>
+              <p className="mt-2 text-sm text-mecg-navy/55">{round.submitted}/{round.assignmentCount} forms submitted</p>
+              <p className="mt-1 text-xs text-mecg-navy/45">{round.covered}/{applications.length} applicants have two submitted evaluations</p>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-mecg-navy/10">
+                <div className="h-full rounded-full bg-mecg-orange" style={{ width: `${applications.length ? Math.min(100, (round.covered / applications.length) * 100) : 0}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
         {hashOpen ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-            <table className="w-full text-left text-sm">
+          <div className="mt-5 flex flex-col gap-4">
+            <div className="grid gap-3 sm:grid-cols-4">
+              {decisionStats.map(([value, label]) => (
+                <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3 text-white">
+                  <p className="font-mono text-2xl font-semibold tabular-nums">{value}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">{label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <table className="w-full text-left text-sm">
               <thead className="bg-mecg-navy/[0.03]">
                 <tr>
                   <th className="p-3 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/50">Applicant</th>
@@ -133,10 +183,11 @@ export default async function HashBoard() {
                   );
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         ) : (
-          <p className="mt-4 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Freeze every round and enter decision lock to reveal panel data.</p>
+          <p className="mt-4 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Freeze Speed Dating and Group Case, then enter decision lock to reveal scores and open decisions.</p>
         )}
       </section>
     </main>
