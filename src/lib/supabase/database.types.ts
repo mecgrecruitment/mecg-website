@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   rush: {
     Tables: {
       application_documents: {
@@ -433,41 +438,6 @@ export type Database = {
             columns: ["pnm_id"]
             isOneToOne: false
             referencedRelation: "pnms"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      claim_tokens: {
-        Row: {
-          application_id: string
-          claimed_at: string | null
-          created_at: string
-          expires_at: string
-          id: string
-          token_digest: string
-        }
-        Insert: {
-          application_id: string
-          claimed_at?: string | null
-          created_at?: string
-          expires_at: string
-          id?: string
-          token_digest: string
-        }
-        Update: {
-          application_id?: string
-          claimed_at?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          token_digest?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "claim_tokens_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -1647,10 +1617,6 @@ export type Database = {
         Args: { target_cycle_id: string }
         Returns: boolean
       }
-      actor_is_assigned_evaluator: {
-        Args: { target_application_id: string }
-        Returns: boolean
-      }
       add_applicant: {
         Args: {
           applicant_contact: string
@@ -1675,10 +1641,6 @@ export type Database = {
         }[]
       }
       applicant_schedule: { Args: never; Returns: Json }
-      application_cycle_id: {
-        Args: { target_application_id: string }
-        Returns: string
-      }
       approve_decision: {
         Args: { target_decision_id: string }
         Returns: {
@@ -1885,8 +1847,11 @@ export type Database = {
         Returns: undefined
       }
       resume_upload_locked: { Args: { target_path: string }; Returns: boolean }
+      retire_pending_resume_upload: {
+        Args: { document_id: string }
+        Returns: boolean
+      }
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
-      round_cycle_id: { Args: { target_round_id: string }; Returns: string }
       rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
       save_application_draft: { Args: { payload: Json }; Returns: string }
       screening_admin_overview: {
@@ -1946,6 +1911,13 @@ export type Database = {
           target_round_id: string
         }
         Returns: undefined
+      }
+      stale_pending_resume_uploads: {
+        Args: { older_than?: string }
+        Returns: {
+          document_id: string
+          object_path: string
+        }[]
       }
       submit_application: {
         Args: {
@@ -2077,6 +2049,7 @@ export type Database = {
     }
   }
 }
+
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
