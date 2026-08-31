@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
@@ -9,11 +10,14 @@ import LogoutButton from "@/components/logout-button";
 import BoardNav from "../board-nav";
 import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../decision-form";
 
+export const metadata: Metadata = { title: "Hash" };
+
 export default async function HashBoard() {
   const user = await requireAdmin();
   const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
   if (!cycleId) redirect("/member");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
+  if (!canPanel) redirect("/access-denied");
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
@@ -53,7 +57,7 @@ export default async function HashBoard() {
           <LogoutButton />
         </div>
       </header>
-      <BoardNav current="/admin/hash" />
+      <BoardNav current="/admin/hash" recruitmentOperations={false} hashPanel={canPanel} />
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-mecg-navy/55">Aggregates appear only after every evaluated round is frozen. Hash does not add a numeric score.</p>
@@ -108,7 +112,7 @@ export default async function HashBoard() {
                               <p className="text-xs text-mecg-navy/55">{decision.reason}</p>
                               {!["LOCKED", "RELEASED"].includes(decision.status) && <ApprovalButton decisionId={decision.id} />}
                               {decision.status === "LOCKED" && <ReleaseButton decisionId={decision.id} />}
-                              <PreviewForm decisionId={decision.id} current={decision.communication_preview} />
+                              <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />
                             </div>
                           </details>
                         ) : (

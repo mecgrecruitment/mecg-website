@@ -11,12 +11,20 @@ const errorMessages: Record<string, string> = {
   ROUTING_UNAVAILABLE: "Your account was verified, but your workspace could not be loaded. Try again.",
 };
 
-export default function LoginForm() {
+const callbackErrorMessages: Record<string, string> = {
+  callback: "That link didn't work — it may have expired. Try signing in, or request a new link.",
+  routing: "Something went wrong finishing sign-in. Try again.",
+};
+
+export default function LoginForm({ callbackError }: { callbackError?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const callbackMessage = callbackError
+    ? (callbackErrorMessages[callbackError] ?? "Something went wrong signing you in. Try again.")
+    : "";
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -45,6 +53,7 @@ export default function LoginForm() {
 
   return (
     <>
+      {callbackMessage && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-sm text-red-800">{callbackMessage}</p>}
       <form onSubmit={submit} className="space-y-5">
         <FormField label="Email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
         <FormField label="Password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />

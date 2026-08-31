@@ -1,7 +1,7 @@
 project_id = "mecgwebsite"
 
 [api]
-schemas = ["public", "graphql_public", "rush"]
+schemas = ["graphql_public", "rush"]
 
 [auth]
 site_url = "https://mecgmichigan.com"

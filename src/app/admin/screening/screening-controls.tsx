@@ -35,9 +35,9 @@ export default function ScreeningControls({
 
   if (!batchId) {
     return (
-      <section className="rounded-2xl border border-mecg-navy/10 p-6">
+      <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <h2 className="text-xl font-semibold">Choose blind reviewers</h2>
-        <p className="mt-2 text-sm text-mecg-navy/60">Only ordinary Members can review. Board, Panel, and Owner accounts remain identity stewards.</p>
+        <p className="mt-2 text-sm text-mecg-navy/55">Only ordinary Members can review. Board, Panel, and Owner accounts remain identity stewards.</p>
         <div className="mt-5 flex flex-wrap gap-2">
           {members.map((member) => {
             const checked = reviewerIds.includes(member.id);
@@ -68,10 +68,10 @@ export default function ScreeningControls({
   }
 
   return (
-    <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-mecg-navy/10 p-5">
+    <section className="flex flex-wrap items-center gap-3 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
       {status === "DRAFT" && <button type="button" disabled={pending} onClick={() => void act({ action: "DISTRIBUTE", batchId })} className="button-primary">Distribute approved packets</button>}
       {status === "PUBLISHED" && <button type="button" disabled={pending} onClick={() => void act({ action: "FREEZE", batchId })} className="button-primary">Freeze completed screening</button>}
-      <p className="text-sm text-mecg-navy/60">Batch status: {status}</p>
+      <p className="text-sm text-mecg-navy/55">Batch status: {status}</p>
       {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
     </section>
   );

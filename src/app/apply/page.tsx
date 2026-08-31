@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,10 +9,23 @@ import LogoutButton from "@/components/logout-button";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
 
-type IntakeSchema = { open?: boolean; cycleName?: string | null; questions?: { key: string; prompt: string; inputType: string; required: boolean }[]; draft?: unknown };
+export const metadata: Metadata = { title: "Apply" };
+
+type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[] };
+type IntakeSchema = { open?: boolean; needsInfo?: boolean; cycleName?: string | null; questions?: IntakeQuestion[]; draft?: unknown };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseOptions(value: unknown) {
+  if (!Array.isArray(value) || value.length > 50) return [];
+  const options: string[] = [];
+  for (const option of value) {
+    if (typeof option !== "string" || !option.trim() || option.trim().length > 200) return [];
+    if (!options.includes(option.trim())) options.push(option.trim());
+  }
+  return options;
 }
 
 function parseIntakeSchema(value: unknown): IntakeSchema | null {
@@ -19,11 +33,12 @@ function parseIntakeSchema(value: unknown): IntakeSchema | null {
   const questions = Array.isArray(value.questions)
     ? value.questions.flatMap((question) => {
         if (!isRecord(question) || typeof question.key !== "string" || typeof question.prompt !== "string") return [];
-        return [{ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true }];
+        return [{ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true, options: parseOptions(question.options) }];
       })
     : [];
   return {
-    open: value.open === true,
+    open: typeof value.open === "boolean" ? value.open : undefined,
+    needsInfo: value.needsInfo === true,
     cycleName: typeof value.cycleName === "string" ? value.cycleName : null,
     questions,
     draft: value.draft,
@@ -78,12 +93,18 @@ export default async function ApplyPage() {
                 : "Create an account and verify your email to begin the application."}
             </p>
           </div>
-          {user && (
-            <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
-              Applications open · About 15 minutes
+          {user && typeof schema?.open === "boolean" && (
+            <div className={`rounded-full px-4 py-2 text-sm font-semibold ${schema.open ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+              {schema.open ? "Applications open · About 15 minutes" : "Applications closed"}
             </div>
           )}
         </div>
+
+        {user && schema?.needsInfo === true && (
+          <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-900">
+            The board asked for a bit more before deciding — please review and resubmit below.
+          </div>
+        )}
 
         {user ? (
           <ApplicationForm

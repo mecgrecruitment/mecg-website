@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
@@ -7,9 +8,11 @@ import LogoutButton from "@/components/logout-button";
 import BoardNav from "../board-nav";
 import GroupForms from "./group-forms";
 
+export const metadata: Metadata = { title: "Groups" };
+
 export default async function GroupsPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
   if (!cycleId) redirect("/admin");
   const supabase = await createClient();
   const [{ data: groups }, { data: applications }, { data: members }] = await Promise.all([

@@ -7,65 +7,80 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   rush: {
     Tables: {
-      applications: {
+      application_documents: {
         Row: {
+          application_id: string | null
           created_at: string
           cycle_id: string
+          declared_size: number
+          deleted_at: string | null
           id: string
-          pnm_id: string
-          resume_storage_path: string | null
-          status: Database["rush"]["Enums"]["application_status"]
-          submitted_at: string | null
-          updated_at: string
+          kind: string
+          object_path: string
+          original_filename: string
+          owner_user_id: string
+          page_count: number | null
+          ready_at: string | null
+          rejection_reason: string | null
+          sha256: string | null
+          status: string
+          superseded_at: string | null
+          verified_size: number | null
         }
         Insert: {
+          application_id?: string | null
           created_at?: string
           cycle_id: string
+          declared_size: number
+          deleted_at?: string | null
           id?: string
-          pnm_id: string
-          resume_storage_path?: string | null
-          status?: Database["rush"]["Enums"]["application_status"]
-          submitted_at?: string | null
-          updated_at?: string
+          kind?: string
+          object_path: string
+          original_filename: string
+          owner_user_id: string
+          page_count?: number | null
+          ready_at?: string | null
+          rejection_reason?: string | null
+          sha256?: string | null
+          status?: string
+          superseded_at?: string | null
+          verified_size?: number | null
         }
         Update: {
+          application_id?: string | null
           created_at?: string
           cycle_id?: string
+          declared_size?: number
+          deleted_at?: string | null
           id?: string
-          pnm_id?: string
-          resume_storage_path?: string | null
-          status?: Database["rush"]["Enums"]["application_status"]
-          submitted_at?: string | null
-          updated_at?: string
+          kind?: string
+          object_path?: string
+          original_filename?: string
+          owner_user_id?: string
+          page_count?: number | null
+          ready_at?: string | null
+          rejection_reason?: string | null
+          sha256?: string | null
+          status?: string
+          superseded_at?: string | null
+          verified_size?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "applications_cycle_id_fkey"
+            foreignKeyName: "application_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_documents_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_pnm_id_fkey"
-            columns: ["pnm_id"]
-            isOneToOne: false
-            referencedRelation: "pnms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "application_responses_application_id_fkey"
-            columns: ["id"]
-            isOneToOne: false
-            referencedRelation: "application_responses"
-            referencedColumns: ["application_id"]
           },
         ]
       }
@@ -100,7 +115,15 @@ export type Database = {
           required?: boolean
           sort_order?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "application_questions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       application_responses: {
         Row: {
@@ -137,41 +160,65 @@ export type Database = {
           },
         ]
       }
-      buddy_slots: {
-        Row: { cycle_id: string; ends_at: string; id: string; member_id: string; starts_at: string }
-        Insert: { cycle_id: string; ends_at: string; id?: string; member_id: string; starts_at: string }
-        Update: { cycle_id?: string; ends_at?: string; id?: string; member_id?: string; starts_at?: string }
-        Relationships: []
-      }
-      case_groups: {
-        Row: { cycle_id: string; id: string; name: string; prompt: string }
-        Insert: { cycle_id: string; id?: string; name: string; prompt?: string }
-        Update: { cycle_id?: string; id?: string; name?: string; prompt?: string }
-        Relationships: []
-      }
-      case_group_members: {
-        Row: { application_id: string; group_id: string }
-        Insert: { application_id: string; group_id: string }
-        Update: { application_id?: string; group_id?: string }
-        Relationships: []
-      }
-      event_slots: {
-        Row: { capacity: number; ends_at: string; event_id: string; id: string; starts_at: string }
-        Insert: { capacity?: number; ends_at: string; event_id: string; id?: string; starts_at: string }
-        Update: { capacity?: number; ends_at?: string; event_id?: string; id?: string; starts_at?: string }
-        Relationships: []
-      }
-      interest_signups: {
-        Row: { class_year: string | null; cycle_id: string; email: string; how_heard: string | null; id: string; name: string; uniqname: string | null }
-        Insert: { class_year?: string | null; cycle_id: string; email: string; how_heard?: string | null; id?: string; name: string; uniqname?: string | null }
-        Update: { class_year?: string | null; cycle_id?: string; email?: string; how_heard?: string | null; id?: string; name?: string; uniqname?: string | null }
-        Relationships: []
-      }
-      slot_rsvps: {
-        Row: { application_id: string; created_at: string; id: string; slot_id: string }
-        Insert: { application_id: string; created_at?: string; id?: string; slot_id: string }
-        Update: { application_id?: string; created_at?: string; id?: string; slot_id?: string }
-        Relationships: []
+      applications: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          draft_payload: Json | null
+          id: string
+          offer_responded_at: string | null
+          offer_response: string | null
+          pnm_id: string
+          process_survey_submitted_at: string | null
+          resume_storage_path: string | null
+          status: Database["rush"]["Enums"]["application_status"]
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          draft_payload?: Json | null
+          id?: string
+          offer_responded_at?: string | null
+          offer_response?: string | null
+          pnm_id: string
+          process_survey_submitted_at?: string | null
+          resume_storage_path?: string | null
+          status?: Database["rush"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          draft_payload?: Json | null
+          id?: string
+          offer_responded_at?: string | null
+          offer_response?: string | null
+          pnm_id?: string
+          process_survey_submitted_at?: string | null
+          resume_storage_path?: string | null
+          status?: Database["rush"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_pnm_id_fkey"
+            columns: ["pnm_id"]
+            isOneToOne: false
+            referencedRelation: "pnms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_events: {
         Row: {
@@ -207,6 +254,146 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "audit_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buddy_bookings: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          slot_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          slot_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_bookings_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buddy_bookings_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: true
+            referencedRelation: "buddy_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buddy_slots: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          ends_at: string
+          id: string
+          member_id: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          ends_at: string
+          id?: string
+          member_id: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          ends_at?: string
+          id?: string
+          member_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buddy_slots_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buddy_slots_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_group_members: {
+        Row: {
+          application_id: string
+          group_id: string
+        }
+        Insert: {
+          application_id: string
+          group_id: string
+        }
+        Update: {
+          application_id?: string
+          group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_group_members_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "case_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_groups: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          id: string
+          name: string
+          prompt: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          id?: string
+          name: string
+          prompt?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          name?: string
+          prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_groups_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
@@ -402,12 +589,12 @@ export type Database = {
       decisions: {
         Row: {
           application_id: string
+          communication_preview: string | null
           created_at: string
           created_by_id: string
           cycle_id: string
           id: string
           locked_at: string | null
-          communication_preview: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
           released_at: string | null
@@ -416,12 +603,12 @@ export type Database = {
         }
         Insert: {
           application_id: string
+          communication_preview?: string | null
           created_at?: string
           created_by_id: string
           cycle_id: string
           id?: string
           locked_at?: string | null
-          communication_preview?: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
           released_at?: string | null
@@ -430,12 +617,12 @@ export type Database = {
         }
         Update: {
           application_id?: string
+          communication_preview?: string | null
           created_at?: string
           created_by_id?: string
           cycle_id?: string
           id?: string
           locked_at?: string | null
-          communication_preview?: string | null
           outcome?: Database["rush"]["Enums"]["decision_outcome"]
           reason?: string
           released_at?: string | null
@@ -599,6 +786,38 @@ export type Database = {
           },
         ]
       }
+      event_slots: {
+        Row: {
+          capacity: number
+          ends_at: string
+          event_id: string
+          id: string
+          starts_at: string
+        }
+        Insert: {
+          capacity?: number
+          ends_at: string
+          event_id: string
+          id?: string
+          starts_at: string
+        }
+        Update: {
+          capacity?: number
+          ends_at?: string
+          event_id?: string
+          id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_slots_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           checkin_closes_at: string
@@ -651,6 +870,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interest_signups: {
+        Row: {
+          class_year: string | null
+          created_at: string
+          cycle_id: string
+          email: string
+          how_heard: string | null
+          id: string
+          name: string
+          uniqname: string | null
+        }
+        Insert: {
+          class_year?: string | null
+          created_at?: string
+          cycle_id: string
+          email: string
+          how_heard?: string | null
+          id?: string
+          name: string
+          uniqname?: string | null
+        }
+        Update: {
+          class_year?: string | null
+          created_at?: string
+          cycle_id?: string
+          email?: string
+          how_heard?: string | null
+          id?: string
+          name?: string
+          uniqname?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interest_signups_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
@@ -729,10 +989,13 @@ export type Database = {
       }
       pnms: {
         Row: {
+          accessibility_notes: string | null
           auth_user_id: string | null
           class_year: string | null
+          college: string | null
           contact: string
           created_at: string
+          grad_term: string | null
           id: string
           linkedin_url: string | null
           major: string | null
@@ -740,13 +1003,17 @@ export type Database = {
           normalized_contact: string
           phone: string | null
           preferred_name: string | null
+          uniqname: string | null
           updated_at: string
         }
         Insert: {
+          accessibility_notes?: string | null
           auth_user_id?: string | null
           class_year?: string | null
+          college?: string | null
           contact: string
           created_at?: string
+          grad_term?: string | null
           id?: string
           linkedin_url?: string | null
           major?: string | null
@@ -754,13 +1021,17 @@ export type Database = {
           normalized_contact: string
           phone?: string | null
           preferred_name?: string | null
+          uniqname?: string | null
           updated_at?: string
         }
         Update: {
+          accessibility_notes?: string | null
           auth_user_id?: string | null
           class_year?: string | null
+          college?: string | null
           contact?: string
           created_at?: string
+          grad_term?: string | null
           id?: string
           linkedin_url?: string | null
           major?: string | null
@@ -768,9 +1039,42 @@ export type Database = {
           normalized_contact?: string
           phone?: string | null
           preferred_name?: string | null
+          uniqname?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      process_surveys: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          id: string
+          note: string | null
+          rating: number
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          id?: string
+          note?: string | null
+          rating: number
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          note?: string | null
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_surveys_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -793,6 +1097,24 @@ export type Database = {
           display_name?: string
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          bucket: string
+          count: number
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          window_start?: string
         }
         Relationships: []
       }
@@ -946,11 +1268,389 @@ export type Database = {
         }
         Relationships: []
       }
+      screening_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          packet_id: string
+          reviewer_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          packet_id: string
+          reviewer_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          packet_id?: string
+          reviewer_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_assignments_packet_id_fkey"
+            columns: ["packet_id"]
+            isOneToOne: false
+            referencedRelation: "screening_packets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_assignments_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_batches: {
+        Row: {
+          created_at: string
+          created_by: string
+          cycle_id: string
+          frozen_at: string | null
+          id: string
+          published_at: string | null
+          reviews_per_application: number
+          rubric_id: string
+          seed_commitment: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          cycle_id: string
+          frozen_at?: string | null
+          id?: string
+          published_at?: string | null
+          reviews_per_application?: number
+          rubric_id: string
+          seed_commitment?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          cycle_id?: string
+          frozen_at?: string | null
+          id?: string
+          published_at?: string | null
+          reviews_per_application?: number
+          rubric_id?: string
+          seed_commitment?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_batches_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_batches_rubric_id_fkey"
+            columns: ["rubric_id"]
+            isOneToOne: false
+            referencedRelation: "rubrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_distribution_runs: {
+        Row: {
+          assignment_count: number
+          batch_id: string
+          created_at: string
+          created_by: string
+          id: string
+          seed_commitment: string
+          summary: Json
+        }
+        Insert: {
+          assignment_count: number
+          batch_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          seed_commitment: string
+          summary: Json
+        }
+        Update: {
+          assignment_count?: number
+          batch_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          seed_commitment?: string
+          summary?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_distribution_runs_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "screening_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_distribution_runs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_packets: {
+        Row: {
+          application_id: string
+          approved_at: string | null
+          approved_by: string | null
+          batch_id: string
+          candidate_code: string
+          content: Json
+          content_hash: string
+          created_at: string
+          id: string
+          redaction_status: string
+        }
+        Insert: {
+          application_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id: string
+          candidate_code: string
+          content: Json
+          content_hash: string
+          created_at?: string
+          id?: string
+          redaction_status?: string
+        }
+        Update: {
+          application_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string
+          candidate_code?: string
+          content?: Json
+          content_hash?: string
+          created_at?: string
+          id?: string
+          redaction_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_packets_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_packets_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_packets_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "screening_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_ratings: {
+        Row: {
+          criterion_id: string
+          note: string | null
+          review_id: string
+          score: number
+        }
+        Insert: {
+          criterion_id: string
+          note?: string | null
+          review_id: string
+          score: number
+        }
+        Update: {
+          criterion_id?: string
+          note?: string | null
+          review_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_ratings_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "rubric_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_ratings_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "screening_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_reviewers: {
+        Row: {
+          active: boolean
+          batch_id: string
+          capacity: number
+          reviewer_id: string
+        }
+        Insert: {
+          active?: boolean
+          batch_id: string
+          capacity?: number
+          reviewer_id: string
+        }
+        Update: {
+          active?: boolean
+          batch_id?: string
+          capacity?: number
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_reviewers_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "screening_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_reviewers_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      screening_reviews: {
+        Row: {
+          assignment_id: string
+          evidence: string
+          id: string
+          recommendation: string
+          reviewer_id: string
+          score: number
+          submitted_at: string
+        }
+        Insert: {
+          assignment_id: string
+          evidence: string
+          id?: string
+          recommendation: string
+          reviewer_id: string
+          score: number
+          submitted_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          evidence?: string
+          id?: string
+          recommendation?: string
+          reviewer_id?: string
+          score?: number
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screening_reviews_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: true
+            referencedRelation: "screening_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "screening_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slot_rsvps: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          slot_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          slot_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slot_rsvps_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slot_rsvps_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "event_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      actor_can_read_colleague_profile: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
+      actor_has_application_conflict: {
+        Args: { target_application_id: string }
+        Returns: boolean
+      }
+      actor_has_application_in_cycle: {
+        Args: { target_cycle_id: string }
+        Returns: boolean
+      }
+      actor_is_assigned_evaluator: {
+        Args: { target_application_id: string }
+        Returns: boolean
+      }
       add_applicant: {
         Args: {
           applicant_contact: string
@@ -967,10 +1667,17 @@ export type Database = {
           cycle_name: string
           display_status: string
           has_resume: boolean
+          offer_response: string
           released_at: string
           released_outcome: Database["rush"]["Enums"]["decision_outcome"]
           responses: Json
+          survey_submitted: boolean
         }[]
+      }
+      applicant_schedule: { Args: never; Returns: Json }
+      application_cycle_id: {
+        Args: { target_application_id: string }
+        Returns: string
       }
       approve_decision: {
         Args: { target_decision_id: string }
@@ -978,6 +1685,14 @@ export type Database = {
           approvals: number
           locked: boolean
         }[]
+      }
+      approve_screening_packet: {
+        Args: { approved: boolean; target_packet_id: string }
+        Returns: undefined
+      }
+      assign_case_group: {
+        Args: { target_application_id: string; target_group_id: string }
+        Returns: undefined
       }
       assign_evaluator: {
         Args: {
@@ -988,10 +1703,44 @@ export type Database = {
         }
         Returns: string
       }
+      authorize_resume_access: {
+        Args: { target_application_id: string }
+        Returns: string
+      }
+      begin_resume_upload: {
+        Args: { upload_filename: string; upload_size: number }
+        Returns: Json
+      }
+      board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
+      book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       check_in: { Args: { raw_token: string }; Returns: boolean }
+      check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
+      commit_screening_assignments: {
+        Args: {
+          commitment: string
+          proposal: Json
+          summary: Json
+          target_batch_id: string
+        }
+        Returns: number
+      }
+      create_buddy_slot: {
+        Args: {
+          slot_ends_at: string
+          slot_starts_at: string
+          target_cycle_id: string
+        }
+        Returns: string
+      }
+      create_case_group: {
+        Args: {
+          group_name: string
+          group_prompt?: string
+          target_cycle_id: string
+        }
+        Returns: string
+      }
       create_cycle: { Args: { cycle_name: string }; Returns: string }
-      create_resume_upload: { Args: never; Returns: string }
-      intake_schema: { Args: never; Returns: Json }
       create_decision: {
         Args: {
           decision_reason: string
@@ -1015,18 +1764,6 @@ export type Database = {
         }
         Returns: Json
       }
-      public_recruitment: { Args: never; Returns: Json }
-      submit_interest: {
-        Args: {
-          class_year?: string
-          email: string
-          full_name: string
-          how_heard?: string
-          uniqname?: string
-        }
-        Returns: string
-      }
-      save_application_draft: { Args: { payload: Json }; Returns: string }
       create_event_slot: {
         Args: {
           slot_capacity?: number
@@ -1036,39 +1773,11 @@ export type Database = {
         }
         Returns: string
       }
-      rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
-      create_case_group: {
-        Args: { group_name: string; group_prompt?: string; target_cycle_id: string }
+      create_resume_upload: { Args: never; Returns: string }
+      create_screening_batch: {
+        Args: { reviewer_ids: string[]; target_cycle_id: string }
         Returns: string
       }
-      assign_case_group: {
-        Args: { target_application_id: string; target_group_id: string }
-        Returns: undefined
-      }
-      create_buddy_slot: {
-        Args: { slot_ends_at: string; slot_starts_at: string; target_cycle_id: string }
-        Returns: string
-      }
-      book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
-      respond_to_offer: { Args: { accept: boolean }; Returns: undefined }
-      set_decision_preview: {
-        Args: { preview_text: string; target_decision_id: string }
-        Returns: undefined
-      }
-      submit_process_survey: {
-        Args: { score: number; survey_note?: string }
-        Returns: undefined
-      }
-      set_applicant_profile: {
-        Args: {
-          accessibility_notes?: string
-          college?: string
-          grad_term?: string
-          uniqname?: string
-        }
-        Returns: undefined
-      }
-      applicant_schedule: { Args: never; Returns: Json }
       declare_conflict: {
         Args: { conflict_reason: string; target_application_id: string }
         Returns: undefined
@@ -1091,6 +1800,19 @@ export type Database = {
           status: Database["rush"]["Enums"]["application_status"]
         }[]
       }
+      finalize_resume_upload: {
+        Args: {
+          actual_size: number
+          content_sha256: string
+          detected_page_count: number
+          target_document_id: string
+        }
+        Returns: Json
+      }
+      freeze_screening_batch: {
+        Args: { target_batch_id: string }
+        Returns: undefined
+      }
       grant_membership: {
         Args: {
           target_cycle_id: string
@@ -1099,6 +1821,10 @@ export type Database = {
         }
         Returns: string
       }
+      has_cycle_capability: {
+        Args: { capability: string; target_cycle_id: string }
+        Returns: boolean
+      }
       has_cycle_role: {
         Args: {
           allowed_roles: Database["rush"]["Enums"]["member_role"][]
@@ -1106,7 +1832,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      intake_schema: { Args: never; Returns: Json }
+      is_active_screening_reviewer: {
+        Args: { target_cycle_id: string }
+        Returns: boolean
+      }
       is_applicant: { Args: never; Returns: boolean }
+      is_eligible_screening_reviewer: {
+        Args: { target_cycle_id: string; target_user_id: string }
+        Returns: boolean
+      }
       member_applicants: {
         Args: { target_cycle_id: string }
         Returns: {
@@ -1114,21 +1849,96 @@ export type Database = {
           name: string
         }[]
       }
+      my_ready_resume: { Args: { target_path?: string }; Returns: Json }
+      my_screening_queue: {
+        Args: { target_cycle_id: string }
+        Returns: {
+          assignment_id: string
+          assignment_status: string
+          candidate_code: string
+        }[]
+      }
       owns_application: {
         Args: { target_application_id: string }
         Returns: boolean
+      }
+      pending_resume_upload: {
+        Args: { target_document_id: string }
+        Returns: Json
+      }
+      prune_rate_limits: { Args: never; Returns: undefined }
+      public_recruitment: { Args: never; Returns: Json }
+      recuse_screening_assignment: {
+        Args: { recusal_reason: string; target_assignment_id: string }
+        Returns: undefined
+      }
+      reject_resume_upload: {
+        Args: { rejection: string; target_document_id: string }
+        Returns: string
       }
       release_decision: {
         Args: { target_decision_id: string }
         Returns: undefined
       }
+      respond_to_offer: {
+        Args: { accept: boolean; target_application_id: string }
+        Returns: undefined
+      }
+      resume_upload_locked: { Args: { target_path: string }; Returns: boolean }
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
+      round_cycle_id: { Args: { target_round_id: string }; Returns: string }
+      rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
+      save_application_draft: { Args: { payload: Json }; Returns: string }
+      screening_admin_overview: {
+        Args: { target_cycle_id: string }
+        Returns: Json
+      }
+      screening_assignment_detail: {
+        Args: { target_assignment_id: string }
+        Returns: Json
+      }
+      screening_assignment_inputs: {
+        Args: { target_batch_id: string }
+        Returns: Json
+      }
+      seed_cycle_questions: {
+        Args: { target_cycle_id: string }
+        Returns: undefined
+      }
+      set_applicant_profile: {
+        Args: {
+          accessibility_notes?: string
+          college?: string
+          grad_term?: string
+          uniqname?: string
+        }
+        Returns: undefined
+      }
+      set_application_status: {
+        Args: {
+          next_status: Database["rush"]["Enums"]["application_status"]
+          target_application_id: string
+        }
+        Returns: undefined
+      }
       set_cycle_status: {
         Args: {
           next_status: Database["rush"]["Enums"]["cycle_status"]
           target_cycle_id: string
         }
         Returns: undefined
+      }
+      set_decision_preview: {
+        Args: { preview_text: string; target_decision_id: string }
+        Returns: undefined
+      }
+      set_membership_role: {
+        Args: {
+          target_cycle_id: string
+          target_role: Database["rush"]["Enums"]["member_role"]
+          target_user_id: string
+        }
+        Returns: string
       }
       set_round_status: {
         Args: {
@@ -1139,25 +1949,26 @@ export type Database = {
       }
       submit_application: {
         Args: {
+          accessibility_notes?: string
           answers?: Json
           applicant_contact: string
           applicant_name: string
           class_year?: string
+          college?: string
           consent?: boolean
+          grad_term?: string
           linkedin_url?: string
           major?: string
           phone?: string
           preferred_name?: string
           resume_storage_path?: string
+          uniqname?: string
         }
-        Returns: string
+        Returns: Json
       }
-      set_application_status: {
-        Args: {
-          next_status: Database["rush"]["Enums"]["application_status"]
-          target_application_id: string
-        }
-        Returns: undefined
+      submit_application_self_test: {
+        Args: { applicant_contact: string; applicant_name: string }
+        Returns: string
       }
       submit_evaluation: {
         Args: {
@@ -1169,6 +1980,37 @@ export type Database = {
           evaluation_id: string
           score: number
         }[]
+      }
+      submit_interest: {
+        Args: {
+          class_year?: string
+          email: string
+          full_name: string
+          how_heard?: string
+          uniqname?: string
+        }
+        Returns: string
+      }
+      submit_process_survey: {
+        Args: {
+          score: number
+          survey_note?: string
+          target_application_id: string
+        }
+        Returns: undefined
+      }
+      submit_screening_review: {
+        Args: {
+          ratings: Json
+          review_evidence: string
+          review_recommendation: string
+          target_assignment_id: string
+        }
+        Returns: number
+      }
+      update_screening_packet_content: {
+        Args: { revised_content: Json; target_packet_id: string }
+        Returns: undefined
       }
       verify_full_workflow: {
         Args: { applicant_id: string; owner_id: string; panel_id: string }
@@ -1216,7 +2058,12 @@ export type Database = {
         | "SUPERSEDED"
         | "VOID"
       event_status: "DRAFT" | "PUBLISHED" | "CLOSED" | "CANCELLED"
-      member_role: "MEMBER" | "BOARD" | "PANEL" | "OWNER"
+      member_role:
+        | "MEMBER"
+        | "BOARD"
+        | "PANEL"
+        | "OWNER"
+        | "RECRUITMENT_COMMITTEE"
       round_status:
         | "DRAFT"
         | "PUBLISHED"
@@ -1230,7 +2077,6 @@ export type Database = {
     }
   }
 }
-
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
@@ -1390,7 +2236,13 @@ export const Constants = {
       ],
       evaluation_status: ["DRAFT", "SUBMITTED", "LOCKED", "SUPERSEDED", "VOID"],
       event_status: ["DRAFT", "PUBLISHED", "CLOSED", "CANCELLED"],
-      member_role: ["MEMBER", "BOARD", "PANEL", "OWNER"],
+      member_role: [
+        "MEMBER",
+        "BOARD",
+        "PANEL",
+        "OWNER",
+        "RECRUITMENT_COMMITTEE",
+      ],
       round_status: [
         "DRAFT",
         "PUBLISHED",

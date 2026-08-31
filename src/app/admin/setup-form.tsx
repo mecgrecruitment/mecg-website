@@ -33,12 +33,15 @@ export default function SetupForm() {
       <p className="text-sm text-gray-600">
         This also creates the approved Speed Dating and Group Case rubrics.
       </p>
-      <input
-        className="rounded border px-3 py-2"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        required
-      />
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        Cycle name
+        <input
+          className="rounded border px-3 py-2 font-normal"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+        />
+      </label>
       {error && <p className="text-sm text-red-700">{error}</p>}
       <button className="rounded bg-slate-950 px-4 py-2 text-white" disabled={pending}>
         {pending ? "Creating…" : "Create cycle"}

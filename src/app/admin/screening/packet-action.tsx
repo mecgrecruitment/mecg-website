@@ -27,7 +27,7 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
   }
   return (
     <div className="mt-4 space-y-3">
-      <details className="group rounded-xl border p-3">
+      <details className="group rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <summary className="button-secondary w-fit cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
           <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M6 9l6 6 6-6" />
@@ -35,11 +35,23 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
           Edit redacted answers
         </summary>
         <div className="mt-3 space-y-3">
-          {responses.map((response, index) => <label key={index} className="block text-xs font-medium">{response.question}<textarea value={answers[index]} onChange={(event) => setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value : answer))} className="mt-1 min-h-24 w-full rounded border px-3 py-2 text-sm font-normal" /></label>)}
+          {responses.map((response, index) => (
+            <label key={index} className="block text-xs font-medium">
+              {response.question}
+              <textarea
+                value={answers[index]}
+                onChange={(event) => setAnswers((current) => current.map((answer, answerIndex) => answerIndex === index ? event.target.value : answer))}
+                className="mt-1 min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] px-3 py-2 text-sm font-normal shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+              />
+            </label>
+          ))}
           <button type="button" disabled={pending} onClick={() => void saveRedaction()} className="button-secondary">Save redaction</button>
         </div>
       </details>
-      <div className="flex flex-wrap gap-2"><button disabled={pending || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">Approve blind packet</button><button disabled={pending || status === "REJECTED"} onClick={() => void decide(false)} className="button-secondary">Reject for redaction</button></div>
+      <div className="flex flex-wrap gap-2">
+        <button disabled={pending || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">Approve blind packet</button>
+        <button disabled={pending || status === "REJECTED"} onClick={() => void decide(false)} className="button-secondary">Reject for redaction</button>
+      </div>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </div>
   );

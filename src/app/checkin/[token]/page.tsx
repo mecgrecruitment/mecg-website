@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import CheckinForm from "./checkin-form";
 import PortalShell from "@/components/portal-shell";
+
+export const metadata: Metadata = { title: "Check in" };
 
 export default async function CheckinPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

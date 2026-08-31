@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,8 +13,9 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_cycle", { cycle_name: name });
   if (error) {
-    const status = error.code === "23505" ? 409 : error.code === "42501" ? 403 : 400;
-    return NextResponse.json({ error: error.message }, { status });
+    console.error("create_cycle failed", error);
+    const { body, status } = mapRpcError(error);
+    return NextResponse.json(body, { status });
   }
   return NextResponse.json({ id: data }, { status: 201 });
 }

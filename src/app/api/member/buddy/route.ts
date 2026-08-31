@@ -12,6 +12,9 @@ export async function POST(req: NextRequest) {
     slot_starts_at: String(body?.startsAt ?? ""),
     slot_ends_at: String(body?.endsAt ?? ""),
   });
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("create_buddy_slot failed", error);
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
   return NextResponse.json({ ok: true });
 }

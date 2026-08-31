@@ -12,6 +12,9 @@ export async function POST(request: NextRequest) {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return NextResponse.json({ code: "RECOVERY_SESSION_REQUIRED" }, { status: 401 });
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return NextResponse.json({ code: "RESET_FAILED" }, { status: 400 });
+  if (error) {
+    console.error("reset_password failed", error);
+    return NextResponse.json({ code: "RESET_FAILED" }, { status: 400 });
+  }
   return NextResponse.json({ ok: true });
 }

@@ -265,3 +265,9 @@ No phase may be called complete when its gate has an unexplained failure or skip
 8. How long must legacy portal and API compatibility remain available?
 
 Until MECG answers these questions, implementation can finish the local schema, tests, UI shells, and staging flows, but production cutover stays blocked.
+
+## Recruitment Committee role boundary
+
+`RECRUITMENT_COMMITTEE` is a cycle-scoped operational role and is assigned to no users by the migration. It may manage applicant intake, screening administration, evaluator assignments, round coordination, events and slots, check-in operations, case groups, candidate dossier/resume access, attendance-only exports, audit reads, and decision-preview drafting. It cannot create or change cycles, grant roles, access Hash, read locked evaluation evidence, create or approve decisions, release decisions, or perform broad applicant exports. Blind reviewing remains disabled by default.
+
+Committee application status writes are limited to `DRAFT`, `SUBMITTED`, `NEEDS_INFO`, `ELIGIBLE`, `INVITED`, `IN_PROCESS`, and `FINAL_REVIEW`; outcome and withdrawal statuses are rejected at the database boundary.

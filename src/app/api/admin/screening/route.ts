@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { distributeScreeningReviews, type ScreeningPacketInput, type ScreeningReviewerInput } from "@/lib/screening";
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json().catch(() => null);
   const cycleId = typeof body?.cycleId === "string" ? body.cycleId : "";
-  if (!cycleId || !hasPermission(user.memberships, cycleId, "MANAGE_CYCLE")) {
+  if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const supabase = await createClient();
@@ -64,8 +65,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (result.error) {
-    const status = result.error.code === "42501" ? 403 : result.error.code === "P0002" ? 404 : result.error.code === "55000" || result.error.code === "23505" ? 409 : 400;
-    return NextResponse.json({ error: result.error.message }, { status });
+    console.error(`admin screening ${body.action} failed`, result.error);
+    const { body: errorBody, status } = mapRpcError(result.error);
+    return NextResponse.json(errorBody, { status });
   }
   return NextResponse.json({ data: result.data });
 }

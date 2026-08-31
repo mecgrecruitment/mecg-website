@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,8 +12,9 @@ export async function POST(
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("check_in", { raw_token: token });
   if (error) {
-    const status = error.code === "P0002" ? 404 : error.code === "42501" ? 403 : 400;
-    return NextResponse.json({ error: error.message }, { status });
+    console.error("check_in failed", error);
+    const { body, status } = mapRpcError(error);
+    return NextResponse.json(body, { status });
   }
   return NextResponse.json({ alreadyCheckedIn: data }, { status: data ? 200 : 201 });
 }

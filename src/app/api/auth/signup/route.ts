@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { destinationForUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -19,6 +20,10 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createClient();
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!(await checkRateLimit(`signup:${ip}`))) {
+    return NextResponse.json({ code: "RATE_LIMITED" }, { status: 429 });
+  }
   const callbackUrl = new URL("/auth/callback?next=/apply", request.nextUrl.origin).toString();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -30,6 +35,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
+    console.error("signup failed", error);
     const status = error.status === 429 ? 429 : 400;
     return NextResponse.json(
       { code: status === 429 ? "RATE_LIMITED" : "SIGNUP_FAILED" },
@@ -43,7 +49,8 @@ export async function POST(request: NextRequest) {
 
   try {
     return NextResponse.json({ destination: await destinationForUser(supabase, data.user.id) }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("signup destination lookup failed", error);
     return NextResponse.json({ code: "ROUTING_UNAVAILABLE" }, { status: 503 });
   }
 }

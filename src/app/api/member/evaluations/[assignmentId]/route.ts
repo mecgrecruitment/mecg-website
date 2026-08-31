@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,8 +14,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ass
     submitted_evidence: typeof body?.evidence === "string" ? body.evidence : undefined,
   });
   if (error) {
-    const status = error.code === "P0002" ? 404 : error.code === "42501" ? 403 : error.code === "55000" || error.code === "23505" ? 409 : 400;
-    return NextResponse.json({ error: error.message }, { status });
+    console.error("submit_evaluation failed", error);
+    const { body, status } = mapRpcError(error);
+    return NextResponse.json(body, { status });
   }
   return NextResponse.json({ id: data?.[0]?.evaluation_id, score: data?.[0]?.score }, { status: 201 });
 }

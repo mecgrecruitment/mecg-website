@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { resolveAuthDestination, type AccessRole, type AuthDestination } from "@/lib/auth-destination";
+import { hasPermission } from "@/lib/authorization";
 
 export type CurrentUser = {
   id: string;
@@ -12,7 +13,7 @@ export type CurrentUser = {
   memberships: Array<{
     id: string;
     cycleId: string;
-    role: "MEMBER" | "BOARD" | "PANEL" | "OWNER";
+    role: "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTEE";
     active: boolean;
     cycle: {
       id: string;
@@ -31,7 +32,7 @@ export async function destinationForUser(
 ): Promise<AuthDestination> {
   const [profileResult, membershipResult, applicantResult] = await Promise.all([
     supabase.from("profiles").select("active").eq("id", userId).maybeSingle(),
-    supabase.from("memberships").select("role").eq("user_id", userId).eq("active", true),
+    supabase.from("memberships").select("role, rush_cycles!inner(status)").eq("user_id", userId).eq("active", true),
     supabase.rpc("is_applicant"),
   ]);
 
@@ -41,7 +42,10 @@ export async function destinationForUser(
 
   return resolveAuthDestination({
     active: profileResult.data?.active === true,
-    roles: (membershipResult.data ?? []).map((membership) => membership.role as AccessRole),
+    memberships: (membershipResult.data ?? []).map((membership) => ({
+      role: membership.role as AccessRole,
+      cycleStatus: membership.rush_cycles.status,
+    })),
     hasApplication: applicantResult.data === true,
   });
 }
@@ -101,7 +105,7 @@ export async function requireUser() {
 export async function requireMember() {
   const user = await requireUser();
   const hasInternalRole = user.memberships.some((membership) =>
-    ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(membership.role),
+    hasPermission([membership], membership.cycleId, "WORKSPACE_ACCESS"),
   );
   if (!hasInternalRole) redirect(await currentDestination() ?? "/login");
   return user;
@@ -110,7 +114,8 @@ export async function requireMember() {
 export async function requireAdmin() {
   const user = await requireUser();
   const hasAdminRole = user.memberships.some((membership) =>
-    ["BOARD", "PANEL", "OWNER"].includes(membership.role),
+    ["BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role)
+    && hasPermission([membership], membership.cycleId, "WORKSPACE_ACCESS"),
   );
   if (!hasAdminRole) redirect(await currentDestination() ?? "/login");
   return user;

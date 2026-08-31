@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(87);
+select extensions.plan(94);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -75,6 +75,13 @@ select extensions.ok(position('has_cycle_role(target_cycle_id,array[''OWNER'']' 
 select extensions.ok(position('auth.uid()=target_user_id' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('self grant forbidden' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants retain self-grant protection');
 select extensions.ok(position('MEMBERSHIP_GRANTED' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('audit_events' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants retain audit logging');
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='grant_membership' and p.prosecdef and p.proconfig @> array['search_path=""']), 'membership grants remain security definer with empty search path');
+select extensions.has_function('rush','set_membership_role',array['uuid','text','rush.member_role'],'membership role function exists');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'membership role changes are security definer with empty search path');
+select extensions.ok(has_function_privilege('authenticated','rush.set_membership_role(uuid,text,rush.member_role)','EXECUTE') and not has_function_privilege('anon','rush.set_membership_role(uuid,text,rush.member_role)','EXECUTE'), 'membership role ACL excludes anonymous callers');
+select extensions.ok(position('owner required' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('self role change forbidden' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes remain owner-only and reject self-promotion');
+select extensions.ok(position('screening reviewer cannot receive a privileged role' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes protect screening independence');
+select extensions.ok(position('cycle must retain an owner' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes preserve a cycle owner');
+select extensions.ok(position('MEMBERSHIP_ROLE_CHANGED' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes retain audit logging');
 select extensions.ok(position('committee.role' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('RECRUITMENT_COMMITTEE' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('CLOSED' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('ARCHIVED' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0, 'closed-cycle committee membership restricts additive member profile access');
 select extensions.ok(position('CANDIDATE_ACCESS' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0 and position('PANEL' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0 and position('actor_has_application_conflict' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0, 'resume access supports active-cycle operators and panel while preserving recusal');
 select extensions.ok((select p.prosecdef and p.proconfig @> array['search_path=""'] and pg_get_userbyid(p.proowner)='postgres' from pg_proc p where p.oid='rush.actor_can_read_colleague_profile(uuid)'::regprocedure) and (select p.prosecdef and p.proconfig @> array['search_path=""'] and pg_get_userbyid(p.proowner)='postgres' from pg_proc p where p.oid='rush.create_cycle(text)'::regprocedure), 'authorization functions are postgres-owned security definers with empty search paths');

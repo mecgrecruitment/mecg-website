@@ -39,7 +39,7 @@ export default function CheckinForm({ token }: { token: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm text-mecg-navy/60">Check-in uses your signed-in applicant account.</p>
+      <p className="text-sm leading-6 text-mecg-navy/65">Check-in uses your signed-in applicant account.</p>
       {status === "error" && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{errorMessage}</p>}
       <button
         type="submit"

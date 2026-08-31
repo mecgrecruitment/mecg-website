@@ -18,20 +18,22 @@ function initials(name: string) {
 
 export default async function RoundBoardPage({ kind, title, nav }: { kind: string; title: string; nav: string }) {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
+  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
+  const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
+  const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const supabase = await createClient();
   const { data: cycle } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
   if (!cycle) redirect("/member");
   const { data: round, error } = await supabase
     .from("rounds")
-    .select("id,name,status,kind,evaluation_assignments(id,status,evaluator_id,applications(id,pnms(name)),evaluations(status))")
+    .select("id,name,status,kind,evaluation_assignments(id,status,evaluator_id,applications(id,pnms(name)))")
     .eq("cycle_id", cycleId)
     .eq("kind", kind)
     .maybeSingle();
   if (error) throw error;
   const canManage = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
-  const assignments = round?.evaluation_assignments ?? [];
+  const assignments = canOperate ? round?.evaluation_assignments ?? [] : [];
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10">
@@ -45,7 +47,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
           <LogoutButton />
         </div>
       </header>
-      <BoardNav current={nav} />
+      <BoardNav current={nav} recruitmentOperations={canOperate} hashPanel={canHash} />
       {!round ? (
         <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
           <p className="text-[13px] text-mecg-navy/40">This cycle does not have a {title} round yet.</p>
@@ -56,11 +58,13 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
             <p className="text-sm text-mecg-navy/55">
               Round status: {round.status}. {canManage ? "Use Pipeline ops to publish, activate, and freeze." : null}
             </p>
-            <p className="font-mono text-xs text-mecg-navy/50">
-              {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
-            </p>
+            {canOperate ? (
+              <p className="font-mono text-xs text-mecg-navy/50">
+                {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
+              </p>
+            ) : null}
           </div>
-          {assignments.length === 0 ? (
+          {!canOperate ? null : assignments.length === 0 ? (
             <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
               <p className="text-[13px] text-mecg-navy/40">No assignments yet</p>
             </div>
@@ -80,7 +84,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                     : assignment.applications?.pnms && !Array.isArray(assignment.applications.pnms)
                       ? assignment.applications.pnms.name
                       : "Applicant";
-                  const submitted = assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status));
+                  const submitted = ["SUBMITTED", "LOCKED"].includes(assignment.status);
                   return (
                     <tr key={assignment.id} className="border-b border-mecg-navy/10">
                       <td className="py-2.5">

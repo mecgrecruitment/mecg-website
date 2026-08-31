@@ -25,12 +25,12 @@ try {
     const label = ["owner", "panel", "applicant"][index];
     const { error: loginError } = await userClient.auth.signInWithPassword({ email: `workflow-${label}-${suffix}@example.invalid`, password });
     if (loginError) throw new Error(`Test identity could not sign in: ${loginError.message}`);
-    const { data: visibleProfiles, error: profileError } = await userClient.from("profiles").select("id");
-    if (profileError || visibleProfiles.length !== 1 || visibleProfiles[0].id !== ids[index]) throw new Error("Profile RLS did not isolate the authenticated user");
+    const { data: visibleProfile, error: profileError } = await userClient.from("profiles").select("id").eq("id", ids[index]).single();
+    if (profileError || visibleProfile.id !== ids[index]) throw new Error(`Profile RLS did not expose the authenticated user: ${profileError?.message ?? "unexpected profile"}`);
     await userClient.auth.signOut();
   }
   const { error } = await client.rpc("verify_full_workflow", { owner_id: ids[0], panel_id: ids[1], applicant_id: ids[2] });
-  if (!error || error.message !== "WORKFLOW_SELF_TEST_PASSED") throw new Error(`Workflow self-test failed: ${error?.message ?? "function unexpectedly committed"}`);
+  if (!error || error.message !== "WORKFLOW_SELF_TEST_PASSED") throw new Error(`Workflow self-test failed: ${JSON.stringify(error)}`);
   console.log("Full Supabase workflow passed and its database transaction was rolled back.");
 } finally {
   for (const id of ids) await client.auth.admin.deleteUser(id);

@@ -38,7 +38,7 @@ export default function RotateButton({ eventId }: { eventId: string }) {
       >
         {busy ? "Rotating..." : "Rotate QR code"}
       </button>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </div>
   );
 }

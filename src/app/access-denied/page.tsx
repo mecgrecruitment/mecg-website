@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
+
+export const metadata: Metadata = { title: "Access denied" };
 
 export default function AccessDeniedPage() {
   return (

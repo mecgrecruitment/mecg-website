@@ -7,13 +7,54 @@ export default function PortalShell({
   description,
   children,
   centered = false,
+  workspace = false,
+  headerAction,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   children: React.ReactNode;
   centered?: boolean;
+  workspace?: boolean;
+  headerAction?: React.ReactNode;
 }) {
+  if (workspace) {
+    return (
+      <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
+        <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
+          <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-5">
+            <Link
+              href="/home"
+              className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange"
+              aria-label="MECG home"
+            >
+              <Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={45} priority className="h-10 w-auto" style={{ width: "auto" }} />
+            </Link>
+            <div className="flex min-h-11 items-center gap-5 text-sm">
+              <Link href="/home" className="hidden text-mecg-navy/55 transition-colors hover:text-mecg-navy sm:inline-flex">
+                Back to site
+              </Link>
+              {headerAction}
+            </div>
+          </div>
+        </header>
+
+        <section className="relative overflow-hidden bg-mecg-navy px-6 py-10 text-white sm:px-10 sm:py-12">
+          <div className="project-blueprint absolute inset-0 opacity-45" aria-hidden="true" />
+          <div className="relative mx-auto max-w-7xl">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">{eyebrow}</p>
+            <h1 className="mt-3 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">{title}</h1>
+            <p className="mt-4 max-w-2xl text-pretty leading-7 text-white/65">{description}</p>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-6 py-8 sm:px-10 sm:py-10">
+          {children}
+        </section>
+      </main>
+    );
+  }
+
   if (centered) {
     return (
       <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
@@ -33,7 +74,7 @@ export default function PortalShell({
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{eyebrow}</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
             <p className="mx-auto mt-4 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
-            <div className="mt-7 rounded-[28px] bg-white p-7 text-left shadow-[0_24px_80px_rgba(7,13,31,0.09)] sm:p-9">
+            <div className="mt-7 rounded-[28px] bg-white p-7 text-left shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.05)] sm:p-9">
               {children}
             </div>
           </div>
@@ -75,7 +116,7 @@ export default function PortalShell({
         </p>
       </aside>
 
-      <section className="flex min-h-dvh items-center bg-white px-6 py-8 text-mecg-navy sm:px-10 lg:px-16">
+      <section className="flex min-h-dvh items-center bg-[#f5f4ef] px-6 py-8 text-mecg-navy sm:px-10 lg:px-16">
         <div className="mx-auto w-full max-w-xl">
           <div className="mb-10 flex items-center justify-between lg:hidden">
             <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
@@ -88,7 +129,7 @@ export default function PortalShell({
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{eyebrow}</p>
           <h1 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
           <p className="mt-5 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
-          <div className="mt-8">{children}</div>
+          <div className="mt-8 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.05)] sm:p-8">{children}</div>
         </div>
       </section>
     </main>

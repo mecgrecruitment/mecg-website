@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, type ApplicationDraft } from "@/lib/workflow";
 
-type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean };
+type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[] };
 type Step = "details" | "responses" | "materials" | "review";
 type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; label: string } | { kind: "error"; message: string };
 type UploadState =
@@ -34,6 +34,25 @@ function guidanceFor(key: string) {
   return "Recommended: 150–250 words";
 }
 
+function answerId(key: string) {
+  return `answer-${encodeURIComponent(key)}`;
+}
+
+function isHttpUrl(value: string) {
+  const trimmed = value.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  try {
+    const url = new URL(trimmed);
+    return ["http:", "https:"].includes(url.protocol) && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function FieldError({ id, children }: { id: string; children?: string }) {
+  return children ? <p id={id} className="mt-2 text-sm text-red-700" role="alert">{children}</p> : null;
+}
+
 export default function ApplicationForm({ initialName, email, cycleOpen, cycleName, questions, initialDraft }: {
   initialName: string;
   email: string;
@@ -54,7 +73,11 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   const [gradTerm, setGradTerm] = useState(initialDraft?.gradTerm ?? "");
   const [accessibilityNotes, setAccessibilityNotes] = useState(initialDraft?.accessibilityNotes ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(initialDraft?.linkedinUrl ?? "");
-  const [answers, setAnswers] = useState<Record<string, string>>(initialDraft?.answers ?? {});
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    const restored = { ...(initialDraft?.answers ?? {}) };
+    for (const question of questions) if (question.inputType === "select" && restored[question.key] && !question.options.includes(restored[question.key])) restored[question.key] = "";
+    return restored;
+  });
   const [resumePath, setResumePath] = useState(initialDraft?.resumeStoragePath ?? "");
   const [consent, setConsent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,9 +85,41 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   const [uploadState, setUploadState] = useState<UploadState>(initialDraft?.resumeStoragePath ? { kind: "uploaded", label: "Previously uploaded PDF" } : { kind: "idle" });
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
   const initialized = useRef(false);
+  const autosaveTimer = useRef<number | null>(null);
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
+  const saveSequence = useRef(0);
   const uploadSequence = useRef(0);
+  const stepChangeRequested = useRef(false);
 
   const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath]);
+
+  const cancelPendingSave = useCallback(() => {
+    if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = null;
+  }, []);
+
+  const saveDraft = useCallback((payload: typeof draftPayload, focusFailure = false) => {
+    const sequence = ++saveSequence.current;
+    setSaveState({ kind: "saving" });
+    const operation = saveQueue.current.then(async () => {
+      try {
+        const response = await fetch("/api/apply/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        if (!response.ok) {
+          if (response.status === 401) throw new Error("Your session expired. Sign in again to save your application.");
+          throw new Error("We could not save your application. Please try again.");
+        }
+        if (sequence === saveSequence.current) setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
+        return true;
+      } catch (error) {
+        if (sequence !== saveSequence.current) return false;
+        setSaveState({ kind: "error", message: error instanceof Error ? error.message : "We could not save your application. Please try again." });
+        if (focusFailure) window.requestAnimationFrame(() => document.getElementById("draft-save-error")?.focus());
+        return false;
+      }
+    });
+    saveQueue.current = operation.then(() => undefined);
+    return operation;
+  }, []);
 
   useEffect(() => {
     if (!cycleOpen) return;
@@ -72,18 +127,31 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       initialized.current = true;
       return;
     }
-    const timer = window.setTimeout(async () => {
-      setSaveState({ kind: "saving" });
-      try {
-        const response = await fetch("/api/apply/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draftPayload) });
-        if (!response.ok) throw new Error("Could not save your draft");
-        setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
-      } catch (error) {
-        setSaveState({ kind: "error", message: error instanceof Error ? error.message : "Could not save your draft" });
-      }
+    autosaveTimer.current = window.setTimeout(() => {
+      autosaveTimer.current = null;
+      void saveDraft(draftPayload);
     }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [cycleOpen, draftPayload]);
+    return () => {
+      if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
+    };
+  }, [cycleOpen, draftPayload, saveDraft]);
+
+  useEffect(() => () => cancelPendingSave(), [cancelPendingSave]);
+
+  useEffect(() => {
+    if (!stepChangeRequested.current) return;
+    stepChangeRequested.current = false;
+    const heading = document.getElementById("application-step-heading");
+    heading?.focus({ preventScroll: true });
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  }, [step]);
+
+  function changeStep(next: Step) {
+    if (next === step) return;
+    stepChangeRequested.current = true;
+    setStep(next);
+  }
 
   async function uploadResume(file: File) {
     const sequence = ++uploadSequence.current;
@@ -144,23 +212,32 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       if (!major.trim()) next.major = "Enter your major.";
     }
     if (target === "responses") {
-      for (const question of questions) if (question.required && !answers[question.key]?.trim()) next[question.key] = "Write a response before continuing.";
+      for (const question of questions) {
+        const answer = answers[question.key]?.trim() ?? "";
+        if (question.required && !answer) next[question.key] = "Write a response before continuing.";
+        else if (question.inputType === "select" && answer && !question.options.includes(answer)) next[question.key] = "Select one of the available options.";
+        else if (question.inputType === "url" && answer && !isHttpUrl(answer)) next[question.key] = "Enter a complete http or https URL.";
+      }
     }
-    if (target === "materials" && !resumePath) next.resume = "Upload your resume before continuing.";
+    if (target === "materials" && (uploadState.kind === "uploading" || !resumePath)) next.resume = uploadState.kind === "uploading" ? "Wait for your resume upload to finish." : "Upload your resume before continuing.";
     setErrors(next);
-    return Object.keys(next).length === 0;
+    const first = Object.keys(next)[0];
+    if (first) window.requestAnimationFrame(() => document.getElementById(first === "resume" ? "resume" : questions.some((question) => question.key === first) ? answerId(first) : first)?.focus());
+    return !first;
   }
 
-  function move(next: Step) {
-    if (!validate(step)) return;
-    setStep(next);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  async function move(next: Step) {
+    if (uploadState.kind === "uploading" || !validate(step)) return;
+    cancelPendingSave();
+    if (await saveDraft(draftPayload, true)) changeStep(next);
   }
 
   async function submit() {
-    if (!consent || submitState.kind === "submitting") return;
+    if (!consent || submitState.kind === "submitting" || uploadState.kind === "uploading") return;
+    cancelPendingSave();
     setSubmitState({ kind: "submitting" });
     try {
+      await saveQueue.current;
       const response = await fetch("/api/apply", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...draftPayload, consent: true }) });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
@@ -173,83 +250,109 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
     }
   }
 
-  if (!cycleOpen) return <div className="mt-8 rounded-2xl bg-red-50 p-6 text-red-900"><p className="font-semibold">Applications are currently closed.</p><p className="mt-2 text-sm leading-6 text-red-800/75">Check the recruitment page for the next opening date, or email the MECG board if you expected to apply today.</p></div>;
+  if (!cycleOpen) return <div className="mt-8 rounded-2xl bg-red-50 p-6 text-red-900"><p className="font-semibold">Applications are currently closed.</p><p className="mt-2 text-sm leading-6 text-red-800/80">Check the recruitment page for the next opening date, or email the MECG board if you expected to apply today.</p></div>;
 
   const currentIndex = STEPS.findIndex((item) => item.id === step);
   const completed = (id: Step) => STEPS.findIndex((item) => item.id === id) < currentIndex;
+  const saving = saveState.kind === "saving";
+  const uploading = uploadState.kind === "uploading";
 
   return (
-    <div className="mt-8 grid gap-8 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-12">
+    <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-10">
       <aside className="lg:sticky lg:top-8">
         <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
           <ol className="mt-6 grid grid-cols-4 gap-2 lg:block lg:space-y-2" aria-label="Application progress">
             {STEPS.map((item, index) => {
               const active = item.id === step;
-              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && setStep(item.id)} disabled={index > currentIndex} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/75 hover:bg-white/8" : "cursor-default text-white/35"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span className="hidden lg:inline">{item.label}</span><span className="sr-only lg:hidden">{item.shortLabel}</span></button></li>;
+              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || saving} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span className="hidden lg:inline">{item.label}</span><span className="sr-only lg:hidden">{item.shortLabel}</span></button></li>;
             })}
           </ol>
-          <div className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/55">
-            {saveState.kind === "saving" && <p>Saving changes...</p>}
-            {saveState.kind === "saved" && <p className="tabular-nums">Saved at {saveState.label}</p>}
-            {saveState.kind === "error" && <p className="text-red-200">{saveState.message}</p>}
+          <div className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/70">
+            {saveState.kind === "saving" && <p aria-hidden="true">Saving changes...</p>}
+            {saveState.kind === "saved" && <p className="tabular-nums" role="status" aria-live="polite">Saved at {saveState.label}</p>}
+            {saveState.kind === "error" && <p id="draft-save-error" className="text-red-200" role="alert" tabIndex={-1}>{saveState.message}</p>}
             {saveState.kind === "idle" && <p>Your answers save automatically.</p>}
           </div>
         </div>
-        <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/50">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>
+        <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/65">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>
       </aside>
 
-      <section className="min-w-0 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.06)] sm:p-9">
+      <section className="min-w-0 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.06)] sm:p-8">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
         {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
         {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
         {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
-        {step === "review" && <ReviewStep values={{ name, preferredName, email, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} setConsent={setConsent} submitState={submitState} submit={submit} setStep={setStep} />}
+        {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} setConsent={setConsent} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
 
-        {step !== "review" && <div className="mt-9 flex items-center justify-between gap-3 border-t border-mecg-navy/8 pt-6"><button type="button" onClick={() => setStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/60 disabled:invisible">Back</button><button type="button" onClick={() => move(STEPS[currentIndex + 1].id)} className="min-h-12 rounded-xl bg-mecg-navy px-6 font-semibold text-white transition-transform active:scale-[0.96]">Save and continue</button></div>}
+        {step !== "review" && <div className="mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 pt-5"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} className="min-h-12 rounded-xl bg-mecg-navy px-6 font-semibold text-white transition-transform active:scale-[0.96] disabled:cursor-wait disabled:opacity-60">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
       </section>
     </div>
   );
 }
 
-function FieldError({ children }: { children?: string }) { return children ? <p className="mt-2 text-sm text-red-700" role="alert">{children}</p> : null; }
+function StepHeading({ children }: { children: React.ReactNode }) {
+  return <h2 id="application-step-heading" tabIndex={-1} className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em] outline-none">{children}</h2>;
+}
 
 function DetailsStep({ values, setters, email, errors }: { values: Record<string, string>; setters: Record<string, (value: string) => void>; email: string; errors: Record<string, string> }) {
-  return <><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">Start with the basics.</h2><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/55">These details stay separate from the anonymous first review of your written responses.</p><div className="mt-8 grid gap-5 sm:grid-cols-2">
-    <label className={labelClass}>Full name <span className="text-mecg-orange-ink">*</span><input value={values.name} onChange={(e) => setters.setName(e.target.value)} autoComplete="name" className={fieldClass} aria-invalid={Boolean(errors.name)} /><FieldError>{errors.name}</FieldError></label>
-    <label className={labelClass}>Preferred name <span className="font-normal text-mecg-navy/40">Optional</span><input value={values.preferredName} onChange={(e) => setters.setPreferredName(e.target.value)} autoComplete="nickname" className={fieldClass} /></label>
+  const describedBy = (key: string) => errors[key] ? `${key}-error` : undefined;
+  return <><StepHeading>Start with the basics.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">These details stay separate from the anonymous first review of your written responses.</p><div className="mt-8 grid gap-5 sm:grid-cols-2">
+    <label htmlFor="name" className={labelClass}>Full name <span className="text-mecg-orange-ink">(required)</span><input id="name" value={values.name} onChange={(e) => setters.setName(e.target.value)} autoComplete="name" required className={fieldClass} aria-invalid={Boolean(errors.name)} aria-describedby={describedBy("name")} /><FieldError id="name-error">{errors.name}</FieldError></label>
+    <label htmlFor="preferredName" className={labelClass}>Preferred name <span className="font-normal text-mecg-navy/60">Optional</span><input id="preferredName" value={values.preferredName} onChange={(e) => setters.setPreferredName(e.target.value)} autoComplete="nickname" className={fieldClass} /></label>
     <div className="sm:col-span-2"><p className={labelClass}>Verified email</p><div className="mt-2 flex min-h-12 items-center justify-between rounded-xl bg-mecg-blue/8 px-4 text-sm"><span>{email}</span><span className="font-semibold text-emerald-700">✓ Verified</span></div></div>
-    <label className={labelClass}>Phone <span className="font-normal text-mecg-navy/40">Optional</span><input value={values.phone} onChange={(e) => setters.setPhone(e.target.value)} type="tel" autoComplete="tel" className={fieldClass} /></label>
-    <label className={labelClass}>Uniqname <span className="text-mecg-orange-ink">*</span><input value={values.uniqname} onChange={(e) => setters.setUniqname(e.target.value.toLowerCase())} autoCapitalize="none" className={fieldClass} aria-invalid={Boolean(errors.uniqname)} /><FieldError>{errors.uniqname}</FieldError></label>
-    <label className={labelClass}>Year <span className="text-mecg-orange-ink">*</span><select value={values.classYear} onChange={(e) => setters.setClassYear(e.target.value)} className={fieldClass} aria-invalid={Boolean(errors.classYear)}><option value="">Select year</option>{CLASS_YEARS.map((year) => <option key={year} value={year}>{CLASS_YEAR_LABELS[year]}</option>)}</select><FieldError>{errors.classYear}</FieldError></label>
-    <label className={labelClass}>College <span className="text-mecg-orange-ink">*</span><select value={values.college} onChange={(e) => setters.setCollege(e.target.value)} className={fieldClass} aria-invalid={Boolean(errors.college)}><option value="">Select college</option>{COLLEGES.map((item) => <option key={item}>{item}</option>)}</select><FieldError>{errors.college}</FieldError></label>
-    <label className={labelClass}>Major <span className="text-mecg-orange-ink">*</span><input value={values.major} onChange={(e) => setters.setMajor(e.target.value)} className={fieldClass} aria-invalid={Boolean(errors.major)} /><FieldError>{errors.major}</FieldError></label>
-    <label className={labelClass}>Expected graduation <span className="font-normal text-mecg-navy/40">Optional</span><input value={values.gradTerm} onChange={(e) => setters.setGradTerm(e.target.value)} placeholder="Winter 2028" className={fieldClass} /></label>
+    <label htmlFor="phone" className={labelClass}>Phone <span className="font-normal text-mecg-navy/60">Optional</span><input id="phone" value={values.phone} onChange={(e) => setters.setPhone(e.target.value)} type="tel" autoComplete="tel" className={fieldClass} /></label>
+    <label htmlFor="uniqname" className={labelClass}>Uniqname <span className="text-mecg-orange-ink">(required)</span><input id="uniqname" value={values.uniqname} onChange={(e) => setters.setUniqname(e.target.value.toLowerCase())} autoCapitalize="none" required className={fieldClass} aria-invalid={Boolean(errors.uniqname)} aria-describedby={describedBy("uniqname")} /><FieldError id="uniqname-error">{errors.uniqname}</FieldError></label>
+    <label htmlFor="classYear" className={labelClass}>Year <span className="text-mecg-orange-ink">(required)</span><select id="classYear" value={values.classYear} onChange={(e) => setters.setClassYear(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.classYear)} aria-describedby={describedBy("classYear")}><option value="">Select year</option>{CLASS_YEARS.map((year) => <option key={year} value={year}>{CLASS_YEAR_LABELS[year]}</option>)}</select><FieldError id="classYear-error">{errors.classYear}</FieldError></label>
+    <label htmlFor="college" className={labelClass}>College <span className="text-mecg-orange-ink">(required)</span><select id="college" value={values.college} onChange={(e) => setters.setCollege(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.college)} aria-describedby={describedBy("college")}><option value="">Select college</option>{COLLEGES.map((item) => <option key={item}>{item}</option>)}</select><FieldError id="college-error">{errors.college}</FieldError></label>
+    <label htmlFor="major" className={labelClass}>Major <span className="text-mecg-orange-ink">(required)</span><input id="major" value={values.major} onChange={(e) => setters.setMajor(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.major)} aria-describedby={describedBy("major")} /><FieldError id="major-error">{errors.major}</FieldError></label>
+    <label htmlFor="gradTerm" className={labelClass}>Expected graduation <span className="font-normal text-mecg-navy/60">Optional</span><input id="gradTerm" value={values.gradTerm} onChange={(e) => setters.setGradTerm(e.target.value)} placeholder="Winter 2028" className={fieldClass} /></label>
   </div></>;
 }
 
 function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: IntakeQuestion[]; answers: Record<string, string>; setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>; errors: Record<string, string> }) {
-  return <><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">Tell us how you think.</h2><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/55">Be specific about your own actions. We care more about judgment and reflection than polished business language.</p><div className="mt-8 space-y-8">{questions.map((question, index) => { const value = answers[question.key] ?? ""; return <label key={question.key} className="block"><span className="flex gap-3"><span className="font-mono text-xs text-mecg-orange-ink">0{index + 1}</span><span className="text-lg font-semibold leading-7">{question.prompt}</span></span><textarea value={value} onChange={(e) => setAnswers((current) => ({ ...current, [question.key]: e.target.value }))} maxLength={2400} rows={7} className={`${fieldClass} min-h-44 py-4 leading-7`} aria-invalid={Boolean(errors[question.key])} /><span className="mt-2 flex justify-between text-xs text-mecg-navy/45"><span>{guidanceFor(question.key)}</span><span className="tabular-nums">{wordCount(value)} words</span></span><FieldError>{errors[question.key]}</FieldError></label>; })}</div></>;
+  return <><StepHeading>Tell us how you think.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Be specific about your own actions. We care more about judgment and reflection than polished business language.</p><div className="mt-6 space-y-6">{questions.map((question, index) => {
+    const value = answers[question.key] ?? "";
+    const id = answerId(question.key);
+    const guidanceId = `${id}-guidance`;
+    const errorId = `${id}-error`;
+    const describedBy = errors[question.key] ? `${guidanceId} ${errorId}` : guidanceId;
+    const common = { id, value, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setAnswers((current) => ({ ...current, [question.key]: event.target.value })), required: question.required, "aria-invalid": Boolean(errors[question.key]), "aria-describedby": describedBy };
+    let control: React.ReactNode;
+    if (question.inputType === "short_text") control = <input {...common} type="text" maxLength={2400} className={fieldClass} />;
+    else if (question.inputType === "url") control = <input {...common} type="url" maxLength={2400} className={fieldClass} />;
+    else if (question.inputType === "select") control = <select {...common} className={fieldClass}><option value="">Select an option</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
+    else control = <textarea {...common} maxLength={2400} rows={5} className={`${fieldClass} min-h-32 py-3 leading-6`} />;
+    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="font-mono text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-mecg-navy/65"><span>{guidanceFor(question.key)}</span><span className="tabular-nums">{wordCount(value)} words · {2400 - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
+  })}</div></>;
 }
 
 function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string }) {
-  return <><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">Add your materials.</h2><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/55">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
-    <label className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/8"><input type="file" accept="application/pdf" disabled={uploadState.kind === "uploading"} className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading and checking resume..." : resumePath ? "Replace your resume" : "Upload your resume"}</span><span className="mt-1 block text-sm text-mecg-navy/50">PDF only, up to 10 MB and 20 pages</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
-    {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/55" role="status">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError>{uploadState.message}</FieldError>}<FieldError>{error}</FieldError>
-    <label className={labelClass}>LinkedIn profile <span className="font-normal text-mecg-navy/40">Optional</span><input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} type="url" placeholder="https://linkedin.com/in/..." className={fieldClass} /></label>
-    <label className={labelClass}>Scheduling or access needs <span className="font-normal text-mecg-navy/40">Optional and never scored</span><textarea value={accessibilityNotes} onChange={(e) => setAccessibilityNotes(e.target.value)} rows={4} className={`${fieldClass} py-3`} /><span className="mt-2 block text-xs font-normal leading-5 text-mecg-navy/45">Only the operations team uses this information to arrange an accessible recruitment process.</span></label>
+  const resumeDescription = ["resume-guidance", error ? "resume-error" : "", uploadState.kind === "error" ? "resume-upload-error" : ""].filter(Boolean).join(" ");
+  return <><StepHeading>Add your materials.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
+    <label htmlFor="resume" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-orange"><input id="resume" type="file" accept="application/pdf" required={!resumePath} disabled={uploadState.kind === "uploading"} className="sr-only" aria-invalid={Boolean(error || uploadState.kind === "error")} aria-describedby={resumeDescription} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume (required)"}</span><span id="resume-guidance" className="mt-1 block text-sm text-mecg-navy/65">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
+    {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/65" role="status" aria-live="polite">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status" aria-live="polite">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError id="resume-upload-error">{uploadState.message}</FieldError>}<FieldError id="resume-error">{error}</FieldError>
+    <label htmlFor="linkedinUrl" className={labelClass}>LinkedIn profile <span className="font-normal text-mecg-navy/60">Optional</span><input id="linkedinUrl" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} type="url" placeholder="https://linkedin.com/in/..." className={fieldClass} /></label>
+    <label htmlFor="accessibilityNotes" className={labelClass}>Scheduling or access needs <span className="font-normal text-mecg-navy/60">Optional and never scored</span><textarea id="accessibilityNotes" value={accessibilityNotes} onChange={(e) => setAccessibilityNotes(e.target.value)} rows={4} className={`${fieldClass} py-3`} aria-describedby="accessibilityNotes-guidance" /><span id="accessibilityNotes-guidance" className="mt-2 block text-xs font-normal leading-5 text-mecg-navy/65">Only the operations team uses this information to arrange an accessible recruitment process.</span></label>
   </div></>;
 }
 
-function ReviewStep({ values, questions, answers, resumeLabel, consent, setConsent, submitState, submit, setStep }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; consent: boolean; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; setStep: (step: Step) => void }) {
-  return <><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em]">Review before you submit.</h2><p className="mt-3 text-pretty leading-7 text-mecg-navy/55">You will not be able to edit this application after submission.</p><div className="mt-8 space-y-4">
-    <ReviewCard title="About you" edit={() => setStep("details")}><p>{values.name}{values.preferredName ? ` · Goes by ${values.preferredName}` : ""}</p><p className="mt-1 text-mecg-navy/50">{values.email} · {values.uniqname} · {values.major}, {values.college}</p></ReviewCard>
-    <ReviewCard title="Written responses" edit={() => setStep("responses")}><ul className="space-y-3">{questions.map((question) => <li key={question.key}><p className="font-medium">{question.prompt}</p><p className="mt-1 line-clamp-2 text-mecg-navy/55">{answers[question.key]}</p></li>)}</ul></ReviewCard>
-    <ReviewCard title="Materials" edit={() => setStep("materials")}><p>✓ {resumeLabel}</p>{values.linkedinUrl && <p className="mt-1 text-mecg-navy/50">LinkedIn included</p>}</ReviewCard>
-  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How blind review works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/60">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
+function ReviewStep({ values, questions, answers, resumeLabel, consent, setConsent, submitState, submit, changeStep, uploading }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; consent: boolean; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; changeStep: (step: Step) => void; uploading: boolean }) {
+  const classYearLabel = CLASS_YEARS.includes(values.classYear as (typeof CLASS_YEARS)[number]) ? CLASS_YEAR_LABELS[values.classYear as (typeof CLASS_YEARS)[number]] : values.classYear;
+  return <><StepHeading>Review before you submit.</StepHeading><p className="mt-3 text-pretty leading-7 text-mecg-navy/60">You will not be able to edit this application after submission.</p><div className="mt-8 space-y-4">
+    <ReviewCard title="About you" edit={() => changeStep("details")}><dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2"><ReviewItem label="Full name" value={values.name} /><ReviewItem label="Preferred name" value={values.preferredName} /><ReviewItem label="Email" value={values.email} /><ReviewItem label="Phone" value={values.phone} /><ReviewItem label="Uniqname" value={values.uniqname} /><ReviewItem label="Class year" value={classYearLabel} /><ReviewItem label="College" value={values.college} /><ReviewItem label="Major" value={values.major} /><ReviewItem label="Expected graduation" value={values.gradTerm} /></dl></ReviewCard>
+    <ReviewCard title="Written responses" edit={() => changeStep("responses")}><ul className="space-y-4">{questions.map((question) => <li key={question.key}><p className="font-medium">{question.prompt}</p><p className="mt-1 whitespace-pre-wrap break-words text-mecg-navy/70">{answers[question.key] || "Not provided"}</p></li>)}</ul></ReviewCard>
+    <ReviewCard title="Materials and access" edit={() => changeStep("materials")}><dl className="space-y-3"><ReviewItem label="Resume" value={resumeLabel} /><ReviewItem label="LinkedIn URL" value={values.linkedinUrl} /><ReviewItem label="Scheduling or access needs" value={values.accessibilityNotes} preserveWhitespace /></dl></ReviewCard>
+  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How blind review works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
   <label className="mt-6 flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-mecg-orange" /><span className="text-sm leading-6">I reviewed my application and consent to MECG using this information to administer the current recruitment cycle.</span></label>
-  {submitState.kind === "error" && <div className="mt-4"><FieldError>{submitState.message}</FieldError></div>}
-  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => setStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/60">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting"} className="min-h-12 rounded-xl bg-mecg-orange px-7 font-semibold text-mecg-navy transition-transform active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-45">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
+  {submitState.kind === "error" && <div className="mt-4"><FieldError id="submit-error">{submitState.message}</FieldError></div>}
+  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} className="min-h-12 rounded-xl bg-mecg-orange px-7 font-semibold text-mecg-navy transition-transform active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-45">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
 }
 
-function ReviewCard({ title, edit, children }: { title: string; edit: () => void; children: React.ReactNode }) { return <section className="rounded-2xl bg-mecg-navy/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold">{title}</h3><button type="button" onClick={edit} className="min-h-10 px-2 text-sm font-semibold text-mecg-blue underline underline-offset-2">Edit</button></div><div className="mt-3 text-sm leading-6">{children}</div></section>; }
+function ReviewItem({ label, value, preserveWhitespace = false }: { label: string; value: string; preserveWhitespace?: boolean }) {
+  return <div><dt className="font-medium text-mecg-navy">{label}</dt><dd className={`mt-0.5 break-words text-mecg-navy/70 ${preserveWhitespace ? "whitespace-pre-wrap" : ""}`}>{value || "Not provided"}</dd></div>;
+}
+
+function ReviewCard({ title, edit, children }: { title: string; edit: () => void; children: React.ReactNode }) {
+  return <section className="rounded-2xl bg-mecg-navy/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold">{title}</h3><button type="button" onClick={edit} className="min-h-10 px-2 text-sm font-semibold text-mecg-blue underline underline-offset-2">Edit</button></div><div className="mt-3 text-sm leading-6">{children}</div></section>;
+}

@@ -20,8 +20,14 @@ export async function POST(req: NextRequest) {
     email: user.email,
     password: currentPassword,
   });
-  if (verifyError) return NextResponse.json({ error: "Current password is incorrect" }, { status: 403 });
+  if (verifyError) {
+    console.error("password change failed", verifyError);
+    return NextResponse.json({ error: "Current password is incorrect" }, { status: 403 });
+  }
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) return NextResponse.json({ error: "Password could not be updated" }, { status: 400 });
+  if (error) {
+    console.error("password change failed", error);
+    return NextResponse.json({ error: "Password could not be updated" }, { status: 400 });
+  }
   return NextResponse.json({ ok: true });
 }

@@ -15,12 +15,34 @@ const ROUND_TRANSITIONS: Record<string, string[]> = {
   FINALIZED: [],
 };
 
+const APPLICATION_TRANSITIONS: Record<string, string[]> = {
+  DRAFT: ["SUBMITTED"],
+  SUBMITTED: ["NEEDS_INFO", "ELIGIBLE"],
+  NEEDS_INFO: ["SUBMITTED", "ELIGIBLE"],
+  ELIGIBLE: ["INVITED"],
+  INVITED: ["IN_PROCESS"],
+  IN_PROCESS: ["FINAL_REVIEW"],
+  FINAL_REVIEW: [],
+  OFFERED: [],
+  WAITLISTED: [],
+  REJECTED: [],
+  WITHDRAWN: [],
+};
+
 export function canTransitionCycle(from: string, to: string) {
   return from === to || (CYCLE_TRANSITIONS[from]?.includes(to) ?? false);
 }
 
 export function canTransitionRound(from: string, to: string) {
   return from === to || (ROUND_TRANSITIONS[from]?.includes(to) ?? false);
+}
+
+export function canTransitionApplication(from: string, to: string) {
+  return from === to || (APPLICATION_TRANSITIONS[from]?.includes(to) ?? false);
+}
+
+export function legalManualApplicationStatuses(status: string) {
+  return [status, ...(APPLICATION_TRANSITIONS[status] ?? [])];
 }
 
 export const CLASS_YEARS = ["FIRST_YEAR", "SOPHOMORE", "JUNIOR", "SENIOR", "GRADUATE"] as const;
@@ -69,6 +91,14 @@ export const PIPELINE_STATUSES = [
   "WITHDRAWN",
 ] as const;
 
+export const DECIDED_PIPELINE_STATUSES = new Set(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
+
+const ANSWER_KEY = /^[a-z][a-z0-9_]*$/;
+const MAX_ANSWER_KEY_LENGTH = 80;
+const MAX_ANSWERS = 50;
+const MAX_ANSWER_LENGTH = 8000;
+const MAX_ANSWERS_LENGTH = 40000;
+
 export function normalizePersonInput(nameValue: unknown, contactValue: unknown) {
   const name = typeof nameValue === "string" ? nameValue.trim() : "";
   const contact = typeof contactValue === "string" ? contactValue.trim().toLowerCase() : "";
@@ -85,8 +115,47 @@ function optionalText(value: unknown, max: number) {
   return text;
 }
 
+function validUrl(value: string | null) {
+  if (!value) return true;
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+function parseAnswers(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length > MAX_ANSWERS) return null;
+  let total = 0;
+  const answers: Record<string, string> = {};
+  for (const [key, value] of entries) {
+    if (key.length > MAX_ANSWER_KEY_LENGTH || !ANSWER_KEY.test(key) || typeof value !== "string") return null;
+    const answer = value.trim();
+    total += answer.length;
+    if (answer.length > MAX_ANSWER_LENGTH || total > MAX_ANSWERS_LENGTH) return null;
+    answers[key] = answer;
+  }
+  return answers;
+}
+
+function restoreAnswers(raw: unknown) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const answers: Record<string, string> = {};
+  let total = 0;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (Object.keys(answers).length >= MAX_ANSWERS || key.length > MAX_ANSWER_KEY_LENGTH || !ANSWER_KEY.test(key) || typeof value !== "string") continue;
+    const answer = value.slice(0, Math.min(MAX_ANSWER_LENGTH, MAX_ANSWERS_LENGTH - total));
+    answers[key] = answer;
+    total += answer.length;
+    if (total === MAX_ANSWERS_LENGTH) break;
+  }
+  return answers;
+}
+
 export function parseApplicationIntake(body: unknown, email: string) {
-  if (!body || typeof body !== "object") return null;
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   const input = body as Record<string, unknown>;
   const person = normalizePersonInput(input.name, email);
   if (!person || input.consent !== true) return null;
@@ -100,23 +169,11 @@ export function parseApplicationIntake(body: unknown, email: string) {
   const gradTerm = optionalText(input.gradTerm, 40);
   const accessibilityNotes = optionalText(input.accessibilityNotes, 2000);
   if ([preferredName, phone, major, linkedinUrl, resumeStoragePath, uniqname, college, gradTerm, accessibilityNotes].includes(undefined)) return null;
-  const classYear =
-    input.classYear == null || input.classYear === ""
-      ? null
-      : CLASS_YEARS.includes(input.classYear as ClassYear)
-        ? (input.classYear as ClassYear)
-        : undefined;
-  if (classYear === undefined) return null;
-  if (!resumeStoragePath) return null;
-  const answers =
-    input.answers && typeof input.answers === "object" && !Array.isArray(input.answers)
-      ? Object.fromEntries(
-          Object.entries(input.answers as Record<string, unknown>).map(([key, value]) => [
-            key,
-            typeof value === "string" ? value.trim() : "",
-          ]),
-        )
-      : {};
+  if (!major || !uniqname || !college || !COLLEGES.includes(college as (typeof COLLEGES)[number]) || !validUrl(linkedinUrl ?? null)) return null;
+  const classYear = CLASS_YEARS.includes(input.classYear as ClassYear) ? (input.classYear as ClassYear) : undefined;
+  if (classYear === undefined || !resumeStoragePath) return null;
+  const answers = parseAnswers(input.answers);
+  if (!answers) return null;
   return {
     name: person.name,
     contact: person.contact,
@@ -157,14 +214,6 @@ export function parseApplicationDraft(value: unknown): ApplicationDraft | null {
     const field = input[key];
     return typeof field === "string" ? field.slice(0, max) : "";
   };
-  const answers =
-    input.answers && typeof input.answers === "object" && !Array.isArray(input.answers)
-      ? Object.fromEntries(
-          Object.entries(input.answers as Record<string, unknown>)
-            .filter((entry): entry is [string, string] => typeof entry[1] === "string")
-            .map(([key, answer]) => [key, answer.slice(0, 8000)]),
-        )
-      : {};
 
   return {
     name: text("name", 120),
@@ -172,12 +221,12 @@ export function parseApplicationDraft(value: unknown): ApplicationDraft | null {
     phone: text("phone", 32),
     classYear: CLASS_YEARS.includes(input.classYear as ClassYear) ? String(input.classYear) : "",
     major: text("major", 120),
-    college: text("college", 80),
+    college: COLLEGES.includes(input.college as (typeof COLLEGES)[number]) ? String(input.college) : "",
     uniqname: text("uniqname", 16),
     gradTerm: text("gradTerm", 40),
     accessibilityNotes: text("accessibilityNotes", 2000),
     linkedinUrl: text("linkedinUrl", 400),
-    answers,
+    answers: restoreAnswers(input.answers),
     resumeStoragePath: text("resumeStoragePath", 240),
   };
 }

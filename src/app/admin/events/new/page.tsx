@@ -1,9 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { EVENT_KINDS } from "@/lib/workflow";
+import FormField from "@/components/form-field";
+
+function Select({
+  label,
+  name,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block text-sm font-medium">
+      {label}
+      <div className="relative mt-2">
+        <select
+          name={name}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="min-h-12 w-full appearance-none rounded-xl bg-mecg-navy/[0.035] px-4 pr-10 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        >
+          {children}
+        </select>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-mecg-navy/40"
+        >
+          <path d="M5 8l5 5 5-5" />
+        </svg>
+      </div>
+    </label>
+  );
+}
 
 export default function NewEventPage() {
   const router = useRouter();
@@ -12,6 +54,7 @@ export default function NewEventPage() {
   const [visibility, setVisibility] = useState("PUBLIC");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
+  const [endsAt, setEndsAt] = useState("");
   const [opensAt, setOpensAt] = useState("");
   const [closesAt, setClosesAt] = useState("");
   const [error, setError] = useState("");
@@ -28,6 +71,7 @@ export default function NewEventPage() {
         body: JSON.stringify({
           name,
           date,
+          endsAt,
           checkinOpensAt: opensAt,
           checkinClosesAt: closesAt,
           kind,
@@ -49,78 +93,36 @@ export default function NewEventPage() {
   }
 
   return (
-    <main className="flex-1 p-8 max-w-md mx-auto w-full flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">New event</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm">
-          Name
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Kind
-          <select value={kind} onChange={(e) => setKind(e.target.value)} className="border rounded px-3 py-2">
+    <main className="mx-auto flex w-full max-w-xl flex-col gap-6 p-6 sm:p-10">
+      <header>
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Attendance event</p>
+        <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">New event</h1>
+      </header>
+
+      <form onSubmit={handleSubmit} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+        <div className="flex flex-col gap-2.5">
+          <FormField label="Name" name="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} />
+          <Select label="Kind" name="kind" value={kind} onChange={setKind}>
             {EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Visibility
-          <select value={visibility} onChange={(e) => setVisibility(e.target.value)} className="border rounded px-3 py-2">
+          </Select>
+          <Select label="Visibility" name="visibility" value={visibility} onChange={setVisibility}>
             <option value="PUBLIC">Public (shows on /join)</option>
             <option value="INVITE">Invite only</option>
             <option value="INTERNAL">Internal / check-in only</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Location
-          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="border rounded px-3 py-2" />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Date
-          <input
-            type="datetime-local"
-            required
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </label>
-        <p className="rounded bg-gray-50 p-3 text-sm text-gray-600">
-          Attendance is tracked for operations and does not affect applicant rankings.
-        </p>
-        <label className="flex flex-col gap-1 text-sm">
-          Check-in opens at
-          <input
-            type="datetime-local"
-            required
-            value={opensAt}
-            onChange={(e) => setOpensAt(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Check-in closes at
-          <input
-            type="datetime-local"
-            required
-            value={closesAt}
-            onChange={(e) => setClosesAt(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </label>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="bg-black text-white rounded px-3 py-2 disabled:opacity-50"
-        >
-          {submitting ? "Creating..." : "Create event"}
-        </button>
+          </Select>
+          <FormField label="Location" name="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)} />
+          <FormField label="Date" name="date" type="datetime-local" required value={date} onChange={(e) => setDate(e.target.value)} />
+          <FormField label="Event ends at" name="endsAt" type="datetime-local" required value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+          <p className="rounded-xl bg-mecg-navy/[0.035] p-3 text-sm text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            Attendance is tracked for operations and does not affect applicant rankings.
+          </p>
+          <FormField label="Check-in opens at" name="opensAt" type="datetime-local" required value={opensAt} onChange={(e) => setOpensAt(e.target.value)} />
+          <FormField label="Check-in closes at" name="closesAt" type="datetime-local" required value={closesAt} onChange={(e) => setClosesAt(e.target.value)} />
+          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+          <button type="submit" disabled={submitting} className="button-primary mt-1 w-full disabled:opacity-50">
+            {submitting ? "Creating..." : "Create event"}
+          </button>
+        </div>
       </form>
     </main>
   );

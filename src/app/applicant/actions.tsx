@@ -1,36 +1,261 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+function replaceWithActionStatus(router: ReturnType<typeof useRouter>, action: "rsvp" | "buddy") {
+  const params = new URLSearchParams(window.location.search);
+  params.set("action", action);
+  router.replace(`/applicant?${params.toString()}`, { scroll: false });
+}
+
+function responseError(body: unknown, fallback: string) {
+  return body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : fallback;
+}
 
 export function SlotButton({ id }: { id: string }) {
   const router = useRouter();
-  return <button className="text-sm underline" onClick={() => void fetch("/api/applicant/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) }).then(() => router.refresh())}>RSVP</button>;
-}
+  const inFlight = useRef(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
-export function BuddyButton({ id }: { id: string }) {
-  const router = useRouter();
-  return <button className="text-sm underline" onClick={() => void fetch("/api/applicant/buddy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) }).then(() => router.refresh())}>Book 20 min</button>;
-}
+  async function rsvp() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch("/api/applicant/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(responseError(body, "Could not RSVP"));
+        return;
+      }
+      replaceWithActionStatus(router, "rsvp");
+    } catch {
+      setError("Could not RSVP");
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
+  }
 
-export function OfferButtons() {
-  const router = useRouter();
   return (
-    <div className="mt-3 flex gap-3">
-      <button className="button-primary" onClick={() => void fetch("/api/applicant/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accept: true }) }).then(() => router.refresh())}>Accept offer</button>
-      <button className="button-secondary" onClick={() => void fetch("/api/applicant/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accept: false }) }).then(() => router.refresh())}>Decline</button>
+    <div className="shrink-0">
+      <button type="button" className="button-secondary text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled={pending} onClick={() => void rsvp()}>
+        {pending ? "Saving…" : "RSVP"}
+      </button>
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </div>
   );
 }
 
-export function SurveyForm() {
+export function BuddyButton({ id }: { id: string }) {
   const router = useRouter();
+  const inFlight = useRef(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function book() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch("/api/applicant/buddy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(responseError(body, "Could not book"));
+        return;
+      }
+      replaceWithActionStatus(router, "buddy");
+    } catch {
+      setError("Could not book");
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
+  }
+
   return (
-    <form className="mt-4 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void fetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ score: Number(data.get("score")), note: data.get("note") }) }).then(() => router.refresh()); }}>
-      <label className="text-sm">Anonymous process rating
-        <select name="score" className="ml-2 rounded border px-2 py-1"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+    <div className="shrink-0">
+      <button type="button" className="button-secondary text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled={pending} onClick={() => void book()}>
+        {pending ? "Saving…" : "Book 20 min"}
+      </button>
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+    </div>
+  );
+}
+
+function initialOfferResponse(initialResponse: "ACCEPTED" | "DECLINED" | null): "accept" | "decline" | null {
+  if (initialResponse === "ACCEPTED") return "accept";
+  if (initialResponse === "DECLINED") return "decline";
+  return null;
+}
+
+export function OfferButtons({ applicationId, initialResponse }: { applicationId: string; initialResponse: "ACCEPTED" | "DECLINED" | null }) {
+  const router = useRouter();
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const acceptRef = useRef<HTMLButtonElement>(null);
+  const declineRef = useRef<HTMLButtonElement>(null);
+  const initiatorRef = useRef<HTMLButtonElement | null>(null);
+  const inFlight = useRef(false);
+  const [selected, setSelected] = useState<"accept" | "decline" | null>(null);
+  const [pending, setPending] = useState(false);
+  const [responded, setResponded] = useState<"accept" | "decline" | null>(initialOfferResponse(initialResponse));
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (selected) headingRef.current?.focus();
+  }, [selected]);
+
+  function choose(action: "accept" | "decline") {
+    initiatorRef.current = action === "accept" ? acceptRef.current : declineRef.current;
+    setSelected(action);
+  }
+
+  function cancel() {
+    const initiator = initiatorRef.current;
+    setSelected(null);
+    setError("");
+    requestAnimationFrame(() => initiator?.focus());
+  }
+
+  async function respond() {
+    if (!selected || inFlight.current) return;
+    inFlight.current = true;
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch("/api/applicant/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, accept: selected === "accept" }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(responseError(body, "Could not record your response"));
+        return;
+      }
+      setResponded(selected);
+      router.refresh();
+    } catch {
+      setError("Could not record your response");
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
+  }
+
+  if (responded === "accept") {
+    return (
+      <div className="mt-4 rounded-xl bg-mecg-orange/10 p-4 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.35)]">
+        <p className="text-sm font-semibold text-mecg-navy">Welcome to MECG.</p>
+        <p className="mt-1 text-sm leading-6 text-mecg-navy/75">{"We've recorded your acceptance. Onboarding details will follow from the Board."}</p>
+      </div>
+    );
+  }
+  if (responded === "decline") {
+    return (
+      <div className="mt-4 rounded-xl bg-mecg-navy/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <p className="text-sm leading-6 text-mecg-navy/75">{"We've recorded your decision to decline. Thank you for considering MECG."}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3">
+      {selected ? (
+        <div className="rounded-xl bg-mecg-navy/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+          <h3 ref={headingRef} tabIndex={-1} className="text-base font-semibold outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">
+            Confirm {selected === "accept" ? "acceptance" : "decline"}
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-mecg-navy/75">
+            You selected <strong>{selected === "accept" ? "Accept offer" : "Decline offer"}</strong>. This response cannot be changed in the portal.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button type="button" className={selected === "accept" ? "button-primary" : "button-secondary"} disabled={pending} onClick={() => void respond()}>
+              {pending ? "Saving…" : "Confirm"}
+            </button>
+            <button type="button" className="button-secondary" disabled={pending} onClick={cancel}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3">
+          <button ref={acceptRef} type="button" className="button-primary" onClick={() => choose("accept")}>Accept offer</button>
+          <button ref={declineRef} type="button" className="button-secondary" onClick={() => choose("decline")}>Decline</button>
+        </div>
+      )}
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+    </div>
+  );
+}
+
+const SCORE_OPTIONS = [
+  { value: 5, label: "5 · Excellent" },
+  { value: 4, label: "4 · Good" },
+  { value: 3, label: "3 · Fair" },
+  { value: 2, label: "2 · Poor" },
+  { value: 1, label: "1 · Very poor" },
+];
+
+export function SurveyForm({ applicationId }: { applicationId: string }) {
+  const router = useRouter();
+  const inFlight = useRef(false);
+  const [pending, setPending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setPending(true);
+    setError("");
+    const data = new FormData(event.currentTarget);
+    try {
+      const response = await fetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, score: Number(data.get("score")), note: data.get("note") }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(responseError(body, "Could not send feedback"));
+        return;
+      }
+      setSent(true);
+      router.refresh();
+    } catch {
+      setError("Could not send feedback");
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
+  }
+
+  if (sent) {
+    return <p className="mt-4 text-sm text-mecg-navy/70">{"Thanks for the feedback. It's anonymous and goes straight to the Board."}</p>;
+  }
+
+  return (
+    <form className="mt-4 flex flex-col gap-3" onSubmit={submit}>
+      <label className="block text-sm font-medium">
+        Anonymous process rating
+        <select
+          name="score"
+          defaultValue={5}
+          className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        >
+          {SCORE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
       </label>
-      <textarea name="note" placeholder="What should MECG change?" className="rounded border p-2 text-sm" />
-      <button className="button-secondary w-fit">Send feedback</button>
+      <label className="block text-sm font-medium">
+        What should MECG change?
+        <textarea
+          name="note"
+          placeholder="Optional"
+          className="mt-2 min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-4 text-sm font-normal shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        />
+      </label>
+      <button className="button-secondary w-fit disabled:cursor-not-allowed disabled:opacity-50" disabled={pending}>
+        {pending ? "Sending…" : "Send feedback"}
+      </button>
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </form>
   );
 }

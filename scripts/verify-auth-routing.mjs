@@ -6,9 +6,10 @@ const root = resolve(import.meta.dirname, "..");
 const source = readFileSync(resolve(root, ".env.local"), "utf8");
 const read = (name) => source.match(new RegExp(`^${name}=["']?([^\\n"']+)`, "m"))?.[1]?.trim();
 const supabaseUrl = read("NEXT_PUBLIC_SUPABASE_URL");
+const publicKey = read("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 const serviceKey = read("SUPABASE_SERVICE_ROLE_KEY");
 const baseUrl = (process.argv[2] ?? process.env.AUTH_TEST_BASE_URL ?? "http://127.0.0.1:3100").replace(/\/$/u, "");
-if (!supabaseUrl || !serviceKey) throw new Error("Supabase environment is incomplete");
+if (!supabaseUrl || !publicKey || !serviceKey) throw new Error("Supabase environment is incomplete");
 
 const admin = createClient(supabaseUrl, serviceKey, {
   db: { schema: "rush" },
@@ -47,7 +48,18 @@ async function login(testCase) {
   });
   const body = await response.json().catch(() => null);
   if (response.status !== 200 || body?.destination !== testCase.destination) {
-    throw new Error(`${testCase.label} routed to ${body?.destination ?? response.status}, expected ${testCase.destination}`);
+    const diagnostic = createClient(supabaseUrl, publicKey, {
+      db: { schema: "rush" },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { error: signInError } = await diagnostic.auth.signInWithPassword({ email: testCase.email, password });
+    const results = signInError ? { signIn: signInError } : Object.fromEntries(await Promise.all([
+      ["profiles", diagnostic.from("profiles").select("active").eq("id", testCase.userId).maybeSingle()],
+      ["memberships", diagnostic.from("memberships").select("role, rush_cycles!inner(status)").eq("user_id", testCase.userId).eq("active", true)],
+      ["is_applicant", diagnostic.rpc("is_applicant")],
+    ].map(async ([label, query]) => [label, await query])));
+    await diagnostic.auth.signOut();
+    throw new Error(`${testCase.label} routed to ${body?.destination ?? response.status}, expected ${testCase.destination}; queries=${JSON.stringify(results)}`);
   }
   const cookie = cookieHeader(response);
   if (!cookie) throw new Error(`${testCase.label} login did not set a session cookie`);
