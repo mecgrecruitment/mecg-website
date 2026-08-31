@@ -6,11 +6,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const NAV_LINKS = [
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/team", label: "Team" },
-  { href: "/join", label: "Join" },
-  { href: "/contact", label: "Contact" },
+  { href: "/team", label: "Our Team" },
+  { href: "/work", label: "Client Services" },
+  { href: "/join", label: "Join Our Team" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 export default function SiteHeader() {
@@ -18,12 +17,12 @@ export default function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-mecg-navy/95 text-white backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-mecg-navy/95 text-white shadow-[0_8px_30px_rgba(7,13,31,0.16)] backdrop-blur">
       <div className="mx-auto flex min-h-18 max-w-[90rem] items-center justify-between px-6 sm:px-10 xl:px-24">
         <Link href="/home" className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange" aria-label="MECG home">
           <Image src="/logos/mecg-white.svg" alt="MECG" width={168} height={44} priority className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
         </Link>
-        <nav aria-label="Main navigation" className="hidden items-center gap-7 text-sm font-medium md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-6 text-sm font-medium md:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
@@ -34,8 +33,8 @@ export default function SiteHeader() {
               {label}
             </Link>
           ))}
-          <Link href="/login" className="border-b border-transparent py-1 text-white/60 transition-colors hover:text-white">Log in</Link>
-          <Link href="/apply" className="button-primary">Apply</Link>
+          <Link href="/login" className="border-b border-transparent py-1 text-white/60 transition-colors hover:text-white">Member log in</Link>
+          <Link href="/apply" className="button-primary">Apply now</Link>
         </nav>
         <button
           type="button"
@@ -61,8 +60,8 @@ export default function SiteHeader() {
                 {label}
               </Link>
             ))}
-            <Link href="/login" onClick={() => setOpen(false)} className="border-b border-white/10 py-4 text-lg text-white">Log in</Link>
-            <Link href="/apply" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Apply</Link>
+            <Link href="/login" onClick={() => setOpen(false)} className="border-b border-white/10 py-4 text-lg text-white">Member log in</Link>
+            <Link href="/apply" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Apply now</Link>
           </div>
         </nav>
       )}

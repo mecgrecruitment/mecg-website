@@ -1,82 +1,144 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MarketingSection from "@/components/marketing-section";
 import PageIntro from "@/components/page-intro";
-import SectionLabel from "@/components/section-label";
+import PhotoCarousel from "@/components/photo-carousel";
+import SectionHeading from "@/components/section-heading";
+import { JOIN_FAQS, JOIN_REASONS } from "@/lib/join-content";
 import { createClient } from "@/lib/supabase/server";
-import { EVALUATION_TRAITS, JOIN_FAQS } from "@/lib/join-content";
 import InterestForm from "./interest-form";
 
 export const metadata: Metadata = {
-  title: "Join MECG",
-  description: "Learn what MECG membership involves, who can apply, and how the application process works.",
+  title: "Join Our Team",
+  description: "See the MECG recruitment timeline and learn why students join the team.",
+  alternates: { canonical: "/join" },
 };
 
-const REASONS = [
-  ["Work on a real question", "Members learn through a semester-long client project. The work has a deadline, an audience, and consequences outside a classroom."],
-  ["Get better at the basics", "Education sessions cover research, analysis, structured thinking, and communication. Project teams give you somewhere to use them."],
-  ["Know people outside your major", "MECG is open to every major. Teams work better when technical, business, design, and social perspectives share the table."],
-];
+type Recruitment = {
+  cycle?: { name?: string; status?: string; opensAt?: string | null; closesAt?: string | null } | null;
+  events?: { id: string; name: string; kind: string; startsAt: string; endsAt?: string | null; location?: string | null; visibility: string }[];
+};
 
-const EXPECTATIONS = [
-  ["Show up prepared", "Client work depends on teammates meeting deadlines and bringing usable work to each meeting."],
-  ["Ask better questions", "Members are expected to surface uncertainty, listen carefully, and revise their first answer."],
-  ["Share the work", "Project teams divide research, analysis, client communication, and final delivery across the group."],
+const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "America/Detroit",
+  timeZoneName: "short",
+});
+
+const TIME_FORMAT = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "America/Detroit",
+  timeZoneName: "short",
+});
+
+const JOIN_PHOTOS = [
+  { src: "/mecg/members-together.jpg", alt: "MECG members spending time together" },
+  { src: "/mecg/members-outdoors.jpg", alt: "MECG members together outdoors" },
+  { src: "/mecg/members-in-chicago.jpg", alt: "MECG members during a visit to Chicago" },
+  { src: "/mecg/members-formal.jpg", alt: "MECG members at a formal event" },
 ] as const;
 
-const RECRUITMENT_STEPS = [
-  ["01", "Apply", "Share what you want to learn and how you work. Drafts save until you submit."],
-  ["02", "Meet members", "Open mixers, mass meeting, and office hours. Attendance is never a score."],
-  ["03", "Speed Dating", "Evaluated, assigned conversations. Not the same as the open mixer."],
-  ["04", "Group Case", "Team problem. We score individual behavior, not the group's final answer."],
-] as const;
+function formatDate(value: string) {
+  return DATE_FORMAT.format(new Date(value));
+}
+
+function formatEventTime(startsAt: string, endsAt?: string | null) {
+  const start = formatDate(startsAt);
+  return endsAt ? `${start} to ${TIME_FORMAT.format(new Date(endsAt))}` : start;
+}
+
+function cycleStatus(cycle: NonNullable<Recruitment["cycle"]>) {
+  if (cycle.status === "OPEN") return { label: "Applications are open", detail: cycle.closesAt ? `Apply by ${formatDate(cycle.closesAt)}.` : "Apply now." };
+  if (cycle.status === "IN_PROCESS") return { label: "Selection is in progress", detail: "Current applicants can find invitations and updates on their status page." };
+  return { label: "Recruitment is being scheduled", detail: cycle.opensAt ? `Applications are expected to open ${formatDate(cycle.opensAt)}.` : "Join the interest list for published dates." };
+}
 
 export default async function JoinPage() {
   const supabase = await createClient();
   const { data } = await supabase.rpc("public_recruitment");
-  const recruitment = data && typeof data === "object" ? data as {
-    cycle?: { name?: string; status?: string; closesAt?: string | null } | null;
-    events?: { id: string; name: string; kind: string; startsAt: string; endsAt?: string | null; location?: string | null; visibility: string }[];
-  } : { cycle: null, events: [] };
+  const recruitment = data && typeof data === "object" ? data as Recruitment : { cycle: null, events: [] };
   const events = recruitment.events ?? [];
+  const status = recruitment.cycle ? cycleStatus(recruitment.cycle) : null;
+  const showInterestForm = recruitment.cycle?.status !== "OPEN";
 
   return (
     <main className="bg-white text-mecg-navy">
-      <PageIntro number="04" label="Prospective members" title="You can learn this work." copy="You do not need consulting experience or a specific major. MECG looks for people who are curious, dependable, and willing to improve in public." />
-      {recruitment.cycle && (
-        <section className="px-6 pb-4">
-          <div className="mx-auto max-w-6xl bg-mecg-navy px-6 py-5 text-white outline outline-1 -outline-offset-1 outline-white/10">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange">{recruitment.cycle.name} · {recruitment.cycle.status}</p>
-            <p className="mt-2 text-sm text-white/70">{recruitment.cycle.closesAt ? `Applications close ${new Date(recruitment.cycle.closesAt).toLocaleString()}` : "Dates live on this page as the Board publishes events."}</p>
+      <PageIntro title="Join Our Team" copy="MECG is open to University of Michigan students in every major. No previous consulting experience is required.">
+        <Link href="/apply" className="button-primary">Apply now <span aria-hidden="true">→</span></Link>
+      </PageIntro>
+
+      <MarketingSection spacing="compact">
+        <div className="flex flex-col justify-between gap-5 rounded-2xl bg-mecg-blue/[0.08] p-5 sm:p-6 md:flex-row md:items-center">
+          <div>
+            <h2 className="text-2xl font-semibold">{status?.label ?? "No active recruitment cycle"}</h2>
+            <p className="mt-2 leading-7 text-mecg-navy/65">{status?.detail ?? "Join the interest list and we will send the next published dates."}</p>
           </div>
-        </section>
-      )}
-      <section className="px-6 py-16 sm:py-20"><div className="mx-auto max-w-6xl"><SectionLabel number="04.1">Why join</SectionLabel><div className="mt-7 grid gap-5 lg:grid-cols-3">{REASONS.map(([title,copy],index)=><article key={title} className="bg-mecg-blue/[0.1] p-6 outline outline-1 -outline-offset-1 outline-mecg-navy/10"><p className="font-mono text-xs text-mecg-orange-ink">0{index+1}</p><h2 className="mt-5 text-2xl font-semibold tracking-tight">{title}</h2><p className="mt-3 leading-7 text-mecg-navy/60">{copy}</p></article>)}</div></div></section>
-      <section className="bg-mecg-blue/[0.08] px-6 py-16 sm:py-20"><div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.7fr_1.3fr]"><div><SectionLabel number="04.2">What membership asks</SectionLabel><h2 className="mt-5 text-balance text-4xl font-semibold tracking-[-0.04em]">Be someone your team can count on.</h2></div><div className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">{EXPECTATIONS.map(([title, copy], index) => <div key={title} className="grid gap-2 py-5 sm:grid-cols-[2.5rem_10rem_1fr]"><span className="font-mono text-xs text-mecg-orange-ink">0{index + 1}</span><h3 className="font-semibold">{title}</h3><p className="leading-7 text-mecg-navy/60">{copy}</p></div>)}</div></div></section>
-      <section className="px-6 py-16 sm:py-20"><div className="mx-auto max-w-6xl"><SectionLabel number="04.3">This cycle</SectionLabel><h2 className="mt-5 max-w-2xl text-balance text-4xl font-semibold tracking-tight">Know what comes next.</h2><div className="mt-8 grid gap-px overflow-hidden bg-mecg-navy/10 sm:grid-cols-2 lg:grid-cols-4">{RECRUITMENT_STEPS.map(([number, title, copy]) => <article key={number} className="bg-white p-6"><p className="font-mono text-xs text-mecg-orange-ink">{number}</p><h3 className="mt-5 text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-mecg-navy/60">{copy}</p></article>)}</div>
-        <div className="mt-10 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
-          {events.length === 0 && <p className="py-6 text-mecg-navy/60">Public events appear here when the Board publishes them. Meet members mixers are open; evaluated Speed Dating is invite-only.</p>}
-          {events.map((event) => (
-            <article key={event.id} className="grid gap-2 py-5 sm:grid-cols-[11rem_1fr_10rem]">
-              <p className="font-mono text-xs text-mecg-orange-ink">{new Date(event.startsAt).toLocaleString()}</p>
-              <div>
-                <h3 className="font-semibold">{event.name}</h3>
-                <p className="text-sm text-mecg-navy/60">{event.location ?? "Location shared closer to the event"} · {event.kind === "MIXER" ? "Open mixer" : event.kind.replaceAll("_", " ")}</p>
-              </div>
-              <a className="inline-flex min-h-11 items-center gap-1.5 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/60 transition-colors duration-[var(--t-detent)] hover:text-mecg-orange-ink" href={`/api/events/${event.id}/ics`}>Add to calendar <span aria-hidden="true">↓</span></a>
-            </article>
-          ))}
+          {recruitment.cycle?.name ? <p className="shrink-0 text-sm font-semibold text-mecg-blue">{recruitment.cycle.name}</p> : null}
         </div>
-      </div></section>
-      <section className="bg-mecg-navy px-6 py-16 text-white sm:py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionLabel number="04.4" className="text-mecg-orange">Interest list</SectionLabel>
-          <h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.04em]">Get dates before you write essays.</h2>
-          <InterestForm />
-        </div>
-      </section>
-      <section className="px-6 py-16 sm:py-20"><div className="mx-auto max-w-6xl"><SectionLabel number="04.5">How we evaluate</SectionLabel><p className="mt-5 max-w-2xl leading-7 text-mecg-navy/60">We score listening and structure, not frameworks you memorized. Speed Dating and Group Case use published rubrics, and every application is reviewed against the same fixed rubric.</p><div className="mt-8 grid gap-4 sm:grid-cols-2">{EVALUATION_TRAITS.map(([title, copy]) => <article key={title} className="p-5 outline outline-1 -outline-offset-1 outline-mecg-navy/10"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-mecg-navy/60">{copy}</p></article>)}</div></div></section>
-      <section className="bg-mecg-blue/[0.08] px-6 py-16 sm:py-20"><div className="mx-auto grid max-w-6xl gap-9 lg:grid-cols-[0.72fr_1.28fr]"><div><SectionLabel number="04.6">Questions</SectionLabel><h2 className="mt-5 text-balance text-4xl font-semibold tracking-[-0.04em]">The things applicants ask first.</h2></div><div className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">{JOIN_FAQS.map(([question, answer]) => <details key={question} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-semibold"><span>{question}</span><span className="text-mecg-orange-ink transition-transform group-open:rotate-45" aria-hidden="true">+</span></summary><p className="mt-3 max-w-2xl pr-8 leading-7 text-mecg-navy/60">{answer}</p></details>)}</div></div></section>
-      <section className="bg-mecg-navy px-6 py-16 text-white sm:py-20"><div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_auto] lg:items-end"><div><SectionLabel number="04.7" className="text-mecg-orange">Apply</SectionLabel><h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">One application. One status page.</h2><p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-white/60">Submit once, then use your account for RSVPs, Group Case instructions, and the released outcome. We never show ranks.</p></div><div className="flex flex-wrap gap-3"><Link href="/apply" className="button-primary">Apply now →</Link><a href="mailto:mecg-board@umich.edu?subject=MECG%20rush%20question" className="button-dark">Ask about rush ↗</a></div></div></section>
+      </MarketingSection>
+
+      <MarketingSection aria-labelledby="timeline-title">
+          <SectionHeading id="timeline-title">Recruitment timeline</SectionHeading>
+          <div className="mt-8 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+            {events.length === 0 ? (
+              <p className="py-6 leading-7 text-mecg-navy/65">The Board has not published events for this cycle yet. Join the interest list for date announcements.</p>
+            ) : events.map((event) => (
+              <article key={event.id} className="grid gap-3 py-5 md:grid-cols-[15rem_1fr_auto] md:items-center">
+                <p className="text-sm font-semibold leading-6 text-mecg-blue">{formatEventTime(event.startsAt, event.endsAt)}</p>
+                <div>
+                  <h3 className="text-lg font-semibold">{event.name}</h3>
+                  <p className="mt-1 text-sm text-mecg-navy/60">{event.location ?? "Location shared closer to the event"}</p>
+                </div>
+                <a href={`/api/events/${event.id}/ics`} className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Add to calendar <span className="ml-2" aria-hidden="true">↓</span></a>
+              </article>
+            ))}
+          </div>
+      </MarketingSection>
+
+      <MarketingSection tone="paper">
+          <SectionHeading>Why join MECG?</SectionHeading>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {JOIN_REASONS.map((reason) => (
+              <article key={reason.title} className="rounded-2xl bg-white p-5 sm:p-6">
+                <h3 className="text-xl font-semibold">{reason.title}</h3>
+                <p className="mt-3 leading-7 text-mecg-navy/65">{reason.copy}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-10"><PhotoCarousel images={JOIN_PHOTOS} label="MECG member photos" /></div>
+      </MarketingSection>
+
+      {showInterestForm ? (
+        <MarketingSection tone="navy" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+            <div>
+              <SectionHeading>Get recruitment updates</SectionHeading>
+              <p className="mt-4 max-w-md leading-7 text-white/70">We will email you when the Board publishes dates for the active cycle.</p>
+            </div>
+            <InterestForm />
+        </MarketingSection>
+      ) : null}
+
+      <MarketingSection aria-labelledby="faq-title" innerClassName="grid gap-8 lg:grid-cols-[0.6fr_1.4fr]">
+          <SectionHeading id="faq-title">Frequently asked questions</SectionHeading>
+          <div className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+            {JOIN_FAQS.map(([question, answer]) => (
+              <details key={question} className="group py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-semibold"><span>{question}</span><span className="text-mecg-orange-ink group-open:rotate-45" aria-hidden="true">+</span></summary>
+                <p className="mt-3 max-w-2xl pr-8 leading-7 text-mecg-navy/65">{answer}</p>
+              </details>
+            ))}
+          </div>
+      </MarketingSection>
+
+      <MarketingSection tone="blue" spacing="compact" innerClassName="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <SectionHeading>Ready to apply?</SectionHeading>
+          <Link href="/apply" className="button-light">Apply now <span aria-hidden="true">→</span></Link>
+      </MarketingSection>
     </main>
   );
 }

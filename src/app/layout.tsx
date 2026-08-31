@@ -16,11 +16,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mecgmichigan.com"),
   title: {
     default: "Michigan Engineering Consulting Group",
     template: "%s | MECG",
   },
   description: "Pro-bono, student-led consulting at the University of Michigan.",
+  applicationName: "MECG",
+  openGraph: {
+    type: "website",
+    siteName: "Michigan Engineering Consulting Group",
+    title: "Michigan Engineering Consulting Group",
+    description: "Pro-bono, student-led consulting at the University of Michigan.",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Michigan Engineering Consulting Group",
+    description: "Pro-bono, student-led consulting at the University of Michigan.",
+    images: ["/opengraph-image"],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

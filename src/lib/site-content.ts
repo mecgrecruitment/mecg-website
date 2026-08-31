@@ -21,39 +21,92 @@ export const BOARD = [
 export const PAST_PROJECTS = [
   {
     name: "General Motors",
-    industry: "Automotive",
-    website: "https://www.gm.com/",
-    logo: "/clients/general-motors.jpg",
-    width: 1890,
-    height: 400,
+    logo: "/images/clients/general-motors.svg",
   },
   {
     name: "Legendary Sports Xperiences",
-    industry: "Youth sports",
-    website: "https://www.legendarysportsx.com/",
-    logo: "/clients/legendary-sports.png",
-    width: 1000,
-    height: 239,
+    logo: "/images/clients/legendary-sports-xperiences.png",
   },
   {
-    name: "Glo Skin Beauty",
-    industry: "Beauty and skincare",
-    website: "https://www.gloskinbeauty.com/",
-    logo: "/clients/glo-skin-beauty.svg",
-    width: 151,
-    height: 141,
+    name: "Glo Skin Spa",
+    logo: "/images/clients/glo-skin-spa.png",
+  },
+  {
+    name: "Koops Automation",
+    logo: "/images/clients/koops-automation.jpg",
+  },
+  {
+    name: "Gypsy Spirits",
+    logo: "/images/clients/gypsy-spirits.jpg",
+  },
+  {
+    name: "Here Here Market",
+    logo: "/images/clients/here-here-market.jpg",
+  },
+  {
+    name: "Red Hawk Golf Club",
+    logo: "/images/clients/red-hawk-golf-club.png",
+  },
+  {
+    name: "Lynkr",
+    logo: "/images/clients/lynkr.png",
+  },
+  {
+    name: "Frankel Jewish Academy",
+    logo: "/images/clients/frankel-jewish-academy.png",
+  },
+  {
+    name: "Dani Plan",
+    logo: "/images/clients/dani-plan.png",
+  },
+  {
+    name: "Fired and Fused",
+    logo: "/images/clients/fired-and-fused.png",
+  },
+  {
+    name: "The Probate Pro",
+    logo: "/images/clients/the-probate-pro.png",
+  },
+  {
+    name: "Michigan Creamery",
+    logo: "/images/clients/michigan-creamery.png",
+  },
+  {
+    name: "Homeschool Connections",
+    logo: "/images/clients/homeschool-connections.png",
+  },
+  {
+    name: "The Store House",
+    logo: "/images/clients/the-store-house.png",
   },
 ] as const;
 
-/** Homepage featured case: public facts only, no unpublished outcomes. */
-export const FEATURED_ENGAGEMENT = {
-  client: "General Motors",
-  industry: "Automotive",
-  location: "Detroit / Ann Arbor",
-  question: "A semester-length question from a global manufacturer.",
-  body: "General Motors is among the organizations that have worked with MECG. Student teams take one focused decision, gather evidence, and hand back a recommendation the client can use after the term. Detailed case studies go live only after the client approves them.",
-  href: "/work",
-} as const;
+export const PILLARS = [
+  {
+    title: "Professional Development",
+    body: "We help members build confidence in consulting, communication, networking, and recruiting through workshops, mentorship, and hands-on practice.",
+  },
+  {
+    title: "Education",
+    body: "Members learn the basics of consulting, problem solving, analysis, and presentation in a way that is approachable no matter their major or background.",
+  },
+  {
+    title: "Project Experience",
+    body: "Our teams work with real clients during the semester, turning open-ended questions into research, recommendations, and clear next steps.",
+  },
+  {
+    title: "Community",
+    body: "MECG is also a group of people who want to know each other well. We make space for mentorship, social events, and friendships outside of project work.",
+  },
+] as const;
+
+export const SERVICES = [
+  { title: "Strategy", body: "We help clients think through growth, positioning, competitors, customers, and practical next steps." },
+  { title: "Operations & Management", body: "We look at how work gets done and recommend ways to make processes clearer, smoother, or easier to manage." },
+  { title: "Data Analytics", body: "We organize information, look for patterns, and turn data into insights that clients can use." },
+  { title: "Product Development", body: "We support early product thinking through user research, feature ideas, customer needs, and launch planning." },
+  { title: "Marketing", body: "We help clients understand their audience, refine messaging, and improve how they appear online or in the market." },
+] as const;
 
 export const SEMESTER_FACTS = [
   ["Cost", "Pro bono"],

@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #070d1f;
+  --paper: #f4f1ec;
+  --line: rgb(7 13 31 / 12%);
+  --shadow-card: 0 18px 55px rgb(7 13 31 / 9%);
   --t-detent: 150ms;
   --t-shift: 420ms;
   --t-seat: 700ms;
@@ -33,6 +36,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  background: rgb(254 144 77 / 42%);
+  color: var(--color-mecg-navy);
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;
@@ -40,7 +52,9 @@ a {
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid var(--color-mecg-orange);
   outline-offset: 3px;
 }
@@ -78,6 +92,76 @@ input:focus-visible {
 .button-dark:active,
 .button-light:active,
 .button-ghost-light:active { transform: scale(0.96); }
+
+.button-primary:disabled,
+.button-secondary:disabled,
+.button-dark:disabled,
+.button-light:disabled,
+.button-ghost-light:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  transform: none;
+}
+
+.section-shell {
+  margin-inline: auto;
+  max-width: 72rem;
+  padding-inline: 1.5rem;
+}
+
+.surface-card {
+  border-radius: 1rem;
+  background: white;
+  box-shadow: var(--shadow-card);
+}
+
+.surface-inset {
+  border-radius: 1rem;
+  background: rgb(7 13 31 / 3.5%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.field-control {
+  min-height: 2.75rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  background: rgb(7 13 31 / 3.5%);
+  padding-inline: 0.875rem;
+  box-shadow: inset 0 0 0 1px rgb(7 13 31 / 14%);
+  outline: none;
+  transition: background-color var(--t-detent) var(--ease-detent), box-shadow var(--t-detent) var(--ease-detent);
+}
+
+.field-control:hover {
+  background: rgb(63 99 175 / 7%);
+}
+
+.field-control:focus {
+  box-shadow: inset 0 0 0 2px var(--color-mecg-orange);
+}
+
+.eyebrow {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.text-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-mecg-blue);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color var(--t-detent) var(--ease-detent);
+}
+
+.text-link:hover {
+  color: var(--color-mecg-navy);
+}
 
 .hero-grid {
   background-image:
@@ -126,5 +210,26 @@ input:focus-visible {
 
   .pre-reveal {
     opacity: 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .section-shell {
+    padding-inline: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .pre-reveal {
+    opacity: 1;
   }
 }
