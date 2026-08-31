@@ -3,6 +3,41 @@
 Date: 2026-08-31. Branch `main`, working tree (122 uncommitted paths), not HEAD.
 Method: 9 passes across 5 parallel read-only agents, plus direct verification of every BLOCKER.
 
+## Status as of 2026-08-31, end of session
+
+All nine BLOCKERs are fixed. B6 turned out to be already fixed before the audit
+landed. The SQL half is applied to the linked project and the migration ledger
+is in sync at 63 migrations with zero mismatches.
+
+Two findings surfaced during verification that this document did not originally
+contain, both now fixed:
+
+- Board and panel members could not read `rush.applications` at all. Every read
+  raised `42P17 infinite recursion`, so `/admin`, `/member` and the applicant
+  dossier returned 500 for staff. `applications_read_internal` and
+  `conflicts_read_own_or_manager` each held an inline subquery selecting from the
+  other table, so each policy re-entered the other. Both now route through
+  SECURITY DEFINER helpers.
+- `rush.actor_is_assigned_evaluator` did not exist in the database even though
+  two migrations defining it were recorded as applied. The migration files were
+  edited after they were applied, so the ledger reported converged while the
+  schema was not. That drift is what hid the outage. Applied migrations should be
+  treated as immutable.
+
+Gates all green: lint, tsc, 84 tests across 13 files, build, verify:backend,
+verify:workflow, verify:auth, supabase:lint.
+
+Still open, and neither is something code can close:
+
+- `CRON_SECRET` must be set in Vercel or `/api/maintenance/prune-resumes` fails
+  closed with a 503 and abandoned resume objects are never cleaned up.
+- Supabase Auth leaked-password protection (HaveIBeenPwned) is disabled. It is a
+  dashboard toggle and a cheap win before the portal opens.
+
+The application portal is currently closed to everyone except
+`rbhavan@umich.edu`, enforced by a trigger on `rush.applications`. Reopen with
+`delete from rush.application_portal_allowlist;`.
+
 ## Gate results
 
 | gate | result |
