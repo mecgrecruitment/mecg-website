@@ -63,10 +63,27 @@ function formatEventTime(startsAt: string, endsAt?: string | null) {
   return endsAt ? `${start} to ${TIME_FORMAT.format(new Date(endsAt))}` : start;
 }
 
-function cycleStatus(cycle: NonNullable<Recruitment["cycle"]>) {
-  if (cycle.status === "OPEN") return { label: "Applications are open", detail: cycle.closesAt ? `Apply by ${formatDate(cycle.closesAt)}.` : "Apply now." };
-  if (cycle.status === "IN_PROCESS") return { label: "Selection is in progress", detail: "Current applicants can find invitations and updates on their status page." };
-  return { label: "Recruitment is being scheduled", detail: cycle.opensAt ? `Applications are expected to open ${formatDate(cycle.opensAt)}.` : "Join the interest list for published dates." };
+function cycleStatus(cycle: NonNullable<Recruitment["cycle"]>, now = Date.now()) {
+  const opensAt = cycle.opensAt ? new Date(cycle.opensAt).getTime() : null;
+  const closesAt = cycle.closesAt ? new Date(cycle.closesAt).getTime() : null;
+  const isWithinApplicationWindow = cycle.status === "OPEN"
+    && (opensAt === null || opensAt <= now)
+    && (closesAt === null || closesAt >= now);
+
+  if (isWithinApplicationWindow) return { label: "Applications are open", detail: cycle.closesAt ? `Apply by ${formatDate(cycle.closesAt)}.` : "Apply now.", isOpen: true };
+  if (cycle.status === "OPEN" && closesAt !== null && closesAt < now) {
+    return { label: "Applications are closed", detail: `Applications closed ${formatDate(cycle.closesAt!)}.`, isOpen: false };
+  }
+  if (cycle.status === "IN_PROCESS") {
+    return { label: "Selection is in progress", detail: "Current applicants can find invitations and updates on their status page.", isOpen: false };
+  }
+  return {
+    label: "Applications open soon",
+    detail: cycle.opensAt
+      ? `Applications open ${formatDate(cycle.opensAt)}${cycle.closesAt ? ` and close ${formatDate(cycle.closesAt)}` : ""}.`
+      : "Join the interest list for published dates.",
+    isOpen: false,
+  };
 }
 
 export default async function JoinPage() {
@@ -79,7 +96,7 @@ export default async function JoinPage() {
   const recruitment = data && typeof data === "object" ? data as Recruitment : { cycle: null, events: [] };
   const events = recruitment.events ?? [];
   const status = recruitment.cycle ? cycleStatus(recruitment.cycle) : null;
-  const showInterestForm = recruitment.cycle?.status !== "OPEN";
+  const showInterestForm = status?.isOpen !== true;
 
   return (
     <main className="bg-white text-mecg-navy">
