@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { destinationForUser } from "@/lib/auth";
+import { RECOVERY_COOKIE, RECOVERY_COOKIE_PATH, RECOVERY_TTL_SECONDS, issueRecoveryMarker } from "@/lib/recovery-marker";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +11,17 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
       if (requestedNext === "/reset-password") {
-        return NextResponse.redirect(new URL("/reset-password", request.url));
+        // This is the only point in the app that can attest a recovery link was
+        // just exchanged, so it is where the reset route's proof is minted.
+        const recovery = NextResponse.redirect(new URL("/reset-password", request.url));
+        recovery.cookies.set(RECOVERY_COOKIE, issueRecoveryMarker(data.user.id), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: RECOVERY_COOKIE_PATH,
+          maxAge: RECOVERY_TTL_SECONDS,
+        });
+        return recovery;
       }
       try {
         const destination = await destinationForUser(supabase, data.user.id);

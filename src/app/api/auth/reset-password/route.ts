@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import { recoverySessionState } from "@/lib/recovery-session";
+import { RECOVERY_COOKIE, RECOVERY_COOKIE_PATH, recoveryMarkerValid } from "@/lib/recovery-marker";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -19,20 +19,13 @@ export async function POST(request: NextRequest) {
   if (!userData.user) return NextResponse.json({ code: "RECOVERY_SESSION_REQUIRED" }, { status: 401 });
 
   // Being signed in is not enough: this route sets a password without knowing
-  // the old one, so it must only accept the session minted by a recovery link.
+  // the old one, so it must only accept a session minted by a recovery link.
   // Otherwise a stolen sb-<ref>-auth-token cookie is permanent account takeover,
   // and this route becomes a bypass of the current-password re-verification
   // that /api/account/password enforces. getUser() above proves the token is
-  // authentic; the claim below proves where it came from.
-  const { data: sessionData } = await supabase.auth.getSession();
-  const state = recoverySessionState(sessionData.session?.access_token);
-  if (state === "not-recovery") {
+  // authentic; the marker proves where it came from.
+  if (!recoveryMarkerValid(userData.user.id, request.cookies.get(RECOVERY_COOKIE)?.value)) {
     return NextResponse.json({ code: "RECOVERY_SESSION_REQUIRED" }, { status: 401 });
-  }
-  if (state === "unknown") {
-    console.error("reset_password: access token carried no usable amr claim, allowing the reset unverified", {
-      userId: userData.user.id,
-    });
   }
 
   const { error } = await supabase.auth.updateUser({ password });
@@ -40,5 +33,14 @@ export async function POST(request: NextRequest) {
     console.error("reset_password failed", error);
     return NextResponse.json({ code: "RESET_FAILED" }, { status: 400 });
   }
-  return NextResponse.json({ ok: true });
+  // Single use: the marker dies with the reset it authorized.
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(RECOVERY_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: RECOVERY_COOKIE_PATH,
+    maxAge: 0,
+  });
+  return response;
 }
