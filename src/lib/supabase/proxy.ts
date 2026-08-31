@@ -1,13 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabasePublicEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/database.types";
 
 export async function refreshSupabaseSession(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey =
-    process.env.NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return { response: NextResponse.next(), user: null };
-
+  const { url, anonKey } = getSupabasePublicEnv();
   let response = NextResponse.next();
   const supabase = createServerClient<Database, "rush">(url, anonKey, {
     db: { schema: "rush" },

@@ -17,6 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npx tsc --noEmit
       - run: npm run build
         env:
           # /join is prerendered, so the build reads these. They are the

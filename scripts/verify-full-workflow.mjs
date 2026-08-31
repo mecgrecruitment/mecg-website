@@ -1,18 +1,24 @@
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import {
+  fetchWithTimeout,
+  loadSupabaseEnv,
+  requireServiceRoleKey,
+} from "./lib/supabase-env.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const source = readFileSync(resolve(root, ".env.local"), "utf8");
-const read = (name) => source.match(new RegExp(`^${name}=["']?([^\\n"']+)`, "m"))?.[1]?.trim();
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? read("NEXT_PUBLIC_SUPABASE_URL");
-const publicKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? read("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? read("SUPABASE_SERVICE_ROLE_KEY");
-if (!url || !publicKey || !serviceKey) throw new Error("Supabase environment is incomplete");
-const client = createClient(url, serviceKey, { db: { schema: "rush" }, auth: { persistSession: false, autoRefreshToken: false } });
+const { url, anonKey, serviceRoleKey } = loadSupabaseEnv(root);
+const serviceKey = requireServiceRoleKey(serviceRoleKey);
+const options = {
+  db: { schema: "rush" },
+  auth: { persistSession: false, autoRefreshToken: false },
+  global: { fetch: fetchWithTimeout },
+};
+const client = createClient(url, serviceKey, options);
 const suffix = crypto.randomUUID();
 const password = `${crypto.randomUUID()}Aa1!`;
 const ids = [];
+let primaryError;
 
 try {
   for (const label of ["owner", "panel", "applicant"]) {
@@ -21,7 +27,7 @@ try {
     ids.push(data.user.id);
   }
   for (let index = 0; index < ids.length; index += 1) {
-    const userClient = createClient(url, publicKey, { db: { schema: "rush" }, auth: { persistSession: false, autoRefreshToken: false } });
+    const userClient = createClient(url, anonKey, options);
     const label = ["owner", "panel", "applicant"][index];
     const { error: loginError } = await userClient.auth.signInWithPassword({ email: `workflow-${label}-${suffix}@example.invalid`, password });
     if (loginError) throw new Error(`Test identity could not sign in: ${loginError.message}`);
@@ -32,6 +38,17 @@ try {
   const { error } = await client.rpc("verify_full_workflow", { owner_id: ids[0], panel_id: ids[1], applicant_id: ids[2] });
   if (!error || error.message !== "WORKFLOW_SELF_TEST_PASSED") throw new Error(`Workflow self-test failed: ${JSON.stringify(error)}`);
   console.log("Full Supabase workflow passed and its database transaction was rolled back.");
+} catch (error) {
+  primaryError = error;
+  throw error;
 } finally {
-  for (const id of ids) await client.auth.admin.deleteUser(id);
+  const cleanup = await Promise.allSettled(ids.map((id) => client.auth.admin.deleteUser(id)));
+  const cleanupErrors = cleanup
+    .map((result) => result.status === "rejected" ? result.reason : result.value.error)
+    .filter(Boolean);
+  if (cleanupErrors.length) {
+    const cleanupError = new AggregateError(cleanupErrors, "Could not clean up every workflow test identity");
+    if (primaryError) console.error(cleanupError);
+    else throw cleanupError;
+  }
 }

@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(94);
+select extensions.plan(99);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -88,6 +88,9 @@ select extensions.ok((select p.prosecdef and p.proconfig @> array['search_path="
 select extensions.ok(has_function_privilege('authenticated','rush.actor_can_read_colleague_profile(uuid)','EXECUTE') and not has_function_privilege('anon','rush.actor_can_read_colleague_profile(uuid)','EXECUTE') and has_function_privilege('authenticated','rush.create_cycle(text)','EXECUTE') and not has_function_privilege('anon','rush.create_cycle(text)','EXECUTE'), 'authorization function ACLs exclude anonymous callers');
 select extensions.ok(position('actor_can_read_colleague_profile' in pg_get_expr((select polqual from pg_policy where polname='profiles_read_cycle_colleagues' and polrelid='rush.profiles'::regclass),'rush.profiles'::regclass)) > 0, 'profile colleague policy delegates to the non-recursive helper');
 select extensions.ok(position('public.members' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) = 0 and position('rush.memberships' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) > 0 and position('rush.profiles' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) > 0 and position('CYCLE_CREATED' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) > 0, 'cycle creation uses active rush identities and retains audit logging');
+select extensions.ok((select pg_get_userbyid(p.proowner)='postgres' and p.prosecdef and p.proconfig @> array['search_path=""'] from pg_proc p where p.oid='rush.submit_application_self_test(text,text)'::regprocedure), 'workflow fixture is postgres-owned security definer with an empty search path');
+select extensions.ok(has_function_privilege('service_role','rush.submit_application_self_test(text,text)','EXECUTE') and not has_function_privilege('anon','rush.submit_application_self_test(text,text)','EXECUTE') and not has_function_privilege('authenticated','rush.submit_application_self_test(text,text)','EXECUTE') and not exists(select 1 from aclexplode((select p.proacl from pg_proc p where p.oid='rush.submit_application_self_test(text,text)'::regprocedure)) a where a.grantee=0 and a.privilege_type='EXECUTE'), 'workflow fixture execute ACL is service-role only');
+select extensions.ok(position('auth.role() is distinct from ''service_role''' in pg_get_functiondef('rush.submit_application_self_test(text,text)'::regprocedure)) > 0 and position('service role required' in pg_get_functiondef('rush.submit_application_self_test(text,text)'::regprocedure)) > 0, 'workflow fixture checks service role before writes');
 select extensions.ok(
   not exists (
     select 1
@@ -118,6 +121,10 @@ insert into rush.memberships(user_id,cycle_id,role) values
 
 create temporary table rush_foundation_results(key text primary key,value bigint);
 grant insert,select on rush_foundation_results to authenticated;
+insert into rush_foundation_results values ('fixture_writes_before',
+  (select count(*) from rush.applications) +
+  (select count(*) from rush.application_documents) +
+  (select count(*) from storage.objects));
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
@@ -127,6 +134,19 @@ insert into rush_foundation_results values ('workspace_cycle',(select count(*) f
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='allowed_profile'),1::bigint,'active cycle owner reads a colleague profile without RLS recursion');
 select extensions.is((select value from rush_foundation_results where key='workspace_cycle'),1::bigint,'authenticated workspace lookup joins memberships to cycles without RLS recursion');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.submit_application_self_test('Denied Applicant','workflow-10000000-0000-4000-8000-000000000002@example.invalid')$$,'42501','permission denied for function submit_application_self_test','authenticated callers cannot execute the workflow fixture');
+set local role postgres;
+select extensions.is(
+  (select count(*) from rush.applications) +
+  (select count(*) from rush.application_documents) +
+  (select count(*) from storage.objects),
+  (select value from rush_foundation_results where key='fixture_writes_before'),
+  'denied workflow fixture invocation performs no writes'
+);
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';

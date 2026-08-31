@@ -1,24 +1,26 @@
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import {
+  fetchWithTimeout,
+  loadSupabaseEnv,
+  requireServiceRoleKey,
+} from "./lib/supabase-env.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const source = readFileSync(resolve(root, ".env.local"), "utf8");
-const read = (name) => source.match(new RegExp(`^${name}=["']?([^\\n"']+)`, "m"))?.[1]?.trim();
-const supabaseUrl = read("NEXT_PUBLIC_SUPABASE_URL");
-const publicKey = read("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-const serviceKey = read("SUPABASE_SERVICE_ROLE_KEY");
+const { url: supabaseUrl, anonKey: publicKey, serviceRoleKey } = loadSupabaseEnv(root);
+const serviceKey = requireServiceRoleKey(serviceRoleKey);
 const baseUrl = (process.argv[2] ?? process.env.AUTH_TEST_BASE_URL ?? "http://127.0.0.1:3100").replace(/\/$/u, "");
-if (!supabaseUrl || !publicKey || !serviceKey) throw new Error("Supabase environment is incomplete");
-
-const admin = createClient(supabaseUrl, serviceKey, {
+const supabaseOptions = {
   db: { schema: "rush" },
   auth: { persistSession: false, autoRefreshToken: false },
-});
+  global: { fetch: fetchWithTimeout },
+};
+const admin = createClient(supabaseUrl, serviceKey, supabaseOptions);
 const suffix = crypto.randomUUID();
 const password = `${crypto.randomUUID()}Aa1!`;
 const cycleId = `auth-route-${suffix}`;
 const users = [];
+let primaryError;
 
 const cases = [
   { label: "new-applicant", destination: "/apply" },
@@ -45,13 +47,11 @@ async function login(testCase) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: testCase.email, password }),
     redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
   });
   const body = await response.json().catch(() => null);
   if (response.status !== 200 || body?.destination !== testCase.destination) {
-    const diagnostic = createClient(supabaseUrl, publicKey, {
-      db: { schema: "rush" },
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const diagnostic = createClient(supabaseUrl, publicKey, supabaseOptions);
     const { error: signInError } = await diagnostic.auth.signInWithPassword({ email: testCase.email, password });
     const results = signInError ? { signIn: signInError } : Object.fromEntries(await Promise.all([
       ["profiles", diagnostic.from("profiles").select("active").eq("id", testCase.userId).maybeSingle()],
@@ -70,6 +70,7 @@ async function expectPage(pathname, cookie, expectedStatus = 200, expectedLocati
   const response = await fetch(`${baseUrl}${pathname}`, {
     headers: { Cookie: cookie },
     redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
   });
   if (response.status !== expectedStatus) {
     throw new Error(`${pathname} returned ${response.status}, expected ${expectedStatus}`);
@@ -141,10 +142,29 @@ try {
   await expectPage("/apply", cookies.get("member"), 307, "/member");
   await expectPage("/login", cookies.get("board"), 307, "/admin");
   console.log(`Authentication routing passed for ${cases.length} account states against ${baseUrl}.`);
+} catch (error) {
+  primaryError = error;
+  throw error;
 } finally {
-  await admin.from("applications").delete().eq("id", `auth-app-${suffix}`);
-  await admin.from("pnms").delete().eq("id", `auth-pnm-${suffix}`);
-  await admin.from("memberships").delete().eq("cycle_id", cycleId);
-  await admin.from("rush_cycles").delete().eq("id", cycleId);
-  for (const userId of users) await admin.auth.admin.deleteUser(userId);
+  const cleanupErrors = [];
+  const cleanup = async (operation) => {
+    try {
+      const { error } = await operation();
+      if (error) cleanupErrors.push(error);
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+  };
+  await cleanup(() => admin.from("applications").delete().eq("id", `auth-app-${suffix}`));
+  await cleanup(() => admin.from("pnms").delete().eq("id", `auth-pnm-${suffix}`));
+  await cleanup(() => admin.from("memberships").delete().eq("cycle_id", cycleId));
+  await cleanup(() => admin.from("rush_cycles").delete().eq("id", cycleId));
+  for (const userId of users) {
+    await cleanup(() => admin.auth.admin.deleteUser(userId));
+  }
+  if (cleanupErrors.length) {
+    const cleanupError = new AggregateError(cleanupErrors, "Could not clean up every authentication routing fixture");
+    if (primaryError) console.error(cleanupError);
+    else throw cleanupError;
+  }
 }

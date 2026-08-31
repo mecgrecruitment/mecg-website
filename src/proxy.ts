@@ -3,7 +3,6 @@ import { refreshSupabaseSession } from "@/lib/supabase/proxy";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const { response, user } = await refreshSupabaseSession(req);
   if (
     pathname === "/login" ||
     pathname === "/admin/login" ||
@@ -11,7 +10,9 @@ export async function proxy(req: NextRequest) {
     pathname === "/api/admin/login" ||
     pathname === "/auth/callback" ||
     pathname === "/apply"
-  ) return response;
+  ) return NextResponse.next();
+
+  const { response, user } = await refreshSupabaseSession(req);
   if (user) return response;
 
   const isApi =

@@ -10,27 +10,40 @@ import { createClient } from "@/lib/supabase/server";
 // its own probe; move it to the DB or a KV if the instance count ever makes that
 // a meaningful RPC load.
 const CACHE_MS = 10_000;
+const PROBE_TIMEOUT_MS = 2_000;
 
-let cached: { at: number; body: { ok: boolean; latencyMs?: number }; status: number } | null = null;
+type HealthyResult = { at: number; body: { ok: true; latencyMs: number } };
+
+let cached: HealthyResult | null = null;
+let inFlight: Promise<HealthyResult> | null = null;
 
 export async function GET() {
   if (cached && Date.now() - cached.at < CACHE_MS) {
-    return NextResponse.json(cached.body, { status: cached.status, headers: cacheHeaders() });
+    return NextResponse.json(cached.body, { headers: healthyCacheHeaders() });
   }
 
-  const started = Date.now();
+  const probe = (inFlight ??= probeSupabase());
   try {
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("public_recruitment");
-    if (error) throw error;
-    cached = { at: Date.now(), body: { ok: true, latencyMs: Date.now() - started }, status: 200 };
+    const result = await probe;
+    return NextResponse.json(result.body, { headers: healthyCacheHeaders() });
   } catch (error) {
     console.error("health check failed", error);
-    cached = { at: Date.now(), body: { ok: false }, status: 503 };
+    return NextResponse.json({ ok: false }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  } finally {
+    if (inFlight === probe) inFlight = null;
   }
-  return NextResponse.json(cached.body, { status: cached.status, headers: cacheHeaders() });
 }
 
-function cacheHeaders() {
+async function probeSupabase() {
+  const started = Date.now();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .rpc("public_recruitment")
+    .abortSignal(AbortSignal.timeout(PROBE_TIMEOUT_MS));
+  if (error) throw error;
+  return (cached = { at: Date.now(), body: { ok: true, latencyMs: Date.now() - started } });
+}
+
+function healthyCacheHeaders() {
   return { "Cache-Control": `public, max-age=${CACHE_MS / 1000}` };
 }

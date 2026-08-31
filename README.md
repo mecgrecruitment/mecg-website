@@ -56,11 +56,21 @@ npm run supabase:verify-project
 npm run verify:backend
 ```
 
-`supabase:verify-project` fails unless both `.env.local` and the Supabase CLI
-link point to the healthy MECG Recruitment project. Run `npm run supabase:link`
-to repair a missing or incorrect local CLI link. Run `npm run supabase:sync-env`
-to replace a stale browser key with MECG Recruitment's publishable key.
+Run the gates in order. MECG project precedence comes first: `supabase:verify-project`
+fails unless both `.env.local` and the Supabase CLI link point to the healthy MECG
+Recruitment project. Run `npm run supabase:link` to repair a missing or incorrect
+local CLI link. Run `npm run supabase:sync-env` to replace a stale browser key with
+MECG Recruitment's publishable key.
 
-For the full HTTP state-machine check, start the development server and run `npm run verify:backend` in another terminal. The verifier creates uniquely named records, checks privacy and authorization failures as well as the successful path, and removes its records afterward.
+The deterministic gates are `npm test`, `npx tsc --noEmit`, `npm run lint`, and
+`npm run build`. The Supabase database gate is `npm run test:supabase`. The protected
+live gates are `verify:backend`, `verify:auth`, and `verify:workflow`; run them only
+after project verification succeeds.
+
+Start the development server before `npm run verify:backend` or `npm run verify:auth`.
+The backend verifier creates uniquely named records, checks privacy and authorization
+failures as well as the successful path, and removes its records afterward.
+`npm run verify:workflow` creates temporary Supabase Auth users and removes them when
+it finishes.
 
 The scoring functions are pure and tested independently from Supabase. Database migrations and RLS policies live in `supabase/migrations`.

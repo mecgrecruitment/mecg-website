@@ -1,31 +1,16 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import {
+  fetchWithTimeout,
+  loadSupabaseEnv,
+  requireServiceRoleKey,
+} from "./lib/supabase-env.mjs";
 
 const MECG_RECRUITMENT_PROJECT = {
   ref: "chrxtsohxazngabdcpzb",
   name: "mecgrecruitment's Project",
 };
-
-function readEnvFile(path) {
-  if (!existsSync(path)) return {};
-
-  return Object.fromEntries(
-    readFileSync(path, "utf8")
-      .split(/\r?\n/u)
-      .map((line) => line.trim())
-      .filter((line) => line && !line.startsWith("#") && line.includes("="))
-      .map((line) => {
-        const separator = line.indexOf("=");
-        const key = line.slice(0, separator).trim();
-        const value = line
-          .slice(separator + 1)
-          .trim()
-          .replace(/^(["'])(.*)\1$/u, "$2");
-        return [key, value];
-      }),
-  );
-}
 
 function projectRefFromUrl(value) {
   try {
@@ -41,20 +26,13 @@ function fail(message) {
 }
 
 const root = resolve(import.meta.dirname, "..");
-const localEnv = {
-  ...readEnvFile(resolve(root, ".env")),
-  ...readEnvFile(resolve(root, ".env.local")),
-};
-const configuredRef = projectRefFromUrl(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? localEnv.NEXT_PUBLIC_SUPABASE_URL,
-);
-const configuredUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? localEnv.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? localEnv.SUPABASE_SERVICE_ROLE_KEY;
-const publicKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-  localEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+let env;
+try {
+  env = loadSupabaseEnv(root);
+} catch (error) {
+  fail(error.message);
+}
+const configuredRef = projectRefFromUrl(env.url);
 
 if (configuredRef !== MECG_RECRUITMENT_PROJECT.ref) {
   fail(
@@ -120,24 +98,26 @@ try {
   fail("the CLI could not confirm the MECG Recruitment API keys");
 }
 
-if (!projectKeys.some(({ api_key: key, type }) => type === "publishable" && key === publicKey)) {
+if (!projectKeys.some(({ api_key: key, type }) => type === "publishable" && key === env.anonKey)) {
   fail("NEXT_PUBLIC_SUPABASE_ANON_KEY is not MECG Recruitment's publishable key; run npm run supabase:sync-env");
 }
 
-if (!serviceRoleKey) fail("SUPABASE_SERVICE_ROLE_KEY is missing");
+let serviceRoleKey;
+try {
+  serviceRoleKey = requireServiceRoleKey(env.serviceRoleKey);
+} catch (error) {
+  fail(error.message);
+}
 
 let schemaResponse;
 try {
-  schemaResponse = await fetch(
-    `${configuredUrl}/rest/v1/rush_cycles?select=id&limit=0`,
-    {
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        "Accept-Profile": "rush",
-      },
+  schemaResponse = await fetchWithTimeout(`${env.url}/rest/v1/rush_cycles?select=id&limit=0`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Accept-Profile": "rush",
     },
-  );
+  });
 } catch {
   fail("the rush schema could not be reached through the Supabase API");
 }
