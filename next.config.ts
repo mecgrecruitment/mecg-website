@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
+  deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
   async redirects() {
     return [
       { source: "/", destination: "/home", permanent: true },
