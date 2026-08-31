@@ -24,7 +24,7 @@ export default function HomePage() {
     <main className="bg-white text-mecg-navy">
       <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
         <Image
-          src="/mecg/members-professional.png"
+          src="/mecg/members-professional.jpeg"
           alt="MECG members visiting PwC in Chicago"
           fill
           priority

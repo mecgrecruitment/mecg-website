@@ -14,8 +14,8 @@ export const BOARD = [
   { name: "Sumedha Katti", role: "VP Consulting", src: "/board/sumedha.jpeg", linkedin: "https://www.linkedin.com/in/sumedha-katti/" },
   { name: "Maya Menon", role: "VP Education", src: "/board/maya.jpeg", linkedin: "https://www.linkedin.com/in/mayamenon28" },
   { name: "Luciano del Carpio", role: "VP Education", src: "/board/luciano.jpeg", linkedin: "https://www.linkedin.com/in/luciano-del-carpio/" },
-  { name: "Selena Cooper", role: "VP Finance", src: "/board/selena.png", linkedin: "https://www.linkedin.com/in/selena-cooper/" },
-  { name: "Angela Yang", role: "VP Marketing", src: "/board/angela.png", linkedin: "https://www.linkedin.com/in/anngelayang/" },
+  { name: "Selena Cooper", role: "VP Finance", src: "/board/selena.jpeg", linkedin: "https://www.linkedin.com/in/selena-cooper/" },
+  { name: "Angela Yang", role: "VP Marketing", src: "/board/angela.jpeg", linkedin: "https://www.linkedin.com/in/anngelayang/" },
 ];
 
 export const PAST_PROJECTS = [
