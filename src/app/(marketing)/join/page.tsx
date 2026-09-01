@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import ApplicationCountdown from "@/components/application-countdown";
 import MarketingSection from "@/components/marketing-section";
@@ -70,11 +71,18 @@ export default async function JoinPage() {
 
       <MarketingSection aria-labelledby="timeline-title">
           <SectionHeading id="timeline-title">Recruitment timeline</SectionHeading>
-          <div className="mt-8 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+          <div className="relative mt-8 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-px before:bg-mecg-navy/12">
             {events.length === 0 ? (
-              <p className="py-6 leading-7 text-mecg-navy/65">The Board has not published events for this cycle yet. Join the interest list for date announcements.</p>
-            ) : events.map((event) => (
-              <article key={event.id} className="grid gap-3 py-5 md:grid-cols-[15rem_1fr_auto] md:items-center">
+              <p className="border-y border-mecg-navy/10 py-6 pl-12 leading-7 text-mecg-navy/65">The Board has not published events for this cycle yet. Join the interest list for date announcements.</p>
+            ) : events.map((event, index) => (
+              <article
+                key={event.id}
+                className="recruitment-event relative grid gap-3 border-t border-mecg-navy/10 py-6 pl-12 last:border-b md:grid-cols-[15rem_1fr_auto] md:items-center"
+                style={{ "--event-index": index } as CSSProperties}
+              >
+                <span className="absolute left-0 top-6 grid size-8 place-items-center rounded-full bg-mecg-navy font-mono text-[11px] font-semibold text-white ring-4 ring-white" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <p className="text-sm font-semibold leading-6 text-mecg-blue">{formatRecruitmentEventTime(event.startsAt, event.endsAt)}</p>
                 <div>
                   <h3 className="text-lg font-semibold">{event.name}</h3>
@@ -114,8 +122,8 @@ export default async function JoinPage() {
           <div className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
             {JOIN_FAQS.map(([question, answer]) => (
               <details key={question} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 font-semibold"><span>{question}</span><span className="text-mecg-orange-ink group-open:rotate-45" aria-hidden="true">+</span></summary>
-                <p className="mt-3 max-w-2xl pr-8 leading-7 text-mecg-navy/65">{answer}</p>
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 font-semibold"><span>{question}</span><span className="text-xl text-mecg-orange-ink transition-transform duration-[--t-control] ease-[--ease-out] group-open:rotate-45" aria-hidden="true">+</span></summary>
+                <p className="disclosure-panel mt-3 max-w-2xl pr-8 leading-7 text-mecg-navy/65">{answer}</p>
               </details>
             ))}
           </div>

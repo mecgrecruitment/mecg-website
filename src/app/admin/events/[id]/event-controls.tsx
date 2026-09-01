@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import FormField from "@/components/form-field";
+import OperationNotice from "@/components/operation-notice";
+import { EVENT_KINDS } from "@/lib/workflow";
+
+type EventData = {
+  id: string; name: string; kind: string; location: string | null; visibility: string;
+  startsAt: string; endsAt: string; checkinOpensAt: string; checkinClosesAt: string; status: string;
+};
+
+const localValue = (value: string) => {
+  const date = new Date(value);
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+
+export default function EventControls({ event }: { event: EventData }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [reason, setReason] = useState("");
+  const locked = event.status === "CLOSED" || event.status === "CANCELLED";
+
+  async function update(form: HTMLFormElement) {
+    const data = new FormData(form);
+    setPending(true); setError("");
+    try {
+      const response = await fetch(`/api/admin/events/${event.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.get("name"), kind: data.get("kind"), location: data.get("location"), visibility: data.get("visibility"),
+          startsAt: new Date(String(data.get("startsAt"))).toISOString(), endsAt: new Date(String(data.get("endsAt"))).toISOString(),
+          checkinOpensAt: new Date(String(data.get("checkinOpensAt"))).toISOString(), checkinClosesAt: new Date(String(data.get("checkinClosesAt"))).toISOString(),
+        }),
+      });
+      if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Could not update event"); return; }
+      router.refresh();
+    } catch { setError("Could not update event"); } finally { setPending(false); }
+  }
+
+  async function cancel() {
+    if (!reason.trim() || !window.confirm("Cancel this event? Existing RSVPs will remain in the audit history.")) return;
+    setPending(true); setError("");
+    try {
+      const response = await fetch(`/api/admin/events/${event.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }) });
+      if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Could not cancel event"); return; }
+      router.refresh();
+    } catch { setError("Could not cancel event"); } finally { setPending(false); }
+  }
+
+  return (
+    <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Event settings</p>
+      <p className="mt-2 text-sm text-mecg-navy/60">Status: {event.status}</p>
+      {!locked && <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={(submission) => { submission.preventDefault(); void update(submission.currentTarget); }}>
+        <FormField label="Name" name="name" required defaultValue={event.name} />
+        <label className="block text-sm font-medium">Kind<select name="kind" defaultValue={event.kind} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4">{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <FormField label="Location" name="location" defaultValue={event.location ?? ""} />
+        <label className="block text-sm font-medium">Visibility<select name="visibility" defaultValue={event.visibility} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4"><option value="PUBLIC">Public</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal</option></select></label>
+        <FormField label="Starts" name="startsAt" type="datetime-local" required defaultValue={localValue(event.startsAt)} />
+        <FormField label="Ends" name="endsAt" type="datetime-local" required defaultValue={localValue(event.endsAt)} />
+        <FormField label="Check-in opens" name="checkinOpensAt" type="datetime-local" required defaultValue={localValue(event.checkinOpensAt)} />
+        <FormField label="Check-in closes" name="checkinClosesAt" type="datetime-local" required defaultValue={localValue(event.checkinClosesAt)} />
+        <button disabled={pending} className="button-primary sm:col-span-2">{pending ? "Saving…" : "Save event"}</button>
+      </form>}
+      {!locked && <div className="mt-6 border-t border-mecg-navy/10 pt-4">
+        <FormField label="Cancellation reason" name="cancellationReason" value={reason} onChange={(change) => setReason(change.target.value)} />
+        <button type="button" disabled={pending || !reason.trim()} onClick={() => void cancel()} className="mt-3 rounded-full px-4 py-2 text-sm font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.3)] disabled:opacity-45">Cancel event</button>
+      </div>}
+      <OperationNotice kind="error">{error}</OperationNotice>
+    </section>
+  );
+}

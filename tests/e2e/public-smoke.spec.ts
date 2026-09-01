@@ -1,0 +1,36 @@
+import { expect, test } from "@playwright/test";
+
+test("the public entry point redirects to a usable home page", async ({ page }) => {
+  const externalFontRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.resourceType() === "font" && !new URL(request.url()).hostname.match(/^(127\.0\.0\.1|localhost)$/)) {
+      externalFontRequests.push(request.url());
+    }
+  });
+
+  await page.goto("/");
+
+  await expect(page).toHaveURL(/\/home$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Michigan Engineering Consulting Group" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "MECG home" })).toBeVisible();
+  expect(externalFontRequests).toEqual([]);
+});
+
+test("public navigation reaches the contact workflow", async ({ page }) => {
+  await page.goto("/home");
+
+  await page.getByRole("contentinfo").getByRole("link", { name: "Contact Us", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/contact$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Contact Us" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /send/i })).toBeVisible();
+});
+
+test("responses keep the expected browser security boundaries", async ({ request }) => {
+  const response = await request.get("/home");
+
+  expect(response.ok()).toBeTruthy();
+  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect(response.headers()["content-security-policy"]).toContain("font-src 'self'");
+});

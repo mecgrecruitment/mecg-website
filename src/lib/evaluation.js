@@ -1,4 +1,8 @@
-export function scoreEvaluation(criteria, ratings) {
+export function scoreEvaluation(
+  criteria,
+  ratings,
+  minimumObservedCriteria = Math.min(3, criteria.length),
+) {
   const ratingByCriterion = new Map(
     ratings.map((rating) => [rating.criterionId, rating.score]),
   );
@@ -12,7 +16,11 @@ export function scoreEvaluation(criteria, ratings) {
     (criterion) => criterion.required && !observed.includes(criterion),
   );
   const coverage = totalWeight === 0 ? 0 : observedWeight / totalWeight;
-  if (coverage < 0.75 || missingRequired) {
+  if (
+    coverage < 0.75
+    || missingRequired
+    || observed.length < minimumObservedCriteria
+  ) {
     return { valid: false, score: null, coverage };
   }
   const weighted = observed.reduce(

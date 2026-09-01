@@ -10,7 +10,7 @@ const TONES = {
 
 const SPACING = {
   compact: "py-10 sm:py-12",
-  standard: "py-12 sm:py-14",
+  standard: "py-16 sm:py-20",
 } as const;
 
 type MarketingSectionProps = ComponentPropsWithoutRef<"section"> & {

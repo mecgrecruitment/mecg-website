@@ -2,51 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { sendEmail, wrapEmail } from "@/lib/email";
+import { deliverNotification } from "@/lib/notifications";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
 type DecisionOutcome = Database["rush"]["Enums"]["decision_outcome"];
 
 const DECISION_OUTCOMES = new Set<DecisionOutcome>(["OFFER", "WAITLIST", "REJECT", "PROCEDURAL_REVIEW"]);
-
-function decisionEmail(outcome: string, name: string) {
-  const cta = { label: "View your status", href: "https://mecgmichigan.com/applicant" };
-  switch (outcome) {
-    case "OFFER":
-      return {
-        subject: "Your MECG rush decision: offer",
-        html: wrapEmail(
-          `<p>Hi ${name},</p><p>Congratulations! MECG is excited to offer you a spot in our chapter. A board member will follow up with next steps soon.</p>`,
-          cta,
-        ),
-      };
-    case "REJECT":
-      return {
-        subject: "Your MECG rush decision",
-        html: wrapEmail(
-          `<p>Hi ${name},</p><p>Thank you for rushing MECG this cycle. After careful review, we're not able to extend an offer this semester. We appreciate the time you put in and hope you'll stay in touch.</p>`,
-          cta,
-        ),
-      };
-    case "WAITLIST":
-      return {
-        subject: "Your MECG rush decision: waitlist",
-        html: wrapEmail(
-          `<p>Hi ${name},</p><p>Thank you for rushing MECG. You've been placed on our waitlist, we'll reach out if a spot opens up.</p>`,
-          cta,
-        ),
-      };
-    default:
-      return {
-        subject: "Your MECG rush decision",
-        html: wrapEmail(
-          `<p>Hi ${name},</p><p>Your MECG rush application status has been updated. Reach out to the board with any questions.</p>`,
-          cta,
-        ),
-      };
-  }
-}
 
 export async function POST(req: NextRequest) {
   const user = await currentUser();
@@ -104,34 +67,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(body, { status });
   }
   if (body.action === "RELEASE") {
-    // The decision is already RELEASED at this point; a notification failure must never roll it back,
-    // but it must not be reported as a clean success either.
-    const { data: released, error: releasedError } = await supabase
-      .from("decisions")
-      .select("outcome, application_id, applications!inner(pnms!inner(name, contact))")
-      .eq("id", String(body.decisionId ?? ""))
-      .single();
-    if (releasedError) console.error("released decision lookup failed", releasedError);
-    const pnm = released?.applications?.pnms;
-    let notified = false;
-    if (pnm) {
-      const { subject, html } = decisionEmail(released.outcome, pnm.name);
-      notified = await sendEmail({ to: pnm.contact, subject, html });
-      if (!notified) console.error("release decision notification failed", { decisionId: String(body.decisionId ?? "") });
-      const { error: logError } = await supabase.rpc("log_message", {
-        target_application_id: released.application_id,
-        message_kind: "DECISION_RELEASED",
-        message_recipient: pnm.contact,
-        message_subject: subject,
-        was_delivered: notified,
-      });
-      if (logError) console.error("message log failed", logError);
+    // release_decision committed the durable outbox row in the same transaction.
+    // Delivery cannot roll business state back, and temporary failures remain queued.
+    const { data: notificationId, error: notificationLookupError } = await supabase.rpc("decision_notification_id", {
+      target_decision_id: String(body.decisionId ?? ""),
+    });
+    if (notificationLookupError || typeof notificationId !== "string") {
+      console.error("released decision notification lookup failed", notificationLookupError);
+      return NextResponse.json({ released: true, notified: false, queued: true }, { status: 202 });
     }
-    if (!notified) {
-      return NextResponse.json(
-        { released: true, notified: false, error: "Outcome released, but the applicant notification could not be sent. Contact them directly." },
-        { status: 502 },
-      );
+    try {
+      const notification = await deliverNotification(createAdminClient(), notificationId);
+      if (!notification.delivered) {
+        return NextResponse.json(
+          { released: true, notified: false, queued: notification.status === "PENDING" || notification.status === "NOT_DUE" },
+          { status: 202 },
+        );
+      }
+    } catch (notificationError) {
+      console.error("release decision notification attempt failed", {
+        decisionId: String(body.decisionId ?? ""),
+        category: notificationError instanceof Error ? notificationError.message : "unknown",
+      });
+      return NextResponse.json({ released: true, notified: false, queued: true }, { status: 202 });
     }
   }
   return NextResponse.json(data ?? { ok: true }, { status: body.action === "CREATE" ? 201 : 200 });

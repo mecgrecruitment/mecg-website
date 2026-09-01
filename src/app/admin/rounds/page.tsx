@@ -56,14 +56,15 @@ export default async function RoundsPage() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
   const supabase = await createClient();
-  const [cycleResult, roundsResult, membersResult, appsResult, rubricsResult] = await Promise.all([
+  const [cycleResult, roundsResult, membersResult, appsResult, rubricsResult, assignmentsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,kind,status").eq("cycle_id", cycleId).order("name"),
     supabase.from("memberships").select("user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId).neq("status", "DRAFT"),
     supabase.rpc("cycle_rubrics", { target_cycle_id: cycleId }),
+    supabase.from("evaluation_assignments").select("id,evaluator_id,status,rounds!inner(id,name,cycle_id),applications!inner(id,pnms!inner(name)),evaluations(id)").eq("rounds.cycle_id", cycleId).eq("status", "ASSIGNED"),
   ]);
-  for (const result of [cycleResult, roundsResult, membersResult, appsResult]) if (result.error) throw result.error;
+  for (const result of [cycleResult, roundsResult, membersResult, appsResult, assignmentsResult]) if (result.error) throw result.error;
   if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
   const roundRubrics = parseRubrics(rubricsResult.data, cycleId);
   const cycle = cycleResult.data;
@@ -74,9 +75,18 @@ export default async function RoundsPage() {
     .filter((application) => !["WITHDRAWN", "REJECTED"].includes(application.status))
     .map((application) => ({ id: application.id, label: application.pnms.name }))
     .sort((a, b) => a.label.localeCompare(b.label));
+  const accounts = memberAccountsFor(membersResult.data ?? []);
+  const memberNameById = new Map(accounts.map((account) => [account.id, account.name]));
+  const assignments = (assignmentsResult.data ?? []).filter((assignment) => assignment.evaluations.length === 0).map((assignment) => ({
+    id: assignment.id,
+    label: assignment.rounds.name,
+    evaluatorId: assignment.evaluator_id,
+    evaluatorName: memberNameById.get(assignment.evaluator_id) ?? "Unknown evaluator",
+    applicationName: assignment.applications.pnms.name,
+  }));
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-6xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Rounds"
@@ -86,8 +96,9 @@ export default async function RoundsPage() {
       <RoundControls
         cycleId={cycleId}
         rounds={rounds}
-        memberAccounts={memberAccountsFor(membersResult.data ?? [])}
+        memberAccounts={accounts}
         applications={applications}
+        assignments={assignments}
       />
       {roundRubrics.map((round) => <RubricEditor key={round.roundId} round={round} />)}
       <section>

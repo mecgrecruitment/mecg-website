@@ -46,7 +46,7 @@ export default function DeliberationDeck({ entries }: { entries: DeckEntry[] }) 
       <div className="flex flex-1 items-center justify-center">
         <div
           key={entry.id}
-          className="flex w-full max-w-3xl flex-col items-center gap-8 rounded-3xl bg-white/[0.04] p-10 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] animate-[fade-up_var(--t-shift)_var(--ease-seat)] sm:p-14"
+          className="flex w-full max-w-3xl flex-col items-center gap-8 rounded-3xl bg-white/[0.04] p-10 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:p-14"
         >
           <div>
             <h1 className="text-5xl font-semibold tracking-[-0.03em] sm:text-6xl">{entry.name}</h1>

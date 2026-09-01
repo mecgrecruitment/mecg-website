@@ -11,6 +11,7 @@ export type RoundAggregate = {
 export function scoreEvaluation(
   criteria: CriterionInput[],
   ratings: RatingInput[],
+  minimumObservedCriteria?: number,
 ): ScoredEvaluation;
 export function aggregateRound(evaluations: ScoredEvaluation[]): RoundAggregate;
 export function combineRoundScores(

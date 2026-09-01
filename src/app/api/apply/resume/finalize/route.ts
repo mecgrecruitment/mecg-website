@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
-import { validateResumePdf } from "@/lib/pdf-validation";
+import { PDF_VALIDATION_TIMEOUT_MS, validateResumePdf } from "@/lib/pdf-validation";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_REQUEST_BYTES = 2 * 1024;
-const PARSE_TIMEOUT_MS = 15_000;
-const PARSE_TIMEOUT_MESSAGE = "The PDF took too long to check. Re-export it and try again.";
 
 type PendingUpload = { documentId: string; path: string; declaredSize: number; filename: string };
 type ReadyUpload = {
@@ -66,16 +64,7 @@ export async function POST(req: NextRequest) {
   }
 
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  // A crafted PDF can keep pdfjs-dist busy indefinitely, and validateResumePdf
-  // owns the loading task, so the handler can only bound its own wait here.
-  // ponytail: the parse keeps burning CPU in the background after this fires --
-  // the real cancel (loadingTask.destroy() on expiry) belongs in pdf-validation.ts.
-  const validation = await Promise.race([
-    validateResumePdf(bytes),
-    new Promise<{ ok: false; message: string }>((resolve) =>
-      setTimeout(() => resolve({ ok: false, message: PARSE_TIMEOUT_MESSAGE }), PARSE_TIMEOUT_MS).unref?.(),
-    ),
-  ]);
+  const validation = await validateResumePdf(bytes, { timeoutMs: PDF_VALIDATION_TIMEOUT_MS });
   if (!validation.ok) {
     await rejectUpload(supabase, documentId, pending.path, validation.message);
     return NextResponse.json({ error: validation.message }, { status: 400 });

@@ -78,6 +78,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const deadlineB = b.rounds.closes_at ? new Date(b.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY;
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
+  const firstReadyAssignmentId = visible.find(isReady)?.id;
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
   // One list of what this member actually owes, ordered by deadline. Before
@@ -129,7 +130,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         : "No evaluations have been assigned yet";
 
   return (
-    <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-7xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow={`${cycleMembership.cycle.name} · ${cycleMembership.cycle.status}`}
         title="Evaluation Hub"
@@ -147,10 +148,15 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             <Link
               key={`${task.href}-${task.label}`}
               href={task.href}
-              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/[0.05]"
+              className="task-row flex items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]"
             >
-              <span className="text-[14px] font-semibold text-mecg-navy">{task.label}</span>
-              <span className="text-[12px] text-mecg-navy/50">{task.detail}</span>
+              <span className="min-w-0">
+                <span className="block text-[14px] font-semibold text-mecg-navy">{task.label}</span>
+                <span className="mt-0.5 block text-[12px] text-mecg-navy/65">{task.detail}</span>
+              </span>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="task-row-arrow shrink-0 text-mecg-blue" aria-hidden="true">
+                <path d="M6 4l6 6-6 6" />
+              </svg>
             </Link>
           ))}
           {!tasks.length && (
@@ -253,7 +259,17 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 {submitted ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. A Board Member can create an audited correction if needed.</p>
                 ) : ready && rubric ? (
-                  <EvaluationForm assignmentId={assignment.id} criteria={criteria} />
+                  <details className="mt-3" open={assignment.id === firstReadyAssignmentId}>
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] marker:content-none">
+                      <span>{assignment.id === firstReadyAssignmentId ? "Continue evaluation" : "Open evaluation"}</span>
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
+                        <path d="M5 8l5 5 5-5" />
+                      </svg>
+                    </summary>
+                    <div className="disclosure-panel">
+                      <EvaluationForm assignmentId={assignment.id} criteria={criteria} />
+                    </div>
+                  </details>
                 ) : ready ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its rubric is unavailable. Contact the Board before evaluating.</p>
                 ) : assignment.status === "RECUSED" ? (

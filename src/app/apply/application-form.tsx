@@ -66,6 +66,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("details");
+  const [stepDirection, setStepDirection] = useState<"forward" | "back">("forward");
   const [name, setName] = useState(initialDraft?.name || initialName);
   const [preferredName, setPreferredName] = useState(initialDraft?.preferredName ?? "");
   const [phone, setPhone] = useState(initialDraft?.phone ?? "");
@@ -181,6 +182,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
 
   function changeStep(next: Step) {
     if (next === step) return;
+    setStepDirection(STEPS.findIndex((item) => item.id === next) > STEPS.findIndex((item) => item.id === step) ? "forward" : "back");
     stepChangeRequested.current = true;
     setStep(next);
   }
@@ -298,7 +300,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-10">
-      <aside className="order-2 lg:order-1 lg:sticky lg:top-8">
+      <aside className="order-2 hidden lg:order-1 lg:sticky lg:top-8 lg:block">
         <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
           <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2" aria-label="Application progress">
@@ -318,11 +320,25 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       </aside>
 
       <section onChangeCapture={handleApplicationChange} className="surface-card order-1 min-w-0 bg-white p-6 sm:p-8 lg:order-2">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
-        {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
-        {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
-        {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
-        {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
+        <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-6 rounded-t-[28px] border-b border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur lg:hidden">
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
+            <p className="text-xs font-semibold text-mecg-navy/65" aria-live="polite">
+              {saveState.kind === "saving" ? "Saving…" : saveState.kind === "saved" ? "Saved" : saveState.kind === "error" ? "Save failed" : STEPS[currentIndex].label}
+            </p>
+          </div>
+          <div className="progress-track mt-3" aria-hidden="true">
+            <div className="progress-fill" style={{ transform: `scaleX(${(currentIndex + 1) / STEPS.length})` }} />
+          </div>
+        </div>
+
+        <div key={step} className="step-seat" data-direction={stepDirection}>
+          <p className="hidden font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
+          {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
+          {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
+          {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
+          {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
+        </div>
 
         {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} aria-busy={saving || uploading} className="button-dark flex-1 bg-mecg-navy sm:flex-none">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
       </section>

@@ -3,14 +3,22 @@
 :root {
   --background: #ffffff;
   --foreground: #070d1f;
+  --font-montserrat: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --paper: #f4f1ec;
   --line: rgb(7 13 31 / 12%);
   --shadow-card: 0 18px 55px rgb(7 13 31 / 9%);
-  --t-detent: 150ms;
-  --t-shift: 420ms;
+  --t-press: 120ms;
+  --t-control: 150ms;
+  --t-panel: 200ms;
+  --t-page: 360ms;
+  --t-detent: var(--t-control);
+  --t-shift: var(--t-page);
   --t-seat: 700ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-shift: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-seat: cubic-bezier(0.2, 0, 0.1, 1);
-  --ease-detent: cubic-bezier(0.4, 0, 0, 1);
+  --ease-detent: var(--ease-out);
 }
 
 @theme {
@@ -101,6 +109,7 @@ textarea:focus-visible {
 }
 
 .button-primary { background: var(--color-mecg-orange); color: var(--color-mecg-navy); }
+.button-primary.is-success { background: oklch(0.527 0.154 150.069); color: white; }
 .button-primary:hover { filter: brightness(1.08); }
 .button-secondary { box-shadow: inset 0 0 0 1px rgb(7 13 31 / 18%); color: var(--color-mecg-navy); }
 .button-secondary:hover { background: rgb(63 99 175 / 12%); }
@@ -208,6 +217,55 @@ textarea:focus-visible {
   color: var(--color-mecg-navy);
 }
 
+.workspace-stack {
+  gap: 2.5rem;
+}
+
+.task-row {
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--t-control);
+  transition-timing-function: var(--ease-out);
+}
+
+.task-row:hover,
+.task-row:focus-visible {
+  background: rgb(63 99 175 / 5%);
+  box-shadow: inset 0 0 0 1px rgb(63 99 175 / 24%);
+}
+
+.task-row-arrow {
+  transition: transform var(--t-control) var(--ease-out), color var(--t-control) var(--ease-out);
+}
+
+.task-row:hover .task-row-arrow,
+.task-row:focus-visible .task-row-arrow {
+  color: var(--color-mecg-orange-ink);
+  transform: translateX(2px);
+}
+
+.disclosure-chevron {
+  transition: transform var(--t-control) var(--ease-out);
+}
+
+details[open] > summary .disclosure-chevron {
+  transform: rotate(180deg);
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: rgb(7 13 31 / 10%);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-mecg-orange);
+  transition: transform var(--t-panel) var(--ease-out);
+  transform-origin: left;
+}
+
 .hero-grid {
   background-image:
     linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
@@ -238,6 +296,39 @@ textarea:focus-visible {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  @keyframes panel-seat {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes step-forward {
+    from {
+      opacity: 0;
+      transform: translateX(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes step-back {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   @keyframes fade-up {
     from {
       opacity: 0;
@@ -256,6 +347,28 @@ textarea:focus-visible {
   .pre-reveal {
     opacity: 0;
   }
+
+  .panel-seat,
+  details[open] > .disclosure-panel {
+    animation: panel-seat var(--t-panel) var(--ease-out) both;
+  }
+
+  .step-seat[data-direction="forward"] {
+    animation: step-forward var(--t-panel) var(--ease-out) both;
+  }
+
+  .step-seat[data-direction="back"] {
+    animation: step-back var(--t-panel) var(--ease-out) both;
+  }
+
+  .recruitment-event {
+    animation: panel-seat var(--t-page) var(--ease-out) both;
+    animation-delay: calc(var(--event-index, 0) * 60ms);
+  }
+
+  .submission-confirmed {
+    animation: panel-seat var(--t-panel) var(--ease-out) both;
+  }
 }
 
 @media (min-width: 640px) {
@@ -265,16 +378,27 @@ textarea:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html {
     scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 
   .pre-reveal {
     opacity: 1;
+  }
+
+  .button-primary:active,
+  .button-secondary:active,
+  .button-dark:active,
+  .button-light:active,
+  .button-ghost-light:active,
+  [class*="active:scale-"]:active {
+    transform: none;
+    scale: 1;
+  }
+
+  .task-row-arrow,
+  .disclosure-chevron,
+  .progress-fill {
+    transition-duration: 80ms;
   }
 }

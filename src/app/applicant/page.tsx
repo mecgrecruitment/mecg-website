@@ -218,9 +218,9 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         )
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
         {submitted === "1" && (
-          <section role="status" className="rounded-2xl bg-emerald-50 p-6 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
+          <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-6 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-emerald-700">Application received</p>
             <h2 className="mt-3 text-2xl font-semibold">You are all set.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written responses will enter anonymous first-pass review, and any released updates will appear on this page.</p>
@@ -238,7 +238,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           </section>
         )}
         {(action === "rsvp" || action === "buddy") && (
-          <section role="status" className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
+          <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
             {action === "rsvp" ? "Your RSVP is confirmed." : "Your member chat is booked."}
           </section>
         )}
@@ -267,9 +267,19 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         {dashboardApplications.map((application) => {
           const responses = Array.isArray(application.responses) ? application.responses as { key: string; prompt?: string; answer?: string }[] : [];
           const withdrawn = application.display_status === "WITHDRAWN" && !application.released_outcome;
+          const isCurrentApplication = application.application_id === heroApplication.application_id;
           return (
-            <section key={application.application_id} className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-              <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">{application.cycle_name}</p>
+            <details key={application.application_id} open={isCurrentApplication} className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 marker:content-none">
+                <span>
+                  <span className="block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-mecg-navy/65">{application.cycle_name}</span>
+                  <span className="mt-1 block text-sm text-mecg-navy/65">{isCurrentApplication ? "Current application" : "Earlier application"}</span>
+                </span>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
+                  <path d="M5 8l5 5 5-5" />
+                </svg>
+              </summary>
+              <div className="disclosure-panel">
               {withdrawn ? (
                 <>
                   <p className="mt-3 text-2xl font-semibold">Application withdrawn</p>
@@ -348,7 +358,8 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   ))}
                 </dl>
               )}
-            </section>
+              </div>
+            </details>
           );
         })}
         <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">

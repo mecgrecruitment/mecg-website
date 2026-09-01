@@ -8,19 +8,20 @@ type MemberRole = Database["rush"]["Enums"]["member_role"];
 const ROLE_PRIORITY: readonly MemberRole[] = ["OWNER", "PANEL", "BOARD", "RECRUITMENT_COMMITTEE", "MEMBER"];
 
 export function memberAccountsFor(
-  memberships: ReadonlyArray<{ user_id: string; role: MemberRole; profiles: { display_name: string } }>,
+  memberships: ReadonlyArray<{ user_id: string; role: MemberRole; active?: boolean; profiles: { display_name: string } }>,
 ) {
-  const accounts = new Map<string, { id: string; name: string; roles: MemberRole[] }>();
+  const accounts = new Map<string, { id: string; name: string; roles: MemberRole[]; active: boolean }>();
   for (const membership of memberships) {
     const account = accounts.get(membership.user_id);
-    if (account) account.roles.push(membership.role);
-    else accounts.set(membership.user_id, { id: membership.user_id, name: membership.profiles.display_name, roles: [membership.role] });
+    if (account) { account.roles.push(membership.role); account.active ||= membership.active !== false; }
+    else accounts.set(membership.user_id, { id: membership.user_id, name: membership.profiles.display_name, roles: [membership.role], active: membership.active !== false });
   }
   return Array.from(accounts.values())
     .map((account) => ({
       id: account.id,
       name: account.name,
       role: ROLE_PRIORITY.find((role) => account.roles.includes(role)) ?? ("MEMBER" as MemberRole),
+      active: account.active,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

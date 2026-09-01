@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { operationalLog } from "@/lib/operational-log";
 import { createClient } from "@/lib/supabase/server";
 
 // Unauthenticated on purpose (platform health checks cannot sign in), so the
@@ -27,7 +28,10 @@ export async function GET() {
     const result = await probe;
     return NextResponse.json(result.body, { headers: healthyCacheHeaders() });
   } catch (error) {
-    console.error("health check failed", error);
+    operationalLog("error", {
+      event: "health.supabase_failed",
+      code: error instanceof Error ? error.name : "UNKNOWN",
+    });
     return NextResponse.json({ ok: false }, { status: 503, headers: { "Cache-Control": "no-store" } });
   } finally {
     if (inFlight === probe) inFlight = null;

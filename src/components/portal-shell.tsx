@@ -41,7 +41,7 @@ export default function PortalShell({
           </div>
         </header>
 
-        <section className="relative overflow-hidden bg-mecg-navy px-6 py-10 text-white sm:px-10 sm:py-12">
+        <section className="relative overflow-hidden bg-mecg-navy px-6 py-8 text-white sm:px-10 sm:py-10">
           <div className="project-blueprint absolute inset-0 opacity-45" aria-hidden="true" />
           <div className="relative mx-auto max-w-7xl">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">{eyebrow}</p>

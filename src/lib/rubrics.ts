@@ -3,6 +3,7 @@ export const ROUND_DEFINITIONS = [
     kind: "SPEED_DATING",
     name: "Speed Dating",
     weight: 40,
+    minimumObservedCriteria: 3,
     criteria: [
       ["communication", "Clear communication and concision", 25, true, "Answers clearly, concisely, and adapts to the listener."],
       ["listening", "Listening and question quality", 20, false, "Listens, follows up, and builds on the conversation."],
@@ -15,6 +16,7 @@ export const ROUND_DEFINITIONS = [
     kind: "GROUP_CASE",
     name: "Group Case",
     weight: 60,
+    minimumObservedCriteria: 3,
     criteria: [
       ["framing", "Problem framing and assumptions", 20, false, "Clarifies the objective, ambiguity, and assumptions."],
       ["analysis", "Analysis and evidence", 20, false, "Uses evidence and tests assumptions."],

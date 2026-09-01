@@ -23,6 +23,7 @@ export default function ImpressionForm({
   const [note, setNote] = useState(initial?.note ?? "");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
   const scoreGroupRef = useRef<HTMLDivElement>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -46,7 +47,8 @@ export default function ImpressionForm({
         setPending(false);
         return;
       }
-      router.refresh();
+      setSaved(true);
+      window.setTimeout(() => router.refresh(), 220);
     } catch {
       setError("Could not save impression. Check your connection and try again.");
       setPending(false);
@@ -116,8 +118,9 @@ export default function ImpressionForm({
       />
       <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>
       <OperationNotice kind="error">{error}</OperationNotice>
-      <button disabled={pending} className="button-primary disabled:opacity-50">
-        {pending ? "Saving…" : "Save impression"}
+      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Impression saved.</p>}
+      <button disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
+        {saved ? "✓ Saved" : pending ? "Saving…" : "Save impression"}
       </button>
     </form>
   );

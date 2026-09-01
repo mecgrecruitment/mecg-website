@@ -540,19 +540,22 @@ export type Database = {
         Row: {
           approver_id: string
           created_at: string
-          decision_id: string
+          decision_id: string | null
+          event_id: string | null
           id: string
         }
         Insert: {
           approver_id: string
           created_at?: string
-          decision_id: string
+          decision_id?: string | null
+          event_id?: string | null
           id?: string
         }
         Update: {
           approver_id?: string
           created_at?: string
-          decision_id?: string
+          decision_id?: string | null
+          event_id?: string | null
           id?: string
         }
         Relationships: [
@@ -1076,6 +1079,95 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_outbox: {
+        Row: {
+          application_id: string
+          attempt_count: number
+          created_at: string
+          cycle_id: string
+          decision_id: string
+          id: string
+          idempotency_key: string
+          last_attempt_at: string | null
+          last_error_category: string | null
+          max_attempts: number
+          next_attempt_at: string
+          provider_message_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          template_key: string
+          template_version: number
+        }
+        Insert: {
+          application_id: string
+          attempt_count?: number
+          created_at?: string
+          cycle_id: string
+          decision_id: string
+          id?: string
+          idempotency_key: string
+          last_attempt_at?: string | null
+          last_error_category?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          provider_message_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          template_key: string
+          template_version?: number
+        }
+        Update: {
+          application_id?: string
+          attempt_count?: number
+          created_at?: string
+          cycle_id?: string
+          decision_id?: string
+          id?: string
+          idempotency_key?: string
+          last_attempt_at?: string | null
+          last_error_category?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          provider_message_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          template_key?: string
+          template_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -1874,6 +1966,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_event: {
+        Args: { cancellation_reason: string; target_event_id: string }
+        Returns: undefined
+      }
+      deactivate_cycle_membership: {
+        Args: { revocation_reason: string; target_cycle_id: string; target_user_id: string }
+        Returns: boolean
+      }
+      reassign_evaluator: {
+        Args: { replacement_evaluator_id: string; target_assignment_id: string }
+        Returns: string
+      }
+      restore_cycle_membership: {
+        Args: { target_cycle_id: string; target_user_id: string }
+        Returns: boolean
+      }
+      unassign_evaluator: {
+        Args: { target_assignment_id: string }
+        Returns: boolean
+      }
+      update_event: {
+        Args: {
+          closes_at: string
+          event_ends_at: string
+          event_kind: string
+          event_location: string
+          event_name: string
+          event_starts_at: string
+          event_visibility: string
+          opens_at: string
+          target_event_id: string
+        }
+        Returns: undefined
+      }
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -2188,12 +2314,34 @@ export type Database = {
         Args: { target_decision_id: string }
         Returns: undefined
       }
+      claim_notification: {
+        Args: { target_notification_id: string }
+        Returns: Json
+      }
+      complete_notification: {
+        Args: {
+          error_category?: string
+          provider_id?: string
+          should_retry?: boolean
+          target_notification_id: string
+          was_delivered: boolean
+        }
+        Returns: string
+      }
+      decision_notification_id: {
+        Args: { target_decision_id: string }
+        Returns: string
+      }
       release_ready_decisions: {
         Args: { target_cycle_id: string }
         Returns: Json
       }
       respond_to_offer: {
         Args: { accept: boolean; target_application_id: string }
+        Returns: undefined
+      }
+      retry_notification: {
+        Args: { target_notification_id: string }
         Returns: undefined
       }
       resume_upload_locked: { Args: { target_path: string }; Returns: boolean }

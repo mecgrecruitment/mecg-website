@@ -35,7 +35,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
   const currentWorkspace = selected ? `/member/event?event=${selected.event_id}` : "/member/event";
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-3xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow="Live event grading"
         title={selected ? selected.event_name : "No event selected"}
@@ -58,9 +58,14 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
         </div>
       ) : (
         <section>
-          <SectionLabel>Quick impressions</SectionLabel>
-          <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{gradedCount} of {rosterRows.length} applicants graded</h2>
-          <p className="mt-1 text-sm text-mecg-navy/55">Started {formatStart(selected.starts_at)} · you can edit an impression until the grading window closes.</p>
+          <div className="sticky top-0 z-20 -mx-6 border-b border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+            <SectionLabel>Quick impressions</SectionLabel>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{gradedCount} of {rosterRows.length} applicants graded</h2>
+            <p className="mt-1 text-sm text-mecg-navy/65">Started {formatStart(selected.starts_at)} · you can edit an impression until the grading window closes.</p>
+            <div className="progress-track mt-3 sm:max-w-sm" aria-hidden="true">
+              <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? gradedCount / rosterRows.length : 0})` }} />
+            </div>
+          </div>
           <div className="mt-3.5 flex flex-col gap-4">
             {rosterRows.map((row) => (
               <article key={row.application_id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
@@ -69,21 +74,25 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
                   <details className="group mt-3 rounded-xl">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                       <span className="text-sm font-semibold text-mecg-navy">Graded · Score {row.score} · edit</span>
-                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron flex-shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>
-                    <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ score: row.score, tags: row.tags ?? [], note: row.note ?? "" }} />
+                    <div className="disclosure-panel">
+                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ score: row.score, tags: row.tags ?? [], note: row.note ?? "" }} />
+                    </div>
                   </details>
                 ) : (
                   <details className="group mt-3 rounded-xl" open={row.application_id === firstUngradedId}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                       <span className="text-sm font-semibold text-mecg-navy">Not graded yet</span>
-                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron flex-shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>
-                    <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} />
+                    <div className="disclosure-panel">
+                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} />
+                    </div>
                   </details>
                 )}
               </article>

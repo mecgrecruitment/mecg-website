@@ -21,8 +21,12 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   ADD_USER: "MANAGE_MEMBERSHIPS",
   ADD_EXISTING_USER: "MANAGE_MEMBERSHIPS",
   SET_MEMBER_ROLE: "MANAGE_MEMBERSHIPS",
+  DEACTIVATE_MEMBERSHIP: "MANAGE_MEMBERSHIPS",
+  RESTORE_MEMBERSHIP: "MANAGE_MEMBERSHIPS",
   ADD_APPLICANT: "RECRUITMENT_OPERATIONS",
   ASSIGN: "RECRUITMENT_OPERATIONS",
+  UNASSIGN: "RECRUITMENT_OPERATIONS",
+  REASSIGN: "RECRUITMENT_OPERATIONS",
   SET_APPLICATION_STATUS: "RECRUITMENT_OPERATIONS",
   CREATE_SLOT: "RECRUITMENT_OPERATIONS",
   SET_EVENT_GRADING: "RECRUITMENT_OPERATIONS",
@@ -97,10 +101,28 @@ export async function POST(req: NextRequest) {
   } else if (action === "SET_MEMBER_ROLE") {
     if (!memberRole) return NextResponse.json({ error: "Invalid member role" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_membership_role", { target_user_id: String(body.userId), target_cycle_id: cycleId, target_role: memberRole }));
+  } else if (action === "DEACTIVATE_MEMBERSHIP") {
+    const userId = typeof body.userId === "string" ? body.userId : "";
+    const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+    if (!userId || !reason) return NextResponse.json({ error: "A user and reason are required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("deactivate_cycle_membership", { target_user_id: userId, target_cycle_id: cycleId, revocation_reason: reason }));
+  } else if (action === "RESTORE_MEMBERSHIP") {
+    const userId = typeof body.userId === "string" ? body.userId : "";
+    if (!userId) return NextResponse.json({ error: "A user is required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("restore_cycle_membership", { target_user_id: userId, target_cycle_id: cycleId }));
   } else if (action === "ADD_APPLICANT") {
     ({ data, error } = await supabase.rpc("add_applicant", { target_cycle_id: cycleId, applicant_name: String(body.name ?? ""), applicant_contact: String(body.contact ?? "") }));
   } else if (action === "ASSIGN") {
     ({ data, error } = await supabase.rpc("assign_evaluator", { target_cycle_id: cycleId, target_round_id: String(body.roundId ?? ""), target_application_id: String(body.applicationId ?? ""), target_evaluator_id: String(body.evaluatorId ?? "") }));
+  } else if (action === "UNASSIGN") {
+    const assignmentId = typeof body.assignmentId === "string" ? body.assignmentId : "";
+    if (!assignmentId) return NextResponse.json({ error: "An assignment is required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("unassign_evaluator", { target_assignment_id: assignmentId }));
+  } else if (action === "REASSIGN") {
+    const assignmentId = typeof body.assignmentId === "string" ? body.assignmentId : "";
+    const evaluatorId = typeof body.evaluatorId === "string" ? body.evaluatorId : "";
+    if (!assignmentId || !evaluatorId) return NextResponse.json({ error: "An assignment and evaluator are required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("reassign_evaluator", { target_assignment_id: assignmentId, replacement_evaluator_id: evaluatorId }));
   } else if (action === "SET_ROUND_STATUS") {
     ({ data, error } = await supabase.rpc("set_round_status", { target_round_id: String(body.roundId ?? ""), next_status: status as RoundStatus }));
   } else if (action === "SET_CYCLE_STATUS") {

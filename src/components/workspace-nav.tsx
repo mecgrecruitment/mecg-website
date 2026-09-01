@@ -48,6 +48,7 @@ export default async function WorkspaceNav({
         ["/admin/screening", "Screening admin"],
         ["/admin/groups", "Case teams"],
         ["/admin/messages", "Messages"],
+        ...(can("MANAGE_CYCLE") ? [["/admin/notifications", "Delivery"] as const] : []),
       ] as const)
       : []),
     ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash"] as const] : []),
@@ -57,5 +58,9 @@ export default async function WorkspaceNav({
     ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
 
-  return <PillNav ariaLabel="Workspace" current={current} links={links} />;
+  return (
+    <div className="sticky top-0 z-30 -mx-6 border-y border-mecg-navy/8 bg-white/95 px-6 py-2 backdrop-blur sm:-mx-10 sm:px-10">
+      <PillNav ariaLabel="Workspace" current={current} links={links} />
+    </div>
+  );
 }

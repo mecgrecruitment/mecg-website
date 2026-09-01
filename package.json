@@ -8,15 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test",
+    "test:e2e": "playwright test",
     "verify:backend": "node scripts/verify-backend.mjs",
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
     "verify:auth": "node scripts/verify-auth-routing.mjs",
     "test:supabase": "supabase test db --linked supabase/tests/rush_foundation.sql",
+    "test:supabase:local": "supabase test db supabase/tests/rush_foundation.sql",
     "supabase:link": "supabase link --project-ref chrxtsohxazngabdcpzb",
     "supabase:sync-env": "node scripts/sync-supabase-public-key.mjs",
     "supabase:verify-project": "node scripts/verify-supabase-project.mjs",
     "supabase:types": "supabase gen types typescript --linked --schema rush > src/lib/supabase/database.types.ts",
     "supabase:lint": "supabase db lint --linked --schema rush --level error --fail-on error",
+    "supabase:lint:local": "supabase db lint --local --schema rush --level error --fail-on error",
     "check:sql": "python3 scripts/check-sql.py"
   },
   "dependencies": {
@@ -31,6 +34,7 @@
   },
   "devDependencies": {
     "@next/env": "16.3.1",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",

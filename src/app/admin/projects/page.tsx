@@ -62,7 +62,7 @@ export default async function ProjectsPage() {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow="Client work"
         title="Projects"

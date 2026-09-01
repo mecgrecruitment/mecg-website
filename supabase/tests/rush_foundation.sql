@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(194);
+select extensions.plan(207);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -10,6 +10,9 @@ select extensions.has_table('rush','evaluations','evaluations table exists');
 select extensions.has_table('rush','audit_events','audit table exists');
 select extensions.has_table('rush','application_questions','intake questions exist');
 select extensions.has_table('rush','application_responses','intake responses exist');
+select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='rush_cycles' and indexname='rush_cycles_one_non_terminal_idx' and indexdef like '%UNIQUE%'), 'only one non-terminal cycle is allowed');
+select extensions.ok(exists(select 1 from information_schema.columns where table_schema='rush' and table_name='rubrics' and column_name='minimum_observed_criteria' and is_nullable='NO'), 'rubrics store an explicit minimum observed criterion count');
+select extensions.ok(position('observed_count < minimum_observed' in pg_get_functiondef('rush.submit_evaluation(text,jsonb,text)'::regprocedure)) > 0, 'evaluation submission enforces observed count separately from weight coverage');
 select extensions.ok(exists (select 1 from pg_enum e join pg_type t on t.oid = e.enumtypid join pg_namespace n on n.oid = t.typnamespace where n.nspname = 'rush' and t.typname = 'member_role' and e.enumlabel = 'RECRUITMENT_COMMITTEE'), 'committee role exists');
 select extensions.has_function('rush','has_cycle_capability',array['text','text'],'capability helper exists');
 select extensions.has_function('rush','submit_application',array['text','text','text','text','text','text','text','text','jsonb','boolean','text','text','text','text'],'application function exists');
@@ -111,16 +114,22 @@ insert into auth.users(id,email,raw_user_meta_data) values
   ('10000000-0000-4000-8000-000000000001','pgtap-profile-owner@example.invalid','{}'::jsonb),
   ('10000000-0000-4000-8000-000000000002','pgtap-profile-member@example.invalid','{}'::jsonb),
   ('10000000-0000-4000-8000-000000000003','pgtap-profile-outsider@example.invalid','{}'::jsonb);
+update rush.rush_cycles set status='CLOSED' where status in ('DRAFT','OPEN','IN_PROCESS','DECISION_LOCK');
 insert into rush.rush_cycles(id,name,status) values
   ('10000000-0000-4000-8000-000000000011','pgTAP profile cycle','OPEN'),
-  ('10000000-0000-4000-8000-000000000012','pgTAP outsider cycle','OPEN');
+  ('10000000-0000-4000-8000-000000000012','pgTAP outsider cycle','CLOSED');
+select extensions.throws_ok(
+  $$insert into rush.rush_cycles(id,name,status) values ('10000000-0000-4000-8000-000000000019','pgTAP forbidden concurrent cycle','DRAFT')$$,
+  '23505',
+  'duplicate key value violates unique constraint "rush_cycles_one_non_terminal_idx"',
+  'a second non-terminal cycle is rejected by the database');
 insert into rush.memberships(user_id,cycle_id,role) values
   ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000011','OWNER'),
   ('10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000011','MEMBER'),
   ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000012','MEMBER');
 
 create temporary table rush_foundation_results(key text primary key,value bigint);
-grant insert,select on rush_foundation_results to authenticated;
+grant insert,select on rush_foundation_results to authenticated, service_role;
 insert into rush_foundation_results values ('fixture_writes_before',
   (select count(*) from rush.applications) +
   (select count(*) from rush.application_documents) +
@@ -163,6 +172,7 @@ insert into rush_foundation_results values ('inactive_profile',(select count(*) 
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='inactive_profile'),0::bigint,'inactive profile cannot read a colleague profile');
 update rush.profiles set active=true where id='10000000-0000-4000-8000-000000000001';
+update rush.rush_cycles set status='CLOSED' where id='10000000-0000-4000-8000-000000000011';
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
@@ -172,6 +182,7 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 select extensions.throws_ok($$select rush.create_cycle('pgTAP member-denied cycle')$$,'42501','forbidden','non-owner cannot create a cycle');
 select extensions.ok(exists(select 1 from rush.audit_events a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP owner-created cycle' and a.actor_id='10000000-0000-4000-8000-000000000001'::uuid and a.action='CYCLE_CREATED' and a.resource='RushCycle' and a.resource_id=c.id), 'cycle creation retains actor-scoped audit behavior');
+update rush.rush_cycles set status='CLOSED' where name='pgTAP owner-created cycle';
 -- Audit follow-up (docs/audit/02-database-rls.md, Section 2 findings)
 select extensions.ok(not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='resume_upload_locked'), 'dead resume_upload_locked function is dropped');
 select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='events' and indexname='events_cycle_id_idx'), 'events cycle_id index exists');
@@ -226,6 +237,39 @@ set local role authenticated;
 insert into rush_foundation_results values ('reapply_no_open_cycle',(select case when rush.can_start_application() then 1 else 0 end));
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='reapply_no_open_cycle'),0::bigint,'no open cycle means no new application route');
+
+-- A high-weight criterion can satisfy the 75 percent weight gate by itself.
+-- The independent observed-count rule must still reject that evaluation.
+insert into rush.memberships(user_id,cycle_id,role) values
+  ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000012','OWNER');
+insert into rush.pnms(id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-000000000022','pgTAP Evidence Applicant','evidence@example.invalid','evidence@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
+  ('10000000-0000-4000-8000-000000000033','10000000-0000-4000-8000-000000000022','10000000-0000-4000-8000-000000000012','SUBMITTED',now());
+insert into rush.rounds(id,cycle_id,kind,name,status,weight) values
+  ('10000000-0000-4000-8000-000000000042','10000000-0000-4000-8000-000000000012','PGTAP_EVIDENCE','pgTAP evidence round','ACTIVE',100);
+insert into rush.rubrics(id,round_id,version,minimum_observed_criteria) values
+  ('10000000-0000-4000-8000-000000000052','10000000-0000-4000-8000-000000000042',1,2);
+insert into rush.rubric_criteria(id,rubric_id,key,name,weight,required,position) values
+  ('10000000-0000-4000-8000-000000000061','10000000-0000-4000-8000-000000000052','primary','Primary',80,true,0),
+  ('10000000-0000-4000-8000-000000000062','10000000-0000-4000-8000-000000000052','second','Second',10,false,1),
+  ('10000000-0000-4000-8000-000000000063','10000000-0000-4000-8000-000000000052','third','Third',10,false,2);
+insert into rush.evaluation_assignments(id,round_id,application_id,evaluator_id) values
+  ('10000000-0000-4000-8000-000000000071','10000000-0000-4000-8000-000000000042','10000000-0000-4000-8000-000000000033','10000000-0000-4000-8000-000000000001');
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
+  '22023','required criteria or observation coverage missing',
+  '80 percent weight does not bypass the explicit observed criterion minimum');
+set local role postgres;
+update rush.rubrics set minimum_observed_criteria=1 where id='10000000-0000-4000-8000-000000000052';
+set local role authenticated;
+select extensions.lives_ok(
+  $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
+  'the same ratings pass when the rubric explicitly requires one observation');
+set local role postgres;
 
 
 -- Application question editor. The prompts were previously only changeable by
@@ -373,6 +417,10 @@ select extensions.is(
   1,
   'rubric versions restart at 1 in the new cycle');
 select extensions.is(
+  (select b.minimum_observed_criteria from rush.rubrics b join rush.rounds r on r.id=b.round_id join rush.rush_cycles c on c.id=r.cycle_id where c.name='pgTAP cloned cycle' and r.kind='PGTAP_ROUND'),
+  (select b.minimum_observed_criteria from rush.rubrics b where b.round_id='10000000-0000-4000-8000-000000000041' order by b.version desc limit 1),
+  'the cloned rubric keeps its explicit observation minimum');
+select extensions.is(
   (select count(*) from rush.application_questions q join rush.rush_cycles c on c.id=q.cycle_id where c.name='pgTAP cloned cycle'),
   (select count(*) from rush.application_questions q where q.cycle_id='10000000-0000-4000-8000-000000000011'),
   'the edited application questions come across');
@@ -503,6 +551,7 @@ select extensions.has_table('rush','reminders_sent','reminder bookkeeping table 
 select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has row level security enabled and forced');
 select extensions.ok(not exists(select 1 from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has no policies, so only service_role reaches it');
 select extensions.ok(position('reminders_sent' in pg_get_functiondef('rush.pending_reminders()'::regprocedure)) > 0, 'pending_reminders excludes anyone already reminded');
+select extensions.ok(position('on conflict on constraint reminders_sent_kind_subject_id_recipient_id_key' in pg_get_functiondef('rush.mark_reminder_sent(text,text,uuid)'::regprocedure)) > 0, 'reminder idempotency uses an unambiguous conflict target');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
@@ -510,6 +559,13 @@ set local role authenticated;
 select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function mark_reminder_sent','an authenticated caller cannot record a reminder');
 select extensions.throws_ok($$select rush.pending_reminders()$$,'42501','permission denied for function pending_reminders','an authenticated caller cannot read pending reminders');
 set local role postgres;
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"service_role"}';
+set local role service_role;
+select rush.mark_reminder_sent('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid);
+select rush.mark_reminder_sent('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid);
+set local role postgres;
+select extensions.is((select count(*) from rush.reminders_sent where kind='EVALUATION_DUE' and subject_id='pgtap-round' and recipient_id='10000000-0000-4000-8000-000000000001'::uuid),1::bigint,'recording the same reminder twice stays idempotent');
 
 
 -- Policy decisions. Each of these encodes a rule that was previously left to
@@ -528,12 +584,29 @@ select extensions.ok(position('screening_packets' in pg_get_functiondef('rush.at
 -- Retention anonymises rather than deletes, so the audit trail survives.
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='anonymize_archived_applicants' and p.prosecdef and p.proconfig @> array['search_path=""']), 'retention function exists and is security definer with empty search path');
 select extensions.ok(position('delete from rush.pnms' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) = 0, 'retention never removes an applicant row, so decisions stay reconstructable');
+select extensions.ok(position('with stale_pnms as materialized' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) > 0 and position('temporary table stale_pnms' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) = 0, 'retention uses one analyzable candidate CTE for every write');
 select extensions.ok(exists(select 1 from cron.job where jobname = 'anonymize-archived-applicants'), 'retention is scheduled rather than merely available');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','permission denied for function anonymize_archived_applicants','an authenticated caller cannot run retention');
+set local role postgres;
+insert into rush.rush_cycles(id,name,status,updated_at) values
+  ('10000000-0000-4000-8000-000000000015','pgTAP expired archive','ARCHIVED',now() - interval '3 years');
+insert into rush.pnms(id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-000000000023','Retention Applicant','retention@example.invalid','retention@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at,draft_payload) values
+  ('10000000-0000-4000-8000-000000000034','10000000-0000-4000-8000-000000000023','10000000-0000-4000-8000-000000000015','REJECTED',now() - interval '3 years','{"private":"draft"}'::jsonb);
+insert into rush.application_responses(application_id,question_key,question_text,response_text) values
+  ('10000000-0000-4000-8000-000000000034','retention','Private question','Private answer');
+set local "request.jwt.claims" = '{"role":"service_role"}';
+set local role service_role;
+insert into rush_foundation_results values ('retention_count',rush.anonymize_archived_applicants());
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='retention_count'),1::bigint,'retention anonymizes the eligible archived applicant');
+select extensions.is((select name from rush.pnms where id='10000000-0000-4000-8000-000000000023'),'Redacted applicant','retention removes the applicant identity');
+select extensions.is((select count(*) from rush.application_responses where application_id='10000000-0000-4000-8000-000000000034'),0::bigint,'retention removes the applicant free-text responses');
 
 -- Prior-cycle history is board-only. ...0004 is an applicant, not staff.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';

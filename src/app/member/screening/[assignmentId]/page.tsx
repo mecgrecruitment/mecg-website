@@ -12,7 +12,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
   const { data: detail, error } = await screeningRpc<ScreeningDetail>(supabase, "screening_assignment_detail", { target_assignment_id: assignmentId });
   if (error || !detail) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">This blind assignment is unavailable.</p><Link href="/member/screening" className="button-secondary mt-4 text-sm">Back to queue</Link></main>;
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-3xl flex-col p-6 sm:p-10">
       <header className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{detail.candidateCode}</p>

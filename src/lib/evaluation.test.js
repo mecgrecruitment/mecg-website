@@ -33,6 +33,33 @@ test("scoreEvaluation rejects missing required criteria and low coverage", () =>
   );
 });
 
+test("scoreEvaluation enforces observed criterion count independently of weight", () => {
+  const topHeavyCriteria = [
+    { id: "required", weight: 80, required: true },
+    { id: "second", weight: 10, required: false },
+    { id: "third", weight: 10, required: false },
+  ];
+  const result = scoreEvaluation(
+    topHeavyCriteria,
+    [{ criterionId: "required", score: 4 }],
+    2,
+  );
+
+  assert.equal(result.coverage, 0.8);
+  assert.equal(result.valid, false);
+  assert.equal(result.score, null);
+});
+
+test("scoreEvaluation uses the rubric's explicit observed criterion minimum", () => {
+  const result = scoreEvaluation(criteria, [
+    { criterionId: "required", score: 4 },
+    { criterionId: "second", score: 4 },
+  ], 2);
+
+  assert.equal(result.coverage, 0.75);
+  assert.equal(result.valid, true);
+});
+
 test("aggregateRound keeps a single evaluation pending and flags wide disagreement", () => {
   assert.equal(aggregateRound([{ valid: true, score: 70 }]).status, "PENDING");
   const aggregate = aggregateRound([

@@ -1,4 +1,5 @@
 import { getSupabasePublicEnv, getSupabaseServiceRoleKey } from "@/lib/env";
+import { operationalLog } from "@/lib/operational-log";
 
 export function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
@@ -19,6 +20,6 @@ export function register() {
   }
 
   for (const problem of degraded) {
-    console.error(`[boot] DEGRADED: ${problem}`);
+    operationalLog("error", { event: "boot.degraded", detail: { problem } });
   }
 }

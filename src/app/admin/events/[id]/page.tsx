@@ -11,13 +11,14 @@ import { hasPermission } from "@/lib/authorization";
 import Link from "next/link";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
+import EventControls from "./event-controls";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
   const { id } = await params;
   const { token } = await searchParams;
   const supabase = await createClient();
-  const { data: event, error: eventError } = await supabase.from("events").select("id,name,cycle_id,starts_at,checkin_opens_at,checkin_closes_at,member_grading").eq("id", id).maybeSingle();
+  const { data: event, error: eventError } = await supabase.from("events").select("id,name,cycle_id,kind,status,location,visibility,starts_at,ends_at,checkin_opens_at,checkin_closes_at,member_grading").eq("id", id).maybeSingle();
   if (eventError) throw eventError;
   if (!event) notFound();
   if (
@@ -79,6 +80,13 @@ export default async function EventDetailPage({ params, searchParams }: { params
         action={<Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>}
       />
       {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
+
+      <EventControls event={{
+        id: event.id, name: event.name, kind: event.kind, status: event.status,
+        location: event.location, visibility: event.visibility, startsAt: event.starts_at,
+        endsAt: event.ends_at ?? event.checkin_closes_at,
+        checkinOpensAt: event.checkin_opens_at, checkinClosesAt: event.checkin_closes_at,
+      }} />
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Operational attendance only</p>

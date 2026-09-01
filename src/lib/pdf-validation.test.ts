@@ -58,3 +58,33 @@ test("rejects oversized and overlong resumes", async () => {
   assert.equal((await validateResumePdf(new Uint8Array(MAX_RESUME_BYTES + 1))).ok, false);
   assert.equal((await validateResumePdf(pdf(21))).ok, false);
 });
+
+test("destroys the PDF loading task when parsing times out", async (t) => {
+  let destroyCalls = 0;
+  t.mock.module("pdfjs-dist/legacy/build/pdf.mjs", {
+    namedExports: {
+      AnnotationType: {
+        FILEATTACHMENT: 17,
+        MOVIE: 19,
+        SOUND: 18,
+        SCREEN: 20,
+        RICHMEDIA: 21,
+        THREED: 16,
+      },
+      getDocument: () => ({
+        promise: new Promise(() => {}),
+        destroy: async () => { destroyCalls += 1; },
+      }),
+    },
+  });
+  const timeoutModule = "./pdf-validation.ts?case=timeout";
+  const { validateResumePdf: validateWithStalledParser } = await import(timeoutModule) as typeof import("./pdf-validation.ts");
+
+  const result = await validateWithStalledParser(pdf(), { timeoutMs: 5 });
+
+  assert.deepEqual(result, {
+    ok: false,
+    message: "The PDF took too long to check. Re-export it and try again.",
+  });
+  assert.equal(destroyCalls, 1);
+});

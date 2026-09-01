@@ -207,7 +207,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const actorNameById = new Map((actorProfiles ?? []).map((profile) => [profile.id, profile.display_name]));
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-6xl flex-col p-6 sm:p-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Applicant dossier</p>
@@ -218,7 +218,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
 
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
-        <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:order-none">
+        <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:sticky lg:top-20 lg:order-none">
           <StatusPill tone={isTerminal ? "navy" : "orange"}>{humanize(application.status)}</StatusPill>
           {application.offer_response && (
             <div className="rounded-xl bg-white/70 p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">

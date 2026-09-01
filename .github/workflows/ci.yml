@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  application:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,36 +20,61 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run build
         env:
-          # /join is prerendered, so the build reads these. They are the
-          # browser-visible pair, not secrets. The placeholders let CI build
-          # without repository secrets: the recruitment RPC fails, the page
-          # renders its "no active cycle" state, and the artifact is discarded.
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci.invalid' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'ci-placeholder' }}
+          # /join is prerendered, so the build reads these browser-visible
+          # values. The artifact is discarded and never receives a secret.
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
-      - id: supabase-link
+          version: 2.116.0
+      - name: Start isolated database and apply every migration
+        run: >-
+          supabase start
+          --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - run: supabase db reset --local --no-seed
+      - run: supabase db lint --local --schema rush --level error --fail-on error
+      - run: supabase test db supabase/tests/rush_foundation.sql
+      - name: Stop isolated database
+        if: always()
+        run: supabase stop --no-backup
+
+  live-migration-parity:
+    # The isolated database above is required for every PR and main build.
+    # The protected main branch additionally proves its migration ledger still
+    # matches the live project. Missing credentials are a failure, not a skip.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.116.0
+      - name: Require protected project credentials
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # db lint, the SQL tests, and migration parity below all need a
-          # linked live project, which needs these two secrets. A fork PR has
-          # neither, so this links if it can and otherwise skips the database
-          # checks with a clear message instead of failing the build.
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-            echo "SUPABASE_ACCESS_TOKEN and/or SUPABASE_DB_PASSWORD not set, skipping db lint, SQL tests, and migration parity check"
-            echo "linked=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          supabase link --project-ref chrxtsohxazngabdcpzb
-          echo "linked=true" >> "$GITHUB_OUTPUT"
-      - if: steps.supabase-link.outputs.linked == 'true'
-        run: npm run supabase:lint
-      - if: steps.supabase-link.outputs.linked == 'true'
-        run: npm run test:supabase
-      - if: steps.supabase-link.outputs.linked == 'true'
+          test -n "$SUPABASE_ACCESS_TOKEN" || { echo "SUPABASE_ACCESS_TOKEN is required on main"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "SUPABASE_DB_PASSWORD is required on main"; exit 1; }
+      - name: Link live project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase link --project-ref chrxtsohxazngabdcpzb
+      - name: Verify live migration ledger
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           node --input-type=module -e '
             import { execFileSync } from "node:child_process";

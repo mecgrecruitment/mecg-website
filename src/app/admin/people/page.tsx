@@ -52,7 +52,7 @@ export default async function PeoplePage() {
   const [cycleResult, membersResult, directoryResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     canManage
-      ? supabase.from("memberships").select("id,user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true)
+      ? supabase.from("memberships").select("id,user_id,role,active,profiles!inner(display_name)").eq("cycle_id", cycleId)
       : Promise.resolve({ data: [], error: null }),
     supabase.rpc("cycle_directory", { target_cycle_id: cycleId }),
   ]);
@@ -64,7 +64,7 @@ export default async function PeoplePage() {
   const directory = parseDirectory(directoryResult.data);
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="People"

@@ -33,7 +33,7 @@ export default function DossierTabs({ panels }: { panels: Record<TabKey, ReactNo
   }
   return (
     <div>
-      <div role="tablist" aria-label="Applicant dossier sections" className="scroll-cue -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      <div role="tablist" aria-label="Applicant dossier sections" className="scroll-cue sticky top-[60px] z-20 -mx-2 flex gap-2 overflow-x-auto border-b border-mecg-navy/8 bg-white/95 px-2 py-2 backdrop-blur">
         {TABS.map(([key, label]) => (
           <button
             key={key}

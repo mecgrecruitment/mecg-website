@@ -23,7 +23,7 @@ export default async function ScreeningAdminPage() {
   const members = (memberships ?? []).filter((item) => item.role === "MEMBER" && !privileged.has(item.user_id)).map((item) => ({ id: item.user_id, name: item.profiles.display_name }));
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-6xl flex-col p-6 sm:p-10">
       <WorkspaceHeader
         eyebrow="Recruitment operations"
         title="Blind application screening"

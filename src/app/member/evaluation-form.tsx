@@ -30,6 +30,7 @@ export default function EvaluationForm({
   const [evidence, setEvidence] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
   const criterionRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
   const noteRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const scoredCount = criteria.filter((criterion) => scores[criterion.id]).length;
@@ -89,7 +90,8 @@ export default function EvaluationForm({
         setPending(false);
         return;
       }
-      router.refresh();
+      setSaved(true);
+      window.setTimeout(() => router.refresh(), 220);
     } catch {
       setError("Could not submit evaluation. Check your connection and try again.");
       setPending(false);
@@ -173,8 +175,9 @@ export default function EvaluationForm({
       />
       <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
       <OperationNotice kind="error">{error}</OperationNotice>
-      <button disabled={pending} className="button-primary disabled:opacity-50">
-        {pending ? "Submitting…" : "Submit and lock evaluation"}
+      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Evaluation submitted and locked.</p>}
+      <button disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
+        {saved ? "✓ Submitted" : pending ? "Submitting…" : "Submit and lock evaluation"}
       </button>
     </form>
   );

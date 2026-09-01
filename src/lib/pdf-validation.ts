@@ -3,6 +3,8 @@ import { AnnotationType, getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 export const MAX_RESUME_PAGES = 20;
+export const PDF_VALIDATION_TIMEOUT_MS = 15_000;
+export const PDF_VALIDATION_TIMEOUT_MESSAGE = "The PDF took too long to check. Re-export it and try again.";
 
 export type PdfValidationResult =
   | { ok: true; byteSize: number; pageCount: number; sha256: string }
@@ -25,7 +27,17 @@ const ACTIVE_ANNOTATION_TYPES = new Set([
   AnnotationType.THREED,
 ]);
 
-export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidationResult> {
+class PdfValidationTimeoutError extends Error {
+  constructor() {
+    super(PDF_VALIDATION_TIMEOUT_MESSAGE);
+    this.name = "PdfValidationTimeoutError";
+  }
+}
+
+export async function validateResumePdf(
+  bytes: Uint8Array,
+  { timeoutMs = PDF_VALIDATION_TIMEOUT_MS }: { timeoutMs?: number } = {},
+): Promise<PdfValidationResult> {
   if (bytes.byteLength === 0 || bytes.byteLength > MAX_RESUME_BYTES) {
     return { ok: false, message: "The PDF must be smaller than 10 MB." };
   }
@@ -58,9 +70,25 @@ export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidatio
     useWorkerFetch: false,
     verbosity: 0,
   });
+  let destroyPromise: Promise<void> | null = null;
+  const destroyLoadingTask = () => {
+    destroyPromise ??= loadingTask.destroy();
+    return destroyPromise;
+  };
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const parseTimedOut = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => {
+      reject(new PdfValidationTimeoutError());
+      // Destroying the task terminates its worker and prevents a hostile PDF
+      // from continuing to consume resources after the request has timed out.
+      void destroyLoadingTask().catch((error) => {
+        console.error("pdf validation cancellation failed", error);
+      });
+    }, timeoutMs);
+  });
 
   try {
-    const document = await loadingTask.promise;
+    const document = await Promise.race([loadingTask.promise, parseTimedOut]);
     if (document.numPages < 1) {
       return { ok: false, message: "The PDF does not contain any pages." };
     }
@@ -88,6 +116,9 @@ export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidatio
 
     return { ok: true, byteSize: bytes.byteLength, pageCount: document.numPages, sha256 };
   } catch (error) {
+    if (error instanceof PdfValidationTimeoutError) {
+      return { ok: false, message: PDF_VALIDATION_TIMEOUT_MESSAGE };
+    }
     if (error instanceof Error && error.name === "PasswordException") {
       return { ok: false, message: "Password-protected PDFs are not supported." };
     }
@@ -100,6 +131,7 @@ export async function validateResumePdf(bytes: Uint8Array): Promise<PdfValidatio
     });
     return { ok: false, message: "The uploaded file is not a valid PDF." };
   } finally {
-    await loadingTask.destroy();
+    clearTimeout(timeout);
+    await destroyLoadingTask();
   }
 }

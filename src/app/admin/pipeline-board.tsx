@@ -237,7 +237,7 @@ function PipelineBoardInner({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search name or contact…"
-              className="min-h-11 w-full rounded-full bg-mecg-navy/[0.035] px-4 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] sm:w-56"
+              className="field-control min-h-11 w-full rounded-xl bg-white text-sm sm:w-64"
             />
           </label>
         </div>
@@ -256,18 +256,20 @@ function PipelineBoardInner({
       </div>
 
       {view === "ALL" ? (
-        <ApplicantRoster
-          applications={rosterApplications}
-          total={applications.length}
-          canOperate={canOperate}
-          cycleId={cycleId}
-          statusFilter={statusFilter}
-          resumeFilter={resumeFilter}
-          onStatusFilterChange={setStatusFilter}
-          onResumeFilterChange={setResumeFilter}
-        />
+        <div key="all-applicants" className="panel-seat">
+          <ApplicantRoster
+            applications={rosterApplications}
+            total={applications.length}
+            canOperate={canOperate}
+            cycleId={cycleId}
+            statusFilter={statusFilter}
+            resumeFilter={resumeFilter}
+            onStatusFilterChange={setStatusFilter}
+            onResumeFilterChange={setResumeFilter}
+          />
+        </div>
       ) : (
-        <>
+        <div key="pipeline" className="panel-seat">
           <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(190px,1fr)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicant pipeline by stage">
             {ACTIVE_STATUSES.map((status) => {
               const column = searchResults.filter((application) => application.status === status);
@@ -299,9 +301,14 @@ function PipelineBoardInner({
             })}
           </div>
           <div className="mt-4 rounded-2xl bg-mecg-navy/[0.025] p-4">
-            <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between text-left">
+            <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between gap-4 text-left">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Decided · {decidedCount}</span>
-              <span className="text-xs font-semibold text-mecg-blue">{showDecided ? "Hide" : "Show"}</span>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-mecg-blue">
+                {showDecided ? "Hide" : "Show"}
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className={`disclosure-chevron ${showDecided ? "rotate-180" : ""}`} aria-hidden="true">
+                  <path d="M5 8l5 5 5-5" />
+                </svg>
+              </span>
             </button>
             {!showDecided ? (
               <div className="mt-2.5 flex flex-wrap gap-2">
@@ -312,7 +319,7 @@ function PipelineBoardInner({
                 ))}
               </div>
             ) : (
-              <div id="decided-pipeline" className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div id="decided-pipeline" className="panel-seat mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {DECIDED_STATUSES.map((status) => {
                   const column = searchResults.filter((application) => application.status === status);
                   return (
@@ -344,7 +351,7 @@ function PipelineBoardInner({
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </section>
   );

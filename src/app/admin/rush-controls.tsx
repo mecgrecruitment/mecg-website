@@ -7,7 +7,7 @@ import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
 
 type Option = { id: string; label: string };
 type MemberRole = "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTEE";
-type MemberAccount = { id: string; name: string; role: MemberRole };
+type MemberAccount = { id: string; name: string; role: MemberRole; active?: boolean };
 
 const CYCLE_STATUSES = ["DRAFT", "OPEN", "IN_PROCESS", "DECISION_LOCK", "CLOSED", "ARCHIVED"];
 const ROUND_STATUSES = ["DRAFT", "PUBLISHED", "ACTIVE", "FROZEN", "FINALIZED", "ARCHIVED"];
@@ -183,6 +183,7 @@ export function PeopleControls({
         <div className="mt-4 grid gap-2">
           {memberAccounts.map((member) => {
             const isCurrentUser = member.id === currentUserId;
+            const isActive = member.active !== false;
             return (
               <form
                 key={member.id}
@@ -194,14 +195,14 @@ export function PeopleControls({
                 }}
               >
                 <div>
-                  <p className="text-[13px] font-semibold text-mecg-navy">{member.name}{isCurrentUser ? " · You" : ""}</p>
+                  <p className="text-[13px] font-semibold text-mecg-navy">{member.name}{isCurrentUser ? " · You" : ""}{!isActive ? " · Inactive" : ""}</p>
                   {isCurrentUser && <p className="mt-0.5 text-[11px] text-mecg-navy/60">Ask another owner to change your role.</p>}
                 </div>
                 <div className="flex items-center gap-2">
                   <select
                     name="role"
                     defaultValue={member.role}
-                    disabled={pending || isCurrentUser}
+                    disabled={pending || isCurrentUser || !isActive}
                     aria-label={`Role for ${member.name}`}
                     className="min-h-11 rounded-full bg-white px-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none disabled:opacity-55"
                   >
@@ -209,11 +210,19 @@ export function PeopleControls({
                   </select>
                   <button
                     type="submit"
-                    disabled={pending || isCurrentUser}
+                    disabled={pending || isCurrentUser || !isActive}
                     className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:opacity-45"
                   >
                     Save
                   </button>
+                  {isActive ? (
+                    <button type="button" disabled={pending || isCurrentUser} onClick={() => {
+                      const reason = window.prompt(`Why are you deactivating ${member.name}?`);
+                      if (reason?.trim() && window.confirm(`Remove all cycle access for ${member.name}?`)) void act({ action: "DEACTIVATE_MEMBERSHIP", userId: member.id, reason });
+                    }} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.25)] disabled:opacity-45">Deactivate</button>
+                  ) : (
+                    <button type="button" disabled={pending || isCurrentUser} onClick={() => void act({ action: "RESTORE_MEMBERSHIP", userId: member.id })} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] disabled:opacity-45">Restore</button>
+                  )}
                 </div>
               </form>
             );
@@ -231,7 +240,13 @@ export function RoundControls({
   rounds,
   memberAccounts,
   applications,
-}: ControlProps & { rounds: (Option & { status: string })[]; memberAccounts: MemberAccount[]; applications: Option[] }) {
+  assignments,
+}: ControlProps & {
+  rounds: (Option & { status: string })[];
+  memberAccounts: MemberAccount[];
+  applications: Option[];
+  assignments: Array<Option & { evaluatorId: string; evaluatorName: string; applicationName: string }>;
+}) {
   const { act, pending, error } = useRushAction(cycleId);
   return (
     <section className="flex flex-col gap-5">
@@ -292,6 +307,27 @@ export function RoundControls({
             ))}
             {!rounds.length && <p className="text-sm text-mecg-navy/45">No rounds configured yet.</p>}
           </div>
+        </div>
+      </div>
+      <div className="rounded-2xl bg-paper p-5">
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Open assignments</p>
+        <p className="mt-1 text-sm text-mecg-navy/55">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
+        <div className="mt-3 grid gap-2">
+          {assignments.map((assignment) => (
+            <form key={assignment.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-white px-3.5 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]" onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              void act({ action: "REASSIGN", assignmentId: assignment.id, evaluatorId: data.get("evaluatorId") });
+            }}>
+              <div className="min-w-48 flex-1"><p className="text-[13px] font-semibold">{assignment.applicationName}</p><p className="text-xs text-mecg-navy/55">{assignment.label} · {assignment.evaluatorName}</p></div>
+              <select name="evaluatorId" defaultValue={assignment.evaluatorId} aria-label={`Evaluator for ${assignment.applicationName}`} className="min-h-10 rounded-full bg-white px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">
+                {memberAccounts.filter((member) => member.active !== false).map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
+              </select>
+              <button disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">Reassign</button>
+              <button type="button" disabled={pending} onClick={() => { if (window.confirm(`Remove the assignment for ${assignment.applicationName}?`)) void act({ action: "UNASSIGN", assignmentId: assignment.id }); }} className="min-h-10 rounded-full px-3 text-xs font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.25)]">Unassign</button>
+            </form>
+          ))}
+          {!assignments.length && <p className="text-sm text-mecg-navy/55">No untouched assignments are available to change.</p>}
         </div>
       </div>
       <ErrorNotice error={error} />
