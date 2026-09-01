@@ -8,11 +8,13 @@ const FIELD_CLASS =
 
 export default function InterestForm() {
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
+    setIsError(false);
     setPending(true);
 
     const form = event.currentTarget;
@@ -36,9 +38,11 @@ export default function InterestForm() {
         setMessage("You're on the list. We'll email you when cycle details change.");
       } else {
         const body = await response.json().catch(() => null);
+        setIsError(true);
         setMessage(body?.error ?? "We couldn't save your information. Please try again.");
       }
     } catch {
+      setIsError(true);
       setMessage("We couldn't reach the server. Check your connection and try again.");
     } finally {
       setPending(false);
@@ -104,7 +108,7 @@ export default function InterestForm() {
         </button>
         <p className="text-xs leading-5 text-white/45">Updates only. Joining this list is not an application.</p>
       </div>
-      <p aria-live="polite" className="min-h-5 text-sm text-white/70 sm:col-span-2">{message}</p>
+      <p role={isError ? "alert" : "status"} className={`min-h-5 text-sm sm:col-span-2 ${isError ? "text-mecg-orange" : "text-white/70"}`}>{message}</p>
     </form>
   );
 }

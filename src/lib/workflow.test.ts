@@ -36,6 +36,12 @@ test("round transitions cannot skip or reopen states", () => {
   assert.equal(canTransitionRound("FROZEN", "ACTIVE"), false);
 });
 
+test("a finalized round can be archived, matching rush.set_round_status", () => {
+  assert.equal(canTransitionRound("FINALIZED", "ARCHIVED"), true);
+  assert.equal(canTransitionRound("ARCHIVED", "FINALIZED"), false);
+  assert.equal(canTransitionRound("ARCHIVED", "ARCHIVED"), true);
+});
+
 test("application transitions expose only legal manual next statuses", () => {
   assert.equal(canTransitionApplication("SUBMITTED", "NEEDS_INFO"), true);
   assert.equal(canTransitionApplication("SUBMITTED", "ELIGIBLE"), true);

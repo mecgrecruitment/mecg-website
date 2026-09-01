@@ -12,6 +12,7 @@ export default function ConflictForm({ applications }: { applications: { id: str
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!window.confirm("Declaring a conflict is irreversible: it voids your existing evaluation work for this applicant and cannot be undone. Continue?")) return;
     setError("");
     setMessage("");
     setPending(true);

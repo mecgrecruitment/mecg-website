@@ -55,18 +55,30 @@ export async function POST(req: NextRequest) {
   }
   const { applicationId, submittedNow } = result;
   if (submittedNow) {
+    const subject = "We received your MECG application";
+    let delivered = false;
     try {
-      await sendEmail({
+      delivered = await sendEmail({
         to: user.email,
-        subject: "We received your MECG application",
+        subject,
         html: wrapEmail(
           `<p>Hi ${intake.name},</p><p>We've received your MECG application. Our board will review it and follow up with next steps.</p>`,
           { label: "View your application", href: "https://mecgmichigan.com/applicant" },
         ),
-      });
+      }) === true;
     } catch (emailError) {
       console.error("application confirmation email failed", emailError);
     }
+    // Logged either way. A send that failed is exactly the case the board needs
+    // to see, so it must not be the case that goes unrecorded.
+    const { error: logError } = await supabase.rpc("log_message", {
+      target_application_id: applicationId,
+      message_kind: "APPLICATION_RECEIVED",
+      message_recipient: user.email,
+      message_subject: subject,
+      was_delivered: delivered,
+    });
+    if (logError) console.error("message log failed", logError);
   }
   return NextResponse.json({ applicationId }, { status: submittedNow ? 201 : 200 });
 }

@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { distributeScreeningReviews, type ScreeningPacketInput, type ScreeningReviewerInput } from "@/lib/screening";
@@ -35,8 +35,13 @@ function parsePacketContent(value: unknown) {
 export async function POST(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await request.json().catch(() => null);
-  const cycleId = typeof body?.cycleId === "string" ? body.cycleId : "";
+  const parsedBody = await readJsonBody(request, 64 * 1024);
+  if (parsedBody.error === "too_large") return NextResponse.json({ error: "Payload is too large" }, { status: 413 });
+  if (parsedBody.error || !parsedBody.data || typeof parsedBody.data !== "object" || Array.isArray(parsedBody.data)) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+  const body = parsedBody.data as Record<string, unknown>;
+  const cycleId = typeof body.cycleId === "string" ? body.cycleId : "";
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

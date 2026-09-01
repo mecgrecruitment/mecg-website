@@ -9,7 +9,8 @@ import SlotForm from "./slot-form";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import Link from "next/link";
-import BoardNav from "../../board-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
@@ -24,17 +25,23 @@ export default async function EventDetailPage({ params, searchParams }: { params
     || (!hasPermission(user.memberships, event.cycle_id, "MANAGE_CYCLE")
       && !hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS"))
   ) redirect("/access-denied");
-  const canOperate = hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS");
-  const canHash = hasPermission(user.memberships, event.cycle_id, "HASH_PANEL_ACCESS");
-  const { data: slots, error: slotsError } = await supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id);
+  const [
+    { data: slots, error: slotsError },
+    { data: checkins, error: checkinsError },
+    { count: memberCheckinCount, error: memberCheckinsError },
+    { data: impressions, error: impressionsError },
+    { data: applications, error: applicationsError },
+  ] = await Promise.all([
+    supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id),
+    supabase.from("checkins").select("pnm_id,checked_in_at,pnms(name)").eq("event_id", id),
+    supabase.from("member_checkins").select("id", { count: "exact", head: true }).eq("event_id", id),
+    supabase.from("event_impressions").select("application_id,score").eq("event_id", id),
+    supabase.from("applications").select("id,pnm_id,status").eq("cycle_id", event.cycle_id),
+  ]);
   if (slotsError) console.error("event slot list failed", slotsError);
-  const { data: checkins, error: checkinsError } = await supabase.from("checkins").select("pnm_id,checked_in_at,pnms(name)").eq("event_id", id);
   if (checkinsError) console.error("event checkin list failed", checkinsError);
-  const { count: memberCheckinCount, error: memberCheckinsError } = await supabase.from("member_checkins").select("id", { count: "exact", head: true }).eq("event_id", id);
   if (memberCheckinsError) console.error("event member checkin count failed", memberCheckinsError);
-  const { data: impressions, error: impressionsError } = await supabase.from("event_impressions").select("application_id,score").eq("event_id", id);
   if (impressionsError) console.error("event impression list failed", impressionsError);
-  const { data: applications, error: applicationsError } = await supabase.from("applications").select("id,pnm_id,status").eq("cycle_id", event.cycle_id);
   if (applicationsError) console.error("event application list failed", applicationsError);
   const applicationByPnm = new Map((applications ?? []).filter((application) => application.status !== "DRAFT" && application.status !== "WITHDRAWN").map((application) => [application.pnm_id, application]));
   const scoresByApplication = new Map<string, number[]>();
@@ -65,25 +72,23 @@ export default async function EventDetailPage({ params, searchParams }: { params
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Attendance event</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{event.name}</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">{new Date(event.starts_at).toLocaleString()}</p>
-        </div>
-        <Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>
-      </header>
-      <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canHash} />
+      <WorkspaceHeader
+        eyebrow="Attendance event"
+        title={event.name}
+        description={new Date(event.starts_at).toLocaleString()}
+        action={<Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>}
+      />
+      {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Operational attendance only</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Operational attendance only</p>
         <p className="mt-3 text-sm text-mecg-navy/60">
           Check-in window: {new Date(event.checkin_opens_at).toLocaleString()} – {new Date(event.checkin_closes_at).toLocaleString()}
         </p>
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Member grading</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Member grading</p>
         <p className="mt-3 text-sm">
           Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
         </p>
@@ -93,7 +98,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Live attendance</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Live attendance</p>
         <p className="mt-3 text-sm">
           Applicant check-ins: <strong className="font-semibold text-mecg-navy">{checkins?.length ?? 0}</strong>
         </p>
@@ -112,11 +117,11 @@ export default async function EventDetailPage({ params, searchParams }: { params
             </li>
           ))}
         </ul>
-        {!coverage.length && <p className="mt-3 text-sm text-mecg-navy/45">No applicant check-ins yet.</p>}
+        {!coverage.length && <p className="mt-3 text-sm text-mecg-navy/60">No applicant check-ins yet.</p>}
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Check-in QR code</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Check-in QR code</p>
         {qrDataUrl ? (
           <div className="mt-3 flex flex-col items-start gap-2">
             <Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} className="rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" />
@@ -135,7 +140,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       {event.cycle_id && <SlotForm cycleId={event.cycle_id} eventId={event.id} />}
 
       <section>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">RSVP slots</p>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">RSVP slots</p>
         <ul className="mt-3 flex flex-col gap-1.5">
           {(slots ?? []).map((slot) => (
             <li key={slot.id} className="text-sm text-mecg-navy/70">
@@ -145,7 +150,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
         </ul>
         {slotsError
           ? <p className="text-sm text-mecg-orange-ink">Slots could not be loaded. Reload before adding one, this list may be incomplete.</p>
-          : !slots?.length && <p className="text-sm text-mecg-navy/45">No slots yet.</p>}
+          : !slots?.length && <p className="text-sm text-mecg-navy/60">No slots yet.</p>}
       </section>
     </main>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { EVENT_KINDS } from "@/lib/workflow";
+import { useAction } from "@/lib/use-action";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
 
@@ -21,7 +21,6 @@ function Select({ label, name, value, onChange, children }: { label: string; nam
 }
 
 export default function EventForm() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [kind, setKind] = useState("MIXER");
   const [visibility, setVisibility] = useState("PUBLIC");
@@ -30,31 +29,22 @@ export default function EventForm() {
   const [endsAt, setEndsAt] = useState("");
   const [opensAt, setOpensAt] = useState("");
   const [closesAt, setClosesAt] = useState("");
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const { pending: submitting, error, run, router, setError } = useAction("/api/admin/events", "Could not create event. Check your connection and try again.");
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setSubmitting(true);
-    setError("");
-    try {
-      const utc = (value: string) => new Date(value).toISOString();
-      const response = await fetch("/api/admin/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date: utc(date), endsAt: utc(endsAt), checkinOpensAt: utc(opensAt), checkinClosesAt: utc(closesAt), kind, location, visibility }),
-      });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.id || !data?.checkinToken) {
-        setError(data?.error ?? "Could not create event.");
-        return;
-      }
-      router.push(`/admin/events/${data.id}?token=${encodeURIComponent(data.checkinToken)}`);
-    } catch {
-      setError("Could not create event. Check your connection and try again.");
-    } finally {
-      setSubmitting(false);
+    const utc = (value: string) => new Date(value).toISOString();
+    const result = await run(
+      { name, date: utc(date), endsAt: utc(endsAt), checkinOpensAt: utc(opensAt), checkinClosesAt: utc(closesAt), kind, location, visibility },
+      { skipRefresh: true, fallbackError: "Could not create event." },
+    );
+    if (!result.ok) return;
+    const data = result.body as { id?: string; checkinToken?: string } | null;
+    if (!data?.id || !data?.checkinToken) {
+      setError("Could not create event.");
+      return;
     }
+    router.push(`/admin/events/${data.id}?token=${encodeURIComponent(data.checkinToken)}`);
   }
 
   return (

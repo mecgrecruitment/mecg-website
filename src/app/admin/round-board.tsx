@@ -4,25 +4,19 @@ import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
-import LogoutButton from "@/components/logout-button";
-import BoardNav from "./board-nav";
+import { initials } from "@/lib/initials";
+import SectionLabel from "@/components/section-label";
+import StatTile from "@/components/stat-tile";
+import StatusPill from "@/components/status-pill";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import RoundAssignmentForm from "./round-assignment-form";
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 export default async function RoundBoardPage({ kind, title, nav }: { kind: string; title: string; nav: string }) {
   const user = await requireAdmin();
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
-  const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const supabase = await createClient();
   const { data: cycle, error: cycleError } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
   if (cycleError) throw cycleError;
@@ -65,23 +59,24 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
   }
   const coveredApplicants = activeApplications.filter((application) => (assignmentCounts.get(application.id)?.total ?? 0) >= 2).length;
   const submittedAssignments = assignments.filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
+  const uncoveredApplicants = activeApplications.filter((application) => (assignmentCounts.get(application.id)?.total ?? 0) === 0);
+  const evaluatorLoad = new Map<string, { name: string; open: number; total: number }>();
+  for (const assignment of assignments) {
+    const evaluatorName = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
+    const entry = evaluatorLoad.get(assignment.evaluator_id) ?? { name: evaluatorName ?? "Unassigned", open: 0, total: 0 };
+    entry.total += 1;
+    if (!["SUBMITTED", "LOCKED"].includes(assignment.status)) entry.open += 1;
+    evaluatorLoad.set(assignment.evaluator_id, entry);
+  }
+  const evaluatorLoadList = Array.from(evaluatorLoad.entries()).sort(([, a], [, b]) => b.open - a.open);
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink sm:text-xs sm:tracking-[0.2em]">{cycle.name} · {cycle.status}</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] sm:mt-2.5 sm:text-[34px]">{title}</h1>
-        </div>
-        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start sm:gap-5">
-          <Link href="/member" className="button-secondary flex-1 text-sm sm:flex-none">Evaluation Hub</Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <BoardNav current={nav} recruitmentOperations={canOperate} hashPanel={canHash} />
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+      <WorkspaceHeader eyebrow={`${cycle.name} · ${cycle.status}`} title={title} />
+      <WorkspaceNav user={user} cycleId={cycleId} current={nav} />
       {!round ? (
         <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
-          <p className="text-[13px] text-mecg-navy/40">This cycle does not have a {title} round yet.</p>
+          <p className="text-[13px] text-mecg-navy/60">This cycle does not have a {title} round yet.</p>
         </div>
       ) : (
         <section className="flex flex-col gap-5">
@@ -90,25 +85,60 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
               Round status: {round.status}. {canManage ? "Use Pipeline operations to publish, activate, and freeze it." : null}
             </p>
             {canOperate ? (
-              <p className="font-mono text-xs text-mecg-navy/50">
+              <p className="font-mono text-xs text-mecg-navy/60">
                 {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
               </p>
             ) : null}
           </div>
           {canOperate && (
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-              {[
-                [String(activeApplications.length), "applicants"],
-                [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
-                [String(assignments.length - submittedAssignments), "open forms"],
-                [String(submittedAssignments), "submitted"],
-              ].map(([value, label]) => (
-                <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 text-white sm:py-3">
-                  <p className="font-mono text-2xl font-semibold tabular-nums">{value}</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">{label}</p>
+            <>
+              <SectionLabel>Round workload</SectionLabel>
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+                {[
+                  [String(activeApplications.length), "applicants"],
+                  [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
+                  [String(assignments.length - submittedAssignments), "open forms"],
+                  [String(submittedAssignments), "submitted"],
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 sm:py-3">
+                    <StatTile value={value} label={label} tone="dark" />
+                  </div>
+                ))}
+              </div>
+              {(uncoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
+                <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
+                  {uncoveredApplicants.length > 0 && (
+                    <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Needs an evaluator · {uncoveredApplicants.length}</p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {uncoveredApplicants.map((application) => (
+                          <Link
+                            key={application.id}
+                            href={`/admin/applications/${application.id}`}
+                            className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
+                          >
+                            {application.pnms.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {evaluatorLoadList.length > 0 && (
+                    <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Evaluator load</p>
+                      <div className="mt-2 flex flex-col gap-1.5">
+                        {evaluatorLoadList.map(([evaluatorId, evaluator]) => (
+                          <div key={evaluatorId} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                            <span className="font-medium text-mecg-navy">{evaluator.name}</span>
+                            <span className="font-mono text-xs text-mecg-navy/60">{evaluator.open} open · {evaluator.total} total</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
           {canOperate && ["DRAFT", "PUBLISHED"].includes(round.status) && (
             <RoundAssignmentForm
@@ -120,10 +150,11 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
           )}
           {!canOperate ? null : assignments.length === 0 ? (
             <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
-              <p className="text-[13px] text-mecg-navy/40">No assignments yet</p>
+              <p className="text-[13px] text-mecg-navy/60">No assignments yet</p>
             </div>
           ) : (
             <>
+              <SectionLabel>Assignments</SectionLabel>
               <div className="flex flex-col gap-3 md:hidden">
                 {assignments.map((assignment) => {
                   const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
@@ -138,20 +169,20 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">{initials(applicantName)}</span>
                           <p className="font-semibold text-mecg-navy">{applicantName}</p>
                         </div>
-                        <span className={`rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold ${submitted ? "bg-mecg-navy/10 text-mecg-navy" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]"}`}>{submitted ? "Submitted" : "Open"}</span>
+                        <StatusPill tone={submitted ? "navy" : "neutral"}>{submitted ? "Submitted" : "Open"}</StatusPill>
                       </div>
                       <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Evaluator</dt>
+                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/60">Evaluator</dt>
                           <dd className="mt-1 text-mecg-navy/70">{evaluator ?? "Unassigned"}</dd>
                         </div>
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Assignment</dt>
+                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/60">Assignment</dt>
                           <dd className="mt-1 text-mecg-navy/70">{assignment.status}</dd>
                         </div>
                         {kind === "GROUP_CASE" && (
                           <div className="col-span-2">
-                            <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Case team</dt>
+                            <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/60">Case team</dt>
                             <dd className="mt-1 text-mecg-navy/70">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</dd>
                           </div>
                         )}
@@ -192,15 +223,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{assignment.status}</td>
                       <td className="px-4 py-3">
-                        <span
-                          className={
-                            submitted
-                              ? "inline-flex items-center rounded-full bg-mecg-navy/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-mecg-navy"
-                              : "inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold text-mecg-navy/50 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]"
-                          }
-                        >
-                          {submitted ? "Submitted" : "Open"}
-                        </span>
+                        <StatusPill tone={submitted ? "navy" : "neutral"}>{submitted ? "Submitted" : "Open"}</StatusPill>
                       </td>
                     </tr>
                   );

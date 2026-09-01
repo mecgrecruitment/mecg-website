@@ -14,7 +14,6 @@ export default function PipelineStatusForm({
   applicationId: string;
   cycleId: string;
   status: string;
-  nonTerminalOnly?: boolean;
   controlId?: string;
 }) {
   const router = useRouter();
@@ -66,7 +65,7 @@ export default function PipelineStatusForm({
           aria-label="Pipeline status"
           defaultValue={status}
           disabled={pending}
-          className="operation-control min-h-9 rounded-md bg-mecg-navy/[0.035] px-2 text-[10px] font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none disabled:opacity-60"
+          className="operation-control rounded-md bg-mecg-navy/[0.035] px-2 text-[10px] font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none disabled:opacity-60"
         >
           {legalManualApplicationStatuses(status).map((item) => (
             <option key={item}>{item}</option>
@@ -75,7 +74,7 @@ export default function PipelineStatusForm({
         <button
           type="submit"
           disabled={pending}
-          className="operation-control min-h-9 rounded-md px-2.5 text-[10px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
+          className="operation-control rounded-md px-2.5 text-[10px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Moving…" : "Move"}
         </button>

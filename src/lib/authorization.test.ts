@@ -56,3 +56,24 @@ test("closed cycles preserve board and owner recruitment operations", () => {
     assert.equal(hasPermission([{ ...membership(role), cycle: { status: "CLOSED" } }], "cycle", "RECRUITMENT_OPERATIONS"), true);
   }
 });
+
+// Hash pages derive "panelOnly" as HASH_PANEL_ACCESS without MANAGE_CYCLE or
+// RECRUITMENT_OPERATIONS (src/app/admin/hash/page.tsx, hash/deliberate/page.tsx,
+// applications/[id]/page.tsx). Only that combination should ever see an applicant
+// code and hidden evaluator identity instead of the real dossier.
+function panelOnly(role: string) {
+  const memberships = [membership(role)];
+  return (
+    hasPermission(memberships, "cycle", "HASH_PANEL_ACCESS")
+    && !hasPermission(memberships, "cycle", "MANAGE_CYCLE")
+    && !hasPermission(memberships, "cycle", "RECRUITMENT_OPERATIONS")
+  );
+}
+
+test("only a bare PANEL membership is treated as panel-only for blind Hash review", () => {
+  assert.equal(panelOnly("PANEL"), true);
+  assert.equal(panelOnly("BOARD"), false);
+  assert.equal(panelOnly("OWNER"), false);
+  assert.equal(panelOnly("RECRUITMENT_COMMITTEE"), false);
+  assert.equal(panelOnly("MEMBER"), false);
+});

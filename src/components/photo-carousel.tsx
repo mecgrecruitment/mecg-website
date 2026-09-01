@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type CarouselImage = {
   src: string;
@@ -11,16 +11,21 @@ type CarouselImage = {
 
 export default function PhotoCarousel({ images, label }: { images: readonly CarouselImage[]; label: string }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  // ponytail: index tracks button-driven navigation only, not manual touch/drag
+  // scrolling; good enough for the "N of M" announcement this fixes.
+  const [index, setIndex] = useState(0);
 
   function move(direction: -1 | 1) {
     const track = trackRef.current;
     if (!track) return;
     track.scrollBy({ left: direction * Math.min(track.clientWidth * 0.82, 720), behavior: "smooth" });
+    setIndex((current) => Math.min(Math.max(current + direction, 0), images.length - 1));
   }
 
   return (
     <div>
-      <div className="mb-5 flex justify-end gap-2">
+      <div className="mb-5 flex items-center justify-end gap-2">
+        <p aria-live="polite" className="sr-only">{`Photo ${index + 1} of ${images.length}`}</p>
         <button type="button" onClick={() => move(-1)} aria-label={`Previous ${label} photo`} className="grid size-11 place-items-center rounded-full border border-mecg-navy/15 text-xl text-mecg-navy hover:bg-mecg-blue/[0.08]">←</button>
         <button type="button" onClick={() => move(1)} aria-label={`Next ${label} photo`} className="grid size-11 place-items-center rounded-full border border-mecg-navy/15 text-xl text-mecg-navy hover:bg-mecg-blue/[0.08]">→</button>
       </div>

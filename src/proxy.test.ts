@@ -54,6 +54,18 @@ test("proxy refreshes protected APIs and returns 401 for anonymous users", async
   assert.deepEqual(await response.json(), { error: "Unauthorized" });
 });
 
+test("proxy now covers /api/applicant and /api/apply, returning 401 rather than an HTML redirect", async (t) => {
+  const refreshes = mockSession(t);
+  const { proxy } = await importProxy("applicant-apply");
+
+  for (const pathname of ["/api/applicant/buddy", "/api/apply/resume/start"]) {
+    const response = await proxy(request(pathname));
+    assert.equal(response.status, 401, pathname);
+    assert.deepEqual(await response.json(), { error: "Unauthorized" }, pathname);
+  }
+  assert.equal(refreshes(), 2);
+});
+
 test("proxy preserves the refreshed response for authenticated users", async (t) => {
   const refreshes = mockSession(t, { id: "member" });
   const { proxy } = await importProxy("authenticated");

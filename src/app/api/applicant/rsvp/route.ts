@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
   const body = parsedBody.data as Record<string, unknown>;
   const slotId = typeof body.slotId === "string" ? body.slotId.trim() : "";
   if (!slotId || slotId.length > 100) return NextResponse.json({ error: "Invalid slot" }, { status: 400 });
+  if (!(await checkRateLimit(`applicant-rsvp:${user.id}`))) {
+    return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
+  }
   const supabase = await createClient();
   const { error } = await supabase.rpc("rsvp_slot", { target_slot_id: slotId });
   if (error) {

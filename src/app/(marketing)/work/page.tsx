@@ -8,17 +8,32 @@ import SectionHeading from "@/components/section-heading";
 import { listPublicProjectCards } from "@/lib/projects/public-projects";
 import { ENGAGEMENT_STEPS, PAST_PROJECTS, SEMESTER_FACTS, SERVICES } from "@/lib/site-content";
 
+const TITLE = "Client Services";
+const DESCRIPTION = "Partner with MECG on a semester-long, pro-bono consulting engagement.";
+
 export const metadata: Metadata = {
-  title: "Client Services",
-  description: "Partner with MECG on a semester-long, pro-bono consulting engagement.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/work" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/work" },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
-export default function WorkPage() {
-  const publicProjects = listPublicProjectCards();
+const BREADCRUMB_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://mecgmichigan.com/home" },
+    { "@type": "ListItem", position: 2, name: "Client Services", item: "https://mecgmichigan.com/work" },
+  ],
+};
+
+export default async function WorkPage() {
+  const publicProjects = await listPublicProjectCards();
 
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_JSON_LD) }} />
       <PageIntro
         title="Client Services"
         copy="MECG partners with organizations on semester-long, pro-bono consulting engagements. Each project begins with a focused question and ends with recommendations the client can use."
@@ -58,7 +73,7 @@ export default function WorkPage() {
               <dl className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-mecg-navy/10">
                 {SEMESTER_FACTS.map(([term, value]) => (
                   <div key={term} className="bg-mecg-blue/[0.06] p-5">
-                    <dt className="text-sm text-mecg-navy/55">{term}</dt>
+                    <dt className="text-sm text-mecg-navy/60">{term}</dt>
                     <dd className="mt-1 font-semibold">{value}</dd>
                   </div>
                 ))}

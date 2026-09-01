@@ -116,7 +116,7 @@ export default function EvaluationForm({
             </legend>
             <p className="mb-3 text-sm text-mecg-navy/55">{criterion.description}</p>
             <div className="text-sm font-medium" id={`rating-label-${assignmentId}-${criterion.id}`}>Rating</div>
-            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6" role="radiogroup" aria-labelledby={`rating-label-${assignmentId}-${criterion.id}`}>
+            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6" role="group" aria-labelledby={`rating-label-${assignmentId}-${criterion.id}`}>
               {RATING_OPTIONS.map((option) => {
                 const value = String(option);
                 const selected = scores[criterion.id] === value;
@@ -125,8 +125,7 @@ export default function EvaluationForm({
                   <button
                     key={value}
                     type="button"
-                    role="radio"
-                    aria-checked={selected}
+                    aria-pressed={selected}
                     aria-label={label}
                     disabled={pending}
                     onClick={() => selectScore(criterion.id, value)}
@@ -142,34 +141,37 @@ export default function EvaluationForm({
                 );
               })}
             </div>
+            {scores[criterion.id] && scores[criterion.id] !== "NO" && (
+              <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>
+            )}
             <label className="mt-3 block text-sm font-medium" htmlFor={`note-${assignmentId}-${criterion.id}`}>
               Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-orange-ink">Required</span>}
             </label>
             <textarea
               id={`note-${assignmentId}-${criterion.id}`}
               ref={(node) => { noteRefs.current[criterion.id] = node; }}
-              className="mt-2 min-h-20 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+              className="mt-2 min-h-20 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
               value={note}
               onChange={(event) => setNotes((current) => ({ ...current, [criterion.id]: event.target.value }))}
               maxLength={MAX_NOTE_LENGTH}
               disabled={pending}
               aria-describedby={`note-count-${assignmentId}-${criterion.id}`}
             />
-            <p id={`note-count-${assignmentId}-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/45">{note.length} / {MAX_NOTE_LENGTH}</p>
+            <p id={`note-count-${assignmentId}-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / {MAX_NOTE_LENGTH}</p>
           </fieldset>
         );
       })}
       <label className="font-medium" htmlFor={`evidence-${assignmentId}`}>Overall observable evidence (optional)</label>
       <textarea
         id={`evidence-${assignmentId}`}
-        className="min-h-24 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        className="min-h-24 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
         value={evidence}
         onChange={(event) => setEvidence(event.target.value)}
         maxLength={MAX_EVIDENCE_LENGTH}
         disabled={pending}
         aria-describedby={`evidence-count-${assignmentId}`}
       />
-      <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/45">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
+      <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
       <OperationNotice kind="error">{error}</OperationNotice>
       <button disabled={pending} className="button-primary disabled:opacity-50">
         {pending ? "Submitting…" : "Submit and lock evaluation"}

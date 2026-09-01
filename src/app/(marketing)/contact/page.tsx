@@ -4,15 +4,20 @@ import PageIntro from "@/components/page-intro";
 import SectionHeading from "@/components/section-heading";
 import ContactForm from "./contact-form";
 
+const TITLE = "Contact Us";
+const DESCRIPTION = "Contact MECG about membership, a client project, or a general question.";
+
 export const metadata: Metadata = {
-  title: "Contact Us",
-  description: "Contact MECG about membership, a client project, or a general question.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/contact" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/contact" },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 export default function ContactPage() {
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
       <PageIntro title="Contact Us" />
       <MarketingSection id="message" className="scroll-mt-24" innerClassName="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
           <div>

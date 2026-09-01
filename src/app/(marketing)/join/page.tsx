@@ -1,13 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import Link from "next/link";
+import ApplicationCountdown from "@/components/application-countdown";
 import MarketingSection from "@/components/marketing-section";
 import PageIntro from "@/components/page-intro";
 import PhotoCarousel from "@/components/photo-carousel";
 import SectionHeading from "@/components/section-heading";
-import { requireEnv } from "@/lib/env";
 import { JOIN_FAQS, JOIN_REASONS } from "@/lib/join-content";
-import type { Database } from "@/lib/supabase/database.types";
+import {
+  applicationCycleStatus,
+  fetchPublicRecruitment,
+  formatRecruitmentEventTime,
+} from "@/lib/public-recruitment";
 import InterestForm from "./interest-form";
 
 // This page reads one public RPC and no session, so it is served from the
@@ -16,33 +19,21 @@ import InterestForm from "./interest-form";
 // cookies(), which is the only thing that was forcing dynamic rendering.
 export const revalidate = 300;
 
+const TITLE = "Join Our Team";
+const DESCRIPTION = "See the MECG recruitment timeline and learn why students join the team.";
+
 export const metadata: Metadata = {
-  title: "Join Our Team",
-  description: "See the MECG recruitment timeline and learn why students join the team.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/join" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/join" },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 type Recruitment = {
   cycle?: { name?: string; status?: string; opensAt?: string | null; closesAt?: string | null } | null;
   events?: { id: string; name: string; kind: string; startsAt: string; endsAt?: string | null; location?: string | null; visibility: string }[];
 };
-
-const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
-  month: "long",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "America/Detroit",
-  timeZoneName: "short",
-});
-
-const TIME_FORMAT = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "America/Detroit",
-  timeZoneName: "short",
-});
 
 const JOIN_PHOTOS = [
   { src: "/mecg/members-board-professional.jpeg", alt: "MECG executive board in a professional group portrait" },
@@ -54,52 +45,14 @@ const JOIN_PHOTOS = [
   { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
-function formatDate(value: string) {
-  return DATE_FORMAT.format(new Date(value));
-}
-
-function formatEventTime(startsAt: string, endsAt?: string | null) {
-  const start = formatDate(startsAt);
-  return endsAt ? `${start} to ${TIME_FORMAT.format(new Date(endsAt))}` : start;
-}
-
-function cycleStatus(cycle: NonNullable<Recruitment["cycle"]>, now = Date.now()) {
-  const opensAt = cycle.opensAt ? new Date(cycle.opensAt).getTime() : null;
-  const closesAt = cycle.closesAt ? new Date(cycle.closesAt).getTime() : null;
-  const isWithinApplicationWindow = cycle.status === "OPEN"
-    && (opensAt === null || opensAt <= now)
-    && (closesAt === null || closesAt >= now);
-
-  if (isWithinApplicationWindow) return { label: "Applications are open", detail: cycle.closesAt ? `Apply by ${formatDate(cycle.closesAt)}.` : "Apply now.", isOpen: true };
-  if (cycle.status === "OPEN" && closesAt !== null && closesAt < now) {
-    return { label: "Applications are closed", detail: `Applications closed ${formatDate(cycle.closesAt!)}.`, isOpen: false };
-  }
-  if (cycle.status === "IN_PROCESS") {
-    return { label: "Selection is in progress", detail: "Current applicants can find invitations and updates on their status page.", isOpen: false };
-  }
-  return {
-    label: "Applications open soon",
-    detail: cycle.opensAt
-      ? `Applications open ${formatDate(cycle.opensAt)}${cycle.closesAt ? ` and close ${formatDate(cycle.closesAt)}` : ""}.`
-      : "Join the interest list for published dates.",
-    isOpen: false,
-  };
-}
-
 export default async function JoinPage() {
-  const supabase = createClient<Database, "rush">(
-    process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    process.env.NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY ?? requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "rush" } },
-  );
-  const { data } = await supabase.rpc("public_recruitment");
-  const recruitment = data && typeof data === "object" ? data as Recruitment : { cycle: null, events: [] };
+  const recruitment = await fetchPublicRecruitment() as Recruitment;
   const events = recruitment.events ?? [];
-  const status = recruitment.cycle ? cycleStatus(recruitment.cycle) : null;
+  const status = recruitment.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const showInterestForm = status?.isOpen !== true;
 
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
       <PageIntro title="Join Our Team" copy="MECG is open to University of Michigan students in every major. No previous consulting experience is required.">
         <Link href="/apply" className="button-primary">Apply now <span aria-hidden="true">→</span></Link>
       </PageIntro>
@@ -109,6 +62,7 @@ export default async function JoinPage() {
           <div>
             <h2 className="text-2xl font-semibold">{status?.label ?? "No active recruitment cycle"}</h2>
             <p className="mt-2 leading-7 text-mecg-navy/65">{status?.detail ?? "Join the interest list and we will send the next published dates."}</p>
+            {status?.opensAt && status.isOpen !== true ? <ApplicationCountdown opensAt={status.opensAt} /> : null}
           </div>
           {recruitment.cycle?.name ? <p className="shrink-0 text-sm font-semibold text-mecg-blue">{recruitment.cycle.name}</p> : null}
         </div>
@@ -121,7 +75,7 @@ export default async function JoinPage() {
               <p className="py-6 leading-7 text-mecg-navy/65">The Board has not published events for this cycle yet. Join the interest list for date announcements.</p>
             ) : events.map((event) => (
               <article key={event.id} className="grid gap-3 py-5 md:grid-cols-[15rem_1fr_auto] md:items-center">
-                <p className="text-sm font-semibold leading-6 text-mecg-blue">{formatEventTime(event.startsAt, event.endsAt)}</p>
+                <p className="text-sm font-semibold leading-6 text-mecg-blue">{formatRecruitmentEventTime(event.startsAt, event.endsAt)}</p>
                 <div>
                   <h3 className="text-lg font-semibold">{event.name}</h3>
                   <p className="mt-1 text-sm text-mecg-navy/60">{event.location ?? "Location shared closer to the event"}</p>

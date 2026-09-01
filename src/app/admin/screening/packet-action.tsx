@@ -1,15 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useAction } from "@/lib/use-action";
 import OperationNotice from "@/components/operation-notice";
 
 export default function PacketAction({ cycleId, packetId, status, responses }: { cycleId: string; packetId: string; status: string; responses: Array<{ question?: string; answer?: string }> }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
+  const { pending, error, success, run, setError } = useAction("/api/admin/screening");
   const [answers, setAnswers] = useState(responses.map((response) => response.answer ?? ""));
-  const [success, setSuccess] = useState("");
   const dirty = useMemo(() => answers.some((answer, index) => answer !== (responses[index]?.answer ?? "")), [answers, responses]);
 
   useEffect(() => {
@@ -27,43 +24,17 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
       setError("Save or discard your redaction changes before changing this packet’s review status.");
       return;
     }
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "APPROVE_PACKET", packetId, approved }) });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not update packet");
-        return;
-      }
-      setSuccess(approved ? "Blind packet approved." : "Packet returned for redaction.");
-      router.refresh();
-    } catch {
-      setError("Could not update packet. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    await run(
+      { cycleId, action: "APPROVE_PACKET", packetId, approved },
+      { successMessage: approved ? "Blind packet approved." : "Packet returned for redaction.", fallbackError: "Could not update packet" },
+    );
   }
   async function saveRedaction() {
-    setPending(true);
-    setError("");
-    setSuccess("");
     const content = { responses: responses.map((response, index) => ({ question: response.question ?? "", answer: answers[index] ?? "" })) };
-    try {
-      const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "UPDATE_PACKET", packetId, content }) });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not save redaction");
-        return;
-      }
-      setSuccess("Redaction saved. The packet must be approved again.");
-      router.refresh();
-    } catch {
-      setError("Could not save redaction. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    await run(
+      { cycleId, action: "UPDATE_PACKET", packetId, content },
+      { successMessage: "Redaction saved. The packet must be approved again.", fallbackError: "Could not save redaction" },
+    );
   }
   return (
     <div className="mt-4 space-y-3">

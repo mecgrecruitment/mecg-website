@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireMember } from "@/lib/auth";
 import { screeningRpc, type ScreeningDetail } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
+import SectionLabel from "@/components/section-label";
 import ScreeningReviewForm from "./screening-review-form";
 
 export default async function ScreeningAssignmentPage({ params }: { params: Promise<{ assignmentId: string }> }) {
@@ -20,8 +21,16 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
         </div>
         <Link href="/member/screening" className="button-secondary text-sm">Screening queue</Link>
       </header>
-      <section className="space-y-5 rounded-2xl bg-mecg-navy/[0.035] p-6">{(detail.content.responses ?? []).map((response, index) => <article key={index}><h2 className="font-semibold">{response.question}</h2><p className="mt-2 whitespace-pre-wrap leading-7 text-mecg-navy/70">{response.answer}</p></article>)}</section>
-      <ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} />
+      <section>
+        <SectionLabel number="01">Application packet</SectionLabel>
+        <div className="mt-3.5 space-y-5 rounded-2xl bg-mecg-navy/[0.035] p-6">{(detail.content.responses ?? []).map((response, index) => <article key={index}><h2 className="font-semibold">{response.question}</h2><p className="mt-2 whitespace-pre-wrap leading-7 text-mecg-navy/70">{response.answer}</p></article>)}</div>
+      </section>
+      <section>
+        <SectionLabel number="02">Your review</SectionLabel>
+        <div className="mt-3.5">
+          <ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} />
+        </div>
+      </section>
     </main>
   );
 }

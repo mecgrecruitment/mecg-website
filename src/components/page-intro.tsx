@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import SectionLabel from "@/components/section-label";
 
 export default function PageIntro({
+  number = "01",
   label,
   title,
   copy,
@@ -19,7 +20,7 @@ export default function PageIntro({
     <section className="bg-mecg-navy text-white">
       <div className="mx-auto max-w-6xl px-6 py-10 sm:px-10 sm:py-14">
         {label ? (
-          <SectionLabel number="" className="text-mecg-orange">
+          <SectionLabel number={number} dark>
             {label}
           </SectionLabel>
         ) : null}

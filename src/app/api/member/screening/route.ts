@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
@@ -26,8 +26,13 @@ function parseScreeningRatings(value: unknown) {
 export async function POST(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await request.json().catch(() => null);
-  const assignmentId = typeof body?.assignmentId === "string" ? body.assignmentId : "";
+  const parsedBody = await readJsonBody(request, 128 * 1024);
+  if (parsedBody.error === "too_large") return NextResponse.json({ error: "Payload is too large" }, { status: 413 });
+  if (parsedBody.error || !parsedBody.data || typeof parsedBody.data !== "object" || Array.isArray(parsedBody.data)) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+  const body = parsedBody.data as Record<string, unknown>;
+  const assignmentId = typeof body.assignmentId === "string" ? body.assignmentId : "";
   if (!assignmentId) return NextResponse.json({ error: "Assignment required" }, { status: 400 });
   const supabase = await createClient();
   let result: { data: unknown; error: { code?: string; message: string } | null };

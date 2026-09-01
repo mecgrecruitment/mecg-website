@@ -66,18 +66,52 @@ async function login(testCase) {
   return cookie;
 }
 
-async function expectPage(pathname, cookie, expectedStatus = 200, expectedLocation) {
-  const response = await fetch(`${baseUrl}${pathname}`, {
+async function fetchPage(pathname, cookie) {
+  return fetch(`${baseUrl}${pathname}`, {
     headers: { Cookie: cookie },
     redirect: "manual",
     signal: AbortSignal.timeout(15_000),
   });
-  if (response.status !== expectedStatus) {
-    throw new Error(`${pathname} returned ${response.status}, expected ${expectedStatus}`);
+}
+
+async function expectPage(pathname, cookie) {
+  const response = await fetchPage(pathname, cookie);
+  if (response.status !== 200) {
+    throw new Error(`${pathname} returned ${response.status}, expected 200`);
   }
-  if (expectedLocation) {
+  const html = await response.text();
+  if (html.includes("__next-page-redirect")) {
+    throw new Error(`${pathname} redirected away, expected it to render`);
+  }
+}
+
+// Next.js does not always express a Server Component redirect as a 3xx. Since
+// 16 it commonly answers 200 with a `__next-page-redirect` meta refresh, and
+// the page body is not rendered either way. Asserting a status code here tested
+// the framework's transport rather than the thing that matters, and broke on
+// upgrade while the app was behaving correctly.
+//
+// What matters is the security property: the caller does not get the page, and
+// is sent to the right place. Accept either transport, and require both.
+async function expectRedirect(pathname, cookie, expectedLocation) {
+  const response = await fetchPage(pathname, cookie);
+  if (response.status >= 300 && response.status < 400) {
     const location = response.headers.get("location");
-    if (!location?.endsWith(expectedLocation)) throw new Error(`${pathname} redirected to ${location}, expected ${expectedLocation}`);
+    if (!location?.endsWith(expectedLocation)) {
+      throw new Error(`${pathname} redirected to ${location}, expected ${expectedLocation}`);
+    }
+    return;
+  }
+  if (response.status !== 200) {
+    throw new Error(`${pathname} returned ${response.status}, expected a redirect to ${expectedLocation}`);
+  }
+  const html = await response.text();
+  const meta = html.match(/<meta id="__next-page-redirect"[^>]*url=([^"']+)/);
+  if (!meta) {
+    throw new Error(`${pathname} rendered instead of redirecting to ${expectedLocation}`);
+  }
+  if (!meta[1].endsWith(expectedLocation)) {
+    throw new Error(`${pathname} redirected to ${meta[1]}, expected ${expectedLocation}`);
   }
 }
 
@@ -138,9 +172,9 @@ try {
     await expectPage(testCase.destination, cookie);
   }
 
-  await expectPage("/member", cookies.get("submitted-applicant"), 307, "/applicant");
-  await expectPage("/apply", cookies.get("member"), 307, "/member");
-  await expectPage("/login", cookies.get("board"), 307, "/admin");
+  await expectRedirect("/member", cookies.get("submitted-applicant"), "/applicant");
+  await expectRedirect("/apply", cookies.get("member"), "/member");
+  await expectRedirect("/login", cookies.get("board"), "/admin");
   console.log(`Authentication routing passed for ${cases.length} account states against ${baseUrl}.`);
 } catch (error) {
   primaryError = error;

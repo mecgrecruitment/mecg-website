@@ -5,15 +5,20 @@ import PageIntro from "@/components/page-intro";
 import SectionHeading from "@/components/section-heading";
 import { BOARD } from "@/lib/site-content";
 
+const TITLE = "Our Team";
+const DESCRIPTION = "Meet the Michigan Engineering Consulting Group executive board.";
+
 export const metadata: Metadata = {
-  title: "Our Team",
-  description: "Meet the Michigan Engineering Consulting Group executive board.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/team" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/team" },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 export default function TeamPage() {
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
       <PageIntro title="Our Team" />
 
       <MarketingSection>
@@ -23,7 +28,7 @@ export default function TeamPage() {
               <article key={name}>
                 <a href={linkedin} target="_blank" rel="noreferrer" aria-label={`${name} on LinkedIn, opens in a new tab`} className="group block">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-                    <Image src={src} alt="" fill loading={index === 0 ? "eager" : "lazy"} className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]" style={{ objectPosition }} sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw" />
+                    <Image src={src} alt="" fill priority={index === 0} loading={index === 0 ? "eager" : "lazy"} className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]" style={{ objectPosition }} sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold tracking-[-0.02em]">{name}</h3>
                   <p className="mt-1 text-sm text-mecg-navy/60">{role}</p>

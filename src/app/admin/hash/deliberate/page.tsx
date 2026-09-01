@@ -6,6 +6,7 @@ import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { applicantCode } from "@/lib/applicant-code";
 import DeliberationDeck, { type DeckEntry } from "./deliberation-deck";
 
 export const metadata: Metadata = { title: "Deliberation" };
@@ -16,6 +17,11 @@ export default async function DeliberationPage() {
   if (!cycleId) redirect("/member");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   if (!canPanel) redirect("/access-denied");
+  const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
+  const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
+  // Blind Hash review: never send a PANEL-only viewer's real name into the deck's
+  // client-side props, since deliberation-deck.tsx is a "use client" component.
+  const panelOnly = canPanel && !canManageCycle && !canOperate;
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
@@ -72,7 +78,7 @@ export default async function DeliberationPage() {
     const decision = decisionByApplication.get(application.id);
     return {
       id: application.id,
-      name: application.pnms.name,
+      name: panelOnly ? applicantCode(application.id) : application.pnms.name,
       status: application.status,
       rounds: byRound.map(({ round, aggregate }) => ({ name: round.name, score: aggregate.score, count: aggregate.count, spread: aggregate.spread, status: aggregate.status })),
       finalScore: combineRoundScores(byRound.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight }))),

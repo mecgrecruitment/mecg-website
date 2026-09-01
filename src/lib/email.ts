@@ -37,6 +37,10 @@ export function escapeHtml(value: string): string {
 export async function sendEmail(params: { to: string; subject: string; html: string; replyTo?: string }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
+  // Replies default to a shared address rather than falling into whatever the
+  // sending domain does with them. An applicant answering a decision email
+  // should reach the board, not a person who has since graduated.
+  const replyTo = params.replyTo ?? process.env.RECRUITMENT_REPLY_TO?.trim() ?? process.env.CONTACT_TO_EMAIL?.trim();
   if (!apiKey || !from) {
     console.error(`RESEND_API_KEY/RESEND_FROM_EMAIL not configured, skipping email to ${params.to}`);
     return false;
@@ -53,7 +57,7 @@ export async function sendEmail(params: { to: string; subject: string; html: str
         to: [params.to],
         subject: params.subject,
         html: params.html,
-        ...(params.replyTo ? { reply_to: params.replyTo } : {}),
+        ...(replyTo ? { reply_to: replyTo } : {}),
       }),
       signal: AbortSignal.timeout(5000),
     });

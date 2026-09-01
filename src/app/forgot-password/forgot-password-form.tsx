@@ -3,6 +3,7 @@
 import { useState } from "react";
 import PortalShell from "@/components/portal-shell";
 import FormField from "@/components/form-field";
+import OperationNotice from "@/components/operation-notice";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -36,11 +37,11 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <PortalShell eyebrow="Account recovery" title="Reset your password." description="Use the email attached to your MECG account.">
+    <PortalShell eyebrow="Account recovery" title="Reset your password." description="Use the email attached to your MECG account." centered>
       <form onSubmit={submit} className="space-y-4">
         <FormField label="Email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-        {message && <p role="status" className="rounded bg-mecg-blue/10 p-3 text-sm">{message}</p>}
-        {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+        <OperationNotice kind="info">{message}</OperationNotice>
+        <OperationNotice kind="error">{error}</OperationNotice>
         <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Sending..." : "Send reset email"}</button>
       </form>
     </PortalShell>

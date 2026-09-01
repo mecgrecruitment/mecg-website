@@ -1,5 +1,15 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+
+// timingSafeEqual throws on a length mismatch instead of returning false, so the
+// lengths are compared first -- itself not a timing oracle, since the secret's
+// length isn't confidential (only its content is).
+function secretsMatch(presented: string, expected: string): boolean {
+  const presentedBuf = Buffer.from(presented);
+  const expectedBuf = Buffer.from(expected);
+  return presentedBuf.length === expectedBuf.length && timingSafeEqual(presentedBuf, expectedBuf);
+}
 
 // Removes resume uploads that were started but never finalized or cancelled.
 // Supabase forbids deleting storage.objects from SQL, so the storage half has to
@@ -23,7 +33,7 @@ async function prune(request: NextRequest) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
   }
   const presented = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
-  if (presented !== expected) {
+  if (!presented || !secretsMatch(presented, expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

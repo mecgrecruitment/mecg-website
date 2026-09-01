@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { sendEmail, wrapEmail } from "@/lib/email";
@@ -51,12 +51,21 @@ function decisionEmail(outcome: string, name: string) {
 export async function POST(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await req.json().catch(() => null);
-  const action = typeof body?.action === "string" ? body.action : "";
+  const parsedBody = await readJsonBody(req, 16 * 1024);
+  if (parsedBody.error === "too_large") return NextResponse.json({ error: "Payload is too large" }, { status: 413 });
+  if (parsedBody.error || !parsedBody.data || typeof parsedBody.data !== "object" || Array.isArray(parsedBody.data)) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+  const body = parsedBody.data as Record<string, unknown>;
+  const action = typeof body.action === "string" ? body.action : "";
   if (!["CREATE", "APPROVE", "RELEASE", "PREVIEW"].includes(action)) return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   const supabase = await createClient();
-  let cycleId = typeof body?.cycleId === "string" ? body.cycleId : "";
-  if (action !== "CREATE" && action !== "PREVIEW") {
+  let cycleId = typeof body.cycleId === "string" ? body.cycleId : "";
+  // PREVIEW must re-derive the decision's real cycle from the DB, same as APPROVE/RELEASE:
+  // trusting a client-supplied cycleId here would let a caller satisfy this app-layer check
+  // against any cycle they hold DECIDE in, regardless of which cycle the target decision
+  // actually belongs to. Only CREATE has no existing decisionId to look the cycle up from.
+  if (action !== "CREATE") {
     const { data: decision, error: decisionError } = await supabase.from("decisions").select("application_id").eq("id", String(body.decisionId ?? "")).maybeSingle();
     const { data: application, error: applicationError } = decision?.application_id
       ? await supabase.from("applications").select("cycle_id").eq("id", decision.application_id).maybeSingle()
@@ -78,6 +87,15 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("create_decision", { target_cycle_id: String(body.cycleId ?? ""), target_application_id: String(body.applicationId ?? ""), target_outcome: body.outcome as DecisionOutcome, decision_reason: String(body.reason ?? "") }));
   } else if (body?.action === "APPROVE") ({ data, error } = await supabase.rpc("approve_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE") ({ data, error } = await supabase.rpc("release_decision", { target_decision_id: String(body.decisionId ?? "") }));
+  else if (body?.action === "RELEASE_ALL") ({ data, error } = await supabase.rpc("release_ready_decisions", { target_cycle_id: String(body.cycleId ?? "") }));
+  else if (body?.action === "SET_DEADLINE") {
+    const expiresAt = typeof body.expiresAt === "string" && body.expiresAt ? new Date(body.expiresAt) : null;
+    if (expiresAt && Number.isNaN(expiresAt.getTime())) return NextResponse.json({ error: "Invalid deadline" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("set_offer_deadline", {
+      target_application_id: String(body.applicationId ?? ""),
+      expires_at: expiresAt ? expiresAt.toISOString() : null as unknown as string,
+    }));
+  }
   else if (body?.action === "PREVIEW") ({ data, error } = await supabase.rpc("set_decision_preview", { target_decision_id: String(body.decisionId ?? ""), preview_text: String(body.preview ?? "") }));
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   if (error) {
@@ -90,7 +108,7 @@ export async function POST(req: NextRequest) {
     // but it must not be reported as a clean success either.
     const { data: released, error: releasedError } = await supabase
       .from("decisions")
-      .select("outcome, applications!inner(pnms!inner(name, contact))")
+      .select("outcome, application_id, applications!inner(pnms!inner(name, contact))")
       .eq("id", String(body.decisionId ?? ""))
       .single();
     if (releasedError) console.error("released decision lookup failed", releasedError);
@@ -100,6 +118,14 @@ export async function POST(req: NextRequest) {
       const { subject, html } = decisionEmail(released.outcome, pnm.name);
       notified = await sendEmail({ to: pnm.contact, subject, html });
       if (!notified) console.error("release decision notification failed", { decisionId: String(body.decisionId ?? "") });
+      const { error: logError } = await supabase.rpc("log_message", {
+        target_application_id: released.application_id,
+        message_kind: "DECISION_RELEASED",
+        message_recipient: pnm.contact,
+        message_subject: subject,
+        was_delivered: notified,
+      });
+      if (logError) console.error("message log failed", logError);
     }
     if (!notified) {
       return NextResponse.json(

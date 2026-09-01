@@ -56,7 +56,7 @@ export default function ImpressionForm({
   return (
     <form onSubmit={submit} className="mt-4 flex flex-col gap-4" noValidate>
       <div className="text-sm font-medium" id={`impression-score-label-${applicationId}`}>Score</div>
-      <div ref={scoreGroupRef} tabIndex={-1} className="grid grid-cols-5 gap-2" role="radiogroup" aria-labelledby={`impression-score-label-${applicationId}`}>
+      <div ref={scoreGroupRef} tabIndex={-1} className="grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-labelledby={`impression-score-label-${applicationId}`}>
         {SCORE_OPTIONS.map((option) => {
           const selected = score === option;
           const label = `Score ${option}: ${SCORE_ANCHORS[option]}`;
@@ -64,8 +64,7 @@ export default function ImpressionForm({
             <button
               key={option}
               type="button"
-              role="radio"
-              aria-checked={selected}
+              aria-pressed={selected}
               aria-label={label}
               disabled={pending}
               onClick={() => { setScore(option); setError(""); }}
@@ -81,6 +80,7 @@ export default function ImpressionForm({
           );
         })}
       </div>
+      {score && <p className="text-xs text-mecg-navy/65">{SCORE_ANCHORS[score]}</p>}
       <div className="text-sm font-medium" id={`impression-tags-label-${applicationId}`}>Tags</div>
       <div className="flex flex-wrap gap-2" aria-labelledby={`impression-tags-label-${applicationId}`}>
         {IMPRESSION_TAGS.map((tag) => {
@@ -93,7 +93,7 @@ export default function ImpressionForm({
               aria-label={`${selected ? "Remove" : "Add"} tag: ${tag}`}
               disabled={pending}
               onClick={() => setTags((current) => selected ? current.filter((existing) => existing !== tag) : [...current, tag])}
-              className={`min-h-11 rounded-full px-3.5 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
+              className={`min-h-11 rounded-xl px-3.5 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                 selected
                   ? "bg-mecg-navy text-white"
                   : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
@@ -114,7 +114,7 @@ export default function ImpressionForm({
         onChange={(event) => setNote(event.target.value)}
         aria-describedby={`impression-note-count-${applicationId}`}
       />
-      <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/45">{note.length} / 1000</p>
+      <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>
       <OperationNotice kind="error">{error}</OperationNotice>
       <button disabled={pending} className="button-primary disabled:opacity-50">
         {pending ? "Saving…" : "Save impression"}

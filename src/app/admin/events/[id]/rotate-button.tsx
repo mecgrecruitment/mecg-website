@@ -1,35 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAction } from "@/lib/use-action";
 import OperationNotice from "@/components/operation-notice";
 
 export default function RotateButton({ eventId }: { eventId: string }) {
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { pending: busy, error, success, run, router, setError } = useAction(`/api/admin/events/${eventId}/rotate`, "Could not rotate the QR code.");
 
   async function handleRotate() {
     if (busy) return;
     if (!confirm("Rotate the QR code? The old code will stop working.")) return;
-    setBusy(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch(`/api/admin/events/${eventId}/rotate`, { method: "POST" });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.checkinToken) {
-        setError(data?.error ?? "Could not rotate the QR code.");
-        return;
-      }
-      setSuccess("QR code rotated. The previous code no longer works.");
-      router.replace(`/admin/events/${eventId}?token=${encodeURIComponent(data.checkinToken)}`);
-    } catch {
+    const result = await run(
+      {},
+      { skipRefresh: true, fallbackError: "Could not rotate the QR code.", successMessage: "QR code rotated. The previous code no longer works." },
+    );
+    if (!result.ok) return;
+    const token = (result.body as { checkinToken?: string } | null)?.checkinToken;
+    if (!token) {
       setError("Could not rotate the QR code.");
-    } finally {
-      setBusy(false);
+      return;
     }
+    router.replace(`/admin/events/${eventId}?token=${encodeURIComponent(token)}`);
   }
 
   return (

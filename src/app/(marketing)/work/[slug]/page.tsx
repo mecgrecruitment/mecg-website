@@ -13,33 +13,57 @@ type ProjectPageProps = {
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getPublicProjectSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getPublicProjectSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getPublicProject(slug);
+  const project = await getPublicProject(slug);
 
+  // dynamicParams = false + generateStaticParams above means an unknown slug
+  // 404s before this ever runs, but this branch stays defensive rather than
+  // reading fields off an undefined project.
   if (!project) return {};
 
   return {
     title: project.title,
     description: project.decision,
     alternates: { canonical: `/work/${slug}` },
+    openGraph: {
+      title: project.title,
+      description: project.decision,
+      url: `/work/${slug}`,
+      images: [`/work/${slug}/opengraph-image`],
+    },
+    twitter: {
+      title: project.title,
+      description: project.decision,
+      images: [`/work/${slug}/opengraph-image`],
+    },
   };
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = getPublicProject(slug);
+  const project = await getPublicProject(slug);
 
   if (!project) notFound();
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://mecgmichigan.com/home" },
+      { "@type": "ListItem", position: 2, name: "Client Services", item: "https://mecgmichigan.com/work" },
+      { "@type": "ListItem", position: 3, name: project.title, item: `https://mecgmichigan.com/work/${slug}` },
+    ],
+  };
+
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <PageIntro
-        number="01"
         label={`${project.industry} · ${project.semester}`}
         title={project.title}
         copy={project.decision}
@@ -49,7 +73,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <MarketingSection aria-labelledby="context-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
-            <SectionLabel number="01.1">Context</SectionLabel>
+            <SectionLabel>Context</SectionLabel>
             <SectionHeading id="context-title" className="mt-4">The decision came first.</SectionHeading>
           </div>
           <div>
@@ -63,7 +87,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </MarketingSection>
 
       <MarketingSection tone="softBlue" aria-labelledby="work-title">
-          <SectionLabel number="01.2">How the team worked</SectionLabel>
+          <SectionLabel>How the team worked</SectionLabel>
           <SectionHeading id="work-title" className="mt-4 max-w-2xl">What the team did to answer it.</SectionHeading>
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {project.methods.map((method, index) => (
@@ -77,7 +101,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <MarketingSection aria-labelledby="deliverables-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
-            <SectionLabel number="01.3">The handoff</SectionLabel>
+            <SectionLabel>The handoff</SectionLabel>
             <SectionHeading id="deliverables-title" className="mt-4">What MECG delivered.</SectionHeading>
           </div>
           <div>
@@ -90,7 +114,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <MarketingSection tone="navy" aria-labelledby="member-work-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
-            <SectionLabel number="01.4" className="text-mecg-orange">Member ownership</SectionLabel>
+            <SectionLabel className="text-mecg-orange">Member ownership</SectionLabel>
             <SectionHeading id="member-work-title" className="mt-4">The work students owned.</SectionHeading>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2">

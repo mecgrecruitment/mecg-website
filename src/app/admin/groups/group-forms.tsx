@@ -1,29 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { useAction } from "@/lib/use-action";
 import FormField from "@/components/form-field";
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-async function act(payload: Record<string, unknown>) {
-  try {
-    const response = await fetch("/api/admin/rush", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    if (response.ok) return { ok: true };
-    const body = await response.json().catch(() => null);
-    return { ok: false, error: body?.error as string | undefined };
-  } catch {
-    return { ok: false, error: "Request failed" };
-  }
-}
+import StatTile from "@/components/stat-tile";
+import { initials } from "@/lib/initials";
 
 function ChevronSelect({ id, name, label, children }: { id: string; name: string; label: string; children: ReactNode }) {
   return (
@@ -45,7 +26,7 @@ function ChevronSelect({ id, name, label, children }: { id: string; name: string
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-mecg-navy/40"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-mecg-navy/60"
       >
         <path d="M5 8l5 5 5-5" />
       </svg>
@@ -54,22 +35,12 @@ function ChevronSelect({ id, name, label, children }: { id: string; name: string
 }
 
 function AssignForm({ cycleId, group, applications }: { cycleId: string; group: { id: string; name: string }; applications: { id: string; name: string }[] }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
+  const { pending, error, run } = useAction("/api/admin/rush", "Could not assign applicant");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
-    setError("");
-    try {
-      const data = new FormData(event.currentTarget);
-      const result = await act({ cycleId, action: "ASSIGN_GROUP", groupId: group.id, applicationId: data.get("applicationId") });
-      if (!result.ok) setError(result.error ?? "Could not assign applicant");
-      else router.refresh();
-    } finally {
-      setPending(false);
-    }
+    const data = new FormData(event.currentTarget);
+    await run({ cycleId, action: "ASSIGN_GROUP", groupId: group.id, applicationId: data.get("applicationId") });
   }
 
   return (
@@ -98,21 +69,11 @@ function GroupActionButton({
   children: ReactNode;
   danger?: boolean;
 }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
+  const { pending, error, run } = useAction("/api/admin/rush", "Could not update the team");
 
-  async function run() {
+  async function handleClick() {
     if (danger && !window.confirm("Delete this empty team?")) return;
-    setPending(true);
-    setError("");
-    try {
-      const result = await act({ cycleId, ...payload });
-      if (!result.ok) setError(result.error ?? "Could not update the team");
-      else router.refresh();
-    } finally {
-      setPending(false);
-    }
+    await run({ cycleId, ...payload });
   }
 
   return (
@@ -120,8 +81,8 @@ function GroupActionButton({
       <button
         type="button"
         disabled={pending}
-        onClick={run}
-        className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-red-700" : "text-mecg-navy/45 hover:text-mecg-orange-ink"}`}
+        onClick={handleClick}
+        className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-red-700" : "text-mecg-navy/60 hover:text-mecg-orange-ink"}`}
       >
         {pending ? "Working..." : children}
       </button>
@@ -141,26 +102,14 @@ export default function GroupForms({
   applications: { id: string; name: string }[];
   members: { group_id: string; application_id: string }[];
 }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
+  const { pending, error, run } = useAction("/api/admin/rush", "Could not create team");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
-    setError("");
-    try {
-      const form = event.currentTarget;
-      const data = new FormData(form);
-      const result = await act({ cycleId, action: "CREATE_GROUP", name: data.get("name"), prompt: data.get("prompt") });
-      if (!result.ok) setError(result.error ?? "Could not create team");
-      else {
-        form.reset();
-        router.refresh();
-      }
-    } finally {
-      setPending(false);
-    }
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const result = await run({ cycleId, action: "CREATE_GROUP", name: data.get("name"), prompt: data.get("prompt") });
+    if (result.ok) form.reset();
   }
 
   return (
@@ -171,9 +120,8 @@ export default function GroupForms({
           [String(members.length), "assigned applicants"],
           [String(Math.max(0, applications.length - new Set(members.map((member) => member.application_id)).size)), "unassigned applicants"],
         ].map(([value, label]) => (
-          <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3 text-white">
-            <p className="font-mono text-2xl font-semibold tabular-nums">{value}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.1em] text-white/50">{label}</p>
+          <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3">
+            <StatTile value={value} label={label} tone="dark" />
           </div>
         ))}
       </div>
@@ -218,7 +166,7 @@ export default function GroupForms({
               {group.prompt && <p className="mt-1.5 text-sm text-mecg-navy/55">{group.prompt}</p>}
               <div className="mt-3 flex flex-col gap-1.5">
                 {groupMembers.length === 0 ? (
-                  <p className="text-[12.5px] text-mecg-navy/40">No members yet</p>
+                  <p className="text-[12.5px] text-mecg-navy/60">No members yet</p>
                 ) : (
                   groupMembers.map((member) => {
                     const applicant = applications.find((application) => application.id === member.application_id);

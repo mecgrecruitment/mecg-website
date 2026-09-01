@@ -145,6 +145,7 @@ test("POST /api/apply returns 429 without persisting when rate limited", async (
 test("POST /api/apply submits all fields in one persistence call", async (t) => {
   const { calls, client } = fakeSupabaseClient({
     submit_application: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
+    log_message: () => ({ data: "message-1", error: null }),
   });
   let emailCount = 0;
   mockCommon(t, client, { sendEmail: async () => { emailCount += 1; } });
@@ -152,7 +153,8 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 201);
   assert.deepEqual(await res.json(), { applicationId: "application-1" });
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].name, "log_message");
   assert.deepEqual(calls[0], {
     name: "submit_application",
     args: {
@@ -219,6 +221,7 @@ test("POST /api/apply returns a generic error for unknown RPC failures", async (
 test("POST /api/apply succeeds when confirmation email delivery fails", async (t) => {
   const { calls, client } = fakeSupabaseClient({
     submit_application: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
+    log_message: () => ({ data: "message-1", error: null }),
   });
   mockCommon(t, client, { sendEmail: async () => { throw new Error("SMTP unavailable"); } });
   t.mock.method(console, "error", () => undefined);
@@ -226,5 +229,15 @@ test("POST /api/apply succeeds when confirmation email delivery fails", async (t
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 201);
   assert.deepEqual(await res.json(), { applicationId: "application-2" });
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[1], {
+    name: "log_message",
+    args: {
+      target_application_id: "application-2",
+      message_kind: "APPLICATION_RECEIVED",
+      message_recipient: "ada@umich.edu",
+      message_subject: "We received your MECG application",
+      was_delivered: false,
+    },
+  });
 });

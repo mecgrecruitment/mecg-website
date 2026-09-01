@@ -24,7 +24,7 @@ const HOME_PHOTOS = [
 
 export default function HomePage() {
   return (
-    <main className="bg-white text-mecg-navy">
+    <main id="main-content" className="bg-white text-mecg-navy">
       <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
         <Image
           src="/mecg/members-professional.jpeg"
