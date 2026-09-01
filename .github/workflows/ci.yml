@@ -15,6 +15,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Migrations are only otherwise validated by applying them to a real
+      # database. libpg_query is the parser Postgres itself uses, so this
+      # catches syntax errors, including inside plpgsql function bodies,
+      # without needing one.
+      - run: pip3 install --quiet pglast
+      - run: npm run check:sql
       - run: npm run lint
       - run: npm test
       - run: npx tsc --noEmit

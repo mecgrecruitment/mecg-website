@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_PROJECTS } from "@/content/projects.public";
-import { requireEnv } from "@/lib/env";
+import { getSupabasePublicEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/database.types";
 import type { PublicProjectCard, PublicProjectDetail } from "./public-types";
 
@@ -13,11 +13,15 @@ import type { PublicProjectCard, PublicProjectDetail } from "./public-types";
 // lib/supabase/server so it never touches cookies(), which is the only thing
 // that would force these pages out of the ISR cache.
 function readClient() {
-  return createClient<Database, "rush">(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
-    { db: { schema: "rush" }, auth: { persistSession: false } },
-  );
+  // getSupabasePublicEnv, not requireEnv: it resolves the MECG_-prefixed names
+  // this deployment actually uses and falls back to the plain ones. Reading a
+  // single hard-coded name here would throw during prerender wherever only the
+  // prefixed pair is set, which includes CI.
+  const { url, anonKey } = getSupabasePublicEnv();
+  return createClient<Database, "rush">(url, anonKey, {
+    db: { schema: "rush" },
+    auth: { persistSession: false },
+  });
 }
 
 function textOf(value: unknown) {
