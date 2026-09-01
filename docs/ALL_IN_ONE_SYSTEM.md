@@ -380,13 +380,19 @@ The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving 
 
 **Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. Still the largest new subsystem here, and still the one that only pays off if sending actually moves off personal inboxes.
 
-**Phase 5. Editors done. Cycle clone not started.** `rush.set_application_questions` / `cycle_application_questions` (migration `...010000`) with an editor on `/admin/settings`, and `rush.set_rubric_criteria` / `cycle_rubrics` (migration `...020000`) with a per-round editor on `/admin/rounds`. Prompts, criteria, weights and required flags are all editable without a deploy.
+**Phase 5. Done.** `rush.set_application_questions` / `cycle_application_questions` (migration `...010000`) with an editor on `/admin/settings`, and `rush.set_rubric_criteria` / `cycle_rubrics` (migration `...020000`) with a per-round editor on `/admin/rounds`. Prompts, criteria, weights and required flags are all editable without a deploy.
 
 The rubric editor is versioned rather than destructive: `criterion_ratings.criterion_id` references `rubric_criteria` with no cascade, so editing a scored rubric would either fail on the foreign key or silently rewrite what a past score meant. When the current rubric has any evaluation against it the RPC publishes version + 1; otherwise it edits in place. Editing is refused once a round leaves DRAFT or PUBLISHED.
 
-Cycle clone turned out to be worth less than the plan assumed: `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`. A new cycle is not empty. Clone would only carry forward *edited* content and the roster, which is worth doing but was never the thing standing between the board and next semester. The missing editors were.
+`rush.clone_cycle` (migration `...040000`) copies rounds, each round's current rubric and criteria, the application questions and the roster, and copies nothing applicant-shaped. Rubric versions restart at 1, since a version means "the wording this score was given under" and that scope is a round.
 
-**Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record, then projects and staffing.
+Note on ordering: clone was worth less than the plan assumed until the editors existed. `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`, so a new cycle was never empty. Clone only earns its keep now that content can diverge from the seeds.
+
+**Phase 6. Partly done.** `profiles` gained four optional columns (grad term, major, position, bio), plus `update_my_profile`, `cycle_directory` and `my_member_record` (migration `...050000`). `/admin/people` is now one page with two audiences: any member reads the directory, only `MANAGE_MEMBERSHIPS` sees the role controls. The member page gained a profile form and a personal record.
+
+`cycle_directory` returns no email or contact detail on purpose, and a pgTAP assertion pins that.
+
+Still open here: the task inbox, and projects and staffing moving into the database.
 
 **Phase 7. Applicant polish. Withdraw done, rest not started.** `rush.withdraw_application` (migration `...030000`) plus a two-step button on the portal.
 
@@ -416,5 +422,6 @@ Open, and none of it blocking:
 
 Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
 
-- Four migrations have never run: `20260901000000_allow_reapplication`, `20260901010000_application_question_editor`, `20260901020000_rubric_criteria_editor`, `20260901030000_applicant_withdraw`.
-- The pgTAP file went from 99 assertions to 130 and none of the 31 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is the single largest piece of unverified work on the branch.
+- Six migrations have never run: `20260901000000_allow_reapplication`, `...010000_application_question_editor`, `...020000_rubric_criteria_editor`, `...030000_applicant_withdraw`, `...040000_clone_cycle`, `...050000_member_profiles`.
+- The pgTAP file went from 99 assertions to 149 and none of the 50 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is by far the largest piece of unverified work on the branch, and nothing here should merge on the strength of `tsc` and `next build` alone.
+- `database.types.ts` was hand-edited to match each migration rather than regenerated. Run `npm run supabase:types` once the migrations are applied and reconcile.
