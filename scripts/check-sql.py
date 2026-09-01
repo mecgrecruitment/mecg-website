@@ -16,6 +16,15 @@ Two passes, because they cover different things:
 What this does not do: it is a parser, not a database. It will not catch a
 missing column, a wrong type, or a policy that does not do what it claims.
 Those still need `npm run test:supabase` against a real project.
+
+Run it with `npm run check:sql` (needs `pip3 install pglast`).
+
+Not wired into .github/workflows/ci.yml yet: pushing a workflow edit needs a
+token with the `workflow` scope, which the account that pushed this branch does
+not have. To add it, put these two lines after `npm ci`:
+
+    - run: pip3 install --quiet pglast
+    - run: npm run check:sql
 """
 
 import sys
