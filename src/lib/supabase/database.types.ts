@@ -2153,7 +2153,12 @@ export type Database = {
         Returns: string
       }
       my_offer_deadlines: { Args: never; Returns: Json }
+      mark_reminder_sent: {
+        Args: { reminder_kind: string; subject_id: string; recipient_id: string }
+        Returns: boolean
+      }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
+      pending_reminders: { Args: never; Returns: Json }
       public_projects: { Args: never; Returns: Json }
       release_ready_decisions: { Args: { target_cycle_id: string }; Returns: Json }
       set_application_questions: {

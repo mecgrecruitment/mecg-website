@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(173);
+select extensions.plan(179);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -486,6 +486,22 @@ set local role authenticated;
 select extensions.throws_ok(
   $$select rush.set_project_staffing((select id from rush.projects where slug='pgtap-project'), '[{"userId":"10000000-0000-4000-8000-0000000000ff"}]'::jsonb)$$,
   'P0002','unknown member','staffing an unknown member is an error rather than a silent skip');
+set local role postgres;
+
+
+-- Reminders. The idempotency guard is the point: an hourly job must not send
+-- the same nudge every hour.
+set local role postgres;
+select extensions.has_table('rush','reminders_sent','reminder bookkeeping table exists');
+select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has row level security enabled and forced');
+select extensions.ok(not exists(select 1 from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has no policies, so only service_role reaches it');
+select extensions.ok(position('reminders_sent' in pg_get_functiondef('rush.pending_reminders()'::regprocedure)) > 0, 'pending_reminders excludes anyone already reminded');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','service role required','an authenticated caller cannot record a reminder');
+select extensions.is(rush.pending_reminders(),'[]'::jsonb,'pending_reminders returns nothing to a non-scheduler caller');
 set local role postgres;
 
 select * from extensions.finish();

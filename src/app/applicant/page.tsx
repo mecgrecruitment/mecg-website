@@ -119,7 +119,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
   // routed there on login, but must still be able to open their own history.
   if (destination !== "/applicant" && destination !== "/apply") redirect(destination ?? "/login");
   const supabase = await createClient();
-  const [{ data: applications, error }, { data: schedule }, { data: canStartApplication }, messagesResult, deadlinesResult] = await Promise.all([
+  const [{ data: applications, error }, { data: schedule }, { data: canStartApplication }, messagesResult, deadlinesResult, recruitmentResult] = await Promise.all([
     supabase.rpc("applicant_dashboard"),
     supabase.rpc("applicant_schedule"),
     supabase.rpc("can_start_application"),
@@ -128,11 +128,22 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
     // support load: what we sent is visible where they already are.
     supabase.from("messages").select("id,kind,subject,created_at,application_id").order("created_at", { ascending: false }),
     supabase.rpc("my_offer_deadlines"),
+    // Same public RPC the /join page uses. The stepper says which of four
+    // stages they are in; this says what actually happens next and when.
+    supabase.rpc("public_recruitment"),
   ]);
   if (error) throw error;
   if (!applications?.length) redirect("/apply");
   if (messagesResult.error) console.error("applicant message lookup failed", messagesResult.error);
   if (deadlinesResult.error) console.error("offer deadline lookup failed", deadlinesResult.error);
+  if (recruitmentResult.error) console.error("recruitment schedule lookup failed", recruitmentResult.error);
+  const recruitment = recruitmentResult.data && typeof recruitmentResult.data === "object" && !Array.isArray(recruitmentResult.data)
+    ? recruitmentResult.data as { events?: Array<{ id: string; name: string; startsAt: string; location?: string | null }> }
+    : {};
+  const now = new Date().getTime();
+  const timeline = (recruitment.events ?? [])
+    .filter((event) => typeof event?.startsAt === "string" && typeof event?.name === "string")
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
   const deadlines = deadlinesResult.data && typeof deadlinesResult.data === "object" && !Array.isArray(deadlinesResult.data)
     ? deadlinesResult.data as Record<string, string | null>
     : {};
@@ -178,6 +189,28 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         {(action === "rsvp" || action === "buddy") && (
           <section role="status" className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
             {action === "rsvp" ? "Your RSVP is confirmed." : "Your member chat is booked."}
+          </section>
+        )}
+        {timeline.length > 0 && (
+          <section className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">What happens next</p>
+            <ol className="mt-4 flex flex-col gap-2">
+              {timeline.map((event) => {
+                const past = new Date(event.startsAt).getTime() < now;
+                return (
+                  <li key={event.id} className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] ${past ? "opacity-50" : ""}`}>
+                    <span className="text-[14px] font-semibold text-mecg-navy">{event.name}</span>
+                    <span className="text-[12px] text-mecg-navy/55">
+                      <time dateTime={event.startsAt}>
+                        {new Date(event.startsAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Detroit" })}
+                      </time>
+                      {event.location ? ` · ${event.location}` : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <p className="mt-3 text-xs text-mecg-navy/45">Past dates are dimmed. Anything you need to book appears below.</p>
           </section>
         )}
         {dashboardApplications.map((application) => {
