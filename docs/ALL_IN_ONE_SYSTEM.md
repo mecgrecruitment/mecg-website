@@ -380,7 +380,11 @@ The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving 
 
 **Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. Still the largest new subsystem here, and still the one that only pays off if sending actually moves off personal inboxes.
 
-**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle still needs a developer and a migration. Pairs with Phase 0 as the other half of making "next semester" cheap.
+**Phase 5. Question editor. Done. Cycle clone and rubric editor not started.** `rush.set_application_questions` and `rush.cycle_application_questions` (migration `20260901010000_application_question_editor.sql`), with an editor on `/admin/settings`. Prompts are now editable without a deploy, and freeze once a cohort has submitted.
+
+Cycle clone turned out to be worth less than the plan assumed: `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`. A new cycle is not empty. Clone would only carry forward *edited* questions, rubric tweaks, and the member roster, which is worth doing but is no longer the thing standing between the board and next semester. The question editor was.
+
+The rubric editor is still missing: criteria weights and wording remain migration-only.
 
 **Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record, then projects and staffing.
 
@@ -408,5 +412,5 @@ Open, and none of it blocking:
 
 Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
 
-- Migration `20260901000000_allow_reapplication.sql` has never run.
-- The 5 pgTAP assertions have never executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging.
+- Migrations `20260901000000_allow_reapplication.sql` and `20260901010000_application_question_editor.sql` have never run.
+- The pgTAP file went from 99 assertions to 113 and none of the 14 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging.
