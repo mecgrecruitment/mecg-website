@@ -42,6 +42,7 @@ type ApplicationDossierRow = {
     class_year: string | null;
     major: string | null;
     linkedin_url: string | null;
+    accessibility_notes: string | null;
   };
 };
 
@@ -49,7 +50,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const { id } = await params;
   const user = await requireAdmin();
   const supabase = await createClient();
-  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url)";
+  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
   const { data, error } = await supabase
     .from("applications")
     .select(applicationSelect)
@@ -263,6 +264,17 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               </div>
             )}
           </dl>
+
+          {/* Collected at intake since the first cycle and read by nobody until
+              now. An applicant declaring an access need and never hearing back
+              is an accessibility failure, not a missing feature. */}
+          {person.accessibility_notes && (
+            <div className="rounded-xl bg-mecg-blue/[0.07] p-4 shadow-[inset_0_0_0_1px_rgba(63,99,175,0.2)]">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-blue">Accessibility request</p>
+              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/75">{person.accessibility_notes}</p>
+              <p className="mt-2 text-xs text-mecg-navy/50">Arrange this before scheduling them for anything timed or in person.</p>
+            </div>
+          )}
 
           <div>
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/45">Resume</p>
