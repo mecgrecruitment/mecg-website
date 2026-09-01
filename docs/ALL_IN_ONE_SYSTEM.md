@@ -362,70 +362,54 @@ The one real identity gap left: a person who applies with a personal address and
 
 ---
 
-## 10. Sequence and status
+## 10. Status
 
-Branch `fix/applicant-reapplication` carries Phases 0 through 3.
+All seven phases are implemented on branch `fix/applicant-reapplication` (18 commits, 9 migrations). What each one turned into:
 
-**Phase 0. Fix reapplication. Done.** `rush.can_start_application()` (migration `20260901000000_allow_reapplication.sql`), routed on in `resolveAuthDestination`, `/applicant` guard relaxed so history stays reachable, both pages cross-linked. Routing cases went 5 to 11; 5 new pgTAP assertions.
+**Phase 0. Reapplication.** `can_start_application`, the routing fix, history kept reachable, both pages cross-linked. The database already supported reapplication; only the router forbade it.
 
-**Phase 1. Unify the shell. Done, with one deviation.** `WorkspaceHeader` and `WorkspaceNav` now back all 12 workspace pages. `admin/board-nav.tsx`, the inline `navLinks` array, and both cross-link buttons are deleted. Round filtering moved from the global nav onto the member page, where it filters something.
+**Phase 1. One shell, one nav.** `WorkspaceHeader` and `WorkspaceNav` back all workspace pages. `board-nav.tsx`, the inline `navLinks`, and both cross-link buttons are gone. Routes stayed at `/admin/*` and `/member/*`; see the deviation note below.
 
-The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`.** The move touches 90 string references plus the proxy matcher and the `AuthDestination` union, all of it in the auth-routing surface, and it buys nothing a user can see once the shell and nav are shared. The duplication this phase existed to kill is gone either way. If the tidier tree is worth that churn, it is a mechanical follow-up that can happen any time; it is no longer blocking anything.
+**Phase 2. The junk drawer.** `/admin/people`, `/admin/rounds`, `/admin/settings`, each gated on the capability its actions need rather than merely collapsed behind a `<summary>`.
 
-**Phase 2. Break up the junk drawer. Done.** `/admin/people`, `/admin/rounds`, `/admin/settings`. `rush-controls.tsx` became a shared `useRushAction` hook plus four focused components instead of one 327-line default export. Each page gates on the capability its actions need, so Settings is unreachable without `MANAGE_CYCLE` rather than merely collapsed. The pipeline page dropped its memberships query.
+**Phase 3. Audit viewer.** `/admin/audit`, cycle-wide, filterable, paged. No migration needed.
 
-**Phase 3. Audit viewer. Done.** `/admin/audit`: cycle-wide, newest first, filterable by resource, paged. No migration needed, the table and its read policy and index already existed. Per-applicant history turned out to already exist on the dossier, so only the cycle view was missing.
+**Phase 4. Comms.** `rush.messages` logs every send attempt, delivered or not. Bulk send to a pipeline segment at `/admin/messages`. Batch decision release. Automatic evaluation-due reminders on the existing Vercel Cron pattern, idempotent through `reminders_sent`.
 
-### Not started
+**Phase 5. Editors and clone.** Application questions and rubric criteria are both editable without a deploy. Rubric edits publish a new version when the current one has been scored against. `clone_cycle` carries rounds, rubrics, questions and the roster, and nothing applicant-shaped.
 
-**Phase 4. Partly done.** `rush.messages` plus `log_message` and `release_ready_decisions` (migration `...060000`). Every send attempt is now recorded, wired into the intake confirmation and the decision release, and shown on the applicant dossier. A failed send is logged as `delivered = false` rather than dropped, since that is the case the board most needs to see.
+**Phase 6. Member year-round.** Task inbox, profile fields, cycle directory, personal record. Projects and staffing moved into the database, with the marketing pages reading from it and the old static file kept as a fallback.
 
-Batch release replaces sixty separate clicks on decision night. It calls `release_decision` per row rather than reimplementing the rules, so the approval count, conflict and status checks cannot drift from the single-decision path, and it catches per-decision failures so one conflicted decision cannot strand the rest.
+**Phase 7. Applicant.** Withdrawal (a status that was previously unreachable), the message list, the dated timeline, offer deadlines with expiry enforced in the RPC, and accessibility requests finally surfaced to the board.
 
-Still open here: editable templates, automatic triggers (event reminders, evaluation-due nudges, needs-info requests), and bulk send to a filtered pipeline segment. The log and the RLS policy are the foundation those need, and the policy already lets an applicant read their own messages, which is what Phase 7's message list wants.
+### The one deviation
 
-**Phase 5. Done.** `rush.set_application_questions` / `cycle_application_questions` (migration `...010000`) with an editor on `/admin/settings`, and `rush.set_rubric_criteria` / `cycle_rubrics` (migration `...020000`) with a per-round editor on `/admin/rounds`. Prompts, criteria, weights and required flags are all editable without a deploy.
+Routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`. The move touches 90 string references plus the proxy matcher and the `AuthDestination` union, all inside the auth-routing surface, and buys nothing visible once the shell and nav are shared. It is a mechanical follow-up whenever you want it.
 
-The rubric editor is versioned rather than destructive: `criterion_ratings.criterion_id` references `rubric_criteria` with no cascade, so editing a scored rubric would either fail on the foreign key or silently rewrite what a past score meant. When the current rubric has any evaluation against it the RPC publishes version + 1; otherwise it edits in place. Editing is refused once a round leaves DRAFT or PUBLISHED.
+### Deliberately not built
 
-`rush.clone_cycle` (migration `...040000`) copies rounds, each round's current rubric and criteria, the application questions and the roster, and copies nothing applicant-shaped. Rubric versions restart at 1, since a version means "the wording this score was given under" and that scope is a round.
-
-Note on ordering: clone was worth less than the plan assumed until the editors existed. `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`, so a new cycle was never empty. Clone only earns its keep now that content can diverge from the seeds.
-
-**Phase 6. Partly done.** `profiles` gained four optional columns (grad term, major, position, bio), plus `update_my_profile`, `cycle_directory` and `my_member_record` (migration `...050000`). `/admin/people` is now one page with two audiences: any member reads the directory, only `MANAGE_MEMBERSHIPS` sees the role controls. The member page gained a profile form and a personal record.
-
-`cycle_directory` returns no email or contact detail on purpose, and a pgTAP assertion pins that.
-
-Still open here: the task inbox, and projects and staffing moving into the database.
-
-**Phase 7. Applicant polish. Withdraw done, rest not started.** `rush.withdraw_application` (migration `...030000`) plus a two-step button on the portal.
-
-WITHDRAWN was an unreachable status: it is in the enum, four guards check for it, and the portal already renders an "Application withdrawn" branch, but `set_application_status` refuses the outcome statuses and no applicant-facing RPC existed. Every one of those guards was dead code. Withdrawal stays off `set_application_status` on purpose, since staff withdrawing someone on their behalf is the ambiguity that refusal was protecting against.
-
-Still open here: timeline with dates, document center, messages, offer expiry and countdown.
+- **The applicant document center.** Replacing a resume after submission is not a UI gap: `begin_resume_upload` is scoped to a DRAFT or NEEDS_INFO application, and letting someone swap a resume after a blind screening packet is built is a fairness question, not a coding one. Decide the policy first.
+- **Editable comms templates.** Bulk send lets the board write and send; stored per-trigger templates only pay off once the same message is being sent repeatedly. Worth revisiting after a cycle of real use.
+- **Everything in section 8**, unchanged.
 
 ---
 
-## 11. Decisions
+## 11. Before this merges
 
-| Question | Decision | Status |
-|---|---|---|
-| Does the member portal grow past recruitment? | Yes, year-round org system | Phase 6, not started |
-| Do applicants keep accounts across cycles? | Yes | Already true; only routing needed fixing. No `people` table required |
-| Does comms move into the system? | Yes | Phase 4, not started |
-| May applicants reapply next semester? | Yes | Done |
+Nothing here has touched a database. This machine has no Supabase CLI and no Docker, so:
 
-Open, and none of it blocking:
+- **Nine migrations have never run**: `20260901000000` through `20260901090000`.
+- **pgTAP is at 179 assertions, up from 99. None of the 80 new ones have executed.** Run `npm run test:supabase`.
+- **Run `npm run verify:auth` and `npm run verify:workflow`** against a real project.
+- **`database.types.ts` was hand-edited to match every migration rather than regenerated.** Run `npm run supabase:types` once the migrations apply and reconcile any drift. This is the most likely place for a silent mismatch.
+- **Clear `rush.application_portal_allowlist`.** It holds one address and blocks every applicant until it is emptied.
+- **Set `CRON_SECRET`** or the reminder job fails closed and never sends.
 
-- **The launch allowlist.** `application_portal_allowlist` holds one address. Clear it before applications open or nobody can apply, first-time or repeat.
+`tsc`, `eslint`, `npm test` (42 passing) and `next build` pass after every commit. That is real but it is not the same as the database agreeing.
+
+## 12. Decisions still yours
+
 - **Reapplication policy.** May someone who declined an offer reapply? Does the board see prior-cycle history while scoring? The plumbing supports either.
-- **Retention.** A persistent `pnms` row means a 2026 applicant still exists in 2030. `prune-resumes` is the cron pattern to copy.
-- **Comms ownership.** Phase 4 needs a named owner on the board or the templates rot.
-
-## 12. Unverified
-
-Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
-
-- Seven migrations have never run: `20260901000000_allow_reapplication`, `...010000_application_question_editor`, `...020000_rubric_criteria_editor`, `...030000_applicant_withdraw`, `...040000_clone_cycle`, `...050000_member_profiles`, `...060000_message_log_and_batch_release`.
-- The pgTAP file went from 99 assertions to 158 and none of the 59 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is by far the largest piece of unverified work on the branch, and nothing here should merge on the strength of `tsc` and `next build` alone.
-- `database.types.ts` was hand-edited to match each migration rather than regenerated. Run `npm run supabase:types` once the migrations are applied and reconcile.
+- **Retention.** A `pnms` row from 2026 still exists in 2030. `prune-resumes` is the cron pattern to copy.
+- **Comms ownership.** The engine needs a named owner or the messages rot.
+- **Resume replacement.** See the document center note above.
