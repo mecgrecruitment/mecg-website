@@ -198,7 +198,7 @@ Evaluations submitted, events attended (`member_checkins` already records this),
 
 `src/content/projects.public.ts` is a static file driving the marketing site. Members have no view of who is on what team. Moving projects into the database and adding a staffing table turns the marketing page into a byproduct of real data and gives members a year-round reason to log in.
 
-Decided: yes. See section 9 for the schema and the public/private split this needs.
+Decided: yes. Staffing hangs off `profiles`; see section 9 for why no new identity table is needed, and for the public/private split this requires.
 
 ### 5.6 Handbook and resources
 
@@ -272,35 +272,93 @@ Named explicitly so it does not creep back in:
 
 ---
 
-## 9. The person spine
+## 9. Reapplication and the person spine
 
-Decided: one person record spans cycles, and the member portal grows into the org's year-round system. Both of those rest on the same schema change, so it comes first.
+Requirement: an applicant may reapply next semester.
 
-Today identity is split and both halves are cycle-scoped:
+I traced this against the schema and the routing code rather than assuming. The result splits cleanly: **the database already supports reapplication correctly, and the application layer forbids it.**
 
-- `rush.profiles` is one row per auth user, holding `display_name` and `active`.
-- `rush.pnms` is one row per applicant per cycle. Reapplying next year creates a second unrelated row.
-- `rush.memberships` ties a profile to a cycle with a role, so "is this person in the org" is only answerable per cycle.
+### The database is already right
 
-Target: a `people` table as the single identity anchor. `profiles` and `pnms` both point at it. A person can be an applicant in Fall 2026, a member in Winter 2027, and a board member in Fall 2028, and that is one row with three relationships rather than three strangers.
+`rush.pnms` is not per-cycle. It is one row per person, globally:
 
-What this unlocks that nothing else can:
-- Reapplicant history visible on the dossier: applied before, how far they got, why.
-- The alumni and past-member view that a year-round directory needs.
-- One profile that feeds the member directory, the marketing `/team` page, and project staffing.
+```sql
+create table rush.pnms (
+  id text primary key ...,
+  auth_user_id uuid unique references auth.users (id) on delete set null,
+  normalized_contact text not null unique,
+  ...
+);
+create table rush.applications (
+  pnm_id text not null references rush.pnms (id),
+  cycle_id text not null references rush.rush_cycles (id),
+  ...
+  unique (pnm_id, cycle_id)
+);
+```
 
-### The risk this creates, and the guard
+One person, many applications, at most one per cycle. That is exactly the reapplication model.
 
-Blind screening currently works because reviewer-facing RPCs never join `pnms`. A shared `people` table adds a second path to an applicant's identity, and a careless join through `people` would silently unblind a reviewer.
+The write path honors it. `save_application_draft` resolves the open cycle, reuses the existing pnm and only inserts one when missing, then:
 
-The guard, decided up front rather than after the incident:
-- No screening RPC gains a `people` join. Ever. The existing `search_path = ''` plus `SECURITY DEFINER` pattern stays.
-- Add a pgTAP test asserting that no function reachable by a screening reviewer selects from `people` or `pnms`. `supabase/tests/` already exists and pgTAP is already enabled, so this is a test file, not new infrastructure.
-- Cross-cycle history on the dossier is gated behind `RECRUITMENT_OPERATIONS`, not `WORKSPACE_ACCESS`.
+```sql
+insert into rush.applications (pnm_id, cycle_id, status, draft_payload)
+values (person_id, v_cycle_id, 'DRAFT', payload)
+on conflict (pnm_id, cycle_id) do update ...
+```
 
-### Projects and staffing
+A new cycle means a new application row for the same person. `submit_application` scopes its lookup to `(pnm_id, v_cycle_id)`. `intake_schema` scopes the draft to the currently open cycle. All correct.
 
-`src/content/projects.public.ts` becomes a `projects` table plus a `project_members` join to `people`. The marketing `/work` and `/team` pages then read from the database instead of drifting from a hand-edited file. Keep the public/private split explicit: a `public` flag per project, and the marketing query selects only public fields. Client-confidential detail must not be one boolean away from the ISR cache.
+The read path is correct too. `applicant_dashboard()` returns every application ordered by `created_at desc`, and `applicant/page.tsx` already renders one card per application labeled with `cycle_name`. `applicant_schedule()` uses `distinct on (a.cycle_id)` and filters to `c.status in ('OPEN','IN_PROCESS','DECISION_LOCK')`, so a closed prior cycle contributes no stale events. Someone already thought about multiple cycles here.
+
+### The bug: routing makes reapplication unreachable
+
+`rush.is_applicant()` asks "have you ever applied", not "do you have live business":
+
+```sql
+select exists(
+  select 1 from rush.pnms p
+  join rush.applications a on a.pnm_id = p.id
+  where p.auth_user_id = auth.uid() and a.status not in ('DRAFT', 'NEEDS_INFO')
+);
+```
+
+That feeds `resolveAuthDestination`, where `hasApplication` true routes to `/applicant`. And `apply/page.tsx` opens with:
+
+```ts
+const destination = await currentDestination();
+if (destination && destination !== "/apply") redirect(destination);
+```
+
+So a student rejected in Fall 2026 who returns in Winter 2027 is redirected to `/applicant`, shown last cycle's rejection, and has no route to a new application. Permanently. The one flow the requirement names is the one flow the router forbids.
+
+### The fix
+
+Change the question from "have you ever applied" to "is there an open cycle you have not applied to yet". Three small edits, no schema change, no data migration:
+
+1. Add `rush.can_start_application()`: true when a cycle is OPEN and within its window and the caller has no application row for that cycle. This mirrors the cycle selection already written in `save_application_draft` and `intake_schema`, so reuse that predicate rather than writing a fourth copy.
+2. In `resolveAuthDestination`, prefer `/apply` when that is true, and fall back to `/applicant` when the caller has past applications. Memberships keep priority, so an accepted applicant who became a member still lands in the workspace.
+3. On `/applicant`, when a new cycle is open, show a "Applications for {cycle} are open. Start a new application." card linking to `/apply`. Without it the returning applicant has no way to discover the new cycle.
+
+`src/lib/auth-destination.test.ts` already exists and is pure, so the routing table for these cases is a test-only change on the app side.
+
+### The person spine already exists
+
+I previously recommended a new `people` table for cross-cycle identity. That was based on a wrong reading of `pnms` and it is not needed. The anchor is already there:
+
+- `rush.profiles.id` **is** `auth.users.id`.
+- `rush.pnms.auth_user_id` references `auth.users.id` and is `unique`.
+
+So `profiles.id = pnms.auth_user_id` is the join, and an applicant who becomes a member is already one identity in two tables. Cross-cycle applicant history is a query against `applications` grouped by `pnm_id`, available today. The member directory and project staffing from section 5 hang off `profiles`, which needs new columns, not a new anchor table.
+
+This deletes the riskiest migration in the plan. It also deletes the unblinding risk that migration would have created, since no new join path to applicant identity gets introduced. Keep the pgTAP guard anyway as a regression test: it is a test file, and screening staying blind is worth pinning.
+
+The one real identity gap left: a person who applies with a personal address and later joins with a umich address is two `auth.users` rows. That is an account merge tool, small and rare, not a schema problem. Defer until someone hits it.
+
+### Two things to check before launch
+
+- `rush.application_portal_allowlist` currently holds exactly one address (`rbhavan@umich.edu`, noted "Portal closed to everyone else pending launch"). `application_portal_allows` returns false for everyone else, so **no applications can be submitted at all** until that row is removed or the allowlist is filled. This blocks first-time applicants and reapplicants alike.
+- Reapplication needs a stated policy, not just a working button: may an applicant who declined an offer reapply, and does the board see prior-cycle history when scoring? The data supports either answer. Section 4.5's audit viewer is where prior history would surface, gated behind `RECRUITMENT_OPERATIONS` so screening reviewers never see it.
 
 ---
 
@@ -308,21 +366,23 @@ The guard, decided up front rather than after the incident:
 
 Each phase ships and reverts on its own.
 
-**Phase 0. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features, no schema change. Best legibility gain per line touched, and it makes every later phase cheaper.
+**Phase 0. Fix reapplication.** `can_start_application()`, the routing change, the "new cycle is open" card on `/applicant`, and cases added to `auth-destination.test.ts`. No schema change. This is first because it is a stated requirement that is currently broken, and because it is roughly a day of work rather than a project.
 
-**Phase 1. Break up the junk drawer.** `/portal/rounds`, `/portal/people`, `/portal/settings`. Still no schema change.
+**Phase 1. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features. Best legibility gain per line touched, and every later phase gets cheaper.
 
-**Phase 2. The person spine.** The `people` table, backfill from `profiles` and `pnms`, the pgTAP unblinding guard, and the cross-cycle history tab on the dossier. This is the riskiest migration in the plan and it belongs here, before anything is layered on top of it, not after.
+**Phase 2. Break up the junk drawer.** `/portal/rounds`, `/portal/people`, `/portal/settings`. Still no schema change.
 
-**Phase 3. Answer the two unanswerable questions.** Audit viewer and per-applicant send log. "Who changed this?" and "Did anyone tell them?"
+**Phase 3. Answer the two unanswerable questions.** Audit viewer and per-applicant send log. "Who changed this?" and "Did anyone tell them?" The audit viewer is also where prior-cycle applicant history surfaces, gated behind `RECRUITMENT_OPERATIONS`.
 
 **Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. `release_decision` gets a batch sibling so decision night is one action rather than sixty.
 
-**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle stops needing a developer and a migration.
+**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle stops needing a developer and a migration. This is what makes "next semester" cheap for the board, so it pairs with Phase 0 as the other half of the reapplication story.
 
-**Phase 6. Member year-round.** Task inbox, extended profiles, directory, personal record. Then projects and staffing on the spine from Phase 2, with the marketing pages cut over to read from the database.
+**Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record. Then projects and staffing, with the marketing pages cut over to read from the database.
 
 **Phase 7. Applicant polish.** Timeline, document center, messages, offer expiry and countdown, withdraw.
+
+The `people` table that used to be Phase 2 is gone. See section 9.
 
 ---
 
@@ -330,11 +390,14 @@ Each phase ships and reverts on its own.
 
 | Question | Decision | Consequence |
 |---|---|---|
-| Does the member portal grow past recruitment? | Yes, year-round org system | Projects and staffing move into the database; profiles extend; directory ships in Phase 6 |
-| Do applicants keep accounts across cycles? | Yes, persistent person record | `people` table in Phase 2, with an explicit unblinding guard for screening |
+| Does the member portal grow past recruitment? | Yes, year-round org system | Projects and staffing move into the database; `profiles` gains columns; directory ships in Phase 6 |
+| Do applicants keep accounts across cycles? | Yes | Already true. `pnms` is global and `auth.users.id` is the anchor. Only the routing gate needed fixing |
 | Does comms move into the system? | Yes | Comms engine in Phase 4; sending moves off personal inboxes or the work is wasted |
+| May applicants reapply next semester? | Yes | Phase 0. Database already supports it; `is_applicant()` and the `/apply` redirect blocked it |
 
-Still open, and answerable later without blocking Phase 0:
+Still open, and none of it blocks Phase 0:
 
-- Retention. A persistent person record means an applicant rejected in 2026 still has a row in 2030. Decide a retention window and a deletion path before Phase 2 ships, not after someone asks for their data back. `prune-resumes` already establishes the cron pattern for this.
-- Who on the board owns comms templates day to day. The engine needs an owner or the templates rot.
+- **The launch allowlist.** `application_portal_allowlist` holds one address. Clear it before applications open or nobody can apply.
+- **Reapplication policy.** May someone who declined an offer reapply? Does the board see prior-cycle history while scoring? The data supports either; pick one and write it down.
+- **Retention.** A persistent `pnms` row means a 2026 applicant still exists in 2030. Decide a retention window and a deletion path. `prune-resumes` already establishes the cron pattern to copy.
+- **Comms ownership.** The engine needs a named owner on the board or the templates rot.
