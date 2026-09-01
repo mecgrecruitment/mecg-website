@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(113);
+select extensions.plan(123);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -257,6 +257,59 @@ insert into rush.memberships(user_id,cycle_id,role) values
   ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000014','OWNER');
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000014','[]'::jsonb)$$,'55000','applications already submitted','questions freeze once a cohort has submitted');
+set local role postgres;
+
+
+-- Rubric criteria editor. The version-bump rule is the important one: criteria
+-- are referenced by criterion_ratings with no cascade, so a rubric that has
+-- been scored against must never be edited in place.
+set local role postgres;
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='set_rubric_criteria' and p.prosecdef and p.proconfig @> array['search_path=""']), 'rubric writer exists and is security definer with empty search path');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='cycle_rubrics' and p.prosecdef and p.proconfig @> array['search_path=""']), 'rubric reader exists and is security definer with empty search path');
+
+insert into rush.rounds(id,cycle_id,kind,name,status,weight) values
+  ('10000000-0000-4000-8000-000000000041','10000000-0000-4000-8000-000000000011','PGTAP_ROUND','pgTAP round','DRAFT',50);
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10}]'::jsonb)$$,'42501','forbidden','a plain member cannot edit a rubric');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[]'::jsonb)$$,'22023','a rubric needs at least one criterion','an empty rubric is rejected');
+select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":0}]'::jsonb)$$,'22023','invalid criterion weight','a zero weight is rejected');
+select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10},{"key":"a","name":"B","weight":10}]'::jsonb)$$,'23505','duplicate criterion key','duplicate criterion keys are rejected');
+
+select rush.set_rubric_criteria(
+  '10000000-0000-4000-8000-000000000041',
+  '[{"key":"clarity","name":"Clarity","description":"","weight":30,"required":true},
+    {"key":"rigour","name":"Rigour","description":"","weight":20,"required":false}]'::jsonb);
+set local role postgres;
+insert into rush_foundation_results values ('rubric_first_version',
+  (select max(b.version) from rush.rubrics b where b.round_id='10000000-0000-4000-8000-000000000041'));
+select extensions.is((select value from rush_foundation_results where key='rubric_first_version'),1::bigint,'a round with no rubric gets version 1');
+select extensions.is(
+  (select count(*) from rush.rubric_criteria c join rush.rubrics b on b.id=c.rubric_id where b.round_id='10000000-0000-4000-8000-000000000041'),
+  2::bigint,
+  'editing in place replaces criteria rather than appending');
+
+-- Re-saving with no evaluations against the rubric must stay on version 1.
+set local role authenticated;
+select rush.set_rubric_criteria(
+  '10000000-0000-4000-8000-000000000041',
+  '[{"key":"clarity","name":"Clarity again","description":"","weight":40,"required":true}]'::jsonb);
+set local role postgres;
+insert into rush_foundation_results values ('rubric_reedit_version',
+  (select max(b.version) from rush.rubrics b where b.round_id='10000000-0000-4000-8000-000000000041'));
+select extensions.is((select value from rush_foundation_results where key='rubric_reedit_version'),1::bigint,'an unscored rubric is edited in place, not versioned');
+
+update rush.rounds set status='PUBLISHED' where id='10000000-0000-4000-8000-000000000041';
+update rush.rounds set status='ACTIVE' where id='10000000-0000-4000-8000-000000000041';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10}]'::jsonb)$$,
+  '55000','round is already under way','a round under way has a fixed rubric');
 set local role postgres;
 
 select * from extensions.finish();

@@ -1787,6 +1787,7 @@ export type Database = {
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       can_start_application: { Args: never; Returns: boolean }
       cycle_application_questions: { Args: { target_cycle_id: string }; Returns: Json }
+      cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
       commit_screening_assignments: {
@@ -2026,6 +2027,10 @@ export type Database = {
       set_application_questions: {
         Args: { target_cycle_id: string; questions: Json }
         Returns: number
+      }
+      set_rubric_criteria: {
+        Args: { target_round_id: string; criteria: Json }
+        Returns: string
       }
       set_cycle_status: {
         Args: {

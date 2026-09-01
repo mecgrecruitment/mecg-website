@@ -33,6 +33,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   SET_ROUND_STATUS: "MANAGE_CYCLE",
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
   SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
+  SET_RUBRIC_CRITERIA: "MANAGE_CYCLE",
 };
 
 function isMemberRole(value: unknown): value is MemberRole {
@@ -108,6 +109,12 @@ export async function POST(req: NextRequest) {
     // to edit once a cohort has started submitting).
     if (!Array.isArray(body.questions)) return NextResponse.json({ error: "Questions must be a list" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_application_questions", { target_cycle_id: cycleId, questions: body.questions as Json }));
+  } else if (action === "SET_RUBRIC_CRITERIA") {
+    // Shape only again. The RPC owns the round-status gate, the version bump
+    // when a rubric has already been scored against, and every field rule.
+    if (!Array.isArray(body.criteria)) return NextResponse.json({ error: "Criteria must be a list" }, { status: 400 });
+    if (typeof body.roundId !== "string" || !body.roundId) return NextResponse.json({ error: "Round is required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("set_rubric_criteria", { target_round_id: body.roundId, criteria: body.criteria as Json }));
   } else if (action === "SET_APPLICATION_STATUS") {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
   } else if (action === "CREATE_SLOT") {
