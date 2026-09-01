@@ -7,16 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import SectionLabel from "@/components/section-label";
 import SetupForm from "./setup-form";
-import RushControls from "./rush-controls";
+import { AddApplicantForm } from "./rush-controls";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
-import type { Database } from "@/lib/supabase/database.types";
-
-type MemberRole = Database["rush"]["Enums"]["member_role"];
-
-const ROLE_PRIORITY: readonly MemberRole[] = ["OWNER", "PANEL", "BOARD", "RECRUITMENT_COMMITTEE", "MEMBER"];
 
 export const metadata: Metadata = { title: "Board dashboard" };
 
@@ -63,9 +58,7 @@ export default async function AdminDashboard() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
-  const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
-  const canManageMemberships = hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS");
-  const [cycleResult, roundsResult, appsResult, membersResult, eventsResult] = await Promise.all([
+  const [cycleResult, roundsResult, appsResult, eventsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
     supabase
@@ -74,10 +67,9 @@ export default async function AdminDashboard() {
       .eq("cycle_id", cycleId)
       .not("submitted_at", "is", null)
       .neq("status", "DRAFT"),
-    supabase.from("memberships").select("id,user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     supabase.from("events").select("id,name,starts_at").eq("cycle_id", cycleId).order("starts_at"),
   ]);
-  for (const result of [cycleResult, roundsResult, appsResult, membersResult, eventsResult]) if (result.error) throw result.error;
+  for (const result of [cycleResult, roundsResult, appsResult, eventsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
   const applications = (appsResult.data ?? [])
@@ -87,22 +79,6 @@ export default async function AdminDashboard() {
     })
     .sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
   const events = eventsResult.data ?? [];
-  const members = membersResult.data ?? [];
-  const memberAccounts = Array.from(
-    members.reduce((accounts, membership) => {
-      const account = accounts.get(membership.user_id);
-      if (account) account.roles.push(membership.role);
-      else accounts.set(membership.user_id, {
-        id: membership.user_id,
-        name: membership.profiles.display_name,
-        roles: [membership.role],
-      });
-      return accounts;
-    }, new Map<string, { id: string; name: string; roles: MemberRole[] }>()),
-  ).map(([, account]) => ({
-    ...account,
-    role: ROLE_PRIORITY.find((role) => account.roles.includes(role)) ?? "MEMBER",
-  })).sort((a, b) => a.name.localeCompare(b.name));
   const decidedCount = applications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
   const resumeCount = applications.filter((application) => application.resume_storage_path).length;
   const missingResumeCount = applications.length - resumeCount;
@@ -267,31 +243,10 @@ export default async function AdminDashboard() {
       </section>
       {canOperate && (
         <section>
-          <SectionLabel number="04">Administration</SectionLabel>
-          <details className="group mt-3.5 rounded-2xl bg-mecg-navy/[0.025] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-            <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 marker:content-none">
-              <span>
-                <span className="block text-sm font-semibold text-mecg-navy">Quick actions and cycle settings</span>
-                <span className="mt-0.5 block text-xs text-mecg-navy/45">Add people, create assignments, or change workflow status.</span>
-              </span>
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/45 transition-transform group-open:rotate-180" aria-hidden="true">
-                <path d="M5 8l5 5 5-5" />
-              </svg>
-            </summary>
-            <div className="border-t border-mecg-navy/10 p-5">
-              <RushControls
-                cycleId={cycle.id}
-                cycleStatus={cycle.status}
-                canOperate={canOperate}
-                canManageCycle={canManageCycle}
-                canManageMemberships={canManageMemberships}
-                currentUserId={user.id}
-                rounds={(roundsResult.data ?? []).map((round) => ({ id: round.id, label: round.name, status: round.status }))}
-                memberAccounts={memberAccounts}
-                applications={applications.map((application) => ({ id: application.id, label: application.pnms.name }))}
-              />
-            </div>
-          </details>
+          <SectionLabel number="04">Add an applicant</SectionLabel>
+          <div className="mt-3.5">
+            <AddApplicantForm cycleId={cycle.id} />
+          </div>
         </section>
       )}
     </main>

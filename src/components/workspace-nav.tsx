@@ -44,13 +44,14 @@ export default async function WorkspaceNav({
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
         ["/admin", "Pipeline"],
+        ["/admin/rounds", "Rounds"],
         ["/admin/screening", "Screening admin"],
-        ["/admin/speed-dating", "Speed Dating"],
-        ["/admin/group-case", "Group Case"],
         ["/admin/groups", "Case teams"],
       ] as const)
       : []),
     ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash"] as const] : []),
+    ...(can("MANAGE_MEMBERSHIPS") ? [["/admin/people", "People"] as const] : []),
+    ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
 
   return <PillNav ariaLabel="Workspace" current={current} links={links} />;
