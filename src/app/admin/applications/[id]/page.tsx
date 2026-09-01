@@ -7,7 +7,7 @@ import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evalu
 import { CLASS_YEAR_LABELS, PIPELINE_STATUSES, type ClassYear } from "@/lib/workflow";
 import LogoutButton from "@/components/logout-button";
 import WorkspaceNav from "@/components/workspace-nav";
-import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../../decision-form";
+import DecisionForm, { ApprovalButton, OfferDeadlineForm, PreviewForm, ReleaseButton } from "../../decision-form";
 import DossierTabs from "./tabs";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
@@ -33,6 +33,7 @@ type ApplicationDossierRow = {
   cycle_id: string;
   offer_response: string | null;
   offer_responded_at: string | null;
+  offer_expires_at: string | null;
   pnms: {
     name: string;
     contact: string;
@@ -128,7 +129,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
     );
   }
 
-  const offerSelect: string = "offer_response,offer_responded_at";
+  const offerSelect: string = "offer_response,offer_responded_at,offer_expires_at";
   const [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult] = await Promise.all([
     supabase.from("applications").select(offerSelect).eq("id", id).single(),
     supabase.from("application_responses").select("question_key,question_text,response_text").eq("application_id", id),
@@ -147,9 +148,10 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   ]);
   for (const result of [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult]) if (result.error) throw result.error;
   if (!offerResult.data) notFound();
-  const offer = offerResult.data as unknown as Pick<ApplicationDossierRow, "offer_response" | "offer_responded_at">;
+  const offer = offerResult.data as unknown as Pick<ApplicationDossierRow, "offer_response" | "offer_responded_at" | "offer_expires_at">;
   application.offer_response = offer.offer_response;
   application.offer_responded_at = offer.offer_responded_at;
+  application.offer_expires_at = offer.offer_expires_at;
 
   const responses = responsesResult.data ?? [];
   const rounds = (roundsResult.data ?? []).map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
@@ -367,6 +369,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                       {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
                       {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
                       {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
+                      {canDecide && decision.outcome === "OFFER" && !application.offer_response && (
+                        <OfferDeadlineForm applicationId={application.id} current={application.offer_expires_at} />
+                      )}
                     </div>
                   ))}
                 </div>

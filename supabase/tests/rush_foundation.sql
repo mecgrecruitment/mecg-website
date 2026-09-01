@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(158);
+select extensions.plan(162);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -441,6 +441,20 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.release_ready_decisions('10000000-0000-4000-8000-000000000011')$$,'42501','panel role required','a non-panel member cannot batch release');
+set local role postgres;
+
+
+-- Offer deadlines. Expiry is enforced in respond_to_offer rather than in the
+-- UI, so a page left open overnight cannot accept an offer that has lapsed.
+set local role postgres;
+select extensions.has_column('rush','applications','offer_expires_at','applications carry an offer deadline');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='set_offer_deadline' and p.prosecdef and p.proconfig @> array['search_path=""']), 'deadline setter exists and is security definer with empty search path');
+select extensions.ok(position('offer expired' in pg_get_functiondef('rush.respond_to_offer(text,boolean)'::regprocedure)) > 0, 'respond_to_offer enforces the deadline itself');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000-8000-000000000031', now() + interval '7 days')$$,'42501','panel role required','a non-panel member cannot set an offer deadline');
 set local role postgres;
 
 select * from extensions.finish();

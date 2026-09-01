@@ -79,6 +79,14 @@ export async function POST(req: NextRequest) {
   } else if (body?.action === "APPROVE") ({ data, error } = await supabase.rpc("approve_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE") ({ data, error } = await supabase.rpc("release_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE_ALL") ({ data, error } = await supabase.rpc("release_ready_decisions", { target_cycle_id: String(body.cycleId ?? "") }));
+  else if (body?.action === "SET_DEADLINE") {
+    const expiresAt = typeof body.expiresAt === "string" && body.expiresAt ? new Date(body.expiresAt) : null;
+    if (expiresAt && Number.isNaN(expiresAt.getTime())) return NextResponse.json({ error: "Invalid deadline" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("set_offer_deadline", {
+      target_application_id: String(body.applicationId ?? ""),
+      expires_at: expiresAt ? expiresAt.toISOString() : null as unknown as string,
+    }));
+  }
   else if (body?.action === "PREVIEW") ({ data, error } = await supabase.rpc("set_decision_preview", { target_decision_id: String(body.decisionId ?? ""), preview_text: String(body.preview ?? "") }));
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   if (error) {

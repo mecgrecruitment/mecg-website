@@ -210,3 +210,62 @@ export function ReleaseAllButton({ cycleId, readyCount }: { cycleId: string; rea
     </div>
   );
 }
+
+// An offer with no deadline leaves the cohort open indefinitely. The RPC
+// enforces expiry in respond_to_offer, so this only has to collect the date.
+export function OfferDeadlineForm({ applicationId, current }: { applicationId: string; current: string | null }) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  async function save(form: HTMLFormElement) {
+    const value = String(new FormData(form).get("expiresAt") ?? "");
+    setPending(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await fetch("/api/admin/decisions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt: value }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Could not set the deadline");
+        return;
+      }
+      setSuccess(value ? "Deadline saved." : "Deadline cleared.");
+      router.refresh();
+    } catch {
+      setError("Could not set the deadline");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form
+      className="flex flex-col items-start gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void save(event.currentTarget);
+      }}
+    >
+      <label className="text-xs font-semibold text-mecg-navy/60">
+        Offer deadline
+        <input
+          type="datetime-local"
+          name="expiresAt"
+          defaultValue={current ? current.slice(0, 16) : ""}
+          className="mt-1.5 block min-h-10 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+        />
+      </label>
+      <button type="submit" disabled={pending} className="button-secondary text-xs">
+        {pending ? "Saving…" : "Save deadline"}
+      </button>
+      <OperationNotice kind="error">{error}</OperationNotice>
+      <OperationNotice kind="success">{success}</OperationNotice>
+    </form>
+  );
+}

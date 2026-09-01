@@ -190,6 +190,7 @@ export type Database = {
           draft_payload: Json | null
           id: string
           offer_responded_at: string | null
+          offer_expires_at: string | null
           offer_response: string | null
           pnm_id: string
           process_survey_submitted_at: string | null
@@ -204,6 +205,7 @@ export type Database = {
           draft_payload?: Json | null
           id?: string
           offer_responded_at?: string | null
+          offer_expires_at?: string | null
           offer_response?: string | null
           pnm_id: string
           process_survey_submitted_at?: string | null
@@ -2084,6 +2086,7 @@ export type Database = {
         }
         Returns: string
       }
+      my_offer_deadlines: { Args: never; Returns: Json }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
       release_ready_decisions: { Args: { target_cycle_id: string }; Returns: Json }
       set_application_questions: {
@@ -2101,6 +2104,10 @@ export type Database = {
         Returns: boolean
       }
       withdraw_application: { Args: { target_application_id: string }; Returns: boolean }
+      set_offer_deadline: {
+        Args: { target_application_id: string; expires_at: string }
+        Returns: boolean
+      }
       set_rubric_criteria: {
         Args: { target_round_id: string; criteria: Json }
         Returns: string
