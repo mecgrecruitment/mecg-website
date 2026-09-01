@@ -277,3 +277,97 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
     </form>
   );
 }
+
+// WITHDRAWN was unreachable before rush.withdraw_application existed, so an
+// applicant who wanted out had to email the board. Two steps rather than one,
+// because this is not undoable and there is no way back into the cycle.
+export function WithdrawButton({ applicationId }: { applicationId: string }) {
+  const router = useRouter();
+  const confirmRef = useRef<HTMLParagraphElement>(null);
+  const openRef = useRef<HTMLButtonElement>(null);
+  const inFlight = useRef(false);
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (confirming) confirmRef.current?.focus();
+  }, [confirming]);
+
+  async function withdraw() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setApplicantActionPending(true);
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch("/api/applicant/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ applicationId }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(responseError(body, "Could not withdraw your application"));
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Could not withdraw your application");
+    } finally {
+      inFlight.current = false;
+      setApplicantActionPending(false);
+      setPending(false);
+    }
+  }
+
+  if (!confirming) {
+    return (
+      <div className="mt-5">
+        <button
+          ref={openRef}
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-mecg-navy/55 underline underline-offset-4 hover:text-mecg-navy"
+        >
+          Withdraw my application
+        </button>
+        {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+      <p ref={confirmRef} tabIndex={-1} className="text-sm font-semibold text-mecg-navy outline-none">
+        Withdraw your application?
+      </p>
+      <p className="mt-1 text-sm leading-6 text-mecg-navy/60">
+        This removes you from the rest of this cycle and cannot be undone. You can apply again in a future cycle.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-3">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => void withdraw()}
+          className="inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:opacity-55"
+        >
+          {pending ? "Withdrawing…" : "Yes, withdraw"}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => {
+            setConfirming(false);
+            setError("");
+            requestAnimationFrame(() => openRef.current?.focus());
+          }}
+          className="button-secondary text-sm"
+        >
+          Keep my application
+        </button>
+      </div>
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+    </div>
+  );
+}

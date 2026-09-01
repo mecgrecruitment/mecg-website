@@ -2028,6 +2028,7 @@ export type Database = {
         Args: { target_cycle_id: string; questions: Json }
         Returns: number
       }
+      withdraw_application: { Args: { target_application_id: string }; Returns: boolean }
       set_rubric_criteria: {
         Args: { target_round_id: string; criteria: Json }
         Returns: string

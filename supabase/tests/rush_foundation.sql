@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(123);
+select extensions.plan(130);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -310,6 +310,29 @@ set local role authenticated;
 select extensions.throws_ok(
   $$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10}]'::jsonb)$$,
   '55000','round is already under way','a round under way has a fixed rubric');
+set local role postgres;
+
+
+-- Applicant withdrawal. WITHDRAWN was unreachable before this function: four
+-- guards checked for it and nothing could set it.
+set local role postgres;
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='withdraw_application' and p.prosecdef and p.proconfig @> array['search_path=""']), 'withdrawal function exists and is security definer with empty search path');
+
+-- ...0002 does not own the reapplicant's application ...032.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000032')$$,'42501','forbidden','one applicant cannot withdraw another applicant''s application');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000031')$$,'55000','application cannot be withdrawn','a rejected application cannot be withdrawn');
+select extensions.ok(rush.withdraw_application('10000000-0000-4000-8000-000000000032'), 'the owner withdraws their submitted application');
+set local role postgres;
+select extensions.is((select status::text from rush.applications where id='10000000-0000-4000-8000-000000000032'),'WITHDRAWN','withdrawal reaches the previously unreachable status');
+select extensions.ok(exists(select 1 from rush.audit_events where resource='Application' and resource_id='10000000-0000-4000-8000-000000000032' and action='APPLICATION_WITHDRAWN' and actor_id='10000000-0000-4000-8000-000000000004'::uuid), 'withdrawal is recorded in the audit log with the applicant as actor');
+set local role authenticated;
+select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000032')$$,'55000','application cannot be withdrawn','withdrawing twice is refused');
 set local role postgres;
 
 select * from extensions.finish();

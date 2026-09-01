@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
-import { BuddyButton, OfferButtons, SlotButton, SurveyForm } from "./actions";
+import { BuddyButton, OfferButtons, SlotButton, SurveyForm, WithdrawButton } from "./actions";
 import ApplicantStatusRefresh from "./status-refresh";
 
 export const metadata: Metadata = { title: "Applicant portal" };
@@ -190,6 +190,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               <p className="mt-4 text-sm text-mecg-navy/55">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
               {application.released_outcome === "OFFER" && (
                 <OfferButtons applicationId={application.application_id} initialResponse={application.offer_response as "ACCEPTED" | "DECLINED" | null} />
+              )}
+              {/* The RPC refuses DRAFT, WITHDRAWN and REJECTED; mirror that here
+                  so the option only appears when it would actually work. An
+                  answered offer is already a final decision either way. */}
+              {!withdrawn
+                && !["DRAFT", "REJECTED"].includes(application.display_status)
+                && !application.offer_response && (
+                <WithdrawButton applicationId={application.application_id} />
               )}
               {responses.length > 0 && (
                 <dl className="mt-5 space-y-4">
