@@ -1182,6 +1182,72 @@ export type Database = {
         }
         Relationships: []
       }
+      project_members: {
+        Row: { project_id: string; role_label: string; user_id: string }
+        Insert: { project_id: string; role_label?: string; user_id: string }
+        Update: { project_id?: string; role_label?: string; user_id?: string }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          client_label: string
+          constraints: Json
+          context: string
+          created_at: string
+          decision: string
+          deliverables: Json
+          handoff: string
+          id: string
+          industry: string
+          is_public: boolean
+          member_work: Json
+          methods: Json
+          semester: string
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_label?: string
+          constraints?: Json
+          context?: string
+          created_at?: string
+          decision?: string
+          deliverables?: Json
+          handoff?: string
+          id?: string
+          industry?: string
+          is_public?: boolean
+          member_work?: Json
+          methods?: Json
+          semester?: string
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_label?: string
+          constraints?: Json
+          context?: string
+          created_at?: string
+          decision?: string
+          deliverables?: Json
+          handoff?: string
+          id?: string
+          industry?: string
+          is_public?: boolean
+          member_work?: Json
+          methods?: Json
+          semester?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active: boolean
