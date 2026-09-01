@@ -378,7 +378,11 @@ The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving 
 
 ### Not started
 
-**Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. Still the largest new subsystem here, and still the one that only pays off if sending actually moves off personal inboxes.
+**Phase 4. Partly done.** `rush.messages` plus `log_message` and `release_ready_decisions` (migration `...060000`). Every send attempt is now recorded, wired into the intake confirmation and the decision release, and shown on the applicant dossier. A failed send is logged as `delivered = false` rather than dropped, since that is the case the board most needs to see.
+
+Batch release replaces sixty separate clicks on decision night. It calls `release_decision` per row rather than reimplementing the rules, so the approval count, conflict and status checks cannot drift from the single-decision path, and it catches per-decision failures so one conflicted decision cannot strand the rest.
+
+Still open here: editable templates, automatic triggers (event reminders, evaluation-due nudges, needs-info requests), and bulk send to a filtered pipeline segment. The log and the RLS policy are the foundation those need, and the policy already lets an applicant read their own messages, which is what Phase 7's message list wants.
 
 **Phase 5. Done.** `rush.set_application_questions` / `cycle_application_questions` (migration `...010000`) with an editor on `/admin/settings`, and `rush.set_rubric_criteria` / `cycle_rubrics` (migration `...020000`) with a per-round editor on `/admin/rounds`. Prompts, criteria, weights and required flags are all editable without a deploy.
 
@@ -422,6 +426,6 @@ Open, and none of it blocking:
 
 Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
 
-- Six migrations have never run: `20260901000000_allow_reapplication`, `...010000_application_question_editor`, `...020000_rubric_criteria_editor`, `...030000_applicant_withdraw`, `...040000_clone_cycle`, `...050000_member_profiles`.
-- The pgTAP file went from 99 assertions to 149 and none of the 50 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is by far the largest piece of unverified work on the branch, and nothing here should merge on the strength of `tsc` and `next build` alone.
+- Seven migrations have never run: `20260901000000_allow_reapplication`, `...010000_application_question_editor`, `...020000_rubric_criteria_editor`, `...030000_applicant_withdraw`, `...040000_clone_cycle`, `...050000_member_profiles`, `...060000_message_log_and_batch_release`.
+- The pgTAP file went from 99 assertions to 158 and none of the 59 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is by far the largest piece of unverified work on the branch, and nothing here should merge on the strength of `tsc` and `next build` alone.
 - `database.types.ts` was hand-edited to match each migration rather than regenerated. Run `npm run supabase:types` once the migrations are applied and reconcile.
