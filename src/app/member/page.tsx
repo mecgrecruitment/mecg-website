@@ -80,6 +80,34 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     });
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
+  // One list of what this member actually owes, ordered by deadline. Before
+  // this, learning whether you were behind meant visiting /member,
+  // /member/screening and /member/event and comparing three separate views.
+  const tasks: Array<{ href: string; label: string; detail: string; dueAt: number }> = [
+    ...openAssignments.map((assignment) => ({
+      href: `#assignment-${assignment.id}`,
+      label: `Evaluate ${assignment.applications.pnms.name}`,
+      detail: assignment.rounds.closes_at ? `${assignment.rounds.name} · closes ${formatDeadline(assignment.rounds.closes_at)}` : assignment.rounds.name,
+      dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
+    })),
+    ...(screeningQueue.data ?? [])
+      .filter((item) => item.assignment_status === "ASSIGNED")
+      .map((item) => ({
+        href: `/member/screening/${item.assignment_id}`,
+        label: `Screen candidate ${item.candidate_code}`,
+        detail: "Blind first-pass review",
+        dueAt: Number.POSITIVE_INFINITY,
+      })),
+    ...(gradingEvent?.grading_open
+      ? [{
+        href: "/member/event",
+        label: `Grade at ${gradingEvent.event_name}`,
+        detail: "Grading is open now",
+        dueAt: 0,
+      }]
+      : []),
+  ].sort((a, b) => a.dueAt - b.dueAt);
+
   const recordCounts = record && typeof record === "object" && !Array.isArray(record) ? record as Record<string, unknown> : {};
   const memberRecord: Array<readonly [string, number]> = [
     ["evaluations submitted", Number(recordCounts.evaluationsSubmitted ?? 0)],
@@ -110,7 +138,31 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <WorkspaceNav user={user} cycleId={cycleMembership.cycleId} current={currentWorkspace} />
 
       <section>
-        <SectionLabel number="01">Review overview</SectionLabel>
+        <SectionLabel number="01">What you owe</SectionLabel>
+        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">
+          {tasks.length ? `${tasks.length} open ${tasks.length === 1 ? "task" : "tasks"}` : "Nothing is waiting on you"}
+        </h2>
+        <div className="mt-3.5 flex flex-col gap-2">
+          {tasks.map((task) => (
+            <Link
+              key={`${task.href}-${task.label}`}
+              href={task.href}
+              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/[0.05]"
+            >
+              <span className="text-[14px] font-semibold text-mecg-navy">{task.label}</span>
+              <span className="text-[12px] text-mecg-navy/50">{task.detail}</span>
+            </Link>
+          ))}
+          {!tasks.length && (
+            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
+              You are caught up. New work appears here when the Board opens a round or assigns a packet.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section>
+        <SectionLabel number="02">Review overview</SectionLabel>
         <div className="mt-3.5 overflow-hidden rounded-[22px] bg-mecg-navy text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
           <div className="grid gap-px bg-white/10 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="bg-mecg-navy p-5 sm:p-7">
@@ -158,7 +210,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <SectionLabel number="02">Your assignments</SectionLabel>
+            <SectionLabel number="03">Your assignments</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
           </div>
         </div>
@@ -224,7 +276,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="03">Your record</SectionLabel>
+        <SectionLabel number="04">Your record</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">What you have done this cycle</h2>
         <dl className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {memberRecord.map(([label, value]) => (
@@ -237,7 +289,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="04">Member tools</SectionLabel>
+        <SectionLabel number="05">Member tools</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
         {gradingEvent && (
           <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-[22px] bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)] sm:p-6">
