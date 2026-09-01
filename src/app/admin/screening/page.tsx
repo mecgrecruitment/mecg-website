@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import BoardNav from "../board-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import { requireAdmin } from "@/lib/auth";
-import { hasPermission } from "@/lib/authorization";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { screeningRpc, type ScreeningOverview } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
@@ -23,12 +23,12 @@ export default async function ScreeningAdminPage() {
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10">
-      <header>
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Recruitment operations</p>
-        <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Blind application screening</h1>
-        <p className="mt-1.5 max-w-3xl text-[15px] text-mecg-navy/55">Review and approve identity-free packets before assigning exactly three independent reviewers.</p>
-      </header>
-      <BoardNav current="/admin/screening" recruitmentOperations={hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")} hashPanel={hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS")} />
+      <WorkspaceHeader
+        eyebrow="Recruitment operations"
+        title="Blind application screening"
+        description="Review and approve identity-free packets before assigning exactly three independent reviewers."
+      />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
       <ScreeningControls cycleId={cycleId} members={members} batchId={overview?.batchId} status={overview?.status} />
       {overview && (
         <p className="rounded-2xl bg-mecg-navy/[0.03] p-4 text-sm text-mecg-navy/70">

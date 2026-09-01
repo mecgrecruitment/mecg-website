@@ -5,11 +5,11 @@ import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
-import LogoutButton from "@/components/logout-button";
 import SectionLabel from "@/components/section-label";
 import SetupForm from "./setup-form";
 import RushControls from "./rush-controls";
-import BoardNav from "./board-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
 import type { Database } from "@/lib/supabase/database.types";
@@ -55,13 +55,7 @@ export default async function AdminDashboard() {
   if (!cycleCount) {
     return (
       <main className="mx-auto flex max-w-5xl flex-col gap-8 p-8">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">MECG rush setup</h1>
-            <p className="text-gray-600">Signed in as {user.name}</p>
-          </div>
-          <LogoutButton />
-        </header>
+        <WorkspaceHeader eyebrow="Setup" title="MECG rush setup" description={`Signed in as ${user.name}`} />
         <SetupForm />
       </main>
     );
@@ -71,7 +65,6 @@ export default async function AdminDashboard() {
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canManageMemberships = hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS");
-  const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const [cycleResult, roundsResult, appsResult, membersResult, eventsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
@@ -141,18 +134,12 @@ export default async function AdminDashboard() {
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.name} · {cycle.status}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Board dashboard</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Signed in as {user.name}</p>
-        </div>
-        <div className="flex items-center gap-5">
-          <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canHash} />
+      <WorkspaceHeader
+        eyebrow={`${cycle.name} · ${cycle.status}`}
+        title="Board dashboard"
+        description={`Signed in as ${user.name}`}
+      />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
       <section>
         <SectionLabel number="01">Recruitment overview</SectionLabel>
         <div className="mt-3.5 overflow-hidden rounded-[22px] bg-mecg-navy text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">

@@ -6,8 +6,9 @@ import EvaluationForm from "./evaluation-form";
 import ConflictForm from "./conflict-form";
 import PasswordForm from "./password-form";
 import BuddySlotForm from "./buddy-slot-form";
-import LogoutButton from "@/components/logout-button";
 import PillNav from "@/components/pill-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import SectionLabel from "@/components/section-label";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
@@ -52,8 +53,6 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (screeningReviewer.error) throw new Error(screeningReviewer.error.message);
   if (applicantsError) throw applicantsError;
   if (screeningQueue.error) throw new Error(screeningQueue.error.message);
-  const isPanel = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["PANEL", "OWNER"].includes(membership.role));
-  const canAdmin = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
   const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
   const assignmentRows = assignments ?? [];
   const openAssignments = assignmentRows.filter(isReady);
@@ -76,16 +75,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const deadlineB = b.rounds.closes_at ? new Date(b.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY;
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
-  const screeningOpenCount = (screeningQueue.data ?? []).filter((item) => item.assignment_status === "ASSIGNED").length;
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
-  const navLinks: Array<readonly [string, string]> = [
-    ["/member", "All work"],
-    ...(screeningReviewer.data ? [["/member/screening", `Blind screening${screeningOpenCount ? ` · ${screeningOpenCount}` : ""}`] as const] : []),
-    ...(gradingEvent ? [["/member/event", "Live event"] as const] : []),
-    ["/member?round=SPEED_DATING", "Speed Dating"],
-    ["/member?round=GROUP_CASE", "Group Case"],
-    ...(isPanel ? [["/admin/hash", "Hash"] as const] : []),
-  ];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
     ? "Speed Dating"
@@ -102,18 +92,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycleMembership.cycle.name} · {cycleMembership.cycle.status}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Evaluation Hub</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Signed in as {user.name}</p>
-        </div>
-        <div className="flex items-center gap-5">
-          {canAdmin && <Link href="/admin" className="button-secondary text-sm">Board dashboard</Link>}
-          <LogoutButton />
-        </div>
-      </header>
-      <PillNav ariaLabel="Evaluation workspaces" current={currentWorkspace} links={navLinks} />
+      <WorkspaceHeader
+        eyebrow={`${cycleMembership.cycle.name} · ${cycleMembership.cycle.status}`}
+        title="Evaluation Hub"
+        description={`Signed in as ${user.name}`}
+      />
+      <WorkspaceNav user={user} cycleId={cycleMembership.cycleId} current={currentWorkspace} />
 
       <section>
         <SectionLabel number="01">Review overview</SectionLabel>
@@ -167,7 +151,17 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             <SectionLabel number="02">Your assignments</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
           </div>
-          {activeRoundFilter && <Link href="/member" className="text-link">Show all assignments</Link>}
+        </div>
+        <div className="mt-3.5">
+          <PillNav
+            ariaLabel="Filter assignments by round"
+            current={currentWorkspace}
+            links={[
+              ["/member", "All work"],
+              ["/member?round=SPEED_DATING", "Speed Dating"],
+              ["/member?round=GROUP_CASE", "Group Case"],
+            ]}
+          />
         </div>
         <div className="mt-3.5 flex flex-col gap-4">
           {visible.map((assignment) => {

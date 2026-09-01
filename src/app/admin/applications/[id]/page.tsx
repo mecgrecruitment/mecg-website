@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
 import { CLASS_YEAR_LABELS, PIPELINE_STATUSES, type ClassYear } from "@/lib/workflow";
 import LogoutButton from "@/components/logout-button";
-import BoardNav from "../../board-nav";
+import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../../decision-form";
 import DossierTabs from "./tabs";
 
@@ -100,7 +100,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
           </div>
           <LogoutButton />
         </header>
-        <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canPanel} />
+        <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
         <section className="flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
           <span className={`inline-flex w-fit items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${isTerminal ? "bg-mecg-navy text-white" : "bg-mecg-orange/15 text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.35)]"}`}>
             {humanize(application.status)}
@@ -194,7 +194,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         </div>
         <LogoutButton />
       </header>
-      <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canPanel} />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
 
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
         <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:order-none">

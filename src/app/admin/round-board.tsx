@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
-import LogoutButton from "@/components/logout-button";
-import BoardNav from "./board-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import RoundAssignmentForm from "./round-assignment-form";
 
 function initials(name: string) {
@@ -22,7 +21,6 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
-  const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const supabase = await createClient();
   const { data: cycle, error: cycleError } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
   if (cycleError) throw cycleError;
@@ -68,17 +66,8 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink sm:text-xs sm:tracking-[0.2em]">{cycle.name} · {cycle.status}</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] sm:mt-2.5 sm:text-[34px]">{title}</h1>
-        </div>
-        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start sm:gap-5">
-          <Link href="/member" className="button-secondary flex-1 text-sm sm:flex-none">Evaluation Hub</Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <BoardNav current={nav} recruitmentOperations={canOperate} hashPanel={canHash} />
+      <WorkspaceHeader eyebrow={`${cycle.name} · ${cycle.status}`} title={title} />
+      <WorkspaceNav user={user} cycleId={cycleId} current={nav} />
       {!round ? (
         <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
           <p className="text-[13px] text-mecg-navy/40">This cycle does not have a {title} round yet.</p>

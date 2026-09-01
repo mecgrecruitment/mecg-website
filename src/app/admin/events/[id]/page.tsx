@@ -9,7 +9,8 @@ import SlotForm from "./slot-form";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import Link from "next/link";
-import BoardNav from "../../board-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
@@ -24,8 +25,6 @@ export default async function EventDetailPage({ params, searchParams }: { params
     || (!hasPermission(user.memberships, event.cycle_id, "MANAGE_CYCLE")
       && !hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS"))
   ) redirect("/access-denied");
-  const canOperate = hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS");
-  const canHash = hasPermission(user.memberships, event.cycle_id, "HASH_PANEL_ACCESS");
   const { data: slots, error: slotsError } = await supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id);
   if (slotsError) console.error("event slot list failed", slotsError);
   const { data: checkins, error: checkinsError } = await supabase.from("checkins").select("pnm_id,checked_in_at,pnms(name)").eq("event_id", id);
@@ -65,15 +64,13 @@ export default async function EventDetailPage({ params, searchParams }: { params
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Attendance event</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{event.name}</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">{new Date(event.starts_at).toLocaleString()}</p>
-        </div>
-        <Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>
-      </header>
-      <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canHash} />
+      <WorkspaceHeader
+        eyebrow="Attendance event"
+        title={event.name}
+        description={new Date(event.starts_at).toLocaleString()}
+        action={<Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>}
+      />
+      {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Operational attendance only</p>
