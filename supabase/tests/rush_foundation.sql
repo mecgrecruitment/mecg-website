@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(162);
+select extensions.plan(173);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -455,6 +455,37 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000-8000-000000000031', now() + interval '7 days')$$,'42501','panel role required','a non-panel member cannot set an offer deadline');
+set local role postgres;
+
+
+-- Projects and staffing. The assertion that matters is that a project is
+-- private until somebody deliberately publishes it.
+set local role postgres;
+select extensions.has_table('rush','projects','projects table exists');
+select extensions.has_table('rush','project_members','project staffing table exists');
+select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='projects'), 'projects has row level security enabled and forced');
+
+insert into rush.projects (slug, title) values ('pgtap-project','pgTAP project');
+select extensions.is((select is_public from rush.projects where slug='pgtap-project'), false, 'a project is private until it is deliberately published');
+select extensions.is(rush.public_projects(), '[]'::jsonb, 'a private project is invisible to the public site');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.upsert_project('{"slug":"member-project","title":"Nope"}'::jsonb)$$,'42501','forbidden','a plain member cannot create a project');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.throws_ok($$select rush.upsert_project('{"slug":"Bad Slug","title":"Nope"}'::jsonb)$$,'22023','invalid project slug','a malformed slug is rejected');
+select extensions.ok(rush.upsert_project('{"slug":"pgtap-project","title":"pgTAP project","isPublic":true}'::jsonb) is not null, 'an owner publishes a project');
+set local role postgres;
+select extensions.is(jsonb_array_length(rush.public_projects()), 1, 'a published project reaches the public site');
+select extensions.is(rush.public_projects() -> 0 ->> 'slug', 'pgtap-project', 'the public payload carries the slug');
+
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.set_project_staffing((select id from rush.projects where slug='pgtap-project'), '[{"userId":"10000000-0000-4000-8000-0000000000ff"}]'::jsonb)$$,
+  'P0002','unknown member','staffing an unknown member is an error rather than a silent skip');
 set local role postgres;
 
 select * from extensions.finish();

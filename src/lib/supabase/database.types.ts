@@ -2088,6 +2088,7 @@ export type Database = {
       }
       my_offer_deadlines: { Args: never; Returns: Json }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
+      public_projects: { Args: never; Returns: Json }
       release_ready_decisions: { Args: { target_cycle_id: string }; Returns: Json }
       set_application_questions: {
         Args: { target_cycle_id: string; questions: Json }
@@ -2103,10 +2104,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      upsert_project: { Args: { project: Json }; Returns: string }
       withdraw_application: { Args: { target_application_id: string }; Returns: boolean }
       set_offer_deadline: {
         Args: { target_application_id: string; expires_at: string }
         Returns: boolean
+      }
+      set_project_staffing: {
+        Args: { target_project_id: string; members: Json }
+        Returns: number
       }
       set_rubric_criteria: {
         Args: { target_round_id: string; criteria: Json }

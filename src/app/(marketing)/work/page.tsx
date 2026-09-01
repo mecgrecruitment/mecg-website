@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/work" },
 };
 
-export default function WorkPage() {
-  const publicProjects = listPublicProjectCards();
+export default async function WorkPage() {
+  const publicProjects = await listPublicProjectCards();
 
   return (
     <main className="bg-white text-mecg-navy">
