@@ -11,9 +11,12 @@
 -- reviewer is already reading. A screening packet existing for the application
 -- is the precise moment review begins, so that is the gate.
 --
--- Reproduced from the resume lifecycle migration with the status list widened
--- from (DRAFT, NEEDS_INFO) to include SUBMITTED, plus the packet check. The
--- size, filename, cycle-window and hourly-rate-limit rules are unchanged.
+-- Reproduced from 20260831120000_resume_document_lifecycle with exactly two
+-- changes: the status list widens from (DRAFT, NEEDS_INFO) to include
+-- SUBMITTED, and the packet check is added. Everything else, including both
+-- rate limits and the returned key names, is byte-for-byte the original. The
+-- 20-per-cycle replacement cap matters more here, not less: post-submission
+-- replacement is exactly when someone could churn uploads.
 create or replace function rush.begin_resume_upload(
   upload_filename text,
   upload_size integer
@@ -76,13 +79,20 @@ begin
     raise exception 'upload limit reached' using errcode = '55000';
   end if;
 
+  if (
+    select count(*) from rush.application_documents d
+    where d.owner_user_id = actor and d.cycle_id = target_cycle_id
+  ) >= 20 then
+    raise exception 'replacement limit reached' using errcode = '55000';
+  end if;
+
   object_name := actor::text || '/' || target_cycle_id || '/' || document_id || '.pdf';
   insert into rush.application_documents (
     id, application_id, owner_user_id, cycle_id, object_path, original_filename, declared_size
   ) values (
     document_id, target_application_id, actor, target_cycle_id, object_name, safe_filename, upload_size
   );
-  return jsonb_build_object('documentId', document_id, 'objectPath', object_name);
+  return jsonb_build_object('documentId', document_id, 'path', object_name);
 end;
 $$;
 
