@@ -198,7 +198,7 @@ Evaluations submitted, events attended (`member_checkins` already records this),
 
 `src/content/projects.public.ts` is a static file driving the marketing site. Members have no view of who is on what team. Moving projects into the database and adding a staffing table turns the marketing page into a byproduct of real data and gives members a year-round reason to log in.
 
-This is the one item here that is a genuine scope expansion beyond recruitment. It is also the item that decides whether this is a recruitment tool or the org's system. Flagged as a decision below, not assumed.
+Decided: yes. See section 9 for the schema and the public/private split this needs.
 
 ### 5.6 Handbook and resources
 
@@ -272,28 +272,69 @@ Named explicitly so it does not creep back in:
 
 ---
 
-## 9. Sequence
+## 9. The person spine
 
-Each phase is shippable and reversible on its own.
+Decided: one person record spans cycles, and the member portal grows into the org's year-round system. Both of those rest on the same schema change, so it comes first.
 
-**Phase 0. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features, no schema change. Best legibility gain per line touched, and every later phase gets cheaper.
+Today identity is split and both halves are cycle-scoped:
 
-**Phase 1. Break up the junk drawer.** `/portal/rounds`, `/portal/people`, `/portal/settings`. Still no schema change.
+- `rush.profiles` is one row per auth user, holding `display_name` and `active`.
+- `rush.pnms` is one row per applicant per cycle. Reapplying next year creates a second unrelated row.
+- `rush.memberships` ties a profile to a cycle with a role, so "is this person in the org" is only answerable per cycle.
 
-**Phase 2. Answer the two unanswerable questions.** Audit viewer and comms send log. "Who changed this?" and "Did anyone tell them?"
+Target: a `people` table as the single identity anchor. `profiles` and `pnms` both point at it. A person can be an applicant in Fall 2026, a member in Winter 2027, and a board member in Fall 2028, and that is one row with three relationships rather than three strangers.
 
-**Phase 3. Comms engine.** Templates, triggers, bulk send, batch release.
+What this unlocks that nothing else can:
+- Reapplicant history visible on the dossier: applied before, how far they got, why.
+- The alumni and past-member view that a year-round directory needs.
+- One profile that feeds the member directory, the marketing `/team` page, and project staffing.
 
-**Phase 4. Cycle clone plus rubric and question editors.** Setup for the next cycle stops needing a migration.
+### The risk this creates, and the guard
 
-**Phase 5. Member year-round.** Task inbox, profiles, directory, personal record. Projects and staffing only if section 10 says yes.
+Blind screening currently works because reviewer-facing RPCs never join `pnms`. A shared `people` table adds a second path to an applicant's identity, and a careless join through `people` would silently unblind a reviewer.
 
-**Phase 6. Applicant polish.** Timeline, documents, messages, offer expiry, withdraw.
+The guard, decided up front rather than after the incident:
+- No screening RPC gains a `people` join. Ever. The existing `search_path = ''` plus `SECURITY DEFINER` pattern stays.
+- Add a pgTAP test asserting that no function reachable by a screening reviewer selects from `people` or `pnms`. `supabase/tests/` already exists and pgTAP is already enabled, so this is a test file, not new infrastructure.
+- Cross-cycle history on the dossier is gated behind `RECRUITMENT_OPERATIONS`, not `WORKSPACE_ACCESS`.
+
+### Projects and staffing
+
+`src/content/projects.public.ts` becomes a `projects` table plus a `project_members` join to `people`. The marketing `/work` and `/team` pages then read from the database instead of drifting from a hand-edited file. Keep the public/private split explicit: a `public` flag per project, and the marketing query selects only public fields. Client-confidential detail must not be one boolean away from the ISR cache.
 
 ---
 
-## 10. Decisions needed before Phase 5
+## 10. Sequence
 
-1. **Does the member portal grow past recruitment?** Projects, client staffing, and a directory make this the org's system. Keeping it recruitment-only makes it a rush tool that sits idle nine months a year. This changes the data model, not just screens.
-2. **Who owns comms?** If decisions and reminders keep going out by hand from a personal inbox, sections 4.4 and 6.3 are wasted work. The engine only pays off if sending moves into the system.
-3. **Do applicants keep accounts after a cycle?** If yes, a rejected applicant who reapplies next year is one person with history. If no, `pnms` stays per-cycle and reapplication is a fresh row. This decides whether a year-round `people` spine exists at all.
+Each phase ships and reverts on its own.
+
+**Phase 0. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features, no schema change. Best legibility gain per line touched, and it makes every later phase cheaper.
+
+**Phase 1. Break up the junk drawer.** `/portal/rounds`, `/portal/people`, `/portal/settings`. Still no schema change.
+
+**Phase 2. The person spine.** The `people` table, backfill from `profiles` and `pnms`, the pgTAP unblinding guard, and the cross-cycle history tab on the dossier. This is the riskiest migration in the plan and it belongs here, before anything is layered on top of it, not after.
+
+**Phase 3. Answer the two unanswerable questions.** Audit viewer and per-applicant send log. "Who changed this?" and "Did anyone tell them?"
+
+**Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. `release_decision` gets a batch sibling so decision night is one action rather than sixty.
+
+**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle stops needing a developer and a migration.
+
+**Phase 6. Member year-round.** Task inbox, extended profiles, directory, personal record. Then projects and staffing on the spine from Phase 2, with the marketing pages cut over to read from the database.
+
+**Phase 7. Applicant polish.** Timeline, document center, messages, offer expiry and countdown, withdraw.
+
+---
+
+## 11. Resolved decisions
+
+| Question | Decision | Consequence |
+|---|---|---|
+| Does the member portal grow past recruitment? | Yes, year-round org system | Projects and staffing move into the database; profiles extend; directory ships in Phase 6 |
+| Do applicants keep accounts across cycles? | Yes, persistent person record | `people` table in Phase 2, with an explicit unblinding guard for screening |
+| Does comms move into the system? | Yes | Comms engine in Phase 4; sending moves off personal inboxes or the work is wasted |
+
+Still open, and answerable later without blocking Phase 0:
+
+- Retention. A persistent person record means an applicant rejected in 2026 still has a row in 2030. Decide a retention window and a deletion path before Phase 2 ships, not after someone asks for their data back. `prune-resumes` already establishes the cron pattern for this.
+- Who on the board owns comms templates day to day. The engine needs an owner or the templates rot.
