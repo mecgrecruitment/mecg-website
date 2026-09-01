@@ -4,7 +4,7 @@ import { currentUser } from "@/lib/auth";
 import { hasPermission, type Permission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
 
 type CycleStatus = Database["rush"]["Enums"]["cycle_status"];
@@ -32,6 +32,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   DELETE_GROUP: "RECRUITMENT_OPERATIONS",
   SET_ROUND_STATUS: "MANAGE_CYCLE",
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
+  SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
 };
 
 function isMemberRole(value: unknown): value is MemberRole {
@@ -41,7 +42,7 @@ function isMemberRole(value: unknown): value is MemberRole {
 export async function POST(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const parsedBody = await readJsonBody(req, 8 * 1024);
+  const parsedBody = await readJsonBody(req, 64 * 1024);
   if (parsedBody.error === "too_large") return NextResponse.json({ error: "Payload is too large" }, { status: 413 });
   if (parsedBody.error || !parsedBody.data || typeof parsedBody.data !== "object" || Array.isArray(parsedBody.data)) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -101,6 +102,12 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("set_round_status", { target_round_id: String(body.roundId ?? ""), next_status: status as RoundStatus }));
   } else if (action === "SET_CYCLE_STATUS") {
     ({ data, error } = await supabase.rpc("set_cycle_status", { target_cycle_id: cycleId, next_status: status as CycleStatus }));
+  } else if (action === "SET_APPLICATION_QUESTIONS") {
+    // Shape only. The RPC re-validates every field and owns the real rules
+    // (key format, prompt length, input type, duplicate keys, and the refusal
+    // to edit once a cohort has started submitting).
+    if (!Array.isArray(body.questions)) return NextResponse.json({ error: "Questions must be a list" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("set_application_questions", { target_cycle_id: cycleId, questions: body.questions as Json }));
   } else if (action === "SET_APPLICATION_STATUS") {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
   } else if (action === "CREATE_SLOT") {

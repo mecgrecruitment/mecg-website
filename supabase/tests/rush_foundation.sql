@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(104);
+select extensions.plan(113);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -219,6 +219,45 @@ set local role authenticated;
 insert into rush_foundation_results values ('reapply_no_open_cycle',(select case when rush.can_start_application() then 1 else 0 end));
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='reapply_no_open_cycle'),0::bigint,'no open cycle means no new application route');
+
+
+-- Application question editor. The prompts were previously only changeable by
+-- writing a migration; these pin the write path's authorization, its ordering,
+-- and its refusal to edit under a cohort that has started submitting.
+set local role postgres;
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='set_application_questions' and p.prosecdef and p.proconfig @> array['search_path=""']), 'question writer exists and is security definer with empty search path');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='cycle_application_questions' and p.prosecdef and p.proconfig @> array['search_path=""']), 'question reader exists and is security definer with empty search path');
+
+-- ...0002 is a plain MEMBER of cycle ...0011.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[]'::jsonb)$$,'42501','forbidden','a plain member cannot edit application questions');
+select extensions.is(rush.cycle_application_questions('10000000-0000-4000-8000-000000000011'),'[]'::jsonb,'a plain member reads no questions back');
+
+-- ...0001 is OWNER of cycle ...0011, which has no applications at all.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.is(
+  rush.set_application_questions('10000000-0000-4000-8000-000000000011',
+    '[{"key":"second_q","prompt":"Second prompt","inputType":"short_text","required":false},
+      {"key":"first_q","prompt":"First prompt","inputType":"long_text","required":true}]'::jsonb),
+  2,
+  'an owner replaces the question set and gets the written count back');
+select extensions.is(
+  rush.cycle_application_questions('10000000-0000-4000-8000-000000000011') -> 0 ->> 'key',
+  'second_q',
+  'questions read back in submitted order, not alphabetically');
+select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[{"key":"Bad Key","prompt":"x"}]'::jsonb)$$,'22023','invalid question key','a malformed key is rejected');
+select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[{"key":"dup","prompt":"a"},{"key":"dup","prompt":"b"}]'::jsonb)$$,'23505','duplicate question key','duplicate keys are rejected');
+
+-- Cycle ...0014 holds the SUBMITTED reapplication fixture above.
+set local role postgres;
+insert into rush.memberships(user_id,cycle_id,role) values
+  ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000014','OWNER');
+set local role authenticated;
+select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000014','[]'::jsonb)$$,'55000','applications already submitted','questions freeze once a cohort has submitted');
+set local role postgres;
 
 select * from extensions.finish();
 rollback;
