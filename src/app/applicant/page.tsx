@@ -8,6 +8,7 @@ import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
 import { BuddyButton, OfferButtons, SlotButton, SurveyForm, WithdrawButton } from "./actions";
 import ApplicantStatusRefresh from "./status-refresh";
+import ResumeReplace from "./resume-replace";
 
 export const metadata: Metadata = { title: "Applicant portal" };
 
@@ -238,6 +239,12 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                 </>
               )}
               <p className="mt-4 text-sm text-mecg-navy/55">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
+              {/* The RPCs refuse a replacement once a screening packet exists or
+                  the window closes; this only hides the control for files that
+                  are already finished either way. */}
+              {!withdrawn && !application.released_outcome && !["DRAFT", "REJECTED"].includes(application.display_status) && (
+                <ResumeReplace hasResume={application.has_resume} />
+              )}
               {application.released_outcome === "OFFER" && (
                 <>
                   {(() => {

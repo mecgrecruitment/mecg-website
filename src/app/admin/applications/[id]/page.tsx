@@ -171,12 +171,13 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const finalScore = combineRoundScores(evaluationRounds.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight })));
 
   const decisionIds = decisions.map((decision) => decision.id);
-  const [applicationAuditResult, decisionAuditResult, messagesResult] = await Promise.all([
+  const [applicationAuditResult, decisionAuditResult, messagesResult, priorCyclesResult] = await Promise.all([
     supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Application").eq("resource_id", id),
     decisionIds.length
       ? supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Decision").in("resource_id", decisionIds)
       : Promise.resolve({ data: [], error: null }),
     supabase.from("messages").select("id,kind,recipient,subject,delivered,created_at").eq("application_id", id).order("created_at", { ascending: false }),
+    supabase.rpc("applicant_prior_cycles", { target_application_id: id }),
   ]);
   const auditEvents = [...(applicationAuditResult.data ?? []), ...(decisionAuditResult.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -186,6 +187,15 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const auditUnavailable = Boolean(applicationAuditResult.error || decisionAuditResult.error);
   if (messagesResult.error) console.error("message log lookup failed", messagesResult.error);
   const messages = messagesResult.data ?? [];
+  if (priorCyclesResult.error) console.error("prior cycle lookup failed", priorCyclesResult.error);
+  const priorCycles = Array.isArray(priorCyclesResult.data)
+    ? priorCyclesResult.data.flatMap((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+      const row = entry as Record<string, unknown>;
+      if (typeof row.cycleName !== "string" || typeof row.status !== "string") return [];
+      return [{ cycleName: row.cycleName, status: row.status, submittedAt: typeof row.submittedAt === "string" ? row.submittedAt : null }];
+    })
+    : [];
   const actorIds = [...new Set(auditEvents.map((event) => event.actor_id).filter((actorId): actorId is string => Boolean(actorId)))];
   const { data: actorProfiles, error: actorProfilesError } = actorIds.length ? await supabase.from("profiles").select("id,display_name").in("id", actorIds) : { data: [], error: null };
   if (actorProfilesError) console.error("audit actor lookup failed", actorProfilesError);
@@ -392,6 +402,22 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                 <div className="flex flex-col gap-2">
                   {auditUnavailable && <p className="text-sm text-mecg-orange-ink">The audit log could not be loaded. What is shown here may be incomplete.</p>}
                   {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/45">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
+                  {priorCycles.length > 0 && (
+                    <div className="mt-6">
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Earlier applications</p>
+                      <p className="mt-1 text-sm text-mecg-navy/55">
+                        Applying again is not held against anyone. Screening reviewers and evaluators never see this.
+                      </p>
+                      <div className="mt-3 flex flex-col gap-2">
+                        {priorCycles.map((prior) => (
+                          <div key={`${prior.cycleName}-${prior.status}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                            <span className="text-[13px] font-semibold text-mecg-navy">{prior.cycleName}</span>
+                            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-mecg-navy/50">{prior.status.replaceAll("_", " ")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-6">
                     <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Messages sent</p>
                     <p className="mt-1 text-sm text-mecg-navy/55">Every email this system tried to send to this applicant, delivered or not.</p>

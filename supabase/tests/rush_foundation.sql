@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(179);
+select extensions.plan(188);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -502,6 +502,36 @@ set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001",
 set local role authenticated;
 select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','service role required','an authenticated caller cannot record a reminder');
 select extensions.is(rush.pending_reminders(),'[]'::jsonb,'pending_reminders returns nothing to a non-scheduler caller');
+set local role postgres;
+
+
+-- Policy decisions. Each of these encodes a rule that was previously left to
+-- convention, so the assertions are the record of what was decided.
+set local role postgres;
+
+-- Declining an offer does not bar a later application. can_start_application
+-- asks only whether the caller has a row in the open cycle.
+select extensions.ok(position('offer_response' in pg_get_functiondef('rush.can_start_application()'::regprocedure)) = 0, 'declining an offer does not bar a later application');
+
+-- Resume replacement is allowed until review starts, not until submission.
+select extensions.ok(position('SUBMITTED' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0, 'a submitted applicant may still upload a replacement resume');
+select extensions.ok(position('screening_packets' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0, 'replacement stops once a screening packet exists');
+select extensions.ok(position('screening_packets' in pg_get_functiondef('rush.attach_ready_resume()'::regprocedure)) > 0, 'attaching a replacement stops once a screening packet exists');
+
+-- Retention anonymises rather than deletes, so the audit trail survives.
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='anonymize_archived_applicants' and p.prosecdef and p.proconfig @> array['search_path=""']), 'retention function exists and is security definer with empty search path');
+select extensions.ok(position('delete from rush.pnms' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) = 0, 'retention never removes an applicant row, so decisions stay reconstructable');
+select extensions.ok(exists(select 1 from cron.job where jobname = 'anonymize-archived-applicants'), 'retention is scheduled rather than merely available');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','service role required','an authenticated caller cannot run retention');
+
+-- Prior-cycle history is board-only. ...0004 is an applicant, not staff.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+select extensions.is(rush.applicant_prior_cycles('10000000-0000-4000-8000-000000000032'),'[]'::jsonb,'an applicant cannot read prior-cycle history through the board function');
 set local role postgres;
 
 select * from extensions.finish();

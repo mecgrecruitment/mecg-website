@@ -1898,6 +1898,9 @@ export type Database = {
       }
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
+      attach_ready_resume: { Args: never; Returns: string }
+      applicant_prior_cycles: { Args: { target_application_id: string }; Returns: Json }
+      anonymize_archived_applicants: { Args: never; Returns: number }
       can_start_application: { Args: never; Returns: boolean }
       clone_cycle: {
         Args: { source_cycle_id: string; cycle_name: string }
