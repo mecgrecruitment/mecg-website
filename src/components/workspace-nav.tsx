@@ -47,6 +47,7 @@ export default async function WorkspaceNav({
         ["/admin/rounds", "Rounds"],
         ["/admin/screening", "Screening admin"],
         ["/admin/groups", "Case teams"],
+        ["/admin/messages", "Messages"],
       ] as const)
       : []),
     ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash"] as const] : []),
