@@ -362,42 +362,51 @@ The one real identity gap left: a person who applies with a personal address and
 
 ---
 
-## 10. Sequence
+## 10. Sequence and status
 
-Each phase ships and reverts on its own.
+Branch `fix/applicant-reapplication` carries Phases 0 through 3.
 
-**Phase 0. Fix reapplication. Done, branch `fix/applicant-reapplication`.** Added `rush.can_start_application()` (migration `20260901000000_allow_reapplication.sql`), routed on it in `resolveAuthDestination`, relaxed the `/applicant` guard so history stays reachable once login sends returning applicants to `/apply`, and cross-linked the two pages. Checks: `auth-destination.test.ts` went from 5 cases to 11, and `supabase/tests/rush_foundation.sql` gained 5 pgTAP assertions covering a past cycle, an open cycle, an already-submitted cycle, and no open cycle. `tsc`, `eslint`, `npm test` (42) and `next build` all pass. The pgTAP block has not been executed: it needs `supabase test db --linked`, and neither the Supabase CLI nor Docker is installed here.
+**Phase 0. Fix reapplication. Done.** `rush.can_start_application()` (migration `20260901000000_allow_reapplication.sql`), routed on in `resolveAuthDestination`, `/applicant` guard relaxed so history stays reachable, both pages cross-linked. Routing cases went 5 to 11; 5 new pgTAP assertions.
 
-**Phase 1. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features. Best legibility gain per line touched, and every later phase gets cheaper.
+**Phase 1. Unify the shell. Done, with one deviation.** `WorkspaceHeader` and `WorkspaceNav` now back all 12 workspace pages. `admin/board-nav.tsx`, the inline `navLinks` array, and both cross-link buttons are deleted. Round filtering moved from the global nav onto the member page, where it filters something.
 
-**Phase 2. Break up the junk drawer.** `/portal/rounds`, `/portal/people`, `/portal/settings`. Still no schema change.
+The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`.** The move touches 90 string references plus the proxy matcher and the `AuthDestination` union, all of it in the auth-routing surface, and it buys nothing a user can see once the shell and nav are shared. The duplication this phase existed to kill is gone either way. If the tidier tree is worth that churn, it is a mechanical follow-up that can happen any time; it is no longer blocking anything.
 
-**Phase 3. Answer the two unanswerable questions.** Audit viewer and per-applicant send log. "Who changed this?" and "Did anyone tell them?" The audit viewer is also where prior-cycle applicant history surfaces, gated behind `RECRUITMENT_OPERATIONS`.
+**Phase 2. Break up the junk drawer. Done.** `/admin/people`, `/admin/rounds`, `/admin/settings`. `rush-controls.tsx` became a shared `useRushAction` hook plus four focused components instead of one 327-line default export. Each page gates on the capability its actions need, so Settings is unreachable without `MANAGE_CYCLE` rather than merely collapsed. The pipeline page dropped its memberships query.
 
-**Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. `release_decision` gets a batch sibling so decision night is one action rather than sixty.
+**Phase 3. Audit viewer. Done.** `/admin/audit`: cycle-wide, newest first, filterable by resource, paged. No migration needed, the table and its read policy and index already existed. Per-applicant history turned out to already exist on the dossier, so only the cycle view was missing.
 
-**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle stops needing a developer and a migration. This is what makes "next semester" cheap for the board, so it pairs with Phase 0 as the other half of the reapplication story.
+### Not started
 
-**Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record. Then projects and staffing, with the marketing pages cut over to read from the database.
+**Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. Still the largest new subsystem here, and still the one that only pays off if sending actually moves off personal inboxes.
+
+**Phase 5. Cycle clone plus rubric and question editors.** Setup for the next cycle still needs a developer and a migration. Pairs with Phase 0 as the other half of making "next semester" cheap.
+
+**Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record, then projects and staffing.
 
 **Phase 7. Applicant polish.** Timeline, document center, messages, offer expiry and countdown, withdraw.
 
-The `people` table that used to be Phase 2 is gone. See section 9.
-
 ---
 
-## 11. Resolved decisions
+## 11. Decisions
 
-| Question | Decision | Consequence |
+| Question | Decision | Status |
 |---|---|---|
-| Does the member portal grow past recruitment? | Yes, year-round org system | Projects and staffing move into the database; `profiles` gains columns; directory ships in Phase 6 |
-| Do applicants keep accounts across cycles? | Yes | Already true. `pnms` is global and `auth.users.id` is the anchor. Only the routing gate needed fixing |
-| Does comms move into the system? | Yes | Comms engine in Phase 4; sending moves off personal inboxes or the work is wasted |
-| May applicants reapply next semester? | Yes | Phase 0. Database already supports it; `is_applicant()` and the `/apply` redirect blocked it |
+| Does the member portal grow past recruitment? | Yes, year-round org system | Phase 6, not started |
+| Do applicants keep accounts across cycles? | Yes | Already true; only routing needed fixing. No `people` table required |
+| Does comms move into the system? | Yes | Phase 4, not started |
+| May applicants reapply next semester? | Yes | Done |
 
-Still open, and none of it blocks Phase 0:
+Open, and none of it blocking:
 
-- **The launch allowlist.** `application_portal_allowlist` holds one address. Clear it before applications open or nobody can apply.
-- **Reapplication policy.** May someone who declined an offer reapply? Does the board see prior-cycle history while scoring? The data supports either; pick one and write it down.
-- **Retention.** A persistent `pnms` row means a 2026 applicant still exists in 2030. Decide a retention window and a deletion path. `prune-resumes` already establishes the cron pattern to copy.
-- **Comms ownership.** The engine needs a named owner on the board or the templates rot.
+- **The launch allowlist.** `application_portal_allowlist` holds one address. Clear it before applications open or nobody can apply, first-time or repeat.
+- **Reapplication policy.** May someone who declined an offer reapply? Does the board see prior-cycle history while scoring? The plumbing supports either.
+- **Retention.** A persistent `pnms` row means a 2026 applicant still exists in 2030. `prune-resumes` is the cron pattern to copy.
+- **Comms ownership.** Phase 4 needs a named owner on the board or the templates rot.
+
+## 12. Unverified
+
+Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
+
+- Migration `20260901000000_allow_reapplication.sql` has never run.
+- The 5 pgTAP assertions have never executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging.
