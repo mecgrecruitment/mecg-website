@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import EvaluationForm from "./evaluation-form";
 import ConflictForm from "./conflict-form";
 import PasswordForm from "./password-form";
+import ProfileForm from "./profile-form";
 import BuddySlotForm from "./buddy-slot-form";
 import PillNav from "@/components/pill-nav";
 import WorkspaceHeader from "@/components/workspace-header";
@@ -36,11 +37,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }] = await Promise.all([
+  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }, { data: profile }, { data: record }] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.rpc("my_grading_events"),
+    supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
+    supabase.rpc("my_member_record", { target_cycle_id: cycleMembership.cycleId }),
   ]);
   if (error) throw error;
   if (buddySlotsError) throw buddySlotsError;
@@ -77,6 +80,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     });
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
+  const recordCounts = record && typeof record === "object" && !Array.isArray(record) ? record as Record<string, unknown> : {};
+  const memberRecord: Array<readonly [string, number]> = [
+    ["evaluations submitted", Number(recordCounts.evaluationsSubmitted ?? 0)],
+    ["assignments open", Number(recordCounts.assignmentsOpen ?? 0)],
+    ["events attended", Number(recordCounts.eventsAttended ?? 0)],
+    ["conflicts declared", Number(recordCounts.conflictsDeclared ?? 0)],
+  ];
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
     ? "Speed Dating"
     : activeRoundFilter === "GROUP_CASE"
@@ -214,7 +224,20 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="03">Member tools</SectionLabel>
+        <SectionLabel number="03">Your record</SectionLabel>
+        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">What you have done this cycle</h2>
+        <dl className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {memberRecord.map(([label, value]) => (
+            <div key={label} className="rounded-2xl bg-paper p-4">
+              <dd className="font-mono text-[26px] font-semibold tabular-nums text-mecg-navy">{value}</dd>
+              <dt className="mt-1 text-[11px] uppercase leading-4 tracking-[0.1em] text-mecg-navy/45">{label}</dt>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section>
+        <SectionLabel number="04">Member tools</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
         {gradingEvent && (
           <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-[22px] bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)] sm:p-6">
@@ -244,6 +267,15 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="mt-4 flex flex-col gap-4">
           {!screeningReviewer.data && <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />}
+          <ProfileForm
+            initial={{
+              displayName: profile?.display_name ?? user.name,
+              gradTerm: profile?.grad_term ?? "",
+              major: profile?.major ?? "",
+              position: profile?.position_title ?? "",
+              bio: profile?.bio ?? "",
+            }}
+          />
           <PasswordForm />
         </div>
       </section>

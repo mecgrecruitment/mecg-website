@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(140);
+select extensions.plan(149);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -376,6 +376,35 @@ select extensions.is(
 select extensions.ok(
   exists(select 1 from rush.memberships m join rush.rush_cycles c on c.id=m.cycle_id where c.name='pgTAP cloned cycle' and m.user_id='10000000-0000-4000-8000-000000000002'::uuid),
   'the roster is carried across');
+
+
+-- Member profiles and the directory. The directory must be scoped to a cycle
+-- the caller actually belongs to, and must not leak contact details.
+set local role postgres;
+select extensions.has_column('rush','profiles','position_title','profiles carry an org position');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='update_my_profile' and p.prosecdef and p.proconfig @> array['search_path=""']), 'profile writer exists and is security definer with empty search path');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='cycle_directory' and p.prosecdef and p.proconfig @> array['search_path=""']), 'directory reader exists and is security definer with empty search path');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.ok(rush.update_my_profile('pgTAP Member','Winter 2027','Industrial Engineering','Engagement lead','Short bio.'), 'a member updates their own profile');
+select extensions.throws_ok($$select rush.update_my_profile('','','','','')$$,'22023','invalid display name','a blank display name is rejected');
+set local role postgres;
+select extensions.is((select position_title from rush.profiles where id='10000000-0000-4000-8000-000000000002'),'Engagement lead','the profile write lands on the caller''s own row');
+
+set local role authenticated;
+select extensions.ok(
+  jsonb_array_length(rush.cycle_directory('10000000-0000-4000-8000-000000000011')) > 0,
+  'a member of the cycle reads its directory');
+select extensions.ok(
+  not (rush.cycle_directory('10000000-0000-4000-8000-000000000011')::text like '%@%'),
+  'the directory carries no email addresses');
+-- ...0003 belongs to cycle ...0012 only.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
+select extensions.is(rush.cycle_directory('10000000-0000-4000-8000-000000000011'),'[]'::jsonb,'an outsider reads an empty directory');
+set local role postgres;
 
 select * from extensions.finish();
 rollback;

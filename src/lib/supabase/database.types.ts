@@ -1150,23 +1150,35 @@ export type Database = {
       profiles: {
         Row: {
           active: boolean
+          bio: string | null
           created_at: string
           display_name: string
+          grad_term: string | null
           id: string
+          major: string | null
+          position_title: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
+          bio?: string | null
           created_at?: string
           display_name: string
+          grad_term?: string | null
           id: string
+          major?: string | null
+          position_title?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
+          bio?: string | null
           created_at?: string
           display_name?: string
+          grad_term?: string | null
           id?: string
+          major?: string | null
+          position_title?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1790,6 +1802,7 @@ export type Database = {
         Args: { source_cycle_id: string; cycle_name: string }
         Returns: string
       }
+      cycle_directory: { Args: { target_cycle_id: string }; Returns: Json }
       cycle_application_questions: { Args: { target_cycle_id: string }; Returns: Json }
       cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
       check_in: { Args: { raw_token: string }; Returns: boolean }
@@ -2028,9 +2041,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
       set_application_questions: {
         Args: { target_cycle_id: string; questions: Json }
         Returns: number
+      }
+      update_my_profile: {
+        Args: {
+          display_name: string
+          grad_term: string
+          major: string
+          position_title: string
+          bio: string
+        }
+        Returns: boolean
       }
       withdraw_application: { Args: { target_application_id: string }; Returns: boolean }
       set_rubric_criteria: {
