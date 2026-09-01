@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(149);
+select extensions.plan(158);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -404,6 +404,43 @@ select extensions.ok(
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
 select extensions.is(rush.cycle_directory('10000000-0000-4000-8000-000000000011'),'[]'::jsonb,'an outsider reads an empty directory');
+set local role postgres;
+
+
+-- Message log. The point of the log is that a failed send is recorded, so that
+-- is what the assertions pin, alongside who may write one.
+set local role postgres;
+select extensions.has_table('rush','messages','message log table exists');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='log_message' and p.prosecdef and p.proconfig @> array['search_path=""']), 'message logger exists and is security definer with empty search path');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='release_ready_decisions' and p.prosecdef and p.proconfig @> array['search_path=""']), 'batch release exists and is security definer with empty search path');
+select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='messages'), 'message log has row level security enabled and forced');
+
+-- ...0002 is a plain member of ...0011 and has no role on ...0014, which owns
+-- application ...032.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.log_message('10000000-0000-4000-8000-000000000032','TEST','a@example.invalid','Subject',true)$$,'42501','forbidden','an unrelated member cannot log a message against an application');
+
+-- The applicant may log their own intake confirmation.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+select extensions.ok(rush.log_message('10000000-0000-4000-8000-000000000032','APPLICATION_RECEIVED','pgtap-reapplicant@example.invalid','We received your MECG application',false) is not null, 'the applicant logs their own confirmation');
+set local role postgres;
+select extensions.is(
+  (select delivered from rush.messages where application_id='10000000-0000-4000-8000-000000000032' order by created_at desc limit 1),
+  false,
+  'a failed send is recorded rather than dropped');
+select extensions.is(
+  (select cycle_id from rush.messages where application_id='10000000-0000-4000-8000-000000000032' order by created_at desc limit 1),
+  '10000000-0000-4000-8000-000000000014',
+  'the log takes its cycle from the application, not from the caller');
+
+-- ...0001 owns ...0014 but is not PANEL there, so batch release is refused.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.release_ready_decisions('10000000-0000-4000-8000-000000000011')$$,'42501','panel role required','a non-panel member cannot batch release');
 set local role postgres;
 
 select * from extensions.finish();

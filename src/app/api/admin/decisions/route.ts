@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("create_decision", { target_cycle_id: String(body.cycleId ?? ""), target_application_id: String(body.applicationId ?? ""), target_outcome: body.outcome as DecisionOutcome, decision_reason: String(body.reason ?? "") }));
   } else if (body?.action === "APPROVE") ({ data, error } = await supabase.rpc("approve_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE") ({ data, error } = await supabase.rpc("release_decision", { target_decision_id: String(body.decisionId ?? "") }));
+  else if (body?.action === "RELEASE_ALL") ({ data, error } = await supabase.rpc("release_ready_decisions", { target_cycle_id: String(body.cycleId ?? "") }));
   else if (body?.action === "PREVIEW") ({ data, error } = await supabase.rpc("set_decision_preview", { target_decision_id: String(body.decisionId ?? ""), preview_text: String(body.preview ?? "") }));
   else return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   if (error) {
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
     // but it must not be reported as a clean success either.
     const { data: released, error: releasedError } = await supabase
       .from("decisions")
-      .select("outcome, applications!inner(pnms!inner(name, contact))")
+      .select("outcome, application_id, applications!inner(pnms!inner(name, contact))")
       .eq("id", String(body.decisionId ?? ""))
       .single();
     if (releasedError) console.error("released decision lookup failed", releasedError);
@@ -100,6 +101,14 @@ export async function POST(req: NextRequest) {
       const { subject, html } = decisionEmail(released.outcome, pnm.name);
       notified = await sendEmail({ to: pnm.contact, subject, html });
       if (!notified) console.error("release decision notification failed", { decisionId: String(body.decisionId ?? "") });
+      const { error: logError } = await supabase.rpc("log_message", {
+        target_application_id: released.application_id,
+        message_kind: "DECISION_RELEASED",
+        message_recipient: pnm.contact,
+        message_subject: subject,
+        was_delivered: notified,
+      });
+      if (logError) console.error("message log failed", logError);
     }
     if (!notified) {
       return NextResponse.json(

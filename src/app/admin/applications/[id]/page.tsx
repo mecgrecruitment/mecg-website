@@ -168,11 +168,12 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const finalScore = combineRoundScores(evaluationRounds.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight })));
 
   const decisionIds = decisions.map((decision) => decision.id);
-  const [applicationAuditResult, decisionAuditResult] = await Promise.all([
+  const [applicationAuditResult, decisionAuditResult, messagesResult] = await Promise.all([
     supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Application").eq("resource_id", id),
     decisionIds.length
       ? supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Decision").in("resource_id", decisionIds)
       : Promise.resolve({ data: [], error: null }),
+    supabase.from("messages").select("id,kind,recipient,subject,delivered,created_at").eq("application_id", id).order("created_at", { ascending: false }),
   ]);
   const auditEvents = [...(applicationAuditResult.data ?? []), ...(decisionAuditResult.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -180,6 +181,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   if (applicationAuditResult.error) console.error("application audit lookup failed", applicationAuditResult.error);
   if (decisionAuditResult.error) console.error("decision audit lookup failed", decisionAuditResult.error);
   const auditUnavailable = Boolean(applicationAuditResult.error || decisionAuditResult.error);
+  if (messagesResult.error) console.error("message log lookup failed", messagesResult.error);
+  const messages = messagesResult.data ?? [];
   const actorIds = [...new Set(auditEvents.map((event) => event.actor_id).filter((actorId): actorId is string => Boolean(actorId)))];
   const { data: actorProfiles, error: actorProfilesError } = actorIds.length ? await supabase.from("profiles").select("id,display_name").in("id", actorIds) : { data: [], error: null };
   if (actorProfilesError) console.error("audit actor lookup failed", actorProfilesError);
@@ -372,6 +375,29 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                 <div className="flex flex-col gap-2">
                   {auditUnavailable && <p className="text-sm text-mecg-orange-ink">The audit log could not be loaded. What is shown here may be incomplete.</p>}
                   {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/45">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
+                  <div className="mt-6">
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Messages sent</p>
+                    <p className="mt-1 text-sm text-mecg-navy/55">Every email this system tried to send to this applicant, delivered or not.</p>
+                    <div className="mt-3 flex flex-col gap-2">
+                      {messages.map((message) => (
+                        <div key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
+                            <p className="mt-0.5 text-[11.5px] text-mecg-navy/50">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                              {message.delivered ? "Delivered" : "Failed"}
+                            </span>
+                            <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
+                              {new Date(message.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" })}
+                            </time>
+                          </div>
+                        </div>
+                      ))}
+                      {!messages.length && <p className="text-sm text-mecg-navy/45">Nothing has been sent to this applicant yet.</p>}
+                    </div>
+                  </div>
                   {auditEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                       <div>

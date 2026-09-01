@@ -8,7 +8,7 @@ import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evalu
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
-import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../decision-form";
+import DecisionForm, { ApprovalButton, PreviewForm, ReleaseAllButton, ReleaseButton } from "../decision-form";
 
 export const metadata: Metadata = { title: "Hash" };
 
@@ -98,6 +98,12 @@ export default async function HashBoard() {
         action={hashOpen ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Deliberation mode</Link> : null}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
+      {canDecide && (
+        <ReleaseAllButton
+          cycleId={cycleId}
+          readyCount={decisions.filter((decision) => decision.status === "LOCKED").length}
+        />
+      )}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-mecg-navy/55">Aggregates appear only after every evaluated round is frozen. Hash does not add a numeric score.</p>

@@ -160,3 +160,53 @@ export function ReleaseButton({ decisionId }: { decisionId: string }) {
     </div>
   );
 }
+
+// Decision night was sixty separate Release clicks, each of which could half
+// fail with no record of how far the board got. This releases everything the
+// single-decision path would accept and reports what it skipped.
+export function ReleaseAllButton({ cycleId, readyCount }: { cycleId: string; readyCount: number }) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  async function releaseAll() {
+    if (pending || !window.confirm(`Release ${readyCount} locked outcome${readyCount === 1 ? "" : "s"} to applicants now? This cannot be undone.`)) return;
+    setPending(true);
+    setError("");
+    setSuccess("");
+    try {
+      const response = await fetch("/api/admin/decisions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "RELEASE_ALL", cycleId }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Could not release the outcomes");
+        return;
+      }
+      const released = Number(body?.released ?? 0);
+      const skipped = Number(body?.skipped ?? 0);
+      setSuccess(skipped
+        ? `Released ${released}. Skipped ${skipped} that were not ready or that you are conflicted on.`
+        : `Released ${released} outcome${released === 1 ? "" : "s"}.`);
+      router.refresh();
+    } catch {
+      setError("Could not release the outcomes. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (!readyCount) return null;
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <button type="button" disabled={pending} onClick={releaseAll} className="button-primary text-sm">
+        {pending ? "Releasing…" : `Release all ${readyCount} locked outcomes`}
+      </button>
+      <OperationNotice kind="error">{error}</OperationNotice>
+      <OperationNotice kind="success">{success}</OperationNotice>
+    </div>
+  );
+}

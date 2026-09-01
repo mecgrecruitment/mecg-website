@@ -1147,6 +1147,39 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          cycle_id: string | null
+          delivered: boolean
+          id: string
+          kind: string
+          recipient: string
+          subject: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          delivered?: boolean
+          id?: string
+          kind: string
+          recipient: string
+          subject: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          delivered?: boolean
+          id?: string
+          kind?: string
+          recipient?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active: boolean
@@ -2041,7 +2074,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_message: {
+        Args: {
+          target_application_id: string
+          message_kind: string
+          message_recipient: string
+          message_subject: string
+          was_delivered: boolean
+        }
+        Returns: string
+      }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
+      release_ready_decisions: { Args: { target_cycle_id: string }; Returns: Json }
       set_application_questions: {
         Args: { target_cycle_id: string; questions: Json }
         Returns: number
