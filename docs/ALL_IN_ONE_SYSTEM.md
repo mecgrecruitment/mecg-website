@@ -398,7 +398,10 @@ Routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`. T
 
 Nothing here has touched a database. This machine has no Supabase CLI and no Docker, so:
 
-- **Ten migrations have never run**: `20260901000000` through `20260901100000`.
+Every migration and database test now parses with libpg_query, the parser Postgres itself uses, via `npm run check:sql` (81 files, 211 plpgsql function bodies). That catches syntax errors without a database. It is a parser, not a database: it cannot catch a missing column, a wrong type, or a policy that does not do what it claims. It is also not yet in CI, because pushing a workflow edit needs a token with the `workflow` scope; the two lines to add are in the script's docstring.
+
+
+- **Eleven migrations have never run**: `20260901000000` through `20260901100000`. They parse; they have not been applied.
 - **pgTAP is at 188 assertions, up from 99. None of the 89 new ones have executed.** Run `npm run test:supabase`.
 - **Run `npm run verify:auth` and `npm run verify:workflow`** against a real project.
 - **`database.types.ts` was hand-edited to match every migration rather than regenerated.** Run `npm run supabase:types` once the migrations apply and reconcile any drift. This is the most likely place for a silent mismatch.
