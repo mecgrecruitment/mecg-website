@@ -398,18 +398,26 @@ Routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`. T
 
 Nothing here has touched a database. This machine has no Supabase CLI and no Docker, so:
 
-- **Nine migrations have never run**: `20260901000000` through `20260901090000`.
-- **pgTAP is at 179 assertions, up from 99. None of the 80 new ones have executed.** Run `npm run test:supabase`.
+- **Ten migrations have never run**: `20260901000000` through `20260901100000`.
+- **pgTAP is at 188 assertions, up from 99. None of the 89 new ones have executed.** Run `npm run test:supabase`.
 - **Run `npm run verify:auth` and `npm run verify:workflow`** against a real project.
 - **`database.types.ts` was hand-edited to match every migration rather than regenerated.** Run `npm run supabase:types` once the migrations apply and reconcile any drift. This is the most likely place for a silent mismatch.
 - **Clear `rush.application_portal_allowlist`.** It holds one address and blocks every applicant until it is emptied.
 - **Set `CRON_SECRET`** or the reminder job fails closed and never sends.
+- **Set `RECRUITMENT_REPLY_TO`** to a shared address, or replies fall back to `CONTACT_TO_EMAIL`.
 
 `tsc`, `eslint`, `npm test` (42 passing) and `next build` pass after every commit. That is real but it is not the same as the database agreeing.
 
-## 12. Decisions still yours
+## 12. Decisions, now made
 
-- **Reapplication policy.** May someone who declined an offer reapply? Does the board see prior-cycle history while scoring? The plumbing supports either.
-- **Retention.** A `pnms` row from 2026 still exists in 2030. `prune-resumes` is the cron pattern to copy.
-- **Comms ownership.** The engine needs a named owner or the messages rot.
-- **Resume replacement.** See the document center note above.
+All four were open questions in earlier drafts. Each is now enforced in the database rather than left as convention.
+
+**Reapplication after declining an offer: allowed.** Declining is a legitimate choice about timing or workload, and barring someone for it punishes honesty. `can_start_application` already permitted it; an assertion now pins that it never learns to care about `offer_response`.
+
+**Prior-cycle history: board only.** `applicant_prior_cycles` gates on `APPLICANT_OPERATIONS` and appears on the dossier. Screening reviewers and evaluators never see it. "They applied last year too" is exactly the context that becomes bias in the hands of someone holding a rubric.
+
+**Resume replacement: until review starts, not until submission.** The fairness line is review. Everyone gets the same chance to fix a wrong file before the deadline; nobody swaps the document a reviewer is already reading. The gate is whether a screening packet exists for the application. `attach_ready_resume` then points the application at the new file, which nothing did after intake.
+
+**Retention: anonymise two years after the cycle is archived.** Monthly via pg_cron. Anonymised rather than deleted, because deleting the rows takes the audit trail with them and the point of that trail is reconstructing a decision that affected someone. Names, contacts, free text and the auth link go; counts and outcomes stay. Two years covers a realistic return window (first-year applies, junior reapplies) without keeping a rejected applicant's essays for the rest of their twenties.
+
+**Comms ownership: a shared reply-to.** Outbound applicant email defaults `reply_to` to `RECRUITMENT_REPLY_TO`, falling back to `CONTACT_TO_EMAIL`. Naming the human owner is still an org choice; this makes the address institutional either way, so an applicant answering a decision email reaches the board rather than someone who has since graduated.
