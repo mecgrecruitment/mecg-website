@@ -1,29 +1,69 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import OperationNotice from "@/components/operation-notice";
 
 export default function PacketAction({ cycleId, packetId, status, responses }: { cycleId: string; packetId: string; status: string; responses: Array<{ question?: string; answer?: string }> }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [answers, setAnswers] = useState(responses.map((response) => response.answer ?? ""));
+  const [success, setSuccess] = useState("");
+  const dirty = useMemo(() => answers.some((answer, index) => answer !== (responses[index]?.answer ?? "")), [answers, responses]);
+
+  useEffect(() => {
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [dirty]);
+
   async function decide(approved: boolean) {
+    if (dirty) {
+      setError("Save or discard your redaction changes before changing this packet’s review status.");
+      return;
+    }
     setPending(true);
     setError("");
-    const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "APPROVE_PACKET", packetId, approved }) });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) setError(body?.error ?? "Could not update packet"); else router.refresh();
-    setPending(false);
+    setSuccess("");
+    try {
+      const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "APPROVE_PACKET", packetId, approved }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Could not update packet");
+        return;
+      }
+      setSuccess(approved ? "Blind packet approved." : "Packet returned for redaction.");
+      router.refresh();
+    } catch {
+      setError("Could not update packet. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
   }
   async function saveRedaction() {
     setPending(true);
     setError("");
+    setSuccess("");
     const content = { responses: responses.map((response, index) => ({ question: response.question ?? "", answer: answers[index] ?? "" })) };
-    const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "UPDATE_PACKET", packetId, content }) });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) setError(body?.error ?? "Could not save redaction"); else router.refresh();
-    setPending(false);
+    try {
+      const response = await fetch("/api/admin/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cycleId, action: "UPDATE_PACKET", packetId, content }) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Could not save redaction");
+        return;
+      }
+      setSuccess("Redaction saved. The packet must be approved again.");
+      router.refresh();
+    } catch {
+      setError("Could not save redaction. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
   }
   return (
     <div className="mt-4 space-y-3">
@@ -45,14 +85,16 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
               />
             </label>
           ))}
-          <button type="button" disabled={pending} onClick={() => void saveRedaction()} className="button-secondary">Save redaction</button>
+          {dirty && <p className="text-xs font-medium text-mecg-orange-ink">Unsaved redaction changes</p>}
+          <button type="button" disabled={pending || !dirty} onClick={() => void saveRedaction()} className="button-secondary">{pending ? "Saving…" : "Save redaction"}</button>
         </div>
       </details>
       <div className="flex flex-wrap gap-2">
-        <button disabled={pending || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">Approve blind packet</button>
-        <button disabled={pending || status === "REJECTED"} onClick={() => void decide(false)} className="button-secondary">Reject for redaction</button>
+        <button disabled={pending || dirty || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">{pending ? "Working…" : "Approve blind packet"}</button>
+        <button disabled={pending || dirty || status === "REJECTED"} onClick={() => void decide(false)} className="button-secondary">Reject for redaction</button>
       </div>
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      <OperationNotice kind="error">{error}</OperationNotice>
+      <OperationNotice kind="success">{success}</OperationNotice>
     </div>
   );
 }

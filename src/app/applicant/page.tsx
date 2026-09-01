@@ -6,6 +6,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
 import { BuddyButton, OfferButtons, SlotButton, SurveyForm } from "./actions";
+import ApplicantStatusRefresh from "./status-refresh";
 
 export const metadata: Metadata = { title: "Applicant portal" };
 
@@ -168,6 +169,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   <p className="mt-3 text-2xl font-semibold">Your application is moving through review.</p>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/60">No final outcome has been released yet. This page updates automatically once the Board releases a decision.</p>
                   <StatusStepper stage={pipelineStage(application.display_status, false)} />
+                  <ApplicantStatusRefresh />
                 </>
               )}
               <p className="mt-4 text-sm text-mecg-navy/55">{application.has_resume ? "Resume on file." : "No resume on file."}</p>

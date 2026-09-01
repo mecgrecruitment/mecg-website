@@ -12,10 +12,13 @@ export default async function ScreeningQueuePage() {
   if (error) throw new Error(error.message);
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-8 p-6 sm:p-10">
-      <header>
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.cycle.name}</p>
-        <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Blind application screening</h1>
-        <p className="mt-1.5 max-w-2xl text-[15px] text-mecg-navy/55">Review only the evidence in each packet. Do not try to identify applicants or discuss assignments with other reviewers.</p>
+      <header className="flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.cycle.name}</p>
+          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Blind application screening</h1>
+          <p className="mt-1.5 max-w-2xl text-[15px] text-mecg-navy/55">Review only the evidence in each packet. Do not try to identify applicants or discuss assignments with other reviewers.</p>
+        </div>
+        <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
       </header>
       <div className="grid gap-4 sm:grid-cols-2">
         {(queue ?? []).map((item) => (
@@ -27,7 +30,6 @@ export default async function ScreeningQueuePage() {
         ))}
         {!queue?.length && <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">No blind screening assignments are open.</p>}
       </div>
-      <Link href="/member" className="text-sm text-mecg-orange-ink underline">Back to Evaluation Hub</Link>
     </main>
   );
 }

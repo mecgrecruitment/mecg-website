@@ -5,6 +5,7 @@ import {
   canTransitionCycle,
   canTransitionRound,
   hasExactCriterionSet,
+  isPipelineStatus,
   legalManualApplicationStatuses,
   normalizePersonInput,
   parseApplicationDraft,
@@ -43,6 +44,13 @@ test("application transitions expose only legal manual next statuses", () => {
   assert.equal(canTransitionApplication("ELIGIBLE", "ELIGIBLE"), true);
   assert.deepEqual(legalManualApplicationStatuses("INVITED"), ["INVITED", "IN_PROCESS"]);
   assert.deepEqual(legalManualApplicationStatuses("OFFERED"), ["OFFERED"]);
+});
+
+test("pipeline status excludes application drafts", () => {
+  assert.equal(isPipelineStatus("SUBMITTED"), true);
+  assert.equal(isPipelineStatus("WITHDRAWN"), true);
+  assert.equal(isPipelineStatus("DRAFT"), false);
+  assert.equal(isPipelineStatus("UNKNOWN"), false);
 });
 
 test("criterion submission requires each expected criterion exactly once", () => {

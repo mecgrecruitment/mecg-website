@@ -11,7 +11,7 @@ import SetupForm from "./setup-form";
 import RushControls from "./rush-controls";
 import BoardNav from "./board-nav";
 import PipelineBoard from "./pipeline-board";
-import { DECIDED_PIPELINE_STATUSES } from "@/lib/workflow";
+import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
 import type { Database } from "@/lib/supabase/database.types";
 
 type MemberRole = Database["rush"]["Enums"]["member_role"];
@@ -35,6 +35,15 @@ function eventDate(startsAt: string) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+  });
+}
+
+function submittedDate(submittedAt: string) {
+  return new Date(submittedAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "America/Detroit",
   });
 }
 
@@ -66,14 +75,24 @@ export default async function AdminDashboard() {
   const [cycleResult, roundsResult, appsResult, membersResult, eventsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
-    supabase.from("applications").select("id,status,resume_storage_path,pnms!inner(id,name,contact)").eq("cycle_id", cycleId),
+    supabase
+      .from("applications")
+      .select("id,status,submitted_at,resume_storage_path,pnms!inner(id,name,contact)")
+      .eq("cycle_id", cycleId)
+      .not("submitted_at", "is", null)
+      .neq("status", "DRAFT"),
     supabase.from("memberships").select("id,user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     supabase.from("events").select("id,name,starts_at").eq("cycle_id", cycleId).order("starts_at"),
   ]);
   for (const result of [cycleResult, roundsResult, appsResult, membersResult, eventsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
-  const applications = (appsResult.data ?? []).sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
+  const applications = (appsResult.data ?? [])
+    .flatMap((application) => {
+      if (!application.submitted_at || !isPipelineStatus(application.status)) return [];
+      return [{ ...application, status: application.status, submitted_at: application.submitted_at }];
+    })
+    .sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
   const events = eventsResult.data ?? [];
   const members = membersResult.data ?? [];
   const memberAccounts = Array.from(
@@ -208,6 +227,9 @@ export default async function AdminDashboard() {
           id: application.id,
           status: application.status,
           name: application.pnms.name,
+          contact: application.pnms.contact,
+          submittedAt: application.submitted_at,
+          submittedLabel: submittedDate(application.submitted_at),
           hasResume: Boolean(application.resume_storage_path),
         }))}
         canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
@@ -220,7 +242,7 @@ export default async function AdminDashboard() {
             <SectionLabel number="03">Attendance events</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Attendance events</h2>
           </div>
-          <Link href="/admin/events/new" className="button-secondary text-sm">+ New event</Link>
+          {canOperate && <Link href="/admin/events/new" className="button-secondary text-sm">+ New event</Link>}
         </div>
         <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
           {events.map((event) => {

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import OperationNotice from "@/components/operation-notice";
 
 export default function ScreeningControls({
   cycleId,
@@ -18,19 +19,30 @@ export default function ScreeningControls({
   const [reviewerIds, setReviewerIds] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function act(payload: Record<string, unknown>) {
     setPending(true);
     setError("");
-    const response = await fetch("/api/admin/screening", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cycleId, ...payload }),
-    });
-    const body = await response.json().catch(() => null);
-    if (!response.ok) setError(body?.error ?? "Request failed");
-    else router.refresh();
-    setPending(false);
+    setSuccess("");
+    try {
+      const response = await fetch("/api/admin/screening", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cycleId, ...payload }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) {
+        setError(body?.error ?? "Request failed");
+        return;
+      }
+      setSuccess(payload.action === "CREATE" ? "Screening packets created." : payload.action === "DISTRIBUTE" ? "Approved packets distributed." : "Completed screening frozen.");
+      router.refresh();
+    } catch {
+      setError("Request failed. Check your connection and try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
   if (!batchId) {
@@ -62,7 +74,7 @@ export default function ScreeningControls({
           })}
         </div>
         <button type="button" disabled={pending || reviewerIds.length < 3} onClick={() => void act({ action: "CREATE", reviewerIds })} className="button-primary mt-5 disabled:opacity-50">Create packets for {reviewerIds.length} reviewers</button>
-        {error && <p role="alert" className="mt-4 text-sm text-red-700">{error}</p>}
+        <div className="mt-4 space-y-2"><OperationNotice kind="error">{error}</OperationNotice><OperationNotice kind="success">{success}</OperationNotice></div>
       </section>
     );
   }
@@ -72,7 +84,7 @@ export default function ScreeningControls({
       {status === "DRAFT" && <button type="button" disabled={pending} onClick={() => void act({ action: "DISTRIBUTE", batchId })} className="button-primary">Distribute approved packets</button>}
       {status === "PUBLISHED" && <button type="button" disabled={pending} onClick={() => void act({ action: "FREEZE", batchId })} className="button-primary">Freeze completed screening</button>}
       <p className="text-sm text-mecg-navy/55">Batch status: {status}</p>
-      {error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}
+      <div className="w-full space-y-2"><OperationNotice kind="error">{error}</OperationNotice><OperationNotice kind="success">{success}</OperationNotice></div>
     </section>
   );
 }

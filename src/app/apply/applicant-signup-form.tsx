@@ -69,7 +69,7 @@ export default function ApplicantSignupForm() {
         hint="Use at least 8 characters. You will verify your email before submitting."
       />
       {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-      {message && <p role="status" className="rounded-xl bg-mecg-blue/10 p-4 text-sm text-mecg-navy">{message}</p>}
+      {message && <div role="status" className="rounded-xl bg-mecg-blue/10 p-4 text-sm text-mecg-navy"><p>{message}</p><p className="mt-2 text-mecg-navy/70">If it is missing, check spam or promotions. You can also change your details and try again to request a new verification email.</p><button type="button" onClick={() => setMessage("")} className="mt-3 min-h-11 font-semibold underline underline-offset-2">Change details or try again</button></div>}
       <button type="submit" disabled={pending || Boolean(message)} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
         {pending ? "Creating account..." : "Create applicant account"}
       </button>

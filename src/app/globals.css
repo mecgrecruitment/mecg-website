@@ -50,6 +50,13 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -138,6 +145,23 @@ textarea:focus-visible {
 
 .field-control:focus {
   box-shadow: inset 0 0 0 2px var(--color-mecg-orange);
+}
+
+.operation-control {
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+}
+
+.scroll-cue {
+  scrollbar-color: rgb(7 13 31 / 24%) transparent;
+  scrollbar-width: thin;
+  overscroll-behavior-inline: contain;
+}
+
+.scroll-cue:focus-visible {
+  border-radius: 0.75rem;
+  outline: 2px solid var(--color-mecg-orange);
+  outline-offset: 3px;
 }
 
 .eyebrow {

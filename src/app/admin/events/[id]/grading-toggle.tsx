@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import OperationNotice from "@/components/operation-notice";
 
 export default function GradingToggle({ eventId, cycleId, enabled }: { eventId: string; cycleId: string; enabled: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function handleToggle() {
     if (busy) return;
     setBusy(true);
     setError("");
+    setSuccess("");
     try {
       const response = await fetch("/api/admin/rush", {
         method: "POST",
@@ -23,6 +26,7 @@ export default function GradingToggle({ eventId, cycleId, enabled }: { eventId: 
         setError(data?.error ?? "Could not update member grading.");
         return;
       }
+      setSuccess(`Member grading ${enabled ? "disabled" : "enabled"}.`);
       router.refresh();
     } catch {
       setError("Could not update member grading.");
@@ -37,11 +41,12 @@ export default function GradingToggle({ eventId, cycleId, enabled }: { eventId: 
         type="button"
         onClick={handleToggle}
         disabled={busy}
-        className="border rounded px-3 py-2 text-sm disabled:opacity-50"
+        className="button-secondary text-sm"
       >
         {busy ? "Saving..." : enabled ? "Disable member grading" : "Enable member grading"}
       </button>
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      <OperationNotice kind="error">{error}</OperationNotice>
+      <OperationNotice kind="success">{success}</OperationNotice>
     </div>
   );
 }

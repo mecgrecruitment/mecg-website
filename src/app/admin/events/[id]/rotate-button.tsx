@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import OperationNotice from "@/components/operation-notice";
 
 export default function RotateButton({ eventId }: { eventId: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function handleRotate() {
     if (busy) return;
     if (!confirm("Rotate the QR code? The old code will stop working.")) return;
     setBusy(true);
     setError("");
+    setSuccess("");
     try {
       const response = await fetch(`/api/admin/events/${eventId}/rotate`, { method: "POST" });
       const data = await response.json().catch(() => null);
@@ -20,6 +23,7 @@ export default function RotateButton({ eventId }: { eventId: string }) {
         setError(data?.error ?? "Could not rotate the QR code.");
         return;
       }
+      setSuccess("QR code rotated. The previous code no longer works.");
       router.replace(`/admin/events/${eventId}?token=${encodeURIComponent(data.checkinToken)}`);
     } catch {
       setError("Could not rotate the QR code.");
@@ -34,11 +38,12 @@ export default function RotateButton({ eventId }: { eventId: string }) {
         type="button"
         onClick={handleRotate}
         disabled={busy}
-        className="border rounded px-3 py-2 text-sm disabled:opacity-50"
+        className="button-secondary text-sm"
       >
         {busy ? "Rotating..." : "Rotate QR code"}
       </button>
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      <OperationNotice kind="error">{error}</OperationNotice>
+      <OperationNotice kind="success">{success}</OperationNotice>
     </div>
   );
 }

@@ -91,7 +91,13 @@ export const PIPELINE_STATUSES = [
   "WITHDRAWN",
 ] as const;
 
-export const DECIDED_PIPELINE_STATUSES = new Set(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
+export type PipelineStatus = (typeof PIPELINE_STATUSES)[number];
+
+export function isPipelineStatus(status: string): status is PipelineStatus {
+  return PIPELINE_STATUSES.some((pipelineStatus) => pipelineStatus === status);
+}
+
+export const DECIDED_PIPELINE_STATUSES: ReadonlySet<PipelineStatus> = new Set(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
 
 const ANSWER_KEY = /^[a-z][a-z0-9_]*$/;
 const MAX_ANSWER_KEY_LENGTH = 80;

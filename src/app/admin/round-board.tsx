@@ -123,7 +123,44 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
               <p className="text-[13px] text-mecg-navy/40">No assignments yet</p>
             </div>
           ) : (
-            <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+            <>
+              <div className="flex flex-col gap-3 md:hidden">
+                {assignments.map((assignment) => {
+                  const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
+                  const person = application?.pnms && (Array.isArray(application.pnms) ? application.pnms[0] : application.pnms);
+                  const applicantName = person?.name ?? "Applicant";
+                  const submitted = ["SUBMITTED", "LOCKED"].includes(assignment.status);
+                  const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
+                  return (
+                    <article key={assignment.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">{initials(applicantName)}</span>
+                          <p className="font-semibold text-mecg-navy">{applicantName}</p>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold ${submitted ? "bg-mecg-navy/10 text-mecg-navy" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]"}`}>{submitted ? "Submitted" : "Open"}</span>
+                      </div>
+                      <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Evaluator</dt>
+                          <dd className="mt-1 text-mecg-navy/70">{evaluator ?? "Unassigned"}</dd>
+                        </div>
+                        <div>
+                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Assignment</dt>
+                          <dd className="mt-1 text-mecg-navy/70">{assignment.status}</dd>
+                        </div>
+                        {kind === "GROUP_CASE" && (
+                          <div className="col-span-2">
+                            <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Case team</dt>
+                            <dd className="mt-1 text-mecg-navy/70">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </article>
+                  );
+                })}
+              </div>
+            <div className="scroll-cue -mx-4 hidden overflow-x-auto px-4 pb-1 md:block sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${title} assignments`}>
               <div className="min-w-[42rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">
               <thead>
@@ -172,6 +209,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
               </table>
               </div>
             </div>
+            </>
           )}
         </section>
       )}

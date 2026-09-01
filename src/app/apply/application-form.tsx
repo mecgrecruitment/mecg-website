@@ -82,8 +82,10 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   });
   const [resumePath, setResumePath] = useState(initialDraft?.resumeStoragePath ?? "");
   const [consent, setConsent] = useState(false);
+  const [consentNotice, setConsentNotice] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<SaveState>({ kind: "idle" });
+  const [draftDirty, setDraftDirty] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>(initialDraft?.resumeStoragePath ? { kind: "uploaded", label: "Previously uploaded PDF" } : { kind: "idle" });
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
   const initialized = useRef(false);
@@ -110,7 +112,10 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
           if (response.status === 401) throw new Error("Your session expired. Sign in again to save your application.");
           throw new Error("We could not save your application. Please try again.");
         }
-        if (sequence === saveSequence.current) setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
+        if (sequence === saveSequence.current) {
+          setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
+          setDraftDirty(false);
+        }
         return true;
       } catch (error) {
         if (sequence !== saveSequence.current) return false;
@@ -122,6 +127,20 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
     saveQueue.current = operation.then(() => undefined);
     return operation;
   }, []);
+
+  function markApplicationEdited() {
+    saveSequence.current += 1;
+    setDraftDirty(true);
+    if (consent) {
+      setConsent(false);
+      setConsentNotice("Your consent was cleared because the application changed. Review the update, then check the box again.");
+    }
+  }
+
+  function handleApplicationChange(event: React.FormEvent<HTMLElement>) {
+    const target = event.target as HTMLInputElement;
+    if (target.type !== "checkbox") markApplicationEdited();
+  }
 
   useEffect(() => {
     if (!cycleOpen) return;
@@ -139,6 +158,16 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   }, [cycleOpen, draftPayload, saveDraft]);
 
   useEffect(() => () => cancelPendingSave(), [cancelPendingSave]);
+
+  useEffect(() => {
+    if (!cycleOpen || !draftDirty) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [cycleOpen, draftDirty]);
 
   useEffect(() => {
     if (!stepChangeRequested.current) return;
@@ -188,6 +217,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       }
       if (sequence !== uploadSequence.current) return;
       setResumePath(finalized.path);
+      markApplicationEdited();
       setUploadState({ kind: "uploaded", label: finalized.filename ?? file.name, size: finalized.size, pageCount: finalized.pageCount });
       setErrors((current) => ({ ...current, resume: "" }));
     } catch (error) {
@@ -264,30 +294,30 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       <aside className="lg:sticky lg:top-8">
         <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
-          <ol className="mt-6 grid grid-cols-4 gap-2 lg:block lg:space-y-2" aria-label="Application progress">
+          <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2" aria-label="Application progress">
             {STEPS.map((item, index) => {
               const active = item.id === step;
-              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || saving} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-sm transition-colors ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span className="hidden lg:inline">{item.label}</span><span className="sr-only lg:hidden">{item.shortLabel}</span></button></li>;
+              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || saving} className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs transition-colors sm:flex-col sm:items-start sm:text-sm lg:flex-row lg:gap-3 ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span>{item.shortLabel}</span></button></li>;
             })}
           </ol>
           <div className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/70">
             {saveState.kind === "saving" && <p aria-hidden="true">Saving changes...</p>}
             {saveState.kind === "saved" && <p className="tabular-nums" role="status" aria-live="polite">Saved at {saveState.label}</p>}
-            {saveState.kind === "error" && <p id="draft-save-error" className="text-red-200" role="alert" tabIndex={-1}>{saveState.message}</p>}
+            {saveState.kind === "error" && <div id="draft-save-error" className="text-red-200" role="alert" tabIndex={-1}><p>{saveState.message}</p><button type="button" onClick={() => void saveDraft(draftPayload, true)} disabled={saving} className="mt-2 min-h-11 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
             {saveState.kind === "idle" && <p>Your answers save automatically.</p>}
           </div>
         </div>
         <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/65">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>
       </aside>
 
-      <section className="min-w-0 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.06)] sm:p-8">
+      <section onChangeCapture={handleApplicationChange} className="min-w-0 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.06)] sm:p-8">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
         {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
         {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
         {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
-        {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} setConsent={setConsent} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
+        {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
 
-        {step !== "review" && <div className="mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 pt-5"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} aria-busy={saving || uploading} className="min-h-12 rounded-xl bg-mecg-navy px-6 font-semibold text-white transition-transform active:scale-[0.96] disabled:cursor-wait disabled:opacity-60">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
+        {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} aria-busy={saving || uploading} className="min-h-12 flex-1 rounded-xl bg-mecg-navy px-6 font-semibold text-white transition-transform active:scale-[0.96] disabled:cursor-wait disabled:opacity-60 sm:flex-none">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
       </section>
     </div>
   );
@@ -339,7 +369,7 @@ function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAcc
   </div></>;
 }
 
-function ReviewStep({ values, questions, answers, resumeLabel, consent, setConsent, submitState, submit, changeStep, uploading }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; consent: boolean; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; changeStep: (step: Step) => void; uploading: boolean }) {
+function ReviewStep({ values, questions, answers, resumeLabel, consent, consentNotice, setConsent, submitState, submit, changeStep, uploading }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; consent: boolean; consentNotice: string; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; changeStep: (step: Step) => void; uploading: boolean }) {
   const classYearLabel = CLASS_YEARS.includes(values.classYear as (typeof CLASS_YEARS)[number]) ? CLASS_YEAR_LABELS[values.classYear as (typeof CLASS_YEARS)[number]] : values.classYear;
   return <><StepHeading>Review before you submit.</StepHeading><p className="mt-3 text-pretty leading-7 text-mecg-navy/60">You will not be able to edit this application after submission.</p><div className="mt-8 space-y-4">
     <ReviewCard title="About you" edit={() => changeStep("details")}><dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2"><ReviewItem label="Full name" value={values.name} /><ReviewItem label="Preferred name" value={values.preferredName} /><ReviewItem label="Email" value={values.email} /><ReviewItem label="Phone" value={values.phone} /><ReviewItem label="Uniqname" value={values.uniqname} /><ReviewItem label="Class year" value={classYearLabel} /><ReviewItem label="College" value={values.college} /><ReviewItem label="Major" value={values.major} /><ReviewItem label="Expected graduation" value={values.gradTerm} /></dl></ReviewCard>
@@ -347,6 +377,7 @@ function ReviewStep({ values, questions, answers, resumeLabel, consent, setConse
     <ReviewCard title="Materials and access" edit={() => changeStep("materials")}><dl className="space-y-3"><ReviewItem label="Resume" value={resumeLabel} /><ReviewItem label="LinkedIn URL" value={values.linkedinUrl} /><ReviewItem label="Scheduling or access needs" value={values.accessibilityNotes} preserveWhitespace /></dl></ReviewCard>
   </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How blind review works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
   <label className="mt-6 flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-mecg-orange" /><span className="text-sm leading-6">I reviewed my application and consent to MECG using this information to administer the current recruitment cycle.</span></label>
+  {consentNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{consentNotice}</p>}
   {submitState.kind === "error" && <div className="mt-4"><FieldError id="submit-error" alert>{submitState.message}</FieldError></div>}
   <p className="sr-only" role="status" aria-live="polite">{submitState.kind === "submitting" ? "Submitting your application. Please wait." : ""}</p>
   <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} aria-busy={submitState.kind === "submitting"} className="min-h-12 rounded-xl bg-mecg-orange px-7 font-semibold text-mecg-navy transition-transform active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-45">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;

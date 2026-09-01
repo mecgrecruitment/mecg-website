@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { setApplicantActionPending } from "./status-refresh";
 
 function replaceWithActionStatus(router: ReturnType<typeof useRouter>, action: "rsvp" | "buddy") {
   const params = new URLSearchParams(window.location.search);
@@ -22,6 +23,7 @@ export function SlotButton({ id }: { id: string }) {
   async function rsvp() {
     if (inFlight.current) return;
     inFlight.current = true;
+    setApplicantActionPending(true);
     setPending(true);
     setError("");
     try {
@@ -37,6 +39,7 @@ export function SlotButton({ id }: { id: string }) {
     } finally {
       inFlight.current = false;
       setPending(false);
+      setApplicantActionPending(false);
     }
   }
 
@@ -59,6 +62,7 @@ export function BuddyButton({ id }: { id: string }) {
   async function book() {
     if (inFlight.current) return;
     inFlight.current = true;
+    setApplicantActionPending(true);
     setPending(true);
     setError("");
     try {
@@ -74,6 +78,7 @@ export function BuddyButton({ id }: { id: string }) {
     } finally {
       inFlight.current = false;
       setPending(false);
+      setApplicantActionPending(false);
     }
   }
 
@@ -124,6 +129,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
   async function respond() {
     if (!selected || inFlight.current) return;
     inFlight.current = true;
+    setApplicantActionPending(true);
     setPending(true);
     setError("");
     try {
@@ -140,6 +146,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
     } finally {
       inFlight.current = false;
       setPending(false);
+      setApplicantActionPending(false);
     }
   }
 
@@ -201,16 +208,18 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [score, setScore] = useState("");
+  const [note, setNote] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current) return;
     inFlight.current = true;
+    setApplicantActionPending(true);
     setPending(true);
     setError("");
-    const data = new FormData(event.currentTarget);
     try {
-      const response = await fetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, score: Number(data.get("score")), note: data.get("note") }) });
+      const response = await fetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, score: Number(score), note }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(responseError(body, "Could not send feedback"));
@@ -223,6 +232,7 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
     } finally {
       inFlight.current = false;
       setPending(false);
+      setApplicantActionPending(false);
     }
   }
 
@@ -236,9 +246,12 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
         Anonymous process rating
         <select
           name="score"
-          defaultValue={5}
+          value={score}
+          onChange={(event) => setScore(event.target.value)}
+          required
           className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         >
+          <option value="" disabled>Select a rating</option>
           {SCORE_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
@@ -248,9 +261,14 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
         What should MECG change?
         <textarea
           name="note"
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
           placeholder="Optional"
+          maxLength={2000}
+          aria-describedby="survey-note-counter"
           className="mt-2 min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-4 text-sm font-normal shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         />
+        <span id="survey-note-counter" className="mt-1 block text-xs font-normal text-mecg-navy/60" aria-live="polite">{note.length}/2000 characters</span>
       </label>
       <button className="button-secondary w-fit disabled:cursor-not-allowed disabled:opacity-50" disabled={pending}>
         {pending ? "Sending…" : "Send feedback"}

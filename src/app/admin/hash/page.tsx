@@ -17,6 +17,8 @@ export default async function HashBoard() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
   if (!cycleId) redirect("/member");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
+  const canDecide = hasPermission(user.memberships, cycleId, "DECIDE");
+  const canRelease = hasPermission(user.memberships, cycleId, "RELEASE");
   if (!canPanel) redirect("/access-denied");
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult] = await Promise.all([
@@ -134,7 +136,52 @@ export default async function HashBoard() {
                 </div>
               ))}
             </div>
-            <div className="overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="flex flex-col gap-3 md:hidden">
+              {rankings.map(({ application, rounds: results, finalScore }) => {
+                const decision = decisionByApplication.get(application.id);
+                const impressions = impressionsByApplication.get(application.id);
+                return (
+                  <article key={application.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <Link href={`/admin/applications/${application.id}`} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy underline decoration-mecg-navy/30 underline-offset-2">{application.pnms.name}</Link>
+                        <p className="text-xs text-mecg-navy/45">{application.status}</p>
+                      </div>
+                      <p className="font-mono text-xl font-bold tabular-nums">{finalScore === null ? "Pending" : finalScore.toFixed(1)}</p>
+                    </div>
+                    <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                      {results.map(({ round, aggregate }) => (
+                        <div key={round.id}>
+                          <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">{round.name}</dt>
+                          <dd className="mt-1 text-mecg-navy/70">{aggregate.score === null ? "Pending" : aggregate.score.toFixed(1)} · {aggregate.count} ratings</dd>
+                        </div>
+                      ))}
+                      <div>
+                        <dt className="font-mono uppercase tracking-[0.08em] text-mecg-navy/45">Impressions</dt>
+                        <dd className="mt-1 text-mecg-navy/70">{impressions ? `${impressions.avg.toFixed(1)} · ${impressions.count}` : "—"}</dd>
+                      </div>
+                    </dl>
+                    <details className="group mt-4">
+                      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl px-3 text-sm font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
+                        <span>{decision ? `${decision.outcome} · ${decision.status}` : "Create decision"}</span>
+                        <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
+                      </summary>
+                      <div className="mt-3 flex flex-col gap-3">
+                        {decision ? (
+                          <>
+                            <p className="text-sm text-mecg-navy/60">{decision.reason}</p>
+                            {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
+                            {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
+                            {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
+                          </>
+                        ) : canDecide ? <DecisionForm cycleId={cycle.id} applicationId={application.id} /> : <p className="text-sm text-mecg-navy/55">Only decision-panel members can record outcomes.</p>}
+                      </div>
+                    </details>
+                  </article>
+                );
+              })}
+            </div>
+            <div className="scroll-cue hidden overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:block" tabIndex={0} role="region" aria-label="Hash decision table">
               <table className="w-full text-left text-sm">
               <thead className="bg-mecg-navy/[0.03]">
                 <tr>
@@ -190,9 +237,9 @@ export default async function HashBoard() {
                             </summary>
                             <div className="mt-2.5 flex flex-col gap-2.5 px-1">
                               <p className="text-xs text-mecg-navy/55">{decision.reason}</p>
-                              {!["LOCKED", "RELEASED"].includes(decision.status) && <ApprovalButton decisionId={decision.id} />}
-                              {decision.status === "LOCKED" && <ReleaseButton decisionId={decision.id} />}
-                              <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />
+                              {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
+                              {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
+                              {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
                             </div>
                           </details>
                         ) : (
@@ -204,7 +251,7 @@ export default async function HashBoard() {
                               </svg>
                             </summary>
                             <div className="mt-2.5 px-1">
-                              <DecisionForm cycleId={cycle.id} applicationId={application.id} />
+                              {canDecide ? <DecisionForm cycleId={cycle.id} applicationId={application.id} /> : <p className="text-xs text-mecg-navy/55">Only decision-panel members can record outcomes.</p>}
                             </div>
                           </details>
                         )}

@@ -61,6 +61,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
+  const canDecide = hasPermission(user.memberships, cycleId, "DECIDE");
+  const canRelease = hasPermission(user.memberships, cycleId, "RELEASE");
   const committeeOnly = canOperate && !canManageCycle && !canPanel;
   if (!canManageCycle && !canPanel && !canOperate) redirect("/member");
 
@@ -194,8 +196,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
       </header>
       <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canPanel} />
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
-        <section className="flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
+        <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:order-none">
           <span
             className={`inline-flex w-fit items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${
               isTerminal ? "bg-mecg-navy text-white" : "bg-mecg-orange/15 text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.35)]"
@@ -277,7 +279,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
           </div>
         </section>
 
-        <div className="mt-6 lg:mt-0">
+        <div className="order-1 lg:order-none">
           <DossierTabs
             panels={{
               responses: (
@@ -341,11 +343,14 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               ),
               decision: (
                 <div className="flex flex-col gap-4">
-                  {visibleDecisions.length === 0 && !committeeOnly && (
+                  {visibleDecisions.length === 0 && canDecide && (
                     <div className="rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                       <p className="mb-3 text-sm text-mecg-navy/55">No decision yet.</p>
                       <DecisionForm cycleId={cycleId} applicationId={application.id} />
                     </div>
+                  )}
+                  {visibleDecisions.length === 0 && !canDecide && (
+                    <p className="rounded-2xl bg-mecg-navy/[0.035] p-5 text-sm leading-6 text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">Decision controls are available only to authorized Hash panel members.</p>
                   )}
                   {visibleDecisions.map((decision) => (
                     <div key={decision.id} className="flex flex-col gap-3 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
@@ -356,9 +361,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                         <span className="font-mono text-[11px] text-mecg-navy/45">{decision.decision_approvals.length}/2 approvals</span>
                       </div>
                       <p className="text-sm text-mecg-navy/65">{decision.reason}</p>
-                      {!["LOCKED", "RELEASED"].includes(decision.status) && <ApprovalButton decisionId={decision.id} />}
-                      {decision.status === "LOCKED" && <ReleaseButton decisionId={decision.id} />}
-                      <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />
+                      {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
+                      {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
+                      {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
                     </div>
                   ))}
                 </div>
