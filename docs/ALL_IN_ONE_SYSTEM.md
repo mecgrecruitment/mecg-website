@@ -366,7 +366,7 @@ The one real identity gap left: a person who applies with a personal address and
 
 Each phase ships and reverts on its own.
 
-**Phase 0. Fix reapplication.** `can_start_application()`, the routing change, the "new cycle is open" card on `/applicant`, and cases added to `auth-destination.test.ts`. No schema change. This is first because it is a stated requirement that is currently broken, and because it is roughly a day of work rather than a project.
+**Phase 0. Fix reapplication. Done, branch `fix/applicant-reapplication`.** Added `rush.can_start_application()` (migration `20260901000000_allow_reapplication.sql`), routed on it in `resolveAuthDestination`, relaxed the `/applicant` guard so history stays reachable once login sends returning applicants to `/apply`, and cross-linked the two pages. Checks: `auth-destination.test.ts` went from 5 cases to 11, and `supabase/tests/rush_foundation.sql` gained 5 pgTAP assertions covering a past cycle, an open cycle, an already-submitted cycle, and no open cycle. `tsc`, `eslint`, `npm test` (42) and `next build` all pass. The pgTAP block has not been executed: it needs `supabase test db --linked`, and neither the Supabase CLI nor Docker is installed here.
 
 **Phase 1. Unify the shell.** Move `/admin/*` and `/member/*` under `/portal/*` with redirects. Use `PortalShell workspace` everywhere. One nav array. Delete `BoardNav`, the inline `navLinks`, and both cross-link buttons. No new features. Best legibility gain per line touched, and every later phase gets cheaper.
 
