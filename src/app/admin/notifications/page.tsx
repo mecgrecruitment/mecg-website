@@ -7,6 +7,7 @@ import { hasPermission } from "@/lib/authorization";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import RetryButton from "./retry-button";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Notification delivery" };
 
@@ -38,7 +39,7 @@ export default async function NotificationsPage() {
         <div className="flex items-baseline justify-between gap-4">
           <div>
             <h2 id="failed-notifications" className="text-lg font-semibold text-mecg-navy">Needs attention</h2>
-            <p className="mt-1 text-sm text-mecg-navy/55">Only terminal failures appear here. Temporary failures retry automatically.</p>
+            <p className="mt-1 text-sm text-mecg-navy/65">Only terminal failures appear here. Temporary failures retry automatically.</p>
           </div>
           <span className="rounded-full bg-red-50 px-3 py-1 font-mono text-xs font-semibold text-red-800">{needsAttention.length} failed</span>
         </div>
@@ -47,14 +48,14 @@ export default async function NotificationsPage() {
             <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                <p className="mt-0.5 font-mono text-[11px] text-mecg-navy/50">
+                <p className="mt-0.5 font-mono text-xs text-mecg-navy/65">
                   {item.last_error_category ?? "UNKNOWN"} · attempt {item.attempt_count} of {item.max_attempts}
                 </p>
               </div>
               {item.attempt_count < 8 && <RetryButton notificationId={item.id} />}
             </article>
           ))}
-          {!needsAttention.length && <p className="rounded-xl border border-dashed border-mecg-navy/15 p-6 text-center text-sm text-mecg-navy/55">No failed notifications.</p>}
+          {!needsAttention.length && <p className="rounded-xl border border-dashed border-mecg-navy/15 p-6 text-center text-sm text-mecg-navy/65">No failed notifications.</p>}
         </div>
       </section>
 
@@ -65,12 +66,12 @@ export default async function NotificationsPage() {
             <article key={item.id} className="flex flex-wrap items-baseline justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                <p className="mt-0.5 text-xs text-mecg-navy/50">Attempt {item.attempt_count} of {item.max_attempts}{item.last_error_category ? ` · ${item.last_error_category}` : ""}</p>
+                <p className="mt-0.5 text-xs text-mecg-navy/65">Attempt {item.attempt_count} of {item.max_attempts}{item.last_error_category ? ` · ${item.last_error_category}` : ""}</p>
               </div>
               <div className="text-right">
                 <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold ${item.status === "SENT" ? "bg-emerald-50 text-emerald-800" : item.status === "FAILED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"}`}>{item.status}</span>
-                <time className="ml-3 font-mono text-[11px] text-mecg-navy/45" dateTime={item.sent_at ?? item.next_attempt_at}>
-                  {new Date(item.sent_at ?? item.next_attempt_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" })}
+                <time className="ml-3 font-mono text-xs text-mecg-navy/65" dateTime={item.sent_at ?? item.next_attempt_at}>
+                  {formatEasternDateTime(item.sent_at ?? item.next_attempt_at)}
                 </time>
               </div>
             </article>

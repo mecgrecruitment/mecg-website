@@ -30,6 +30,7 @@ export default function PillNav({
     };
 
     updateIndicator();
+    selectedLink.scrollIntoView({ block: "nearest", inline: "center", behavior: "auto" });
     const observer = new ResizeObserver(updateIndicator);
     observer.observe(selectedLink);
     if (selectedLink.parentElement) observer.observe(selectedLink.parentElement);

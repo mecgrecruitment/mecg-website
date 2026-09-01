@@ -540,22 +540,19 @@ export type Database = {
         Row: {
           approver_id: string
           created_at: string
-          decision_id: string | null
-          event_id: string | null
+          decision_id: string
           id: string
         }
         Insert: {
           approver_id: string
           created_at?: string
-          decision_id?: string | null
-          event_id?: string | null
+          decision_id: string
           id?: string
         }
         Update: {
           approver_id?: string
           created_at?: string
-          decision_id?: string | null
-          event_id?: string | null
+          decision_id?: string
           id?: string
         }
         Relationships: [
@@ -1083,13 +1080,38 @@ export type Database = {
           },
         ]
       }
+      mutation_receipts: {
+        Row: {
+          actor_id: string
+          created_at: string
+          mutation_key: string
+          operation: string
+          result: Json
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          mutation_key: string
+          operation: string
+          result?: Json
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          mutation_key?: string
+          operation?: string
+          result?: Json
+        }
+        Relationships: []
+      }
       notification_outbox: {
         Row: {
           application_id: string
           attempt_count: number
           created_at: string
           cycle_id: string
-          decision_id: string
+          decision_id: string | null
+          event_id: string | null
           id: string
           idempotency_key: string
           last_attempt_at: string | null
@@ -1108,7 +1130,8 @@ export type Database = {
           attempt_count?: number
           created_at?: string
           cycle_id: string
-          decision_id: string
+          decision_id?: string | null
+          event_id?: string | null
           id?: string
           idempotency_key: string
           last_attempt_at?: string | null
@@ -1127,7 +1150,8 @@ export type Database = {
           attempt_count?: number
           created_at?: string
           cycle_id?: string
-          decision_id?: string
+          decision_id?: string | null
+          event_id?: string | null
           id?: string
           idempotency_key?: string
           last_attempt_at?: string | null
@@ -1171,30 +1195,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      mutation_receipts: {
-        Row: {
-          actor_id: string
-          created_at: string
-          mutation_key: string
-          operation: string
-          result: Json
-        }
-        Insert: {
-          actor_id: string
-          created_at?: string
-          mutation_key: string
-          operation: string
-          result?: Json
-        }
-        Update: {
-          actor_id?: string
-          created_at?: string
-          mutation_key?: string
-          operation?: string
-          result?: Json
-        }
-        Relationships: []
       }
       pnms: {
         Row: {
@@ -1542,6 +1542,7 @@ export type Database = {
           created_at: string
           frozen_at: string | null
           id: string
+          minimum_observed_criteria: number
           round_id: string
           version: number
         }
@@ -1549,6 +1550,7 @@ export type Database = {
           created_at?: string
           frozen_at?: string | null
           id?: string
+          minimum_observed_criteria?: number
           round_id: string
           version: number
         }
@@ -1556,6 +1558,7 @@ export type Database = {
           created_at?: string
           frozen_at?: string | null
           id?: string
+          minimum_observed_criteria?: number
           round_id?: string
           version?: number
         }
@@ -1966,40 +1969,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cancel_event: {
-        Args: { cancellation_reason: string; target_event_id: string }
-        Returns: undefined
-      }
-      deactivate_cycle_membership: {
-        Args: { revocation_reason: string; target_cycle_id: string; target_user_id: string }
-        Returns: boolean
-      }
-      reassign_evaluator: {
-        Args: { replacement_evaluator_id: string; target_assignment_id: string }
-        Returns: string
-      }
-      restore_cycle_membership: {
-        Args: { target_cycle_id: string; target_user_id: string }
-        Returns: boolean
-      }
-      unassign_evaluator: {
-        Args: { target_assignment_id: string }
-        Returns: boolean
-      }
-      update_event: {
-        Args: {
-          closes_at: string
-          event_ends_at: string
-          event_kind: string
-          event_location: string
-          event_name: string
-          event_starts_at: string
-          event_visibility: string
-          opens_at: string
-          target_event_id: string
-        }
-        Returns: undefined
-      }
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -2090,8 +2059,16 @@ export type Database = {
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       can_start_application: { Args: never; Returns: boolean }
+      cancel_event: {
+        Args: { cancellation_reason: string; target_event_id: string }
+        Returns: undefined
+      }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
+      claim_notification: {
+        Args: { target_notification_id: string }
+        Returns: Json
+      }
       clone_cycle: {
         Args: { cycle_name: string; source_cycle_id: string }
         Returns: string
@@ -2104,6 +2081,16 @@ export type Database = {
           target_batch_id: string
         }
         Returns: number
+      }
+      complete_notification: {
+        Args: {
+          error_category?: string
+          provider_id?: string
+          should_retry?: boolean
+          target_notification_id: string
+          was_delivered: boolean
+        }
+        Returns: string
       }
       create_buddy_slot: {
         Args: {
@@ -2165,6 +2152,18 @@ export type Database = {
       }
       cycle_directory: { Args: { target_cycle_id: string }; Returns: Json }
       cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
+      deactivate_cycle_membership: {
+        Args: {
+          revocation_reason: string
+          target_cycle_id: string
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      decision_notification_id: {
+        Args: { target_decision_id: string }
+        Returns: string
+      }
       declare_conflict: {
         Args: { conflict_reason: string; target_application_id: string }
         Returns: undefined
@@ -2299,9 +2298,14 @@ export type Database = {
         Args: { target_document_id: string }
         Returns: Json
       }
+      prune_pending_resume_uploads: { Args: never; Returns: undefined }
       prune_rate_limits: { Args: never; Returns: undefined }
       public_projects: { Args: never; Returns: Json }
       public_recruitment: { Args: never; Returns: Json }
+      reassign_evaluator: {
+        Args: { replacement_evaluator_id: string; target_assignment_id: string }
+        Returns: string
+      }
       recuse_screening_assignment: {
         Args: { recusal_reason: string; target_assignment_id: string }
         Returns: undefined
@@ -2314,24 +2318,6 @@ export type Database = {
         Args: { target_decision_id: string }
         Returns: undefined
       }
-      claim_notification: {
-        Args: { target_notification_id: string }
-        Returns: Json
-      }
-      complete_notification: {
-        Args: {
-          error_category?: string
-          provider_id?: string
-          should_retry?: boolean
-          target_notification_id: string
-          was_delivered: boolean
-        }
-        Returns: string
-      }
-      decision_notification_id: {
-        Args: { target_decision_id: string }
-        Returns: string
-      }
       release_ready_decisions: {
         Args: { target_cycle_id: string }
         Returns: Json
@@ -2340,14 +2326,17 @@ export type Database = {
         Args: { accept: boolean; target_application_id: string }
         Returns: undefined
       }
-      retry_notification: {
-        Args: { target_notification_id: string }
-        Returns: undefined
+      restore_cycle_membership: {
+        Args: { target_cycle_id: string; target_user_id: string }
+        Returns: boolean
       }
-      resume_upload_locked: { Args: { target_path: string }; Returns: boolean }
       retire_pending_resume_upload: {
         Args: { document_id: string }
         Returns: boolean
+      }
+      retry_notification: {
+        Args: { target_notification_id: string }
+        Returns: undefined
       }
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
       round_cycle_id: { Args: { target_round_id: string }; Returns: string }
@@ -2511,6 +2500,24 @@ export type Database = {
       }
       unassign_case_group: {
         Args: { target_application_id: string; target_group_id: string }
+        Returns: undefined
+      }
+      unassign_evaluator: {
+        Args: { target_assignment_id: string }
+        Returns: boolean
+      }
+      update_event: {
+        Args: {
+          closes_at: string
+          event_ends_at: string
+          event_kind: string
+          event_location: string
+          event_name: string
+          event_starts_at: string
+          event_visibility: string
+          opens_at: string
+          target_event_id: string
+        }
         Returns: undefined
       }
       update_my_profile: {

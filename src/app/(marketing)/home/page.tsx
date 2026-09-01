@@ -30,7 +30,7 @@ export default function HomePage() {
           src="/mecg/members-professional.jpeg"
           alt="MECG members visiting PwC in Chicago"
           fill
-          priority
+          preload
           sizes="100vw"
           className="object-cover object-center"
         />

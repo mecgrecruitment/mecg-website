@@ -13,11 +13,12 @@ import WorkspaceNav from "@/components/workspace-nav";
 import SectionLabel from "@/components/section-label";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Evaluation Hub" };
 
 function formatDeadline(closesAt: string) {
-  return new Date(closesAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return formatEasternDateTime(closesAt);
 }
 
 function isSubmitted(assignment: { status: string; evaluations: Array<{ status: string }> }) {

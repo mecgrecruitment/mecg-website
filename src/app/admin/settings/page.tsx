@@ -8,6 +8,7 @@ import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import { CloneCycleForm, CycleControls } from "../rush-controls";
 import QuestionEditor, { type IntakeQuestion } from "./question-editor";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Cycle settings" };
 
@@ -74,7 +75,7 @@ export default async function SettingsPage() {
             <div key={label} className="rounded-xl bg-white p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <dt className="text-[11px] uppercase tracking-[0.1em] text-mecg-navy/45">{label}</dt>
               <dd className="mt-1 text-sm font-semibold text-mecg-navy">
-                {value ? new Date(value).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" }) : "Not set"}
+                {value ? formatEasternDateTime(value) : "Not set"}
               </dd>
             </div>
           ))}

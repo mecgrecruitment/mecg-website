@@ -43,7 +43,7 @@ export default function PasswordForm() {
           <span className="block text-sm font-semibold text-mecg-navy">Account security</span>
           <span className="mt-0.5 block text-xs text-mecg-navy/60">Change your password and sign out other sessions.</span>
         </span>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180" aria-hidden="true">
           <path d="M5 8l5 5 5-5" />
         </svg>
       </summary>

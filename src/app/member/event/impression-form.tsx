@@ -119,7 +119,7 @@ export default function ImpressionForm({
       <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>
       <OperationNotice kind="error">{error}</OperationNotice>
       {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Impression saved.</p>}
-      <button disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
+      <button type="submit" disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
         {saved ? "✓ Saved" : pending ? "Saving…" : "Save impression"}
       </button>
     </form>

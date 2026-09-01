@@ -67,7 +67,7 @@ export default function LoginForm({ callbackError }: { callbackError?: string })
         <FormField label="Password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? "login-error" : undefined} />
         {error && <p ref={errorRef} id="login-error" tabIndex={-1} role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">{error}</p>}
         <button type="submit" disabled={submitting} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
-          {submitting ? "Signing in..." : "Sign in"}
+          {submitting ? "Signing in…" : "Sign in"}
         </button>
       </form>
       <div className="mt-5 flex flex-col text-center text-sm">

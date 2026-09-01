@@ -9,6 +9,7 @@ import LogoutButton from "@/components/logout-button";
 import { BuddyButton, OfferButtons, SlotButton, SurveyForm, WithdrawButton } from "./actions";
 import ApplicantStatusRefresh from "./status-refresh";
 import ResumeReplace from "./resume-replace";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Applicant portal" };
 
@@ -22,16 +23,12 @@ function pipelineStage(displayStatus: string, released: boolean) {
   return 0; // SUBMITTED, NEEDS_INFO
 }
 
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-}
-
 function DateTimeRange({ startsAt, endsAt }: { startsAt: string; endsAt: string }) {
   return (
     <>
-      <time dateTime={startsAt}>{formatDateTime(startsAt)}</time>
+      <time dateTime={startsAt}>{formatEasternDateTime(startsAt)}</time>
       {" to "}
-      <time dateTime={endsAt}>{formatDateTime(endsAt)}</time>
+      <time dateTime={endsAt}>{formatEasternDateTime(endsAt)}</time>
     </>
   );
 }
@@ -53,7 +50,7 @@ function nextScheduleItem(plan: ApplicantSchedule): { label: string; when: strin
   ]
     .filter((item) => new Date(item.startsAt).getTime() > now)
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-  if (confirmed[0]) return { label: confirmed[0].label, when: formatDateTime(confirmed[0].startsAt) };
+  if (confirmed[0]) return { label: confirmed[0].label, when: formatEasternDateTime(confirmed[0].startsAt) };
   const openCount = (plan.openSlots ?? []).filter((slot) => slot.remaining > 0).length + (plan.openBuddy ?? []).length;
   return openCount ? { label: `${openCount} open slot${openCount === 1 ? "" : "s"} to book below`, when: null } : null;
 }
@@ -244,16 +241,16 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         )}
         {timeline.length > 0 && (
           <section className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">What happens next</p>
+            <p className="font-mono text-xs uppercase tracking-[0.12em] text-mecg-navy/65">What happens next</p>
             <ol className="mt-4 flex flex-col gap-2">
               {timeline.map((event) => {
                 const past = new Date(event.startsAt).getTime() < now;
                 return (
                   <li key={event.id} className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] ${past ? "opacity-50" : ""}`}>
                     <span className="text-[14px] font-semibold text-mecg-navy">{event.name}</span>
-                    <span className="text-[12px] text-mecg-navy/55">
+                    <span className="text-xs text-mecg-navy/65">
                       <time dateTime={event.startsAt}>
-                        {new Date(event.startsAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Detroit" })}
+                        {formatEasternDateTime(event.startsAt)}
                       </time>
                       {event.location ? ` · ${event.location}` : ""}
                     </span>
@@ -261,7 +258,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                 );
               })}
             </ol>
-            <p className="mt-3 text-xs text-mecg-navy/45">Past dates are dimmed. Anything you need to book appears below.</p>
+            <p className="mt-3 text-xs text-mecg-navy/65">Past dates are dimmed. Anything you need to book appears below.</p>
           </section>
         )}
         {dashboardApplications.map((application) => {
@@ -298,7 +295,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   <ApplicantStatusRefresh />
                 </>
               )}
-              <p className="mt-4 text-sm text-mecg-navy/55">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
+              <p className="mt-4 text-sm text-mecg-navy/65">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
               {/* The RPCs refuse a replacement once a screening packet exists or
                   the window closes; this only hides the control for files that
                   are already finished either way. */}
@@ -315,7 +312,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                       <p className={`mt-4 rounded-xl px-4 py-3 text-sm font-medium ${expired ? "bg-red-50 text-red-800" : "bg-mecg-orange/[0.14] text-mecg-orange-ink"}`}>
                         {expired ? "This offer expired on " : "Respond by "}
                         <time dateTime={deadline}>
-                          {new Date(deadline).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", timeZone: "America/Detroit" })}
+                          {formatEasternDateTime(deadline, "full")}
                         </time>
                         {expired ? ". Contact the board if you still want to join." : "."}
                       </p>
@@ -334,18 +331,18 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               )}
               {(messagesByApplication.get(application.application_id)?.length ?? 0) > 0 && (
                 <div className="mt-5">
-                  <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">What we have sent you</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.12em] text-mecg-navy/65">What we have sent you</p>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {(messagesByApplication.get(application.application_id) ?? []).map((message) => (
                       <li key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
                         <span className="text-[13px] font-medium text-mecg-navy">{message.subject}</span>
-                        <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
-                          {new Date(message.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                        <time dateTime={message.created_at} className="font-mono text-xs tabular-nums text-mecg-navy/65">
+                          {formatEasternDateTime(message.created_at)}
                         </time>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-2 text-xs text-mecg-navy/45">If something here never reached your inbox, check your spam folder.</p>
+                  <p className="mt-2 text-xs text-mecg-navy/65">If something here never reached your inbox, check your spam folder.</p>
                 </div>
               )}
               {responses.length > 0 && (

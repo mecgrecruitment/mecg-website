@@ -237,7 +237,7 @@ export default async function HashBoard() {
                                 <span className="text-xs font-semibold text-mecg-navy">{decision.outcome} · {decision.status}</span>
                                 <span className="block text-[11px] text-mecg-navy/60">{decision.decision_approvals.length}/2 approvals</span>
                               </span>
-                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
                                 <path d="M5 8l5 5 5-5" />
                               </svg>
                             </summary>
@@ -252,7 +252,7 @@ export default async function HashBoard() {
                           <details className="group rounded-xl">
                             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                               No decision yet
-                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
                                 <path d="M5 8l5 5 5-5" />
                               </svg>
                             </summary>

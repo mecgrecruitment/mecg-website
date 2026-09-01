@@ -30,7 +30,7 @@ export default function RotateButton({ eventId }: { eventId: string }) {
         disabled={busy}
         className="button-secondary text-sm"
       >
-        {busy ? "Rotating..." : "Rotate QR code"}
+        {busy ? "Rotating…" : "Rotate QR code"}
       </button>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>

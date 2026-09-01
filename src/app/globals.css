@@ -66,6 +66,12 @@ textarea {
   font: inherit;
 }
 
+input,
+select,
+textarea {
+  font-size: 1rem;
+}
+
 /*
  * Focus ring color. mecg-orange is ~2.25:1 on white (docs/DESIGN.md already
  * bans it on light backgrounds for the same reason) and ~2.58:1 on the
@@ -279,6 +285,13 @@ details[open] > summary .disclosure-chevron {
   outline-offset: -1px;
 }
 
+/* Small operational copy must clear WCAG's normal-text contrast floor. */
+.text-mecg-navy\/45,
+.text-mecg-navy\/50,
+.text-mecg-navy\/55 {
+  color: rgb(7 13 31 / 65%);
+}
+
 .paper-band {
   background: var(--color-paper);
 }
@@ -382,6 +395,15 @@ details[open] > summary .disclosure-chevron {
     scroll-behavior: auto !important;
   }
 
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .pre-reveal {
     opacity: 1;
   }
@@ -396,9 +418,4 @@ details[open] > summary .disclosure-chevron {
     scale: 1;
   }
 
-  .task-row-arrow,
-  .disclosure-chevron,
-  .progress-fill {
-    transition-duration: 80ms;
-  }
 }

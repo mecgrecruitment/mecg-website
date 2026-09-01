@@ -49,7 +49,7 @@ function ApplicantCard({
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-[0_1px_2px_rgba(7,13,31,0.06)]">
       <div className="flex items-center gap-2">
-        <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+        <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
           {initials(application.name)}
         </span>
         <Link href={`/admin/applications/${application.id}`} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
@@ -59,7 +59,7 @@ function ApplicantCard({
       <p className="flex items-center gap-1 text-[11.5px] text-mecg-navy/60">
         {application.hasResume ? (
           <>
-            <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" className="flex-shrink-0 text-mecg-navy/55" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" className="shrink-0 text-mecg-navy/55" aria-hidden="true">
               <path d="M4 10.5l4 4 8-9" />
             </svg>
             <span className="text-mecg-navy/55">Resume on file</span>
@@ -143,7 +143,7 @@ function ApplicantRoster({
           {applications.map((application) => (
             <li key={application.id} className="grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto] md:items-center">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[11px] font-semibold text-white">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[11px] font-semibold text-white">
                   {initials(application.name)}
                 </span>
                 <div className="min-w-0">

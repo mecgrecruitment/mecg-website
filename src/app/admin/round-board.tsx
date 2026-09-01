@@ -213,7 +213,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                     <tr key={assignment.id} className="border-b border-mecg-navy/10">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
                             {initials(applicantName)}
                           </span>
                           <span className="text-[13px] font-semibold text-mecg-navy">{applicantName}</span>

@@ -22,7 +22,7 @@ export default function GradingToggle({ eventId, cycleId, enabled }: { eventId: 
         disabled={busy}
         className="button-secondary text-sm"
       >
-        {busy ? "Saving..." : enabled ? "Disable member grading" : "Enable member grading"}
+        {busy ? "Saving…" : enabled ? "Disable member grading" : "Enable member grading"}
       </button>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>

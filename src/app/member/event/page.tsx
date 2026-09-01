@@ -7,11 +7,12 @@ import { createClient } from "@/lib/supabase/server";
 import PillNav from "@/components/pill-nav";
 import SectionLabel from "@/components/section-label";
 import ImpressionForm from "./impression-form";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Live Event Grading" };
 
 function formatStart(startsAt: string) {
-  return new Date(startsAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return formatEasternDateTime(startsAt);
 }
 
 export default async function EventGradingPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
@@ -74,7 +75,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
                   <details className="group mt-3 rounded-xl">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                       <span className="text-sm font-semibold text-mecg-navy">Graded · Score {row.score} · edit</span>
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron flex-shrink-0 text-mecg-navy/60">
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>
@@ -86,7 +87,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
                   <details className="group mt-3 rounded-xl" open={row.application_id === firstUngradedId}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                       <span className="text-sm font-semibold text-mecg-navy">Not graded yet</span>
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron flex-shrink-0 text-mecg-navy/60">
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>

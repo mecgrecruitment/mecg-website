@@ -61,7 +61,7 @@ export default function CheckinForm({ token }: { token: string }) {
         disabled={status === "submitting"}
         className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "submitting" ? "Checking in..." : "Check in"}
+        {status === "submitting" ? "Checking in…" : "Check in"}
       </button>
     </form>
   );

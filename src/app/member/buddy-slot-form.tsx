@@ -89,7 +89,7 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
           <ul className="mt-2 space-y-2 text-sm text-mecg-navy/60">
             {slots.map((slot) => (
               <li key={slot.id} className="flex items-center gap-3 rounded-xl bg-mecg-navy/[0.035] px-3.5 py-2.5">
-                <span className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white font-mono text-[10px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white font-mono text-[10px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                   {new Date(slot.startsAt).toLocaleDateString([], { day: "2-digit" })}
                 </span>
                 <span>

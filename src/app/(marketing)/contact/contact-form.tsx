@@ -48,7 +48,7 @@ export default function ContactForm() {
       <label htmlFor={messageId} className="mt-5 block text-sm font-medium">Message<textarea id={messageId} name="message" required minLength={10} maxLength={5000} rows={6} className={textareaClass} /></label>
       <label className="absolute -left-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <div className="mt-6 flex flex-wrap items-center gap-4">
-        <button type="submit" disabled={status === "sending"} className="button-primary">{status === "sending" ? "Sending..." : "Send message"}</button>
+        <button type="submit" disabled={status === "sending"} className="button-primary">{status === "sending" ? "Sending…" : "Send message"}</button>
         <p role={status === "error" ? "alert" : "status"} className={`text-sm ${status === "error" ? "text-red-700" : "text-mecg-navy/65"}`}>{message}</p>
       </div>
     </form>

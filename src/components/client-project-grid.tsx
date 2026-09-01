@@ -56,7 +56,7 @@ export default function ClientProjectGrid({
                   sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw"
                 />
               </span>
-              <span className={`absolute inset-x-3 bottom-3 text-xs font-semibold transition-opacity duration-150 ${selected ? "text-mecg-blue opacity-100" : "text-mecg-navy/65 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"}`}>
+              <span className={`absolute inset-x-3 bottom-3 text-xs font-semibold transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy/65"}`}>
                 {project.name} <span aria-hidden="true">→</span>
               </span>
             </button>

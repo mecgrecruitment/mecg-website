@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 type Readiness = {
   ready: boolean;
@@ -53,7 +54,7 @@ export default function ReadinessPanel() {
     return () => { cancelled = true; };
   }, []);
 
-  if (!result && !error) return <p role="status" className="text-sm text-mecg-navy/65">Checking production dependencies...</p>;
+  if (!result && !error) return <p role="status" className="text-sm text-mecg-navy/65">Checking production dependencies…</p>;
   if (error) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-900" role="alert">
@@ -73,7 +74,7 @@ export default function ReadinessPanel() {
     <div className="space-y-5">
       <div className={`rounded-2xl p-5 ${result.ready ? "bg-emerald-50 text-emerald-950" : "bg-red-50 text-red-950"}`} role="status">
         <p className="font-semibold">{result.ready ? "Production dependencies are ready." : "Production dependencies need attention."}</p>
-        <p className="mt-1 text-sm opacity-75">Checked {new Date(result.checkedAt).toLocaleString()}</p>
+        <p className="mt-1 text-sm opacity-75">Checked {formatEasternDateTime(result.checkedAt)}</p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2">
         {checks.map(([label, ok, detail]) => (

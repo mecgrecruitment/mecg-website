@@ -84,7 +84,7 @@ function GroupActionButton({
         onClick={handleClick}
         className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-red-700" : "text-mecg-navy/60 hover:text-mecg-orange-ink"}`}
       >
-        {pending ? "Working..." : children}
+        {pending ? "Working…" : children}
       </button>
       {error && <span role="alert" className="mt-1 text-right text-[11px] text-red-700">{error}</span>}
     </span>
@@ -173,7 +173,7 @@ export default function GroupForms({
                     return (
                       <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
                             {initials(applicant?.name ?? member.application_id)}
                           </span>
                           <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>

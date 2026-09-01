@@ -21,7 +21,7 @@ export default function LogoutButton() {
 
   return (
     <button type="button" onClick={logout} disabled={busy} className="text-sm underline text-gray-600 disabled:opacity-50">
-      {busy ? "Signing out..." : "Sign out"}
+      {busy ? "Signing out…" : "Sign out"}
     </button>
   );
 }

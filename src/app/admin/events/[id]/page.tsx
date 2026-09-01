@@ -12,6 +12,7 @@ import Link from "next/link";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import EventControls from "./event-controls";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
@@ -76,7 +77,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       <WorkspaceHeader
         eyebrow="Attendance event"
         title={event.name}
-        description={new Date(event.starts_at).toLocaleString()}
+        description={formatEasternDateTime(event.starts_at)}
         action={<Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>}
       />
       {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
@@ -91,7 +92,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Operational attendance only</p>
         <p className="mt-3 text-sm text-mecg-navy/60">
-          Check-in window: {new Date(event.checkin_opens_at).toLocaleString()} – {new Date(event.checkin_closes_at).toLocaleString()}
+          Check-in window: {formatEasternDateTime(event.checkin_opens_at)} to {formatEasternDateTime(event.checkin_closes_at)}
         </p>
       </section>
 
@@ -152,7 +153,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <ul className="mt-3 flex flex-col gap-1.5">
           {(slots ?? []).map((slot) => (
             <li key={slot.id} className="text-sm text-mecg-navy/70">
-              {new Date(slot.starts_at).toLocaleString()} · cap {slot.capacity}
+              {formatEasternDateTime(slot.starts_at)} · cap {slot.capacity}
             </li>
           ))}
         </ul>

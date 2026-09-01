@@ -85,12 +85,12 @@ export default function QuestionEditor({
     <section className="rounded-2xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Application questions</p>
-          <p className="mt-1 max-w-2xl text-sm text-mecg-navy/55">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/65">Application questions</p>
+          <p className="mt-1 max-w-2xl text-sm text-mecg-navy/65">
             These are the written prompts on the public application, in order.
           </p>
         </div>
-        <span className="font-mono text-xs tabular-nums text-mecg-navy/45">{questions.length} of 25</span>
+        <span className="font-mono text-xs tabular-nums text-mecg-navy/65">{questions.length} of 25</span>
       </div>
 
       {locked ? (
@@ -104,11 +104,11 @@ export default function QuestionEditor({
             {questions.map((question, index) => (
               <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-[11px] font-semibold tabular-nums text-mecg-navy/45">{index + 1}</span>
+                  <span className="font-mono text-xs font-semibold tabular-nums text-mecg-navy/65">{index + 1}</span>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move question ${index + 1} up`} className="inline-flex size-9 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
-                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === questions.length - 1} aria-label={`Move question ${index + 1} down`} className="inline-flex size-9 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
-                    <button type="button" onClick={() => setQuestions((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove question ${index + 1}`} className="inline-flex min-h-9 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
+                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move question ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
+                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === questions.length - 1} aria-label={`Move question ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
+                    <button type="button" onClick={() => setQuestions((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove question ${index + 1}`} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
                   </div>
                 </div>
 
@@ -171,7 +171,7 @@ export default function QuestionEditor({
               + Add question
             </button>
             <button type="button" disabled={pending || invalid} onClick={() => void save()} className="button-primary">
-              {pending ? "Saving..." : "Save questions"}
+              {pending ? "Saving…" : "Save questions"}
             </button>
             {duplicateKeys.length > 0 && <p className="text-sm text-red-700">Duplicate key: {duplicateKeys[0]}</p>}
           </div>

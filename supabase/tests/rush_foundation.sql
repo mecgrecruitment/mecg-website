@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(207);
+select extensions.plan(213);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -53,6 +53,9 @@ select extensions.ok(position('duplicate assignment proposal' in pg_get_function
 select extensions.ok(position('jsonb_typeof(x->''question'')<>''string''' in pg_get_functiondef('rush.update_screening_packet_content(text,jsonb)'::regprocedure)) > 0 and position('char_length(trim(x->>''question''))=0' in pg_get_functiondef('rush.update_screening_packet_content(text,jsonb)'::regprocedure)) > 0, 'packet responses require non-empty strings');
 select extensions.ok(position('required_count' in pg_get_functiondef('rush.freeze_screening_batch(text)'::regprocedure)) > 0 and position('<>3' in pg_get_functiondef('rush.freeze_screening_batch(text)'::regprocedure)) = 0, 'screening freeze uses batch review count');
 select extensions.ok(position('slot outside event bounds' in pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure)) > 0 and position('between 1 and 80' in pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure)) > 0, 'event slots enforce event bounds and table capacity');
+select extensions.ok(position('for share' in lower(pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure))) > 0, 'event slot creation coordinates with event-bound updates through a row lock');
+select extensions.ok(position('existing slot outside event bounds' in pg_get_functiondef('rush.update_event(text,text,text,text,text,timestamptz,timestamptz,timestamptz,timestamptz)'::regprocedure)) > 0 and position('for update' in lower(pg_get_functiondef('rush.update_event(text,text,text,text,text,timestamptz,timestamptz,timestamptz,timestamptz)'::regprocedure))) > 0, 'event updates lock and validate existing slots');
+select extensions.ok(position('''role'',''service_role''' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0 and position('submit_application_self_test' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0, 'workflow verifier retains the service-role claim for its guarded fixture call');
 select extensions.ok(position('array[''applicantName'',''evidence'']' in pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure)) > 0 and position('b.status=''FROZEN''' in pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure)) > 0, 'frozen screening output redacts committee identity and evidence');
 select extensions.ok(position('CLOSED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ARCHIVED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('ATTENDANCE_EXPORT' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('DECISION_PREVIEW' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0, 'committee capabilities end for closed cycles and exclude transitions, export, and preview');
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) = 0, 'round transitions retain strict board authorization');
@@ -127,6 +130,34 @@ insert into rush.memberships(user_id,cycle_id,role) values
   ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000011','OWNER'),
   ('10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000011','MEMBER'),
   ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000012','MEMBER');
+
+insert into rush.events(id,cycle_id,name,status,starts_at,ends_at,checkin_opens_at,checkin_closes_at,checkin_token_digest)
+values('10000000-0000-4000-8000-000000000081','10000000-0000-4000-8000-000000000011','pgTAP bounded event','PUBLISHED',
+  now() + interval '1 day',now() + interval '1 day 2 hours',now() + interval '23 hours 45 minutes',now() + interval '1 day 2 hours 15 minutes',repeat('8',64));
+insert into rush.event_slots(id,event_id,starts_at,ends_at,capacity)
+values('10000000-0000-4000-8000-000000000082','10000000-0000-4000-8000-000000000081',now() + interval '1 day 1 hour',now() + interval '1 day 1 hour 30 minutes',8);
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.update_event('10000000-0000-4000-8000-000000000081','pgTAP bounded event','GENERAL','Ross','INTERNAL',
+    (select starts_at from rush.events where id='10000000-0000-4000-8000-000000000081'),
+    (select starts_at + interval '1 hour 15 minutes' from rush.events where id='10000000-0000-4000-8000-000000000081'),
+    (select checkin_opens_at from rush.events where id='10000000-0000-4000-8000-000000000081'),
+    (select starts_at + interval '1 hour 20 minutes' from rush.events where id='10000000-0000-4000-8000-000000000081'))$$,
+  '22023','existing slot outside event bounds','an event cannot be narrowed around an existing slot');
+set local role postgres;
+
+set local "request.jwt.claim.role" = 'service_role';
+set local "request.jwt.claims" = '{"role":"service_role"}';
+set local role service_role;
+select extensions.throws_ok(
+  $$select rush.verify_full_workflow('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000003')$$,
+  'P0001','WORKFLOW_SELF_TEST_PASSED','the full workflow runs while a real non-terminal cycle exists');
+set local role postgres;
+select extensions.is(
+  (select status::text from rush.rush_cycles where id='10000000-0000-4000-8000-000000000011'),
+  'OPEN','the workflow sentinel rollback preserves the real active cycle');
 
 create temporary table rush_foundation_results(key text primary key,value bigint);
 grant insert,select on rush_foundation_results to authenticated, service_role;

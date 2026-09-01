@@ -102,11 +102,11 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
             {criteria.map((item, index) => (
               <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-[11px] font-semibold tabular-nums text-mecg-navy/45">{index + 1}</span>
+                  <span className="font-mono text-xs font-semibold tabular-nums text-mecg-navy/65">{index + 1}</span>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move criterion ${index + 1} up`} className="inline-flex size-9 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
-                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === criteria.length - 1} aria-label={`Move criterion ${index + 1} down`} className="inline-flex size-9 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
-                    <button type="button" onClick={() => setCriteria((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove criterion ${index + 1}`} className="inline-flex min-h-9 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
+                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move criterion ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
+                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === criteria.length - 1} aria-label={`Move criterion ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
+                    <button type="button" onClick={() => setCriteria((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove criterion ${index + 1}`} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
                   </div>
                 </div>
 
@@ -182,7 +182,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
               + Add criterion
             </button>
             <button type="button" disabled={pending || invalid} onClick={() => void save()} className="button-primary">
-              {pending ? "Saving..." : "Save rubric"}
+              {pending ? "Saving…" : "Save rubric"}
             </button>
             {duplicates.length > 0 && <p className="text-sm text-red-700">Duplicate key: {duplicates[0]}</p>}
           </div>

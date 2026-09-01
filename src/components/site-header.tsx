@@ -28,12 +28,12 @@ export default function SiteHeader() {
               key={href}
               href={href}
               aria-current={pathname === href ? "page" : undefined}
-              className={`border-b py-1 transition-colors ${pathname === href ? "border-mecg-orange text-white" : "border-transparent text-white/60 hover:text-white"}`}
+              className={`inline-flex min-h-10 items-center border-b transition-colors ${pathname === href ? "border-mecg-orange text-white" : "border-transparent text-white/60 hover:text-white"}`}
             >
               {label}
             </Link>
           ))}
-          <Link href="/login" className="border-b border-transparent py-1 text-white/60 transition-colors hover:text-white">Member log in</Link>
+          <Link href="/login" className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-colors hover:text-white">Member log in</Link>
           <Link href="/apply" className="button-primary">Apply now</Link>
         </nav>
         <button

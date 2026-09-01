@@ -47,7 +47,7 @@ export default function ResetPasswordForm() {
       <form onSubmit={submit} className="space-y-4">
         <FormField label="New password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} />
         <OperationNotice kind="error">{error}</OperationNotice>
-        <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Updating..." : "Update password"}</button>
+        <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Updating…" : "Update password"}</button>
       </form>
     </PortalShell>
   );

@@ -11,6 +11,7 @@ import StatusPill from "@/components/status-pill";
 import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, OfferDeadlineForm, PreviewForm, ReleaseButton } from "../../decision-form";
 import DossierTabs from "./tabs";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
 
@@ -226,7 +227,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               <p className="mt-1 font-semibold text-mecg-navy">{humanize(application.offer_response)}</p>
               {application.offer_responded_at && (
                 <time dateTime={application.offer_responded_at} className="mt-1 block text-xs text-mecg-navy/65">
-                  Recorded {new Date(application.offer_responded_at).toLocaleString()}
+                  Recorded {formatEasternDateTime(application.offer_responded_at)}
                 </time>
               )}
             </div>
@@ -435,19 +436,19 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                         <div key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                           <div className="min-w-0">
                             <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
-                            <p className="mt-0.5 text-[11.5px] text-mecg-navy/50">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
+                            <p className="mt-0.5 text-xs text-mecg-navy/65">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
                               {message.delivered ? "Delivered" : "Failed"}
                             </span>
-                            <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
-                              {new Date(message.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" })}
+                            <time dateTime={message.created_at} className="font-mono text-xs tabular-nums text-mecg-navy/65">
+                              {formatEasternDateTime(message.created_at)}
                             </time>
                           </div>
                         </div>
                       ))}
-                      {!messages.length && <p className="text-sm text-mecg-navy/45">Nothing has been sent to this applicant yet.</p>}
+                      {!messages.length && <p className="text-sm text-mecg-navy/65">Nothing has been sent to this applicant yet.</p>}
                     </div>
                   </div>
                   {auditEvents.map((event) => (
@@ -456,7 +457,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                         <p className="font-medium text-mecg-navy">{humanize(event.action)}</p>
                         <p className="text-xs text-mecg-navy/60">{event.actor_id ? (actorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
                       </div>
-                      <time className="shrink-0 font-mono text-[11px] text-mecg-navy/60">{new Date(event.created_at).toLocaleString()}</time>
+                      <time className="shrink-0 font-mono text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
                     </div>
                   ))}
                 </div>

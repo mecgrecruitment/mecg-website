@@ -42,7 +42,7 @@ export default function ForgotPasswordForm() {
         <FormField label="Email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <OperationNotice kind="info">{message}</OperationNotice>
         <OperationNotice kind="error">{error}</OperationNotice>
-        <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Sending..." : "Send reset email"}</button>
+        <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Sending…" : "Send reset email"}</button>
       </form>
     </PortalShell>
   );

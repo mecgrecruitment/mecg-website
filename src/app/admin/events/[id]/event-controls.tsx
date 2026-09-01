@@ -5,16 +5,11 @@ import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
 import { EVENT_KINDS } from "@/lib/workflow";
+import { eventDateTimeToIso, formatEventDateTime } from "./event-datetime";
 
 type EventData = {
   id: string; name: string; kind: string; location: string | null; visibility: string;
   startsAt: string; endsAt: string; checkinOpensAt: string; checkinClosesAt: string; status: string;
-};
-
-const localValue = (value: string) => {
-  const date = new Date(value);
-  const offset = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 };
 
 export default function EventControls({ event }: { event: EventData }) {
@@ -32,8 +27,10 @@ export default function EventControls({ event }: { event: EventData }) {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.get("name"), kind: data.get("kind"), location: data.get("location"), visibility: data.get("visibility"),
-          startsAt: new Date(String(data.get("startsAt"))).toISOString(), endsAt: new Date(String(data.get("endsAt"))).toISOString(),
-          checkinOpensAt: new Date(String(data.get("checkinOpensAt"))).toISOString(), checkinClosesAt: new Date(String(data.get("checkinClosesAt"))).toISOString(),
+          startsAt: eventDateTimeToIso(String(data.get("startsAt")), event.startsAt),
+          endsAt: eventDateTimeToIso(String(data.get("endsAt")), event.endsAt),
+          checkinOpensAt: eventDateTimeToIso(String(data.get("checkinOpensAt")), event.checkinOpensAt),
+          checkinClosesAt: eventDateTimeToIso(String(data.get("checkinClosesAt")), event.checkinClosesAt),
         }),
       });
       if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Could not update event"); return; }
@@ -60,11 +57,11 @@ export default function EventControls({ event }: { event: EventData }) {
         <label className="block text-sm font-medium">Kind<select name="kind" defaultValue={event.kind} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4">{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <FormField label="Location" name="location" defaultValue={event.location ?? ""} />
         <label className="block text-sm font-medium">Visibility<select name="visibility" defaultValue={event.visibility} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4"><option value="PUBLIC">Public</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal</option></select></label>
-        <FormField label="Starts" name="startsAt" type="datetime-local" required defaultValue={localValue(event.startsAt)} />
-        <FormField label="Ends" name="endsAt" type="datetime-local" required defaultValue={localValue(event.endsAt)} />
-        <FormField label="Check-in opens" name="checkinOpensAt" type="datetime-local" required defaultValue={localValue(event.checkinOpensAt)} />
-        <FormField label="Check-in closes" name="checkinClosesAt" type="datetime-local" required defaultValue={localValue(event.checkinClosesAt)} />
-        <button disabled={pending} className="button-primary sm:col-span-2">{pending ? "Saving…" : "Save event"}</button>
+        <FormField label="Starts" name="startsAt" type="datetime-local" required defaultValue={formatEventDateTime(event.startsAt)} />
+        <FormField label="Ends" name="endsAt" type="datetime-local" required defaultValue={formatEventDateTime(event.endsAt)} />
+        <FormField label="Check-in opens" name="checkinOpensAt" type="datetime-local" required defaultValue={formatEventDateTime(event.checkinOpensAt)} />
+        <FormField label="Check-in closes" name="checkinClosesAt" type="datetime-local" required defaultValue={formatEventDateTime(event.checkinClosesAt)} />
+        <button type="submit" disabled={pending} className="button-primary sm:col-span-2">{pending ? "Saving…" : "Save event"}</button>
       </form>}
       {!locked && <div className="mt-6 border-t border-mecg-navy/10 pt-4">
         <FormField label="Cancellation reason" name="cancellationReason" value={reason} onChange={(change) => setReason(change.target.value)} />

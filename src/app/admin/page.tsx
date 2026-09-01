@@ -13,33 +13,24 @@ import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
+import { easternDateBadge, formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Board dashboard" };
 
 function eventBadge(startsAt: string) {
-  const date = new Date(startsAt);
-  return {
-    month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
-    day: date.toLocaleDateString("en-US", { day: "2-digit" }),
-  };
+  return easternDateBadge(startsAt);
 }
 
 function eventDate(startsAt: string) {
-  return new Date(startsAt).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatEasternDateTime(startsAt);
 }
 
 function submittedDate(submittedAt: string) {
   return new Date(submittedAt).toLocaleDateString("en-US", {
+    timeZone: "America/Detroit",
     month: "short",
     day: "numeric",
     year: "numeric",
-    timeZone: "America/Detroit",
   });
 }
 
@@ -257,7 +248,7 @@ export default async function AdminDashboard() {
                       <p className="font-medium text-mecg-navy">{event.action.replaceAll("_", " ")}</p>
                       <p className="text-xs text-mecg-navy/60">{event.actor_id ? (auditActorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
                     </div>
-                    <time className="shrink-0 font-mono text-[11px] text-mecg-navy/60">{new Date(event.created_at).toLocaleString()}</time>
+                    <time className="shrink-0 font-mono text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
                   </div>
                 )) : <p className="text-sm text-mecg-navy/55">No recent activity.</p>}
               </div>

@@ -176,7 +176,7 @@ export default function EvaluationForm({
       <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
       <OperationNotice kind="error">{error}</OperationNotice>
       {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Evaluation submitted and locked.</p>}
-      <button disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
+      <button type="submit" disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
         {saved ? "✓ Submitted" : pending ? "Submitting…" : "Submit and lock evaluation"}
       </button>
     </form>

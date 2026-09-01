@@ -96,7 +96,7 @@ function useRushAction(cycleId: string) {
 }
 
 function ErrorNotice({ error }: { error: string }) {
-  return error ? <p className="text-sm text-red-700">{error}</p> : null;
+  return error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null;
 }
 
 const CARD = "rounded-2xl p-[18px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]";
@@ -297,11 +297,11 @@ export function RoundControls({
                     name="status"
                     aria-label={`Status for ${round.label}`}
                     defaultValue={round.status}
-                    className="h-[30px] rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
+                    className="min-h-10 rounded-full px-3 font-mono text-xs font-semibold uppercase tracking-[0.04em] text-mecg-navy/65 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
                   >
                     {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status}>{status}</option>)}
                   </select>
-                  <button type="submit" disabled={pending} className="rounded-full px-3 py-1 text-[11px] font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]">Save</button>
+                  <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]">Save</button>
                 </div>
               </form>
             ))}
@@ -323,7 +323,7 @@ export function RoundControls({
               <select name="evaluatorId" defaultValue={assignment.evaluatorId} aria-label={`Evaluator for ${assignment.applicationName}`} className="min-h-10 rounded-full bg-white px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">
                 {memberAccounts.filter((member) => member.active !== false).map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
               </select>
-              <button disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">Reassign</button>
+              <button type="submit" disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">Reassign</button>
               <button type="button" disabled={pending} onClick={() => { if (window.confirm(`Remove the assignment for ${assignment.applicationName}?`)) void act({ action: "UNASSIGN", assignmentId: assignment.id }); }} className="min-h-10 rounded-full px-3 text-xs font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.25)]">Unassign</button>
             </form>
           ))}

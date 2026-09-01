@@ -3,6 +3,7 @@ import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import CheckinForm from "./checkin-form";
 import PortalShell from "@/components/portal-shell";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Check in" };
 
@@ -27,7 +28,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
     );
   }
   return (
-    <PortalShell eyebrow="Event check-in" title={event.name} description={new Date(event.starts_at).toLocaleString()} centered>
+    <PortalShell eyebrow="Event check-in" title={event.name} description={formatEasternDateTime(event.starts_at)} centered>
       {event.is_open ? (
         <>
           {user && <p className="mb-4 text-sm text-mecg-navy/65">Checking in as <span className="font-semibold text-mecg-navy">{user.email}</span>.</p>}

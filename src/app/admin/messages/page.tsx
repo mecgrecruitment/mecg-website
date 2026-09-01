@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import ComposeForm from "./compose-form";
+import { formatEasternDateTime } from "@/lib/date-time";
 
 export const metadata: Metadata = { title: "Messages" };
 
@@ -74,7 +75,7 @@ export default async function MessagesPage() {
                   {message.delivered ? "Delivered" : "Failed"}
                 </span>
                 <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
-                  {new Date(message.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" })}
+                  {formatEasternDateTime(message.created_at)}
                 </time>
               </div>
             </article>

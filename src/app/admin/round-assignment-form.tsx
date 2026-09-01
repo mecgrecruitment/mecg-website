@@ -70,7 +70,7 @@ export default function RoundAssignmentForm({
           </select>
         </label>
         <button type="submit" disabled={pending || !applicants.length || !evaluators.length} className="button-primary min-h-11 w-full sm:col-span-2 lg:col-span-1 lg:w-auto disabled:opacity-50">
-          {pending ? "Assigning..." : "Add assignment"}
+          {pending ? "Assigning…" : "Add assignment"}
         </button>
       </div>
       <p className="mt-3 text-pretty text-xs leading-5 text-mecg-navy/60">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>

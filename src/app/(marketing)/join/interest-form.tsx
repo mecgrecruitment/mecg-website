@@ -97,14 +97,14 @@ export default function InterestForm() {
         How did you hear about MECG? <span className="font-normal text-white/45">optional</span>
         <input
           name="howHeard"
-          placeholder="A friend, an event, Instagram..."
+          placeholder="A friend, an event, Instagram…"
           disabled={pending}
           className={FIELD_CLASS}
         />
       </label>
       <div className="mt-1 flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center">
         <button type="submit" disabled={pending} className="button-primary disabled:cursor-wait disabled:opacity-60">
-          {pending ? "Saving..." : "Join the interest list"}
+          {pending ? "Saving…" : "Join the interest list"}
         </button>
         <p className="text-xs leading-5 text-white/45">Updates only. Joining this list is not an application.</p>
       </div>
