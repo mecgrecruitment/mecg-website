@@ -25,6 +25,11 @@ language plpgsql
 security definer
 set search_path = ''
 as $$
+-- The parameters are deliberately named after the columns they set, which makes
+-- the RPC contract read well from TypeScript but makes every reference on the
+-- right-hand side of the UPDATE ambiguous. Same directive submit_application
+-- already uses: an ambiguous name resolves to the parameter.
+#variable_conflict use_variable
 declare
   actor uuid := auth.uid();
   clean_name text := trim(coalesce(display_name, ''));

@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   rush: {
     Tables: {
       application_documents: {
@@ -189,8 +184,8 @@ export type Database = {
           cycle_id: string
           draft_payload: Json | null
           id: string
-          offer_responded_at: string | null
           offer_expires_at: string | null
+          offer_responded_at: string | null
           offer_response: string | null
           pnm_id: string
           process_survey_submitted_at: string | null
@@ -204,8 +199,8 @@ export type Database = {
           cycle_id: string
           draft_payload?: Json | null
           id?: string
-          offer_responded_at?: string | null
           offer_expires_at?: string | null
+          offer_responded_at?: string | null
           offer_response?: string | null
           pnm_id: string
           process_survey_submitted_at?: string | null
@@ -219,6 +214,7 @@ export type Database = {
           cycle_id?: string
           draft_payload?: Json | null
           id?: string
+          offer_expires_at?: string | null
           offer_responded_at?: string | null
           offer_response?: string | null
           pnm_id?: string
@@ -1036,6 +1032,54 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          cycle_id: string | null
+          delivered: boolean
+          id: string
+          kind: string
+          recipient: string
+          subject: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          delivered?: boolean
+          id?: string
+          kind: string
+          recipient: string
+          subject: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          delivered?: boolean
+          id?: string
+          kind?: string
+          recipient?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mutation_receipts: {
         Row: {
           actor_id: string
@@ -1149,44 +1193,67 @@ export type Database = {
           },
         ]
       }
-      messages: {
+      profiles: {
         Row: {
-          application_id: string | null
+          active: boolean
+          bio: string | null
           created_at: string
-          cycle_id: string | null
-          delivered: boolean
+          display_name: string
+          grad_term: string | null
           id: string
-          kind: string
-          recipient: string
-          subject: string
+          major: string | null
+          position_title: string | null
+          updated_at: string
         }
         Insert: {
-          application_id?: string | null
+          active?: boolean
+          bio?: string | null
           created_at?: string
-          cycle_id?: string | null
-          delivered?: boolean
-          id?: string
-          kind: string
-          recipient: string
-          subject: string
+          display_name: string
+          grad_term?: string | null
+          id: string
+          major?: string | null
+          position_title?: string | null
+          updated_at?: string
         }
         Update: {
-          application_id?: string | null
+          active?: boolean
+          bio?: string | null
           created_at?: string
-          cycle_id?: string | null
-          delivered?: boolean
+          display_name?: string
+          grad_term?: string | null
           id?: string
-          kind?: string
-          recipient?: string
-          subject?: string
+          major?: string | null
+          position_title?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       project_members: {
-        Row: { project_id: string; role_label: string; user_id: string }
-        Insert: { project_id: string; role_label?: string; user_id: string }
-        Update: { project_id?: string; role_label?: string; user_id?: string }
-        Relationships: []
+        Row: {
+          project_id: string
+          role_label: string
+          user_id: string
+        }
+        Insert: {
+          project_id: string
+          role_label?: string
+          user_id: string
+        }
+        Update: {
+          project_id?: string
+          role_label?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -1248,42 +1315,6 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
-        Row: {
-          active: boolean
-          bio: string | null
-          created_at: string
-          display_name: string
-          grad_term: string | null
-          id: string
-          major: string | null
-          position_title: string | null
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          bio?: string | null
-          created_at?: string
-          display_name: string
-          grad_term?: string | null
-          id: string
-          major?: string | null
-          position_title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          bio?: string | null
-          created_at?: string
-          display_name?: string
-          grad_term?: string | null
-          id?: string
-          major?: string | null
-          position_title?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       rate_limits: {
         Row: {
           bucket: string
@@ -1299,6 +1330,30 @@ export type Database = {
           bucket?: string
           count?: number
           window_start?: string
+        }
+        Relationships: []
+      }
+      reminders_sent: {
+        Row: {
+          id: string
+          kind: string
+          recipient_id: string
+          sent_at: string
+          subject_id: string
+        }
+        Insert: {
+          id?: string
+          kind: string
+          recipient_id: string
+          sent_at?: string
+          subject_id: string
+        }
+        Update: {
+          id?: string
+          kind?: string
+          recipient_id?: string
+          sent_at?: string
+          subject_id?: string
         }
         Relationships: []
       }
@@ -1847,6 +1902,7 @@ export type Database = {
         }
         Returns: string
       }
+      anonymize_archived_applicants: { Args: never; Returns: number }
       applicant_dashboard: {
         Args: never
         Returns: {
@@ -1862,7 +1918,15 @@ export type Database = {
           survey_submitted: boolean
         }[]
       }
+      applicant_prior_cycles: {
+        Args: { target_application_id: string }
+        Returns: Json
+      }
       applicant_schedule: { Args: never; Returns: Json }
+      application_cycle_id: {
+        Args: { target_application_id: string }
+        Returns: string
+      }
       application_portal_allows: { Args: { actor: string }; Returns: boolean }
       approve_decision: {
         Args: { target_decision_id: string }
@@ -1888,6 +1952,7 @@ export type Database = {
         }
         Returns: string
       }
+      attach_ready_resume: { Args: never; Returns: string }
       authorize_resume_access: {
         Args: { target_application_id: string }
         Returns: string
@@ -1898,19 +1963,13 @@ export type Database = {
       }
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
-      attach_ready_resume: { Args: never; Returns: string }
-      applicant_prior_cycles: { Args: { target_application_id: string }; Returns: Json }
-      anonymize_archived_applicants: { Args: never; Returns: number }
       can_start_application: { Args: never; Returns: boolean }
-      clone_cycle: {
-        Args: { source_cycle_id: string; cycle_name: string }
-        Returns: string
-      }
-      cycle_directory: { Args: { target_cycle_id: string }; Returns: Json }
-      cycle_application_questions: { Args: { target_cycle_id: string }; Returns: Json }
-      cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
+      clone_cycle: {
+        Args: { cycle_name: string; source_cycle_id: string }
+        Returns: string
+      }
       commit_screening_assignments: {
         Args: {
           commitment: string
@@ -1974,6 +2033,12 @@ export type Database = {
         Args: { reviewer_ids: string[]; target_cycle_id: string }
         Returns: string
       }
+      cycle_application_questions: {
+        Args: { target_cycle_id: string }
+        Returns: Json
+      }
+      cycle_directory: { Args: { target_cycle_id: string }; Returns: Json }
+      cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
       declare_conflict: {
         Args: { conflict_reason: string; target_application_id: string }
         Returns: undefined
@@ -2054,6 +2119,24 @@ export type Database = {
         Args: { target_cycle_id: string; target_user_id: string }
         Returns: boolean
       }
+      log_message: {
+        Args: {
+          message_kind: string
+          message_recipient: string
+          message_subject: string
+          target_application_id: string
+          was_delivered: boolean
+        }
+        Returns: string
+      }
+      mark_reminder_sent: {
+        Args: {
+          recipient_id: string
+          reminder_kind: string
+          subject_id: string
+        }
+        Returns: boolean
+      }
       member_applicants: {
         Args: { target_cycle_id: string }
         Returns: {
@@ -2070,6 +2153,8 @@ export type Database = {
           starts_at: string
         }[]
       }
+      my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
+      my_offer_deadlines: { Args: never; Returns: Json }
       my_ready_resume: { Args: { target_path?: string }; Returns: Json }
       my_screening_queue: {
         Args: { target_cycle_id: string }
@@ -2083,11 +2168,13 @@ export type Database = {
         Args: { target_application_id: string }
         Returns: boolean
       }
+      pending_reminders: { Args: never; Returns: Json }
       pending_resume_upload: {
         Args: { target_document_id: string }
         Returns: Json
       }
       prune_rate_limits: { Args: never; Returns: undefined }
+      public_projects: { Args: never; Returns: Json }
       public_recruitment: { Args: never; Returns: Json }
       recuse_screening_assignment: {
         Args: { recusal_reason: string; target_assignment_id: string }
@@ -2101,6 +2188,10 @@ export type Database = {
         Args: { target_decision_id: string }
         Returns: undefined
       }
+      release_ready_decisions: {
+        Args: { target_cycle_id: string }
+        Returns: Json
+      }
       respond_to_offer: {
         Args: { accept: boolean; target_application_id: string }
         Returns: undefined
@@ -2111,6 +2202,7 @@ export type Database = {
         Returns: boolean
       }
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
+      round_cycle_id: { Args: { target_round_id: string }; Returns: string }
       rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
       save_application_draft: { Args: { payload: Json }; Returns: string }
       screening_admin_overview: {
@@ -2138,59 +2230,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_application_questions: {
+        Args: { questions: Json; target_cycle_id: string }
+        Returns: number
+      }
       set_application_status: {
         Args: {
           next_status: Database["rush"]["Enums"]["application_status"]
           target_application_id: string
         }
         Returns: undefined
-      }
-      log_message: {
-        Args: {
-          target_application_id: string
-          message_kind: string
-          message_recipient: string
-          message_subject: string
-          was_delivered: boolean
-        }
-        Returns: string
-      }
-      my_offer_deadlines: { Args: never; Returns: Json }
-      mark_reminder_sent: {
-        Args: { reminder_kind: string; subject_id: string; recipient_id: string }
-        Returns: boolean
-      }
-      my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
-      pending_reminders: { Args: never; Returns: Json }
-      public_projects: { Args: never; Returns: Json }
-      release_ready_decisions: { Args: { target_cycle_id: string }; Returns: Json }
-      set_application_questions: {
-        Args: { target_cycle_id: string; questions: Json }
-        Returns: number
-      }
-      update_my_profile: {
-        Args: {
-          display_name: string
-          grad_term: string
-          major: string
-          position_title: string
-          bio: string
-        }
-        Returns: boolean
-      }
-      upsert_project: { Args: { project: Json }; Returns: string }
-      withdraw_application: { Args: { target_application_id: string }; Returns: boolean }
-      set_offer_deadline: {
-        Args: { target_application_id: string; expires_at: string }
-        Returns: boolean
-      }
-      set_project_staffing: {
-        Args: { target_project_id: string; members: Json }
-        Returns: number
-      }
-      set_rubric_criteria: {
-        Args: { target_round_id: string; criteria: Json }
-        Returns: string
       }
       set_cycle_status: {
         Args: {
@@ -2215,12 +2264,24 @@ export type Database = {
         }
         Returns: string
       }
+      set_offer_deadline: {
+        Args: { expires_at: string; target_application_id: string }
+        Returns: boolean
+      }
+      set_project_staffing: {
+        Args: { members: Json; target_project_id: string }
+        Returns: number
+      }
       set_round_status: {
         Args: {
           next_status: Database["rush"]["Enums"]["round_status"]
           target_round_id: string
         }
         Returns: undefined
+      }
+      set_rubric_criteria: {
+        Args: { criteria: Json; target_round_id: string }
+        Returns: string
       }
       stale_pending_resume_uploads: {
         Args: { older_than?: string }
@@ -2304,13 +2365,28 @@ export type Database = {
         Args: { target_application_id: string; target_group_id: string }
         Returns: undefined
       }
+      update_my_profile: {
+        Args: {
+          bio: string
+          display_name: string
+          grad_term: string
+          major: string
+          position_title: string
+        }
+        Returns: boolean
+      }
       update_screening_packet_content: {
         Args: { revised_content: Json; target_packet_id: string }
         Returns: undefined
       }
+      upsert_project: { Args: { project: Json }; Returns: string }
       verify_full_workflow: {
         Args: { applicant_id: string; owner_id: string; panel_id: string }
         Returns: undefined
+      }
+      withdraw_application: {
+        Args: { target_application_id: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -2551,3 +2627,4 @@ export const Constants = {
     },
   },
 } as const
+

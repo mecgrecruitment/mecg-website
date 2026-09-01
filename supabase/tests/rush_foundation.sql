@@ -367,7 +367,7 @@ select extensions.is(
   'rubric versions restart at 1 in the new cycle');
 select extensions.is(
   (select count(*) from rush.application_questions q join rush.rush_cycles c on c.id=q.cycle_id where c.name='pgTAP cloned cycle'),
-  1::bigint,
+  (select count(*) from rush.application_questions q where q.cycle_id='10000000-0000-4000-8000-000000000011'),
   'the edited application questions come across');
 select extensions.is(
   (select count(*) from rush.applications a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP cloned cycle'),
@@ -500,8 +500,8 @@ select extensions.ok(position('reminders_sent' in pg_get_functiondef('rush.pendi
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
-select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','service role required','an authenticated caller cannot record a reminder');
-select extensions.is(rush.pending_reminders(),'[]'::jsonb,'pending_reminders returns nothing to a non-scheduler caller');
+select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function mark_reminder_sent','an authenticated caller cannot record a reminder');
+select extensions.throws_ok($$select rush.pending_reminders()$$,'42501','permission denied for function pending_reminders','an authenticated caller cannot read pending reminders');
 set local role postgres;
 
 
@@ -526,7 +526,7 @@ select extensions.ok(exists(select 1 from cron.job where jobname = 'anonymize-ar
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
-select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','service role required','an authenticated caller cannot run retention');
+select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','permission denied for function anonymize_archived_applicants','an authenticated caller cannot run retention');
 
 -- Prior-cycle history is board-only. ...0004 is an applicant, not staff.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';

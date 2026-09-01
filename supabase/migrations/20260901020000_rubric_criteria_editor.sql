@@ -62,7 +62,9 @@ begin
     end if;
   end loop;
 
-  if (select count(distinct entry->>'key') from jsonb_array_elements(criteria) entry)
+  -- Alias must not be "entry": that is the loop variable above, and plpgsql
+  -- resolves the ambiguity by refusing at runtime, not at create time.
+  if (select count(distinct elem->>'key') from jsonb_array_elements(criteria) elem)
      <> jsonb_array_length(criteria) then
     raise exception 'duplicate criterion key' using errcode = '23505';
   end if;

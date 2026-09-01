@@ -47,8 +47,12 @@ grant execute on function rush.set_offer_deadline(text, timestamptz) to authenti
 -- Reproduced from 20260830100000 with one added condition: an expired offer can
 -- no longer be answered. Everything else, including the row lock and the
 -- single-response guard, is unchanged.
+-- returns void, matching 20260830100000. create or replace cannot change a
+-- return type, and dropping a SECURITY DEFINER function to widen it would
+-- briefly remove the grants that protect it for no benefit: no caller reads
+-- the result.
 create or replace function rush.respond_to_offer(target_application_id text, accept boolean)
-returns boolean
+returns void
 language plpgsql
 security definer
 set search_path = ''
@@ -70,7 +74,6 @@ begin
   update rush.applications a set offer_response=case when accept then 'ACCEPTED' else 'DECLINED' end,offer_responded_at=now() where a.id=app_row.id;
   insert into rush.audit_events (actor_id,cycle_id,action,resource,resource_id,metadata)
   values (actor,app_row.cycle_id,'OFFER_RESPONSE','Application',app_row.id,jsonb_build_object('response',case when accept then 'ACCEPTED' else 'DECLINED' end));
-  return true;
 end;
 $$;
 
