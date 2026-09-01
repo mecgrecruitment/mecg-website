@@ -380,15 +380,19 @@ The deviation: **routes stayed at `/admin/*` and `/member/*` rather than moving 
 
 **Phase 4. Comms engine.** Templates, automatic triggers, bulk send to a filtered segment, batch decision release. Still the largest new subsystem here, and still the one that only pays off if sending actually moves off personal inboxes.
 
-**Phase 5. Question editor. Done. Cycle clone and rubric editor not started.** `rush.set_application_questions` and `rush.cycle_application_questions` (migration `20260901010000_application_question_editor.sql`), with an editor on `/admin/settings`. Prompts are now editable without a deploy, and freeze once a cohort has submitted.
+**Phase 5. Editors done. Cycle clone not started.** `rush.set_application_questions` / `cycle_application_questions` (migration `...010000`) with an editor on `/admin/settings`, and `rush.set_rubric_criteria` / `cycle_rubrics` (migration `...020000`) with a per-round editor on `/admin/rounds`. Prompts, criteria, weights and required flags are all editable without a deploy.
 
-Cycle clone turned out to be worth less than the plan assumed: `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`. A new cycle is not empty. Clone would only carry forward *edited* questions, rubric tweaks, and the member roster, which is worth doing but is no longer the thing standing between the board and next semester. The question editor was.
+The rubric editor is versioned rather than destructive: `criterion_ratings.criterion_id` references `rubric_criteria` with no cascade, so editing a scored rubric would either fail on the foreign key or silently rewrite what a past score meant. When the current rubric has any evaluation against it the RPC publishes version + 1; otherwise it edits in place. Editing is refused once a round leaves DRAFT or PUBLISHED.
 
-The rubric editor is still missing: criteria weights and wording remain migration-only.
+Cycle clone turned out to be worth less than the plan assumed: `rush.create_cycle` already seeds both rounds, both rubrics with full criteria, and a default question set via `rush.seed_cycle_questions`. A new cycle is not empty. Clone would only carry forward *edited* content and the roster, which is worth doing but was never the thing standing between the board and next semester. The missing editors were.
 
 **Phase 6. Member year-round.** Task inbox, extended `profiles` columns, directory, personal record, then projects and staffing.
 
-**Phase 7. Applicant polish.** Timeline, document center, messages, offer expiry and countdown, withdraw.
+**Phase 7. Applicant polish. Withdraw done, rest not started.** `rush.withdraw_application` (migration `...030000`) plus a two-step button on the portal.
+
+WITHDRAWN was an unreachable status: it is in the enum, four guards check for it, and the portal already renders an "Application withdrawn" branch, but `set_application_status` refuses the outcome statuses and no applicant-facing RPC existed. Every one of those guards was dead code. Withdrawal stays off `set_application_status` on purpose, since staff withdrawing someone on their behalf is the ambiguity that refusal was protecting against.
+
+Still open here: timeline with dates, document center, messages, offer expiry and countdown.
 
 ---
 
@@ -412,5 +416,5 @@ Open, and none of it blocking:
 
 Everything above was checked with `tsc`, `eslint`, `npm test` (42 passing) and `next build`. Two things were not, because this machine has neither the Supabase CLI nor Docker:
 
-- Migrations `20260901000000_allow_reapplication.sql` and `20260901010000_application_question_editor.sql` have never run.
-- The pgTAP file went from 99 assertions to 113 and none of the 14 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging.
+- Four migrations have never run: `20260901000000_allow_reapplication`, `20260901010000_application_question_editor`, `20260901020000_rubric_criteria_editor`, `20260901030000_applicant_withdraw`.
+- The pgTAP file went from 99 assertions to 130 and none of the 31 new ones have executed. Run `npm run test:supabase` and `npm run verify:auth` against a real project before merging. This is the single largest piece of unverified work on the branch.
