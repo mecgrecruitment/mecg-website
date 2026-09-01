@@ -40,7 +40,14 @@ export async function destinationForUser(
   if (profileResult.error) throw profileResult.error;
   if (membershipResult.error) throw membershipResult.error;
   if (applicantResult.error) throw applicantResult.error;
-  if (canStartResult.error) throw canStartResult.error;
+  // Deliberately not fatal. This function is on the sign-in, sign-up and
+  // auth-callback paths, so throwing here takes down authentication for
+  // everyone. can_start_application is an additive capability check, and false
+  // reproduces exactly the routing that existed before it, so a database that
+  // has not had the migration applied yet degrades to the old behaviour instead
+  // of locking every user out. Logged, because silently answering false would
+  // hide a real outage.
+  if (canStartResult.error) console.error("can_start_application failed, treating as false", canStartResult.error);
 
   return resolveAuthDestination({
     active: profileResult.data?.active === true,
