@@ -5,13 +5,13 @@ export const alt = "MECG client case study";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export function generateImageMetadata() {
-  return getPublicProjectSlugs().map((slug) => ({ id: slug }));
+export async function generateImageMetadata() {
+  return (await getPublicProjectSlugs()).map((slug) => ({ id: slug }));
 }
 
 export default async function ProjectOpenGraphImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = getPublicProject(slug);
+  const project = await getPublicProject(slug);
 
   return new ImageResponse(
     <div style={{ alignItems: "center", background: "#070d1f", color: "white", display: "flex", height: "100%", padding: "80px", width: "100%" }}>

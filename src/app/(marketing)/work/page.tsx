@@ -28,8 +28,8 @@ const BREADCRUMB_JSON_LD = {
   ],
 };
 
-export default function WorkPage() {
-  const publicProjects = listPublicProjectCards();
+export default async function WorkPage() {
+  const publicProjects = await listPublicProjectCards();
 
   return (
     <main id="main-content" className="bg-white text-mecg-navy">

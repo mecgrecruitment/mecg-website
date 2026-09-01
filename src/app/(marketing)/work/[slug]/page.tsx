@@ -13,13 +13,13 @@ type ProjectPageProps = {
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return getPublicProjectSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getPublicProjectSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = getPublicProject(slug);
+  const project = await getPublicProject(slug);
 
   // dynamicParams = false + generateStaticParams above means an unknown slug
   // 404s before this ever runs, but this branch stays defensive rather than
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = getPublicProject(slug);
+  const project = await getPublicProject(slug);
 
   if (!project) notFound();
 

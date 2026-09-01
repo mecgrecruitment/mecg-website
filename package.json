@@ -16,7 +16,8 @@
     "supabase:sync-env": "node scripts/sync-supabase-public-key.mjs",
     "supabase:verify-project": "node scripts/verify-supabase-project.mjs",
     "supabase:types": "supabase gen types typescript --linked --schema rush > src/lib/supabase/database.types.ts",
-    "supabase:lint": "supabase db lint --linked --schema rush --level error --fail-on error"
+    "supabase:lint": "supabase db lint --linked --schema rush --level error --fail-on error",
+    "check:sql": "python3 scripts/check-sql.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

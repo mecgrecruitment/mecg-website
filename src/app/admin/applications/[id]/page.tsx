@@ -8,8 +8,8 @@ import { CLASS_YEAR_LABELS, PIPELINE_STATUSES, type ClassYear } from "@/lib/work
 import { applicantCode } from "@/lib/applicant-code";
 import LogoutButton from "@/components/logout-button";
 import StatusPill from "@/components/status-pill";
-import BoardNav from "../../board-nav";
-import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../../decision-form";
+import WorkspaceNav from "@/components/workspace-nav";
+import DecisionForm, { ApprovalButton, OfferDeadlineForm, PreviewForm, ReleaseButton } from "../../decision-form";
 import DossierTabs from "./tabs";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
@@ -35,6 +35,7 @@ type ApplicationDossierRow = {
   cycle_id: string;
   offer_response: string | null;
   offer_responded_at: string | null;
+  offer_expires_at: string | null;
   pnms: {
     name: string;
     contact: string;
@@ -43,6 +44,7 @@ type ApplicationDossierRow = {
     class_year: string | null;
     major: string | null;
     linkedin_url: string | null;
+    accessibility_notes: string | null;
   };
 };
 
@@ -50,7 +52,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const { id } = await params;
   const user = await requireAdmin();
   const supabase = await createClient();
-  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url)";
+  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
   const { data, error } = await supabase
     .from("applications")
     .select(applicationSelect)
@@ -107,7 +109,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
           </div>
           <LogoutButton />
         </header>
-        <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canPanel} />
+        <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
         <section className="flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
           <StatusPill tone={isTerminal ? "navy" : "orange"}>{humanize(application.status)}</StatusPill>
           <dl className="grid gap-3 text-sm leading-6 text-mecg-navy/80 sm:grid-cols-2">
@@ -133,7 +135,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
     );
   }
 
-  const offerSelect: string = "offer_response,offer_responded_at";
+  const offerSelect: string = "offer_response,offer_responded_at,offer_expires_at";
   const [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult] = await Promise.all([
     supabase.from("applications").select(offerSelect).eq("id", id).single(),
     supabase.from("application_responses").select("question_key,question_text,response_text").eq("application_id", id),
@@ -152,9 +154,10 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   ]);
   for (const result of [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult]) if (result.error) throw result.error;
   if (!offerResult.data) notFound();
-  const offer = offerResult.data as unknown as Pick<ApplicationDossierRow, "offer_response" | "offer_responded_at">;
+  const offer = offerResult.data as unknown as Pick<ApplicationDossierRow, "offer_response" | "offer_responded_at" | "offer_expires_at">;
   application.offer_response = offer.offer_response;
   application.offer_responded_at = offer.offer_responded_at;
+  application.offer_expires_at = offer.offer_expires_at;
 
   const responses = responsesResult.data ?? [];
   const rounds = (roundsResult.data ?? []).map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
@@ -173,11 +176,13 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const finalScore = combineRoundScores(evaluationRounds.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight })));
 
   const decisionIds = decisions.map((decision) => decision.id);
-  const [applicationAuditResult, decisionAuditResult] = await Promise.all([
+  const [applicationAuditResult, decisionAuditResult, messagesResult, priorCyclesResult] = await Promise.all([
     supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Application").eq("resource_id", id),
     decisionIds.length
       ? supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Decision").in("resource_id", decisionIds)
       : Promise.resolve({ data: [], error: null }),
+    supabase.from("messages").select("id,kind,recipient,subject,delivered,created_at").eq("application_id", id).order("created_at", { ascending: false }),
+    supabase.rpc("applicant_prior_cycles", { target_application_id: id }),
   ]);
   const auditEvents = [...(applicationAuditResult.data ?? []), ...(decisionAuditResult.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -185,6 +190,17 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   if (applicationAuditResult.error) console.error("application audit lookup failed", applicationAuditResult.error);
   if (decisionAuditResult.error) console.error("decision audit lookup failed", decisionAuditResult.error);
   const auditUnavailable = Boolean(applicationAuditResult.error || decisionAuditResult.error);
+  if (messagesResult.error) console.error("message log lookup failed", messagesResult.error);
+  const messages = messagesResult.data ?? [];
+  if (priorCyclesResult.error) console.error("prior cycle lookup failed", priorCyclesResult.error);
+  const priorCycles = Array.isArray(priorCyclesResult.data)
+    ? priorCyclesResult.data.flatMap((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+      const row = entry as Record<string, unknown>;
+      if (typeof row.cycleName !== "string" || typeof row.status !== "string") return [];
+      return [{ cycleName: row.cycleName, status: row.status, submittedAt: typeof row.submittedAt === "string" ? row.submittedAt : null }];
+    })
+    : [];
   const actorIds = [...new Set(auditEvents.map((event) => event.actor_id).filter((actorId): actorId is string => Boolean(actorId)))];
   const { data: actorProfiles, error: actorProfilesError } = actorIds.length ? await supabase.from("profiles").select("id,display_name").in("id", actorIds) : { data: [], error: null };
   if (actorProfilesError) console.error("audit actor lookup failed", actorProfilesError);
@@ -199,7 +215,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         </div>
         <LogoutButton />
       </header>
-      <BoardNav current="/admin" recruitmentOperations={canOperate} hashPanel={canPanel} />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
 
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
         <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:order-none">
@@ -265,6 +281,17 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               </div>
             )}
           </dl>
+
+          {/* Collected at intake since the first cycle and read by nobody until
+              now. An applicant declaring an access need and never hearing back
+              is an accessibility failure, not a missing feature. */}
+          {person.accessibility_notes && (
+            <div className="rounded-xl bg-mecg-blue/[0.07] p-4 shadow-[inset_0_0_0_1px_rgba(63,99,175,0.2)]">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-blue">Accessibility request</p>
+              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/75">{person.accessibility_notes}</p>
+              <p className="mt-2 text-xs text-mecg-navy/50">Arrange this before scheduling them for anything timed or in person.</p>
+            </div>
+          )}
 
           <div>
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Resume</p>
@@ -373,6 +400,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                       {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
                       {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
                       {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
+                      {canDecide && decision.outcome === "OFFER" && !application.offer_response && (
+                        <OfferDeadlineForm applicationId={application.id} current={application.offer_expires_at} />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -381,6 +411,45 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                 <div className="flex flex-col gap-2">
                   {auditUnavailable && <p className="text-sm text-mecg-orange-ink">The audit log could not be loaded. What is shown here may be incomplete.</p>}
                   {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/60">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
+                  {priorCycles.length > 0 && (
+                    <div className="mt-6">
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Earlier applications</p>
+                      <p className="mt-1 text-sm text-mecg-navy/55">
+                        Applying again is not held against anyone. Screening reviewers and evaluators never see this.
+                      </p>
+                      <div className="mt-3 flex flex-col gap-2">
+                        {priorCycles.map((prior) => (
+                          <div key={`${prior.cycleName}-${prior.status}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                            <span className="text-[13px] font-semibold text-mecg-navy">{prior.cycleName}</span>
+                            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-mecg-navy/50">{prior.status.replaceAll("_", " ")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="mt-6">
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Messages sent</p>
+                    <p className="mt-1 text-sm text-mecg-navy/55">Every email this system tried to send to this applicant, delivered or not.</p>
+                    <div className="mt-3 flex flex-col gap-2">
+                      {messages.map((message) => (
+                        <div key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
+                            <p className="mt-0.5 text-[11.5px] text-mecg-navy/50">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                              {message.delivered ? "Delivered" : "Failed"}
+                            </span>
+                            <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
+                              {new Date(message.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Detroit" })}
+                            </time>
+                          </div>
+                        </div>
+                      ))}
+                      {!messages.length && <p className="text-sm text-mecg-navy/45">Nothing has been sent to this applicant yet.</p>}
+                    </div>
+                  </div>
                   {auditEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                       <div>

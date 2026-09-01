@@ -5,9 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import EvaluationForm from "./evaluation-form";
 import ConflictForm from "./conflict-form";
 import PasswordForm from "./password-form";
+import ProfileForm from "./profile-form";
 import BuddySlotForm from "./buddy-slot-form";
-import LogoutButton from "@/components/logout-button";
 import PillNav from "@/components/pill-nav";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import SectionLabel from "@/components/section-label";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
@@ -35,11 +37,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }] = await Promise.all([
+  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }, { data: profile }, { data: record }] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.rpc("my_grading_events"),
+    supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
+    supabase.rpc("my_member_record", { target_cycle_id: cycleMembership.cycleId }),
   ]);
   if (error) throw error;
   if (buddySlotsError) throw buddySlotsError;
@@ -52,8 +56,6 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (screeningReviewer.error) throw new Error(screeningReviewer.error.message);
   if (applicantsError) throw applicantsError;
   if (screeningQueue.error) throw new Error(screeningQueue.error.message);
-  const isPanel = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["PANEL", "OWNER"].includes(membership.role));
-  const canAdmin = user.memberships.some((membership) => membership.cycleId === cycleMembership.cycleId && ["BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
   const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
   const assignmentRows = assignments ?? [];
   const openAssignments = assignmentRows.filter(isReady);
@@ -76,17 +78,43 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const deadlineB = b.rounds.closes_at ? new Date(b.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY;
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
-  const screeningOpenCount = (screeningQueue.data ?? []).filter((item) => item.assignment_status === "ASSIGNED").length;
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
-  const navLinks: Array<readonly [string, string]> = [
-    ["/member", "All work"],
-    ...(screeningReviewer.data ? [["/member/screening", `Blind screening${screeningOpenCount ? ` · ${screeningOpenCount}` : ""}`] as const] : []),
-    ...(gradingEvent ? [["/member/event", "Live event"] as const] : []),
-    ["/member?round=SPEED_DATING", "Speed Dating"],
-    ["/member?round=GROUP_CASE", "Group Case"],
-    ...(isPanel ? [["/admin/hash", "Hash"] as const] : []),
-  ];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
+  // One list of what this member actually owes, ordered by deadline. Before
+  // this, learning whether you were behind meant visiting /member,
+  // /member/screening and /member/event and comparing three separate views.
+  const tasks: Array<{ href: string; label: string; detail: string; dueAt: number }> = [
+    ...openAssignments.map((assignment) => ({
+      href: `#assignment-${assignment.id}`,
+      label: `Evaluate ${assignment.applications.pnms.name}`,
+      detail: assignment.rounds.closes_at ? `${assignment.rounds.name} · closes ${formatDeadline(assignment.rounds.closes_at)}` : assignment.rounds.name,
+      dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
+    })),
+    ...(screeningQueue.data ?? [])
+      .filter((item) => item.assignment_status === "ASSIGNED")
+      .map((item) => ({
+        href: `/member/screening/${item.assignment_id}`,
+        label: `Screen candidate ${item.candidate_code}`,
+        detail: "Blind first-pass review",
+        dueAt: Number.POSITIVE_INFINITY,
+      })),
+    ...(gradingEvent?.grading_open
+      ? [{
+        href: "/member/event",
+        label: `Grade at ${gradingEvent.event_name}`,
+        detail: "Grading is open now",
+        dueAt: 0,
+      }]
+      : []),
+  ].sort((a, b) => a.dueAt - b.dueAt);
+
+  const recordCounts = record && typeof record === "object" && !Array.isArray(record) ? record as Record<string, unknown> : {};
+  const memberRecord: Array<readonly [string, number]> = [
+    ["evaluations submitted", Number(recordCounts.evaluationsSubmitted ?? 0)],
+    ["assignments open", Number(recordCounts.assignmentsOpen ?? 0)],
+    ["events attended", Number(recordCounts.eventsAttended ?? 0)],
+    ["conflicts declared", Number(recordCounts.conflictsDeclared ?? 0)],
+  ];
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
     ? "Speed Dating"
     : activeRoundFilter === "GROUP_CASE"
@@ -102,21 +130,39 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycleMembership.cycle.name} · {cycleMembership.cycle.status}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Evaluation Hub</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Signed in as {user.name}</p>
-        </div>
-        <div className="flex items-center gap-5">
-          {canAdmin && <Link href="/admin" className="button-secondary text-sm">Board dashboard</Link>}
-          <LogoutButton />
-        </div>
-      </header>
-      <PillNav ariaLabel="Evaluation workspaces" current={currentWorkspace} links={navLinks} />
+      <WorkspaceHeader
+        eyebrow={`${cycleMembership.cycle.name} · ${cycleMembership.cycle.status}`}
+        title="Evaluation Hub"
+        description={`Signed in as ${user.name}`}
+      />
+      <WorkspaceNav user={user} cycleId={cycleMembership.cycleId} current={currentWorkspace} />
 
       <section>
-        <SectionLabel>Review overview</SectionLabel>
+        <SectionLabel number="01">What you owe</SectionLabel>
+        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">
+          {tasks.length ? `${tasks.length} open ${tasks.length === 1 ? "task" : "tasks"}` : "Nothing is waiting on you"}
+        </h2>
+        <div className="mt-3.5 flex flex-col gap-2">
+          {tasks.map((task) => (
+            <Link
+              key={`${task.href}-${task.label}`}
+              href={task.href}
+              className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] transition-colors hover:bg-mecg-blue/[0.05]"
+            >
+              <span className="text-[14px] font-semibold text-mecg-navy">{task.label}</span>
+              <span className="text-[12px] text-mecg-navy/50">{task.detail}</span>
+            </Link>
+          ))}
+          {!tasks.length && (
+            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
+              You are caught up. New work appears here when the Board opens a round or assigns a packet.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section>
+        <SectionLabel number="02">Review overview</SectionLabel>
         <div className="mt-3.5 overflow-hidden rounded-2xl bg-mecg-navy text-white ring-1 ring-white/12">
           <div className="grid gap-px bg-white/10 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="bg-mecg-navy p-5 sm:p-7">
@@ -164,10 +210,20 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <SectionLabel>Your assignments</SectionLabel>
+            <SectionLabel number="03">Your assignments</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
           </div>
-          {activeRoundFilter && <Link href="/member" className="text-link">Show all assignments</Link>}
+        </div>
+        <div className="mt-3.5">
+          <PillNav
+            ariaLabel="Filter assignments by round"
+            current={currentWorkspace}
+            links={[
+              ["/member", "All work"],
+              ["/member?round=SPEED_DATING", "Speed Dating"],
+              ["/member?round=GROUP_CASE", "Group Case"],
+            ]}
+          />
         </div>
         <div className="mt-3.5 flex flex-col gap-4">
           {visible.map((assignment) => {
@@ -220,7 +276,20 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel>Member tools</SectionLabel>
+        <SectionLabel number="04">Your record</SectionLabel>
+        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">What you have done this cycle</h2>
+        <dl className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {memberRecord.map(([label, value]) => (
+            <div key={label} className="rounded-2xl bg-paper p-4">
+              <dd className="font-mono text-[26px] font-semibold tabular-nums text-mecg-navy">{value}</dd>
+              <dt className="mt-1 text-[11px] uppercase leading-4 tracking-[0.1em] text-mecg-navy/45">{label}</dt>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section>
+        <SectionLabel number="05">Member tools</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
         {gradingEvent && (
           <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-mecg-navy p-5 text-white ring-1 ring-white/12 sm:p-6">
@@ -250,6 +319,15 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="mt-4 flex flex-col gap-4">
           {!screeningReviewer.data && <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />}
+          <ProfileForm
+            initial={{
+              displayName: profile?.display_name ?? user.name,
+              gradTerm: profile?.grad_term ?? "",
+              major: profile?.major ?? "",
+              position: profile?.position_title ?? "",
+              bio: profile?.bio ?? "",
+            }}
+          />
           <PasswordForm />
         </div>
       </section>

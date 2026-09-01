@@ -30,15 +30,24 @@ export async function destinationForUser(
   supabase: RushClient,
   userId: string,
 ): Promise<AuthDestination> {
-  const [profileResult, membershipResult, applicantResult] = await Promise.all([
+  const [profileResult, membershipResult, applicantResult, canStartResult] = await Promise.all([
     supabase.from("profiles").select("active").eq("id", userId).maybeSingle(),
     supabase.from("memberships").select("role, rush_cycles!inner(status)").eq("user_id", userId).eq("active", true),
     supabase.rpc("is_applicant"),
+    supabase.rpc("can_start_application"),
   ]);
 
   if (profileResult.error) throw profileResult.error;
   if (membershipResult.error) throw membershipResult.error;
   if (applicantResult.error) throw applicantResult.error;
+  // Deliberately not fatal. This function is on the sign-in, sign-up and
+  // auth-callback paths, so throwing here takes down authentication for
+  // everyone. can_start_application is an additive capability check, and false
+  // reproduces exactly the routing that existed before it, so a database that
+  // has not had the migration applied yet degrades to the old behaviour instead
+  // of locking every user out. Logged, because silently answering false would
+  // hide a real outage.
+  if (canStartResult.error) console.error("can_start_application failed, treating as false", canStartResult.error);
 
   return resolveAuthDestination({
     active: profileResult.data?.active === true,
@@ -47,6 +56,7 @@ export async function destinationForUser(
       cycleStatus: membership.rush_cycles.status,
     })),
     hasApplication: applicantResult.data === true,
+    canStartApplication: canStartResult.data === true,
   });
 }
 

@@ -7,11 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
-import LogoutButton from "@/components/logout-button";
 import StatTile from "@/components/stat-tile";
 import StatusPill from "@/components/status-pill";
-import BoardNav from "../board-nav";
-import DecisionForm, { ApprovalButton, PreviewForm, ReleaseButton } from "../decision-form";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
+import DecisionForm, { ApprovalButton, PreviewForm, ReleaseAllButton, ReleaseButton } from "../decision-form";
 
 export const metadata: Metadata = { title: "Hash" };
 
@@ -101,18 +101,18 @@ export default async function HashBoard() {
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.name} · {cycle.status}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Hash</h1>
-        </div>
-        <div className="flex items-center gap-5">
-          {hashOpen && <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Deliberation mode</Link>}
-          <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <BoardNav current="/admin/hash" recruitmentOperations={false} hashPanel={canPanel} />
+      <WorkspaceHeader
+        eyebrow={`${cycle.name} · ${cycle.status}`}
+        title="Hash"
+        action={hashOpen ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Deliberation mode</Link> : null}
+      />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
+      {canDecide && (
+        <ReleaseAllButton
+          cycleId={cycleId}
+          readyCount={decisions.filter((decision) => decision.status === "LOCKED").length}
+        />
+      )}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-mecg-navy/55">Aggregates appear only after every evaluated round is frozen. Hash does not add a numeric score.</p>

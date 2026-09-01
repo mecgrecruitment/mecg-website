@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import { createClient } from "@/lib/supabase/server";
 import PillNav from "@/components/pill-nav";
 import SectionLabel from "@/components/section-label";
@@ -29,18 +31,17 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
     ["/member", "All work"],
     ...eventRows.map((row) => [`/member/event?event=${row.event_id}`, row.event_name] as const),
   ];
+  const workspaceCycleId = user.memberships.find((membership) => membership.active)?.cycleId ?? null;
   const currentWorkspace = selected ? `/member/event?event=${selected.event_id}` : "/member/event";
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Live event grading</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{selected ? selected.event_name : "No event selected"}</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Signed in as {user.name}</p>
-        </div>
-        <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
-      </header>
+      <WorkspaceHeader
+        eyebrow="Live event grading"
+        title={selected ? selected.event_name : "No event selected"}
+        description={`Signed in as ${user.name}`}
+      />
+      {workspaceCycleId && <WorkspaceNav user={user} cycleId={workspaceCycleId} current="/member/event" />}
       <PillNav ariaLabel="Grading events" current={currentWorkspace} links={navLinks} />
 
       {!selected ? (

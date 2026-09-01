@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
+import WorkspaceHeader from "@/components/workspace-header";
+import WorkspaceNav from "@/components/workspace-nav";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 import SectionLabel from "@/components/section-label";
@@ -20,14 +22,12 @@ export default async function ScreeningQueuePage() {
   if (error) throw new Error(error.message);
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-8 p-6 sm:p-10">
-      <header className="flex flex-wrap items-start justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{cycle.cycle.name}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Blind application screening</h1>
-          <p className="mt-1.5 max-w-2xl text-[15px] text-mecg-navy/55">Review only the evidence in each packet. Do not try to identify applicants or discuss assignments with other reviewers.</p>
-        </div>
-        <Link href="/member" className="button-secondary text-sm">Evaluation Hub</Link>
-      </header>
+      <WorkspaceHeader
+        eyebrow={cycle.cycle.name}
+        title="Blind application screening"
+        description="Review only the evidence in each packet. Do not try to identify applicants or discuss assignments with other reviewers."
+      />
+      <WorkspaceNav user={user} cycleId={cycle.cycleId} current="/member/screening" />
       <section>
         <SectionLabel number="01">Screening queue</SectionLabel>
         <div className="mt-3.5 grid gap-4 sm:grid-cols-2">
