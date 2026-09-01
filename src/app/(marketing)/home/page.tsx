@@ -77,7 +77,7 @@ export default function HomePage() {
               <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
               <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
             </div>
-            <div className="relative aspect-[9/7] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
               <Image
                 src="/mecg/community-formal-pair.jpeg"
                 alt="MECG members celebrating Michigan's national championship"
