@@ -64,7 +64,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <main id="main-content" className="bg-white text-mecg-navy">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <PageIntro
-       
         label={`${project.industry} · ${project.semester}`}
         title={project.title}
         copy={project.decision}
