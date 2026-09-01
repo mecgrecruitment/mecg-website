@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(99);
+select extensions.plan(104);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -172,5 +172,53 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 select extensions.throws_ok($$select rush.create_cycle('pgTAP member-denied cycle')$$,'42501','forbidden','non-owner cannot create a cycle');
 select extensions.ok(exists(select 1 from rush.audit_events a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP owner-created cycle' and a.actor_id='10000000-0000-4000-8000-000000000001'::uuid and a.action='CYCLE_CREATED' and a.resource='RushCycle' and a.resource_id=c.id), 'cycle creation retains actor-scoped audit behavior');
+
+-- Reapplication. rush.is_applicant answers "have you ever applied", which is
+-- the wrong question for routing: it pinned a rejected applicant to /applicant
+-- while /apply redirected them back, so they could never apply again.
+-- rush.can_start_application answers "is there an open cycle you have not
+-- applied to yet". These assertions pin both behaviours.
+set local role postgres;
+select extensions.has_function('rush','can_start_application',array[]::text[],'reapplication eligibility function exists');
+
+-- The portal allowlist gates every applicant write. Emptying it inside this
+-- transaction opens the portal for the fixture; the rollback restores it.
+delete from rush.application_portal_allowlist;
+
+insert into auth.users(id,email,raw_user_meta_data) values
+  ('10000000-0000-4000-8000-000000000004','pgtap-reapplicant@example.invalid','{}'::jsonb);
+
+-- now() is fixed for the whole transaction, so every fixture cycle would share
+-- a created_at and "newest open cycle" would be arbitrary. Set them explicitly.
+insert into rush.rush_cycles(id,name,status,created_at) values
+  ('10000000-0000-4000-8000-000000000013','pgTAP past cycle','CLOSED',now() - interval '1 year'),
+  ('10000000-0000-4000-8000-000000000014','pgTAP reapply cycle','OPEN',now() + interval '1 day');
+insert into rush.pnms(id,auth_user_id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-000000000021','10000000-0000-4000-8000-000000000004','pgTAP Reapplicant','pgtap-reapplicant@example.invalid','pgtap-reapplicant@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
+  ('10000000-0000-4000-8000-000000000031','10000000-0000-4000-8000-000000000021','10000000-0000-4000-8000-000000000013','REJECTED',now() - interval '1 year');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+set local role authenticated;
+insert into rush_foundation_results values ('reapply_can_start',(select case when rush.can_start_application() then 1 else 0 end));
+insert into rush_foundation_results values ('reapply_is_applicant',(select case when rush.is_applicant() then 1 else 0 end));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='reapply_can_start'),1::bigint,'a rejected applicant may start an application in a newly opened cycle');
+select extensions.is((select value from rush_foundation_results where key='reapply_is_applicant'),1::bigint,'is_applicant stays true for the past cycle, so routing cannot use it alone');
+
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
+  ('10000000-0000-4000-8000-000000000032','10000000-0000-4000-8000-000000000021','10000000-0000-4000-8000-000000000014','SUBMITTED',now());
+set local role authenticated;
+insert into rush_foundation_results values ('reapply_after_submit',(select case when rush.can_start_application() then 1 else 0 end));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='reapply_after_submit'),0::bigint,'applying in the open cycle closes the new-application route');
+
+update rush.rush_cycles set status='CLOSED' where id='10000000-0000-4000-8000-000000000014';
+set local role authenticated;
+insert into rush_foundation_results values ('reapply_no_open_cycle',(select case when rush.can_start_application() then 1 else 0 end));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='reapply_no_open_cycle'),0::bigint,'no open cycle means no new application route');
+
 select * from extensions.finish();
 rollback;

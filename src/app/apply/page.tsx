@@ -54,7 +54,9 @@ export default async function ApplyPage() {
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
   const supabase = user ? await createClient() : null;
-  const { data: intake, error: intakeError } = supabase ? await supabase.rpc("intake_schema") : { data: null, error: null };
+  const [{ data: intake, error: intakeError }, { data: hasPastApplication }] = supabase
+    ? await Promise.all([supabase.rpc("intake_schema"), supabase.rpc("is_applicant")])
+    : [{ data: null, error: null }, { data: false }];
   if (intakeError) console.error("intake_schema failed", intakeError);
   const schema = intakeError ? null : parseIntakeSchema(intake);
   // A failed or malformed schema is not the same thing as a closed cycle; never say "closed" for it.
@@ -79,6 +81,11 @@ export default async function ApplyPage() {
           </Link>
           <div className="flex min-h-11 items-center gap-4 text-sm">
             <span className="hidden text-mecg-navy/45 sm:inline">{user ? user.email : "Applicant portal"}</span>
+            {user && hasPastApplication === true && (
+              <Link href="/applicant" className="flex min-h-11 items-center font-semibold underline underline-offset-4">
+                Past applications
+              </Link>
+            )}
             {user ? (
               <LogoutButton />
             ) : (

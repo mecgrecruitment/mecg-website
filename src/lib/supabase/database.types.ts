@@ -1785,6 +1785,7 @@ export type Database = {
       }
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
+      can_start_application: { Args: never; Returns: boolean }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
       commit_screening_assignments: {

@@ -30,15 +30,17 @@ export async function destinationForUser(
   supabase: RushClient,
   userId: string,
 ): Promise<AuthDestination> {
-  const [profileResult, membershipResult, applicantResult] = await Promise.all([
+  const [profileResult, membershipResult, applicantResult, canStartResult] = await Promise.all([
     supabase.from("profiles").select("active").eq("id", userId).maybeSingle(),
     supabase.from("memberships").select("role, rush_cycles!inner(status)").eq("user_id", userId).eq("active", true),
     supabase.rpc("is_applicant"),
+    supabase.rpc("can_start_application"),
   ]);
 
   if (profileResult.error) throw profileResult.error;
   if (membershipResult.error) throw membershipResult.error;
   if (applicantResult.error) throw applicantResult.error;
+  if (canStartResult.error) throw canStartResult.error;
 
   return resolveAuthDestination({
     active: profileResult.data?.active === true,
@@ -47,6 +49,7 @@ export async function destinationForUser(
       cycleStatus: membership.rush_cycles.status,
     })),
     hasApplication: applicantResult.data === true,
+    canStartApplication: canStartResult.data === true,
   });
 }
 

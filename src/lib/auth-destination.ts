@@ -8,6 +8,7 @@ export function resolveAuthDestination(input: {
   active: boolean;
   memberships: readonly AccessMembership[];
   hasApplication: boolean;
+  canStartApplication: boolean;
 }): AuthDestination {
   if (!input.active) return "/access-denied";
 
@@ -16,5 +17,8 @@ export function resolveAuthDestination(input: {
     .map((membership) => membership.role));
   if (roles.has("OWNER") || roles.has("BOARD") || roles.has("PANEL") || roles.has("RECRUITMENT_COMMITTEE")) return "/admin";
   if (roles.has("MEMBER")) return "/member";
+  // A past application must not trap someone on the old decision. If a cycle is
+  // open that they have not applied to, applying is their live business.
+  if (input.canStartApplication) return "/apply";
   return input.hasApplication ? "/applicant" : "/apply";
 }

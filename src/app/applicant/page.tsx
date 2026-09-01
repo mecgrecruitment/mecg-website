@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentDestination, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -114,11 +115,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
   const { submitted, action } = await searchParams;
   await requireUser();
   const destination = await currentDestination();
-  if (destination !== "/applicant") redirect(destination ?? "/login");
+  // /apply is allowed through. A past applicant with a newly open cycle is now
+  // routed there on login, but must still be able to open their own history.
+  if (destination !== "/applicant" && destination !== "/apply") redirect(destination ?? "/login");
   const supabase = await createClient();
-  const [{ data: applications, error }, { data: schedule }] = await Promise.all([
+  const [{ data: applications, error }, { data: schedule }, { data: canStartApplication }] = await Promise.all([
     supabase.rpc("applicant_dashboard"),
     supabase.rpc("applicant_schedule"),
+    supabase.rpc("can_start_application"),
   ]);
   if (error) throw error;
   if (!applications?.length) redirect("/apply");
@@ -141,6 +145,17 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-emerald-700">Application received</p>
             <h2 className="mt-3 text-2xl font-semibold">You are all set.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written responses will enter anonymous first-pass review, and any released updates will appear on this page.</p>
+          </section>
+        )}
+        {canStartApplication === true && (
+          <section className="rounded-2xl bg-mecg-orange/[0.12] p-6 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.4)]">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange-ink">Applications are open</p>
+            <h2 className="mt-3 text-2xl font-semibold">You can apply again this cycle.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">
+              A new recruitment cycle is accepting applications and you have not started one yet. Your earlier
+              applications stay on this page.
+            </p>
+            <Link href="/apply" className="button-primary mt-5 inline-flex">Start a new application</Link>
           </section>
         )}
         {(action === "rsvp" || action === "buddy") && (
