@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FormField from "@/components/form-field";
+import OperationNotice from "@/components/operation-notice";
 
 const errorMessages: Record<string, string> = {
   INVALID_NAME: "Enter your full name.",
@@ -68,8 +69,15 @@ export default function ApplicantSignupForm() {
         autoComplete="new-password"
         hint="Use at least 8 characters. You will verify your email before submitting."
       />
-      {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-      {message && <div role="status" className="rounded-xl bg-mecg-blue/10 p-4 text-sm text-mecg-navy"><p>{message}</p><p className="mt-2 text-mecg-navy/70">If it is missing, check spam or promotions. You can also change your details and try again to request a new verification email.</p><button type="button" onClick={() => setMessage("")} className="mt-3 min-h-11 font-semibold underline underline-offset-2">Change details or try again</button></div>}
+      <OperationNotice kind="error">{error}</OperationNotice>
+      {message && (
+        <div>
+          <OperationNotice kind="info">
+            {message} If it is missing, check spam or promotions. You can also change your details and try again to request a new verification email.
+          </OperationNotice>
+          <button type="button" onClick={() => setMessage("")} className="mt-3 min-h-11 font-semibold underline underline-offset-2">Change details or try again</button>
+        </div>
+      )}
       <button type="submit" disabled={pending || Boolean(message)} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
         {pending ? "Creating account..." : "Create applicant account"}
       </button>

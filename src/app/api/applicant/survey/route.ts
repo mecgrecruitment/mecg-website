@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -17,6 +18,9 @@ export async function POST(req: NextRequest) {
   const note = body?.note == null ? null : typeof body.note === "string" ? body.note.trim() : undefined;
   if (!applicationId || applicationId.length > 128 || !Number.isInteger(score) || score < 1 || score > 5 || note === undefined || (note?.length ?? 0) > 2000) {
     return NextResponse.json({ error: "Invalid survey" }, { status: 400 });
+  }
+  if (!(await checkRateLimit(`applicant-survey:${user.id}`))) {
+    return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_process_survey", { target_application_id: applicationId, score, survey_note: note ?? undefined });

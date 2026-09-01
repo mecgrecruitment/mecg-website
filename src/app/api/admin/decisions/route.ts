@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { sendEmail, wrapEmail } from "@/lib/email";
@@ -51,12 +51,21 @@ function decisionEmail(outcome: string, name: string) {
 export async function POST(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await req.json().catch(() => null);
-  const action = typeof body?.action === "string" ? body.action : "";
+  const parsedBody = await readJsonBody(req, 16 * 1024);
+  if (parsedBody.error === "too_large") return NextResponse.json({ error: "Payload is too large" }, { status: 413 });
+  if (parsedBody.error || !parsedBody.data || typeof parsedBody.data !== "object" || Array.isArray(parsedBody.data)) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+  const body = parsedBody.data as Record<string, unknown>;
+  const action = typeof body.action === "string" ? body.action : "";
   if (!["CREATE", "APPROVE", "RELEASE", "PREVIEW"].includes(action)) return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   const supabase = await createClient();
-  let cycleId = typeof body?.cycleId === "string" ? body.cycleId : "";
-  if (action !== "CREATE" && action !== "PREVIEW") {
+  let cycleId = typeof body.cycleId === "string" ? body.cycleId : "";
+  // PREVIEW must re-derive the decision's real cycle from the DB, same as APPROVE/RELEASE:
+  // trusting a client-supplied cycleId here would let a caller satisfy this app-layer check
+  // against any cycle they hold DECIDE in, regardless of which cycle the target decision
+  // actually belongs to. Only CREATE has no existing decisionId to look the cycle up from.
+  if (action !== "CREATE") {
     const { data: decision, error: decisionError } = await supabase.from("decisions").select("application_id").eq("id", String(body.decisionId ?? "")).maybeSingle();
     const { data: application, error: applicationError } = decision?.application_id
       ? await supabase.from("applications").select("cycle_id").eq("id", decision.application_id).maybeSingle()

@@ -10,7 +10,7 @@ type MemberRole = "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTE
 type MemberAccount = { id: string; name: string; role: MemberRole };
 
 const CYCLE_STATUSES = ["DRAFT", "OPEN", "IN_PROCESS", "DECISION_LOCK", "CLOSED", "ARCHIVED"];
-const ROUND_STATUSES = ["DRAFT", "PUBLISHED", "ACTIVE", "FROZEN", "FINALIZED"];
+const ROUND_STATUSES = ["DRAFT", "PUBLISHED", "ACTIVE", "FROZEN", "FINALIZED", "ARCHIVED"];
 const MEMBER_ROLES: readonly { value: MemberRole; label: string }[] = [
   { value: "MEMBER", label: "Member" },
   { value: "BOARD", label: "Board operations" },
@@ -51,7 +51,7 @@ function Select({
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
-          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-mecg-navy/40"
+          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-mecg-navy/60"
         >
           <path d="M5 8l5 5 5-5" />
         </svg>
@@ -110,7 +110,7 @@ export default function RushControls({
 
   return (
     <section className="flex flex-col gap-5">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Quick actions</p>
+      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Quick actions</p>
       <div className="-mt-2 grid gap-5 lg:grid-cols-3">
       {canManageMemberships && (
         <form
@@ -147,7 +147,7 @@ export default function RushControls({
           }}
         >
           <h2 className="text-base font-semibold">Existing account</h2>
-          <p className="mt-1 text-xs leading-5 text-mecg-navy/50">Give an existing Supabase user access to this cycle.</p>
+          <p className="mt-1 text-xs leading-5 text-mecg-navy/60">Give an existing Supabase user access to this cycle.</p>
           <div className="mt-3 flex flex-col gap-2.5">
             <FormField label="Email" name="email" type="email" required placeholder="name@umich.edu" />
             <Select label="Role" name="role" defaultValue="MEMBER">
@@ -208,7 +208,7 @@ export default function RushControls({
       {canManageMemberships && (
         <div className="rounded-2xl bg-paper p-5">
           <div>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Member roles</p>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Member roles</p>
             <p className="mt-1 text-sm text-mecg-navy/55">Role changes apply to this recruitment cycle and are recorded in the audit log.</p>
           </div>
           <div className="mt-4 grid gap-2">
@@ -226,7 +226,7 @@ export default function RushControls({
                 >
                   <div>
                     <p className="text-[13px] font-semibold text-mecg-navy">{member.name}{isCurrentUser ? " · You" : ""}</p>
-                    {isCurrentUser && <p className="mt-0.5 text-[11px] text-mecg-navy/45">Ask another owner to change your role.</p>}
+                    {isCurrentUser && <p className="mt-0.5 text-[11px] text-mecg-navy/60">Ask another owner to change your role.</p>}
                   </div>
                   <div className="flex items-center gap-2">
                     <select
@@ -234,14 +234,14 @@ export default function RushControls({
                       defaultValue={member.role}
                       disabled={pending || isCurrentUser}
                       aria-label={`Role for ${member.name}`}
-                      className="min-h-10 rounded-full bg-white px-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none disabled:opacity-55"
+                      className="min-h-11 rounded-full bg-white px-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none disabled:opacity-55"
                     >
                       {MEMBER_ROLES.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
                     </select>
                     <button
                       type="submit"
                       disabled={pending || isCurrentUser}
-                      className="inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:opacity-45"
+                      className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:opacity-45"
                     >
                       Save
                     </button>
@@ -256,7 +256,7 @@ export default function RushControls({
       {canManageCycle && <div className="rounded-2xl bg-paper p-5">
         <div className="grid gap-6 sm:grid-cols-[220px_1fr] sm:divide-x sm:divide-mecg-navy/10">
           <div>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Cycle status</p>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Cycle status</p>
             <form
               className="mt-3 flex items-center gap-2"
               onSubmit={(event) => {
@@ -269,14 +269,14 @@ export default function RushControls({
                 name="status"
                 aria-label="Cycle status"
                 defaultValue={cycleStatus}
-                className="min-h-10 flex-1 rounded-full bg-white px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                className="min-h-11 flex-1 rounded-full bg-white px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
               >
                 {CYCLE_STATUSES.filter((status) => canTransitionCycle(cycleStatus, status)).map((status) => <option key={status}>{status}</option>)}
               </select>
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]"
+                className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]"
               >
                 Save
               </button>
@@ -284,7 +284,7 @@ export default function RushControls({
           </div>
 
           <div className="sm:pl-6">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Round controls</p>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Round controls</p>
             <div className="mt-3 flex flex-col gap-2">
               {rounds.map((round) => (
                 <form
@@ -302,21 +302,21 @@ export default function RushControls({
                       name="status"
                       aria-label={`Status for ${round.label}`}
                       defaultValue={round.status}
-                      className="h-[30px] rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
+                      className="min-h-11 rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
                     >
                       {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status}>{status}</option>)}
                     </select>
                     <button
                       type="submit"
                       disabled={pending}
-                      className="rounded-full px-3 py-1 text-[11px] font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]"
+                      className="inline-flex min-h-11 items-center rounded-full px-3 text-[11px] font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]"
                     >
                       Save
                     </button>
                   </div>
                 </form>
               ))}
-              {!rounds.length && <p className="text-sm text-mecg-navy/45">No rounds configured yet.</p>}
+              {!rounds.length && <p className="text-sm text-mecg-navy/60">No rounds configured yet.</p>}
             </div>
           </div>
         </div>

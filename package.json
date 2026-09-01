@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test scripts/export-public-projects.test.mjs src/lib/evaluation.test.js && node --experimental-strip-types --test src/lib/auth-destination.test.ts src/lib/authorization.test.ts src/lib/cycles.test.ts src/lib/pdf-validation.test.ts src/lib/workflow.test.ts src/lib/screening.test.ts && node --experimental-strip-types --experimental-test-module-mocks --import ./scripts/test-esm-loader.mjs --test src/lib/env.test.ts src/lib/recovery-marker.test.ts src/proxy.test.ts src/app/api/apply/route.test.ts src/app/api/apply/resume/resume-routes.test.ts src/app/api/contact/route.test.ts src/app/api/health/route.test.ts",
+    "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test",
     "verify:backend": "node scripts/verify-backend.mjs",
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
     "verify:auth": "node scripts/verify-auth-routing.mjs",
@@ -29,6 +29,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@next/env": "16.3.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
@@ -38,8 +39,5 @@
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "overrides": {
-    "deepmerge-ts": "8.0.1"
   }
 }

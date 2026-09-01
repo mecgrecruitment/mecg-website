@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -13,6 +14,9 @@ export async function POST(req: NextRequest) {
   }
   if (currentPassword === newPassword) {
     return NextResponse.json({ error: "New password must be different" }, { status: 400 });
+  }
+  if (!(await checkRateLimit(`account-password:${user.id}`))) {
+    return NextResponse.json({ error: "Too many attempts, try again later" }, { status: 429 });
   }
 
   const supabase = await createClient();

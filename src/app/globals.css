@@ -18,6 +18,7 @@
   --color-mecg-orange: #fe904d;
   --color-mecg-orange-ink: #a83e0b;
   --color-mecg-navy: #070d1f;
+  --color-mecg-paper-workspace: #f5f4ef;
 }
 
 @theme inline {
@@ -57,13 +58,28 @@ textarea {
   font: inherit;
 }
 
+/*
+ * Focus ring color. mecg-orange is ~2.25:1 on white (docs/DESIGN.md already
+ * bans it on light backgrounds for the same reason) and ~2.58:1 on the
+ * mecg-blue section fill, both below the 3:1 WCAG 2.2 SC 1.4.11 floor.
+ * mecg-navy clears 3:1 against every light/blue surface the ring appears on
+ * (white 19.33:1, paper 17.16:1, mecg-blue fill 3.33:1) so it is the default.
+ * It drops to ~1:1 (invisible) on the site's opaque navy surfaces, so those
+ * surfaces (header, footer, tone="navy" sections) override back to orange,
+ * which is 8.57:1 against navy.
+ */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--color-mecg-orange);
+  outline: 2px solid var(--color-mecg-navy);
   outline-offset: 3px;
+}
+
+[class~="bg-mecg-navy"] :focus-visible,
+[class~="bg-mecg-navy/95"] :focus-visible {
+  outline-color: var(--color-mecg-orange);
 }
 
 .button-primary,
@@ -116,10 +132,15 @@ textarea:focus-visible {
   padding-inline: 1.5rem;
 }
 
+/*
+ * Portal auth/workspace outer card: the single outermost card of a
+ * full-bleed auth/workspace screen (login, apply, workspace loading/error).
+ * Reserved for that one outer surface; content cards inside a workspace
+ * stay rounded-2xl with a hairline per the rest of the design system.
+ */
 .surface-card {
-  border-radius: 1rem;
-  background: white;
-  box-shadow: var(--shadow-card);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgba(7, 13, 31, 0.09), inset 0 0 0 1px rgba(7, 13, 31, 0.05);
 }
 
 .surface-inset {
@@ -144,7 +165,7 @@ textarea:focus-visible {
 }
 
 .field-control:focus {
-  box-shadow: inset 0 0 0 2px var(--color-mecg-orange);
+  box-shadow: inset 0 0 0 2px var(--color-mecg-navy);
 }
 
 .operation-control {
@@ -160,7 +181,7 @@ textarea:focus-visible {
 
 .scroll-cue:focus-visible {
   border-radius: 0.75rem;
-  outline: 2px solid var(--color-mecg-orange);
+  outline: 2px solid var(--color-mecg-navy);
   outline-offset: 3px;
 }
 

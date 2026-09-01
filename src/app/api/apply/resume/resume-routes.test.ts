@@ -46,22 +46,51 @@ function importCancelRoute(testCase: string) {
   return import(`./cancel/route.ts?case=${testCase}`) as Promise<typeof import("./cancel/route.ts")>;
 }
 
-test("resume start creates a server-controlled upload target", async (t) => {
+const SIGNED_UPLOAD_URL = `https://storage.example/object/upload/sign/resumes/${PATH}?token=signed-token`;
+
+function clientWithSignedUpload(rpcHandler: (name: string, args?: Record<string, unknown>) => unknown) {
   const calls: Array<{ name: string; args?: Record<string, unknown> }> = [];
   const client = {
     rpc: async (name: string, args?: Record<string, unknown>) => {
       calls.push({ name, args });
-      return { data: { documentId: DOCUMENT_ID, path: PATH }, error: null };
+      return rpcHandler(name, args);
+    },
+    storage: {
+      from: () => ({
+        createSignedUploadUrl: async (path: string) => ({ data: { signedUrl: `${SIGNED_UPLOAD_URL}&path=${path}`, token: "signed-token", path }, error: null }),
+      }),
     },
   };
+  return { client, calls };
+}
+
+test("resume start creates a server-controlled upload target", async (t) => {
+  const { client, calls } = clientWithSignedUpload(() => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }));
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importStartRoute("success");
   const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
   assert.equal(response.status, 201);
-  assert.deepEqual(await response.json(), { documentId: DOCUMENT_ID, path: PATH });
+  const body = await response.json();
+  assert.equal(body.documentId, DOCUMENT_ID);
+  assert.equal(body.path, PATH);
+  assert.equal(body.uploadUrl, `${SIGNED_UPLOAD_URL}&path=${PATH}`);
   assert.deepEqual(calls, [{ name: "begin_resume_upload", args: { upload_filename: "Ada Resume.pdf", upload_size: 26 } }]);
+});
+
+test("resume start ignores a client-supplied path and always uploads to the server-derived object", async (t) => {
+  const { client } = clientWithSignedUpload(() => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }));
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importStartRoute("path-traversal");
+  // A malicious client tries to steer the object path via the request body.
+  const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26, path: "../other-user/resume.pdf" }));
+  assert.equal(response.status, 201);
+  const body = await response.json();
+  assert.equal(body.path, PATH);
+  assert.equal(body.uploadUrl.includes("other-user"), false);
 });
 
 test("resume start rejects invalid files before creating an upload", async (t) => {
@@ -71,6 +100,19 @@ test("resume start rejects invalid files before creating an upload", async (t) =
   const { POST } = await importStartRoute("invalid");
   const response = await POST(request("/api/apply/resume/start", { filename: "resume.docx", size: 26 }));
   assert.equal(response.status, 400);
+});
+
+test("resume start fails closed when the signed upload URL cannot be created", async (t) => {
+  const client = {
+    rpc: async () => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }),
+    storage: { from: () => ({ createSignedUploadUrl: async () => ({ data: null, error: { message: "boom" } }) }) },
+  };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importStartRoute("signed-url-failure");
+  const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
+  assert.equal(response.status, 500);
 });
 
 test("resume finalize verifies bytes and records the digest", async (t) => {

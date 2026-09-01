@@ -116,8 +116,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <PillNav ariaLabel="Evaluation workspaces" current={currentWorkspace} links={navLinks} />
 
       <section>
-        <SectionLabel number="01">Review overview</SectionLabel>
-        <div className="mt-3.5 overflow-hidden rounded-[22px] bg-mecg-navy text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
+        <SectionLabel>Review overview</SectionLabel>
+        <div className="mt-3.5 overflow-hidden rounded-2xl bg-mecg-navy text-white ring-1 ring-white/12">
           <div className="grid gap-px bg-white/10 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="bg-mecg-navy p-5 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -138,12 +138,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 ].map(([value, label]) => (
                   <div key={label}>
                     <p className="font-mono text-[28px] font-semibold tabular-nums">{value}</p>
-                    <p className="mt-1 text-[10px] uppercase leading-4 tracking-[0.1em] text-white/45">{label}</p>
+                    <p className="mt-1 text-[10px] uppercase leading-4 tracking-[0.1em] text-white/50">{label}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-[#111a32] p-5 sm:p-7">
+            <div className="bg-white/5 p-5 sm:p-7">
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Next deadline</p>
               {nextDeadline?.rounds.closes_at ? (
                 <div className="mt-4">
@@ -164,7 +164,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <SectionLabel number="02">Your assignments</SectionLabel>
+            <SectionLabel>Your assignments</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
           </div>
           {activeRoundFilter && <Link href="/member" className="text-link">Show all assignments</Link>}
@@ -193,7 +193,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                     {statusLabel.replaceAll("_", " ")}
                   </span>
                 </div>
-                {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/45">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
+                {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/60">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
                 {submitted ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. A Board Member can create an audited correction if needed.</p>
                 ) : ready && rubric ? (
@@ -220,10 +220,10 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="03">Member tools</SectionLabel>
+        <SectionLabel>Member tools</SectionLabel>
         <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
         {gradingEvent && (
-          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-[22px] bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)] sm:p-6">
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-mecg-navy p-5 text-white ring-1 ring-white/12 sm:p-6">
             <div>
               <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Live event</p>
               <h3 className="mt-2 text-lg font-semibold">{gradingEvent.event_name}</h3>
@@ -235,7 +235,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="mt-3.5 grid gap-4 lg:grid-cols-2">
           <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
           <section className="rounded-2xl bg-paper p-5 sm:p-6">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/45">Before you score</p>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/65">Before you score</p>
             <h3 className="mt-2 text-lg font-semibold">Calibration anchors</h3>
             <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Use the same evidence standard in every live evaluation.</p>
             <ol className="mt-4 space-y-2 text-sm text-mecg-navy/70">

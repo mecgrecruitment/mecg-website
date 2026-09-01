@@ -40,5 +40,16 @@ export async function POST(req: NextRequest) {
     const mapped = error ? mapRpcError(error, "Could not start resume upload") : { body: { error: "Could not start resume upload" }, status: 500 };
     return NextResponse.json(mapped.body, { status: mapped.status });
   }
-  return NextResponse.json(data, { status: 201 });
+
+  // `data.path` came from begin_resume_upload, never from the request body, so the
+  // browser cannot steer this to another user's object. The browser never sees a
+  // session token for storage: it PUTs straight to this pre-authorized signed URL,
+  // which is what lets the auth cookie be httpOnly (see cookie-options.ts).
+  const { data: signed, error: signedError } = await supabase.storage.from("resumes").createSignedUploadUrl(data.path);
+  if (signedError || !signed?.signedUrl) {
+    console.error("resume signed upload url failed", signedError);
+    return NextResponse.json({ error: "Could not start resume upload" }, { status: 500 });
+  }
+
+  return NextResponse.json({ documentId: data.documentId, path: data.path, uploadUrl: signed.signedUrl }, { status: 201 });
 }

@@ -84,7 +84,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
               <legend className="px-2 font-semibold">{criterion.name} · {criterion.weight}%</legend>
               <p className="text-sm text-mecg-navy/55">{criterion.description}</p>
               <div className="mt-4 text-sm font-medium" id={`screening-rating-label-${criterion.id}`}>Rating</div>
-              <div className="mt-2 grid grid-cols-5 gap-2" role="radiogroup" aria-labelledby={`screening-rating-label-${criterion.id}`}>
+              <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-labelledby={`screening-rating-label-${criterion.id}`}>
                 {SCORE_OPTIONS.map((score) => {
                   const selected = scores[criterion.id] === String(score);
                   const label = `Score ${score}: ${SCORE_ANCHORS[score]}`;
@@ -92,8 +92,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
                     <button
                       key={score}
                       type="button"
-                      role="radio"
-                      aria-checked={selected}
+                      aria-pressed={selected}
                       aria-label={label}
                       title={label}
                       disabled={pending}
@@ -109,6 +108,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
                   );
                 })}
               </div>
+              {scores[criterion.id] && <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>}
               <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note (optional)</label>
               <textarea
                 id={`screening-note-${criterion.id}`}
@@ -119,7 +119,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
                 aria-describedby={`screening-note-count-${criterion.id}`}
                 className="mt-2 min-h-20 w-full rounded-xl bg-mecg-navy/[0.035] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
               />
-              <p id={`screening-note-count-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/45">{note.length} / {MAX_NOTE_LENGTH}</p>
+              <p id={`screening-note-count-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / {MAX_NOTE_LENGTH}</p>
             </fieldset>
           );
         })}
@@ -137,7 +137,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
             className="mt-2 min-h-28 w-full rounded-xl bg-mecg-navy/[0.035] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
           />
         </label>
-        <p id="screening-evidence-help" className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/45">{evidence.length} / {MAX_EVIDENCE_LENGTH} characters · at least {MIN_EVIDENCE_LENGTH} required</p>
+        <p id="screening-evidence-help" className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH} characters · at least {MIN_EVIDENCE_LENGTH} required</p>
         <label className="block font-medium" htmlFor="screening-recommendation">
           Recommendation
           <select id="screening-recommendation" ref={recommendationRef} required value={recommendation} disabled={pending} onChange={(event) => { setRecommendation(event.target.value); setError(""); }} className="mt-2 min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]">
@@ -150,10 +150,10 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
         <OperationNotice kind="error">{error}</OperationNotice>
         <button disabled={pending} className="button-primary">{pending ? "Submitting…" : "Submit and lock review"}</button>
       </form>
-      <section className="rounded-2xl bg-amber-50 p-5" aria-labelledby="recusal-heading">
-        <h2 id="recusal-heading" className="font-semibold text-amber-950">Recognize this applicant?</h2>
-        <p className="mt-1 text-sm text-amber-900/75">Do not name the applicant. If eligible replacement coverage exists, recusal records a conflict, permanently removes this packet from your queue, and assigns a replacement. If no replacement is available, no recusal is completed.</p>
-        <label className="mt-3 block text-sm font-medium text-amber-950" htmlFor="screening-recusal-reason">Reason for recusal</label>
+      <section className="rounded-2xl bg-mecg-orange/[0.08] p-5" aria-labelledby="recusal-heading">
+        <h2 id="recusal-heading" className="font-semibold text-mecg-orange-ink">Recognize this applicant?</h2>
+        <p className="mt-1 text-sm text-mecg-navy/70">Do not name the applicant. If eligible replacement coverage exists, recusal records a conflict, permanently removes this packet from your queue, and assigns a replacement. If no replacement is available, no recusal is completed.</p>
+        <label className="mt-3 block text-sm font-medium text-mecg-orange-ink" htmlFor="screening-recusal-reason">Reason for recusal</label>
         <textarea
           id="screening-recusal-reason"
           value={recusalReason}
@@ -161,9 +161,9 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
           disabled={pending}
           onChange={(event) => setRecusalReason(event.target.value)}
           placeholder="Brief reason, such as a prior close relationship or an identity revealed in the response"
-          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(180,83,9,0.25)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         />
-        <p className="mt-1 text-right text-xs tabular-nums text-amber-900/65">{recusalReason.length} / 1000</p>
+        <p className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{recusalReason.length} / 1000</p>
         <button type="button" disabled={pending || recusalReason.trim().length < 5} onClick={() => void act({ action: "RECUSE", reason: recusalReason })} className="button-secondary mt-3">{pending ? "Recusing…" : "Recuse from packet"}</button>
       </section>
     </div>

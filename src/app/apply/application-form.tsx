@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, type ApplicationDraft } from "@/lib/workflow";
 
 type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[] };
@@ -22,7 +21,9 @@ const STEPS: { id: Step; label: string; shortLabel: string }[] = [
   { id: "review", label: "Review and submit", shortLabel: "Review" },
 ];
 
-const fieldClass = "mt-2 min-h-12 w-full rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange),0_1px_2px_rgba(7,13,31,0.04)]";
+// scroll-mb-24 keeps a focused field's ring clear of the sticky Back/Continue bar below `sm`
+// (the bar itself is ~85px tall there); the bar is `sm:static` so no margin is needed at `sm`+.
+const fieldClass = "mt-2 min-h-12 w-full scroll-mb-24 rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy),0_1px_2px_rgba(7,13,31,0.04)] sm:scroll-mb-0";
 const labelClass = "block text-sm font-semibold text-mecg-navy";
 
 function wordCount(value: string) {
@@ -199,13 +200,19 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
         body: JSON.stringify({ filename: file.name, size: file.size }),
       });
       const startBody = await startResponse.json().catch(() => null);
-      if (!startResponse.ok || typeof startBody?.documentId !== "string" || typeof startBody?.path !== "string") {
+      if (!startResponse.ok || typeof startBody?.documentId !== "string" || typeof startBody?.uploadUrl !== "string") {
         throw new Error(startBody?.error ?? "We could not start the resume upload.");
       }
       documentId = startBody.documentId;
-      const supabase = createClient();
-      const { error: uploadError } = await supabase.storage.from("resumes").upload(startBody.path, file, { contentType: "application/pdf", upsert: false });
-      if (uploadError) throw new Error("We could not upload your resume. Please try again.");
+      // The session cookie is httpOnly, so this can't use the Supabase client (it has no
+      // token to attach). Instead PUT straight to the short-lived signed upload URL the
+      // server already scoped to this user's object path.
+      const uploadResponse = await fetch(startBody.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/pdf" },
+        body: file,
+      });
+      if (!uploadResponse.ok) throw new Error("We could not upload your resume. Please try again.");
       const finalizeResponse = await fetch("/api/apply/resume/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -291,7 +298,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-10">
-      <aside className="lg:sticky lg:top-8">
+      <aside className="order-2 lg:order-1 lg:sticky lg:top-8">
         <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
           <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2" aria-label="Application progress">
@@ -310,14 +317,14 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
         <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/65">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>
       </aside>
 
-      <section onChangeCapture={handleApplicationChange} className="min-w-0 rounded-[28px] bg-white p-6 shadow-[0_24px_80px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.06)] sm:p-8">
+      <section onChangeCapture={handleApplicationChange} className="surface-card order-1 min-w-0 bg-white p-6 sm:p-8 lg:order-2">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
         {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
         {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
         {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
         {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
 
-        {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} aria-busy={saving || uploading} className="min-h-12 flex-1 rounded-xl bg-mecg-navy px-6 font-semibold text-white transition-transform active:scale-[0.96] disabled:cursor-wait disabled:opacity-60 sm:flex-none">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
+        {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0 || saving} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={saving || uploading} aria-busy={saving || uploading} className="button-dark flex-1 bg-mecg-navy sm:flex-none">{uploading ? "Uploading resume..." : saving ? "Saving..." : "Save and continue"}</button></div>}
       </section>
     </div>
   );
@@ -362,7 +369,7 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
 function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string }) {
   const resumeDescription = ["resume-guidance", error ? "resume-error" : "", uploadState.kind === "error" ? "resume-upload-error" : ""].filter(Boolean).join(" ");
   return <><StepHeading>Add your materials.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
-    <label htmlFor="resume" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-orange"><input id="resume" type="file" accept="application/pdf" required={!resumePath} disabled={uploadState.kind === "uploading"} className="sr-only" aria-invalid={Boolean(error || uploadState.kind === "error")} aria-describedby={resumeDescription} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume (required)"}</span><span id="resume-guidance" className="mt-1 block text-sm text-mecg-navy/65">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
+    <label htmlFor="resume" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy"><input id="resume" type="file" accept="application/pdf" required={!resumePath} disabled={uploadState.kind === "uploading"} className="sr-only" aria-invalid={Boolean(error || uploadState.kind === "error")} aria-describedby={resumeDescription} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume (required)"}</span><span id="resume-guidance" className="mt-1 block text-sm text-mecg-navy/65">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
     {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/65" role="status" aria-live="polite">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status" aria-live="polite">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError id="resume-upload-error" alert>{uploadState.message}</FieldError>}<FieldError id="resume-error">{error}</FieldError>
     <label htmlFor="linkedinUrl" className={labelClass}>LinkedIn profile <span className="font-normal text-mecg-navy/60">Optional</span><input id="linkedinUrl" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} type="url" placeholder="https://linkedin.com/in/..." className={fieldClass} /></label>
     <label htmlFor="accessibilityNotes" className={labelClass}>Scheduling or access needs <span className="font-normal text-mecg-navy/60">Optional and never scored</span><textarea id="accessibilityNotes" value={accessibilityNotes} onChange={(e) => setAccessibilityNotes(e.target.value)} rows={4} className={`${fieldClass} py-3`} aria-describedby="accessibilityNotes-guidance" /><span id="accessibilityNotes-guidance" className="mt-2 block text-xs font-normal leading-5 text-mecg-navy/65">Only the operations team uses this information to arrange an accessible recruitment process.</span></label>
@@ -380,7 +387,7 @@ function ReviewStep({ values, questions, answers, resumeLabel, consent, consentN
   {consentNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{consentNotice}</p>}
   {submitState.kind === "error" && <div className="mt-4"><FieldError id="submit-error" alert>{submitState.message}</FieldError></div>}
   <p className="sr-only" role="status" aria-live="polite">{submitState.kind === "submitting" ? "Submitting your application. Please wait." : ""}</p>
-  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} aria-busy={submitState.kind === "submitting"} className="min-h-12 rounded-xl bg-mecg-orange px-7 font-semibold text-mecg-navy transition-transform active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-45">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
+  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} aria-busy={submitState.kind === "submitting"} className="button-primary">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
 }
 
 function ReviewItem({ label, value, preserveWhitespace = false }: { label: string; value: string; preserveWhitespace?: boolean }) {

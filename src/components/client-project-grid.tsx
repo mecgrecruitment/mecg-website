@@ -95,7 +95,7 @@ export default function ClientProjectGrid({
           </p>
 
           <div className="mt-7 border-t border-mecg-navy/10 pt-5">
-            <p className="font-mono text-[0.68rem] uppercase tracking-[0.13em] text-mecg-navy/45">
+            <p className="font-mono text-[0.68rem] uppercase tracking-[0.13em] text-mecg-navy/60">
               MECG engagement
             </p>
             <p className="mt-2 leading-7 text-mecg-navy/60">

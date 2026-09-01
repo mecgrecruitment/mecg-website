@@ -20,15 +20,40 @@ function pipelineStage(displayStatus: string, released: boolean) {
   return 0; // SUBMITTED, NEEDS_INFO
 }
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
 function DateTimeRange({ startsAt, endsAt }: { startsAt: string; endsAt: string }) {
-  const format = (value: string) => new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   return (
     <>
-      <time dateTime={startsAt}>{format(startsAt)}</time>
+      <time dateTime={startsAt}>{formatDateTime(startsAt)}</time>
       {" to "}
-      <time dateTime={endsAt}>{format(endsAt)}</time>
+      <time dateTime={endsAt}>{formatDateTime(endsAt)}</time>
     </>
   );
+}
+
+function applicationHeadline(application: { display_status: string; released_outcome: string | null }) {
+  if (application.display_status === "WITHDRAWN" && !application.released_outcome) return "Application withdrawn";
+  if (application.released_outcome === "OFFER") return "You have an offer to join MECG.";
+  if (application.released_outcome === "WAITLIST") return "You're on the waitlist.";
+  if (application.released_outcome === "REJECT") return "We won't be extending an offer this cycle.";
+  if (application.released_outcome) return application.released_outcome.replaceAll("_", " ");
+  return "Your application is moving through review.";
+}
+
+function nextScheduleItem(plan: ApplicantSchedule): { label: string; when: string | null } | null {
+  const now = Date.now();
+  const confirmed = [
+    ...(plan.rsvps ?? []).map((item) => ({ label: item.eventName, startsAt: item.startsAt })),
+    ...(plan.buddy ? [{ label: "Member chat", startsAt: plan.buddy.startsAt }] : []),
+  ]
+    .filter((item) => new Date(item.startsAt).getTime() > now)
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+  if (confirmed[0]) return { label: confirmed[0].label, when: formatDateTime(confirmed[0].startsAt) };
+  const openCount = (plan.openSlots ?? []).filter((slot) => slot.remaining > 0).length + (plan.openBuddy ?? []).length;
+  return openCount ? { label: `${openCount} open slot${openCount === 1 ? "" : "s"} to book below`, when: null } : null;
 }
 
 type ApplicantSchedule = {
@@ -43,7 +68,7 @@ function scheduleFromJson(value: Json): ApplicantSchedule {
   return value && typeof value === "object" && !Array.isArray(value) ? value as ApplicantSchedule : {};
 }
 
-function StatusStepper({ stage }: { stage: number }) {
+function StatusStepper({ stage, dark = false }: { stage: number; dark?: boolean }) {
   return (
     <ol className="mt-5 flex items-center">
       {STAGE_LABELS.map((label, index) => {
@@ -56,17 +81,25 @@ function StatusStepper({ stage }: { stage: number }) {
                   state === "current"
                     ? "bg-mecg-orange font-semibold text-mecg-navy"
                     : state === "done"
-                      ? "bg-mecg-navy text-white"
-                      : "bg-mecg-navy/[0.08] text-mecg-navy/60"
+                      ? dark ? "bg-white text-mecg-navy" : "bg-mecg-navy text-white"
+                      : dark ? "bg-white/[0.08] text-white/60" : "bg-mecg-navy/[0.08] text-mecg-navy/60"
                 }`}
               >
                 {state === "done" ? "✓" : index + 1}
               </span>
-              <span className={`text-center text-[11px] font-medium ${state === "current" ? "text-mecg-navy" : state === "done" ? "text-mecg-navy/65" : "text-mecg-navy/60"}`}>
+              <span
+                className={`text-center text-[11px] font-medium ${
+                  state === "current"
+                    ? dark ? "text-white" : "text-mecg-navy"
+                    : state === "done"
+                      ? dark ? "text-white/80" : "text-mecg-navy/65"
+                      : dark ? "text-white/60" : "text-mecg-navy/60"
+                }`}
+              >
                 {label}{state === "current" && <span className="block font-semibold">Current</span>}
               </span>
             </div>
-            {index < STAGE_LABELS.length - 1 && <div className={`mx-2 mb-4 h-px flex-1 ${index < stage ? "bg-mecg-navy/25" : "bg-mecg-navy/10"}`} />}
+            {index < STAGE_LABELS.length - 1 && <div className={`mx-2 mb-4 h-px flex-1 ${index < stage ? (dark ? "bg-white/25" : "bg-mecg-navy/25") : (dark ? "bg-white/10" : "bg-mecg-navy/10")}`} />}
           </li>
         );
       })}
@@ -96,7 +129,7 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   if (outcome === "REJECT") {
     return (
       <div className="mt-1 rounded-xl bg-mecg-navy/[0.03] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">Decision released</p>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Decision released</p>
         <h2 className="mt-2 text-xl font-semibold">We won&rsquo;t be extending an offer this cycle.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">This was a genuinely competitive process, and the call came down to cohort fit and the limited spots we had this rush, not a shortfall in what you brought to it. Thank you for the time you put into your application and for showing up to our events, we hope you&rsquo;ll stay in touch.</p>
       </div>
@@ -104,7 +137,7 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   }
   return (
     <div className="mt-1">
-      <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">Decision released</p>
+      <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Decision released</p>
       <h2 className="mt-2 text-xl font-semibold">{outcome.replaceAll("_", " ")}</h2>
     </div>
   );
@@ -126,14 +159,31 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
   const plan = scheduleFromJson(schedule);
   const confirmedSlotIds = new Set((plan.rsvps ?? []).map((item) => item.slotId));
   const releasedSurveyApplication = dashboardApplications.find((application) => application.released_outcome);
+  const heroApplication = dashboardApplications[0];
+  const heroWithdrawn = heroApplication.display_status === "WITHDRAWN" && !heroApplication.released_outcome;
+  const heroStage = pipelineStage(heroApplication.display_status, Boolean(heroApplication.released_outcome));
+  const nextItem = nextScheduleItem(plan);
 
   return (
     <PortalShell
-      eyebrow="Applicant portal"
-      title={`Welcome, ${dashboardApplications[0].applicant_name}.`}
+      eyebrow={heroApplication.applicant_name}
+      title={applicationHeadline(heroApplication)}
       description="Your application, schedule, and released decisions live here. Attendance and coffee chats are never scores."
       workspace
       headerAction={<LogoutButton />}
+      heroExtra={
+        !heroWithdrawn && (
+          <div className="mt-6 max-w-2xl">
+            <StatusStepper stage={heroStage} dark />
+            {nextItem && (
+              <p className="mt-4 text-sm text-white/70">
+                <span className="font-semibold text-white">Next up:</span>{" "}
+                {nextItem.when ? `${nextItem.label} · ${nextItem.when}` : nextItem.label}
+              </p>
+            )}
+          </div>
+        )
+      }
     >
       <div className="space-y-4">
         {submitted === "1" && (
@@ -153,7 +203,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           const withdrawn = application.display_status === "WITHDRAWN" && !application.released_outcome;
           return (
             <section key={application.application_id} className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-              <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/45">{application.cycle_name}</p>
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">{application.cycle_name}</p>
               {withdrawn ? (
                 <>
                   <p className="mt-3 text-2xl font-semibold">Application withdrawn</p>
@@ -162,13 +212,13 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               ) : application.released_outcome ? (
                 <>
                   <OutcomeCard outcome={application.released_outcome} />
-                  <StatusStepper stage={pipelineStage(application.display_status, true)} />
+                  {application.application_id !== heroApplication.application_id && <StatusStepper stage={pipelineStage(application.display_status, true)} />}
                 </>
               ) : (
                 <>
                   <p className="mt-3 text-2xl font-semibold">Your application is moving through review.</p>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/60">No final outcome has been released yet. This page updates automatically once the Board releases a decision.</p>
-                  <StatusStepper stage={pipelineStage(application.display_status, false)} />
+                  {application.application_id !== heroApplication.application_id && <StatusStepper stage={pipelineStage(application.display_status, false)} />}
                   <ApplicantStatusRefresh />
                 </>
               )}
@@ -191,7 +241,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         })}
         <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
           <h2 className="text-lg font-semibold">Your schedule</h2>
-          <p className="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/40">Confirmed</p>
+          <p className="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Confirmed</p>
           <ul className="mt-2 space-y-2">
             {(plan.rsvps ?? []).map((item) => (
               <li key={item.slotId} className="rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
@@ -205,7 +255,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           {plan.buddy && <p className="mt-2 text-sm">Member chat: <DateTimeRange startsAt={plan.buddy.startsAt} endsAt={plan.buddy.endsAt} /></p>}
           {(Boolean(plan.openSlots?.some((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id))) || Boolean(plan.openBuddy?.length)) && (
             <>
-              <p className="mt-5 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/40">Open slots</p>
+              <p className="mt-5 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Open slots</p>
               <div className="mt-2 space-y-2">
                 {(plan.openSlots ?? []).filter((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id)).map((slot) => (
                   <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">

@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import PipelineStatusForm from "./pipeline-status-form";
-import SectionLabel from "@/components/section-label";
+import StatusPill from "@/components/status-pill";
+import SegmentedControl from "@/components/segmented-control";
+import { initials } from "@/lib/initials";
 import {
   DECIDED_PIPELINE_STATUSES,
   PIPELINE_STATUSES,
@@ -28,15 +31,6 @@ type StatusFilter = "ALL" | PipelineStatus;
 const ACTIVE_STATUSES = PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status));
 const DECIDED_STATUSES = PIPELINE_STATUSES.filter((status) => DECIDED_PIPELINE_STATUSES.has(status));
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
 function statusLabel(status: PipelineStatus) {
   return status.replaceAll("_", " ");
 }
@@ -45,13 +39,11 @@ function ApplicantCard({
   application,
   canOperate,
   cycleId,
-  nonTerminalOnly,
   controlId,
 }: {
   application: PipelineApplication;
   canOperate: boolean;
   cycleId: string;
-  nonTerminalOnly: boolean;
   controlId: string;
 }) {
   return (
@@ -64,7 +56,7 @@ function ApplicantCard({
           {application.name}
         </Link>
       </div>
-      <p className="flex items-center gap-1 text-[11.5px] text-mecg-navy/45">
+      <p className="flex items-center gap-1 text-[11.5px] text-mecg-navy/60">
         {application.hasResume ? (
           <>
             <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" className="flex-shrink-0 text-mecg-navy/55" aria-hidden="true">
@@ -81,7 +73,6 @@ function ApplicantCard({
           applicationId={application.id}
           cycleId={cycleId}
           status={application.status}
-          nonTerminalOnly={nonTerminalOnly}
           controlId={controlId}
         />
       )}
@@ -94,7 +85,6 @@ function ApplicantRoster({
   total,
   canOperate,
   cycleId,
-  nonTerminalOnly,
   statusFilter,
   resumeFilter,
   onStatusFilterChange,
@@ -104,7 +94,6 @@ function ApplicantRoster({
   total: number;
   canOperate: boolean;
   cycleId: string;
-  nonTerminalOnly: boolean;
   statusFilter: StatusFilter;
   resumeFilter: ResumeFilter;
   onStatusFilterChange: (filter: StatusFilter) => void;
@@ -146,7 +135,7 @@ function ApplicantRoster({
             </select>
           </label>
         </div>
-        <p className="text-sm text-mecg-navy/50" aria-live="polite">Showing {applications.length} of {total}</p>
+        <p className="text-sm text-mecg-navy/60" aria-live="polite">Showing {applications.length} of {total}</p>
       </div>
 
       {applications.length ? (
@@ -161,14 +150,12 @@ function ApplicantRoster({
                   <Link href={`/admin/applications/${application.id}`} className="font-semibold text-mecg-navy hover:underline">
                     {application.name}
                   </Link>
-                  <p className="mt-0.5 truncate text-xs text-mecg-navy/50">{application.contact}</p>
+                  <p className="mt-0.5 truncate text-xs text-mecg-navy/60">{application.contact}</p>
                 </div>
               </div>
               <div>
-                <span className="inline-flex rounded-full bg-mecg-orange/[0.14] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-orange-ink">
-                  {statusLabel(application.status)}
-                </span>
-                <p className="mt-1 text-[11px] text-mecg-navy/45">
+                <StatusPill tone="orange">{statusLabel(application.status)}</StatusPill>
+                <p className="mt-1 text-[11px] text-mecg-navy/60">
                   Submitted <time dateTime={application.submittedAt}>{application.submittedLabel}</time>
                 </p>
               </div>
@@ -180,7 +167,6 @@ function ApplicantRoster({
                   applicationId={application.id}
                   cycleId={cycleId}
                   status={application.status}
-                  nonTerminalOnly={nonTerminalOnly}
                   controlId={`roster-${application.id}`}
                 />
               ) : (
@@ -192,7 +178,7 @@ function ApplicantRoster({
           ))}
         </ul>
       ) : (
-        <p className="mt-3 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-8 text-center text-sm text-mecg-navy/45">
+        <p className="mt-3 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-8 text-center text-sm text-mecg-navy/60">
           No applicants match these filters.
         </p>
       )}
@@ -200,21 +186,25 @@ function ApplicantRoster({
   );
 }
 
-export default function PipelineBoard({
+function PipelineBoardInner({
   applications,
   canOperate,
   cycleId,
-  nonTerminalOnly,
 }: {
   applications: PipelineApplication[];
   canOperate: boolean;
   cycleId: string;
-  nonTerminalOnly: boolean;
 }) {
+  const searchParams = useSearchParams();
+  const filterParam = searchParams.get("filter");
   const [view, setView] = useState<ApplicantView>("ALL");
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [resumeFilter, setResumeFilter] = useState<ResumeFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    filterParam && isPipelineStatus(filterParam) ? filterParam : "ALL",
+  );
+  const [resumeFilter, setResumeFilter] = useState<ResumeFilter>(
+    filterParam === "MISSING_RESUME" ? "MISSING" : "ALL",
+  );
   const [showDecided, setShowDecided] = useState(false);
 
   const searchResults = useMemo(() => {
@@ -235,14 +225,11 @@ export default function PipelineBoard({
   const decidedCount = applications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
 
   return (
-    <section>
+    <section id="applicants">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div>
-          <SectionLabel number="02">Applicants</SectionLabel>
-          <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Applicants</h2>
-        </div>
+        <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Applicants</h2>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
-          <p className="text-sm text-mecg-navy/50">{applications.length} submitted applicants in this cycle</p>
+          <p className="text-sm text-mecg-navy/60">{applications.length} submitted applicants in this cycle</p>
           <label>
             <span className="sr-only">Search applicants by name or contact</span>
             <input
@@ -250,29 +237,22 @@ export default function PipelineBoard({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search name or contact…"
-              className="min-h-11 w-full rounded-full bg-mecg-navy/[0.035] px-4 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] sm:w-56"
+              className="min-h-11 w-full rounded-full bg-mecg-navy/[0.035] px-4 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] sm:w-56"
             />
           </label>
         </div>
       </div>
 
-      <div className="mt-4 inline-flex rounded-full bg-mecg-navy/[0.05] p-1" role="group" aria-label="Applicant view">
-        <button
-          type="button"
-          aria-pressed={view === "ALL"}
-          onClick={() => setView("ALL")}
-          className={`min-h-10 rounded-full px-4 text-xs font-semibold transition-colors ${view === "ALL" ? "bg-mecg-navy text-white" : "text-mecg-navy/60 hover:text-mecg-navy"}`}
-        >
-          All applicants
-        </button>
-        <button
-          type="button"
-          aria-pressed={view === "PIPELINE"}
-          onClick={() => setView("PIPELINE")}
-          className={`min-h-10 rounded-full px-4 text-xs font-semibold transition-colors ${view === "PIPELINE" ? "bg-mecg-navy text-white" : "text-mecg-navy/60 hover:text-mecg-navy"}`}
-        >
-          Pipeline
-        </button>
+      <div className="mt-4 max-w-xs">
+        <SegmentedControl
+          name="Applicant view"
+          value={view}
+          onChange={(value) => setView(value === "PIPELINE" ? "PIPELINE" : "ALL")}
+          options={[
+            { value: "ALL", label: "All applicants" },
+            { value: "PIPELINE", label: "Pipeline" },
+          ]}
+        />
       </div>
 
       {view === "ALL" ? (
@@ -281,7 +261,6 @@ export default function PipelineBoard({
           total={applications.length}
           canOperate={canOperate}
           cycleId={cycleId}
-          nonTerminalOnly={nonTerminalOnly}
           statusFilter={statusFilter}
           resumeFilter={resumeFilter}
           onStatusFilterChange={setStatusFilter}
@@ -289,40 +268,11 @@ export default function PipelineBoard({
         />
       ) : (
         <>
-          <p className="mt-3 text-xs text-mecg-navy/50 sm:hidden">Browse each stage below. Open a stage to review its applicants.</p>
-          <div className="mt-3.5 flex flex-col gap-2 sm:hidden">
+          <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(190px,1fr)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicant pipeline by stage">
             {ACTIVE_STATUSES.map((status) => {
               const column = searchResults.filter((application) => application.status === status);
               return (
-                <details key={status} className="group rounded-2xl bg-mecg-navy/[0.025] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 marker:content-none">
-                    <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">{statusLabel(status)}</span>
-                    <span className="flex items-center gap-2">
-                      <span className="inline-flex min-w-[24px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">{column.length}</span>
-                      <span className="text-mecg-navy/45 transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
-                    </span>
-                  </summary>
-                  <div className="flex flex-col gap-2 border-t border-mecg-navy/10 p-3">
-                    {column.length ? column.map((application) => (
-                      <ApplicantCard
-                        key={application.id}
-                        application={application}
-                        canOperate={canOperate}
-                        cycleId={cycleId}
-                        nonTerminalOnly={nonTerminalOnly}
-                        controlId={`mobile-${application.id}`}
-                      />
-                    )) : <p className="p-2 text-sm text-mecg-navy/45">{query ? "No matches" : "No applicants yet"}</p>}
-                  </div>
-                </details>
-              );
-            })}
-          </div>
-          <div className="scroll-cue mt-3.5 hidden grid-flow-col auto-cols-[248px] gap-3 overflow-x-auto pb-2 sm:grid" tabIndex={0} role="region" aria-label="Applicant pipeline by stage">
-            {ACTIVE_STATUSES.map((status) => {
-              const column = searchResults.filter((application) => application.status === status);
-              return (
-                <article key={status} className="flex flex-col gap-1.5 rounded-[18px] bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+                <article key={status} className="flex flex-col gap-1.5 rounded-2xl bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
                   <div className="flex items-center justify-between">
                     <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">{statusLabel(status)}</p>
                     <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">
@@ -331,7 +281,7 @@ export default function PipelineBoard({
                   </div>
                   {column.length === 0 ? (
                     <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-3 text-center">
-                      <p className="text-[11.5px] text-mecg-navy/40">{query ? "No matches" : "No applicants yet"}</p>
+                      <p className="text-[11.5px] text-mecg-navy/60">{query ? "No matches" : "No applicants yet"}</p>
                     </div>
                   ) : (
                     column.map((application) => (
@@ -340,8 +290,7 @@ export default function PipelineBoard({
                         application={application}
                         canOperate={canOperate}
                         cycleId={cycleId}
-                        nonTerminalOnly={nonTerminalOnly}
-                        controlId={`desktop-${application.id}`}
+                        controlId={application.id}
                       />
                     ))
                   )}
@@ -357,10 +306,9 @@ export default function PipelineBoard({
             {!showDecided ? (
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {DECIDED_STATUSES.map((status) => (
-                  <span key={status} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/50 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-                    {statusLabel(status)}
-                    <span className="text-mecg-navy/70">{applications.filter((application) => application.status === status).length}</span>
-                  </span>
+                  <StatusPill key={status} tone="neutral">
+                    {statusLabel(status)} · {applications.filter((application) => application.status === status).length}
+                  </StatusPill>
                 ))}
               </div>
             ) : (
@@ -369,7 +317,7 @@ export default function PipelineBoard({
                   const column = searchResults.filter((application) => application.status === status);
                   return (
                     <div key={status}>
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/45">
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/60">
                         {statusLabel(status)} · {column.length}
                       </p>
                       <div className="mt-1.5 flex flex-col gap-1.5">
@@ -383,13 +331,12 @@ export default function PipelineBoard({
                                 applicationId={application.id}
                                 cycleId={cycleId}
                                 status={application.status}
-                                nonTerminalOnly={nonTerminalOnly}
                                 controlId={`decided-${application.id}`}
                               />
                             )}
                           </div>
                         ))}
-                        {!column.length && <p className="text-[11px] text-mecg-navy/35">None</p>}
+                        {!column.length && <p className="text-[11px] text-mecg-navy/60">None</p>}
                       </div>
                     </div>
                   );
@@ -400,5 +347,13 @@ export default function PipelineBoard({
         </>
       )}
     </section>
+  );
+}
+
+export default function PipelineBoard(props: { applications: PipelineApplication[]; canOperate: boolean; cycleId: string }) {
+  return (
+    <Suspense fallback={null}>
+      <PipelineBoardInner {...props} />
+    </Suspense>
   );
 }

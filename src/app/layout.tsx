@@ -39,6 +39,18 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+const ORGANIZATION_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Michigan Engineering Consulting Group",
+  url: "https://mecgmichigan.com",
+  logo: "https://mecgmichigan.com/logos/mecg-color.svg",
+  sameAs: [
+    "https://www.instagram.com/mecgmichigan",
+    "https://www.linkedin.com/company/michigan-engineering-consulting-group",
+  ],
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
@@ -46,7 +58,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       data-scroll-behavior="smooth"
       className={`${montserrat.variable} ${geistMono.variable} ${montserrat.className} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
+        {children}
+      </body>
     </html>
   );
 }

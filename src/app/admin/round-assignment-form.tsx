@@ -73,7 +73,7 @@ export default function RoundAssignmentForm({
           {pending ? "Assigning..." : "Add assignment"}
         </button>
       </div>
-      <p className="mt-3 text-pretty text-xs leading-5 text-mecg-navy/45">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
+      <p className="mt-3 text-pretty text-xs leading-5 text-mecg-navy/60">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
     </form>
   );

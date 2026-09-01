@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAction } from "@/lib/use-action";
 import OperationNotice from "@/components/operation-notice";
 
 export default function ScreeningControls({
@@ -15,34 +15,12 @@ export default function ScreeningControls({
   batchId?: string;
   status?: string;
 }) {
-  const router = useRouter();
   const [reviewerIds, setReviewerIds] = useState<string[]>([]);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { pending, error, success, run } = useAction("/api/admin/screening");
 
   async function act(payload: Record<string, unknown>) {
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch("/api/admin/screening", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cycleId, ...payload }),
-      });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Request failed");
-        return;
-      }
-      setSuccess(payload.action === "CREATE" ? "Screening packets created." : payload.action === "DISTRIBUTE" ? "Approved packets distributed." : "Completed screening frozen.");
-      router.refresh();
-    } catch {
-      setError("Request failed. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    const successMessage = payload.action === "CREATE" ? "Screening packets created." : payload.action === "DISTRIBUTE" ? "Approved packets distributed." : "Completed screening frozen.";
+    await run({ cycleId, ...payload }, { successMessage });
   }
 
   if (!batchId) {

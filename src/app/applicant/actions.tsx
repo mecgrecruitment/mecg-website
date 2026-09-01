@@ -16,9 +16,17 @@ function responseError(body: unknown, fallback: string) {
 
 export function SlotButton({ id }: { id: string }) {
   const router = useRouter();
+  const confirmationRef = useRef<HTMLParagraphElement>(null);
   const inFlight = useRef(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    // Once confirmed, this button is replaced by the message below — move focus onto it so it
+    // doesn't silently fall back to <body>, matching application-form.tsx's step-change pattern.
+    if (confirmed) confirmationRef.current?.focus();
+  }, [confirmed]);
 
   async function rsvp() {
     if (inFlight.current) return;
@@ -34,6 +42,7 @@ export function SlotButton({ id }: { id: string }) {
         return;
       }
       replaceWithActionStatus(router, "rsvp");
+      setConfirmed(true);
     } catch {
       setError("Could not RSVP");
     } finally {
@@ -41,6 +50,10 @@ export function SlotButton({ id }: { id: string }) {
       setPending(false);
       setApplicantActionPending(false);
     }
+  }
+
+  if (confirmed) {
+    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-emerald-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">RSVP confirmed.</p>;
   }
 
   return (
@@ -55,9 +68,15 @@ export function SlotButton({ id }: { id: string }) {
 
 export function BuddyButton({ id }: { id: string }) {
   const router = useRouter();
+  const confirmationRef = useRef<HTMLParagraphElement>(null);
   const inFlight = useRef(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (confirmed) confirmationRef.current?.focus();
+  }, [confirmed]);
 
   async function book() {
     if (inFlight.current) return;
@@ -73,6 +92,7 @@ export function BuddyButton({ id }: { id: string }) {
         return;
       }
       replaceWithActionStatus(router, "buddy");
+      setConfirmed(true);
     } catch {
       setError("Could not book");
     } finally {
@@ -80,6 +100,10 @@ export function BuddyButton({ id }: { id: string }) {
       setPending(false);
       setApplicantActionPending(false);
     }
+  }
+
+  if (confirmed) {
+    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-emerald-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">Member chat booked.</p>;
   }
 
   return (
@@ -153,7 +177,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
   if (responded === "accept") {
     return (
       <div className="mt-4 rounded-xl bg-mecg-orange/10 p-4 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.35)]">
-        <p className="text-sm font-semibold text-mecg-navy">Welcome to MECG.</p>
+        <p className="text-sm font-semibold text-mecg-navy">You&rsquo;re in.</p>
         <p className="mt-1 text-sm leading-6 text-mecg-navy/75">{"We've recorded your acceptance. Onboarding details will follow from the Board."}</p>
       </div>
     );

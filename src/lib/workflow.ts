@@ -12,7 +12,8 @@ const ROUND_TRANSITIONS: Record<string, string[]> = {
   PUBLISHED: ["ACTIVE"],
   ACTIVE: ["FROZEN"],
   FROZEN: ["FINALIZED"],
-  FINALIZED: [],
+  FINALIZED: ["ARCHIVED"],
+  ARCHIVED: [],
 };
 
 const APPLICATION_TRANSITIONS: Record<string, string[]> = {

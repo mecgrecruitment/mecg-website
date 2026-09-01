@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -15,6 +16,9 @@ export async function POST(req: NextRequest) {
   const applicationId = typeof body.applicationId === "string" ? body.applicationId.trim() : "";
   if (!applicationId || applicationId.length > 128 || typeof body?.accept !== "boolean") {
     return NextResponse.json({ error: "Application ID and boolean accept are required" }, { status: 400 });
+  }
+  if (!(await checkRateLimit(`applicant-offer:${user.id}`))) {
+    return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("respond_to_offer", { target_application_id: applicationId, accept: body.accept });

@@ -7,14 +7,14 @@ Decision record (2026-08-22): three directions were evaluated — precision spec
 ## 1. Principles
 
 1. **If it's data, it's mono; if it's prose, it's sans.** Montserrat for everything readable. Geist Mono (`font-mono`) only for machine-ish text: section numbers, stat values, labels, metadata, statuses, captions. Never mono body copy.
-2. **One accent, two inks.** `mecg-orange #fe904d` for fills and for text on navy. `mecg-orange-ink #a83e0b` for orange text on white/paper (6.2:1, WCAG AA). Never raw orange text on a light background — it fails contrast at 2.25:1.
+2. **One accent, two inks.** `mecg-orange #fe904d` for fills and for text on navy. `mecg-orange-ink #a83e0b` for orange text on white/paper (6.2:1, WCAG AA). Never raw orange text on a light background — it fails contrast at 2.25:1. Focus rings follow the same floor and are covered separately below (Tokens, "Focus ring").
 3. **Numbers over adjectives.** Every credibility claim is a figure or a named client. No "passionate", no "excellence", no "Welcome to".
 4. **Proof before people.** Home order: hero, stats, clients, featured engagement, semester spec, people, alumni, CTA.
 5. **Two audiences, one CTA each.** "Discuss a project" (clients) and "Join MECG" (students). Never more than these two actions per view.
 6. **One label grammar.** `NN[.N] / LABEL` — Geist Mono, ~11px, uppercase, tracking 0.16em, number in orange (ink on light, orange on dark). Every section on every page is numbered, including home. `SectionLabel` is the only way to write one.
 7. **Motion seats content, never decorates.** Named tokens only: `--t-detent 150ms` (hover/press), `--t-shift 420ms` (state/page transitions), `--t-seat 700ms` (viewport reveals), eases `--ease-seat` / `--ease-detent`. Reveals are opacity + small translate, staggered 60ms in DOM order. Nothing loops, nothing counts up from zero, real numbers render server-side.
 8. **Real artifacts, never stock.** Photos get a hairline frame (`outline-mecg-navy/10` on light, `outline-white/12` on dark) and a mono figure caption: `FIG. NN — PLACE, CONTEXT`. Empty proof gets a status line (`STATUS / CASE STUDY PENDING CLIENT APPROVAL`), never an apology sentence.
-9. **Square, not pill.** Buttons are 2px radius: `.button-primary` (filled orange, navy text), `.button-secondary` (outline on light), `.button-dark` (outline on dark). Cards square or `rounded-2xl` max; nothing at `rounded-[2rem]`.
+9. **Square, not pill.** Buttons are 2px radius: `.button-primary` (filled orange, navy text), `.button-secondary` (outline on light), `.button-dark` (outline on dark). Cards square or `rounded-2xl` max; nothing at `rounded-[2rem]`. Scoped exception: the portal's elevated outer card — `portal-shell.tsx`, `workspace-state.tsx`, `/apply`, `/applicant` — uses `rounded-[28px]` with a heavy shadow, centralized as a single utility class, reserved for the single outermost card of a full-bleed auth/workspace screen; content cards inside a workspace still stay `rounded-2xl` and hairline.
 10. **Hairlines are the structure.** `border-mecg-navy/10` on light, `border-white/12` on dark, `gap-px` grids on tinted backgrounds. No shadows for structure.
 
 ## 2. Tokens
@@ -27,9 +27,11 @@ Decision record (2026-08-22): three directions were evaluated — precision spec
 | `mecg-orange-ink` | `#a83e0b` | Orange text on light surfaces |
 | `paper` | `#f4f1ec` | Mats behind logos/images |
 
-Type scale: display `text-5xl sm:text-7xl` weight 600 tight tracking; section head `text-4xl sm:text-5xl`; body 16–18px `text-mecg-navy/60`+; mono label 11–12px uppercase tracking `0.16em`; all numerals `tabular-nums`. Containers `max-w-6xl px-6`; sections `py-16 sm:py-20`; bands `py-10`.
+Type scale: display `text-5xl sm:text-7xl` weight 600 tight tracking; section head `text-4xl sm:text-5xl`; body 16–18px `text-mecg-navy/60`+; mono label 11–12px uppercase tracking `0.16em`; all numerals `tabular-nums`. Containers `max-w-6xl px-6`; sections `py-16 sm:py-20`; bands `py-10`. Portal container: `max-w-7xl` (`PortalShell`, `WorkspaceLoading`/`WorkspaceError`, every authenticated `/admin`, `/member`, `/apply` shell) — an intentional second value, distinct from marketing's `max-w-6xl px-6`, not a violation.
 
-Accessibility floors (audited): text on white ≥ `text-mecg-navy/60`; text on navy ≥ `text-white/55`; interactive targets ≥ 44px; every field carries its own `focus-visible` ring.
+Accessibility floors (audited): text on white/paper surfaces needs `text-mecg-navy/60` as a floor on pure white, but `/65` on the tinted surfaces `#f5f4ef` and `#f4f1ec` (60 only clears 4.5:1 by a 0.4–0.5 margin there); text on navy ≥ `text-white/50` (measured: `/45` sits at exactly 4.50:1, no margin; `/50` gives real headroom); interactive targets ≥ 44px; every field carries its own `focus-visible` ring.
+
+Focus ring (audited 2026-09-01): default `:focus-visible` outline is `mecg-navy`, not `mecg-orange` — orange is 2.25:1 on white and 2.58:1 on the `mecg-blue` section fill, both under the 3:1 WCAG 2.2 SC 1.4.11 floor for a non-text indicator; navy clears 3:1 on white (19.33:1), paper (17.16:1), and the `mecg-blue` fill (3.33:1). Navy drops to ~1:1 on the site's opaque navy surfaces (header, footer, `tone="navy"` sections), so `globals.css` overrides those back to orange (8.57:1 on navy).
 
 ## 3. Signature details
 

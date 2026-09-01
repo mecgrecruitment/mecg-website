@@ -2,10 +2,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import ApplicationCountdown from "@/components/application-countdown";
+import LogoutButton from "@/components/logout-button";
+import OperationNotice from "@/components/operation-notice";
 import { currentDestination, currentUser } from "@/lib/auth";
+import {
+  applicationCycleStatus,
+  fetchPublicRecruitment,
+  isBeforeApplicationOpen,
+} from "@/lib/public-recruitment";
 import { createClient } from "@/lib/supabase/server";
 import { parseApplicationDraft } from "@/lib/workflow";
-import LogoutButton from "@/components/logout-button";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
 
@@ -53,6 +60,9 @@ export default async function ApplyPage() {
   const destination = await currentDestination();
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
+  const recruitment = user ? null : await fetchPublicRecruitment();
+  const cycleStatus = recruitment?.cycle ? applicationCycleStatus(recruitment.cycle) : null;
+  const upcomingCycle = recruitment?.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
   const supabase = user ? await createClient() : null;
   const { data: intake, error: intakeError } = supabase ? await supabase.rpc("intake_schema") : { data: null, error: null };
   if (intakeError) console.error("intake_schema failed", intakeError);
@@ -63,7 +73,7 @@ export default async function ApplyPage() {
   const draft = parseApplicationDraft(schema?.draft);
 
   return (
-    <main className="min-h-dvh bg-[#f5f4ef] text-mecg-navy">
+    <main className="min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
       <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-4">
           <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
@@ -78,7 +88,7 @@ export default async function ApplyPage() {
             />
           </Link>
           <div className="flex min-h-11 items-center gap-4 text-sm">
-            <span className="hidden text-mecg-navy/45 sm:inline">{user ? user.email : "Applicant portal"}</span>
+            <span className="hidden text-mecg-navy/60 sm:inline">{user ? user.email : "Applicant portal"}</span>
             {user ? (
               <LogoutButton />
             ) : (
@@ -98,26 +108,31 @@ export default async function ApplyPage() {
             <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">
               {user
                 ? "Your work saves automatically. Take your time, review everything, then submit once."
-                : "Create an account and verify your email to begin the application."}
+                : cycleStatus && !cycleStatus.isOpen
+                  ? cycleStatus.detail
+                  : "Create an account and verify your email to begin the application."}
             </p>
+            {!user && upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
           {user && !schemaUnavailable && typeof schema?.open === "boolean" && (
-            <div className={`rounded-full px-4 py-2 text-sm font-semibold ${schema.open ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+            <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema.open ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
               {schema.open ? "Applications open · About 15 minutes" : "Applications closed"}
             </div>
           )}
         </div>
 
         {user && schema?.needsInfo === true && (
-          <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-900">
-            The board asked for a bit more before deciding — please review and resubmit below.
+          <div className="mt-5">
+            <OperationNotice kind="info">The board asked for a bit more before deciding — please review and resubmit below.</OperationNotice>
           </div>
         )}
 
         {user && schemaUnavailable ? (
-          <div className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-900" role="alert">
-            The application could not be loaded right now. This is not the same as applications being closed. Reload in
-            a moment, and email mecg-board@umich.edu if it keeps happening.
+          <div className="mt-5">
+            <OperationNotice kind="error">
+              The application could not be loaded right now. This is not the same as applications being closed. Reload in
+              a moment, and email mecg-board@umich.edu if it keeps happening.
+            </OperationNotice>
           </div>
         ) : user ? (
           <ApplicationForm
@@ -129,7 +144,7 @@ export default async function ApplyPage() {
             initialDraft={draft}
           />
         ) : (
-          <div className="mx-auto mt-8 max-w-xl rounded-[28px] bg-white p-7 text-left shadow-[0_24px_80px_rgba(7,13,31,0.09)] sm:p-9">
+          <div className="surface-card mx-auto mt-8 max-w-xl bg-white p-7 text-left sm:p-9">
             <ApplicantSignupForm />
           </div>
         )}

@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(99);
+select extensions.plan(105);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -172,5 +172,13 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 select extensions.throws_ok($$select rush.create_cycle('pgTAP member-denied cycle')$$,'42501','forbidden','non-owner cannot create a cycle');
 select extensions.ok(exists(select 1 from rush.audit_events a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP owner-created cycle' and a.actor_id='10000000-0000-4000-8000-000000000001'::uuid and a.action='CYCLE_CREATED' and a.resource='RushCycle' and a.resource_id=c.id), 'cycle creation retains actor-scoped audit behavior');
+-- Audit follow-up (docs/audit/02-database-rls.md, Section 2 findings)
+select extensions.ok(not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='resume_upload_locked'), 'dead resume_upload_locked function is dropped');
+select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='events' and indexname='events_cycle_id_idx'), 'events cycle_id index exists');
+select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='case_groups' and indexname='case_groups_cycle_id_idx'), 'case_groups cycle_id index exists');
+select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='application_documents' and indexname='application_documents_application_id_idx'), 'application_documents application_id index exists');
+select extensions.ok(position('has_cycle_capability' in pg_get_expr((select polqual from pg_policy where polname='application_documents_internal_read' and polrelid='rush.application_documents'::regclass),'rush.application_documents'::regclass)) > 0 and position('m.role::text in' in pg_get_expr((select polqual from pg_policy where polname='application_documents_internal_read' and polrelid='rush.application_documents'::regclass),'rush.application_documents'::regclass)) = 0, 'application_documents internal read is capability-gated instead of a raw committee role check');
+select extensions.ok(position('has_cycle_capability' in pg_get_expr((select polqual from pg_policy where polname='storage_resumes_internal_select' and polrelid='storage.objects'::regclass),'storage.objects'::regclass)) > 0 and position('m.role::text in' in pg_get_expr((select polqual from pg_policy where polname='storage_resumes_internal_select' and polrelid='storage.objects'::regclass),'storage.objects'::regclass)) = 0, 'storage resume internal select is capability-gated instead of a raw committee role check');
+
 select * from extensions.finish();
 rollback;

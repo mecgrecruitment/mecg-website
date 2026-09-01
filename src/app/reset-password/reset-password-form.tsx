@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PortalShell from "@/components/portal-shell";
 import FormField from "@/components/form-field";
+import OperationNotice from "@/components/operation-notice";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -42,10 +43,10 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <PortalShell eyebrow="Account recovery" title="Choose a new password." description="Use at least 8 characters.">
+    <PortalShell eyebrow="Account recovery" title="Choose a new password." description="Use at least 8 characters." centered>
       <form onSubmit={submit} className="space-y-4">
         <FormField label="New password" type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} />
-        {error && <p role="alert" className="rounded bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+        <OperationNotice kind="error">{error}</OperationNotice>
         <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">{busy ? "Updating..." : "Update password"}</button>
       </form>
     </PortalShell>

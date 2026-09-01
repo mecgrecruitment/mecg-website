@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readJsonBody } from "@/lib/api-route";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { RECOVERY_COOKIE, RECOVERY_COOKIE_PATH, recoveryMarkerValid } from "@/lib/recovery-marker";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null);
+  const parsedBody = await readJsonBody(request, 2 * 1024);
+  if (parsedBody.error === "too_large") return NextResponse.json({ code: "INVALID_PASSWORD" }, { status: 400 });
+  const body = parsedBody.error ? null : (parsedBody.data as Record<string, unknown>);
   const password = typeof body?.password === "string" ? body.password : "";
   if (password.length < 8 || password.length > 1024) {
     return NextResponse.json({ code: "INVALID_PASSWORD" }, { status: 400 });

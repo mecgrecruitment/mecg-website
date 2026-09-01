@@ -24,6 +24,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
   const roster = selected ? await supabase.rpc("event_grading_roster", { target_event_id: selected.event_id }) : null;
   const rosterRows = roster?.data ?? [];
   const gradedCount = rosterRows.filter((row) => row.impression_id).length;
+  const firstUngradedId = rosterRows.find((row) => !row.impression_id)?.application_id;
   const navLinks: Array<readonly [string, string]> = [
     ["/member", "All work"],
     ...eventRows.map((row) => [`/member/event?event=${row.event_id}`, row.event_name] as const),
@@ -56,7 +57,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
         </div>
       ) : (
         <section>
-          <SectionLabel number="01">Quick impressions</SectionLabel>
+          <SectionLabel>Quick impressions</SectionLabel>
           <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{gradedCount} of {rosterRows.length} applicants graded</h2>
           <p className="mt-1 text-sm text-mecg-navy/55">Started {formatStart(selected.starts_at)} · you can edit an impression until the grading window closes.</p>
           <div className="mt-3.5 flex flex-col gap-4">
@@ -67,14 +68,22 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
                   <details className="group mt-3 rounded-xl">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
                       <span className="text-sm font-semibold text-mecg-navy">Graded · Score {row.score} · edit</span>
-                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/40 transition-transform group-open:rotate-180">
+                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>
                     <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ score: row.score, tags: row.tags ?? [], note: row.note ?? "" }} />
                   </details>
                 ) : (
-                  <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} />
+                  <details className="group mt-3 rounded-xl" open={row.application_id === firstUngradedId}>
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
+                      <span className="text-sm font-semibold text-mecg-navy">Not graded yet</span>
+                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+                        <path d="M5 8l5 5 5-5" />
+                      </svg>
+                    </summary>
+                    <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} />
+                  </details>
                 )}
               </article>
             ))}

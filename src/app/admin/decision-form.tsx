@@ -1,34 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAction } from "@/lib/use-action";
 import OperationNotice from "@/components/operation-notice";
 
 export default function DecisionForm({ cycleId, applicationId }: { cycleId: string; applicationId: string }) {
-  const router = useRouter();
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const [success, setSuccess] = useState("");
+  const { pending, error, success, run } = useAction("/api/admin/decisions", "Could not create decision. Check your connection and try again.");
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const data = new FormData(event.currentTarget);
-      const response = await fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "CREATE", cycleId, applicationId, outcome: data.get("outcome"), reason: data.get("reason") }) });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not create decision");
-        return;
-      }
-      setSuccess("Decision recommendation created.");
-      router.refresh();
-    } catch {
-      setError("Could not create decision. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    const data = new FormData(event.currentTarget);
+    await run(
+      { action: "CREATE", cycleId, applicationId, outcome: data.get("outcome"), reason: data.get("reason") },
+      { successMessage: "Decision recommendation created.", fallbackError: "Could not create decision" },
+    );
   }
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
@@ -50,29 +33,10 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
 }
 
 export function ApprovalButton({ decisionId }: { decisionId: string }) {
-  const router = useRouter();
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const [success, setSuccess] = useState("");
+  const { pending, error, success, run } = useAction("/api/admin/decisions", "Could not approve");
   async function approve() {
     if (pending || !window.confirm("Approve this recommendation? A second approval locks it for release.")) return;
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "APPROVE", decisionId }) });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not approve");
-        return;
-      }
-      setSuccess("Approval recorded.");
-      router.refresh();
-    } catch {
-      setError("Could not record approval. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    await run({ action: "APPROVE", decisionId }, { successMessage: "Approval recorded.", fallbackError: "Could not approve" });
   }
   return (
     <div className="flex flex-col items-start gap-2">
@@ -84,31 +48,15 @@ export function ApprovalButton({ decisionId }: { decisionId: string }) {
 }
 
 export function PreviewForm({ decisionId, cycleId, current }: { decisionId: string; cycleId: string; current?: string | null }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { pending, error, success, run } = useAction("/api/admin/decisions", "Could not save preview. Check your connection and try again.");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const data = new FormData(event.currentTarget);
-      const response = await fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "PREVIEW", cycleId, decisionId, preview: data.get("preview") }) });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not save preview");
-        return;
-      }
-      setSuccess("Release preview saved.");
-      router.refresh();
-    } catch {
-      setError("Could not save preview. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    const data = new FormData(event.currentTarget);
+    await run(
+      { action: "PREVIEW", cycleId, decisionId, preview: data.get("preview") },
+      { successMessage: "Release preview saved.", fallbackError: "Could not save preview" },
+    );
   }
 
   return (
@@ -124,33 +72,16 @@ export function PreviewForm({ decisionId, cycleId, current }: { decisionId: stri
 }
 
 export function ReleaseButton({ decisionId }: { decisionId: string }) {
-  const router = useRouter();
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const [success, setSuccess] = useState("");
+  const { pending, error, success, run, router } = useAction("/api/admin/decisions", "Could not release outcome. Check your connection and try again.");
   async function release() {
     if (pending || !window.confirm("Release this outcome to the applicant now? This cannot be undone.")) return;
-    setPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch("/api/admin/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "RELEASE", decisionId }) });
-      const body = await response.json().catch(() => null);
-    // A 502 with released:true means the outcome IS released and only the
-    // applicant email failed. Refresh anyway, or the board sees a stale LOCKED
-    // row and clicks Release a second time.
-      if (!response.ok) {
-        setError(body?.error ?? "Could not release");
-        if (body?.released === true) router.refresh();
-        return;
-      }
-      setSuccess("Outcome released to the applicant.");
-      router.refresh();
-    } catch {
-      setError("Could not release outcome. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    // A 502 with released:true means the outcome IS released and only the applicant email
+    // failed. Refresh anyway, or the board sees a stale LOCKED row and clicks Release again.
+    const result = await run(
+      { action: "RELEASE", decisionId },
+      { successMessage: "Outcome released to the applicant.", fallbackError: "Could not release", skipRefresh: true },
+    );
+    if (result.ok || (result.body as { released?: boolean } | null)?.released === true) router.refresh();
   }
   return (
     <div className="flex flex-col items-start gap-2">
