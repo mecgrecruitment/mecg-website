@@ -394,22 +394,41 @@ Routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`. T
 
 ---
 
-## 11. Before this merges
+## 11. Verification status
 
-Nothing here has touched a database. This machine has no Supabase CLI and no Docker, so:
+Everything now runs against a real database. A local Supabase stack (OrbStack plus the Supabase CLI) applied all 11 migrations to Postgres, and every check passes:
 
-Every migration and database test now parses with libpg_query, the parser Postgres itself uses, via `npm run check:sql` (81 files, 211 plpgsql function bodies). That catches syntax errors without a database. It is a parser, not a database: it cannot catch a missing column, a wrong type, or a policy that does not do what it claims. It is also not yet in CI, because pushing a workflow edit needs a token with the `workflow` scope; the two lines to add are in the script's docstring.
+| Check | Result |
+|---|---|
+| `supabase db reset` (11 new migrations) | applies clean |
+| `npm run test:supabase` | **188/188 pgTAP assertions pass** |
+| `npm run verify:workflow` | passes end to end |
+| `npm run verify:auth` | passes, 5 account states, against a production build |
+| `npm run check:sql` | 81 files, 211 function bodies |
+| `tsc`, `eslint`, `npm test` (42), `next build` | pass |
+| `database.types.ts` | regenerated from the applied schema, compiles with zero errors |
 
+Running it found four defects that no static check could see:
 
-- **Eleven migrations have never run**: `20260901000000` through `20260901100000`. They parse; they have not been applied.
-- **pgTAP is at 188 assertions, up from 99. None of the 89 new ones have executed.** Run `npm run test:supabase`.
-- **Run `npm run verify:auth` and `npm run verify:workflow`** against a real project.
-- **`database.types.ts` was hand-edited to match every migration rather than regenerated.** Run `npm run supabase:types` once the migrations apply and reconcile any drift. This is the most likely place for a silent mismatch.
-- **Clear `rush.application_portal_allowlist`.** It holds one address and blocks every applicant until it is emptied.
-- **Set `CRON_SECRET`** or the reminder job fails closed and never sends.
-- **Set `RECRUITMENT_REPLY_TO`** to a shared address, or replies fall back to `CONTACT_TO_EMAIL`.
+- `respond_to_offer` could not be created at all: the original returns `void`, mine returned `boolean`, and `create or replace` cannot change a return type.
+- `set_application_questions` and `set_rubric_criteria` used `entry` as both a plpgsql loop variable and a table alias. plpgsql refuses that at runtime, so both created fine and would have failed on first use.
+- `update_my_profile` named its parameters after the columns they set, making every right-hand-side reference ambiguous.
+- Four pgTAP expectations were wrong in an instructive way: they asserted a function's internal service-role guard, but `EXECUTE` is revoked from `authenticated`, so the grant refuses first. The real protection is stronger than the tests assumed.
 
-`tsc`, `eslint`, `npm test` (42 passing) and `next build` pass after every commit. That is real but it is not the same as the database agreeing.
+`verify:auth` also asserted HTTP 307 for a Server Component redirect. Next 16 answers 200 with a `__next-page-redirect` meta refresh in both dev and production, and never renders the body. That was testing the framework's transport rather than the security property; it now accepts either transport and requires both that the caller is redirected and that the page is not served.
+
+### Still required before merging to main
+
+Main is the Vercel production branch, so merging deploys. The code calls 21 functions and 3 tables that exist locally but **not yet in the production database**, so the order matters:
+
+1. Apply the 11 migrations to production (`supabase db push`).
+2. Clear `rush.application_portal_allowlist`; it holds one address and blocks every applicant.
+3. Set `CRON_SECRET` and `RECRUITMENT_REPLY_TO`.
+4. Then merge.
+
+`destinationForUser` was hardened so a missing `can_start_application` degrades to the previous routing rather than breaking sign-in, which makes the critical path tolerate either order. That protects login only; the rest of the branch still needs its migrations first.
+
+---
 
 ## 12. Decisions, now made
 
