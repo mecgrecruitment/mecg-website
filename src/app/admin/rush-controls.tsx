@@ -332,3 +332,37 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
     </section>
   );
 }
+
+// Cloning is how next semester starts. It carries the rounds, the current
+// rubric for each round, the application questions and the roster; it copies
+// no applicant data at all. Owner-only, and the RPC re-checks that.
+export function CloneCycleForm({ cycleId, cycleName }: ControlProps & { cycleName: string }) {
+  const { act, pending, error } = useRushAction(cycleId);
+  return (
+    <section className="flex flex-col gap-3">
+      <form
+        className="rounded-2xl bg-paper p-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          void act({ action: "CLONE_CYCLE", name: data.get("name") }, event.currentTarget);
+        }}
+      >
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Start the next cycle</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">
+          Copies the rounds, each round&rsquo;s current rubric, the application questions and everyone&rsquo;s access from
+          {" "}{cycleName}. No applicants, evaluations, decisions or events come across. The new cycle starts as a draft.
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="min-w-64 flex-1">
+            <FormField label="New cycle name" name="name" required placeholder="Winter 2027" />
+          </div>
+          <button type="submit" disabled={pending} className="button-primary">
+            {pending ? "Cloning\u2026" : "Clone this cycle"}
+          </button>
+        </div>
+      </form>
+      <ErrorNotice error={error} />
+    </section>
+  );
+}

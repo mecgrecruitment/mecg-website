@@ -34,6 +34,8 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
   SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
   SET_RUBRIC_CRITERIA: "MANAGE_CYCLE",
+  // MANAGE_MEMBERSHIPS is the app-side proxy for OWNER; the RPC re-checks it.
+  CLONE_CYCLE: "MANAGE_MEMBERSHIPS",
 };
 
 function isMemberRole(value: unknown): value is MemberRole {
@@ -115,6 +117,10 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(body.criteria)) return NextResponse.json({ error: "Criteria must be a list" }, { status: 400 });
     if (typeof body.roundId !== "string" || !body.roundId) return NextResponse.json({ error: "Round is required" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_rubric_criteria", { target_round_id: body.roundId, criteria: body.criteria as Json }));
+  } else if (action === "CLONE_CYCLE") {
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name || name.length > 120) return NextResponse.json({ error: "A cycle name is required" }, { status: 400 });
+    ({ data, error } = await supabase.rpc("clone_cycle", { source_cycle_id: cycleId, cycle_name: name }));
   } else if (action === "SET_APPLICATION_STATUS") {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
   } else if (action === "CREATE_SLOT") {

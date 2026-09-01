@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(130);
+select extensions.plan(140);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -334,6 +334,48 @@ select extensions.ok(exists(select 1 from rush.audit_events where resource='Appl
 set local role authenticated;
 select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000032')$$,'55000','application cannot be withdrawn','withdrawing twice is refused');
 set local role postgres;
+
+
+-- Cycle clone. The rule that matters is what it does not copy: no applicant
+-- data may cross a cycle boundary.
+set local role postgres;
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='clone_cycle' and p.prosecdef and p.proconfig @> array['search_path=""']), 'clone function exists and is security definer with empty search path');
+
+-- ...0002 is a MEMBER, not an OWNER anywhere.
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP member clone')$$,'42501','forbidden','a non-owner cannot clone a cycle');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.throws_ok($$select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP profile cycle')$$,'23505','cycle exists','a duplicate cycle name is rejected');
+select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP cloned cycle');
+set local role postgres;
+select extensions.is((select status::text from rush.rush_cycles where name='pgTAP cloned cycle'),'DRAFT','a cloned cycle starts as a draft');
+select extensions.is(
+  (select count(*) from rush.rounds r join rush.rush_cycles c on c.id=r.cycle_id where c.name='pgTAP cloned cycle'),
+  (select count(*) from rush.rounds r where r.cycle_id='10000000-0000-4000-8000-000000000011'),
+  'every round is carried across');
+select extensions.is(
+  (select count(*) from rush.rubric_criteria rc join rush.rubrics b on b.id=rc.rubric_id join rush.rounds r on r.id=b.round_id join rush.rush_cycles c on c.id=r.cycle_id where c.name='pgTAP cloned cycle'),
+  1::bigint,
+  'the edited rubric criteria come across, not the create_cycle defaults');
+select extensions.is(
+  (select max(b.version) from rush.rubrics b join rush.rounds r on r.id=b.round_id join rush.rush_cycles c on c.id=r.cycle_id where c.name='pgTAP cloned cycle'),
+  1,
+  'rubric versions restart at 1 in the new cycle');
+select extensions.is(
+  (select count(*) from rush.application_questions q join rush.rush_cycles c on c.id=q.cycle_id where c.name='pgTAP cloned cycle'),
+  1::bigint,
+  'the edited application questions come across');
+select extensions.is(
+  (select count(*) from rush.applications a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP cloned cycle'),
+  0::bigint,
+  'no applicant data crosses a cycle boundary');
+select extensions.ok(
+  exists(select 1 from rush.memberships m join rush.rush_cycles c on c.id=m.cycle_id where c.name='pgTAP cloned cycle' and m.user_id='10000000-0000-4000-8000-000000000002'::uuid),
+  'the roster is carried across');
 
 select * from extensions.finish();
 rollback;

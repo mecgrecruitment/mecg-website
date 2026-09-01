@@ -1786,6 +1786,10 @@ export type Database = {
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       can_start_application: { Args: never; Returns: boolean }
+      clone_cycle: {
+        Args: { source_cycle_id: string; cycle_name: string }
+        Returns: string
+      }
       cycle_application_questions: { Args: { target_cycle_id: string }; Returns: Json }
       cycle_rubrics: { Args: { target_cycle_id: string }; Returns: Json }
       check_in: { Args: { raw_token: string }; Returns: boolean }

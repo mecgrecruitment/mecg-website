@@ -6,7 +6,7 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
-import { CycleControls } from "../rush-controls";
+import { CloneCycleForm, CycleControls } from "../rush-controls";
 import QuestionEditor, { type IntakeQuestion } from "./question-editor";
 
 export const metadata: Metadata = { title: "Cycle settings" };
@@ -64,6 +64,9 @@ export default async function SettingsPage() {
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/settings" />
       <CycleControls cycleId={cycleId} cycleStatus={cycle.status} />
       <QuestionEditor cycleId={cycleId} initial={questions} locked={Boolean(submittedResult.count)} />
+      {hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS") && (
+        <CloneCycleForm cycleId={cycleId} cycleName={cycle.name} />
+      )}
       <section className="rounded-2xl bg-paper p-5">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Application window</p>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
