@@ -179,7 +179,7 @@ select extensions.ok(exists(select 1 from rush.audit_events a join rush.rush_cyc
 -- rush.can_start_application answers "is there an open cycle you have not
 -- applied to yet". These assertions pin both behaviours.
 set local role postgres;
-select extensions.has_function('rush','can_start_application',array[]::text[],'reapplication eligibility function exists');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='can_start_application' and p.pronargs=0 and p.prosecdef and p.proconfig @> array['search_path=""']), 'reapplication eligibility function exists and is security definer with empty search path');
 
 -- The portal allowlist gates every applicant write. Emptying it inside this
 -- transaction opens the portal for the fixture; the rollback restores it.
@@ -214,7 +214,7 @@ insert into rush_foundation_results values ('reapply_after_submit',(select case 
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='reapply_after_submit'),0::bigint,'applying in the open cycle closes the new-application route');
 
-update rush.rush_cycles set status='CLOSED' where id='10000000-0000-4000-8000-000000000014';
+update rush.rush_cycles set status='CLOSED' where status='OPEN';
 set local role authenticated;
 insert into rush_foundation_results values ('reapply_no_open_cycle',(select case when rush.can_start_application() then 1 else 0 end));
 set local role postgres;
