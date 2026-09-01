@@ -50,6 +50,7 @@ export default async function WorkspaceNav({
       ] as const)
       : []),
     ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash"] as const] : []),
+    ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/audit", "Audit log"] as const] : []),
     ...(can("MANAGE_MEMBERSHIPS") ? [["/admin/people", "People"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
