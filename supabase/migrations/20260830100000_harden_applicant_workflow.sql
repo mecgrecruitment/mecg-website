@@ -1,119 +1,56 @@
 alter table rush.applications
   add column if not exists process_survey_submitted_at timestamptz;
-
 alter table rush.applications drop constraint if exists applications_resume_storage_path_check;
 alter table rush.applications add constraint applications_resume_storage_path_check check (
   resume_storage_path is null
   or resume_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/(resume|[0-9a-f-]{36})\.pdf$'
 );
-
--- rush.applications and rush.conflict_declarations both carry FORCE ROW LEVEL SECURITY, and
--- their policies query each other directly (applications_read_internal checks for a conflict
--- declaration; conflicts_read_own_or_manager checks the application's cycle role). Under the
--- `authenticated` role (no BYPASSRLS), that pair of raw cross-table subqueries recurses forever
--- ("infinite recursion detected in policy for relation ...") — confirmed against a real Postgres
--- instance with a plain board-member `select * from rush.applications`. `postgres` has BYPASSRLS
--- (unlike `authenticated`), so a security definer function owned by `postgres` genuinely bypasses
--- RLS despite FORCE, the same way rush.has_cycle_role already does for memberships.
-create or replace function rush.actor_has_application_conflict(target_application_id text)
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select exists (
-    select 1 from rush.conflict_declarations c
-    where c.application_id = target_application_id and c.declarer_id = auth.uid()
-  );
-$$;
-revoke all on function rush.actor_has_application_conflict(text) from public,anon;
-grant execute on function rush.actor_has_application_conflict(text) to authenticated;
-
-create or replace function rush.application_cycle_id(target_application_id text)
-returns text
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select cycle_id from rush.applications where id = target_application_id;
-$$;
-revoke all on function rush.application_cycle_id(text) from public,anon;
-grant execute on function rush.application_cycle_id(text) to authenticated;
-
-drop policy if exists conflicts_read_own_or_manager on rush.conflict_declarations;
-create policy conflicts_read_own_or_manager on rush.conflict_declarations for select to authenticated
-using (
-  declarer_id = auth.uid()
-  or rush.has_cycle_role(rush.application_cycle_id(application_id), array['BOARD','OWNER']::rush.member_role[])
-);
-
--- storage_resumes_board_select_rush (application_intake.sql) has the identical raw
--- applications/conflict_declarations cross-reference, entered from storage.objects instead of
--- pnms. Confirmed against real Postgres that this alone recurses on ANY resume re-upload
--- (`upsert: true`, used by every "replace your resume" click) regardless of application status —
--- a plain draft-stage re-upload with no submission involved reproduces it. Pre-existing, not
--- introduced by this migration; fixed the same way as the two policies above.
-create or replace function rush.board_can_view_resume(target_path text)
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select exists (
-    select 1 from rush.applications a
-    where a.resume_storage_path = target_path
-      and rush.has_cycle_role(a.cycle_id, array['BOARD','OWNER']::rush.member_role[])
-      and not rush.actor_has_application_conflict(a.id)
-  );
-$$;
-revoke all on function rush.board_can_view_resume(text) from public,anon;
-grant execute on function rush.board_can_view_resume(text) to authenticated;
-
-drop policy if exists storage_resumes_board_select_rush on storage.objects;
-create policy storage_resumes_board_select_rush on storage.objects for select to authenticated
-using (bucket_id = 'resumes' and rush.board_can_view_resume(name));
-
 drop policy if exists applications_read_internal on rush.applications;
 create policy applications_read_internal on rush.applications for select to authenticated
 using (
-  not rush.actor_has_application_conflict(applications.id)
+  not exists (
+    select 1 from rush.conflict_declarations c
+    where c.application_id = applications.id and c.declarer_id = auth.uid()
+  )
   and (
     rush.has_cycle_role(cycle_id, array['BOARD','PANEL','OWNER']::rush.member_role[])
     or (rush.has_cycle_capability(cycle_id, 'CANDIDATE_ACCESS') and not rush.is_active_screening_reviewer(cycle_id))
     or (
-      rush.actor_is_assigned_evaluator(applications.id)
+      exists (
+        select 1 from rush.evaluation_assignments ea
+        where ea.application_id = applications.id and ea.evaluator_id = auth.uid()
+      )
       and not rush.is_active_screening_reviewer(cycle_id)
     )
   )
 );
-
 drop policy if exists applications_read_self on rush.applications;
 create policy applications_read_self on rush.applications for select to authenticated
 using (rush.owns_application(id));
-
 drop policy if exists pnms_read_internal on rush.pnms;
 create policy pnms_read_internal on rush.pnms for select to authenticated
 using (exists (
   select 1 from rush.applications a
   where a.pnm_id = pnms.id
-    and not rush.actor_has_application_conflict(a.id)
+    and not exists (
+      select 1 from rush.conflict_declarations c
+      where c.application_id = a.id and c.declarer_id = auth.uid()
+    )
     and (
       rush.has_cycle_role(a.cycle_id, array['BOARD','PANEL','OWNER']::rush.member_role[])
       or (rush.has_cycle_capability(a.cycle_id, 'CANDIDATE_ACCESS') and not rush.is_active_screening_reviewer(a.cycle_id))
       or (
-        rush.actor_is_assigned_evaluator(a.id)
+        exists (
+          select 1 from rush.evaluation_assignments ea
+          where ea.application_id = a.id and ea.evaluator_id = auth.uid()
+        )
         and not rush.is_active_screening_reviewer(a.cycle_id)
       )
     )
 ));
-
 drop policy if exists pnms_read_self on rush.pnms;
 create policy pnms_read_self on rush.pnms for select to authenticated
 using (auth_user_id = auth.uid());
-
 -- security definer so this bypasses RLS on rush.applications/rush.pnms when called from a
 -- storage.objects policy below — an inline subquery there would instead re-trigger those
 -- tables' own RLS policies mid-evaluation and fail with "infinite recursion detected in
@@ -135,10 +72,8 @@ as $$
 $$;
 revoke all on function rush.resume_upload_locked(text) from public,anon;
 grant execute on function rush.resume_upload_locked(text) to authenticated;
-
 drop policy if exists storage_resumes_applicant_insert on storage.objects;
 drop policy if exists storage_resumes_applicant_update on storage.objects;
-
 create policy storage_resumes_applicant_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'resumes'
@@ -147,7 +82,6 @@ with check (
   and case when metadata->>'size' ~ '^[0-9]+$' then (metadata->>'size')::bigint between 1 and 10485760 else false end
   and not rush.resume_upload_locked(name)
 );
-
 create policy storage_resumes_applicant_update on storage.objects for update to authenticated
 using (
   bucket_id = 'resumes'
@@ -161,7 +95,6 @@ with check (
   and case when metadata->>'size' ~ '^[0-9]+$' then (metadata->>'size')::bigint between 1 and 10485760 else false end
   and not rush.resume_upload_locked(name)
 );
-
 create or replace function rush.create_resume_upload()
 returns text
 language plpgsql
@@ -178,10 +111,8 @@ begin
   return actor::text || '/' || v_cycle_id || '/resume.pdf';
 end;
 $$;
-
 drop function if exists rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean);
 drop function if exists rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text);
-
 create function rush.submit_application(
   applicant_name text,
   applicant_contact text,
@@ -315,7 +246,6 @@ begin
   return jsonb_build_object('applicationId',application_id,'submittedNow',true);
 end;
 $$;
-
 create or replace function rush.submit_application_self_test(applicant_name text,applicant_contact text)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); cycle_id text; resume_path text; result jsonb;
@@ -332,7 +262,6 @@ begin
   result:=rush.submit_application(applicant_name,applicant_contact,null,null,'JUNIOR','Self Test',null,resume_path,'{}'::jsonb,true,'w'||substr(replace(actor::text,'-',''),1,15),'Other',null,null);
   return result->>'applicationId';
 end; $$;
-
 create or replace function rush.save_application_draft(payload jsonb)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); v_cycle_id text; person_id text; application_id text; draft_answers jsonb := coalesce(payload->'answers','{}'::jsonb);
@@ -358,7 +287,6 @@ begin
   if application_id is null then raise exception 'application can no longer be edited' using errcode='55000'; end if;
   return application_id;
 end; $$;
-
 drop function if exists rush.respond_to_offer(boolean);
 drop function if exists rush.respond_to_offer(text,boolean);
 create function rush.respond_to_offer(target_application_id text,accept boolean)
@@ -376,7 +304,6 @@ begin
   insert into rush.audit_events (actor_id,cycle_id,action,resource,resource_id,metadata)
   values (actor,app_row.cycle_id,'OFFER_RESPONSE','Application',app_row.id,jsonb_build_object('response',case when accept then 'ACCEPTED' else 'DECLINED' end));
 end; $$;
-
 create or replace function rush.rsvp_slot(target_slot_id text)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); slot rush.event_slots%rowtype; event_row rush.events%rowtype; app_row rush.applications%rowtype; taken integer; result_id text;
@@ -399,7 +326,6 @@ begin
   insert into rush.slot_rsvps (slot_id,application_id) values (slot.id,app_row.id) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.book_buddy_slot(target_slot_id text)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); slot rush.buddy_slots%rowtype; app_row rush.applications%rowtype; result_id text;
@@ -418,7 +344,6 @@ begin
   insert into rush.buddy_bookings (slot_id,application_id) values (slot.id,app_row.id) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.applicant_schedule()
 returns jsonb language sql stable security definer set search_path='' as $$
   with my_apps as (
@@ -444,7 +369,6 @@ returns jsonb language sql stable security definer set search_path='' as $$
         and not exists (select 1 from rush.buddy_bookings own join rush.buddy_slots booked on booked.id=own.slot_id where own.application_id=ma.id and booked.cycle_id=ma.cycle_id)),'[]'::jsonb)
   );
 $$;
-
 drop function if exists rush.submit_process_survey(integer,text);
 drop function if exists rush.submit_process_survey(text,integer,text);
 create function rush.submit_process_survey(target_application_id text,score integer,survey_note text default null)
@@ -461,7 +385,6 @@ begin
   insert into rush.process_surveys (cycle_id,rating,note) values (app_row.cycle_id,score,nullif(trim(survey_note),''));
   update rush.applications a set process_survey_submitted_at=now() where a.id=app_row.id;
 end; $$;
-
 drop function if exists rush.applicant_dashboard();
 create function rush.applicant_dashboard()
 returns table(application_id text,applicant_name text,cycle_name text,display_status text,released_outcome rush.decision_outcome,released_at timestamptz,has_resume boolean,responses jsonb,offer_response text,survey_submitted boolean)
@@ -476,7 +399,6 @@ language sql stable security definer set search_path='' as $$
   left join lateral (select x.id,x.outcome,x.released_at from rush.decisions x where x.application_id=a.id and x.status='RELEASED' order by x.released_at desc limit 1) d on true
   where p.auth_user_id=auth.uid() order by a.created_at desc;
 $$;
-
 create or replace function rush.set_application_status(target_application_id text,next_status rush.application_status)
 returns void language plpgsql security definer set search_path='' as $$
 declare app_row rush.applications%rowtype;
@@ -500,11 +422,9 @@ begin
     values (auth.uid(),app_row.cycle_id,'APPLICATION_STATUS_CHANGED','Application',target_application_id,jsonb_build_object('from',app_row.status,'to',next_status));
   end if;
 end; $$;
-
 revoke all on function rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text),rush.save_application_draft(jsonb),rush.respond_to_offer(text,boolean),rush.rsvp_slot(text),rush.book_buddy_slot(text),rush.applicant_schedule(),rush.submit_process_survey(text,integer,text),rush.applicant_dashboard(),rush.set_application_status(text,rush.application_status) from public,anon;
 grant execute on function rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text),rush.save_application_draft(jsonb),rush.respond_to_offer(text,boolean),rush.rsvp_slot(text),rush.book_buddy_slot(text),rush.applicant_schedule(),rush.submit_process_survey(text,integer,text),rush.applicant_dashboard(),rush.set_application_status(text,rush.application_status) to authenticated,service_role;
 revoke all on function rush.submit_application_self_test(text,text) from public,anon,authenticated;
-
 create or replace function rush.create_decision(target_cycle_id text, target_application_id text, target_outcome rush.decision_outcome, decision_reason text)
 returns text language plpgsql security definer set search_path='' as $$
 declare result_id text;

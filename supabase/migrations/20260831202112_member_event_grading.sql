@@ -298,4 +298,4 @@ grant execute on function
   rush.my_grading_events(),
   rush.event_grading_roster(text),
   rush.submit_event_impression(text, text, int, text[], text)
-to authenticated, service_role;
+to authenticated, service_role;;

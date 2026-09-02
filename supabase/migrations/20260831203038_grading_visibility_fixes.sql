@@ -22,4 +22,4 @@ using (
     rush.event_cycle_id(event_id),
     array['BOARD', 'PANEL', 'OWNER', 'RECRUITMENT_COMMITTEE']::rush.member_role[]
   )
-);
+);;

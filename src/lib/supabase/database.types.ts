@@ -375,6 +375,71 @@ export type Database = {
           },
         ]
       }
+      clerk_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          issuer: string
+          occurred_at: string
+          outcome: string
+          processed_at: string
+          subject: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          issuer: string
+          occurred_at: string
+          outcome: string
+          processed_at?: string
+          subject: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          issuer?: string
+          occurred_at?: string
+          outcome?: string
+          processed_at?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      clerk_webhook_identity_state: {
+        Row: {
+          issuer: string
+          last_event_at: string
+          last_event_id: string
+          last_event_type: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          issuer: string
+          last_event_at: string
+          last_event_id: string
+          last_event_type: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          issuer?: string
+          last_event_at?: string
+          last_event_id?: string
+          last_event_type?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clerk_webhook_identity_state_last_event_id_fkey"
+            columns: ["last_event_id"]
+            isOneToOne: false
+            referencedRelation: "clerk_webhook_events"
+            referencedColumns: ["event_id"]
+          },
+        ]
+      }
       buddy_bookings: {
         Row: {
           application_id: string
@@ -1033,6 +1098,61 @@ export type Database = {
           },
         ]
       }
+      hash_votes: {
+        Row: {
+          application_id: string
+          created_at: string
+          cycle_id: string
+          id: string
+          note: string
+          updated_at: string
+          vote: string
+          voter_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          cycle_id: string
+          id?: string
+          note?: string
+          updated_at?: string
+          vote: string
+          voter_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          note?: string
+          updated_at?: string
+          vote?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hash_votes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hash_votes_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hash_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interest_signups: {
         Row: {
           class_year: string | null
@@ -1574,6 +1694,63 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          email: string
+          id: string
+          name: string
+          normalized_email: string
+          reason: string
+          referrer_id: string
+          status: string
+          updated_at: string
+          year_major: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          email: string
+          id?: string
+          name: string
+          normalized_email: string
+          reason: string
+          referrer_id: string
+          status?: string
+          updated_at?: string
+          year_major?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          email?: string
+          id?: string
+          name?: string
+          normalized_email?: string
+          reason?: string
+          referrer_id?: string
+          status?: string
+          updated_at?: string
+          year_major?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminders_sent: {
         Row: {
           id: string
@@ -1733,6 +1910,7 @@ export type Database = {
         Row: {
           closes_at: string | null
           created_at: string
+          hash_quorum: number
           id: string
           name: string
           opens_at: string | null
@@ -1742,6 +1920,7 @@ export type Database = {
         Insert: {
           closes_at?: string | null
           created_at?: string
+          hash_quorum?: number
           id?: string
           name: string
           opens_at?: string | null
@@ -1751,6 +1930,7 @@ export type Database = {
         Update: {
           closes_at?: string | null
           created_at?: string
+          hash_quorum?: number
           id?: string
           name?: string
           opens_at?: string | null
@@ -2176,11 +2356,11 @@ export type Database = {
         Returns: Json
       }
       applicant_schedule: { Args: never; Returns: Json }
-      application_cycle_id: {
+      application_portal_allows: { Args: { actor: string }; Returns: boolean }
+      apply_hash_result: {
         Args: { target_application_id: string }
         Returns: string
       }
-      application_portal_allows: { Args: { actor: string }; Returns: boolean }
       approve_decision: {
         Args: { target_decision_id: string }
         Returns: {
@@ -2220,6 +2400,10 @@ export type Database = {
       cancel_event: {
         Args: { cancellation_reason: string; target_event_id: string }
         Returns: undefined
+      }
+      cast_hash_vote: {
+        Args: { target_application_id: string; vote_note: string; vote_value: string }
+        Returns: boolean
       }
       check_in: { Args: { raw_token: string }; Returns: boolean }
       staff_assisted_check_in: {
@@ -2352,6 +2536,19 @@ export type Database = {
         }
         Returns: string
       }
+      reconcile_clerk_webhook: {
+        Args: {
+          existing_app_user_id?: string | null
+          identity_display_name?: string | null
+          identity_email?: string | null
+          identity_issuer: string
+          identity_subject: string
+          webhook_event_id: string
+          webhook_event_type: string
+          webhook_occurred_at: string
+        }
+        Returns: string
+      }
       event_cycle_id: { Args: { target_event_id: string }; Returns: string }
       event_for_token: {
         Args: { raw_token: string }
@@ -2415,6 +2612,32 @@ export type Database = {
         Returns: boolean
       }
       intake_schema: { Args: never; Returns: Json }
+      hash_tally: {
+        Args: { target_cycle_id: string }
+        Returns: {
+          application_id: string
+          no_count: number
+          outcome: string
+          quorum: number
+          total_votes: number
+          unsure_count: number
+          yes_count: number
+        }[]
+      }
+      hash_ballot: {
+        Args: { target_cycle_id: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
+      hash_notes: {
+        Args: { target_cycle_id: string }
+        Returns: {
+          application_id: string
+          note: string
+        }[]
+      }
       is_active_screening_reviewer: {
         Args: { target_cycle_id: string }
         Returns: boolean
@@ -2522,7 +2745,6 @@ export type Database = {
         Returns: undefined
       }
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
-      round_cycle_id: { Args: { target_round_id: string }; Returns: string }
       rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
       save_application_draft: { Args: { payload: Json }; Returns: string }
       screening_admin_overview: {
@@ -2599,6 +2821,10 @@ export type Database = {
       set_project_staffing: {
         Args: { members: Json; target_project_id: string }
         Returns: number
+      }
+      set_referral_status: {
+        Args: { next_status: string; target_referral_id: string }
+        Returns: boolean
       }
       set_round_status: {
         Args: {
@@ -2679,6 +2905,16 @@ export type Database = {
           target_application_id: string
         }
         Returns: undefined
+      }
+      submit_referral: {
+        Args: {
+          referral_email: string
+          referral_name: string
+          referral_reason: string
+          referral_year_major: string
+          target_cycle_id: string
+        }
+        Returns: string
       }
       submit_screening_review: {
         Args: {

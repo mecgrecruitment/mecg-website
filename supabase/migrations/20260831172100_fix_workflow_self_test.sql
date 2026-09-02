@@ -67,3 +67,4 @@ end; $$;
 
 revoke all on function rush.verify_full_workflow(uuid,uuid,uuid) from public,anon,authenticated;
 grant execute on function rush.verify_full_workflow(uuid,uuid,uuid) to service_role;
+;

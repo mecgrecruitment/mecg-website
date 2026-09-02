@@ -95,3 +95,4 @@ $$;
 
 revoke all on function rush.set_membership_role(uuid, text, rush.member_role) from public, anon;
 grant execute on function rush.set_membership_role(uuid, text, rush.member_role) to authenticated, service_role;
+;

@@ -3,12 +3,10 @@ alter table rush.pnms
   add column if not exists college text check (college is null or char_length(trim(college)) between 1 and 80),
   add column if not exists grad_term text check (grad_term is null or char_length(trim(grad_term)) between 1 and 40),
   add column if not exists accessibility_notes text check (accessibility_notes is null or char_length(accessibility_notes) <= 2000);
-
 alter table rush.applications
   add column if not exists draft_payload jsonb,
   add column if not exists offer_response text check (offer_response is null or offer_response in ('ACCEPTED','DECLINED')),
   add column if not exists offer_responded_at timestamptz;
-
 create or replace function rush.intake_schema()
 returns jsonb
 language plpgsql
@@ -53,15 +51,12 @@ begin
   );
 end;
 $$;
-
 alter table rush.events
   add column if not exists location text check (location is null or char_length(trim(location)) between 1 and 200),
   add column if not exists visibility text not null default 'INTERNAL' check (visibility in ('PUBLIC','INVITE','INTERNAL')),
   add column if not exists ends_at timestamptz;
-
 alter table rush.decisions
   add column if not exists communication_preview text check (communication_preview is null or char_length(trim(communication_preview)) between 1 and 4000);
-
 create table if not exists rush.interest_signups (
   id text primary key default gen_random_uuid()::text,
   cycle_id text not null references rush.rush_cycles (id) on delete cascade,
@@ -73,7 +68,6 @@ create table if not exists rush.interest_signups (
   created_at timestamptz not null default now(),
   unique (cycle_id, email)
 );
-
 create table if not exists rush.event_slots (
   id text primary key default gen_random_uuid()::text,
   event_id text not null references rush.events (id) on delete cascade,
@@ -82,7 +76,6 @@ create table if not exists rush.event_slots (
   capacity integer not null default 8 check (capacity between 1 and 80),
   check (ends_at > starts_at)
 );
-
 create table if not exists rush.slot_rsvps (
   id text primary key default gen_random_uuid()::text,
   slot_id text not null references rush.event_slots (id) on delete cascade,
@@ -90,7 +83,6 @@ create table if not exists rush.slot_rsvps (
   created_at timestamptz not null default now(),
   unique (slot_id, application_id)
 );
-
 create table if not exists rush.case_groups (
   id text primary key default gen_random_uuid()::text,
   cycle_id text not null references rush.rush_cycles (id) on delete cascade,
@@ -98,13 +90,11 @@ create table if not exists rush.case_groups (
   prompt text not null default '',
   created_at timestamptz not null default now()
 );
-
 create table if not exists rush.case_group_members (
   group_id text not null references rush.case_groups (id) on delete cascade,
   application_id text not null references rush.applications (id) on delete cascade,
   primary key (group_id, application_id)
 );
-
 create table if not exists rush.buddy_slots (
   id text primary key default gen_random_uuid()::text,
   cycle_id text not null references rush.rush_cycles (id) on delete cascade,
@@ -114,7 +104,6 @@ create table if not exists rush.buddy_slots (
   created_at timestamptz not null default now(),
   check (ends_at > starts_at)
 );
-
 create table if not exists rush.buddy_bookings (
   id text primary key default gen_random_uuid()::text,
   slot_id text not null references rush.buddy_slots (id) on delete cascade,
@@ -123,7 +112,6 @@ create table if not exists rush.buddy_bookings (
   unique (slot_id),
   unique (application_id, slot_id)
 );
-
 create table if not exists rush.process_surveys (
   id text primary key default gen_random_uuid()::text,
   cycle_id text not null references rush.rush_cycles (id) on delete cascade,
@@ -131,16 +119,22 @@ create table if not exists rush.process_surveys (
   note text check (note is null or char_length(note) <= 2000),
   created_at timestamptz not null default now()
 );
-
-alter table rush.interest_signups enable row level security; alter table rush.interest_signups force row level security;
-alter table rush.event_slots enable row level security; alter table rush.event_slots force row level security;
-alter table rush.slot_rsvps enable row level security; alter table rush.slot_rsvps force row level security;
-alter table rush.case_groups enable row level security; alter table rush.case_groups force row level security;
-alter table rush.case_group_members enable row level security; alter table rush.case_group_members force row level security;
-alter table rush.buddy_slots enable row level security; alter table rush.buddy_slots force row level security;
-alter table rush.buddy_bookings enable row level security; alter table rush.buddy_bookings force row level security;
-alter table rush.process_surveys enable row level security; alter table rush.process_surveys force row level security;
-
+alter table rush.interest_signups enable row level security;
+alter table rush.interest_signups force row level security;
+alter table rush.event_slots enable row level security;
+alter table rush.event_slots force row level security;
+alter table rush.slot_rsvps enable row level security;
+alter table rush.slot_rsvps force row level security;
+alter table rush.case_groups enable row level security;
+alter table rush.case_groups force row level security;
+alter table rush.case_group_members enable row level security;
+alter table rush.case_group_members force row level security;
+alter table rush.buddy_slots enable row level security;
+alter table rush.buddy_slots force row level security;
+alter table rush.buddy_bookings enable row level security;
+alter table rush.buddy_bookings force row level security;
+alter table rush.process_surveys enable row level security;
+alter table rush.process_surveys force row level security;
 create policy interest_board_read on rush.interest_signups for select to authenticated
 using (rush.has_cycle_role(cycle_id, array['BOARD','OWNER']::rush.member_role[]));
 create policy slots_read on rush.event_slots for select to authenticated
@@ -170,12 +164,9 @@ using (rush.owns_application(application_id) or exists (
 ));
 create policy surveys_board_read on rush.process_surveys for select to authenticated
 using (rush.has_cycle_role(cycle_id, array['BOARD','OWNER']::rush.member_role[]));
-
 grant select on rush.interest_signups, rush.event_slots, rush.slot_rsvps, rush.case_groups, rush.case_group_members, rush.buddy_slots, rush.buddy_bookings, rush.process_surveys to authenticated;
 grant all on rush.interest_signups, rush.event_slots, rush.slot_rsvps, rush.case_groups, rush.case_group_members, rush.buddy_slots, rush.buddy_bookings, rush.process_surveys to service_role;
-
 grant usage on schema rush to anon;
-
 create or replace function rush.public_recruitment()
 returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare cycle_row rush.rush_cycles%rowtype;
@@ -198,7 +189,6 @@ begin
     ), '[]'::jsonb)
   );
 end; $$;
-
 create or replace function rush.submit_interest(full_name text, email text, uniqname text default null, class_year text default null, how_heard text default null)
 returns text language plpgsql security definer set search_path='' as $$
 declare v_cycle_id text; result_id text;
@@ -214,9 +204,7 @@ begin
   returning id into result_id;
   return result_id;
 end; $$;
-
 drop function if exists rush.create_event(text,text,timestamptz,timestamptz,timestamptz);
-
 create function rush.create_event(
   target_cycle_id text,
   event_name text,
@@ -241,7 +229,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'EVENT_CREATED','Event',event_id);
   return jsonb_build_object('id',event_id,'checkinToken',raw_token);
 end; $$;
-
 create or replace function rush.save_application_draft(payload jsonb)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); v_cycle_id text; person_id text; application_id text;
@@ -263,7 +250,6 @@ begin
   returning id into application_id;
   return application_id;
 end; $$;
-
 create or replace function rush.create_event_slot(target_event_id text, slot_starts_at timestamptz, slot_ends_at timestamptz, slot_capacity integer default 8)
 returns text language plpgsql security definer set search_path='' as $$
 declare target_cycle text; result_id text;
@@ -273,7 +259,6 @@ begin
   insert into rush.event_slots (event_id, starts_at, ends_at, capacity) values (target_event_id, slot_starts_at, slot_ends_at, slot_capacity) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.rsvp_slot(target_slot_id text)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); slot rush.event_slots%rowtype; app_id text; taken integer; result_id text;
@@ -291,7 +276,6 @@ begin
   returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.create_case_group(target_cycle_id text, group_name text, group_prompt text default '')
 returns text language plpgsql security definer set search_path='' as $$
 declare result_id text;
@@ -300,7 +284,6 @@ begin
   insert into rush.case_groups (cycle_id, name, prompt) values (target_cycle_id, trim(group_name), coalesce(group_prompt,'')) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.assign_case_group(target_group_id text, target_application_id text)
 returns void language plpgsql security definer set search_path='' as $$
 declare v_cycle text;
@@ -310,7 +293,6 @@ begin
   delete from rush.case_group_members where application_id=target_application_id and group_id in (select id from rush.case_groups where cycle_id=v_cycle);
   insert into rush.case_group_members (group_id, application_id) values (target_group_id, target_application_id);
 end; $$;
-
 create or replace function rush.create_buddy_slot(target_cycle_id text, slot_starts_at timestamptz, slot_ends_at timestamptz)
 returns text language plpgsql security definer set search_path='' as $$
 declare result_id text;
@@ -319,7 +301,6 @@ begin
   insert into rush.buddy_slots (cycle_id, member_id, starts_at, ends_at) values (target_cycle_id, auth.uid(), slot_starts_at, slot_ends_at) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.book_buddy_slot(target_slot_id text)
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); slot rush.buddy_slots%rowtype; app_id text; result_id text;
@@ -334,7 +315,6 @@ begin
   insert into rush.buddy_bookings (slot_id, application_id) values (target_slot_id, app_id) returning id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.respond_to_offer(accept boolean)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); app_row rush.applications%rowtype;
@@ -345,7 +325,6 @@ begin
   if app_row.id is null then raise exception 'no offer' using errcode='P0002'; end if;
   update rush.applications set offer_response = case when accept then 'ACCEPTED' else 'DECLINED' end, offer_responded_at=now() where id=app_row.id;
 end; $$;
-
 create or replace function rush.set_decision_preview(target_decision_id text, preview_text text)
 returns void language plpgsql security definer set search_path='' as $$
 declare d rush.decisions%rowtype;
@@ -354,7 +333,6 @@ begin
   if d.id is null or not rush.has_cycle_role(d.cycle_id, array['PANEL','OWNER']::rush.member_role[]) then raise exception 'forbidden' using errcode='42501'; end if;
   update rush.decisions set communication_preview = trim(preview_text) where id=target_decision_id;
 end; $$;
-
 create or replace function rush.submit_process_survey(score integer, survey_note text default null)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); v_cycle_id text;
@@ -366,7 +344,6 @@ begin
   if v_cycle_id is null then raise exception 'application required' using errcode='42501'; end if;
   insert into rush.process_surveys (cycle_id, rating, note) values (v_cycle_id, score, nullif(trim(survey_note),''));
 end; $$;
-
 create or replace function rush.set_applicant_profile(
   uniqname text default null,
   college text default null,
@@ -383,7 +360,6 @@ begin
     accessibility_notes = coalesce(nullif(trim(accessibility_notes),''), rush.pnms.accessibility_notes)
   where auth_user_id = auth.uid();
 end; $$;
-
 create or replace function rush.applicant_schedule()
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
@@ -432,10 +408,8 @@ returns jsonb language sql stable security definer set search_path='' as $$
     ), '[]'::jsonb)
   );
 $$;
-
 revoke all on function rush.public_recruitment(), rush.submit_interest(text,text,text,text,text) from public;
 grant execute on function rush.public_recruitment(), rush.submit_interest(text,text,text,text,text) to anon, authenticated, service_role;
-
 revoke all on function
   rush.create_event(text,text,timestamptz,timestamptz,timestamptz,text,text,text,timestamptz),
   rush.save_application_draft(jsonb),

@@ -11,7 +11,6 @@ create table rush.screening_batches (
   created_at timestamptz not null default now(),
   unique (cycle_id)
 );
-
 create table rush.screening_reviewers (
   batch_id text not null references rush.screening_batches(id) on delete cascade,
   reviewer_id uuid not null references rush.profiles(id),
@@ -19,7 +18,6 @@ create table rush.screening_reviewers (
   active boolean not null default true,
   primary key (batch_id, reviewer_id)
 );
-
 create table rush.screening_packets (
   id text primary key default gen_random_uuid()::text,
   batch_id text not null references rush.screening_batches(id) on delete cascade,
@@ -34,7 +32,6 @@ create table rush.screening_packets (
   unique (batch_id, application_id),
   unique (batch_id, candidate_code)
 );
-
 create table rush.screening_assignments (
   id text primary key default gen_random_uuid()::text,
   packet_id text not null references rush.screening_packets(id) on delete cascade,
@@ -44,7 +41,6 @@ create table rush.screening_assignments (
   updated_at timestamptz not null default now(),
   unique (packet_id, reviewer_id)
 );
-
 create table rush.screening_reviews (
   id text primary key default gen_random_uuid()::text,
   assignment_id text not null unique references rush.screening_assignments(id) on delete cascade,
@@ -54,7 +50,6 @@ create table rush.screening_reviews (
   score numeric not null check (score between 0 and 100),
   submitted_at timestamptz not null default now()
 );
-
 create table rush.screening_ratings (
   review_id text not null references rush.screening_reviews(id) on delete cascade,
   criterion_id text not null references rush.rubric_criteria(id),
@@ -62,7 +57,6 @@ create table rush.screening_ratings (
   note text check (note is null or char_length(note) <= 2000),
   primary key (review_id, criterion_id)
 );
-
 create table rush.screening_distribution_runs (
   id text primary key default gen_random_uuid()::text,
   batch_id text not null references rush.screening_batches(id) on delete cascade,
@@ -72,21 +66,24 @@ create table rush.screening_distribution_runs (
   created_by uuid not null references rush.profiles(id),
   created_at timestamptz not null default now()
 );
-
 create index screening_assignments_reviewer_status_idx on rush.screening_assignments(reviewer_id,status);
 create index screening_packets_batch_status_idx on rush.screening_packets(batch_id,redaction_status);
-
-alter table rush.screening_batches enable row level security; alter table rush.screening_batches force row level security;
-alter table rush.screening_reviewers enable row level security; alter table rush.screening_reviewers force row level security;
-alter table rush.screening_packets enable row level security; alter table rush.screening_packets force row level security;
-alter table rush.screening_assignments enable row level security; alter table rush.screening_assignments force row level security;
-alter table rush.screening_reviews enable row level security; alter table rush.screening_reviews force row level security;
-alter table rush.screening_ratings enable row level security; alter table rush.screening_ratings force row level security;
-alter table rush.screening_distribution_runs enable row level security; alter table rush.screening_distribution_runs force row level security;
-
+alter table rush.screening_batches enable row level security;
+alter table rush.screening_batches force row level security;
+alter table rush.screening_reviewers enable row level security;
+alter table rush.screening_reviewers force row level security;
+alter table rush.screening_packets enable row level security;
+alter table rush.screening_packets force row level security;
+alter table rush.screening_assignments enable row level security;
+alter table rush.screening_assignments force row level security;
+alter table rush.screening_reviews enable row level security;
+alter table rush.screening_reviews force row level security;
+alter table rush.screening_ratings enable row level security;
+alter table rush.screening_ratings force row level security;
+alter table rush.screening_distribution_runs enable row level security;
+alter table rush.screening_distribution_runs force row level security;
 grant all on rush.screening_batches, rush.screening_reviewers, rush.screening_packets, rush.screening_assignments,
   rush.screening_reviews, rush.screening_ratings, rush.screening_distribution_runs to service_role;
-
 create or replace function rush.create_screening_batch(target_cycle_id text, reviewer_ids uuid[])
 returns text language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); v_round_id text; v_rubric_id text; v_batch_id text; v_reviewer_id uuid;
@@ -124,7 +121,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle_id,'SCREENING_BATCH_CREATED','ScreeningBatch',v_batch_id);
   return v_batch_id;
 end $$;
-
 create or replace function rush.screening_admin_overview(target_cycle_id text)
 returns jsonb language sql stable security definer set search_path='' as $$
   select case when not rush.has_cycle_role(target_cycle_id,array['BOARD','OWNER']::rush.member_role[]) then null else coalesce((
@@ -138,7 +134,6 @@ returns jsonb language sql stable security definer set search_path='' as $$
     ) from rush.screening_batches b where b.cycle_id=target_cycle_id
   ),'null'::jsonb) end;
 $$;
-
 create or replace function rush.approve_screening_packet(target_packet_id text, approved boolean)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); target_cycle text;
@@ -148,7 +143,6 @@ begin
   update rush.screening_packets set redaction_status=case when approved then 'APPROVED' else 'REJECTED' end,approved_by=actor,approved_at=now() where id=target_packet_id;
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle,case when approved then 'SCREENING_PACKET_APPROVED' else 'SCREENING_PACKET_REJECTED' end,'ScreeningPacket',target_packet_id);
 end $$;
-
 create or replace function rush.update_screening_packet_content(target_packet_id text, revised_content jsonb)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); target_cycle text;
@@ -160,7 +154,6 @@ begin
   update rush.screening_packets set content=revised_content,content_hash=encode(extensions.digest(revised_content::text,'sha256'),'hex'),redaction_status='PENDING',approved_by=null,approved_at=null where id=target_packet_id;
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle,'SCREENING_PACKET_REDACTED','ScreeningPacket',target_packet_id);
 end $$;
-
 create or replace function rush.screening_assignment_inputs(target_batch_id text)
 returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare target_cycle text;
@@ -175,7 +168,6 @@ begin
     'reviewers',(select coalesce(jsonb_agg(jsonb_build_object('reviewerId',reviewer_id,'capacity',capacity)),'[]'::jsonb) from rush.screening_reviewers where batch_id=target_batch_id and active)
   );
 end $$;
-
 create or replace function rush.commit_screening_assignments(target_batch_id text, proposal jsonb, commitment text, summary jsonb)
 returns integer language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); target_cycle text; required_count integer; inserted_count integer;
@@ -205,13 +197,11 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(actor,target_cycle,'SCREENING_DISTRIBUTED','ScreeningBatch',target_batch_id,jsonb_build_object('assignments',inserted_count));
   return inserted_count;
 end $$;
-
 create or replace function rush.my_screening_queue(target_cycle_id text)
 returns table(assignment_id text,candidate_code text,assignment_status text) language sql stable security definer set search_path='' as $$
   select a.id,p.candidate_code,a.status from rush.screening_assignments a join rush.screening_packets p on p.id=a.packet_id join rush.screening_batches b on b.id=p.batch_id
   where b.cycle_id=target_cycle_id and b.status='PUBLISHED' and a.reviewer_id=auth.uid() order by p.candidate_code;
 $$;
-
 create or replace function rush.screening_assignment_detail(target_assignment_id text)
 returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare result jsonb;
@@ -223,7 +213,6 @@ begin
   if result is null then raise exception 'assignment not found' using errcode='P0002'; end if;
   return result;
 end $$;
-
 create or replace function rush.submit_screening_review(target_assignment_id text, ratings jsonb, review_evidence text, review_recommendation text)
 returns numeric language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); v_rubric_id text; v_review_id text; expected integer; weighted numeric; target_cycle text;
@@ -243,7 +232,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle,'SCREENING_REVIEW_SUBMITTED','ScreeningReview',v_review_id);
   return weighted;
 end $$;
-
 create or replace function rush.recuse_screening_assignment(target_assignment_id text, recusal_reason text)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); packet text; application text; batch text; target_cycle text; replacement uuid;
@@ -262,7 +250,6 @@ begin
   if replacement is not null then insert into rush.screening_assignments(packet_id,reviewer_id) values(packet,replacement); end if;
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(actor,target_cycle,'SCREENING_RECUSED','ScreeningAssignment',target_assignment_id,jsonb_build_object('replacementCreated',replacement is not null));
 end $$;
-
 create or replace function rush.freeze_screening_batch(target_batch_id text)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); target_cycle text;
@@ -277,12 +264,10 @@ begin
   update rush.rounds set status='FROZEN' where id=(select r.round_id from rush.rubrics r join rush.screening_batches b on b.rubric_id=r.id where b.id=target_batch_id);
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle,'SCREENING_FROZEN','ScreeningBatch',target_batch_id);
 end $$;
-
 create or replace function rush.is_active_screening_reviewer(target_cycle_id text)
 returns boolean language sql stable security definer set search_path='' as $$
   select exists(select 1 from rush.screening_reviewers sr join rush.screening_batches b on b.id=sr.batch_id where b.cycle_id=target_cycle_id and b.status='PUBLISHED' and sr.reviewer_id=auth.uid() and sr.active);
 $$;
-
 create or replace function rush.member_applicants(target_cycle_id text)
 returns table(id text,name text) language sql stable security definer set search_path='' as $$
   select a.id,p.name from rush.applications a join rush.pnms p on p.id=a.pnm_id
@@ -291,7 +276,6 @@ returns table(id text,name text) language sql stable security definer set search
     and not rush.is_active_screening_reviewer(target_cycle_id)
   order by p.name;
 $$;
-
 revoke all on function rush.create_screening_batch(text,uuid[]),rush.screening_admin_overview(text),rush.approve_screening_packet(text,boolean),rush.update_screening_packet_content(text,jsonb),
   rush.screening_assignment_inputs(text),rush.commit_screening_assignments(text,jsonb,text,jsonb),rush.my_screening_queue(text),
   rush.screening_assignment_detail(text),rush.submit_screening_review(text,jsonb,text,text),rush.recuse_screening_assignment(text,text),

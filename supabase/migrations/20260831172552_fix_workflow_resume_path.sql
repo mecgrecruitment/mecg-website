@@ -50,3 +50,4 @@ begin
   return result ->> 'applicationId';
 end;
 $$;
+;

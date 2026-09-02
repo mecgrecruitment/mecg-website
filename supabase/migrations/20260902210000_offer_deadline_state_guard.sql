@@ -17,7 +17,7 @@ begin
   if not rush.has_cycle_role(app_row.cycle_id, array['PANEL','OWNER']::rush.member_role[]) then
     raise exception 'panel role required' using errcode = '42501';
   end if;
-  if not exists (
+  if app_row.status <> 'OFFERED' or not exists (
     select 1 from rush.decisions d
     where d.application_id = app_row.id
       and d.cycle_id = app_row.cycle_id

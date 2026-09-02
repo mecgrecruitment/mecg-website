@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(255);
+select extensions.plan(264);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -614,6 +614,7 @@ select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000
 set local role postgres;
 insert into rush.decisions(id,cycle_id,application_id,outcome,status,reason,created_by_id)
 values('10000000-0000-4000-8000-000000000041','10000000-0000-4000-8000-000000000014','10000000-0000-4000-8000-000000000032','OFFER','LOCKED','pgTAP offer','10000000-0000-4000-8000-000000000001');
+update rush.applications set status='OFFERED' where id='10000000-0000-4000-8000-000000000032';
 set local role authenticated;
 select extensions.ok(rush.set_offer_deadline('10000000-0000-4000-8000-000000000032', now() + interval '7 days'),'an owner sets a deadline on an active locked offer');
 set local role postgres;
@@ -755,6 +756,29 @@ select extensions.is(
   '10000000-0000-4000-8000-000000000003'::uuid,
   'prepared imports retain their existing domain UUID');
 select extensions.ok(rush.disable_external_identity('https://clerk.test','user_new'),'external identity deletion revokes only the provider mapping');
+select extensions.has_table('rush','clerk_webhook_events','Clerk webhook delivery ledger exists');
+select extensions.has_table('rush','clerk_webhook_identity_state','Clerk webhook ordering cursor exists');
+select extensions.has_function('rush','reconcile_clerk_webhook',array['text','text','text','text','timestamptz','text','text','uuid'],'atomic Clerk webhook reconciler exists');
+select extensions.ok(
+  has_function_privilege('service_role','rush.reconcile_clerk_webhook(text,text,text,text,timestamptz,text,text,uuid)','EXECUTE')
+    and not has_function_privilege('authenticated','rush.reconcile_clerk_webhook(text,text,text,text,timestamptz,text,text,uuid)','EXECUTE')
+    and not has_function_privilege('anon','rush.reconcile_clerk_webhook(text,text,text,text,timestamptz,text,text,uuid)','EXECUTE'),
+  'only the service role can reconcile Clerk webhooks');
+select extensions.is(
+  rush.reconcile_clerk_webhook('evt-created','user.created','https://clerk.test','user_ordered','2026-09-02T20:00:00Z','ordered@example.invalid','Ordered User'),
+  'APPLIED','a first Clerk event provisions the identity');
+select extensions.is(
+  rush.reconcile_clerk_webhook('evt-created','user.created','https://clerk.test','user_ordered','2026-09-02T20:00:00Z','ordered@example.invalid','Ordered User'),
+  'DUPLICATE','a retried Clerk delivery is idempotent');
+select extensions.is(
+  rush.reconcile_clerk_webhook('evt-deleted','user.deleted','https://clerk.test','user_ordered','2026-09-02T20:02:00Z'),
+  'APPLIED','a newer Clerk deletion is applied');
+select extensions.is(
+  rush.reconcile_clerk_webhook('evt-stale-update','user.updated','https://clerk.test','user_ordered','2026-09-02T20:01:00Z','ordered@example.invalid','Stale Name'),
+  'STALE','an older Clerk update is rejected after deletion');
+select extensions.ok(
+  (select disabled_at is not null from rush.auth_identities where issuer='https://clerk.test' and subject='user_ordered'),
+  'a stale Clerk update cannot reactivate a deleted identity');
 set local role postgres;
 select extensions.ok(not exists(
   select 1 from pg_constraint c
