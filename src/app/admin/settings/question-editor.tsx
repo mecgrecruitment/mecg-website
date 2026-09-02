@@ -8,6 +8,8 @@ export type IntakeQuestion = {
   prompt: string;
   inputType: "short_text" | "long_text" | "url" | "select";
   required: boolean;
+  options: string[];
+  maxWords: number | null;
 };
 
 const INPUT_TYPES: ReadonlyArray<readonly [IntakeQuestion["inputType"], string]> = [
@@ -54,7 +56,12 @@ export default function QuestionEditor({
   const duplicateKeys = questions
     .map((question) => question.key)
     .filter((key, index, all) => all.indexOf(key) !== index);
-  const invalid = questions.some((question) => !KEY_PATTERN.test(question.key) || !question.prompt.trim())
+  const invalid = questions.some((question) => !KEY_PATTERN.test(question.key) || !question.prompt.trim()
+    || question.options.length > 50
+    || question.options.some((option) => !option.trim() || option.trim().length > 200)
+    || new Set(question.options.map((option) => option.trim())).size !== question.options.length
+    || (question.inputType === "select" && question.options.length === 0)
+    || (question.maxWords !== null && (!Number.isInteger(question.maxWords) || question.maxWords < 1 || question.maxWords > 2000)))
     || duplicateKeys.length > 0;
 
   async function save() {
@@ -137,7 +144,10 @@ export default function QuestionEditor({
                     Answer type
                     <select
                       value={question.inputType}
-                      onChange={(event) => update(index, { inputType: event.target.value as IntakeQuestion["inputType"] })}
+                      onChange={(event) => {
+                        const inputType = event.target.value as IntakeQuestion["inputType"];
+                        update(index, { inputType, maxWords: inputType === "long_text" ? question.maxWords : null });
+                      }}
                       className="mt-1.5 min-h-11 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
                     >
                       {INPUT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
@@ -147,7 +157,34 @@ export default function QuestionEditor({
                     <input type="checkbox" checked={question.required} onChange={(event) => update(index, { required: event.target.checked })} className="size-4" />
                     Required
                   </label>
+                  {question.inputType === "long_text" && (
+                    <label className="block text-sm font-medium">
+                      Word limit <span className="font-normal text-mecg-navy/60">Optional</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={2000}
+                        value={question.maxWords ?? ""}
+                        onChange={(event) => update(index, { maxWords: event.target.value ? Number(event.target.value) : null })}
+                        className="mt-1.5 min-h-11 w-32 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      />
+                    </label>
+                  )}
                 </div>
+                {question.inputType === "select" && (
+                  <label className="mt-3 block text-sm font-medium">
+                    Choices <span className="font-normal text-mecg-navy/60">One per line</span>
+                    <textarea
+                      value={question.options.join("\n")}
+                      onChange={(event) => update(index, {
+                        options: event.target.value.split("\n").map((option) => option.trim()).filter(Boolean),
+                      })}
+                      rows={4}
+                      aria-invalid={question.options.length === 0}
+                      className="mt-1.5 w-full rounded-xl bg-mecg-navy/[0.035] p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                    />
+                  </label>
+                )}
                 {!KEY_PATTERN.test(question.key) && (
                   <p className="mt-2 text-xs text-red-700">Keys are lowercase letters, digits and underscores, starting with a letter.</p>
                 )}
@@ -165,7 +202,7 @@ export default function QuestionEditor({
             <button
               type="button"
               disabled={pending || questions.length >= 25}
-              onClick={() => setQuestions((current) => [...current, { key: `question_${current.length + 1}`, prompt: "", inputType: "long_text", required: true }])}
+              onClick={() => setQuestions((current) => [...current, { key: `question_${current.length + 1}`, prompt: "", inputType: "long_text", required: true, options: [], maxWords: null }])}
               className="button-secondary text-sm"
             >
               + Add question

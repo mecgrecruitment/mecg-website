@@ -11,6 +11,7 @@ import {
   applicationCycleStatus,
   fetchPublicRecruitment,
   formatRecruitmentEventTime,
+  isBeforeApplicationOpen,
 } from "@/lib/public-recruitment";
 import InterestForm from "./interest-form";
 
@@ -51,6 +52,9 @@ export default async function JoinPage() {
   const events = recruitment.events ?? [];
   const status = recruitment.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const showInterestForm = status?.isOpen !== true;
+  // Only before the window opens. Keyed off isOpen !== true, this countdown also
+  // rendered after closes_at, under an "Applications are closed" heading.
+  const upcomingCycle = recruitment.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
 
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
@@ -63,7 +67,7 @@ export default async function JoinPage() {
           <div>
             <h2 className="text-2xl font-semibold">{status?.label ?? "No active recruitment cycle"}</h2>
             <p className="mt-2 leading-7 text-mecg-navy/65">{status?.detail ?? "Join the interest list and we will send the next published dates."}</p>
-            {status?.opensAt && status.isOpen !== true ? <ApplicationCountdown opensAt={status.opensAt} /> : null}
+            {upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
           {recruitment.cycle?.name ? <p className="shrink-0 text-sm font-semibold text-mecg-blue">{recruitment.cycle.name}</p> : null}
         </div>

@@ -23,11 +23,31 @@ Confirm these settings without recording their values:
 - `NEXT_PUBLIC_MECG_SUPABASE_URL`
 - `NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY`
 - `MECG_SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `CLERK_ISSUER`
+- `CLERK_WEBHOOK_SIGNING_SECRET`
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 - `CONTACT_TO_EMAIL`
 - `CRON_SECRET`
 - `BASE_URL`, when MECG does not use host-header inference
+
+## Verify Clerk DNS
+
+The production Clerk instance currently requires these public CNAME records:
+
+| Host | Target |
+| --- | --- |
+| `clerk.mecgmichigan.com` | `frontend-api.clerk.services` |
+| `accounts.mecgmichigan.com` | `accounts.clerk.services` |
+| `clkmail.mecgmichigan.com` | `mail.j9fyrp9lip0l.clerk.services` |
+| `clk._domainkey.mecgmichigan.com` | `dkim1.j9fyrp9lip0l.clerk.services` |
+| `clk2._domainkey.mecgmichigan.com` | `dkim2.j9fyrp9lip0l.clerk.services` |
+
+Run `npm run verify:infrastructure`. It must exit 0 before testing login. Then
+open `/login` in a private browser session and confirm the email field renders;
+`/__clerk/v1/environment` and `/__clerk/v1/client` must not return HTTP 400.
 
 In Supabase Auth, enable leaked-password protection. Confirm the production callback URL and both password-recovery URLs.
 
@@ -41,6 +61,7 @@ Start the application against staging. Run:
 
 ```bash
 npm run supabase:verify-project
+npm run verify:infrastructure
 npm run supabase:lint
 npm run test:supabase
 npm run verify:backend

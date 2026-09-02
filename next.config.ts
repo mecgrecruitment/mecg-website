@@ -55,6 +55,11 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Next 16 routes unmatched URLs outside the normal layout tree. A global
+    // boundary guarantees the branded, accessible 404 is used there too.
+    globalNotFound: true,
+  },
   allowedDevOrigins: ["127.0.0.1"],
   // pdfjs-dist loads its worker as a real file at runtime. Bundled into a server
   // chunk that file does not exist, so every resume upload died with

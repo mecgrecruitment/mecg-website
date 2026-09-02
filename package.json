@@ -10,6 +10,7 @@
     "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test",
     "test:e2e": "playwright test",
     "verify:backend": "node scripts/verify-backend.mjs",
+    "verify:infrastructure": "node scripts/verify-public-infrastructure.mjs",
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
     "verify:auth": "node scripts/verify-auth-routing.mjs",
     "test:supabase": "supabase test db --linked supabase/tests/rush_foundation.sql",

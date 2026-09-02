@@ -148,7 +148,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
           </select>
         </label>
         <OperationNotice kind="error">{error}</OperationNotice>
-        <button disabled={pending} className="button-primary">{pending ? "Submitting…" : "Submit and lock review"}</button>
+        <button type="submit" disabled={pending} className="button-primary">{pending ? "Submitting…" : "Submit and lock review"}</button>
       </form>
       <section className="rounded-2xl bg-mecg-orange/[0.08] p-5" aria-labelledby="recusal-heading">
         <h2 id="recusal-heading" className="font-semibold text-mecg-orange-ink">Recognize this applicant?</h2>

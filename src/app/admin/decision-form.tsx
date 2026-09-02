@@ -26,8 +26,9 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
         <option>REJECT</option>
         <option>PROCEDURAL_REVIEW</option>
       </select>
-      <input name="reason" required disabled={pending} placeholder="Evidence-based reason" className="operation-control min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
-      <button disabled={pending} className="button-primary self-start text-xs">{pending ? "Creating…" : "Recommend"}</button>
+      <label className="sr-only" htmlFor={`reason-${applicationId}`}>Evidence-based reason</label>
+      <input id={`reason-${applicationId}`} name="reason" required disabled={pending} placeholder="Evidence-based reason" className="operation-control min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
+      <button type="submit" disabled={pending} className="button-primary self-start text-xs">{pending ? "Creating…" : "Recommend"}</button>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>
     </form>
@@ -63,8 +64,9 @@ export function PreviewForm({ decisionId, cycleId, current }: { decisionId: stri
 
   return (
     <form className="flex flex-col gap-1.5" onSubmit={submit}>
-      <textarea name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-2.5 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
-      <button disabled={pending} className="button-secondary self-start text-xs">
+      <label className="sr-only" htmlFor={`preview-${decisionId}`}>Applicant email preview</label>
+      <textarea id={`preview-${decisionId}`} name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-2.5 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
+      <button type="submit" disabled={pending} className="button-secondary self-start text-xs">
         {pending ? "Saving…" : "Save preview"}
       </button>
       <OperationNotice kind="error">{error}</OperationNotice>

@@ -86,7 +86,7 @@ export default async function RoundsPage() {
   }));
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-6xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Rounds"

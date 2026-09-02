@@ -22,6 +22,29 @@ const VALID_BODY = {
 
 const FAKE_USER = { id: "u1", email: "ada@umich.edu", name: "Ada", active: true, memberships: [] };
 
+/** The argument list of rush.submit_application, in declaration order, from
+ * supabase/migrations/20260830100000_harden_applicant_workflow.sql:185-199.
+ * scripts/check-sql.py:91-95 deliberately compares RPC names only and never
+ * argument names, so a call carrying an argument the function does not define
+ * passes check:sql, tsc and lint and only fails in production as PGRST202 —
+ * a dead portal. Asserting the key set here is what catches that drift. */
+const SUBMIT_APPLICATION_ARGUMENTS = [
+  "applicant_name",
+  "applicant_contact",
+  "preferred_name",
+  "phone",
+  "class_year",
+  "major",
+  "linkedin_url",
+  "resume_storage_path",
+  "answers",
+  "consent",
+  "uniqname",
+  "college",
+  "grad_term",
+  "accessibility_notes",
+];
+
 async function importRoute(testCase: string) {
   const specifier = `./route.ts?case=${testCase}`;
   return import(specifier) as Promise<typeof import("./route.ts")>;
@@ -51,16 +74,35 @@ function fakeSupabaseClient(handlers: RpcHandlers) {
 }
 
 function mockCommon(t: test.TestContext, client: unknown, options: { rateLimited?: boolean; sendEmail?: () => Promise<void> } = {}) {
+  const rateLimitKeys: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => FAKE_USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => !options.rateLimited, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", {
+    namedExports: {
+      checkRateLimit: async (key: string) => { rateLimitKeys.push(key); return !options.rateLimited; },
+      clientIp: () => "203.0.113.7",
+    },
+  });
   t.mock.module("@/lib/email", {
     namedExports: {
       sendEmail: options.sendEmail ?? (async () => undefined),
       wrapEmail: (html: string) => html,
     },
   });
+  return rateLimitKeys;
 }
+
+// The per-user key alone is not a ceiling: with user.id in the bucket name the
+// IP is only a discriminator, so N minted accounts on one host buy N buckets.
+test("POST /api/apply rate limits per user and per IP, not either alone", async (t) => {
+  const { client } = fakeSupabaseClient({
+    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
+  });
+  const keys = mockCommon(t, client);
+  const { POST } = await importRoute("rate-limit-key");
+  await POST(postRequest(VALID_BODY));
+  assert.deepEqual(keys, ["apply:u1:203.0.113.7", "apply-ip:203.0.113.7"]);
+});
 
 test("POST /api/apply returns 401 when unauthenticated", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => null } });
@@ -155,6 +197,7 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
   assert.deepEqual(await res.json(), { applicationId: "application-1" });
   assert.equal(calls.length, 2);
   assert.equal(calls[1].name, "log_message");
+  assert.deepEqual(Object.keys(calls[0].args ?? {}), SUBMIT_APPLICATION_ARGUMENTS);
   assert.deepEqual(calls[0], {
     name: "submit_application",
     args: {

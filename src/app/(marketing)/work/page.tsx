@@ -6,6 +6,7 @@ import PageIntro from "@/components/page-intro";
 import ProjectCard from "@/components/project-card";
 import SectionHeading from "@/components/section-heading";
 import { listPublicProjectCards } from "@/lib/projects/public-projects";
+import { serializeJsonLd } from "@/lib/json-ld";
 import { ENGAGEMENT_STEPS, PAST_PROJECTS, SEMESTER_FACTS, SERVICES } from "@/lib/site-content";
 
 const TITLE = "Client Services";
@@ -33,7 +34,7 @@ export default async function WorkPage() {
 
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_JSON_LD) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(BREADCRUMB_JSON_LD) }} />
       <PageIntro
         title="Client Services"
         copy="MECG partners with organizations on semester-long, pro-bono consulting engagements. Each project begins with a focused question and ends with recommendations the client can use."

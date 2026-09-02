@@ -34,3 +34,12 @@ test("responses keep the expected browser security boundaries", async ({ request
   expect(response.headers()["x-frame-options"]).toBe("DENY");
   expect(response.headers()["content-security-policy"]).toContain("font-src 'self'");
 });
+
+test("unknown routes use the MECG recovery page", async ({ page }) => {
+  const response = await page.goto("/this-route-does-not-exist");
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "This page does not exist." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Return to public site", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Account access" })).toBeVisible();
+});

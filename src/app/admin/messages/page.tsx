@@ -42,7 +42,7 @@ export default async function MessagesPage() {
   const failedCount = log.filter((message) => !message.delivered).length;
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-5xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Messages"

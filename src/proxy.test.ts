@@ -27,7 +27,7 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   const signedOut = async () => ({ userId: null });
   const signedIn = async () => ({ userId: "user_clerk" });
 
-  for (const pathname of ["/design-preview", "/login", "/apply", "/api/auth/login", "/api/webhooks/clerk"]) {
+  for (const pathname of ["/home", "/login", "/apply", "/api/auth/login", "/api/webhooks/clerk"]) {
     const response = await handleProxy(signedOut, request(pathname));
     assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
   }
@@ -48,7 +48,7 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   const unknownResponse = await handleProxy(signedOut, request("/this-route-does-not-exist"));
   assert.equal(unknownResponse.headers.get("x-middleware-next"), "1");
 
-  for (const pathname of ["/design-preview", "/home", "/work/sample", "/this-route-does-not-exist", "/api/contact"]) {
+  for (const pathname of ["/home", "/work/sample", "/this-route-does-not-exist", "/api/contact"]) {
     assert.equal(shouldBypassClerk(request(pathname)), true, pathname);
   }
   for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
@@ -58,7 +58,7 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: "sk_test" }), true);
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: undefined }), false);
 
-  const unconfiguredPublicResponse = await handleUnconfiguredProxy(request("/design-preview"));
+  const unconfiguredPublicResponse = await handleUnconfiguredProxy(request("/home"));
   assert.equal(unconfiguredPublicResponse.headers.get("x-middleware-next"), "1");
 
   const unconfiguredProtectedResponse = await handleUnconfiguredProxy(request("/member"));

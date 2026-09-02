@@ -51,5 +51,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not start resume upload" }, { status: 500 });
   }
 
-  return NextResponse.json({ documentId: data.documentId, path: data.path, uploadUrl: signed.signedUrl }, { status: 201 });
+  return NextResponse.json({ documentId: data.documentId, uploadUrl: signed.signedUrl }, { status: 201 });
 }

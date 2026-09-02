@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasValidCronAuthorization } from "@/lib/cron-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml, sendEmail, wrapEmail } from "@/lib/email";
 
@@ -22,23 +23,27 @@ type Reminder = {
   dueAt: string;
 };
 
-function parseReminders(value: unknown): Reminder[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+function parseReminders(value: unknown): Reminder[] | null {
+  if (!Array.isArray(value)) return null;
+  const reminders: Reminder[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
     const row = entry as Record<string, unknown>;
     const text = (field: unknown) => (typeof field === "string" ? field : "");
-    if (!text(row.email) || !text(row.subjectId) || !text(row.recipientId)) return [];
-    return [{
-      kind: text(row.kind) || "EVALUATION_DUE",
+    const dueAt = text(row.dueAt);
+    if (row.kind !== "EVALUATION_DUE" || !text(row.email) || !text(row.subjectId) || !text(row.recipientId)
+        || !dueAt || Number.isNaN(new Date(dueAt).getTime())) return null;
+    reminders.push({
+      kind: row.kind,
       subjectId: text(row.subjectId),
       recipientId: text(row.recipientId),
       email: text(row.email),
       name: text(row.name) || "there",
       detail: text(row.detail),
-      dueAt: text(row.dueAt),
-    }];
-  });
+      dueAt,
+    });
+  }
+  return reminders;
 }
 
 async function run(request: NextRequest) {
@@ -47,8 +52,9 @@ async function run(request: NextRequest) {
     console.error("reminders: CRON_SECRET is unset, refusing to run");
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
   }
-  const presented = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
-  if (presented !== expected) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!hasValidCronAuthorization(request.headers, expected)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("pending_reminders");
@@ -57,9 +63,16 @@ async function run(request: NextRequest) {
     return NextResponse.json({ error: "Could not load reminders" }, { status: 500 });
   }
 
+  const reminders = parseReminders(data);
+  if (!reminders) {
+    console.error("pending_reminders returned an invalid payload");
+    return NextResponse.json({ error: "Could not load reminders" }, { status: 500 });
+  }
+
   let sent = 0;
   let failed = 0;
-  for (const reminder of parseReminders(data)) {
+  let recordingFailed = 0;
+  for (const reminder of reminders) {
     const due = reminder.dueAt
       ? new Date(reminder.dueAt).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", timeZone: "America/Detroit" })
       : "soon";
@@ -71,19 +84,27 @@ async function run(request: NextRequest) {
         { label: "Open your evaluations", href: "https://mecgmichigan.com/member" },
       ),
     });
-    if (delivered) sent += 1;
-    else failed += 1;
-    // Marked either way. A provider outage must not turn into the same nudge
-    // every hour until it recovers.
+    if (!delivered) {
+      failed += 1;
+      continue;
+    }
     const { error: markError } = await supabase.rpc("mark_reminder_sent", {
       reminder_kind: reminder.kind,
       subject_id: reminder.subjectId,
       recipient_id: reminder.recipientId,
     });
-    if (markError) console.error("mark_reminder_sent failed", markError);
+    if (markError) {
+      recordingFailed += 1;
+      console.error("mark_reminder_sent failed", markError);
+    } else {
+      sent += 1;
+    }
   }
 
-  return NextResponse.json({ sent, failed });
+  return NextResponse.json(
+    { sent, failed, recordingFailed },
+    { status: failed > 0 || recordingFailed > 0 ? 503 : 200 },
+  );
 }
 
 export async function GET(request: NextRequest) {

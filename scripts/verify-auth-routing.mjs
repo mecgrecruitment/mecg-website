@@ -3,6 +3,7 @@ import { createClerkClient } from "@clerk/backend";
 import { chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { loadSupabaseEnv, requireServiceRoleKey } from "./lib/supabase-env.mjs";
+import { clerkTestEmail } from "./lib/clerk-test-email.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const { url, serviceRoleKey } = loadSupabaseEnv(root);
@@ -35,7 +36,7 @@ function assertNoError(error, operation) {
 }
 try {
   for (const testCase of cases) {
-    const email = `auth-${testCase.label}-${suffix}@example.invalid`;
+    const email = clerkTestEmail(`auth-${testCase.label}`, suffix);
     const clerkUser = await clerk.users.createUser({
       emailAddress: [email], password, firstName: "Auth", lastName: testCase.label,
     });

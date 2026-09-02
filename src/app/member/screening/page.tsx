@@ -21,7 +21,7 @@ export default async function ScreeningQueuePage() {
   const { data: queue, error } = await screeningRpc<ScreeningQueueItem[]>(supabase, "my_screening_queue", { target_cycle_id: cycle.cycleId });
   if (error) throw new Error(error.message);
   return (
-    <main className="workspace-stack mx-auto flex max-w-4xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       <WorkspaceHeader
         eyebrow={cycle.cycle.name}
         title="Blind application screening"

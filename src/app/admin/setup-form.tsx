@@ -53,7 +53,7 @@ export default function SetupForm() {
       </label>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>
-      <button className="button-primary" disabled={pending}>
+      <button type="submit" className="button-primary" disabled={pending}>
         {pending ? "Creating…" : "Create cycle"}
       </button>
     </form>

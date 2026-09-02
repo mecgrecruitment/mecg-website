@@ -13,7 +13,7 @@ export default async function OperationsPage() {
   }
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-5xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Owner tools</p>

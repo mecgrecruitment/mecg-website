@@ -294,7 +294,7 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
         />
         <span id="survey-note-counter" className="mt-1 block text-xs font-normal text-mecg-navy/60" aria-live="polite">{note.length}/2000 characters</span>
       </label>
-      <button className="button-secondary w-fit disabled:cursor-not-allowed disabled:opacity-50" disabled={pending}>
+      <button type="submit" className="button-secondary w-fit disabled:cursor-not-allowed disabled:opacity-50" disabled={pending}>
         {pending ? "Sending…" : "Send feedback"}
       </button>
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}

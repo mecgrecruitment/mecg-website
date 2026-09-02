@@ -2,9 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, type ApplicationDraft } from "@/lib/workflow";
+import {
+  clearApplicationDraftRecovery,
+  createApplicationDraftRecoveryScope,
+  loadApplicationDraftRecovery,
+  saveApplicationDraftRecovery,
+} from "@/lib/application-draft-recovery";
+import { uploadResumeFile } from "@/lib/resume-upload";
+import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, countWords, type ApplicationDraft } from "@/lib/workflow";
 
-type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[] };
+type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[]; maxWords: number | null };
 type Step = "details" | "responses" | "materials" | "review";
 type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; label: string } | { kind: "error"; message: string };
 type UploadState =
@@ -26,13 +33,8 @@ const STEPS: { id: Step; label: string; shortLabel: string }[] = [
 const fieldClass = "mt-2 min-h-12 w-full scroll-mb-24 rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy),0_1px_2px_rgba(7,13,31,0.04)] sm:scroll-mb-0";
 const labelClass = "block text-sm font-semibold text-mecg-navy";
 
-function wordCount(value: string) {
-  return value.trim() ? value.trim().split(/\s+/).length : 0;
-}
-
-function guidanceFor(key: string) {
-  if (key === "problem_example") return "Recommended: 200–350 words";
-  return "Recommended: 150–250 words";
+function guidanceFor(question: IntakeQuestion) {
+  return question.maxWords ? `${question.maxWords}-word limit` : "No word limit";
 }
 
 function answerId(key: string) {
@@ -56,10 +58,12 @@ function FieldError({ id, children, alert = false }: { id: string; children?: st
   return children ? <p id={id} className="mt-2 text-sm text-red-700" role={alert ? "alert" : undefined}>{children}</p> : null;
 }
 
-export default function ApplicationForm({ initialName, email, cycleOpen, cycleName, questions, initialDraft }: {
+export default function ApplicationForm({ initialName, email, userId, cycleOpen, cycleId, cycleName, questions, initialDraft }: {
   initialName: string;
   email: string;
+  userId: string;
   cycleOpen: boolean;
+  cycleId: string | null;
   cycleName: string | null;
   questions: IntakeQuestion[];
   initialDraft: ApplicationDraft | null;
@@ -96,8 +100,15 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
   const saveSequence = useRef(0);
   const uploadSequence = useRef(0);
   const stepChangeRequested = useRef(false);
+  const recoveryInitialized = useRef(false);
 
   const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath]);
+  const recoveryScope = useMemo(() => cycleId ? createApplicationDraftRecoveryScope({
+    userIdentity: userId,
+    cycleIdentity: cycleId,
+    questions,
+  }) : null, [cycleId, questions, userId]);
+  const recoveryDraft = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers]);
 
   const cancelPendingSave = useCallback(() => {
     if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
@@ -115,6 +126,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
           throw new Error("We could not save your application. Please try again.");
         }
         if (sequence === saveSequence.current) {
+          clearApplicationDraftRecovery(window.sessionStorage);
           setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
           setDraftDirty(false);
         }
@@ -143,6 +155,39 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
     const target = event.target as HTMLInputElement;
     if (target.type !== "checkbox") markApplicationEdited();
   }
+
+  useEffect(() => {
+    if (!recoveryScope) {
+      recoveryInitialized.current = true;
+      return;
+    }
+    const recovered = loadApplicationDraftRecovery(window.sessionStorage, recoveryScope);
+    recoveryInitialized.current = true;
+    if (!recovered) return;
+    const restoreTimer = window.setTimeout(() => {
+      setName(recovered.name);
+      setPreferredName(recovered.preferredName);
+      setPhone(recovered.phone);
+      setClassYear(CLASS_YEARS.includes(recovered.classYear as (typeof CLASS_YEARS)[number]) ? recovered.classYear : "");
+      setMajor(recovered.major);
+      setCollege(COLLEGES.includes(recovered.college as (typeof COLLEGES)[number]) ? recovered.college : "");
+      setUniqname(recovered.uniqname);
+      setGradTerm(recovered.gradTerm);
+      setAccessibilityNotes(recovered.accessibilityNotes);
+      setLinkedinUrl(recovered.linkedinUrl);
+      setAnswers(Object.fromEntries(questions.map((question) => {
+        const value = recovered.answers[question.key] ?? "";
+        return [question.key, question.inputType === "select" && value && !question.options.includes(value) ? "" : value];
+      })));
+      setDraftDirty(true);
+    }, 0);
+    return () => window.clearTimeout(restoreTimer);
+  }, [questions, recoveryScope]);
+
+  useEffect(() => {
+    if (!cycleOpen || !draftDirty || !recoveryInitialized.current || !recoveryScope) return;
+    saveApplicationDraftRecovery(window.sessionStorage, recoveryScope, recoveryDraft);
+  }, [cycleOpen, draftDirty, recoveryDraft, recoveryScope]);
 
   useEffect(() => {
     if (!cycleOpen) return;
@@ -194,49 +239,14 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       return;
     }
     setUploadState({ kind: "uploading", label: file.name });
-    let documentId = "";
     try {
-      const startResponse = await fetch("/api/apply/resume/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, size: file.size }),
-      });
-      const startBody = await startResponse.json().catch(() => null);
-      if (!startResponse.ok || typeof startBody?.documentId !== "string" || typeof startBody?.uploadUrl !== "string") {
-        throw new Error(startBody?.error ?? "We could not start the resume upload.");
-      }
-      documentId = startBody.documentId;
-      // The session cookie is httpOnly, so this can't use the Supabase client (it has no
-      // token to attach). Instead PUT straight to the short-lived signed upload URL the
-      // server already scoped to this user's object path.
-      const uploadResponse = await fetch(startBody.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "application/pdf" },
-        body: file,
-      });
-      if (!uploadResponse.ok) throw new Error("We could not upload your resume. Please try again.");
-      const finalizeResponse = await fetch("/api/apply/resume/finalize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId }),
-      });
-      const finalized = await finalizeResponse.json().catch(() => null);
-      if (!finalizeResponse.ok || typeof finalized?.path !== "string") {
-        throw new Error(finalized?.error ?? "We could not verify your resume. Please try again.");
-      }
+      const finalized = await uploadResumeFile(file);
       if (sequence !== uploadSequence.current) return;
       setResumePath(finalized.path);
       markApplicationEdited();
       setUploadState({ kind: "uploaded", label: finalized.filename ?? file.name, size: finalized.size, pageCount: finalized.pageCount });
       setErrors((current) => ({ ...current, resume: "" }));
     } catch (error) {
-      if (documentId) {
-        void fetch("/api/apply/resume/cancel", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ documentId }),
-        });
-      }
       if (sequence === uploadSequence.current) {
         setUploadState({ kind: "error", message: error instanceof Error ? error.message : "We could not upload your resume. Please try again." });
       }
@@ -256,6 +266,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
       for (const question of questions) {
         const answer = answers[question.key]?.trim() ?? "";
         if (question.required && !answer) next[question.key] = "Write a response before continuing.";
+        else if (question.maxWords && countWords(answer) > question.maxWords) next[question.key] = `Shorten this response to ${question.maxWords} words or fewer.`;
         else if (question.inputType === "select" && answer && !question.options.includes(answer)) next[question.key] = "Select one of the available options.";
         else if (question.inputType === "url" && answer && !isHttpUrl(answer)) next[question.key] = "Enter a complete http or https URL.";
       }
@@ -284,6 +295,7 @@ export default function ApplicationForm({ initialName, email, cycleOpen, cycleNa
         const body = await response.json().catch(() => null);
         throw new Error(body?.error ?? "The application could not be submitted.");
       }
+      clearApplicationDraftRecovery(window.sessionStorage);
       router.replace("/applicant?submitted=1");
       router.refresh();
     } catch (error) {
@@ -377,8 +389,9 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
     if (question.inputType === "short_text") control = <input {...common} type="text" maxLength={2400} className={fieldClass} />;
     else if (question.inputType === "url") control = <input {...common} type="url" maxLength={2400} className={fieldClass} />;
     else if (question.inputType === "select") control = <select {...common} className={fieldClass}><option value="">Select an option</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
-    else control = <textarea {...common} maxLength={2400} rows={5} className={`${fieldClass} min-h-32 py-3 leading-6`} />;
-    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="font-mono text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-mecg-navy/65"><span>{guidanceFor(question.key)}</span><span className="tabular-nums">{wordCount(value)} words · {2400 - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
+    else control = <textarea {...common} maxLength={8000} rows={5} className={`${fieldClass} min-h-32 py-3 leading-6`} />;
+    const words = countWords(value);
+    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="font-mono text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-mecg-navy/65"><span>{guidanceFor(question)}</span><span className={`tabular-nums ${question.maxWords && words > question.maxWords ? "font-semibold text-red-700" : ""}`}>{question.maxWords ? `${words} / ${question.maxWords} words` : `${words} words`} · {8000 - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
   })}</div></>;
 }
 

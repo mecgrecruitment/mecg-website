@@ -1,15 +1,6 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { hasValidCronAuthorization } from "@/lib/cron-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-// timingSafeEqual throws on a length mismatch instead of returning false, so the
-// lengths are compared first -- itself not a timing oracle, since the secret's
-// length isn't confidential (only its content is).
-function secretsMatch(presented: string, expected: string): boolean {
-  const presentedBuf = Buffer.from(presented);
-  const expectedBuf = Buffer.from(expected);
-  return presentedBuf.length === expectedBuf.length && timingSafeEqual(presentedBuf, expectedBuf);
-}
 
 // Removes resume uploads that were started but never finalized or cancelled.
 // Supabase forbids deleting storage.objects from SQL, so the storage half has to
@@ -32,8 +23,7 @@ async function prune(request: NextRequest) {
     console.error("prune-resumes: CRON_SECRET is unset, refusing to run");
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
   }
-  const presented = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
-  if (!presented || !secretsMatch(presented, expected)) {
+  if (!hasValidCronAuthorization(request.headers, expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -66,9 +56,11 @@ async function prune(request: NextRequest) {
     }
     removed += 1;
   }
-  return NextResponse.json({ ok: failed.length === 0, removed, failed: failed.length });
+  return NextResponse.json(
+    { ok: failed.length === 0, removed, failed: failed.length },
+    { status: failed.length === 0 ? 200 : 503 },
+  );
 }
 
 export const GET = prune;
 export const POST = prune;
-

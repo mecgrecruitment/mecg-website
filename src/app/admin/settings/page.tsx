@@ -6,9 +6,10 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
+import OperationNotice from "@/components/operation-notice";
 import { CloneCycleForm, CycleControls } from "../rush-controls";
 import QuestionEditor, { type IntakeQuestion } from "./question-editor";
-import { formatEasternDateTime } from "@/lib/date-time";
+import CycleWindowForm from "./cycle-window-form";
 
 export const metadata: Metadata = { title: "Cycle settings" };
 
@@ -16,20 +17,41 @@ const INPUT_TYPES = new Set(["short_text", "long_text", "url", "select"]);
 
 // A malformed row must not silently render as an empty editor, which would then
 // save an empty question set over a good one.
-function parseQuestions(value: unknown): IntakeQuestion[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+function parseQuestions(value: unknown): IntakeQuestion[] | null {
+  if (!Array.isArray(value)) return null;
+  const questions: IntakeQuestion[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
     const row = entry as Record<string, unknown>;
-    if (typeof row.key !== "string" || typeof row.prompt !== "string") return [];
-    const inputType = typeof row.inputType === "string" && INPUT_TYPES.has(row.inputType) ? row.inputType : "long_text";
-    return [{
+    if (typeof row.key !== "string" || typeof row.prompt !== "string") return null;
+    if (typeof row.inputType !== "string" || !INPUT_TYPES.has(row.inputType)) return null;
+    if (!Array.isArray(row.options) || row.options.length > 50) return null;
+    const options: string[] = [];
+    const optionSet = new Set<string>();
+    for (const option of row.options) {
+      if (typeof option !== "string" || !option.trim() || option.trim().length > 200) return null;
+      const normalized = option.trim();
+      if (optionSet.has(normalized)) return null;
+      optionSet.add(normalized);
+      options.push(normalized);
+    }
+    if (row.inputType === "select" && options.length === 0) return null;
+    const maxWords = row.maxWords == null
+      ? null
+      : typeof row.maxWords === "number" && Number.isInteger(row.maxWords) && row.maxWords >= 1 && row.maxWords <= 2000
+        ? row.maxWords
+        : undefined;
+    if (maxWords === undefined) return null;
+    questions.push({
       key: row.key,
       prompt: row.prompt,
-      inputType: inputType as IntakeQuestion["inputType"],
+      inputType: row.inputType as IntakeQuestion["inputType"],
       required: row.required !== false,
-    }];
-  });
+      options,
+      maxWords,
+    });
+  }
+  return questions;
 }
 
 export default async function SettingsPage() {
@@ -48,15 +70,11 @@ export default async function SettingsPage() {
   const cycle = cycleResult.data;
   if (!cycle) redirect("/admin");
   if (questionsResult.error) console.error("cycle_application_questions failed", questionsResult.error);
-  const questions = parseQuestions(questionsResult.data);
-
-  const window = [
-    ["Opens", cycle.opens_at],
-    ["Closes", cycle.closes_at],
-  ] as const;
+  const questions = questionsResult.error ? null : parseQuestions(questionsResult.data);
+  if (!questions && !questionsResult.error) console.error("cycle_application_questions returned an unusable payload", questionsResult.data);
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-4xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Cycle settings"
@@ -64,26 +82,22 @@ export default async function SettingsPage() {
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/settings" />
       <CycleControls cycleId={cycleId} cycleStatus={cycle.status} />
-      <QuestionEditor cycleId={cycleId} initial={questions} locked={Boolean(submittedResult.count)} />
+      {questions ? (
+        <QuestionEditor cycleId={cycleId} initial={questions} locked={Boolean(submittedResult.count)} />
+      ) : (
+        <OperationNotice kind="error">
+          Application questions could not be loaded safely. No changes can be made until the data is available again.
+        </OperationNotice>
+      )}
       {hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS") && (
         <CloneCycleForm cycleId={cycleId} cycleName={cycle.name} />
       )}
-      <section className="rounded-2xl bg-paper p-5">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Application window</p>
-        <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-          {window.map(([label, value]) => (
-            <div key={label} className="rounded-xl bg-white p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-              <dt className="text-[11px] uppercase tracking-[0.1em] text-mecg-navy/45">{label}</dt>
-              <dd className="mt-1 text-sm font-semibold text-mecg-navy">
-                {value ? formatEasternDateTime(value) : "Not set"}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-3 text-xs leading-5 text-mecg-navy/45">
-          The window is seeded with the cycle. Editing it here needs a cycle editor, which is not built yet.
-        </p>
-      </section>
+      <CycleWindowForm
+        cycleId={cycleId}
+        cycleStatus={cycle.status}
+        opensAt={cycle.opens_at}
+        closesAt={cycle.closes_at}
+      />
     </main>
   );
 }

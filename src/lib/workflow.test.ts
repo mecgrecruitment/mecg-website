@@ -4,6 +4,7 @@ import {
   canTransitionApplication,
   canTransitionCycle,
   canTransitionRound,
+  countWords,
   hasExactCriterionSet,
   isPipelineStatus,
   legalManualApplicationStatuses,
@@ -11,6 +12,12 @@ import {
   parseApplicationDraft,
   parseApplicationIntake,
 } from "./workflow.ts";
+
+test("word counts match the application limit definition", () => {
+  assert.equal(countWords(""), 0);
+  assert.equal(countWords("  one\n two\tthree  "), 3);
+  assert.equal(countWords("hyphenated-word"), 1);
+});
 
 const validIntake = {
   name: "Ada Lovelace",

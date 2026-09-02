@@ -24,7 +24,7 @@ export default async function GroupsPage() {
   const applications = applicationsResult.data;
   const members = membersResult.data;
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-6 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader eyebrow="Case teams" title="Group case teams" />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/groups" />
       <GroupForms

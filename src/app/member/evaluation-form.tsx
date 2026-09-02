@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
+import { clearEvaluationDraft, evaluationRubricIdentity, readEvaluationDraft, writeEvaluationDraft } from "@/lib/evaluation-draft-recovery";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 
 type Criterion = {
@@ -31,9 +32,35 @@ export default function EvaluationForm({
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [recoveryScopeReady, setRecoveryScopeReady] = useState<string | null>(null);
   const criterionRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
   const noteRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const scoredCount = criteria.filter((criterion) => scores[criterion.id]).length;
+  const recoveryScope = useMemo(
+    () => JSON.stringify([assignmentId, evaluationRubricIdentity(criteria)]),
+    [assignmentId, criteria],
+  );
+
+  useEffect(() => {
+    const recovered = readEvaluationDraft({ storage: window.sessionStorage, assignmentId, criteria });
+    const restoreTimer = window.setTimeout(() => {
+      setScores(recovered?.scores ?? Object.fromEntries(criteria.map((criterion) => [criterion.id, ""])));
+      setNotes(recovered?.notes ?? {});
+      setEvidence(recovered?.evidence ?? "");
+      setRecoveryScopeReady(recoveryScope);
+    }, 0);
+    return () => window.clearTimeout(restoreTimer);
+  }, [assignmentId, criteria, recoveryScope]);
+
+  useEffect(() => {
+    if (recoveryScopeReady !== recoveryScope || pending || saved) return;
+    writeEvaluationDraft({
+      storage: window.sessionStorage,
+      assignmentId,
+      criteria,
+      draft: { scores, notes, evidence },
+    });
+  }, [assignmentId, criteria, evidence, notes, pending, recoveryScope, recoveryScopeReady, saved, scores]);
 
   function selectScore(criterionId: string, value: string) {
     setScores((current) => ({ ...current, [criterionId]: value }));
@@ -90,6 +117,7 @@ export default function EvaluationForm({
         setPending(false);
         return;
       }
+      clearEvaluationDraft(window.sessionStorage, assignmentId);
       setSaved(true);
       window.setTimeout(() => router.refresh(), 220);
     } catch {

@@ -67,3 +67,18 @@ test("GET /api/maintenance/prune-resumes accepts the correct secret", async (t) 
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), { ok: true, removed: 0, failed: 0 });
 });
+
+test("GET /api/maintenance/prune-resumes reports deletion failures as degraded", async (t) => {
+  t.mock.module("@/lib/supabase/admin", {
+    namedExports: {
+      createAdminClient: () => ({
+        rpc: async () => ({ data: [{ document_id: "document-1", object_path: "stale.pdf" }], error: null }),
+        storage: { from: () => ({ remove: async () => ({ error: { message: "provider unavailable" } }) }) },
+      }),
+    },
+  });
+  const { GET } = await withCronSecret(SECRET, () => importRoute("delete-failure"));
+  const res = await withCronSecret(SECRET, () => GET(request({ authorization: `Bearer ${SECRET}` })));
+  assert.equal(res.status, 503);
+  assert.deepEqual(await res.json(), { ok: false, removed: 0, failed: 1 });
+});

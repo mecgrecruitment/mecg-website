@@ -18,7 +18,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { data: signed, error: signedError } = await supabase.storage.from("resumes").createSignedUrl(path, 300);
   if (signedError || !signed?.signedUrl) {
     console.error("resume signed url failed", signedError);
-    return NextResponse.json({ error: "Could not open resume" }, { status: 404 });
+    return NextResponse.json({ error: "The resume is temporarily unavailable" }, { status: 502 });
   }
-  return NextResponse.redirect(signed.signedUrl);
+  const response = NextResponse.redirect(signed.signedUrl);
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }

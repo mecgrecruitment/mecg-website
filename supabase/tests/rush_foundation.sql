@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(224);
+select extensions.plan(250);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -55,7 +55,9 @@ select extensions.ok(position('required_count' in pg_get_functiondef('rush.freez
 select extensions.ok(position('slot outside event bounds' in pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure)) > 0 and position('between 1 and 80' in pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure)) > 0, 'event slots enforce event bounds and table capacity');
 select extensions.ok(position('for share' in lower(pg_get_functiondef('rush.create_event_slot(text,timestamptz,timestamptz,integer)'::regprocedure))) > 0, 'event slot creation coordinates with event-bound updates through a row lock');
 select extensions.ok(position('existing slot outside event bounds' in pg_get_functiondef('rush.update_event(text,text,text,text,text,timestamptz,timestamptz,timestamptz,timestamptz)'::regprocedure)) > 0 and position('for update' in lower(pg_get_functiondef('rush.update_event(text,text,text,text,text,timestamptz,timestamptz,timestamptz,timestamptz)'::regprocedure))) > 0, 'event updates lock and validate existing slots');
-select extensions.ok(position('''role'',''service_role''' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0 and position('submit_application_self_test' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0, 'workflow verifier retains the service-role claim for its guarded fixture call');
+select extensions.ok(position('workflow_test_claims(applicant_id,''service_role'')' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0 and position('submit_application_self_test' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0, 'workflow verifier retains the service-role claim for its guarded fixture call');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.workflow_test_claims(uuid,text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'workflow test claims helper is a hardened security definer');
+select extensions.ok(not has_function_privilege('authenticated','rush.workflow_test_claims(uuid,text)','EXECUTE') and not has_function_privilege('service_role','rush.workflow_test_claims(uuid,text)','EXECUTE'), 'workflow test claims helper is reachable only inside the verifier');
 select extensions.ok(position('array[''applicantName'',''evidence'']' in pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure)) > 0 and position('b.status=''FROZEN''' in pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure)) > 0, 'frozen screening output redacts committee identity and evidence');
 select extensions.ok(position('CLOSED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ARCHIVED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('ATTENDANCE_EXPORT' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('DECISION_PREVIEW' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0, 'committee capabilities end for closed cycles and exclude transitions, export, and preview');
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) = 0, 'round transitions retain strict board authorization');
@@ -89,7 +91,8 @@ select extensions.ok(position('screening reviewer cannot receive a privileged ro
 select extensions.ok(position('cycle must retain an owner' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes preserve a cycle owner');
 select extensions.ok(position('MEMBERSHIP_ROLE_CHANGED' in pg_get_functiondef('rush.set_membership_role(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership role changes retain audit logging');
 select extensions.ok(position('committee.role' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('RECRUITMENT_COMMITTEE' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('CLOSED' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('ARCHIVED' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0, 'closed-cycle committee membership restricts additive member profile access');
-select extensions.ok(position('CANDIDATE_ACCESS' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0 and position('PANEL' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0 and position('actor_has_application_conflict' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0, 'resume access supports active-cycle operators and panel while preserving recusal');
+select extensions.ok(position('CANDIDATE_ACCESS' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0 and position('PANEL' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) = 0 and position('actor_has_application_conflict' in pg_get_functiondef('rush.board_can_view_resume(text)'::regprocedure)) > 0, 'resume access is limited to candidate-access operators and preserves recusal');
+select extensions.ok(position('CANDIDATE_ACCESS' in pg_get_functiondef('rush.authorize_resume_access(text)'::regprocedure)) > 0 and position('PANEL' in pg_get_functiondef('rush.authorize_resume_access(text)'::regprocedure)) = 0 and position('actor_has_application_conflict' in pg_get_functiondef('rush.authorize_resume_access(text)'::regprocedure)) > 0, 'the signed resume route uses the same candidate-access and recusal rules');
 select extensions.ok((select p.prosecdef and p.proconfig @> array['search_path=""'] and pg_get_userbyid(p.proowner)='postgres' from pg_proc p where p.oid='rush.actor_can_read_colleague_profile(uuid)'::regprocedure) and (select p.prosecdef and p.proconfig @> array['search_path=""'] and pg_get_userbyid(p.proowner)='postgres' from pg_proc p where p.oid='rush.create_cycle(text)'::regprocedure), 'authorization functions are postgres-owned security definers with empty search paths');
 select extensions.ok(has_function_privilege('authenticated','rush.actor_can_read_colleague_profile(uuid)','EXECUTE') and not has_function_privilege('anon','rush.actor_can_read_colleague_profile(uuid)','EXECUTE') and has_function_privilege('authenticated','rush.create_cycle(text)','EXECUTE') and not has_function_privilege('anon','rush.create_cycle(text)','EXECUTE'), 'authorization function ACLs exclude anonymous callers');
 select extensions.ok(position('actor_can_read_colleague_profile' in pg_get_expr((select polqual from pg_policy where polname='profiles_read_cycle_colleagues' and polrelid='rush.profiles'::regclass),'rush.profiles'::regclass)) > 0, 'profile colleague policy delegates to the non-recursive helper');
@@ -130,6 +133,30 @@ insert into rush.memberships(user_id,cycle_id,role) values
   ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000011','OWNER'),
   ('10000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000011','MEMBER'),
   ('10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000012','MEMBER');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.set_cycle_application_window('10000000-0000-4000-8000-000000000011','2026-09-08T23:30:00Z','2026-09-11T15:00:00Z')$$,
+  '42501','forbidden','a regular member cannot change the application window');
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.set_cycle_application_window('10000000-0000-4000-8000-000000000011','2026-09-11T15:00:00Z','2026-09-08T23:30:00Z')$$,
+  '22023','invalid application window','the application window must close after it opens');
+select extensions.lives_ok(
+  $$select rush.set_cycle_application_window('10000000-0000-4000-8000-000000000011','2026-09-08T23:30:00Z','2026-09-11T15:00:00Z')$$,
+  'an owner can set a valid application window');
+set local role postgres;
+select extensions.is(
+  (select opens_at from rush.rush_cycles where id='10000000-0000-4000-8000-000000000011'),
+  '2026-09-08T23:30:00Z'::timestamptz,
+  'the configured application opening time is stored exactly');
+select extensions.ok(
+  exists(select 1 from rush.audit_events where cycle_id='10000000-0000-4000-8000-000000000011' and action='APPLICATION_WINDOW_SET' and actor_id='10000000-0000-4000-8000-000000000001'::uuid),
+  'application window changes are actor-audited');
 
 insert into rush.events(id,cycle_id,name,status,starts_at,ends_at,checkin_opens_at,checkin_closes_at,checkin_token_digest)
 values('10000000-0000-4000-8000-000000000081','10000000-0000-4000-8000-000000000011','pgTAP bounded event','PUBLISHED',
@@ -330,11 +357,39 @@ select extensions.is(
   rush.cycle_application_questions('10000000-0000-4000-8000-000000000011') -> 0 ->> 'key',
   'second_q',
   'questions read back in submitted order, not alphabetically');
+select extensions.is(
+  rush.set_application_questions('10000000-0000-4000-8000-000000000011',
+    '[{"key":"second_q","prompt":"Second prompt","inputType":"long_text","required":false,"maxWords":250},
+      {"key":"first_q","prompt":"First prompt","inputType":"long_text","required":true,"maxWords":300}]'::jsonb),
+  2,
+  'an owner can configure question-specific word limits');
+select extensions.is(
+  rush.cycle_application_questions('10000000-0000-4000-8000-000000000011') -> 0 ->> 'maxWords',
+  '250',
+  'question word limits read back with the ordered schema');
 select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[{"key":"Bad Key","prompt":"x"}]'::jsonb)$$,'22023','invalid question key','a malformed key is rejected');
 select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[{"key":"dup","prompt":"a"},{"key":"dup","prompt":"b"}]'::jsonb)$$,'23505','duplicate question key','duplicate keys are rejected');
+select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[{"key":"bad_limit","prompt":"x","maxWords":0}]'::jsonb)$$,'22023','invalid question word limit','word limits must be positive');
+set local role postgres;
+select extensions.is(rush.response_word_count(E'  one\n two\tthree  '),3,'database word counting matches the application UI');
+
+insert into rush.pnms(id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-000000000024','Word Limit Applicant','word-limit@example.invalid','word-limit@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status) values
+  ('10000000-0000-4000-8000-000000000035','10000000-0000-4000-8000-000000000024','10000000-0000-4000-8000-000000000011','DRAFT');
+select extensions.throws_ok(
+  $$insert into rush.application_responses(application_id,question_key,question_text,response_text)
+    values('10000000-0000-4000-8000-000000000035','second_q','Second prompt',repeat('word ',251))$$,
+  '22023','answer exceeds word limit for second_q',
+  'the database rejects a response above its configured word limit');
+insert into rush.application_responses(application_id,question_key,question_text,response_text)
+values('10000000-0000-4000-8000-000000000035','second_q','Second prompt',repeat('word ',250));
+select extensions.is(
+  (select question_word_limit from rush.application_responses where application_id='10000000-0000-4000-8000-000000000035' and question_key='second_q'),
+  250,
+  'submitted responses snapshot the enforced word limit for reviewer display and exports');
 
 -- Cycle ...0014 holds the SUBMITTED reapplication fixture above.
-set local role postgres;
 insert into rush.memberships(user_id,cycle_id,role) values
   ('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000014','OWNER');
 set local role authenticated;
@@ -455,6 +510,10 @@ select extensions.is(
   (select count(*) from rush.application_questions q join rush.rush_cycles c on c.id=q.cycle_id where c.name='pgTAP cloned cycle'),
   (select count(*) from rush.application_questions q where q.cycle_id='10000000-0000-4000-8000-000000000011'),
   'the edited application questions come across');
+select extensions.is(
+  (select q.word_limit from rush.application_questions q join rush.rush_cycles c on c.id=q.cycle_id where c.name='pgTAP cloned cycle' and q.key='second_q'),
+  250,
+  'cloned application questions keep their enforced word limits');
 select extensions.is(
   (select count(*) from rush.applications a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP cloned cycle'),
   0::bigint,
@@ -611,18 +670,25 @@ select extensions.ok(position('offer_response' in pg_get_functiondef('rush.can_s
 select extensions.ok(position('SUBMITTED' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0, 'a submitted applicant may still upload a replacement resume');
 select extensions.ok(position('screening_packets' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0, 'replacement stops once a screening packet exists');
 select extensions.ok(position('screening_packets' in pg_get_functiondef('rush.attach_ready_resume()'::regprocedure)) > 0, 'attaching a replacement stops once a screening packet exists');
+select extensions.ok(position('attached_path is not null then return attached_path' in lower(pg_get_functiondef('rush.attach_ready_resume()'::regprocedure))) > 0, 'retrying resume attachment returns the current attachment without another replacement');
 
 -- Retention anonymises rather than deletes, so the audit trail survives.
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='anonymize_archived_applicants' and p.prosecdef and p.proconfig @> array['search_path=""']), 'retention function exists and is security definer with empty search path');
 select extensions.ok(position('delete from rush.pnms' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) = 0, 'retention never removes an applicant row, so decisions stay reconstructable');
 select extensions.ok(position('with stale_pnms as materialized' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) > 0 and position('temporary table stale_pnms' in pg_get_functiondef('rush.anonymize_archived_applicants()'::regprocedure)) = 0, 'retention uses one analyzable candidate CTE for every write');
-select extensions.ok(exists(select 1 from cron.job where jobname = 'anonymize-archived-applicants'), 'retention is scheduled rather than merely available');
+select extensions.ok(
+  not exists(select 1 from cron.job where jobname = 'anonymize-archived-applicants')
+    and not has_function_privilege('service_role','rush.anonymize_archived_applicants()','EXECUTE'),
+  'unapproved retention is neither scheduled nor executable');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','permission denied for function anonymize_archived_applicants','an authenticated caller cannot run retention');
 set local role postgres;
+-- The implementation remains covered while its production grant is held. This
+-- transaction-local grant rolls back with the test suite.
+grant execute on function rush.anonymize_archived_applicants() to service_role;
 insert into rush.rush_cycles(id,name,status,updated_at) values
   ('10000000-0000-4000-8000-000000000015','pgTAP expired archive','ARCHIVED',now() - interval '3 years');
 insert into rush.pnms(id,name,contact,normalized_contact) values
@@ -650,6 +716,10 @@ set local role postgres;
 select extensions.has_table('rush','auth_identities','external identity map exists');
 select extensions.has_table('rush','auth_migration_ledger','auth migration ledger exists');
 select extensions.has_function('rush','actor_id',array[]::text[],'provider-neutral actor helper exists');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.set_application_questions(text,jsonb)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.set_application_questions(text,jsonb)'::regprocedure)) = 0, 'application question writes use provider-neutral identity');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) = 0, 'application intake uses provider-neutral identity');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.clone_cycle(text,text)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.clone_cycle(text,text)'::regprocedure)) = 0, 'cycle cloning uses provider-neutral identity');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.set_cycle_application_window(text,timestamptz,timestamptz)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.set_cycle_application_window(text,timestamptz,timestamptz)'::regprocedure)) = 0, 'application window writes use provider-neutral identity');
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.is(rush.actor_id(),'10000000-0000-4000-8000-000000000001'::uuid,'legacy issuer and subject resolve to the stable profile UUID');
@@ -675,6 +745,87 @@ select extensions.ok(not exists(
   join pg_namespace n on n.oid=t.relnamespace
   where c.contype='f' and n.nspname='rush' and c.confrelid='auth.users'::regclass
 ),'Rush domain foreign keys no longer depend on auth.users');
+
+-- Resume access uses the same role matrix at the RPC boundary as the Board
+-- dossier. Hash panel membership alone never reveals candidate materials.
+set local role postgres;
+update rush.rush_cycles set status='CLOSED' where status in ('DRAFT','OPEN','IN_PROCESS','DECISION_LOCK');
+insert into auth.users(id,email,raw_user_meta_data) values
+  ('10000000-0000-4000-8000-000000000051','resume-owner@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-000000000052','resume-panel@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-000000000053','resume-committee@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-000000000054','resume-member@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-000000000055','resume-applicant@example.invalid','{}'::jsonb);
+insert into rush.rush_cycles(id,name,status) values
+  ('10000000-0000-4000-8000-000000000059','pgTAP resume access cycle','OPEN');
+insert into rush.memberships(user_id,cycle_id,role) values
+  ('10000000-0000-4000-8000-000000000051','10000000-0000-4000-8000-000000000059','OWNER'),
+  ('10000000-0000-4000-8000-000000000052','10000000-0000-4000-8000-000000000059','PANEL'),
+  ('10000000-0000-4000-8000-000000000053','10000000-0000-4000-8000-000000000059','RECRUITMENT_COMMITTEE'),
+  ('10000000-0000-4000-8000-000000000054','10000000-0000-4000-8000-000000000059','MEMBER');
+insert into rush.pnms(id,auth_user_id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-000000000056','10000000-0000-4000-8000-000000000055','Resume Applicant','resume-applicant@example.invalid','resume-applicant@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
+  ('10000000-0000-4000-8000-000000000057','10000000-0000-4000-8000-000000000056','10000000-0000-4000-8000-000000000059','SUBMITTED',now());
+insert into rush.application_documents(
+  id,application_id,owner_user_id,cycle_id,object_path,original_filename,
+  declared_size,verified_size,sha256,page_count,status,ready_at
+) values (
+  '10000000-0000-4000-8000-000000000058','10000000-0000-4000-8000-000000000057',
+  '10000000-0000-4000-8000-000000000055','10000000-0000-4000-8000-000000000059',
+  '10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000058.pdf',
+  'resume.pdf',100,100,repeat('0',64),1,'READY',now()
+);
+update rush.applications
+set resume_storage_path='10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000058.pdf'
+where id='10000000-0000-4000-8000-000000000057';
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000051","role":"authenticated"}';
+set local role authenticated;
+select extensions.is(
+  rush.authorize_resume_access('10000000-0000-4000-8000-000000000057'),
+  '10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000058.pdf',
+  'an owner can open an attached resume'
+);
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000052","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.authorize_resume_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','a panel-only member cannot open a resume'
+);
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000053","role":"authenticated"}';
+select extensions.is(
+  rush.authorize_resume_access('10000000-0000-4000-8000-000000000057'),
+  '10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000058.pdf',
+  'an active-cycle recruitment committee member can open a resume'
+);
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000054","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.authorize_resume_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','a regular member cannot open a resume'
+);
+
+set local role postgres;
+insert into rush.conflict_declarations(application_id,declarer_id,reason) values
+  ('10000000-0000-4000-8000-000000000057','10000000-0000-4000-8000-000000000051','pgTAP resume conflict');
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000051","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.authorize_resume_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','a conflicted owner cannot open a resume'
+);
+
+set local role postgres;
+update rush.rush_cycles set status='CLOSED' where id='10000000-0000-4000-8000-000000000059';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000053","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok(
+  $$select rush.authorize_resume_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','recruitment committee resume access ends when the cycle closes'
+);
+set local role postgres;
 
 select * from extensions.finish();
 rollback;

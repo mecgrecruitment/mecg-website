@@ -46,10 +46,15 @@ const UNITS = [
 ] as const;
 
 export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
-  const now = useSyncExternalStore(subscribe, getNow, () => Date.parse(opensAt));
-  const remaining = formatRemaining(Date.parse(opensAt) - now);
+  // The server has no clock the browser will agree with, and a server snapshot
+  // of Date.parse(opensAt) made the static HTML read "Applications are open
+  // now." before the window opened. Render the pre-open shell with placeholders
+  // instead; useSyncExternalStore swaps in real digits on hydration without a
+  // mismatch. Both callers only mount this while isBeforeApplicationOpen.
+  const now = useSyncExternalStore<number | null>(subscribe, getNow, () => null);
+  const remaining = now === null ? null : formatRemaining(Date.parse(opensAt) - now);
 
-  if (remaining.done) {
+  if (remaining?.done) {
     return (
       <p className="mt-4 text-sm font-semibold text-emerald-800" role="status">
         Applications are open now.
@@ -69,7 +74,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
             className="rounded-2xl bg-mecg-navy/[0.04] px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]"
           >
             <p className="font-mono text-3xl font-semibold tabular-nums tracking-tight text-mecg-navy">
-              {pad(remaining[key])}
+              {remaining ? pad(remaining[key]) : "--"}
             </p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/55">{label}</p>
           </div>

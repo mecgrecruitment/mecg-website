@@ -38,11 +38,11 @@ export default function PillNav({
   }, [selected]);
 
   return (
-    <nav aria-label={ariaLabel} className="-mx-6 overflow-x-auto px-6 pb-1 sm:mx-0 sm:px-0">
-      <div className="relative flex min-w-max gap-2">
+    <nav aria-label={ariaLabel} className="scroll-cue overflow-x-auto">
+      <div className="relative flex min-w-max gap-1">
         <span
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 left-0 rounded-full bg-mecg-navy transition-[transform,width,opacity] duration-[--t-detent] ease-[--ease-detent] ${indicator.ready ? "opacity-100" : "opacity-0"}`}
+          className={`pointer-events-none absolute inset-y-0 left-0 rounded-xl bg-mecg-navy shadow-[0_7px_18px_rgba(7,13,31,0.18)] transition-[transform,width,opacity] duration-[--t-detent] ease-[--ease-detent] ${indicator.ready ? "opacity-100" : "opacity-0"}`}
           style={{ transform: `translateX(${indicator.left}px)`, width: `${indicator.width}px` }}
         />
         {links.map(([href, label]) => {
@@ -57,10 +57,10 @@ export default function PillNav({
               href={href}
               onNavigate={() => setPending({ from: current, href })}
               aria-current={current === href ? "page" : undefined}
-              className={`relative inline-flex min-h-11 items-center rounded-full px-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] transition-[color,scale,background-color] duration-[--t-detent] ease-[--ease-detent] active:scale-[0.96] ${
+              className={`relative inline-flex min-h-11 items-center rounded-xl px-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] transition-[color,scale,background-color] duration-[--t-detent] ease-[--ease-detent] active:scale-[0.96] ${
                 isSelected
                   ? "text-white"
-                  : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
+                  : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"
               }`}
             >
               {label}

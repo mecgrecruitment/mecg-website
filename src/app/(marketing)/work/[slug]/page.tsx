@@ -6,6 +6,7 @@ import PageIntro from "@/components/page-intro";
 import SectionHeading from "@/components/section-heading";
 import SectionLabel from "@/components/section-label";
 import { getPublicProject, getPublicProjectSlugs } from "@/lib/projects/public-projects";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 type ProjectPageProps = {
   readonly params: Promise<{ slug: string }>;
@@ -62,7 +63,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
       <PageIntro
         label={`${project.industry} · ${project.semester}`}
         title={project.title}

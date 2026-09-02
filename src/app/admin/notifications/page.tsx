@@ -27,7 +27,7 @@ export default async function NotificationsPage() {
   const needsAttention = failedResult.data ?? [];
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-5xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
         eyebrow="Operations"
         title="Notification delivery"

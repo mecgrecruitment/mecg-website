@@ -13,7 +13,7 @@ export default async function NewEventPage() {
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex w-full max-w-4xl flex-col">
       <WorkspaceHeader
         eyebrow="Attendance event"
         title="New event"

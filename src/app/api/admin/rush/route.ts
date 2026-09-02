@@ -39,6 +39,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   DELETE_GROUP: "RECRUITMENT_OPERATIONS",
   SET_ROUND_STATUS: "MANAGE_CYCLE",
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
+  SET_CYCLE_WINDOW: "MANAGE_CYCLE",
   SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
   SET_RUBRIC_CRITERIA: "MANAGE_CYCLE",
   // MANAGE_MEMBERSHIPS is the app-side proxy for OWNER; the RPC re-checks it.
@@ -160,6 +161,17 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("set_round_status", { target_round_id: String(body.roundId ?? ""), next_status: status as RoundStatus }));
   } else if (action === "SET_CYCLE_STATUS") {
     ({ data, error } = await supabase.rpc("set_cycle_status", { target_cycle_id: cycleId, next_status: status as CycleStatus }));
+  } else if (action === "SET_CYCLE_WINDOW") {
+    const opensAt = typeof body.opensAt === "string" ? new Date(body.opensAt) : null;
+    const closesAt = typeof body.closesAt === "string" ? new Date(body.closesAt) : null;
+    if (!opensAt || !closesAt || Number.isNaN(opensAt.getTime()) || Number.isNaN(closesAt.getTime()) || closesAt <= opensAt) {
+      return NextResponse.json({ error: "Applications must have a valid opening and later closing time" }, { status: 400 });
+    }
+    ({ data, error } = await supabase.rpc("set_cycle_application_window", {
+      target_cycle_id: cycleId,
+      application_opens_at: opensAt.toISOString(),
+      application_closes_at: closesAt.toISOString(),
+    }));
   } else if (action === "SET_APPLICATION_QUESTIONS") {
     // Shape only. The RPC re-validates every field and owns the real rules
     // (key format, prompt length, input type, duplicate keys, and the refusal

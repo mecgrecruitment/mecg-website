@@ -19,6 +19,12 @@ additional_redirect_urls = [
 enroll_enabled = true
 verify_enabled = true
 
+# Trust MECG Clerk session tokens in local/staging Supabase, matching the
+# Third-Party Auth integration configured on the hosted project.
+[auth.third_party.clerk]
+enabled = true
+domain = "env(SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN)"
+
 [auth.email]
 enable_confirmations = true
 max_frequency = "1m0s"

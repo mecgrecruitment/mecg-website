@@ -46,6 +46,10 @@ function importCancelRoute(testCase: string) {
   return import(`./cancel/route.ts?case=${testCase}`) as Promise<typeof import("./cancel/route.ts")>;
 }
 
+function importAttachRoute(testCase: string) {
+  return import(`./attach/route.ts?case=${testCase}`) as Promise<typeof import("./attach/route.ts")>;
+}
+
 const SIGNED_UPLOAD_URL = `https://storage.example/object/upload/sign/resumes/${PATH}?token=signed-token`;
 
 function clientWithSignedUpload(rpcHandler: (name: string, args?: Record<string, unknown>) => unknown) {
@@ -74,7 +78,7 @@ test("resume start creates a server-controlled upload target", async (t) => {
   assert.equal(response.status, 201);
   const body = await response.json();
   assert.equal(body.documentId, DOCUMENT_ID);
-  assert.equal(body.path, PATH);
+  assert.equal(body.path, undefined);
   assert.equal(body.uploadUrl, `${SIGNED_UPLOAD_URL}&path=${PATH}`);
   assert.deepEqual(calls, [{ name: "begin_resume_upload", args: { upload_filename: "Ada Resume.pdf", upload_size: 26 } }]);
 });
@@ -89,7 +93,6 @@ test("resume start ignores a client-supplied path and always uploads to the serv
   const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26, path: "../other-user/resume.pdf" }));
   assert.equal(response.status, 201);
   const body = await response.json();
-  assert.equal(body.path, PATH);
   assert.equal(body.uploadUrl.includes("other-user"), false);
 });
 
@@ -240,4 +243,34 @@ test("resume cancel does not remove a document the database refuses to reject", 
   const response = await POST(request("/api/apply/resume/cancel", { documentId: DOCUMENT_ID }));
   assert.equal(response.status, 409);
   assert.equal(removed, false);
+});
+
+test("resume attach points the application at the ready replacement", async (t) => {
+  const calls: string[] = [];
+  const client = {
+    rpc: async (name: string) => {
+      calls.push(name);
+      return { data: PATH, error: null };
+    },
+  };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importAttachRoute("success");
+
+  const response = await POST();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { path: PATH });
+  assert.deepEqual(calls, ["attach_ready_resume"]);
+});
+
+test("resume attach preserves the database replacement gate", async (t) => {
+  const client = { rpc: async () => ({ data: null, error: { code: "55000", message: "review has already started" } }) };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importAttachRoute("review-started");
+
+  const response = await POST();
+
+  assert.equal(response.status, 409);
 });
