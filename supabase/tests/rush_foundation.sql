@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(213);
+select extensions.plan(224);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -78,7 +78,7 @@ select extensions.has_function('rush','grant_membership',array['uuid','text','ru
 select extensions.ok(position('screening_reviewers' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('screening_batches' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('sr.reviewer_id=target_user_id' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('b.cycle_id=target_cycle_id' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants reject any screening reviewer from the same cycle');
 select extensions.ok(position('RECRUITMENT_COMMITTEE' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('BOARD' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('PANEL' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('OWNER' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'reviewer guard covers every privileged role');
 select extensions.ok(position('has_cycle_role(target_cycle_id,array[''OWNER'']' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants remain owner-only');
-select extensions.ok(position('auth.uid()=target_user_id' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('self grant forbidden' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants retain self-grant protection');
+select extensions.ok(position('rush.actor_id()=target_user_id' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('self grant forbidden' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants retain self-grant protection');
 select extensions.ok(position('MEMBERSHIP_GRANTED' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0 and position('audit_events' in pg_get_functiondef('rush.grant_membership(uuid,text,rush.member_role)'::regprocedure)) > 0, 'membership grants retain audit logging');
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='grant_membership' and p.prosecdef and p.proconfig @> array['search_path=""']), 'membership grants remain security definer with empty search path');
 select extensions.has_function('rush','set_membership_role',array['uuid','text','rush.member_role'],'membership role function exists');
@@ -137,7 +137,7 @@ values('10000000-0000-4000-8000-000000000081','10000000-0000-4000-8000-000000000
 insert into rush.event_slots(id,event_id,starts_at,ends_at,capacity)
 values('10000000-0000-4000-8000-000000000082','10000000-0000-4000-8000-000000000081',now() + interval '1 day 1 hour',now() + interval '1 day 1 hour 30 minutes',8);
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok(
   $$select rush.update_event('10000000-0000-4000-8000-000000000081','pgTAP bounded event','GENERAL','Ross','INTERNAL',
@@ -167,16 +167,16 @@ insert into rush_foundation_results values ('fixture_writes_before',
   (select count(*) from storage.objects));
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 insert into rush_foundation_results values ('allowed_profile',(select count(*) from rush.profiles where id='10000000-0000-4000-8000-000000000002'::uuid));
-insert into rush_foundation_results values ('workspace_cycle',(select count(*) from rush.memberships m join rush.rush_cycles c on c.id=m.cycle_id where m.user_id=auth.uid()));
+insert into rush_foundation_results values ('workspace_cycle',(select count(*) from rush.memberships m join rush.rush_cycles c on c.id=m.cycle_id where m.user_id=rush.actor_id()));
 set local role postgres;
 select extensions.is((select value from rush_foundation_results where key='allowed_profile'),1::bigint,'active cycle owner reads a colleague profile without RLS recursion');
 select extensions.is((select value from rush_foundation_results where key='workspace_cycle'),1::bigint,'authenticated workspace lookup joins memberships to cycles without RLS recursion');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.submit_application_self_test('Denied Applicant','workflow-10000000-0000-4000-8000-000000000002@example.invalid')$$,'42501','permission denied for function submit_application_self_test','authenticated callers cannot execute the workflow fixture');
 set local role postgres;
@@ -189,7 +189,7 @@ select extensions.is(
 );
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
 set local role authenticated;
 insert into rush_foundation_results values ('denied_profile',(select count(*) from rush.profiles where id='10000000-0000-4000-8000-000000000002'::uuid));
 set local role postgres;
@@ -197,7 +197,7 @@ select extensions.is((select value from rush_foundation_results where key='denie
 
 update rush.profiles set active=false where id='10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 insert into rush_foundation_results values ('inactive_profile',(select count(*) from rush.profiles where id='10000000-0000-4000-8000-000000000002'::uuid));
 set local role postgres;
@@ -206,11 +206,11 @@ update rush.profiles set active=true where id='10000000-0000-4000-8000-000000000
 update rush.rush_cycles set status='CLOSED' where id='10000000-0000-4000-8000-000000000011';
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 select extensions.lives_ok($$select rush.create_cycle('pgTAP owner-created cycle')$$,'active owner can create a cycle');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 select extensions.throws_ok($$select rush.create_cycle('pgTAP member-denied cycle')$$,'42501','forbidden','non-owner cannot create a cycle');
 select extensions.ok(exists(select 1 from rush.audit_events a join rush.rush_cycles c on c.id=a.cycle_id where c.name='pgTAP owner-created cycle' and a.actor_id='10000000-0000-4000-8000-000000000001'::uuid and a.action='CYCLE_CREATED' and a.resource='RushCycle' and a.resource_id=c.id), 'cycle creation retains actor-scoped audit behavior');
 update rush.rush_cycles set status='CLOSED' where name='pgTAP owner-created cycle';
@@ -248,7 +248,7 @@ insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
   ('10000000-0000-4000-8000-000000000031','10000000-0000-4000-8000-000000000021','10000000-0000-4000-8000-000000000013','REJECTED',now() - interval '1 year');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
 set local role authenticated;
 insert into rush_foundation_results values ('reapply_can_start',(select case when rush.can_start_application() then 1 else 0 end));
 insert into rush_foundation_results values ('reapply_is_applicant',(select case when rush.is_applicant() then 1 else 0 end));
@@ -288,7 +288,7 @@ insert into rush.rubric_criteria(id,rubric_id,key,name,weight,required,position)
 insert into rush.evaluation_assignments(id,round_id,application_id,evaluator_id) values
   ('10000000-0000-4000-8000-000000000071','10000000-0000-4000-8000-000000000042','10000000-0000-4000-8000-000000000033','10000000-0000-4000-8000-000000000001');
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok(
   $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
@@ -312,14 +312,14 @@ select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid
 
 -- ...0002 is a plain MEMBER of cycle ...0011.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_application_questions('10000000-0000-4000-8000-000000000011','[]'::jsonb)$$,'42501','forbidden','a plain member cannot edit application questions');
 select extensions.is(rush.cycle_application_questions('10000000-0000-4000-8000-000000000011'),'[]'::jsonb,'a plain member reads no questions back');
 
 -- ...0001 is OWNER of cycle ...0011, which has no applications at all.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 select extensions.is(
   rush.set_application_questions('10000000-0000-4000-8000-000000000011',
     '[{"key":"second_q","prompt":"Second prompt","inputType":"short_text","required":false},
@@ -353,12 +353,12 @@ insert into rush.rounds(id,cycle_id,kind,name,status,weight) values
   ('10000000-0000-4000-8000-000000000041','10000000-0000-4000-8000-000000000011','PGTAP_ROUND','pgTAP round','DRAFT',50);
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10}]'::jsonb)$$,'42501','forbidden','a plain member cannot edit a rubric');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[]'::jsonb)$$,'22023','a rubric needs at least one criterion','an empty rubric is rejected');
 select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":0}]'::jsonb)$$,'22023','invalid criterion weight','a zero weight is rejected');
 select extensions.throws_ok($$select rush.set_rubric_criteria('10000000-0000-4000-8000-000000000041','[{"key":"a","name":"A","weight":10},{"key":"a","name":"B","weight":10}]'::jsonb)$$,'23505','duplicate criterion key','duplicate criterion keys are rejected');
@@ -402,12 +402,12 @@ select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid
 
 -- ...0002 does not own the reapplicant's application ...032.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000032')$$,'42501','forbidden','one applicant cannot withdraw another applicant''s application');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
 select extensions.throws_ok($$select rush.withdraw_application('10000000-0000-4000-8000-000000000031')$$,'55000','application cannot be withdrawn','a rejected application cannot be withdrawn');
 select extensions.ok(rush.withdraw_application('10000000-0000-4000-8000-000000000032'), 'the owner withdraws their submitted application');
 set local role postgres;
@@ -425,12 +425,12 @@ select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid
 
 -- ...0002 is a MEMBER, not an OWNER anywhere.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP member clone')$$,'42501','forbidden','a non-owner cannot clone a cycle');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 select extensions.throws_ok($$select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP profile cycle')$$,'23505','cycle exists','a duplicate cycle name is rejected');
 select rush.clone_cycle('10000000-0000-4000-8000-000000000011','pgTAP cloned cycle');
 set local role postgres;
@@ -472,7 +472,7 @@ select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='cycle_directory' and p.prosecdef and p.proconfig @> array['search_path=""']), 'directory reader exists and is security definer with empty search path');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.ok(rush.update_my_profile('pgTAP Member','Winter 2027','Industrial Engineering','Engagement lead','Short bio.'), 'a member updates their own profile');
 select extensions.throws_ok($$select rush.update_my_profile('','','','','')$$,'22023','invalid display name','a blank display name is rejected');
@@ -488,7 +488,7 @@ select extensions.ok(
   'the directory carries no email addresses');
 -- ...0003 belongs to cycle ...0012 only.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
 select extensions.is(rush.cycle_directory('10000000-0000-4000-8000-000000000011'),'[]'::jsonb,'an outsider reads an empty directory');
 set local role postgres;
 
@@ -504,13 +504,13 @@ select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_clas
 -- ...0002 is a plain member of ...0011 and has no role on ...0014, which owns
 -- application ...032.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.log_message('10000000-0000-4000-8000-000000000032','TEST','a@example.invalid','Subject',true)$$,'42501','forbidden','an unrelated member cannot log a message against an application');
 
 -- The applicant may log their own intake confirmation.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
 select extensions.ok(rush.log_message('10000000-0000-4000-8000-000000000032','APPLICATION_RECEIVED','pgtap-reapplicant@example.invalid','We received your MECG application',false) is not null, 'the applicant logs their own confirmation');
 set local role postgres;
 select extensions.is(
@@ -524,7 +524,7 @@ select extensions.is(
 
 -- ...0001 owns ...0014 but is not PANEL there, so batch release is refused.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.release_ready_decisions('10000000-0000-4000-8000-000000000011')$$,'42501','panel role required','a non-panel member cannot batch release');
 set local role postgres;
@@ -538,7 +538,7 @@ select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid
 select extensions.ok(position('offer expired' in pg_get_functiondef('rush.respond_to_offer(text,boolean)'::regprocedure)) > 0, 'respond_to_offer enforces the deadline itself');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000-8000-000000000031', now() + interval '7 days')$$,'42501','panel role required','a non-panel member cannot set an offer deadline');
 set local role postgres;
@@ -556,12 +556,12 @@ select extensions.is((select is_public from rush.projects where slug='pgtap-proj
 select extensions.is(rush.public_projects(), '[]'::jsonb, 'a private project is invisible to the public site');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.upsert_project('{"slug":"member-project","title":"Nope"}'::jsonb)$$,'42501','forbidden','a plain member cannot create a project');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 select extensions.throws_ok($$select rush.upsert_project('{"slug":"Bad Slug","title":"Nope"}'::jsonb)$$,'22023','invalid project slug','a malformed slug is rejected');
 select extensions.ok(rush.upsert_project('{"slug":"pgtap-project","title":"pgTAP project","isPublic":true}'::jsonb) is not null, 'an owner publishes a project');
 set local role postgres;
@@ -585,7 +585,7 @@ select extensions.ok(position('reminders_sent' in pg_get_functiondef('rush.pendi
 select extensions.ok(position('on conflict on constraint reminders_sent_kind_subject_id_recipient_id_key' in pg_get_functiondef('rush.mark_reminder_sent(text,text,uuid)'::regprocedure)) > 0, 'reminder idempotency uses an unambiguous conflict target');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function mark_reminder_sent','an authenticated caller cannot record a reminder');
 select extensions.throws_ok($$select rush.pending_reminders()$$,'42501','permission denied for function pending_reminders','an authenticated caller cannot read pending reminders');
@@ -619,7 +619,7 @@ select extensions.ok(position('with stale_pnms as materialized' in pg_get_functi
 select extensions.ok(exists(select 1 from cron.job where jobname = 'anonymize-archived-applicants'), 'retention is scheduled rather than merely available');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.anonymize_archived_applicants()$$,'42501','permission denied for function anonymize_archived_applicants','an authenticated caller cannot run retention');
 set local role postgres;
@@ -641,9 +641,40 @@ select extensions.is((select count(*) from rush.application_responses where appl
 
 -- Prior-cycle history is board-only. ...0004 is an applicant, not staff.
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000004';
-set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}';
 select extensions.is(rush.applicant_prior_cycles('10000000-0000-4000-8000-000000000032'),'[]'::jsonb,'an applicant cannot read prior-cycle history through the board function');
 set local role postgres;
+
+-- Provider-neutral identities preserve UUID domain principals without trusting
+-- a bare subject or allowing webhook races to re-key imported users.
+select extensions.has_table('rush','auth_identities','external identity map exists');
+select extensions.has_table('rush','auth_migration_ledger','auth migration ledger exists');
+select extensions.has_function('rush','actor_id',array[]::text[],'provider-neutral actor helper exists');
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.is(rush.actor_id(),'10000000-0000-4000-8000-000000000001'::uuid,'legacy issuer and subject resolve to the stable profile UUID');
+set local "request.jwt.claims" = '{"iss":"https://unknown.example","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+select extensions.is(rush.actor_id(),null::uuid,'an unrecognized issuer cannot reuse a known UUID subject');
+set local "request.jwt.claims" = '{"role":"service_role"}';
+set local role service_role;
+select extensions.ok(rush.ensure_external_identity('https://clerk.test/','user_new','new-clerk@example.invalid','New Clerk User') is not null,'service provisioning creates a new mapped profile atomically');
+select extensions.is(
+  rush.ensure_external_identity('https://clerk.test','user_new','new-clerk@example.invalid','New Clerk User'),
+  (select app_user_id from rush.auth_identities where issuer='https://clerk.test' and subject='user_new'),
+  'external identity provisioning is idempotent');
+select extensions.ok(rush.prepare_auth_migration('10000000-0000-4000-8000-000000000003','pgtap-profile-outsider@example.invalid'),'existing identity migration is explicitly prepared');
+select extensions.is(
+  rush.ensure_external_identity('https://clerk.test','user_imported','pgtap-profile-outsider@example.invalid','Imported User','10000000-0000-4000-8000-000000000003'),
+  '10000000-0000-4000-8000-000000000003'::uuid,
+  'prepared imports retain their existing domain UUID');
+select extensions.ok(rush.disable_external_identity('https://clerk.test','user_new'),'external identity deletion revokes only the provider mapping');
+set local role postgres;
+select extensions.ok(not exists(
+  select 1 from pg_constraint c
+  join pg_class t on t.oid=c.conrelid
+  join pg_namespace n on n.oid=t.relnamespace
+  where c.contype='f' and n.nspname='rush' and c.confrelid='auth.users'::regclass
+),'Rush domain foreign keys no longer depend on auth.users');
 
 select * from extensions.finish();
 rollback;

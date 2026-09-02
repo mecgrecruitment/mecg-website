@@ -82,6 +82,13 @@ export type Database = {
             referencedRelation: "rush_cycles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "application_documents_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       application_portal_allowlist: {
@@ -274,10 +281,90 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "audit_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "audit_events_cycle_id_fkey"
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "rush_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auth_identities: {
+        Row: {
+          app_user_id: string
+          created_at: string
+          disabled_at: string | null
+          issuer: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          app_user_id: string
+          created_at?: string
+          disabled_at?: string | null
+          issuer: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          app_user_id?: string
+          created_at?: string
+          disabled_at?: string | null
+          issuer?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_identities_app_user_id_fkey"
+            columns: ["app_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auth_migration_ledger: {
+        Row: {
+          expected_email: string
+          linked_at: string | null
+          prepared_at: string
+          provider_subject: string | null
+          source_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          expected_email: string
+          linked_at?: string | null
+          prepared_at?: string
+          provider_subject?: string | null
+          source_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          expected_email?: string
+          linked_at?: string | null
+          prepared_at?: string
+          provider_subject?: string | null
+          source_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_migration_ledger_source_user_id_fkey"
+            columns: ["source_user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -821,6 +908,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_impressions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       event_slots: {
@@ -985,6 +1079,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "member_checkins_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       memberships: {
@@ -1102,7 +1203,15 @@ export type Database = {
           operation?: string
           result?: Json
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mutation_receipts_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_outbox: {
         Row: {
@@ -1251,7 +1360,15 @@ export type Database = {
           uniqname?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pnms_auth_user_id_fkey"
+            columns: ["auth_user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       process_surveys: {
         Row: {
@@ -1295,6 +1412,7 @@ export type Database = {
           id: string
           major: string | null
           position_title: string | null
+          primary_email: string | null
           updated_at: string
         }
         Insert: {
@@ -1306,6 +1424,7 @@ export type Database = {
           id: string
           major?: string | null
           position_title?: string | null
+          primary_email?: string | null
           updated_at?: string
         }
         Update: {
@@ -1317,6 +1436,7 @@ export type Database = {
           id?: string
           major?: string | null
           position_title?: string | null
+          primary_email?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1343,6 +1463,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1447,7 +1574,15 @@ export type Database = {
           sent_at?: string
           subject_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reminders_sent_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rounds: {
         Row: {
@@ -1981,6 +2116,7 @@ export type Database = {
         Args: { target_cycle_id: string }
         Returns: boolean
       }
+      actor_id: { Args: never; Returns: string }
       actor_is_assigned_evaluator: {
         Args: { target_application_id: string }
         Returns: boolean
@@ -2172,6 +2308,20 @@ export type Database = {
         Args: { target_group_id: string }
         Returns: undefined
       }
+      disable_external_identity: {
+        Args: { identity_issuer: string; identity_subject: string }
+        Returns: boolean
+      }
+      ensure_external_identity: {
+        Args: {
+          existing_app_user_id?: string
+          identity_display_name: string
+          identity_email: string
+          identity_issuer: string
+          identity_subject: string
+        }
+        Returns: string
+      }
       event_cycle_id: { Args: { target_event_id: string }; Returns: string }
       event_for_token: {
         Args: { raw_token: string }
@@ -2298,7 +2448,10 @@ export type Database = {
         Args: { target_document_id: string }
         Returns: Json
       }
-      prune_pending_resume_uploads: { Args: never; Returns: undefined }
+      prepare_auth_migration: {
+        Args: { expected_email: string; source_user_id: string }
+        Returns: boolean
+      }
       prune_rate_limits: { Args: never; Returns: undefined }
       public_projects: { Args: never; Returns: Json }
       public_recruitment: { Args: never; Returns: Json }
