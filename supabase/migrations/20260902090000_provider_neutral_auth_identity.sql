@@ -236,6 +236,39 @@ $$;
 
 revoke all on function rush.handle_new_auth_user() from public, anon, authenticated;
 
+-- Preserve historical actors before domain foreign keys stop pointing at
+-- auth.users. A profile may have been deleted while immutable audit or workflow
+-- records still retain its provider UUID. Recreate only referenced profiles,
+-- keep them inactive, and retain their original UUID for audit continuity.
+with referenced_users(id) as (
+  select owner_user_id from rush.application_documents
+  union select actor_id from rush.audit_events where actor_id is not null
+  union select member_id from rush.event_impressions
+  union select member_id from rush.member_checkins
+  union select actor_id from rush.mutation_receipts
+  union select auth_user_id from rush.pnms where auth_user_id is not null
+  union select user_id from rush.project_members
+  union select recipient_id from rush.reminders_sent
+)
+insert into rush.profiles (id, display_name, primary_email, active)
+select
+  u.id,
+  left(coalesce(
+    nullif(trim(u.raw_user_meta_data ->> 'display_name'), ''),
+    nullif(trim(u.raw_user_meta_data ->> 'full_name'), ''),
+    nullif(split_part(coalesce(u.email, ''), '@', 1), ''),
+    'Legacy MECG user'
+  ), 120),
+  case
+    when char_length(lower(trim(coalesce(u.email, '')))) between 3 and 254
+      then lower(trim(u.email))
+    else null
+  end,
+  false
+from auth.users u
+join referenced_users r on r.id = u.id
+on conflict (id) do nothing;
+
 -- Seed mappings only for provider users that already own a domain profile.
 -- Supabase Auth may retain abandoned or administrative accounts with no Rush
 -- profile, and auth_identities deliberately cannot point at those accounts.
