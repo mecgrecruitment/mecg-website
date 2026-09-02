@@ -77,7 +77,6 @@ begin
   return next;
 end;
 $$;
-
 create function rush.declare_conflict(target_application_id text, conflict_reason text)
 returns void language plpgsql security definer set search_path = '' as $$
 declare actor uuid := auth.uid(); target_cycle text; released_id text;
@@ -98,14 +97,12 @@ begin
   insert into rush.audit_events (actor_id, cycle_id, action, resource, resource_id, metadata)
   values (actor, target_cycle, case when released_id is null then 'CONFLICT_DECLARED' else 'CONFLICT_DECLARED_AFTER_RELEASE' end, 'Application', target_application_id, case when released_id is null then '{}'::jsonb else jsonb_build_object('decisionId', released_id, 'requiresReview', true) end);
 end; $$;
-
 create function rush.member_applicants(target_cycle_id text)
 returns table (id text, name text) language sql stable security definer set search_path = '' as $$
   select a.id, p.name from rush.applications a join rush.pnms p on p.id = a.pnm_id
   where a.cycle_id = target_cycle_id and rush.has_cycle_role(target_cycle_id, array['MEMBER','BOARD','PANEL','OWNER']::rush.member_role[])
   order by p.name;
 $$;
-
 revoke all on function rush.submit_evaluation(text,jsonb,text) from public, anon;
 revoke all on function rush.declare_conflict(text,text) from public, anon;
 revoke all on function rush.member_applicants(text) from public, anon;

@@ -84,10 +84,8 @@ begin
   return written;
 end;
 $$;
-
 revoke all on function rush.set_application_questions(text, jsonb) from public, anon;
 grant execute on function rush.set_application_questions(text, jsonb) to authenticated, service_role;
-
 -- The editor needs to read the current set for a cycle. questions_read_authenticated
 -- is scoped to the open intake cycle, so board staff editing a DRAFT cycle
 -- would otherwise see nothing to edit.
@@ -113,6 +111,5 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.cycle_application_questions(text) from public, anon;
 grant execute on function rush.cycle_application_questions(text) to authenticated, service_role;

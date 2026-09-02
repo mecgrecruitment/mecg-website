@@ -29,11 +29,9 @@ as $$
     where p.auth_user_id = auth.uid() and a.status not in ('DRAFT', 'NEEDS_INFO')
   );
 $$;
-
 -- CREATE OR REPLACE can't change a table-returning function's output
 -- columns; drop first since we're adding offer_response.
 drop function if exists rush.applicant_dashboard();
-
 create function rush.applicant_dashboard()
 returns table(
   application_id text,
@@ -77,7 +75,6 @@ $$;
 -- rush/20260822130000_application_intake.sql.
 revoke all on function rush.applicant_dashboard() from public, anon;
 grant execute on function rush.applicant_dashboard() to authenticated, service_role;
-
 create or replace function rush.respond_to_offer(accept boolean)
 returns void language plpgsql security definer set search_path='' as $$
 declare actor uuid := auth.uid(); app_row rush.applications%rowtype;
@@ -92,7 +89,6 @@ begin
   values (actor, app_row.cycle_id, 'OFFER_RESPONSE', 'Application', app_row.id,
     jsonb_build_object('response', case when accept then 'ACCEPTED' else 'DECLINED' end));
 end; $$;
-
 -- Surface the NEEDS_INFO reason to the applicant on /apply, now that
 -- NEEDS_INFO applications route back there instead of dead-ending on
 -- /applicant.

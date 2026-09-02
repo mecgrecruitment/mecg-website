@@ -30,7 +30,6 @@
 drop policy if exists storage_resumes_applicant_insert on storage.objects;
 drop policy if exists storage_resumes_applicant_delete on storage.objects;
 drop policy if exists storage_resumes_applicant_select on storage.objects;
-
 create policy storage_resumes_applicant_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'resumes'
@@ -42,7 +41,6 @@ with check (
       and d.created_at >= now() - interval '1 hour'
   )
 );
-
 create policy storage_resumes_applicant_delete on storage.objects for delete to authenticated
 using (
   bucket_id = 'resumes'
@@ -53,7 +51,6 @@ using (
       and d.status in ('PENDING', 'REJECTED', 'SUPERSEDED')
   )
 );
-
 create policy storage_resumes_applicant_select on storage.objects for select to authenticated
 using (
   bucket_id = 'resumes'
@@ -64,7 +61,6 @@ using (
       and d.status in ('PENDING', 'READY', 'ATTACHED')
   )
 );
-
 -- Regression guard. The 20260902090000 guards count rush objects only, which is
 -- how this gap survived. This one counts every schema, so any policy anywhere
 -- that reaches back to auth.uid() fails the deploy instead of failing an

@@ -71,7 +71,6 @@ end;
 $$;
 revoke all on function rush.check_rate_limit(text) from public;
 grant execute on function rush.check_rate_limit(text) to service_role;
-
 create or replace function rush.response_word_count(value text)
 returns integer
 language sql

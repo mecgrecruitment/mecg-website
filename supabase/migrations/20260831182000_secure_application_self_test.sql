@@ -61,10 +61,8 @@ begin
   return result ->> 'applicationId';
 end;
 $$;
-
 revoke all on function rush.submit_application_self_test(text,text) from public, anon, authenticated;
 grant execute on function rush.submit_application_self_test(text,text) to service_role;
-
 -- The workflow fixture impersonates the applicant before calling this helper.
 -- Keep the applicant identity, but retain the caller's service-role claim for the guarded call.
 do $migration$

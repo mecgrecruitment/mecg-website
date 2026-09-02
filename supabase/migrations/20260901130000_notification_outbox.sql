@@ -20,23 +20,18 @@ create table rush.notification_outbox (
   sent_at timestamptz,
   unique (decision_id, template_key, template_version)
 );
-
 create index notification_outbox_due_idx
   on rush.notification_outbox (next_attempt_at, created_at)
   where status in ('PENDING','PROCESSING');
 create index notification_outbox_cycle_status_idx
   on rush.notification_outbox (cycle_id, status, created_at desc);
-
 alter table rush.notification_outbox enable row level security;
 alter table rush.notification_outbox force row level security;
-
 create policy notification_outbox_read_board on rush.notification_outbox
 for select to authenticated
 using (rush.has_cycle_role(cycle_id, array['BOARD','OWNER']::rush.member_role[]));
-
 grant select on rush.notification_outbox to authenticated, service_role;
 grant insert, update on rush.notification_outbox to service_role;
-
 -- Claims one delivery attempt under a short lease. A crashed worker can be
 -- reclaimed after the lease; Resend's stable idempotency key prevents a second
 -- provider delivery when the first request succeeded but its response was lost.
@@ -88,7 +83,6 @@ begin
   return result;
 end;
 $$;
-
 create function rush.complete_notification(
   target_notification_id text,
   was_delivered boolean,
@@ -137,7 +131,6 @@ begin
   return next_status;
 end;
 $$;
-
 -- Manual retries are Board/Owner-only, audited, and capped at eight total
 -- attempts so repeated clicks cannot create an unbounded send loop.
 create function rush.retry_notification(target_notification_id text)
@@ -165,7 +158,6 @@ begin
           jsonb_build_object('attemptCount', item.attempt_count));
 end;
 $$;
-
 -- Replace the current release function so business state and its delivery
 -- obligation commit together.
 create or replace function rush.release_decision(target_decision_id text)
@@ -196,7 +188,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),d.cycle_id,'DECISION_RELEASED','Decision',d.id);
 end;
 $$;
-
 create function rush.decision_notification_id(target_decision_id text)
 returns text
 language plpgsql
@@ -218,7 +209,6 @@ begin
   return item.id;
 end;
 $$;
-
 revoke all on function rush.claim_notification(text), rush.complete_notification(text,boolean,text,text,boolean), rush.retry_notification(text), rush.decision_notification_id(text) from public, anon, authenticated;
 grant execute on function rush.claim_notification(text), rush.complete_notification(text,boolean,text,text,boolean) to service_role;
 grant execute on function rush.decision_notification_id(text) to authenticated, service_role;

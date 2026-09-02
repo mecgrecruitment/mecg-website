@@ -4,16 +4,13 @@
 
 alter table rush.profiles
   add column primary_email text;
-
 update rush.profiles p
 set primary_email = lower(trim(u.email))
 from auth.users u
 where u.id = p.id and nullif(trim(u.email), '') is not null;
-
 alter table rush.profiles
   add constraint profiles_primary_email_normalized
   check (primary_email is null or (primary_email = lower(trim(primary_email)) and char_length(primary_email) between 3 and 254));
-
 create table rush.auth_identities (
   issuer text not null check (issuer = trim(trailing '/' from trim(issuer)) and issuer <> ''),
   subject text not null check (subject = trim(subject) and subject <> ''),
@@ -24,11 +21,9 @@ create table rush.auth_identities (
   primary key (issuer, subject),
   unique (issuer, app_user_id)
 );
-
 alter table rush.auth_identities enable row level security;
 alter table rush.auth_identities force row level security;
 revoke all on table rush.auth_identities from public, anon, authenticated;
-
 create table rush.auth_migration_ledger (
   source_user_id uuid primary key references rush.profiles (id) on delete cascade,
   expected_email text not null check (expected_email = lower(trim(expected_email)) and char_length(expected_email) between 3 and 254),
@@ -38,11 +33,9 @@ create table rush.auth_migration_ledger (
   linked_at timestamptz,
   updated_at timestamptz not null default now()
 );
-
 alter table rush.auth_migration_ledger enable row level security;
 alter table rush.auth_migration_ledger force row level security;
 revoke all on table rush.auth_migration_ledger from public, anon, authenticated;
-
 create or replace function rush.actor_id()
 returns uuid
 language sql
@@ -56,10 +49,8 @@ as $$
     and i.subject = coalesce(auth.jwt() ->> 'sub', '')
     and i.disabled_at is null;
 $$;
-
 revoke all on function rush.actor_id() from public, anon;
 grant execute on function rush.actor_id() to authenticated, service_role;
-
 create or replace function rush.prepare_auth_migration(source_user_id uuid, expected_email text)
 returns boolean
 language plpgsql
@@ -91,10 +82,8 @@ begin
   return true;
 end;
 $$;
-
 revoke all on function rush.prepare_auth_migration(uuid, text) from public, anon, authenticated;
 grant execute on function rush.prepare_auth_migration(uuid, text) to service_role;
-
 create or replace function rush.ensure_external_identity(
   identity_issuer text,
   identity_subject text,
@@ -178,10 +167,8 @@ begin
   return resolved_id;
 end;
 $$;
-
 revoke all on function rush.ensure_external_identity(text, text, text, text, uuid) from public, anon, authenticated;
 grant execute on function rush.ensure_external_identity(text, text, text, text, uuid) to service_role;
-
 create or replace function rush.disable_external_identity(identity_issuer text, identity_subject text)
 returns boolean
 language plpgsql
@@ -198,10 +185,8 @@ begin
   return found;
 end;
 $$;
-
 revoke all on function rush.disable_external_identity(text, text) from public, anon, authenticated;
 grant execute on function rush.disable_external_identity(text, text) to service_role;
-
 -- Keep Supabase Auth usable throughout the recovery window. Both issuers are
 -- explicit because actor lookup intentionally never guesses from a bare UUID.
 create or replace function rush.handle_new_auth_user()
@@ -233,9 +218,7 @@ begin
   return new;
 end;
 $$;
-
 revoke all on function rush.handle_new_auth_user() from public, anon, authenticated;
-
 -- Preserve historical actors before domain foreign keys stop pointing at
 -- auth.users. A profile may have been deleted while immutable audit or workflow
 -- records still retain its provider UUID. Recreate only referenced profiles,
@@ -268,7 +251,6 @@ select
 from auth.users u
 join referenced_users r on r.id = u.id
 on conflict (id) do nothing;
-
 -- Seed mappings only for provider users that already own a domain profile.
 -- Supabase Auth may retain abandoned or administrative accounts with no Rush
 -- profile, and auth_identities deliberately cannot point at those accounts.
@@ -281,7 +263,6 @@ cross join (values
   ('http://127.0.0.1:54321/auth/v1')
 ) as known(issuer)
 on conflict (issuer, subject) do update set app_user_id = excluded.app_user_id, disabled_at = null, updated_at = now();
-
 -- Move all effective authorization functions and policies through the single
 -- provider-neutral boundary. Guard counts make catalog drift fail loudly.
 -- The linked production project retains an older, equivalent inline form of
@@ -309,7 +290,6 @@ begin
   end loop;
 end;
 $$;
-
 -- The workflow verifier deliberately impersonates its fixture users. Give
 -- those synthetic claims an explicit trusted issuer as production JWTs do.
 do $migration$
@@ -324,7 +304,6 @@ begin
   );
 end;
 $migration$;
-
 do $$
 declare
   coupled_policies text[];
@@ -411,7 +390,6 @@ begin
   end loop;
 end;
 $$;
-
 -- Background jobs now read application-owned contact data, not auth.users.
 create or replace function rush.application_portal_allows(actor uuid)
 returns boolean
@@ -431,10 +409,8 @@ as $$
         where p.id = actor and p.primary_email like 'workflow-%@example.invalid'
       );
 $$;
-
 revoke all on function rush.application_portal_allows(uuid) from public, anon, authenticated;
 grant execute on function rush.application_portal_allows(uuid) to service_role;
-
 create or replace function rush.pending_reminders()
 returns jsonb
 language sql
@@ -462,10 +438,8 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.pending_reminders() from public, anon, authenticated;
 grant execute on function rush.pending_reminders() to service_role;
-
 -- Domain lifecycle is now rooted in profiles rather than provider accounts.
 alter table rush.application_documents drop constraint application_documents_owner_user_id_fkey;
 alter table rush.application_documents add constraint application_documents_owner_user_id_fkey foreign key (owner_user_id) references rush.profiles(id) on delete cascade;
@@ -484,7 +458,6 @@ alter table rush.project_members add constraint project_members_user_id_fkey for
 alter table rush.reminders_sent drop constraint reminders_sent_recipient_id_fkey;
 alter table rush.reminders_sent add constraint reminders_sent_recipient_id_fkey foreign key (recipient_id) references rush.profiles(id) on delete cascade;
 alter table rush.profiles drop constraint profiles_id_fkey;
-
 -- No effective domain object may silently retain the old provider principal.
 do $$
 declare retained integer;

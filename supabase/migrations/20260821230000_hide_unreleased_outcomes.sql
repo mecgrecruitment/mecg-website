@@ -12,12 +12,10 @@ using (exists (
     or exists(select 1 from rush.evaluation_assignments ea where ea.application_id=a.id and ea.evaluator_id=auth.uid())
   )
 ));
-
 create function rush.is_applicant()
 returns boolean language sql stable security definer set search_path='' as $$
   select exists(select 1 from rush.pnms where auth_user_id=auth.uid());
 $$;
-
 create function rush.applicant_dashboard()
 returns table(application_id text,applicant_name text,cycle_name text,display_status text,released_outcome rush.decision_outcome,released_at timestamptz)
 language sql stable security definer set search_path='' as $$

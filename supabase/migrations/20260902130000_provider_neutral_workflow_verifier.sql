@@ -34,11 +34,9 @@ begin
   )::text;
 end;
 $$;
-
 -- This helper is an implementation detail of the service-only verifier. The
 -- verifier runs as its owning role and can call it without exposing a new RPC.
 revoke all on function rush.workflow_test_claims(uuid, text) from public, anon, authenticated, service_role;
-
 do $migration$
 declare
   definition text;

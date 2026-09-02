@@ -112,7 +112,6 @@ begin
   return application_id;
 end;
 $$;
-
 create or replace function rush.submit_interest(
   full_name text,
   email text,
@@ -141,7 +140,6 @@ begin
   returning signup.id into result_id;
   return result_id;
 end; $$;
-
 create or replace function rush.set_applicant_profile(
   uniqname text default null,
   college text default null,
@@ -158,7 +156,6 @@ begin
     accessibility_notes = coalesce(nullif(trim(set_applicant_profile.accessibility_notes),''), p.accessibility_notes)
   where p.auth_user_id = auth.uid();
 end; $$;
-
 create or replace function rush.verify_full_workflow(owner_id uuid, panel_id uuid, applicant_id uuid)
 returns void language plpgsql security definer set search_path='' as $$
 declare

@@ -7,7 +7,6 @@
 -- offer that expired while it sat open.
 alter table rush.applications
   add column if not exists offer_expires_at timestamptz;
-
 create or replace function rush.set_offer_deadline(target_application_id text, expires_at timestamptz)
 returns boolean
 language plpgsql
@@ -40,10 +39,8 @@ begin
   return true;
 end;
 $$;
-
 revoke all on function rush.set_offer_deadline(text, timestamptz) from public, anon;
 grant execute on function rush.set_offer_deadline(text, timestamptz) to authenticated, service_role;
-
 -- Reproduced from 20260830100000 with one added condition: an expired offer can
 -- no longer be answered. Everything else, including the row lock and the
 -- single-response guard, is unchanged.
@@ -76,10 +73,8 @@ begin
   values (actor,app_row.cycle_id,'OFFER_RESPONSE','Application',app_row.id,jsonb_build_object('response',case when accept then 'ACCEPTED' else 'DECLINED' end));
 end;
 $$;
-
 revoke all on function rush.respond_to_offer(text, boolean) from public, anon;
 grant execute on function rush.respond_to_offer(text, boolean) to authenticated, service_role;
-
 -- applicant_dashboard is a table-returning function whose column list cannot be
 -- changed with CREATE OR REPLACE, and reproducing all of it to add one column
 -- risks silently dropping a rule from a function that decides what an applicant
@@ -98,6 +93,5 @@ as $$
     where p.auth_user_id = auth.uid() and a.offer_expires_at is not null
   ), '{}'::jsonb);
 $$;
-
 revoke all on function rush.my_offer_deadlines() from public, anon;
 grant execute on function rush.my_offer_deadlines() to authenticated, service_role;

@@ -25,7 +25,6 @@ create table rush.application_documents (
   superseded_at timestamptz,
   deleted_at timestamptz
 );
-
 -- Preserve already-submitted resumes when this migration reaches an existing
 -- project. They have passed the former bucket/path checks, but do not have the
 -- richer verification metadata introduced here.
@@ -49,7 +48,6 @@ join rush.pnms p on p.id = a.pnm_id and p.auth_user_id is not null
 join storage.objects o on o.bucket_id = 'resumes' and o.name = a.resume_storage_path
 where a.resume_storage_path is not null
 on conflict (object_path) do nothing;
-
 create index application_documents_owner_cycle_created_idx
   on rush.application_documents (owner_user_id, cycle_id, created_at desc);
 create unique index application_documents_one_ready_resume_idx
@@ -58,14 +56,11 @@ create unique index application_documents_one_ready_resume_idx
 create unique index application_documents_one_attached_resume_idx
   on rush.application_documents (owner_user_id, cycle_id, kind)
   where status = 'ATTACHED';
-
 alter table rush.application_documents enable row level security;
 alter table rush.application_documents force row level security;
-
 create policy application_documents_owner_read on rush.application_documents
 for select to authenticated
 using (owner_user_id = auth.uid());
-
 create policy application_documents_internal_read on rush.application_documents
 for select to authenticated
 using (
@@ -83,10 +78,8 @@ using (
     where c.application_id = application_documents.application_id and c.declarer_id = auth.uid()
   )
 );
-
 grant select on rush.application_documents to authenticated;
 grant all on rush.application_documents to service_role;
-
 create or replace function rush.begin_resume_upload(
   upload_filename text,
   upload_size integer
@@ -161,7 +154,6 @@ begin
   return jsonb_build_object('documentId', document_id, 'path', object_name);
 end;
 $$;
-
 create or replace function rush.pending_resume_upload(target_document_id text)
 returns jsonb
 language sql
@@ -181,7 +173,6 @@ as $$
     and d.status = 'PENDING'
     and d.created_at >= now() - interval '1 hour';
 $$;
-
 create or replace function rush.finalize_resume_upload(
   target_document_id text,
   actual_size integer,
@@ -261,7 +252,6 @@ begin
   );
 end;
 $$;
-
 create or replace function rush.reject_resume_upload(
   target_document_id text,
   rejection text
@@ -291,7 +281,6 @@ begin
   return target_document.object_path;
 end;
 $$;
-
 create or replace function rush.my_ready_resume(target_path text default null)
 returns jsonb
 language sql
@@ -314,7 +303,6 @@ as $$
   order by d.ready_at desc
   limit 1;
 $$;
-
 create or replace function rush.authorize_resume_access(target_application_id text)
 returns text
 language plpgsql
@@ -352,7 +340,6 @@ begin
   return target_application.resume_storage_path;
 end;
 $$;
-
 create or replace function rush.require_ready_resume()
 returns trigger
 language plpgsql
@@ -385,12 +372,10 @@ begin
   return new;
 end;
 $$;
-
 drop trigger if exists applications_require_ready_resume on rush.applications;
 create trigger applications_require_ready_resume
 before insert or update of resume_storage_path on rush.applications
 for each row execute function rush.require_ready_resume();
-
 -- Keep the database-only workflow rehearsal compatible with the new invariant.
 -- This function is already restricted to its synthetic workflow identity.
 create or replace function rush.submit_application_self_test(applicant_name text, applicant_contact text)
@@ -426,7 +411,6 @@ begin
   );
 end;
 $$;
-
 revoke all on function rush.begin_resume_upload(text, integer), rush.pending_resume_upload(text),
   rush.finalize_resume_upload(text, integer, text, integer), rush.reject_resume_upload(text, text),
   rush.my_ready_resume(text), rush.authorize_resume_access(text) from public, anon;
@@ -435,7 +419,6 @@ grant execute on function rush.begin_resume_upload(text, integer), rush.pending_
   rush.reject_resume_upload(text, text),
   rush.my_ready_resume(text), rush.authorize_resume_access(text) to authenticated, service_role;
 grant execute on function rush.finalize_resume_upload(text, integer, text, integer) to service_role;
-
 -- Replace the broad owner-folder write rules. A caller can only create the
 -- exact object path issued for a still-pending document.
 drop policy if exists storage_resumes_applicant_insert on storage.objects;
@@ -443,7 +426,6 @@ drop policy if exists storage_resumes_applicant_update on storage.objects;
 drop policy if exists storage_resumes_applicant_delete on storage.objects;
 drop policy if exists storage_resumes_applicant_select on storage.objects;
 drop policy if exists storage_resumes_board_select_rush on storage.objects;
-
 create policy storage_resumes_applicant_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'resumes'
@@ -455,7 +437,6 @@ with check (
       and d.created_at >= now() - interval '1 hour'
   )
 );
-
 create policy storage_resumes_applicant_delete on storage.objects for delete to authenticated
 using (
   bucket_id = 'resumes'
@@ -466,7 +447,6 @@ using (
       and d.status in ('PENDING', 'REJECTED', 'SUPERSEDED')
   )
 );
-
 create policy storage_resumes_applicant_select on storage.objects for select to authenticated
 using (
   bucket_id = 'resumes'
@@ -477,7 +457,6 @@ using (
       and d.status in ('PENDING', 'READY', 'ATTACHED')
   )
 );
-
 create policy storage_resumes_internal_select on storage.objects for select to authenticated
 using (
   bucket_id = 'resumes'

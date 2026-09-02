@@ -10,7 +10,6 @@ alter table rush.profiles
   add column if not exists major text check (major is null or char_length(trim(major)) between 1 and 120),
   add column if not exists position_title text check (position_title is null or char_length(trim(position_title)) between 1 and 120),
   add column if not exists bio text check (bio is null or char_length(bio) <= 1000);
-
 -- Self-service only. Nobody edits anyone else's profile here; role changes stay
 -- in set_membership_role where they are already audited.
 create or replace function rush.update_my_profile(
@@ -55,10 +54,8 @@ begin
   return true;
 end;
 $$;
-
 revoke all on function rush.update_my_profile(text, text, text, text, text) from public, anon;
 grant execute on function rush.update_my_profile(text, text, text, text, text) to authenticated, service_role;
-
 -- The directory. Scoped to one cycle and readable by anyone with access to that
 -- cycle, which is the same bar the workspace already uses. Deliberately returns
 -- no email or contact detail: this answers "who is on the team", not "how do I
@@ -101,10 +98,8 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.cycle_directory(text) from public, anon;
 grant execute on function rush.cycle_directory(text) to authenticated, service_role;
-
 -- Everything a member has done in one cycle, for their own record. Same
 -- self-service boundary as update_my_profile.
 create or replace function rush.my_member_record(target_cycle_id text)
@@ -140,6 +135,5 @@ as $$
     )
   );
 $$;
-
 revoke all on function rush.my_member_record(text) from public, anon;
 grant execute on function rush.my_member_record(text) to authenticated, service_role;

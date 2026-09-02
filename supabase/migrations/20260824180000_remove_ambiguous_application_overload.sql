@@ -18,10 +18,8 @@ begin
   execute function_definition;
 end;
 $migration$;
-
 alter function rush.submit_application(text,text)
   rename to submit_application_self_test;
-
 do $migration$
 declare
   function_definition text;

@@ -103,10 +103,8 @@ begin
   return target_rubric_id;
 end;
 $$;
-
 revoke all on function rush.set_rubric_criteria(text, jsonb) from public, anon;
 grant execute on function rush.set_rubric_criteria(text, jsonb) to authenticated, service_role;
-
 -- The editor needs the current criteria for every round in a cycle. Reading
 -- through PostgREST would work for board staff, but this keeps the shape the
 -- editor posts back identical to the shape it reads, so a round trip cannot
@@ -146,6 +144,5 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.cycle_rubrics(text) from public, anon;
 grant execute on function rush.cycle_rubrics(text) to authenticated, service_role;

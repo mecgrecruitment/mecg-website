@@ -14,25 +14,21 @@ begin
   end if;
 end;
 $$;
-
 create unique index rush_cycles_one_non_terminal_idx
   on rush.rush_cycles ((true))
   where status in ('DRAFT', 'OPEN', 'IN_PROCESS', 'DECISION_LOCK');
-
 -- Weight coverage and observed-criterion count answer different questions.
 -- Keep both rules on the rubric version so past evaluations retain the rule
 -- under which they were submitted.
 alter table rush.rubrics
   add column minimum_observed_criteria integer not null default 3
   check (minimum_observed_criteria between 1 and 20);
-
 update rush.rubrics rubric
 set minimum_observed_criteria = greatest(1, least(3, (
   select count(*)::integer
   from rush.rubric_criteria criterion
   where criterion.rubric_id = rubric.id
 )));
-
 create or replace function rush.set_rubric_criteria(target_round_id text, criteria jsonb)
 returns text
 language plpgsql
@@ -125,7 +121,6 @@ begin
   return target_rubric_id;
 end;
 $$;
-
 create or replace function rush.cycle_rubrics(target_cycle_id text)
 returns jsonb
 language sql
@@ -162,7 +157,6 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 create or replace function rush.submit_evaluation(target_assignment_id text, submitted_ratings jsonb, submitted_evidence text default null)
 returns table (evaluation_id text, score numeric)
 language plpgsql
@@ -250,7 +244,6 @@ begin
   return next;
 end;
 $$;
-
 -- Cloning must copy the evidence rule with the rubric content. Defaulting a
 -- clone to a different minimum would change the meaning of the copied rubric.
 create or replace function rush.clone_cycle(source_cycle_id text, cycle_name text)

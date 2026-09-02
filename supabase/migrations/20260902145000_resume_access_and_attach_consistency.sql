@@ -16,10 +16,8 @@ as $$
       and not rush.actor_has_application_conflict(a.id)
   );
 $$;
-
 revoke all on function rush.board_can_view_resume(text) from public, anon;
 grant execute on function rush.board_can_view_resume(text) to authenticated, service_role;
-
 create or replace function rush.authorize_resume_access(target_application_id text)
 returns text
 language plpgsql
@@ -63,10 +61,8 @@ begin
   return target_application.resume_storage_path;
 end;
 $$;
-
 revoke all on function rush.authorize_resume_access(text) from public, anon;
 grant execute on function rush.authorize_resume_access(text) to authenticated, service_role;
-
 drop policy if exists application_documents_internal_read on rush.application_documents;
 create policy application_documents_internal_read on rush.application_documents
 for select to authenticated
@@ -75,7 +71,6 @@ using (
   and rush.has_cycle_capability(cycle_id, 'CANDIDATE_ACCESS')
   and not rush.actor_has_application_conflict(application_id)
 );
-
 drop policy if exists storage_resumes_internal_select on storage.objects;
 create policy storage_resumes_internal_select on storage.objects
 for select to authenticated
@@ -90,7 +85,6 @@ using (
       and not rush.actor_has_application_conflict(d.application_id)
   )
 );
-
 -- A browser can retry the attach request after losing the response. Return the
 -- existing attachment when no newer READY document exists, and do not emit a
 -- duplicate replacement audit event.
@@ -167,6 +161,5 @@ begin
   return ready_path;
 end;
 $$;
-
 revoke all on function rush.attach_ready_resume() from public, anon;
 grant execute on function rush.attach_ready_resume() to authenticated, service_role;

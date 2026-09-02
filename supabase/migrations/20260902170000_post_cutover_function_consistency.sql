@@ -19,7 +19,6 @@ begin
   end loop;
 end;
 $migration$;
-
 -- Restate clone_cycle so databases that applied the first version of the
 -- question migration also copy the enforced per-question word limit.
 create or replace function rush.clone_cycle(source_cycle_id text, cycle_name text)
@@ -102,6 +101,5 @@ begin
   return new_cycle_id;
 end;
 $$;
-
 revoke all on function rush.clone_cycle(text, text) from public, anon;
 grant execute on function rush.clone_cycle(text, text) to authenticated, service_role;

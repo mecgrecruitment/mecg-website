@@ -65,7 +65,6 @@ end;
 $$;
 revoke all on function rush.check_rate_limit(text) from public;
 grant execute on function rush.check_rate_limit(text) to service_role;
-
 create or replace function rush.prune_rate_limits()
 returns void
 language plpgsql

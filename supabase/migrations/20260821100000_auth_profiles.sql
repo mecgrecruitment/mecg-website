@@ -23,13 +23,10 @@ begin
   return new;
 end;
 $$;
-
 revoke all on function rush.handle_new_auth_user() from public, anon, authenticated;
-
 create trigger rush_auth_user_profile
 after insert or update of email, raw_user_meta_data on auth.users
 for each row execute function rush.handle_new_auth_user();
-
 insert into rush.profiles (id, display_name)
 select
   u.id,

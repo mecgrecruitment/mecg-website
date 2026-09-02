@@ -8,19 +8,16 @@
 -- lifecycle.sql, which never reference it. Confirmed unreferenced by grepping
 -- src/ and scripts/ (only the generated database.types.ts type stub mentions it).
 drop function if exists rush.resume_upload_locked(text);
-
 -- [LOW] rush.events and rush.case_groups have no index on cycle_id despite both
 -- being filtered by it in RLS policies (events_read_participant,
 -- events_read_cycle_staff, groups_read) and in app queries.
 create index if not exists events_cycle_id_idx on rush.events (cycle_id);
 create index if not exists case_groups_cycle_id_idx on rush.case_groups (cycle_id);
-
 -- [LOW] rush.application_documents.application_id (FK to rush.applications) has
 -- no dedicated index; it's the join key require_ready_resume()/
 -- authorize_resume_access() traverse indirectly.
 create index if not exists application_documents_application_id_idx
   on rush.application_documents (application_id);
-
 -- [MEDIUM] application_documents_internal_read and storage_resumes_internal_select
 -- grant RECRUITMENT_COMMITTEE resume access via a raw role check instead of the
 -- has_cycle_capability(cycle_id, 'CANDIDATE_ACCESS') gate used everywhere else,
@@ -42,7 +39,6 @@ using (
     where c.application_id = application_documents.application_id and c.declarer_id = auth.uid()
   )
 );
-
 drop policy if exists storage_resumes_internal_select on storage.objects;
 create policy storage_resumes_internal_select on storage.objects for select to authenticated
 using (

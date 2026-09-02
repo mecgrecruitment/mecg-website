@@ -11,10 +11,8 @@
 -- The row is deliberately NOT deleted up front: it is the only record of which
 -- object is orphaned, so losing it would strand the file permanently.
 drop function if exists rush.prune_pending_resume_uploads();
-
 select cron.unschedule('prune-pending-resume-uploads')
 where exists (select 1 from cron.job where jobname = 'prune-pending-resume-uploads');
-
 create or replace function rush.stale_pending_resume_uploads(older_than interval default interval '1 hour')
 returns table (document_id text, object_path text)
 language plpgsql
@@ -32,7 +30,6 @@ begin
     order by d.created_at;
 end;
 $$;
-
 -- Called only after the storage object is gone, so the row and the file cannot
 -- drift apart. Still status-scoped, so a document that raced to READY survives.
 create or replace function rush.retire_pending_resume_upload(document_id text)
@@ -51,12 +48,10 @@ begin
   return removed > 0;
 end;
 $$;
-
 revoke all on function rush.stale_pending_resume_uploads(interval) from public, anon, authenticated;
 revoke all on function rush.retire_pending_resume_upload(text) from public, anon, authenticated;
 grant execute on function rush.stale_pending_resume_uploads(interval) to service_role;
 grant execute on function rush.retire_pending_resume_upload(text) to service_role;
-
 comment on function rush.stale_pending_resume_uploads(interval) is
   'Work list for the resume prune. Storage removal must go through the Storage API; see /api/maintenance/prune-resumes.';
 comment on function rush.retire_pending_resume_upload(text) is

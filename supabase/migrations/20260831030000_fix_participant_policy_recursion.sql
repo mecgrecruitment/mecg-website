@@ -10,14 +10,12 @@ using (
   rush.has_cycle_capability(id, 'CANDIDATE_ACCESS')
   or rush.actor_has_application_in_cycle(id)
 );
-
 drop policy if exists rounds_read_cycle_participant on rush.rounds;
 create policy rounds_read_cycle_participant on rush.rounds for select to authenticated
 using (
   rush.has_cycle_capability(cycle_id, 'CANDIDATE_ACCESS')
   or rush.actor_has_application_in_cycle(cycle_id)
 );
-
 drop policy if exists rubrics_read_cycle_participant on rush.rubrics;
 create policy rubrics_read_cycle_participant on rush.rubrics for select to authenticated
 using (
@@ -31,7 +29,6 @@ using (
       )
   )
 );
-
 drop policy if exists rubric_criteria_read_cycle_participant on rush.rubric_criteria;
 create policy rubric_criteria_read_cycle_participant on rush.rubric_criteria for select to authenticated
 using (
@@ -46,7 +43,6 @@ using (
       )
   )
 );
-
 drop policy if exists events_read_participant on rush.events;
 create policy events_read_participant on rush.events for select to authenticated
 using (

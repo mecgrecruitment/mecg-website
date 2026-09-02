@@ -42,11 +42,9 @@ as $$
 $$;
 revoke all on function rush.actor_can_read_colleague_profile(uuid) from public, anon;
 grant execute on function rush.actor_can_read_colleague_profile(uuid) to authenticated, service_role;
-
 drop policy if exists profiles_read_cycle_colleagues on rush.profiles;
 create policy profiles_read_cycle_colleagues on rush.profiles for select to authenticated
 using (rush.actor_can_read_colleague_profile(id));
-
 -- public.members was removed in 20260824230000 after asserting that rush already had a cycle.
 -- The old cold-start branch is therefore dead; retain the live owner rule using active rush identities.
 create or replace function rush.create_cycle(cycle_name text)
@@ -107,6 +105,5 @@ begin
   return cycle_id;
 end;
 $$;
-
 revoke all on function rush.create_cycle(text) from public, anon;
 grant execute on function rush.create_cycle(text) to authenticated, service_role;

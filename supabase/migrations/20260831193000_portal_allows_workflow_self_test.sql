@@ -27,6 +27,5 @@ as $$
         where u.id = actor and u.email like 'workflow-%@example.invalid'
       );
 $$;
-
 revoke all on function rush.application_portal_allows(uuid) from public, anon, authenticated;
 grant execute on function rush.application_portal_allows(uuid) to service_role;

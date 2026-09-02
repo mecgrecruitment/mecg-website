@@ -19,13 +19,10 @@ create table if not exists rush.messages (
   delivered boolean not null default false,
   created_at timestamptz not null default now()
 );
-
 create index if not exists messages_application_created_idx on rush.messages (application_id, created_at desc);
 create index if not exists messages_cycle_created_idx on rush.messages (cycle_id, created_at desc);
-
 alter table rush.messages enable row level security;
 alter table rush.messages force row level security;
-
 -- Staff read the log for their own cycle; an applicant reads their own
 -- messages, which is what the portal's future message list needs. Writes go
 -- only through log_message, matching every other table here.
@@ -39,9 +36,7 @@ using (
     where a.id = messages.application_id and p.auth_user_id = auth.uid()
   )
 );
-
 grant select on rush.messages to authenticated;
-
 -- Called right after a send attempt. Delivery is best effort by design, so a
 -- failed send is logged as delivered = false rather than thrown away.
 create or replace function rush.log_message(
@@ -78,10 +73,8 @@ begin
   return message_id;
 end;
 $$;
-
 revoke all on function rush.log_message(text, text, text, text, boolean) from public, anon;
 grant execute on function rush.log_message(text, text, text, text, boolean) to authenticated, service_role;
-
 -- Releases every decision in a cycle that release_decision would accept, and
 -- skips the rest rather than failing the batch. Reuses release_decision itself
 -- so the approval count, conflict and status rules cannot drift apart from the
@@ -123,6 +116,5 @@ begin
   return jsonb_build_object('released', released, 'skipped', skipped);
 end;
 $$;
-
 revoke all on function rush.release_ready_decisions(text) from public, anon;
 grant execute on function rush.release_ready_decisions(text) to authenticated, service_role;

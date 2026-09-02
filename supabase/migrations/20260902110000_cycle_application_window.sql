@@ -58,6 +58,5 @@ begin
   return jsonb_build_object('opensAt', application_opens_at, 'closesAt', application_closes_at);
 end;
 $$;
-
 revoke all on function rush.set_cycle_application_window(text, timestamptz, timestamptz) from public, anon;
 grant execute on function rush.set_cycle_application_window(text, timestamptz, timestamptz) to authenticated, service_role;

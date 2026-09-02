@@ -95,10 +95,8 @@ begin
   return jsonb_build_object('documentId', document_id, 'path', object_name);
 end;
 $$;
-
 revoke all on function rush.begin_resume_upload(text, integer) from public, anon;
 grant execute on function rush.begin_resume_upload(text, integer) to authenticated, service_role;
-
 -- Points a submitted application at the caller's newest READY resume.
 -- submit_application does this at intake; after submission nothing did, so a
 -- replacement uploaded fine and was then invisible to the board.
@@ -149,10 +147,8 @@ begin
   return ready_path;
 end;
 $$;
-
 revoke all on function rush.attach_ready_resume() from public, anon;
 grant execute on function rush.attach_ready_resume() to authenticated, service_role;
-
 -- 2. RETENTION
 --
 -- Decision: applicant personal data is anonymised two years after the cycle it
@@ -222,20 +218,16 @@ begin
   return anonymized;
 end;
 $$;
-
 revoke all on function rush.anonymize_archived_applicants() from public, anon, authenticated;
 grant execute on function rush.anonymize_archived_applicants() to service_role;
-
 -- Monthly. Nothing here is time critical and the window is measured in years.
 select cron.unschedule('anonymize-archived-applicants')
 where exists (select 1 from cron.job where jobname = 'anonymize-archived-applicants');
-
 select cron.schedule(
   'anonymize-archived-applicants',
   '31 4 1 * *',
   $job$select rush.anonymize_archived_applicants();$job$
 );
-
 -- 3. PRIOR-CYCLE HISTORY
 --
 -- Decision: the board may see that someone applied before, and how far they
@@ -266,6 +258,5 @@ as $$
       and rush.has_cycle_capability(current_app.cycle_id, 'APPLICANT_OPERATIONS')
   ), '[]'::jsonb);
 $$;
-
 revoke all on function rush.applicant_prior_cycles(text) from public, anon;
 grant execute on function rush.applicant_prior_cycles(text) to authenticated, service_role;

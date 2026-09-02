@@ -97,6 +97,5 @@ begin
   return new_cycle_id;
 end;
 $$;
-
 revoke all on function rush.clone_cycle(text, text) from public, anon;
 grant execute on function rush.clone_cycle(text, text) to authenticated, service_role;

@@ -5,11 +5,9 @@
 alter table rush.application_questions
   add column if not exists word_limit integer
   check (word_limit is null or word_limit between 1 and 2000);
-
 alter table rush.application_responses
   add column if not exists question_word_limit integer
   check (question_word_limit is null or question_word_limit between 1 and 2000);
-
 create or replace function rush.response_word_count(value text)
 returns integer
 language sql
@@ -24,7 +22,6 @@ as $$
     )
   end;
 $$;
-
 create or replace function rush.enforce_application_response_word_limit()
 returns trigger
 language plpgsql
@@ -48,16 +45,13 @@ begin
   return new;
 end;
 $$;
-
 revoke all on function rush.response_word_count(text), rush.enforce_application_response_word_limit() from public, anon, authenticated;
 grant execute on function rush.response_word_count(text) to service_role;
-
 drop trigger if exists application_response_word_limit_guard on rush.application_responses;
 create trigger application_response_word_limit_guard
 before insert or update of response_text, question_key, application_id
 on rush.application_responses
 for each row execute function rush.enforce_application_response_word_limit();
-
 create or replace function rush.seed_cycle_questions(target_cycle_id text)
 returns void
 language plpgsql
@@ -94,7 +88,6 @@ begin
     word_limit = excluded.word_limit;
 end;
 $$;
-
 create or replace function rush.set_application_questions(target_cycle_id text, questions jsonb)
 returns integer
 language plpgsql
@@ -226,10 +219,8 @@ begin
   return written;
 end;
 $$;
-
 revoke all on function rush.set_application_questions(text, jsonb) from public, anon;
 grant execute on function rush.set_application_questions(text, jsonb) to authenticated, service_role;
-
 create or replace function rush.cycle_application_questions(target_cycle_id text)
 returns jsonb
 language sql
@@ -253,10 +244,8 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.cycle_application_questions(text) from public, anon;
 grant execute on function rush.cycle_application_questions(text) to authenticated, service_role;
-
 create or replace function rush.intake_schema()
 returns jsonb
 language plpgsql
@@ -305,7 +294,6 @@ begin
   );
 end;
 $$;
-
 -- Update only cohorts whose questions are still fair to change. Submitted
 -- cohorts keep their historical prompts; all new cycles use the new seed.
 do $migration$
@@ -332,7 +320,6 @@ begin
   end loop;
 end;
 $migration$;
-
 -- Cycle cloning is the normal way to prepare the next recruitment period. The
 -- clone must preserve the application contract, including the new limits.
 create or replace function rush.clone_cycle(source_cycle_id text, cycle_name text)
@@ -415,6 +402,5 @@ begin
   return new_cycle_id;
 end;
 $$;
-
 revoke all on function rush.clone_cycle(text, text) from public, anon;
 grant execute on function rush.clone_cycle(text, text) to authenticated, service_role;

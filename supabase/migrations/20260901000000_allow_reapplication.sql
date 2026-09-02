@@ -41,6 +41,5 @@ as $$
       )
   );
 $$;
-
 revoke all on function rush.can_start_application() from public, anon;
 grant execute on function rush.can_start_application() to authenticated, service_role;

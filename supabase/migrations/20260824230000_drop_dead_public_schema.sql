@@ -26,7 +26,6 @@ begin
     raise exception 'abort: rush.rush_cycles is empty; rush.create_cycle''s cold-start branch depends on public.members, which this migration drops. Populate rush.rush_cycles or update create_cycle before proceeding.';
   end if;
 end $$;
-
 drop view if exists public.v_candidate_controversy cascade;
 drop view if exists public.v_candidate_roster cascade;
 drop view if exists public.v_open_rush_events cascade;
@@ -36,7 +35,6 @@ drop view if exists public.v_score_composite_internal cascade;
 drop view if exists public.v_score_normalized cascade;
 drop view if exists public.v_team_public cascade;
 drop view if exists public.vote_counts cascade;
-
 drop table if exists public.application_questions cascade;
 drop table if exists public.application_responses cascade;
 drop table if exists public.apply_rate_limit cascade;
@@ -62,7 +60,6 @@ drop table if exists public.score_submissions cascade;
 drop table if exists public.scores cascade;
 drop table if exists public.stage_transitions cascade;
 drop table if exists public.votes cascade;
-
 drop function if exists public.check_in_by_phrase cascade;
 drop function if exists public.current_member_id cascade;
 drop function if exists public.current_member_role cascade;

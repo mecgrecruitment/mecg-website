@@ -26,21 +26,17 @@ create table if not exists rush.projects (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
 create index if not exists projects_public_sort_idx on rush.projects (is_public, sort_order);
-
 create table if not exists rush.project_members (
   project_id text not null references rush.projects (id) on delete cascade,
   user_id uuid not null references auth.users (id) on delete cascade,
   role_label text not null default '' check (char_length(role_label) <= 120),
   primary key (project_id, user_id)
 );
-
 alter table rush.projects enable row level security;
 alter table rush.projects force row level security;
 alter table rush.project_members enable row level security;
 alter table rush.project_members force row level security;
-
 -- Anyone signed in to the workspace may read the project list; the marketing
 -- site reads public projects through a dedicated RPC below rather than through
 -- a policy, so an anonymous visitor never touches this table.
@@ -51,7 +47,6 @@ using (exists (
   join rush.profiles p on p.id = m.user_id
   where m.user_id = auth.uid() and m.active and p.active
 ));
-
 drop policy if exists project_members_read_internal on rush.project_members;
 create policy project_members_read_internal on rush.project_members for select to authenticated
 using (exists (
@@ -59,10 +54,8 @@ using (exists (
   join rush.profiles p on p.id = m.user_id
   where m.user_id = auth.uid() and m.active and p.active
 ));
-
 grant select on rush.projects to authenticated;
 grant select on rush.project_members to authenticated;
-
 -- The only thing the public site may see. Selects the public columns
 -- explicitly, so adding a confidential column later cannot leak it by default.
 create or replace function rush.public_projects()
@@ -90,10 +83,8 @@ as $$
     from rush.projects p where p.is_public
   ), '[]'::jsonb);
 $$;
-
 revoke all on function rush.public_projects() from public;
 grant execute on function rush.public_projects() to anon, authenticated, service_role;
-
 create or replace function rush.upsert_project(project jsonb)
 returns text
 language plpgsql
@@ -158,10 +149,8 @@ begin
   return project_id;
 end;
 $$;
-
 revoke all on function rush.upsert_project(jsonb) from public, anon;
 grant execute on function rush.upsert_project(jsonb) to authenticated, service_role;
-
 create or replace function rush.set_project_staffing(target_project_id text, members jsonb)
 returns integer
 language plpgsql
@@ -202,6 +191,5 @@ begin
   return written;
 end;
 $$;
-
 revoke all on function rush.set_project_staffing(text, jsonb) from public, anon;
 grant execute on function rush.set_project_staffing(text, jsonb) to authenticated, service_role;

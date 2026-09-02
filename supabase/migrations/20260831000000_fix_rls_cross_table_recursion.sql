@@ -15,7 +15,6 @@ as $$
 $$;
 revoke all on function rush.actor_has_application_conflict(text) from public,anon;
 grant execute on function rush.actor_has_application_conflict(text) to authenticated;
-
 create or replace function rush.actor_has_application_in_cycle(target_cycle_id text)
 returns boolean
 language sql
@@ -31,7 +30,6 @@ as $$
 $$;
 revoke all on function rush.actor_has_application_in_cycle(text) from public,anon;
 grant execute on function rush.actor_has_application_in_cycle(text) to authenticated;
-
 -- These six policies still queried rush.applications/rush.pnms/rush.conflict_declarations with a
 -- raw subquery instead of the security definer helpers introduced in
 -- 20260830090000_recruitment_committee_role.sql and 20260830100000_harden_applicant_workflow.sql.
@@ -46,14 +44,12 @@ using (
   or rush.has_cycle_role(cycle_id, array['MEMBER','BOARD','PANEL','OWNER']::rush.member_role[])
   or rush.actor_has_application_in_cycle(cycle_id)
 );
-
 drop policy if exists groups_read on rush.case_groups;
 create policy groups_read on rush.case_groups for select to authenticated
 using (
   rush.has_cycle_role(cycle_id, array['MEMBER','BOARD','PANEL','OWNER']::rush.member_role[])
   or rush.actor_has_application_in_cycle(cycle_id)
 );
-
 drop policy if exists slots_read on rush.event_slots;
 create policy slots_read on rush.event_slots for select to authenticated
 using (
@@ -66,7 +62,6 @@ using (
       )
   )
 );
-
 drop policy if exists evaluations_read_author_or_locked_panel on rush.evaluations;
 create policy evaluations_read_author_or_locked_panel on rush.evaluations for select to authenticated
 using (
@@ -80,7 +75,6 @@ using (
       and not rush.actor_has_application_conflict(ea.application_id)
   )
 );
-
 drop policy if exists decisions_read_owner_or_panel on rush.decisions;
 create policy decisions_read_owner_or_panel on rush.decisions for select to authenticated
 using (
@@ -90,7 +84,6 @@ using (
     and not rush.actor_has_application_conflict(application_id)
   )
 );
-
 drop policy if exists responses_read_owner_or_board on rush.application_responses;
 create policy responses_read_owner_or_board on rush.application_responses for select to authenticated
 using (

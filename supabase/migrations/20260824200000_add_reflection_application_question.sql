@@ -9,7 +9,6 @@ begin
   on conflict (cycle_id, key) do update set prompt = excluded.prompt, input_type = excluded.input_type, required = excluded.required, sort_order = excluded.sort_order;
 end;
 $$;
-
 do $migration$
 declare cycle_id text;
 begin

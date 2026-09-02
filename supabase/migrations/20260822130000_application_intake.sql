@@ -4,13 +4,11 @@ alter table rush.pnms
   add column if not exists class_year text check (class_year is null or class_year in ('FIRST_YEAR','SOPHOMORE','JUNIOR','SENIOR','GRADUATE')),
   add column if not exists major text check (major is null or char_length(trim(major)) between 1 and 120),
   add column if not exists linkedin_url text check (linkedin_url is null or char_length(trim(linkedin_url)) between 8 and 400);
-
 alter table rush.applications
   add column if not exists resume_storage_path text check (
     resume_storage_path is null
     or resume_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.pdf$'
   );
-
 create table if not exists rush.application_questions (
   id text primary key default gen_random_uuid()::text,
   cycle_id text not null references rush.rush_cycles (id) on delete cascade,
@@ -22,7 +20,6 @@ create table if not exists rush.application_questions (
   options jsonb not null default '[]'::jsonb,
   unique (cycle_id, key)
 );
-
 create table if not exists rush.application_responses (
   id text primary key default gen_random_uuid()::text,
   application_id text not null references rush.applications (id) on delete cascade,
@@ -32,18 +29,15 @@ create table if not exists rush.application_responses (
   created_at timestamptz not null default now(),
   unique (application_id, question_key)
 );
-
 alter table rush.application_questions enable row level security;
 alter table rush.application_questions force row level security;
 alter table rush.application_responses enable row level security;
 alter table rush.application_responses force row level security;
-
 create policy questions_read_authenticated on rush.application_questions for select to authenticated
 using (
   rush.has_cycle_role(cycle_id, array['MEMBER','BOARD','PANEL','OWNER']::rush.member_role[])
   or exists (select 1 from rush.rush_cycles c where c.id = application_questions.cycle_id and c.status = 'OPEN')
 );
-
 create policy responses_read_owner_or_board on rush.application_responses for select to authenticated
 using (exists (
   select 1 from rush.applications a
@@ -58,35 +52,28 @@ using (exists (
         and rush.has_cycle_role(a.cycle_id, array['BOARD','OWNER']::rush.member_role[])
     )
 ));
-
 grant select on rush.application_questions, rush.application_responses to authenticated;
 grant all on rush.application_questions, rush.application_responses to service_role;
-
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('resumes', 'resumes', false, 10485760, array['application/pdf']::text[])
 on conflict (id) do update
 set file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
-
 drop policy if exists storage_resumes_applicant_insert on storage.objects;
 drop policy if exists storage_resumes_applicant_update on storage.objects;
 drop policy if exists storage_resumes_applicant_select on storage.objects;
 drop policy if exists storage_resumes_board_select_rush on storage.objects;
-
 create policy storage_resumes_applicant_insert on storage.objects for insert to authenticated
 with check (
   bucket_id = 'resumes'
   and (storage.foldername(name))[1] = auth.uid()::text
   and name ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.pdf$'
 );
-
 create policy storage_resumes_applicant_update on storage.objects for update to authenticated
 using (bucket_id = 'resumes' and (storage.foldername(name))[1] = auth.uid()::text)
 with check (bucket_id = 'resumes' and (storage.foldername(name))[1] = auth.uid()::text);
-
 create policy storage_resumes_applicant_select on storage.objects for select to authenticated
 using (bucket_id = 'resumes' and (storage.foldername(name))[1] = auth.uid()::text);
-
 create policy storage_resumes_board_select_rush on storage.objects for select to authenticated
 using (
   bucket_id = 'resumes'
@@ -100,7 +87,6 @@ using (
       )
   )
 );
-
 create or replace function rush.seed_cycle_questions(target_cycle_id text)
 returns void
 language plpgsql
@@ -115,7 +101,6 @@ begin
   on conflict (cycle_id, key) do nothing;
 end;
 $$;
-
 create or replace function rush.create_cycle(cycle_name text)
 returns text
 language plpgsql
@@ -174,7 +159,6 @@ begin
   return cycle_id;
 end;
 $$;
-
 insert into rush.application_questions (cycle_id, key, prompt, input_type, required, sort_order)
 select c.id, q.key, q.prompt, 'long_text', true, q.sort_order
 from rush.rush_cycles c
@@ -183,7 +167,6 @@ cross join (values
   ('problem_example', 'Describe a messy problem you helped structure. What did you do, and what changed?', 1)
 ) as q(key, prompt, sort_order)
 on conflict (cycle_id, key) do nothing;
-
 create or replace function rush.intake_schema()
 returns jsonb
 language plpgsql
@@ -220,7 +203,6 @@ begin
   );
 end;
 $$;
-
 create or replace function rush.create_resume_upload()
 returns text
 language plpgsql
@@ -239,9 +221,7 @@ begin
   return actor::text || '/' || v_cycle_id || '/' || gen_random_uuid()::text || '.pdf';
 end;
 $$;
-
 drop function if exists rush.submit_application(text, text);
-
 create or replace function rush.submit_application(
   applicant_name text,
   applicant_contact text,
@@ -361,7 +341,6 @@ begin
   return application_id;
 end;
 $$;
-
 create or replace function rush.submit_application(applicant_name text, applicant_contact text)
 returns text
 language plpgsql
@@ -388,9 +367,7 @@ begin
   );
 end;
 $$;
-
 drop function if exists rush.applicant_dashboard();
-
 create function rush.applicant_dashboard()
 returns table(
   application_id text,
@@ -427,7 +404,6 @@ as $$
   where p.auth_user_id = auth.uid()
   order by a.created_at desc;
 $$;
-
 create or replace function rush.set_application_status(target_application_id text, next_status rush.application_status)
 returns void
 language plpgsql
@@ -454,7 +430,6 @@ begin
     jsonb_build_object('from', app_row.status, 'to', next_status));
 end;
 $$;
-
 revoke all on function rush.seed_cycle_questions(text), rush.intake_schema(), rush.create_resume_upload(),
   rush.submit_application(text,text),
   rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean),

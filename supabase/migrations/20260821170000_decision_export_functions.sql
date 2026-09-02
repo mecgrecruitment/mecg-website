@@ -13,7 +13,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'DECISION_CREATED','Decision',result_id);
   return result_id;
 end; $$;
-
 create function rush.approve_decision(target_decision_id text)
 returns table(locked boolean, approvals bigint) language plpgsql security definer set search_path='' as $$
 declare d rush.decisions%rowtype;
@@ -36,7 +35,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(auth.uid(),d.cycle_id,case when locked then 'DECISION_LOCKED' else 'DECISION_APPROVED' end,'Decision',d.id,jsonb_build_object('validApprovals',approvals));
   return next;
 end; $$;
-
 create function rush.release_decision(target_decision_id text)
 returns void language plpgsql security definer set search_path='' as $$
 declare d rush.decisions%rowtype; valid_approvals bigint;
@@ -52,7 +50,6 @@ begin
   update rush.decisions set status='RELEASED',released_at=now() where id=d.id and status='LOCKED';
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),d.cycle_id,'DECISION_RELEASED','Decision',d.id);
 end; $$;
-
 create function rush.export_attendance(target_cycle_id text)
 returns table(applicant_code text,name text,status rush.application_status,events_attended bigint)
 language plpgsql security definer set search_path='' as $$
@@ -61,6 +58,5 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'ATTENDANCE_EXPORTED','RushCycle',target_cycle_id);
   return query select a.id,p.name,a.status,count(c.id) from rush.applications a join rush.pnms p on p.id=a.pnm_id left join rush.checkins c on c.pnm_id=p.id left join rush.events e on e.id=c.event_id and e.cycle_id=target_cycle_id where a.cycle_id=target_cycle_id group by a.id,p.name,a.status order by p.name;
 end; $$;
-
 revoke all on function rush.create_decision(text,text,rush.decision_outcome,text),rush.approve_decision(text),rush.release_decision(text),rush.export_attendance(text) from public,anon;
 grant execute on function rush.create_decision(text,text,rush.decision_outcome,text),rush.approve_decision(text),rush.release_decision(text),rush.export_attendance(text) to authenticated,service_role;

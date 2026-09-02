@@ -45,6 +45,5 @@ begin
   return true;
 end;
 $$;
-
 revoke all on function rush.withdraw_application(text) from public, anon;
 grant execute on function rush.withdraw_application(text) to authenticated, service_role;

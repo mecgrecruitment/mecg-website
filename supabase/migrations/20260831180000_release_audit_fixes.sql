@@ -23,7 +23,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'DECISION_CREATED','Decision',result_id);
   return result_id;
 end; $$;
-
 -- B5: `x->'score' = 'null'::jsonb` yields SQL NULL rather than true when the
 -- `score` key is absent entirely, so a required criterion could be submitted
 -- with no score key at all and still pass. Changes: coalesce the required
@@ -108,14 +107,12 @@ begin
   return next;
 end;
 $$;
-
 -- S1: approval performed no content check, so an admin approving a queue
 -- unread could publish a packet that still names its own applicant.
 -- Change: on approval, raise 55000 naming the field whose value appears in
 -- content::text. Values under 3 characters are skipped so short names and
 -- uniqnames do not make every packet unapprovable.
 create or replace function rush.approve_screening_packet(target_packet_id text, approved boolean) returns void language plpgsql security definer set search_path='' as $$ declare actor uuid:=auth.uid(); target_cycle text; leak_field text; begin select b.cycle_id into target_cycle from rush.screening_packets p join rush.screening_batches b on b.id=p.batch_id where p.id=target_packet_id and b.status='DRAFT'; if target_cycle is null or not rush.has_cycle_capability(target_cycle,'SCREENING_ADMINISTRATION') then raise exception 'forbidden' using errcode='42501'; end if; if approved then select case when char_length(trim(pn.name))>=3 and strpos(lower(p.content::text),lower(trim(pn.name)))>0 then 'name' when pn.uniqname is not null and char_length(trim(pn.uniqname))>=3 and strpos(lower(p.content::text),lower(trim(pn.uniqname)))>0 then 'uniqname' when char_length(split_part(trim(pn.contact),'@',1))>=3 and strpos(lower(p.content::text),lower(split_part(trim(pn.contact),'@',1)))>0 then 'contact' end into leak_field from rush.screening_packets p join rush.applications a on a.id=p.application_id join rush.pnms pn on pn.id=a.pnm_id where p.id=target_packet_id; if leak_field is not null then raise exception 'packet content still contains the applicant''s own %; redact it before approving', leak_field using errcode='55000'; end if; end if; update rush.screening_packets set redaction_status=case when approved then 'APPROVED' else 'REJECTED' end,approved_by=actor,approved_at=now() where id=target_packet_id; insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(actor,target_cycle,case when approved then 'SCREENING_PACKET_APPROVED' else 'SCREENING_PACKET_REJECTED' end,'ScreeningPacket',target_packet_id); end $$;
-
 -- S2: recusing the last eligible reviewer silently left the packet below
 -- reviews_per_application, which freeze_screening_batch then rejects forever
 -- with no recovery RPC (unique (cycle_id) blocks a second batch).
@@ -142,7 +139,6 @@ begin
   insert into rush.screening_assignments(packet_id,reviewer_id) values(packet,replacement);
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(actor,target_cycle,'SCREENING_RECUSED','ScreeningAssignment',target_assignment_id,jsonb_build_object('replacementCreated',replacement is not null));
 end $$;
-
 -- S12: the only decision RPC with no recusal check, so a conflicted PANEL
 -- member could rewrite the applicant-facing communication preview.
 -- Change: add the conflict_declarations guard the other three decision RPCs
@@ -156,14 +152,12 @@ begin
   if exists(select 1 from rush.conflict_declarations where application_id=d.application_id and declarer_id=auth.uid()) then raise exception 'conflict declared' using errcode='42501'; end if;
   update rush.decisions set communication_preview = trim(preview_text) where id=target_decision_id;
 end; $$;
-
 -- S13: assigning an active screening reviewer as an evaluator created a row
 -- that applications_read_internal then hides, so the reviewer saw zero
 -- assignments and the round board showed the slot Open forever.
 -- Change: reject the assignment when the target is an eligible screening
 -- reviewer in a cycle that has a PUBLISHED screening batch.
 create or replace function rush.assign_evaluator(target_cycle_id text,target_round_id text,target_application_id text,target_evaluator_id uuid) returns text language plpgsql security definer set search_path='' as $$ declare result_id text; existing_status rush.assignment_status; begin if not rush.has_cycle_capability(target_cycle_id,'APPLICANT_OPERATIONS') then raise exception 'forbidden' using errcode='42501'; end if; if not exists(select 1 from rush.rush_cycles where id=target_cycle_id and status='IN_PROCESS') then raise exception 'cycle not in process' using errcode='55000'; end if; if not exists(select 1 from rush.rounds where id=target_round_id and cycle_id=target_cycle_id and status in ('DRAFT','PUBLISHED')) then raise exception 'round unavailable' using errcode='55000'; end if; if not exists(select 1 from rush.applications where id=target_application_id and cycle_id=target_cycle_id) then raise exception 'application missing' using errcode='P0002'; end if; if not exists(select 1 from rush.memberships where user_id=target_evaluator_id and cycle_id=target_cycle_id and active) then raise exception 'evaluator inactive' using errcode='42501'; end if; if exists(select 1 from rush.conflict_declarations where application_id=target_application_id and declarer_id=target_evaluator_id) then raise exception 'evaluator conflict' using errcode='42501'; end if; if rush.is_eligible_screening_reviewer(target_cycle_id,target_evaluator_id) and exists(select 1 from rush.screening_batches b where b.cycle_id=target_cycle_id and b.status='PUBLISHED') then raise exception 'screening reviewer cannot be assigned as an evaluator in the same cycle' using errcode='42501'; end if; select status into existing_status from rush.evaluation_assignments where round_id=target_round_id and application_id=target_application_id and evaluator_id=target_evaluator_id for update; if existing_status is not null and existing_status<>'ASSIGNED' then raise exception 'assignment locked' using errcode='55000'; end if; insert into rush.evaluation_assignments(round_id,application_id,evaluator_id) values(target_round_id,target_application_id,target_evaluator_id) on conflict(round_id,application_id,evaluator_id) do update set updated_at=now() returning id into result_id; insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'EVALUATOR_ASSIGNED','EvaluationAssignment',result_id); return result_id; end $$;
-
 -- S9: PENDING resume documents whose bytes uploaded but were never finalized
 -- accumulate in the bucket permanently.
 -- SCHEDULING IS A MANUAL STEP. Nothing calls this function. It must be
@@ -189,14 +183,12 @@ revoke all on function rush.prune_pending_resume_uploads() from public, anon, au
 grant execute on function rush.prune_pending_resume_uploads() to service_role;
 comment on function rush.prune_pending_resume_uploads() is
   'Deletes PENDING resume documents older than 1 hour and their resumes-bucket objects. MUST BE SCHEDULED; nothing calls it.';
-
 -- S7: prune_rate_limits() is never called from any route, script or cron, so
 -- every email typed into the login or forgot-password form accumulates in
 -- plaintext forever. Grants are unchanged; this only records the requirement.
 -- SCHEDULING IS A MANUAL STEP.
 comment on function rush.prune_rate_limits() is
   'Deletes rate_limits rows older than 1 day. MUST BE SCHEDULED; nothing calls it.';
-
 -- S26: audit_read_board was superseded by audit_events_read_internal
 -- (20260830090000) but never dropped, leaving two overlapping permissive
 -- policies. rush.claim_tokens is dead (RLS on, no policy, no RPC, no

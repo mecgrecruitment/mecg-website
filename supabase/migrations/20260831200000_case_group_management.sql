@@ -16,7 +16,6 @@ begin
   values (auth.uid(), target_cycle, 'CASE_GROUP_UNASSIGNED', 'CaseGroup', target_group_id, jsonb_build_object('applicationId', target_application_id));
 end;
 $$;
-
 create or replace function rush.delete_case_group(target_group_id text)
 returns void
 language plpgsql
@@ -35,6 +34,5 @@ begin
   values (auth.uid(), target_cycle, 'CASE_GROUP_DELETED', 'CaseGroup', target_group_id);
 end;
 $$;
-
 revoke all on function rush.unassign_case_group(text, text), rush.delete_case_group(text) from public, anon;
 grant execute on function rush.unassign_case_group(text, text), rush.delete_case_group(text) to authenticated, service_role;

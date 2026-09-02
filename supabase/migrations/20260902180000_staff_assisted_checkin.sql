@@ -6,7 +6,6 @@ alter table rush.checkins
   add column if not exists checkin_method text not null default 'SELF_SERVICE',
   add column if not exists checked_in_by uuid references rush.profiles (id),
   add column if not exists reason_code text;
-
 alter table rush.checkins drop constraint if exists checkins_method_details_check;
 alter table rush.checkins add constraint checkins_method_details_check check (
   (checkin_method = 'SELF_SERVICE' and checked_in_by is null and reason_code is null)
@@ -15,7 +14,6 @@ alter table rush.checkins add constraint checkins_method_details_check check (
     and checked_in_by is not null
     and reason_code in ('NO_CAMERA', 'CONNECTIVITY_FAILURE', 'QR_FAILURE', 'SIGN_IN_UNAVAILABLE', 'ACCESSIBILITY_SUPPORT'))
 );
-
 create or replace function rush.staff_assisted_check_in(
   target_event_id text,
   applicant_identifier text,
@@ -109,6 +107,5 @@ begin
   );
 end;
 $$;
-
 revoke all on function rush.staff_assisted_check_in(text, text, text) from public, anon;
 grant execute on function rush.staff_assisted_check_in(text, text, text) to authenticated, service_role;

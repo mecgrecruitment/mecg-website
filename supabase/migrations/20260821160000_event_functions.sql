@@ -10,7 +10,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'EVENT_CREATED','Event',event_id);
   return jsonb_build_object('id',event_id,'checkinToken',raw_token);
 end; $$;
-
 create function rush.rotate_event_token(target_event_id text)
 returns text language plpgsql security definer set search_path='' as $$
 declare raw_token text := gen_random_uuid()::text || gen_random_uuid()::text; target_cycle text;
@@ -21,6 +20,5 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle,'CHECKIN_TOKEN_ROTATED','Event',target_event_id);
   return raw_token;
 end; $$;
-
 revoke all on function rush.create_event(text,text,timestamptz,timestamptz,timestamptz),rush.rotate_event_token(text) from public,anon;
 grant execute on function rush.create_event(text,text,timestamptz,timestamptz,timestamptz),rush.rotate_event_token(text) to authenticated,service_role;

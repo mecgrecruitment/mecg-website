@@ -13,7 +13,6 @@ begin
   values (auth.uid(), target_cycle_id, 'MEMBERSHIP_GRANTED', 'Profile', target_user_id::text, jsonb_build_object('role', target_role));
   return result_id;
 end; $$;
-
 create function rush.add_applicant(target_cycle_id text, applicant_name text, applicant_contact text)
 returns text language plpgsql security definer set search_path = '' as $$
 declare normalized text := lower(trim(applicant_contact)); person_id text; application_id text;
@@ -29,7 +28,6 @@ begin
   insert into rush.audit_events (actor_id,cycle_id,action,resource,resource_id) values (auth.uid(),target_cycle_id,'APPLICATION_ADDED','Application',application_id);
   return application_id;
 end; $$;
-
 create function rush.assign_evaluator(target_cycle_id text, target_round_id text, target_application_id text, target_evaluator_id uuid)
 returns text language plpgsql security definer set search_path = '' as $$
 declare result_id text; existing_status rush.assignment_status;
@@ -47,7 +45,6 @@ begin
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id) values(auth.uid(),target_cycle_id,'EVALUATOR_ASSIGNED','EvaluationAssignment',result_id);
   return result_id;
 end; $$;
-
 create function rush.set_round_status(target_round_id text, next_status rush.round_status)
 returns void language plpgsql security definer set search_path='' as $$
 declare current_row rush.rounds%rowtype; cycle_status rush.cycle_status;
@@ -61,7 +58,6 @@ begin
   if next_status='FROZEN' then update rush.evaluations e set status='LOCKED' from rush.evaluation_assignments a where e.assignment_id=a.id and a.round_id=target_round_id and e.status='SUBMITTED'; update rush.evaluation_assignments set status='LOCKED' where round_id=target_round_id and status='SUBMITTED'; end if;
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(auth.uid(),current_row.cycle_id,'ROUND_STATUS_CHANGED','Round',target_round_id,jsonb_build_object('from',current_row.status,'to',next_status));
 end; $$;
-
 create function rush.set_cycle_status(target_cycle_id text, next_status rush.cycle_status)
 returns void language plpgsql security definer set search_path='' as $$
 declare current_status rush.cycle_status;
@@ -75,6 +71,5 @@ begin
   update rush.rush_cycles set status=next_status where id=target_cycle_id;
   insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata) values(auth.uid(),target_cycle_id,'CYCLE_STATUS_CHANGED','RushCycle',target_cycle_id,jsonb_build_object('from',current_status,'to',next_status));
 end; $$;
-
 revoke all on function rush.grant_membership(uuid,text,rush.member_role), rush.add_applicant(text,text,text), rush.assign_evaluator(text,text,text,uuid), rush.set_round_status(text,rush.round_status), rush.set_cycle_status(text,rush.cycle_status) from public,anon;
 grant execute on function rush.grant_membership(uuid,text,rush.member_role), rush.add_applicant(text,text,text), rush.assign_evaluator(text,text,text,uuid), rush.set_round_status(text,rush.round_status), rush.set_cycle_status(text,rush.cycle_status) to authenticated,service_role;

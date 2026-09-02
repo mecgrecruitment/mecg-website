@@ -34,10 +34,8 @@ as $$
     where ea.application_id = target_application_id and ea.evaluator_id = auth.uid()
   );
 $$;
-
 revoke all on function rush.actor_is_assigned_evaluator(text) from public;
 grant execute on function rush.actor_is_assigned_evaluator(text) to authenticated, service_role;
-
 -- The other half of the loop. conflict_declarations must be able to ask "does
 -- the actor manage this application's cycle" without reading rush.applications
 -- through RLS.
@@ -54,10 +52,8 @@ as $$
       and rush.has_cycle_role(a.cycle_id, array['BOARD','OWNER']::rush.member_role[])
   );
 $$;
-
 revoke all on function rush.actor_manages_application_cycle(text) from public;
 grant execute on function rush.actor_manages_application_cycle(text) to authenticated, service_role;
-
 -- Same three branches and the same conflict exclusion as the deployed policy,
 -- with the inline conflict_declarations subquery replaced by its definer helper.
 -- The blind-screening exclusions are carried over unchanged.
@@ -78,7 +74,6 @@ using (
     )
   )
 );
-
 -- Same two branches as before, with the inline applications subquery replaced.
 drop policy if exists conflicts_read_own_or_manager on rush.conflict_declarations;
 create policy conflicts_read_own_or_manager on rush.conflict_declarations

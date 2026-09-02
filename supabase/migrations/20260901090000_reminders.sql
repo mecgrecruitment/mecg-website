@@ -16,7 +16,6 @@ create table if not exists rush.reminders_sent (
   sent_at timestamptz not null default now(),
   unique (kind, subject_id, recipient_id)
 );
-
 alter table rush.reminders_sent enable row level security;
 alter table rush.reminders_sent force row level security;
 -- No policies and no grants: only the scheduler, running as service_role,
@@ -60,10 +59,8 @@ as $$
     ), '[]'::jsonb)
   end;
 $$;
-
 revoke all on function rush.pending_reminders() from public, anon, authenticated;
 grant execute on function rush.pending_reminders() to service_role;
-
 -- Recorded whether or not delivery succeeded. A provider outage should not
 -- turn into the same nudge every hour until it recovers; the board can see the
 -- failure in the message log and follow up once.
@@ -83,6 +80,5 @@ begin
   return true;
 end;
 $$;
-
 revoke all on function rush.mark_reminder_sent(text, text, uuid) from public, anon, authenticated;
 grant execute on function rush.mark_reminder_sent(text, text, uuid) to service_role;

@@ -46,7 +46,6 @@ begin
       'location', current_row.location, 'visibility', current_row.visibility, 'startsAt', current_row.starts_at,
       'endsAt', current_row.ends_at, 'checkinOpensAt', current_row.checkin_opens_at, 'checkinClosesAt', current_row.checkin_closes_at)));
 end $$;
-
 create or replace function rush.create_event_slot(
   target_event_id text,
   slot_starts_at timestamptz,
@@ -69,7 +68,6 @@ begin
   values(auth.uid(), event_row.cycle_id, 'EVENT_SLOT_CREATED', 'EventSlot', result_id);
   return result_id;
 end $$;
-
 create or replace function rush.verify_full_workflow(owner_id uuid, panel_id uuid, applicant_id uuid)
 returns void language plpgsql security definer set search_path='' as $$
 declare
@@ -139,6 +137,5 @@ begin
   if not exists(select 1 from rush.audit_events ae where ae.cycle_id=v_cycle_id and ae.action='CONFLICT_DECLARED_AFTER_RELEASE') then raise exception 'post-release conflict audit missing'; end if;
   raise exception 'WORKFLOW_SELF_TEST_PASSED' using errcode='P0001';
 end $$;
-
 revoke all on function rush.verify_full_workflow(uuid,uuid,uuid) from public,anon,authenticated;
 grant execute on function rush.verify_full_workflow(uuid,uuid,uuid) to service_role;

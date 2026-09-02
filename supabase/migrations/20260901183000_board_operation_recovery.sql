@@ -12,7 +12,6 @@ alter table rush.notification_outbox add constraint notification_outbox_one_sour
   check (num_nonnulls(decision_id, event_id) = 1);
 alter table rush.notification_outbox add constraint notification_outbox_event_recipient_key
   unique(event_id, application_id, template_key, template_version);
-
 create or replace function rush.claim_notification(target_notification_id text)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare actor uuid := auth.uid(); item rush.notification_outbox%rowtype; result jsonb;
@@ -44,7 +43,6 @@ begin
   if result is null then raise exception 'notification source missing' using errcode = 'P0002'; end if;
   return result;
 end $$;
-
 create function rush.update_event(
   target_event_id text,
   event_name text,
@@ -83,7 +81,6 @@ begin
       'location', current_row.location, 'visibility', current_row.visibility, 'startsAt', current_row.starts_at,
       'endsAt', current_row.ends_at, 'checkinOpensAt', current_row.checkin_opens_at, 'checkinClosesAt', current_row.checkin_closes_at)));
 end $$;
-
 create function rush.cancel_event(target_event_id text, cancellation_reason text)
 returns void language plpgsql security definer set search_path = '' as $$
 declare current_row rush.events%rowtype; affected_rsvps integer;
@@ -107,7 +104,6 @@ begin
   values(auth.uid(), current_row.cycle_id, 'EVENT_CANCELLED', 'Event', target_event_id,
     jsonb_build_object('reason', trim(cancellation_reason), 'affectedRsvps', affected_rsvps));
 end $$;
-
 create function rush.unassign_evaluator(target_assignment_id text)
 returns boolean language plpgsql security definer set search_path = '' as $$
 declare assignment_row rush.evaluation_assignments%rowtype; target_cycle text;
@@ -124,7 +120,6 @@ begin
     jsonb_build_object('evaluatorId', assignment_row.evaluator_id, 'applicationId', assignment_row.application_id, 'roundId', assignment_row.round_id));
   return true;
 end $$;
-
 create function rush.reassign_evaluator(target_assignment_id text, replacement_evaluator_id uuid)
 returns text language plpgsql security definer set search_path = '' as $$
 declare assignment_row rush.evaluation_assignments%rowtype; target_cycle text;
@@ -148,7 +143,6 @@ begin
     jsonb_build_object('fromEvaluatorId', assignment_row.evaluator_id, 'toEvaluatorId', replacement_evaluator_id));
   return target_assignment_id;
 end $$;
-
 create function rush.deactivate_cycle_membership(target_user_id uuid, target_cycle_id text, revocation_reason text)
 returns boolean language plpgsql security definer set search_path = '' as $$
 declare previous_roles text[];
@@ -170,7 +164,6 @@ begin
     jsonb_build_object('roles', previous_roles, 'reason', trim(revocation_reason)));
   return true;
 end $$;
-
 create function rush.restore_cycle_membership(target_user_id uuid, target_cycle_id text)
 returns boolean language plpgsql security definer set search_path = '' as $$
 declare restored_roles text[]; role_snapshot jsonb;
@@ -195,7 +188,6 @@ begin
     jsonb_build_object('roles', restored_roles));
   return true;
 end $$;
-
 revoke all on function rush.update_event(text,text,text,text,text,timestamptz,timestamptz,timestamptz,timestamptz),
   rush.cancel_event(text,text), rush.unassign_evaluator(text), rush.reassign_evaluator(text,uuid),
   rush.deactivate_cycle_membership(uuid,text,text), rush.restore_cycle_membership(uuid,text) from public, anon;

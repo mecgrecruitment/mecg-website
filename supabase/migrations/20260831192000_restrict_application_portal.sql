@@ -14,7 +14,6 @@ create table if not exists rush.application_portal_allowlist (
   note text,
   created_at timestamptz not null default now()
 );
-
 alter table rush.application_portal_allowlist enable row level security;
 alter table rush.application_portal_allowlist force row level security;
 -- No policies, matching every other rush table: reads and writes go through
@@ -23,7 +22,6 @@ alter table rush.application_portal_allowlist force row level security;
 insert into rush.application_portal_allowlist (email, note)
 values ('rbhavan@umich.edu', 'Portal closed to everyone else pending launch.')
 on conflict (email) do nothing;
-
 create or replace function rush.application_portal_allows(actor uuid)
 returns boolean
 language sql
@@ -39,10 +37,8 @@ as $$
         where u.id = actor
       );
 $$;
-
 revoke all on function rush.application_portal_allows(uuid) from public, anon, authenticated;
 grant execute on function rush.application_portal_allows(uuid) to service_role;
-
 -- The authoritative gate. A trigger rather than an edit to each of the three
 -- RPCs, so every caller routes through one guard and a future write path cannot
 -- miss it.
@@ -68,12 +64,10 @@ begin
   return new;
 end;
 $$;
-
 drop trigger if exists applications_portal_guard on rush.applications;
 create trigger applications_portal_guard
 before insert or update on rush.applications
 for each row execute function rush.enforce_application_portal();
-
 -- intake_schema drives the UI. Without this it would advertise an open portal
 -- and then fail at submit, which reads as a broken site rather than a closed one.
 -- Body reproduced verbatim from 20260825020000 with one added condition.
@@ -124,6 +118,5 @@ begin
   );
 end;
 $$;
-
 comment on table rush.application_portal_allowlist is
   'Non-empty = application portal restricted to these emails. Empty = open to everyone. Delete all rows to reopen.';

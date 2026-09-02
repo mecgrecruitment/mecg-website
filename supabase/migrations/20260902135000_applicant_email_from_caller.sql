@@ -63,7 +63,6 @@ begin
   if application_id is null then raise exception 'application can no longer be edited' using errcode='55000'; end if;
   return application_id;
 end; $$;
-
 -- Unchanged signature, so the grants from 20260830100000 survive the replace.
 -- Restated because a silently ungranted applicant RPC is a closed portal.
 revoke all on function rush.save_application_draft(jsonb) from public, anon;

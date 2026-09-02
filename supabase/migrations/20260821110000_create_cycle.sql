@@ -55,6 +55,5 @@ begin
   return cycle_id;
 end;
 $$;
-
 revoke all on function rush.create_cycle(text) from public, anon;
 grant execute on function rush.create_cycle(text) to authenticated, service_role;
