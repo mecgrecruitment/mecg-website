@@ -3,7 +3,7 @@
 import { useClerk } from "@clerk/nextjs";
 import { useState } from "react";
 
-export default function LogoutButton() {
+function ConfiguredLogoutButton() {
   const clerk = useClerk();
   const [busy, setBusy] = useState(false);
 
@@ -22,4 +22,9 @@ export default function LogoutButton() {
       {busy ? "Signing out…" : "Sign out"}
     </button>
   );
+}
+
+export default function LogoutButton() {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()) return null;
+  return <ConfiguredLogoutButton />;
 }

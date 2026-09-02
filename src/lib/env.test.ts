@@ -4,6 +4,7 @@ import {
   getSupabasePublicEnv,
   getSupabaseServiceRoleKey,
   hasClerkConfiguration,
+  hasClerkFrontendConfiguration,
   hasClerkRuntimeConfiguration,
   requireSupabaseServiceRoleKey,
 } from "./env.ts";
@@ -63,7 +64,9 @@ test("Clerk runtime configuration requires keys and the trusted issuer", () => {
   };
 
   assert.equal(hasClerkConfiguration(complete), true);
+  assert.equal(hasClerkFrontendConfiguration(complete), true);
   assert.equal(hasClerkRuntimeConfiguration(complete), true);
+  assert.equal(hasClerkFrontendConfiguration({ ...complete, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: " " }), false);
   assert.equal(hasClerkRuntimeConfiguration({ ...complete, CLERK_ISSUER: " " }), false);
   assert.equal(hasClerkRuntimeConfiguration({ ...complete, CLERK_SECRET_KEY: undefined }), false);
 });

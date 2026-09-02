@@ -57,9 +57,15 @@ export function hasClerkConfiguration(
   environment: Record<string, string | undefined> = process.env,
 ) {
   return Boolean(
-    environment.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()
+    hasClerkFrontendConfiguration(environment)
     && environment.CLERK_SECRET_KEY?.trim(),
   );
+}
+
+export function hasClerkFrontendConfiguration(
+  environment: Record<string, string | undefined> = process.env,
+) {
+  return Boolean(environment.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
 }
 
 export function hasClerkRuntimeConfiguration(
