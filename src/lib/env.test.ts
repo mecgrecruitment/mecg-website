@@ -3,6 +3,8 @@ import { afterEach, test } from "node:test";
 import {
   getSupabasePublicEnv,
   getSupabaseServiceRoleKey,
+  hasClerkConfiguration,
+  hasClerkRuntimeConfiguration,
   requireSupabaseServiceRoleKey,
 } from "./env.ts";
 
@@ -51,4 +53,17 @@ test("required public and admin configuration throws when blank", () => {
   assert.throws(getSupabasePublicEnv, /NEXT_PUBLIC_MECG_SUPABASE_URL/);
   assert.equal(getSupabaseServiceRoleKey(), undefined);
   assert.throws(requireSupabaseServiceRoleKey, /MECG_SUPABASE_SERVICE_ROLE_KEY/);
+});
+
+test("Clerk runtime configuration requires keys and the trusted issuer", () => {
+  const complete = {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: " pk_test_example ",
+    CLERK_SECRET_KEY: " sk_test_example ",
+    CLERK_ISSUER: " https://example.clerk.accounts.dev ",
+  };
+
+  assert.equal(hasClerkConfiguration(complete), true);
+  assert.equal(hasClerkRuntimeConfiguration(complete), true);
+  assert.equal(hasClerkRuntimeConfiguration({ ...complete, CLERK_ISSUER: " " }), false);
+  assert.equal(hasClerkRuntimeConfiguration({ ...complete, CLERK_SECRET_KEY: undefined }), false);
 });

@@ -62,6 +62,15 @@ export function hasClerkConfiguration(
   );
 }
 
+export function hasClerkRuntimeConfiguration(
+  environment: Record<string, string | undefined> = process.env,
+) {
+  return Boolean(
+    hasClerkConfiguration(environment)
+    && environment.CLERK_ISSUER?.trim(),
+  );
+}
+
 export function requireClerkWebhookSigningSecret() {
   return requireEnv("CLERK_WEBHOOK_SIGNING_SECRET");
 }
