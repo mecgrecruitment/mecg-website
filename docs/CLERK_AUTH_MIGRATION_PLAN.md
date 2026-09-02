@@ -165,6 +165,119 @@ Keep `auth.users`, Supabase secrets, the old release artifact, and legacy issuer
 
 After a clean audit, remove obsolete Supabase Auth routes, callback and recovery marker, cookie refresh helper, auth-only limiter buckets, auth-user triggers, old UI, old tests, and unused secrets. Keep the UUID identity mapping as permanent application architecture. Rename misleading domain columns such as `pnms.auth_user_id` only in a later cleanup.
 
+## Rush-event capacity plan
+
+Ordinary staggered registration is unlikely to approach Clerk's published short-window limits. A rush event is different. Hundreds of people can share one campus public IP and submit the same Clerk operation within seconds. Treat that event as a planned capacity exercise.
+
+Clerk documents `5` signup creations per `10` seconds, `5` sign-in creations per `10` seconds, and `3` signup verification attempts per `10` seconds. Clerk identifies frontend users by IP and returns `Retry-After` with a `429` response. Clerk does not publish a general production verification-email throughput ceiling. See [Clerk's rate-limit documentation](https://clerk.com/docs/guides/how-clerk-works/system-limits).
+
+### Add bounded `Retry-After` handling
+
+First confirm whether Clerk's selected prebuilt components already wait and retry the operations that can return `429`. Clerk does not document that behavior. If the prebuilt flow does not expose enough control, use Clerk's supported custom-flow hooks for the affected steps rather than retrying the entire page request.
+
+Implement these rules:
+
+1. Retry only after a Clerk response returns `429` and a valid `Retry-After` value.
+2. Wait for the full server delay. Add `0` to `1,000` milliseconds of random delay after it to avoid another synchronized burst.
+3. Retry a safe operation at most twice. Preserve the active Clerk signup state and form data between attempts.
+4. Disable the affected submit or resend control while the timer runs. Show a countdown and a plain message such as "High signup traffic. Retrying in 8 seconds."
+5. Before each retry, read the current Clerk flow state. Do not create a second signup when the first request succeeded but its response was interrupted.
+6. Retry signup creation and verification-code send or resend only after the spike proves that the exact SDK operations are safe to repeat.
+7. Do not automatically retry an incorrect password, an incorrect verification code, CAPTCHA failure, `403`, `409`, or `5xx`. Keep user-driven verification attempts under the published limit.
+8. If `Retry-After` is missing or invalid, stop automatic retries. Show a manual retry control after 10 seconds.
+9. After two automatic retries, stop. Keep the user's data, show the next allowed time, and offer event support instructions.
+10. Record the operation name, status, retry delay, attempt number, network class, and result. Do not record the email, password, code, token, or full IP address.
+
+Add focused tests for seconds-based `Retry-After`, missing and invalid headers, timer cleanup, navigation during a wait, duplicate-submit prevention, retry exhaustion, and accessible countdown announcements.
+
+### Spread the event traffic
+
+Do not make cellular data a requirement. Some applicants have limited data, weak reception, or no alternative network.
+
+Use these event controls:
+
+- Open signup before the event when recruitment policy allows it.
+- Divide an in-room signup into cohorts. Release each cohort at least two minutes apart, then adjust the interval from rehearsal results.
+- Put the assigned cohort or start time on the event slide, QR code, or staff instruction.
+- Ask people who already have an account to use sign-in rather than signup.
+- Tell attendees that cellular data is an optional fallback when campus Wi-Fi is busy.
+- Keep a staffed help path for people who cannot use cellular data or do not receive email.
+- Avoid telling the full room to refresh or resubmit together. That recreates the burst after a failure.
+
+The event lead may shorten or lengthen the cohort interval only from live signup and `429` measurements. The event lead must not weaken CAPTCHA, RLS, email verification, or account lockout to increase throughput.
+
+### Load-test the exact flow
+
+Test the whole user journey, not a substitute endpoint:
+
+1. Create the signup attempt.
+2. Request the verification email or code.
+3. Submit the verification.
+4. Establish the Clerk session.
+5. Provision or resolve the UUID identity.
+6. Load `/apply` through Clerk-authenticated Supabase RLS.
+7. Upload and retrieve a test resume through the Clerk-authenticated Storage path.
+
+Run both traffic patterns:
+
+| Scenario | Network shape | Initial schedule |
+|---|---|---|
+| Baseline | Distributed source IPs | 25, 50, 100, and 250 users over five minutes |
+| Synchronized | One shared public IP | 25, 50, and 100 users over ten seconds |
+| Staggered room | One shared public IP | 100 and 250 users in two-minute cohorts |
+| Recovery burst | One shared public IP | A cohort retries after the same `Retry-After` window |
+| Login | One shared public IP | Existing users sign in while new users sign up |
+
+Use Clerk test identities for the high-volume request test. Development and production instances have different limits, so get Clerk approval for any production-like capacity test. Do not send hundreds of real emails without that approval. Test email delivery separately with a controlled inbox cohort and Clerk's written guidance.
+
+Measure signup completion, login completion, `429` rate, retry success, p50 and p95 response time, verification delivery time, post-auth provisioning conflicts, webhook lag, RLS denials, and Storage failures. Keep the full timestamped results with the release evidence.
+
+Use these provisional stop thresholds until the rehearsal sets better values:
+
+- Pause the next cohort if Clerk `429` responses exceed `2%` for two minutes.
+- Pause the next cohort if signup completion falls below `95%` over five minutes.
+- Pause the next cohort if p95 verification delivery exceeds two minutes.
+- Stop new signup traffic for any identity-mapping conflict, cross-user authorization success, or Storage ownership failure.
+- Start the incident runbook if Clerk `5xx` responses exceed `1%` for five minutes.
+
+The team must replace these provisional values with thresholds supported by the rehearsal and Clerk's response before production approval.
+
+### Contact Clerk before the event
+
+Contact Clerk at least two weeks before a planned rush event. Send the production instance ID, event date and time zone, expected total registrations, peak registrations per ten seconds, largest shared-IP cohort, verification method, expected email volume, load-test date, and support contact.
+
+Ask Clerk to confirm:
+
+- the production signup, sign-in, verification, and email capacity for the forecast burst;
+- how frontend IP limits behave behind a large campus NAT;
+- whether Clerk recommends a configuration or support adjustment;
+- the approved way to run a production-like load test;
+- the support and escalation path during the event;
+- the metrics and request identifiers that Clerk needs during an incident.
+
+Attach Clerk's written response to the production stop/go record. No response or an unsupported forecast is a stop for synchronized in-room signup. Use staggered registration instead.
+
+### Run the event
+
+Assign these roles before the event:
+
+| Role | Responsibility |
+|---|---|
+| Event lead | Releases cohorts, pauses signup, and communicates attendee instructions |
+| Auth operator | Watches Clerk errors, `429`, verification delivery, and provider status |
+| Application operator | Watches UUID provisioning, webhooks, RLS denials, and Storage |
+| Support lead | Handles individual access and email problems without triggering group retries |
+| Incident owner | Contacts Clerk and decides whether to stop or continue registration |
+
+Run this checklist:
+
+1. Thirty minutes before signup, verify Clerk status, the MECG deployment, Supabase health, webhook delivery, a canary signup, a canary login, and a canary verification email.
+2. Display the cohort schedule and the support path before releasing the first cohort.
+3. Release one cohort. Watch the capacity metrics for two minutes before releasing the next cohort.
+4. If a pause threshold fires, stop the next cohort. Let active retries finish, then increase the interval or ask affected users to switch networks when they can.
+5. If a stop threshold fires, close signup entry, preserve logs and request IDs, contact Clerk, and keep existing authenticated application work available when safe.
+6. After the event, reconcile Clerk users, `rush.auth_identities`, profiles, applications, verification failures, and support cases. Record the result before the next event.
+
 ## Verification matrix
 
 | Boundary | Required proof |
@@ -177,7 +290,7 @@ After a clean audit, remove obsolete Supabase Auth routes, callback and recovery
 | Existing users | Imported bcrypt users retain passwords and all UUID-linked history; exception accounts have an approved path |
 | New users | Signup, verification, first request, profile creation, routing, reset, and sign-out work without `auth.users` |
 | Webhooks | Invalid signatures fail; duplicate, delayed, and reordered events are idempotent; deletion revokes identity without deleting history |
-| Capacity | Distributed and campus-NAT tests meet response, `429`, and delivery targets |
+| Capacity | Distributed and campus-NAT tests meet response, `429`, bounded-retry, and delivery targets |
 | Operations | Key rotation, provider outage, webhook lag, user lockout, and support escalation have tested runbooks |
 
 Repository commands to retain and extend include:
