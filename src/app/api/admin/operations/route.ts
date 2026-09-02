@@ -24,6 +24,12 @@ export async function GET() {
   const configuration = {
     publicSupabase,
     serviceRole: Boolean(getSupabaseServiceRoleKey()),
+    clerk: Boolean(
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()
+      && process.env.CLERK_SECRET_KEY?.trim()
+      && process.env.CLERK_ISSUER?.trim()
+      && process.env.CLERK_WEBHOOK_SIGNING_SECRET?.trim()
+    ),
     resend: Boolean(process.env.RESEND_API_KEY?.trim() && process.env.RESEND_FROM_EMAIL?.trim()),
     contactRecipient: Boolean(process.env.CONTACT_TO_EMAIL?.trim()),
     cronSecret: Boolean(process.env.CRON_SECRET?.trim()),

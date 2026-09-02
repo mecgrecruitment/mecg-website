@@ -68,3 +68,5 @@ next-env.d.ts
 # Claude Code local worktrees. Previously ignored only via .git/info/exclude,
 # which is per-clone and not shared with anyone else.
 /.claude/worktrees/
+.clerk-migration-manifest.json
+.clerk-migration-manifest.json.tmp

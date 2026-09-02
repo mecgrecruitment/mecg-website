@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useSupabase } from "@/lib/supabase/client";
 
 type State =
   | { kind: "idle" }
@@ -18,6 +18,7 @@ type State =
 // refused once a screening packet exists. This is only the client half.
 export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
   const router = useRouter();
+  const supabase = useSupabase();
   const inputRef = useRef<HTMLInputElement>(null);
   const inFlight = useRef(false);
   const [state, setState] = useState<State>({ kind: "idle" });
@@ -43,7 +44,6 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
       }
       documentId = startBody.documentId;
 
-      const supabase = createClient();
       const { error: uploadError } = await supabase.storage
         .from("resumes")
         .upload(startBody.path, file, { contentType: "application/pdf", upsert: false });

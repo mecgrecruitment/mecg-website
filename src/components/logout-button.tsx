@@ -1,19 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import { useState } from "react";
 
 export default function LogoutButton() {
-  const router = useRouter();
+  const clerk = useClerk();
   const [busy, setBusy] = useState(false);
 
   async function logout() {
     if (busy) return;
     setBusy(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.replace("/login");
-      router.refresh();
+      await clerk.signOut({ redirectUrl: "/login" });
     } finally {
       setBusy(false);
     }
