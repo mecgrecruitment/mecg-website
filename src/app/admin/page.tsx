@@ -6,21 +6,16 @@ import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import SectionLabel from "@/components/section-label";
-import StatTile from "@/components/stat-tile";
 import SetupForm from "./setup-form";
 import { AddApplicantForm } from "./rush-controls";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
-import { easternDateBadge, formatEasternDateTime } from "@/lib/date-time";
-import { cycleStatusLabel, statusLabel } from "@/lib/labels";
+import { formatEasternDateTime } from "@/lib/date-time";
+import { cycleStatusLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Board dashboard" };
-
-function eventBadge(startsAt: string) {
-  return easternDateBadge(startsAt);
-}
 
 function eventDate(startsAt: string) {
   return formatEasternDateTime(startsAt);
@@ -51,9 +46,7 @@ export default async function AdminDashboard() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
-  const canHash = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
-  const canExport = hasPermission(user.memberships, cycleId, "EXPORT");
-  const [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, decisionsResult, auditResult, eventSlotsResult] = await Promise.all([
+  const [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, eventSlotsResult, referralsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
     supabase
@@ -64,11 +57,10 @@ export default async function AdminDashboard() {
       .neq("status", "DRAFT"),
     supabase.from("events").select("id,name,starts_at").eq("cycle_id", cycleId).order("starts_at"),
     supabase.from("evaluation_assignments").select("id,status,rounds!inner(cycle_id)").eq("rounds.cycle_id", cycleId),
-    supabase.from("decisions").select("id,status,decision_approvals(id)").eq("cycle_id", cycleId),
-    supabase.from("audit_events").select("id,actor_id,action,created_at").eq("cycle_id", cycleId).order("created_at", { ascending: false }).limit(8),
     supabase.from("event_slots").select("id,capacity,event_id,slot_rsvps(id),events!inner(cycle_id)").eq("events.cycle_id", cycleId),
+    supabase.from("referrals").select("id", { count: "exact", head: true }).eq("cycle_id", cycleId),
   ]);
-  for (const result of [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, decisionsResult, auditResult, eventSlotsResult]) {
+  for (const result of [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, eventSlotsResult, referralsResult]) {
     if (result.error) throw result.error;
   }
   const cycle = cycleResult.data;
@@ -88,29 +80,12 @@ export default async function AdminDashboard() {
   const activeRounds = (roundsResult.data ?? []).filter((round) => ["PUBLISHED", "ACTIVE"].includes(round.status));
   const now = new Date().getTime();
   const nextEvent = events.find((event) => new Date(event.starts_at).getTime() >= now);
-  const nextEventId = nextEvent?.id;
   const nextEventSlots = nextEvent ? (eventSlotsResult.data ?? []).filter((slot) => slot.event_id === nextEvent.id) : [];
   const nextEventCapacity = nextEventSlots.reduce((sum, slot) => sum + slot.capacity, 0);
   const nextEventRsvps = nextEventSlots.reduce((sum, slot) => sum + slot.slot_rsvps.length, 0);
 
   const totalAssignments = evaluationAssignmentsResult.data?.length ?? 0;
   const submittedAssignments = (evaluationAssignmentsResult.data ?? []).filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
-
-  const decisions = decisionsResult.data ?? [];
-  const decisionFunnel = [
-    ["pending", decisions.filter((decision) => decision.status === "PENDING" && decision.decision_approvals.length === 0).length],
-    ["awaiting 2nd approval", decisions.filter((decision) => decision.status === "PENDING" && decision.decision_approvals.length === 1).length],
-    ["approved", decisions.filter((decision) => ["APPROVED", "LOCKED"].includes(decision.status)).length],
-    ["released", decisions.filter((decision) => decision.status === "RELEASED").length],
-  ] as const;
-
-  const auditEvents = auditResult.data ?? [];
-  const auditActorIds = [...new Set(auditEvents.map((event) => event.actor_id).filter((actorId): actorId is string => Boolean(actorId)))];
-  const { data: auditActorProfiles, error: auditActorProfilesError } = auditActorIds.length
-    ? await supabase.from("profiles").select("id,display_name").in("id", auditActorIds)
-    : { data: [], error: null };
-  if (auditActorProfilesError) console.error("audit actor lookup failed", auditActorProfilesError);
-  const auditActorNameById = new Map((auditActorProfiles ?? []).map((profile) => [profile.id, profile.display_name]));
 
   const STATS = [
     [String(applications.length), "total applicants"],
@@ -230,88 +205,19 @@ export default async function AdminDashboard() {
           hasResume: Boolean(application.resume_storage_path),
         }))}
         canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
+        canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}
         cycleId={cycle.id}
+        referralCount={referralsResult.count ?? 0}
       />
       {canOperate && (
         <section>
-          <SectionLabel>Activity</SectionLabel>
-          <div className={`mt-3.5 grid gap-8 ${canHash ? "lg:grid-cols-[0.9fr_1.1fr]" : ""}`}>
-            {canHash && (
-              <div>
-                <p className="text-[13px] font-semibold text-mecg-navy/65">Decision funnel</p>
-                <div className="mt-2.5 grid grid-cols-2 gap-3 border-y border-mecg-navy/10 py-3 sm:grid-cols-4">
-                  {decisionFunnel.map(([label, value]) => (
-                    <StatTile key={label} value={value} label={label} tone="light" />
-                  ))}
-                </div>
-              </div>
-            )}
-            <div>
-              <p className="text-[13px] font-semibold text-mecg-navy/65">Recent activity</p>
-              <div className="mt-2.5 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
-                {auditEvents.length ? auditEvents.map((event) => (
-                  <div key={event.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
-                    <div>
-                      <p className="font-medium text-mecg-navy">{statusLabel(event.action)}</p>
-                      <p className="text-xs text-mecg-navy/60">{event.actor_id ? (auditActorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
-                    </div>
-                    <time className="shrink-0 tabular text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
-                  </div>
-                )) : <p className="py-3 text-sm text-mecg-navy/55">No recent activity.</p>}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-      <section>
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Attendance events</h2>
-          <div className="flex items-center gap-3">
-            {canExport && (
-              <a href={`/api/admin/export?cycleId=${cycle.id}`} className="button-secondary text-sm">Export attendance CSV</a>
-            )}
-            {canOperate && <Link href="/admin/events/new" className="button-secondary text-sm">+ New event</Link>}
-          </div>
-        </div>
-        <div className="mt-3.5 grid border-t border-mecg-navy/10 sm:grid-cols-2 sm:gap-x-6">
-          {events.map((event) => {
-            const { month, day } = eventBadge(event.starts_at);
-            const isPast = new Date(event.starts_at).getTime() < now;
-            return (
-              <div key={event.id} className={`flex min-w-0 items-center gap-3 border-b border-mecg-navy/10 py-3 ${isPast ? "opacity-55" : ""}`}>
-                <div className={`flex h-11 w-11 flex-shrink-0 flex-col items-center justify-center rounded-lg tabular text-white ${isPast ? "bg-mecg-navy/50" : "bg-mecg-navy"}`}>
-                  <span className="text-xs font-semibold leading-none">{month}</span>
-                  <span className="text-sm font-bold">{day}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-mecg-navy">{event.name}</p>
-                    {event.id === nextEventId && (
-                      <span className="inline-flex items-center rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-xs font-semibold text-mecg-orange-ink">Next</span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-mecg-navy/55">{eventDate(event.starts_at)}</p>
-                </div>
-                <Link href={`/admin/events/${event.id}`} className="shrink-0 text-xs font-semibold text-mecg-blue hover:text-mecg-orange-ink">
-                  View →
-                  <span className="sr-only"> {event.name}</span>
-                </Link>
-              </div>
-            );
-          })}
-          {!events.length && (
-            <p className="border-b border-mecg-navy/10 py-4 text-sm text-mecg-navy/55 sm:col-span-2">
-              No events yet. Add one to start tracking RSVPs and check-ins.
-            </p>
-          )}
-        </div>
-      </section>
-      {canOperate && (
-        <section>
-          <SectionLabel number="04">Add an applicant</SectionLabel>
-          <div className="mt-3.5">
+          <details className="rounded-2xl border border-mecg-navy/10 bg-white p-4">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center font-semibold text-mecg-blue marker:content-none">
+              Add an applicant manually
+            </summary>
+            <p className="mb-4 text-sm text-mecg-navy/55">Use this only when someone cannot submit the standard application.</p>
             <AddApplicantForm cycleId={cycle.id} />
-          </div>
+          </details>
         </section>
       )}
     </main>

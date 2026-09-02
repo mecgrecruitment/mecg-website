@@ -4,6 +4,7 @@ import { screeningRpc, type ScreeningDetail } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 import SectionLabel from "@/components/section-label";
 import ScreeningReviewForm from "./screening-review-form";
+import { parseScreeningProgress, screeningDeadlineLabel } from "../screening-draft";
 
 export default async function ScreeningAssignmentPage({ params }: { params: Promise<{ assignmentId: string }> }) {
   await requireMember();
@@ -11,6 +12,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
   const supabase = await createClient();
   const { data: detail, error } = await screeningRpc<ScreeningDetail>(supabase, "screening_assignment_detail", { target_assignment_id: assignmentId });
   if (error || !detail) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">This assignment is unavailable.</p><Link href="/member/screening" className="button-secondary mt-4 text-sm">Back to queue</Link></main>;
+  const progress = parseScreeningProgress((detail as ScreeningDetail & { progress?: unknown }).progress);
   return (
     <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-6">
@@ -21,12 +23,20 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
         </div>
         <Link href="/member/screening" className="button-secondary text-sm">Reading queue</Link>
       </header>
+      {progress && (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mecg-blue/[0.08] px-5 py-4 text-sm">
+          <p><span className="font-semibold">{progress.completed} of {progress.total}</span> reviews complete</p>
+          <p className="font-semibold text-mecg-navy/70">{screeningDeadlineLabel(progress.deadline)}</p>
+        </section>
+      )}
       <section>
-        <SectionLabel number="01">The application</SectionLabel>
+        <SectionLabel number="01">Read the application</SectionLabel>
+        <p className="mt-2 text-sm text-mecg-navy/60">Read every response before scoring. Use only what is written here.</p>
         <div className="mt-3.5 space-y-5 rounded-2xl bg-mecg-navy/[0.035] p-6">{(detail.content.responses ?? []).map((response, index) => <article key={index}><h2 className="font-semibold">{response.question}</h2><p className="mt-2 whitespace-pre-wrap leading-7 text-mecg-navy/70">{response.answer}</p></article>)}</div>
       </section>
       <section>
-        <SectionLabel number="02">Your review</SectionLabel>
+        <SectionLabel number="02">Score independently</SectionLabel>
+        <p className="mt-2 text-sm text-mecg-navy/60">Apply the same anchors to every application. Your draft and final review are private.</p>
         <div className="mt-3.5">
           <ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} />
         </div>

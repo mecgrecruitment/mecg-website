@@ -17,9 +17,17 @@ function statusTone(status: string) {
   return "orange" as const;
 }
 
+function nextAction(status: string) {
+  if (status === "NEW") return "Board review is next. Nothing else for you to do.";
+  if (status === "REVIEWED") return "The Board reviewed it. Nothing else for you to do.";
+  if (status === "INVITED") return "The Board recorded an invitation. You can follow up with them personally.";
+  if (status === "PASSED") return "This referral is closed for this cycle.";
+  return "The Board will update this status when it has a next step.";
+}
+
 export default async function ReferPage() {
   const user = await requireMember();
-  const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
+  const cycleMembership = user.memberships.find((membership) => membership.active && ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
@@ -60,12 +68,16 @@ export default async function ReferPage() {
                 </div>
                 <StatusPill tone={statusTone(referral.status)}>{referralStatusLabel(referral.status)}</StatusPill>
               </div>
-              <p className="mt-2 text-[12px] text-mecg-navy/55">Sent {formatEasternDateTime(referral.created_at)}</p>
+              <div className="mt-3 rounded-xl bg-mecg-navy/[0.035] px-3 py-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/45">Next</p>
+                <p className="mt-1 text-[13px] leading-5 text-mecg-navy/70">{nextAction(referral.status)}</p>
+              </div>
+              <p className="mt-2 text-[12px] text-mecg-navy/55">Submitted {formatEasternDateTime(referral.created_at)}</p>
             </article>
           ))}
           {!referrals?.length && (
             <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55">
-              You have not referred anyone yet. Anyone you send appears here with what the board did with it.
+              No referrals yet. Submit one above and its Board-review status will appear here.
             </p>
           )}
         </div>

@@ -1,12 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
-import { IMPRESSION_TAGS } from "@/lib/impressions";
-import { SCORE_ANCHORS } from "@/lib/rubrics";
-
-const SCORE_OPTIONS = [1, 2, 3, 4, 5] as const;
+import { OBSERVATION_TAGS } from "./observation-tags";
 
 export default function ImpressionForm({
   eventId,
@@ -15,22 +12,19 @@ export default function ImpressionForm({
 }: {
   eventId: string;
   applicationId: string;
-  initial?: { score: number; tags: string[]; note: string };
+  initial?: { tags: string[]; note: string };
 }) {
   const router = useRouter();
-  const [score, setScore] = useState<number | null>(initial?.score ?? null);
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [note, setNote] = useState(initial?.note ?? "");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
-  const scoreGroupRef = useRef<HTMLDivElement>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!score) {
-      setError("Choose a score before saving this impression.");
-      scoreGroupRef.current?.focus();
+    if (!tags.length && !note.trim()) {
+      setError("Add a neutral tag or a short observation before saving.");
       return;
     }
     setPending(true);
@@ -39,53 +33,30 @@ export default function ImpressionForm({
       const response = await fetch("/api/member/impressions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, applicationId, score, tags, note }),
+        body: JSON.stringify({ eventId, applicationId, tags, note }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        setError(body?.error ?? "Could not save impression");
+        setError(body?.error ?? "Could not save observation");
         setPending(false);
         return;
       }
       setSaved(true);
       window.setTimeout(() => router.refresh(), 220);
     } catch {
-      setError("Could not save impression. Check your connection and try again.");
+      setError("Could not save observation. Check your connection and try again.");
       setPending(false);
     }
   }
 
   return (
     <form onSubmit={submit} className="mt-4 flex flex-col gap-4" noValidate>
-      <div className="text-sm font-medium" id={`impression-score-label-${applicationId}`}>Score</div>
-      <div ref={scoreGroupRef} tabIndex={-1} className="grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-labelledby={`impression-score-label-${applicationId}`}>
-        {SCORE_OPTIONS.map((option) => {
-          const selected = score === option;
-          const label = `Score ${option}: ${SCORE_ANCHORS[option]}`;
-          return (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={selected}
-              aria-label={label}
-              disabled={pending}
-              onClick={() => { setScore(option); setError(""); }}
-              className={`min-h-11 rounded-xl text-sm font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
-                selected
-                  ? "bg-mecg-navy text-white"
-                  : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
-              }`}
-              title={label}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
-      {score && <p className="text-xs text-mecg-navy/65">{SCORE_ANCHORS[score]}</p>}
-      <div className="text-sm font-medium" id={`impression-tags-label-${applicationId}`}>Tags</div>
+      <p className="text-sm leading-6 text-mecg-navy/65">
+        Capture factual context only. Formal rubric evaluations are the only scores used in recruitment decisions.
+      </p>
+      <div className="text-sm font-medium" id={`impression-tags-label-${applicationId}`}>Observation tags</div>
       <div className="flex flex-wrap gap-2" aria-labelledby={`impression-tags-label-${applicationId}`}>
-        {IMPRESSION_TAGS.map((tag) => {
+        {OBSERVATION_TAGS.map((tag) => {
           const selected = tags.includes(tag);
           return (
             <button
@@ -106,7 +77,7 @@ export default function ImpressionForm({
           );
         })}
       </div>
-      <label className="text-sm font-medium" htmlFor={`impression-note-${applicationId}`}>Note (optional)</label>
+      <label className="text-sm font-medium" htmlFor={`impression-note-${applicationId}`}>Factual note (optional when a tag is selected)</label>
       <textarea
         id={`impression-note-${applicationId}`}
         className="min-h-20 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
@@ -118,9 +89,9 @@ export default function ImpressionForm({
       />
       <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>
       <OperationNotice kind="error">{error}</OperationNotice>
-      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Impression saved.</p>}
+      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Observation saved.</p>}
       <button type="submit" disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
-        {saved ? "✓ Saved" : pending ? "Saving…" : "Save impression"}
+        {saved ? "✓ Saved" : pending ? "Saving…" : "Save observation"}
       </button>
     </form>
   );

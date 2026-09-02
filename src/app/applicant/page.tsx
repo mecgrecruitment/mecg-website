@@ -11,6 +11,10 @@ import ApplicantStatusRefresh from "./status-refresh";
 import ResumeReplace from "./resume-replace";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { decisionOutcomeLabel } from "@/lib/labels";
+import ApplicantOnboarding from "./onboarding";
+import { onboardingRpc, parseApplicantOnboarding } from "./onboarding-data";
+import ScheduleActionButton from "./schedule-action";
+import { mapSearchUrl, safeHumanLocation } from "./safe-location";
 
 export const metadata: Metadata = { title: "Applicant portal" };
 
@@ -43,26 +47,56 @@ function applicationHeadline(application: { display_status: string; released_out
   return "Your application is moving through review.";
 }
 
-function nextScheduleItem(plan: ApplicantSchedule): { label: string; when: string | null } | null {
+function nextConfirmedScheduleItem(plan: ApplicantSchedule) {
   const now = Date.now();
+  const buddies = plan.buddies ?? (plan.buddy ? [plan.buddy] : []);
   const confirmed = [
-    ...(plan.rsvps ?? []).map((item) => ({ label: item.eventName, startsAt: item.startsAt })),
-    ...(plan.buddy ? [{ label: "Member chat", startsAt: plan.buddy.startsAt }] : []),
+    ...(plan.rsvps ?? []).map((item) => ({ label: item.eventName, startsAt: item.startsAt, location: safeHumanLocation(item.location) })),
+    ...buddies.map((item) => ({ label: "Member chat", startsAt: item.startsAt, location: null })),
   ]
     .filter((item) => new Date(item.startsAt).getTime() > now)
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-  if (confirmed[0]) return { label: confirmed[0].label, when: formatEasternDateTime(confirmed[0].startsAt) };
-  const openCount = (plan.openSlots ?? []).filter((slot) => slot.remaining > 0).length + (plan.openBuddy ?? []).length;
-  return openCount ? { label: `${openCount} open slot${openCount === 1 ? "" : "s"} to book below`, when: null } : null;
+  return confirmed[0] ?? null;
 }
 
 type ApplicantSchedule = {
-  rsvps?: { slotId: string; eventName: string; startsAt: string; endsAt: string; location: string | null }[];
+  rsvps?: { slotId: string; eventId: string; eventName: string; startsAt: string; endsAt: string; location: string | null }[];
   group?: { name: string; prompt: string } | null;
-  buddy?: { startsAt: string; endsAt: string } | null;
-  openSlots?: { id: string; eventName: string; startsAt: string; endsAt: string; remaining: number }[];
-  openBuddy?: { id: string; startsAt: string; endsAt: string }[];
+  buddy?: { slotId: string; cycleId: string; startsAt: string; endsAt: string } | null;
+  buddies?: { slotId: string; cycleId: string; startsAt: string; endsAt: string }[];
+  openSlots?: { id: string; eventId: string; eventName: string; startsAt: string; endsAt: string; remaining: number }[];
+  openBuddy?: { id: string; cycleId: string; startsAt: string; endsAt: string }[];
 };
+
+function LocationLink({ location }: { location: string | null | undefined }) {
+  const safeLocation = safeHumanLocation(location);
+  const mapUrl = mapSearchUrl(location);
+  if (!safeLocation || !mapUrl) return null;
+  return <a href={mapUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">{safeLocation} · Map</a>;
+}
+
+type NextAction = {
+  eyebrow: string;
+  title: string;
+  detail: string;
+  href?: string;
+  label?: string;
+};
+
+function NextActionCard({ action }: { action: NextAction }) {
+  return (
+    <section className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6" aria-labelledby="next-action-heading">
+      <p className="text-[13px] font-semibold text-mecg-orange-ink">{action.eyebrow}</p>
+      <h2 id="next-action-heading" className="mt-2 text-xl font-semibold tracking-[-0.02em]">{action.title}</h2>
+      <p className="mt-1.5 max-w-2xl text-sm leading-6 text-mecg-navy/65">{action.detail}</p>
+      {action.href && action.label && (
+        <Link href={action.href} className="button-primary mt-4 inline-flex text-sm">
+          {action.label}
+        </Link>
+      )}
+    </section>
+  );
+}
 
 function scheduleFromJson(value: Json): ApplicantSchedule {
   return value && typeof value === "object" && !Array.isArray(value) ? value as ApplicantSchedule : {};
@@ -166,6 +200,8 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
   ]);
   if (error) throw error;
   if (!applications?.length) redirect("/apply");
+  const onboardingResult = await onboardingRpc<unknown>(supabase, "my_member_onboarding");
+  if (onboardingResult.error) console.error("member onboarding lookup failed", onboardingResult.error);
   if (messagesResult.error) console.error("applicant message lookup failed", messagesResult.error);
   if (deadlinesResult.error) console.error("offer deadline lookup failed", deadlinesResult.error);
   if (recruitmentResult.error) console.error("recruitment schedule lookup failed", recruitmentResult.error);
@@ -189,11 +225,87 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
   const dashboardApplications = applications;
   const plan = scheduleFromJson(schedule);
   const confirmedSlotIds = new Set((plan.rsvps ?? []).map((item) => item.slotId));
+  const confirmedByEvent = new Map((plan.rsvps ?? []).map((item) => [item.eventId, item.slotId]));
+  const confirmedBuddies = plan.buddies ?? (plan.buddy ? [plan.buddy] : []);
+  const buddyByCycle = new Map(confirmedBuddies.map((item) => [item.cycleId, item]));
   const releasedSurveyApplication = dashboardApplications.find((application) => application.released_outcome);
   const heroApplication = dashboardApplications[0];
+  const onboardingItems = parseApplicantOnboarding(onboardingResult.data).filter((item) => item.applicationId === heroApplication.application_id);
+  const onboardingRemaining = onboardingItems.filter((item) => !item.completedAt).length;
   const heroWithdrawn = heroApplication.display_status === "WITHDRAWN" && !heroApplication.released_outcome;
   const heroStage = pipelineStage(heroApplication.display_status, Boolean(heroApplication.released_outcome));
-  const nextItem = nextScheduleItem(plan);
+  const openSlotCount = (plan.openSlots ?? []).filter((slot) => slot.remaining > 0).length + (plan.openBuddy ?? []).length;
+  const nextConfirmed = nextConfirmedScheduleItem(plan);
+  const offerDeadline = deadlines[heroApplication.application_id];
+  const offerExpired = offerDeadline ? new Date(offerDeadline).getTime() <= now : false;
+  let nextAction: NextAction;
+  if (heroApplication.released_outcome === "OFFER" && !heroApplication.offer_response && !offerExpired) {
+    nextAction = {
+      eyebrow: "Decision ready",
+      title: "Respond to your offer",
+      detail: offerDeadline ? `Choose by ${formatEasternDateTime(offerDeadline, "full")}.` : "Review the offer and record your response.",
+      href: "#current-application",
+      label: "Review offer",
+    };
+  } else if (heroApplication.released_outcome === "OFFER" && !heroApplication.offer_response && offerExpired) {
+    nextAction = {
+      eyebrow: "Response window closed",
+      title: "Your offer deadline has passed",
+      detail: "Contact the Board if you still want to join MECG.",
+      href: "mailto:mecg-board@umich.edu",
+      label: "Contact the Board",
+    };
+  } else if (heroApplication.offer_response === "ACCEPTED" && onboardingRemaining > 0) {
+    nextAction = {
+      eyebrow: "Member onboarding",
+      title: `${onboardingRemaining} ${onboardingRemaining === 1 ? "step" : "steps"} left before handoff`,
+      detail: "Complete your steps below; the Board owns the remaining handoff work.",
+      href: "#member-onboarding",
+      label: "Continue onboarding",
+    };
+  } else if (canStartApplication === true) {
+    nextAction = {
+      eyebrow: "Next action",
+      title: "Start this cycle's application",
+      detail: "Applications are open and your earlier applications will stay available here.",
+      href: "/apply",
+      label: "Start application",
+    };
+  } else if (heroApplication.released_outcome) {
+    nextAction = {
+      eyebrow: "No action needed",
+      title: heroApplication.offer_response === "ACCEPTED"
+        ? "Your acceptance is recorded"
+        : heroApplication.offer_response === "DECLINED"
+          ? "Your response is recorded"
+          : "Your decision is complete",
+      detail: heroApplication.offer_response === "ACCEPTED"
+        ? "The Board will follow up with onboarding details. Any update will also appear here."
+        : "There is nothing else you need to submit for this cycle.",
+    };
+  } else if (nextConfirmed) {
+    nextAction = {
+      eyebrow: "Next up",
+      title: nextConfirmed.label,
+      detail: `${formatEasternDateTime(nextConfirmed.startsAt)}${nextConfirmed.location ? ` · ${nextConfirmed.location}` : ""}`,
+      href: "#applicant-schedule",
+      label: "View schedule",
+    };
+  } else if (openSlotCount > 0) {
+    nextAction = {
+      eyebrow: "Next action",
+      title: `Choose from ${openSlotCount} open ${openSlotCount === 1 ? "time" : "times"}`,
+      detail: "Book the event or member-chat time that works for you.",
+      href: "#applicant-schedule",
+      label: "Choose a time",
+    };
+  } else {
+    nextAction = {
+      eyebrow: "No action needed",
+      title: "You're caught up",
+      detail: "Your status updates automatically. MECG will contact you when there is something to do.",
+    };
+  }
 
   return (
     <PortalShell
@@ -206,12 +318,6 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         !heroWithdrawn && (
           <div className="mt-6 max-w-2xl">
             <StatusStepper stage={heroStage} dark />
-            {nextItem && (
-              <p className="mt-4 text-sm text-white/70">
-                <span className="font-semibold text-white">Next up:</span>{" "}
-                {nextItem.when ? `${nextItem.label} · ${nextItem.when}` : nextItem.label}
-              </p>
-            )}
           </div>
         )
       }
@@ -224,22 +330,13 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written responses will enter anonymous first-pass review, and any released updates will appear on this page.</p>
           </section>
         )}
-        {canStartApplication === true && (
-          <section className="rounded-2xl bg-mecg-orange/[0.12] p-6 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.4)]">
-            <p className="text-[13px] text-mecg-orange-ink">Applications are open</p>
-            <h2 className="mt-3 text-2xl font-semibold">You can apply again this cycle.</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">
-              A new recruitment cycle is accepting applications and you have not started one yet. Your earlier
-              applications stay on this page.
-            </p>
-            <Link href="/apply" className="button-primary mt-5 inline-flex">Start a new application</Link>
-          </section>
-        )}
-        {(action === "rsvp" || action === "buddy") && (
+        {(action === "rsvp" || action === "buddy" || action === "schedule") && (
           <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
-            {action === "rsvp" ? "Your RSVP is confirmed." : "Your member chat is booked."}
+            {action === "rsvp" ? "Your RSVP is confirmed." : action === "buddy" ? "Your member chat is booked." : "Your schedule was updated."}
           </section>
         )}
+        <NextActionCard action={nextAction} />
+        {onboardingItems.length > 0 && <ApplicantOnboarding items={onboardingItems} />}
         {timeline.length > 0 && (
           <section className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
             <p className="text-[13px] text-mecg-navy/65">What happens next</p>
@@ -247,13 +344,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               {timeline.map((event) => {
                 const past = new Date(event.startsAt).getTime() < now;
                 return (
-                  <li key={event.id} className={`flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] ${past ? "opacity-50" : ""}`}>
+                  <li key={event.id} className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] ${past ? "opacity-50" : ""}`}>
                     <span className="text-[14px] font-semibold text-mecg-navy">{event.name}</span>
-                    <span className="text-xs text-mecg-navy/65">
+                    <span className="text-right text-xs text-mecg-navy/65">
                       <time dateTime={event.startsAt}>
                         {formatEasternDateTime(event.startsAt)}
                       </time>
-                      {event.location ? ` · ${event.location}` : ""}
+                      {safeHumanLocation(event.location) && <> · <LocationLink location={event.location} /></>}
+                      {!past && <a href={`/api/events/${event.id}/ics`} className="ml-3 inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">Add to calendar</a>}
                     </span>
                   </li>
                 );
@@ -267,7 +365,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           const withdrawn = application.display_status === "WITHDRAWN" && !application.released_outcome;
           const isCurrentApplication = application.application_id === heroApplication.application_id;
           return (
-            <details key={application.application_id} open={isCurrentApplication} className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+            <details id={isCurrentApplication ? "current-application" : undefined} key={application.application_id} open={isCurrentApplication} className="scroll-mt-6 rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 marker:content-none">
                 <span>
                   <span className="block text-[13px] font-semibold text-mecg-navy/65">{application.cycle_name}</span>
@@ -360,20 +458,20 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             </details>
           );
         })}
-        <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+        <section id="applicant-schedule" className="scroll-mt-6 rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
           <h2 className="text-lg font-semibold">Your schedule</h2>
           <p className="mt-1 text-[13px] text-mecg-navy/65">Confirmed</p>
           <ul className="mt-2 space-y-2">
             {(plan.rsvps ?? []).map((item) => (
-              <li key={item.slotId} className="rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-                <span className="font-medium">{item.eventName}</span>
-                <span className="text-mecg-navy/70"> · <DateTimeRange startsAt={item.startsAt} endsAt={item.endsAt} />{item.location ? ` · ${item.location}` : ""}</span>
+              <li key={item.slotId} className="flex flex-col gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center sm:justify-between">
+                <div><span className="font-medium">{item.eventName}</span><span className="text-mecg-navy/70"> · <DateTimeRange startsAt={item.startsAt} endsAt={item.endsAt} /></span><div className="mt-1 flex flex-wrap gap-3"><LocationLink location={item.location} /><a href={`/api/events/${item.eventId}/ics`} className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">Add to calendar</a></div></div>
+                {new Date(item.startsAt).getTime() > now && <ScheduleActionButton action="CANCEL_RSVP" currentSlotId={item.slotId} label="Cancel RSVP" />}
               </li>
             ))}
             {!plan.rsvps?.length && <li className="text-sm text-mecg-navy/65">No RSVPs yet.</li>}
           </ul>
           {plan.group && <p className="mt-4 text-sm"><span className="font-medium">{plan.group.name}.</span> {plan.group.prompt}</p>}
-          {plan.buddy && <p className="mt-2 text-sm">Member chat: <DateTimeRange startsAt={plan.buddy.startsAt} endsAt={plan.buddy.endsAt} /></p>}
+          {confirmedBuddies.map((buddy) => <div key={buddy.slotId} className="mt-2 flex flex-col gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"><span>Member chat: <DateTimeRange startsAt={buddy.startsAt} endsAt={buddy.endsAt} /></span>{new Date(buddy.startsAt).getTime() > now && <ScheduleActionButton action="CANCEL_BUDDY" currentSlotId={buddy.slotId} label="Cancel chat" />}</div>)}
           {(Boolean(plan.openSlots?.some((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id))) || Boolean(plan.openBuddy?.length)) && (
             <>
               <p className="mt-5 text-[13px] text-mecg-navy/65">Open slots</p>
@@ -381,13 +479,17 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                 {(plan.openSlots ?? []).filter((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id)).map((slot) => (
                   <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">
                     <span>{slot.eventName} · <DateTimeRange startsAt={slot.startsAt} endsAt={slot.endsAt} /></span>
-                    <SlotButton id={slot.id} />
+                    {confirmedByEvent.has(slot.eventId)
+                      ? <ScheduleActionButton action="RESCHEDULE_RSVP" currentSlotId={confirmedByEvent.get(slot.eventId)!} nextSlotId={slot.id} label="Change to this time" />
+                      : <SlotButton id={slot.id} />}
                   </div>
                 ))}
                 {(plan.openBuddy ?? []).map((slot) => (
                   <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">
                     <span>Member chat · <DateTimeRange startsAt={slot.startsAt} endsAt={slot.endsAt} /></span>
-                    <BuddyButton id={slot.id} />
+                    {buddyByCycle.has(slot.cycleId)
+                      ? <ScheduleActionButton action="RESCHEDULE_BUDDY" currentSlotId={buddyByCycle.get(slot.cycleId)!.slotId} nextSlotId={slot.id} label="Change to this time" />
+                      : <BuddyButton id={slot.id} />}
                   </div>
                 ))}
               </div>

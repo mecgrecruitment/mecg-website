@@ -10,7 +10,7 @@ export type DeckEntry = {
   status: string;
   rounds: { name: string; score: number | null; count: number; spread: number | null; status: string }[];
   finalScore: number | null;
-  impressions: { count: number; avg: number; topTags: string[] } | null;
+  impressions: { count: number; topTags: string[]; notes: string[] } | null;
   decision: { outcome: string; status: string } | null;
 };
 
@@ -66,19 +66,21 @@ export default function DeliberationDeck({ entries }: { entries: DeckEntry[] }) 
             ))}
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-[13px] font-semibold text-white/50">Event impressions</p>
+            <p className="text-[13px] font-semibold text-white/50">Event observations</p>
             {entry.impressions ? (
               <>
-                <p className="text-sm text-white/70">
-                  <span className="tabular text-xl font-semibold text-white">{entry.impressions.avg.toFixed(1)}</span>
-                  <span className="ml-2 text-white/50">{entry.impressions.count} impressions</span>
-                </p>
+                <p className="text-sm text-white/70">{entry.impressions.count} observation{entry.impressions.count === 1 ? "" : "s"}</p>
                 {entry.impressions.topTags.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2">
                     {entry.impressions.topTags.map((tag) => (
                       <span key={tag} className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]">{tag}</span>
                     ))}
                   </div>
+                )}
+                {entry.impressions.notes.length > 0 && (
+                  <ul className="mt-2 max-w-xl space-y-1 text-sm leading-6 text-white/60">
+                    {entry.impressions.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
+                  </ul>
                 )}
               </>
             ) : (

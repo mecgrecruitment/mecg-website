@@ -6,7 +6,7 @@ import OperationNotice from "@/components/operation-notice";
 
 type Status = "idle" | "submitting" | "success" | "already" | "error";
 
-export default function CheckinForm({ token, signedIn }: { token: string; signedIn: boolean }) {
+export default function CheckinForm({ token, eventName, signedIn }: { token: string; eventName: string; signedIn: boolean }) {
   const returnTo = encodeURIComponent(`/checkin/${token}`);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,10 +37,25 @@ export default function CheckinForm({ token, signedIn }: { token: string; signed
   }
 
   if (status === "success") {
-    return <p className="rounded-xl bg-green-50 p-5 text-sm text-green-800">You&apos;re checked in. See you there!</p>;
+    return (
+      <div className="rounded-xl bg-green-50 p-5 text-green-900" role="status">
+        <p className="font-semibold">You&apos;re checked in for {eventName}.</p>
+        <p className="mt-1 text-sm text-green-800">You are all set. Your schedule and application updates stay in the applicant portal.</p>
+        <Link href="/applicant" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+          View your schedule
+        </Link>
+      </div>
+    );
   }
   if (status === "already") {
-    return <p className="rounded-xl bg-mecg-blue/10 p-5 text-sm text-mecg-navy">You&apos;re already checked in for this event.</p>;
+    return (
+      <div className="rounded-xl bg-mecg-blue/10 p-5 text-mecg-navy" role="status">
+        <p className="font-semibold">You&apos;re already checked in for {eventName}.</p>
+        <Link href="/applicant" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">
+          View your schedule
+        </Link>
+      </div>
+    );
   }
 
   // Told up front, not after a failed submit: at a table with a queue behind you,

@@ -30,23 +30,26 @@ test("configured login renders the Clerk flow with visible provider identity", a
   t.mock.module("next/link", {
     defaultExport: ({ children, href }: { children: ReactNode; href: string }) => createElement("a", { href }, children),
   });
-  const seen: { appearance?: ClerkAppearance } = {};
+  const seen: { appearance?: ClerkAppearance; forceRedirectUrl?: string | null } = {};
   t.mock.module("@clerk/nextjs", {
     namedExports: {
-      SignIn: ({ fallback, path, routing, signUpUrl, fallbackRedirectUrl, appearance }: {
+      SignIn: ({ fallback, path, routing, signUpUrl, forceRedirectUrl, fallbackRedirectUrl, appearance }: {
         fallback: ReactElement;
         path: string;
         routing: string;
         signUpUrl: string;
+        forceRedirectUrl: string | null;
         fallbackRedirectUrl: string;
         appearance: ClerkAppearance;
       }) => {
         seen.appearance = appearance;
+        seen.forceRedirectUrl = forceRedirectUrl;
         return createElement("div", {
           "data-clerk-sign-in": true,
           "data-path": path,
           "data-routing": routing,
           "data-sign-up-url": signUpUrl,
+          "data-force-redirect-url": forceRedirectUrl,
           "data-fallback-redirect-url": fallbackRedirectUrl,
         }, fallback);
       },
@@ -56,17 +59,21 @@ test("configured login renders the Clerk flow with visible provider identity", a
   t.mock.module("@/lib/env", { namedExports: { hasClerkRuntimeConfiguration: () => true } });
 
   const specifier = "./[[...login]]/page.tsx?case=configured-clerk";
-  const { default: LoginPage } = await import(specifier) as { default: () => Promise<ReactElement> };
-  const markup = renderToStaticMarkup(await LoginPage());
+  const { default: LoginPage } = await import(specifier) as {
+    default: (props: { searchParams: Promise<{ redirect_url?: string | string[] }> }) => Promise<ReactElement>;
+  };
+  const { validatedRedirect } = await import("./[[...login]]/redirect.ts");
+  const markup = renderToStaticMarkup(await LoginPage({ searchParams: Promise.resolve({ redirect_url: "/checkin/token-1?from=qr" }) }));
 
   assert.match(markup, /data-clerk-sign-in="true"/);
   assert.match(markup, /data-path="\/login"/);
   assert.match(markup, /data-routing="path"/);
-  assert.match(markup, /data-sign-up-url="\/apply"/);
+  assert.match(markup, /data-sign-up-url="\/apply\?redirect_url=%2Fcheckin%2Ftoken-1%3Ffrom%3Dqr"/);
+  assert.equal(seen.forceRedirectUrl, "/checkin/token-1?from=qr");
   assert.match(markup, /Loading secure sign-in/);
   assert.match(markup, /Secure authentication powered by Clerk/);
 
-  // The shell already draws the card, the heading and the Clerk attribution, so the widget ships chromeless.
+  // The shell already draws the heading and the page draws the Clerk attribution, so the widget ships chromeless.
   const elements = seen.appearance?.elements ?? {};
   assert.equal(elements.header?.display, "none");
   assert.equal(elements.footerItem?.display, "none", "Clerk's own 'Secured by Clerk' tag must stay hidden");
@@ -80,6 +87,16 @@ test("configured login renders the Clerk flow with visible provider identity", a
   for (const key of Object.keys(elements)) {
     assert.ok(config.has(key), `unknown Clerk appearance element "${key}"`);
   }
+
+  assert.equal(validatedRedirect("/checkin/token-1?from=qr#done"), "/checkin/token-1?from=qr#done");
+  assert.equal(validatedRedirect("https://example.com/checkin/token-1"), null);
+  assert.equal(validatedRedirect("//example.com/checkin/token-1"), null);
+  assert.equal(validatedRedirect("/\\example.com/checkin/token-1"), null);
+  assert.equal(validatedRedirect(["/checkin/one", "/checkin/two"]), null);
+
+  const rejectedMarkup = renderToStaticMarkup(await LoginPage({ searchParams: Promise.resolve({ redirect_url: "https://example.com" }) }));
+  assert.match(rejectedMarkup, /data-sign-up-url="\/apply"/);
+  assert.equal(seen.forceRedirectUrl, null);
 });
 
 type ClerkAppearance = {

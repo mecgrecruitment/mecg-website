@@ -3,16 +3,17 @@
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 
 const TABS = [
-  ["responses", "Responses"],
-  ["evaluations", "Evaluations"],
+  ["evidence", "Evidence"],
+  ["interviews", "Interviews"],
   ["decision", "Decision"],
-  ["activity", "Activity"],
+  ["messages", "Messages"],
+  ["history", "History"],
 ] as const;
 
 type TabKey = (typeof TABS)[number][0];
 
 export default function DossierTabs({ panels }: { panels: Record<TabKey, ReactNode> }) {
-  const [active, setActive] = useState<TabKey>("responses");
+  const [active, setActive] = useState<TabKey>("evidence");
   const id = useId();
   function selectFromKeyboard(event: KeyboardEvent<HTMLButtonElement>, key: TabKey) {
     const index = TABS.findIndex(([tab]) => tab === key);

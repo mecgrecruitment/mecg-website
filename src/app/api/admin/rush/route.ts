@@ -32,6 +32,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   UNASSIGN: "RECRUITMENT_OPERATIONS",
   REASSIGN: "RECRUITMENT_OPERATIONS",
   SET_APPLICATION_STATUS: "RECRUITMENT_OPERATIONS",
+  ADVANCE_SPEED_DATING: "MANAGE_CYCLE",
   CREATE_SLOT: "RECRUITMENT_OPERATIONS",
   SET_EVENT_GRADING: "RECRUITMENT_OPERATIONS",
   CREATE_GROUP: "RECRUITMENT_OPERATIONS",
@@ -191,6 +192,20 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("clone_cycle", { source_cycle_id: cycleId, cycle_name: name }));
   } else if (action === "SET_APPLICATION_STATUS") {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
+  } else if (action === "ADVANCE_SPEED_DATING") {
+    const applicationIds = Array.isArray(body.applicationIds)
+      ? body.applicationIds.filter((value): value is string => typeof value === "string" && value.length > 0)
+      : [];
+    if (applicationIds.length === 0 || applicationIds.length > 200 || new Set(applicationIds).size !== applicationIds.length) {
+      return NextResponse.json({ error: "Select between 1 and 200 distinct applicants" }, { status: 400 });
+    }
+    ({ data, error } = await (supabase.rpc as unknown as (
+      name: string,
+      args: Record<string, unknown>,
+    ) => PromiseLike<{ data: unknown; error: { code?: string; message: string } | null }>)("advance_to_speed_dating", {
+      target_cycle_id: cycleId,
+      target_application_ids: applicationIds,
+    }));
   } else if (action === "CREATE_SLOT") {
     const startsAt = parseOffsetDateTime(body.startsAt);
     const endsAt = parseOffsetDateTime(body.endsAt);

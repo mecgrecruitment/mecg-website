@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test",
+    "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test 'src/**/*.test.ts' 'src/**/*.test.js' 'scripts/**/*.test.mjs' 'scripts/**/*.test.js'",
     "test:e2e": "playwright test",
     "test:e2e:clerk": "CLERK_E2E_ENABLED=1 playwright test --project=authenticated-clerk",
     "verify:backend": "node scripts/verify-backend.mjs",

@@ -9,10 +9,17 @@ import {
   saveApplicationDraftRecovery,
 } from "@/lib/application-draft-recovery";
 import { uploadResumeFile } from "@/lib/resume-upload";
-import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, countWords, type ApplicationDraft } from "@/lib/workflow";
+import { CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, countWords } from "@/lib/workflow";
+import {
+  clearApplicationStepRecovery,
+  loadApplicationStepRecovery,
+  saveApplicationStepRecovery,
+  type ApplicationServerDraft,
+  type ApplicationStep,
+} from "./application-server-draft";
 
 type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[]; maxWords: number | null };
-type Step = "details" | "responses" | "materials" | "review";
+type Step = ApplicationStep;
 type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; label: string } | { kind: "error"; message: string };
 type UploadState =
   | { kind: "idle" }
@@ -68,10 +75,10 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   cycleId: string | null;
   cycleName: string | null;
   questions: IntakeQuestion[];
-  initialDraft: ApplicationDraft | null;
+  initialDraft: ApplicationServerDraft | null;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("details");
+  const [step, setStep] = useState<Step>(initialDraft?.currentStep ?? "details");
   const [stepDirection, setStepDirection] = useState<"forward" | "back">("forward");
   const [name, setName] = useState(initialDraft?.name || initialName);
   const [preferredName, setPreferredName] = useState(initialDraft?.preferredName ?? "");
@@ -104,7 +111,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   const stepChangeRequested = useRef(false);
   const recoveryInitialized = useRef(false);
 
-  const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath]);
+  const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, currentStep: step, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath, step]);
   const recoveryScope = useMemo(() => cycleId ? createApplicationDraftRecoveryScope({
     userIdentity: userId,
     cycleIdentity: cycleId,
@@ -128,7 +135,6 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
           throw new Error("We could not save your application. Please try again.");
         }
         if (sequence === saveSequence.current) {
-          clearApplicationDraftRecovery(window.sessionStorage);
           setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
           setDraftDirty(false);
         }
@@ -147,6 +153,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   function markApplicationEdited() {
     saveSequence.current += 1;
     setDraftDirty(true);
+    setSaveState({ kind: "idle" });
     if (consent) {
       setConsent(false);
       setConsentNotice("Your consent was cleared because the application changed. Review the update, then check the box again.");
@@ -163,7 +170,12 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       recoveryInitialized.current = true;
       return;
     }
+    if (initialDraft) {
+      recoveryInitialized.current = true;
+      return;
+    }
     const recovered = loadApplicationDraftRecovery(window.sessionStorage, recoveryScope);
+    const recoveredStep = loadApplicationStepRecovery(window.sessionStorage, recoveryScope);
     recoveryInitialized.current = true;
     if (!recovered) return;
     const restoreTimer = window.setTimeout(() => {
@@ -181,15 +193,21 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         const value = recovered.answers[question.key] ?? "";
         return [question.key, question.inputType === "select" && value && !question.options.includes(value) ? "" : value];
       })));
+      setStep(recoveredStep ?? "details");
       setDraftDirty(true);
     }, 0);
     return () => window.clearTimeout(restoreTimer);
-  }, [questions, recoveryScope]);
+  }, [initialDraft, questions, recoveryScope]);
 
   useEffect(() => {
     if (!cycleOpen || !draftDirty || !recoveryInitialized.current || !recoveryScope) return;
     saveApplicationDraftRecovery(window.sessionStorage, recoveryScope, recoveryDraft);
   }, [cycleOpen, draftDirty, recoveryDraft, recoveryScope]);
+
+  useEffect(() => {
+    if (!cycleOpen || !recoveryInitialized.current || !recoveryScope) return;
+    saveApplicationStepRecovery(window.sessionStorage, recoveryScope, step);
+  }, [cycleOpen, recoveryScope, step]);
 
   useEffect(() => {
     if (!cycleOpen) return;
@@ -200,7 +218,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     autosaveTimer.current = window.setTimeout(() => {
       autosaveTimer.current = null;
       void saveDraft(draftPayload);
-    }, 1200);
+    }, 700);
     return () => {
       if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
     };
@@ -231,6 +249,9 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     if (next === step) return;
     setStepDirection(STEPS.findIndex((item) => item.id === next) > STEPS.findIndex((item) => item.id === step) ? "forward" : "back");
     stepChangeRequested.current = true;
+    saveSequence.current += 1;
+    setDraftDirty(true);
+    setSaveState((current) => current.kind === "error" ? current : { kind: "idle" });
     setStep(next);
   }
 
@@ -288,7 +309,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     // draft row is a convenience, not a prerequisite for submitting; sessionStorage recovery
     // covers a reload. The save-error panel (role="alert") still reports the failure, and
     // focus stays with the new step instead of jumping into the sidebar.
-    await saveDraft(draftPayload);
+    await saveDraft({ ...draftPayload, currentStep: next });
     changeStep(next);
   }
 
@@ -304,6 +325,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         throw new Error(body?.error ?? "The application could not be submitted.");
       }
       clearApplicationDraftRecovery(window.sessionStorage);
+      clearApplicationStepRecovery(window.sessionStorage);
       router.replace("/applicant?submitted=1");
       router.refresh();
     } catch (error) {
@@ -342,7 +364,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
             {saveState.kind === "saving" && <p aria-hidden="true">Saving changes...</p>}
             {saveState.kind === "saved" && <p className="tabular-nums" role="status" aria-live="polite">Saved at {saveState.label}</p>}
             {saveState.kind === "error" && <div id="draft-save-error" className="text-red-200" role="alert" tabIndex={-1}><p>{saveState.message}</p><button type="button" onClick={() => void saveDraft(draftPayload, true)} disabled={saving} className="mt-2 min-h-11 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
-            {saveState.kind === "idle" && <p>Your answers save automatically.</p>}
+            {saveState.kind === "idle" && <p>{draftDirty ? "Unsaved changes. Saving shortly..." : "Your answers save automatically."}</p>}
           </div>
         </div>
         <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/65">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>

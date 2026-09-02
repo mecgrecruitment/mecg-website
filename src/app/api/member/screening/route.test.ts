@@ -28,3 +28,29 @@ test("POST /api/member/screening rejects payloads over the 128 KiB cap before pa
   assert.equal(res.status, 413);
   assert.equal((await res.json()).error, "Payload is too large");
 });
+
+test("POST /api/member/screening returns the next private assignment after submit", async (t) => {
+  const calls: Array<{ name: string; args?: Record<string, unknown> }> = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: { createClient: async () => ({
+      rpc: async (name: string, args?: Record<string, unknown>) => {
+        calls.push({ name, args });
+        if (name === "submit_screening_review") return { data: 82, error: null };
+        if (name === "next_screening_assignment") return { data: "assignment-2", error: null };
+        throw new Error(`unexpected RPC ${name}`);
+      },
+    }) },
+  });
+  const { POST } = await importRoute("submit-next");
+  const res = await POST(postRequest({
+    assignmentId: "assignment-1",
+    action: "SUBMIT",
+    ratings: [{ criterionId: "motivation", score: 4, note: "Evidence" }],
+    evidence: "Specific evidence from the written response.",
+    recommendation: "ADVANCE",
+  }));
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).nextAssignmentId, "assignment-2");
+  assert.deepEqual(calls.map((call) => call.name), ["submit_screening_review", "next_screening_assignment"]);
+});

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
@@ -10,41 +10,104 @@ import StatTile from "@/components/stat-tile";
 import StatusPill from "@/components/status-pill";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
-import RoundAssignmentForm from "./round-assignment-form";
+import { RoundControls } from "./rush-controls";
+import { memberAccountsFor } from "./member-accounts";
+import RubricEditor, { type Criterion, type RoundRubric } from "./rounds/rubric-editor";
+import GroupForms from "./groups/group-forms";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
 
-export default async function RoundBoardPage({ kind, title, nav }: { kind: string; title: string; nav: string }) {
+function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; name: string; status: string }): RoundRubric | null {
+  if (!Array.isArray(value)) return null;
+  const entry = value.find((item) => item && typeof item === "object" && !Array.isArray(item) && (item as Record<string, unknown>).roundId === round.id);
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+  const row = entry as Record<string, unknown>;
+  const criteria = Array.isArray(row.criteria)
+    ? row.criteria.flatMap((item): Criterion[] => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+      const criterion = item as Record<string, unknown>;
+      if (typeof criterion.key !== "string" || typeof criterion.name !== "string") return [];
+      return [{
+        key: criterion.key,
+        name: criterion.name,
+        description: typeof criterion.description === "string" ? criterion.description : "",
+        weight: typeof criterion.weight === "number" ? criterion.weight : 1,
+        required: criterion.required === true,
+      }];
+    })
+    : [];
+  return {
+    cycleId,
+    roundId: round.id,
+    roundName: round.name,
+    roundStatus: round.status,
+    rubricVersion: typeof row.rubricVersion === "number" ? row.rubricVersion : null,
+    criteria,
+  };
+}
+
+export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
+  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS")
+    ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS")
+    ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
+  const canManage = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const supabase = await createClient();
-  const { data: cycle, error: cycleError } = await supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single();
-  if (cycleError) throw cycleError;
-  if (!cycle) redirect("/member");
-  const [roundResult, applicationsResult, membersResult, groupMembersResult] = await Promise.all([
+  const [cycleResult, roundResult] = await Promise.all([
+    supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase
       .from("rounds")
-      .select("id,name,status,kind,evaluation_assignments(id,status,evaluator_id,applications(id,pnms(name)),evaluator:profiles(display_name))")
+      .select("id,name,status,kind,weight,evaluation_assignments(id,status,evaluator_id,applications(id,pnms(name)),evaluator:profiles(display_name),evaluations(id))")
       .eq("cycle_id", cycleId)
-      .eq("kind", kind)
+      .eq("id", roundId)
       .maybeSingle(),
+  ]);
+  const { data: cycle, error: cycleError } = cycleResult;
+  if (cycleError) throw cycleError;
+  if (roundResult.error) throw roundResult.error;
+  if (!cycle) redirect("/member");
+  const round = roundResult.data;
+  if (!round) notFound();
+  const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
+  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),
-    supabase.from("memberships").select("user_id,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
-    kind === "GROUP_CASE"
-      ? supabase.from("case_group_members").select("application_id,case_groups!inner(cycle_id,name)").eq("case_groups.cycle_id", cycleId)
+    supabase.from("memberships").select("user_id,role,active,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
+    round.kind === "GROUP_CASE"
+      ? supabase.from("case_group_members").select("group_id,application_id,case_groups!inner(cycle_id,name)").eq("case_groups.cycle_id", cycleId)
+      : Promise.resolve({ data: [], error: null }),
+    canManageGroups
+      ? supabase.from("case_groups").select("id,name,prompt").eq("cycle_id", cycleId)
+      : Promise.resolve({ data: [], error: null }),
+    canOperate
+      ? supabase.rpc("cycle_rubrics", { target_cycle_id: cycleId })
       : Promise.resolve({ data: [], error: null }),
   ]);
-  for (const result of [roundResult, applicationsResult, membersResult, groupMembersResult]) if (result.error) throw result.error;
-  const round = roundResult.data;
-  const canManage = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
+  for (const result of [applicationsResult, membersResult, groupMembersResult, groupsResult]) if (result.error) throw result.error;
+  if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
+  const rubric = parseRoundRubric(rubricsResult.data, cycleId, round);
   const assignments = canOperate ? round?.evaluation_assignments ?? [] : [];
-  const activeApplications = (applicationsResult.data ?? [])
+  const allApplications = (applicationsResult.data ?? [])
+    .map((application) => ({ id: application.id, status: application.status, name: application.pnms.name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const activeApplications = allApplications
     .filter((application) => !["DRAFT", "WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status))
-    .sort((a, b) => a.pnms.name.localeCompare(b.pnms.name));
-  const evaluatorOptions = Array.from(new Map((membersResult.data ?? []).map((member) => [member.user_id, member.profiles.display_name])).entries())
-    .map(([id, label]) => ({ id, label }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .map((application) => ({ id: application.id, label: application.name }));
+  const accounts = memberAccountsFor(membersResult.data ?? []);
+  const memberNameById = new Map(accounts.map((account) => [account.id, account.name]));
+  const untouchedAssignments = assignments
+    .filter((assignment) => assignment.evaluations.length === 0)
+    .map((assignment) => {
+      const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
+      const person = application?.pnms && (Array.isArray(application.pnms) ? application.pnms[0] : application.pnms);
+      return {
+        id: assignment.id,
+        label: round.name,
+        evaluatorId: assignment.evaluator_id,
+        evaluatorName: memberNameById.get(assignment.evaluator_id) ?? "Unknown evaluator",
+        applicationName: person?.name ?? "Applicant",
+      };
+    });
   const groupByApplication = new Map((groupMembersResult.data ?? []).map((member) => [
     member.application_id,
     Array.isArray(member.case_groups) ? member.case_groups[0]?.name : member.case_groups.name,
@@ -73,28 +136,30 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
 
   return (
     <main className="workspace-stack mx-auto flex w-full max-w-7xl flex-col">
-      <WorkspaceHeader eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`} title={title} />
-      <WorkspaceNav user={user} cycleId={cycleId} current={nav} />
-      {!round ? (
-        <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
-          <p className="text-[13px] text-mecg-navy/60">This cycle does not have a {title} round yet.</p>
-        </div>
-      ) : (
-        <section className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-            <p className="text-pretty text-sm leading-6 text-mecg-navy/55">
-              Round status: {roundStatusLabel(round.status)}. {canManage ? "Use Interview rounds to publish, activate, and freeze it." : null}
+      <WorkspaceHeader
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
+        title={round.name}
+        description="Manage this round's readiness, assignments, scoring guide, and results in one place."
+        action={canOperate
+          ? <Link href="/admin/rounds" className="button-secondary text-sm">All interviews</Link>
+          : <Link href="/admin" className="button-secondary text-sm">Overview</Link>}
+      />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin/rounds" />
+      <section className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+          <p className="text-pretty text-sm leading-6 text-mecg-navy/55">
+            Round status: {roundStatusLabel(round.status)}.
+          </p>
+          {canOperate ? (
+            <p className="tabular text-xs text-mecg-navy/60">
+              {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
             </p>
-            {canOperate ? (
-              <p className="tabular text-xs text-mecg-navy/60">
-                {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
-              </p>
-            ) : null}
-          </div>
-          {canOperate && (
-            <>
-              <SectionLabel>Round workload</SectionLabel>
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+          ) : null}
+        </div>
+        {canOperate && (
+          <>
+            <SectionLabel>Round workload</SectionLabel>
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
                 {[
                   [String(activeApplications.length), "applicants"],
                   [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
@@ -105,9 +170,9 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                     <StatTile value={value} label={label} tone="dark" />
                   </div>
                 ))}
-              </div>
-              {(uncoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
-                <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
+            </div>
+            {(uncoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
+              <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {uncoveredApplicants.length > 0 && (
                     <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
                       <p className="text-[13px] font-semibold text-mecg-navy/60">Needs an evaluator · {uncoveredApplicants.length}</p>
@@ -118,7 +183,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                             href={`/admin/applications/${application.id}`}
                             className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
                           >
-                            {application.pnms.name}
+                            {application.label}
                           </Link>
                         ))}
                       </div>
@@ -137,26 +202,50 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                       </div>
                     </div>
                   )}
-                </div>
-              )}
-            </>
-          )}
-          {canOperate && ["DRAFT", "PUBLISHED"].includes(round.status) && (
-            <RoundAssignmentForm
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {canOperate && (
+        <RoundControls
+          cycleId={cycleId}
+          rounds={[{ id: round.id, label: round.name, status: round.status }]}
+          memberAccounts={accounts}
+          applications={activeApplications}
+          assignments={untouchedAssignments}
+        />
+      )}
+
+      {canManageGroups && (
+        <section>
+          <SectionLabel>Group setup</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Create the case teams, set their prompt, and place applicants before the interview begins.</p>
+          <div className="mt-4">
+            <GroupForms
               cycleId={cycleId}
-              roundId={round.id}
-              applicants={activeApplications.map((application) => ({ id: application.id, label: application.pnms.name }))}
-              evaluators={evaluatorOptions}
+              groups={groupsResult.data ?? []}
+              applications={allApplications.map((application) => ({ id: application.id, name: application.name }))}
+              members={(groupMembersResult.data ?? []).map((member) => ({ group_id: member.group_id, application_id: member.application_id }))}
             />
-          )}
-          {!canOperate ? null : assignments.length === 0 ? (
+          </div>
+        </section>
+      )}
+
+      {canOperate && rubric && <RubricEditor round={rubric} />}
+
+      {canOperate && (
+        <section>
+          <SectionLabel>Results and assignments</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Track who is assigned and whether each evaluation is still open or submitted.</p>
+          {assignments.length === 0 ? (
             <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
               <p className="text-[13px] text-mecg-navy/60">No assignments yet</p>
             </div>
           ) : (
             <>
-              <SectionLabel>Assignments</SectionLabel>
-              <div className="flex flex-col gap-3 md:hidden">
+              <div className="mt-4 flex flex-col gap-3 md:hidden">
                 {assignments.map((assignment) => {
                   const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
                   const person = application?.pnms && (Array.isArray(application.pnms) ? application.pnms[0] : application.pnms);
@@ -181,7 +270,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                           <dt className="text-[13px] text-mecg-navy/60">Assignment</dt>
                           <dd className="mt-1 text-mecg-navy/70">{assignmentStatusLabel(assignment.status)}</dd>
                         </div>
-                        {kind === "GROUP_CASE" && (
+                        {round.kind === "GROUP_CASE" && (
                           <div className="col-span-2">
                             <dt className="text-[13px] text-mecg-navy/60">Group interview</dt>
                             <dd className="mt-1 text-mecg-navy/70">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</dd>
@@ -192,13 +281,13 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                   );
                 })}
               </div>
-            <div className="scroll-cue -mx-4 hidden overflow-x-auto px-4 pb-1 md:block sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${title} assignments`}>
+            <div className="scroll-cue -mx-4 mt-4 hidden overflow-x-auto px-4 pb-1 md:block sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${round.name} assignments`}>
               <div className="min-w-[42rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-mecg-navy/10">
                   <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Applicant</th>
-                  {kind === "GROUP_CASE" && <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Group interview</th>}
+                  {round.kind === "GROUP_CASE" && <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Group interview</th>}
                   <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Evaluator</th>
                   <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Assignment</th>
                   <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Evaluation</th>
@@ -220,7 +309,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
                           <span className="text-[13px] font-semibold text-mecg-navy">{applicantName}</span>
                         </div>
                       </td>
-                      {kind === "GROUP_CASE" && <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
+                      {round.kind === "GROUP_CASE" && <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{assignmentStatusLabel(assignment.status)}</td>
                       <td className="px-4 py-3">

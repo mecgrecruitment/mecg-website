@@ -7,108 +7,133 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
-import { RoundControls } from "../rush-controls";
-import { memberAccountsFor } from "../member-accounts";
-import RubricEditor, { type Criterion, type RoundRubric } from "./rubric-editor";
-import { cycleStatusLabel } from "@/lib/labels";
+import StatusPill from "@/components/status-pill";
+import { formatEasternDateTime } from "@/lib/date-time";
+import { cycleStatusLabel, roundStatusLabel, statusLabel } from "@/lib/labels";
 
-export const metadata: Metadata = { title: "Rounds" };
+export const metadata: Metadata = { title: "Interviews" };
 
-// cycle_rubrics returns jsonb. A malformed row must not render as an empty
-// criteria list, because saving that would wipe a working rubric.
-function parseRubrics(value: unknown, cycleId: string): RoundRubric[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
-    const row = entry as Record<string, unknown>;
-    if (typeof row.roundId !== "string" || typeof row.roundName !== "string") return [];
-    const criteria = Array.isArray(row.criteria)
-      ? row.criteria.flatMap((item): Criterion[] => {
-        if (!item || typeof item !== "object" || Array.isArray(item)) return [];
-        const criterion = item as Record<string, unknown>;
-        if (typeof criterion.key !== "string" || typeof criterion.name !== "string") return [];
-        return [{
-          key: criterion.key,
-          name: criterion.name,
-          description: typeof criterion.description === "string" ? criterion.description : "",
-          weight: typeof criterion.weight === "number" ? criterion.weight : 1,
-          required: criterion.required === true,
-        }];
-      })
-      : [];
-    return [{
-      cycleId,
-      roundId: row.roundId,
-      roundName: row.roundName,
-      roundStatus: typeof row.roundStatus === "string" ? row.roundStatus : "DRAFT",
-      rubricVersion: typeof row.rubricVersion === "number" ? row.rubricVersion : null,
-      criteria,
-    }];
-  });
+function roundKindLabel(kind: string) {
+  if (kind === "SPEED_DATING") return "Quick chats";
+  if (kind === "GROUP_CASE") return "Group interview";
+  return statusLabel(kind);
 }
-
-const ROUND_BOARDS: ReadonlyArray<readonly [kind: string, href: string, label: string]> = [
-  ["SPEED_DATING", "/admin/speed-dating", "Quick chats board"],
-  ["GROUP_CASE", "/admin/group-case", "Group interview board"],
-];
 
 export default async function RoundsPage() {
   const user = await requireAdmin();
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
+  const canExport = hasPermission(user.memberships, cycleId, "EXPORT");
   const supabase = await createClient();
-  const [cycleResult, roundsResult, membersResult, appsResult, rubricsResult, assignmentsResult] = await Promise.all([
+  const [cycleResult, roundsResult, appsResult, assignmentsResult, eventsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
-    supabase.from("rounds").select("id,name,kind,status").eq("cycle_id", cycleId).order("name"),
-    supabase.from("memberships").select("user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
-    supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId).neq("status", "DRAFT"),
-    supabase.rpc("cycle_rubrics", { target_cycle_id: cycleId }),
-    supabase.from("evaluation_assignments").select("id,evaluator_id,status,rounds!inner(id,name,cycle_id),applications!inner(id,pnms!inner(name)),evaluations(id)").eq("rounds.cycle_id", cycleId).eq("status", "ASSIGNED"),
+    supabase.from("rounds").select("id,name,kind,status,weight").eq("cycle_id", cycleId).order("name"),
+    supabase.from("applications").select("id,status").eq("cycle_id", cycleId).neq("status", "DRAFT"),
+    supabase
+      .from("evaluation_assignments")
+      .select("id,round_id,application_id,status,rounds!inner(cycle_id)")
+      .eq("rounds.cycle_id", cycleId),
+    supabase.from("events").select("id,name,status,starts_at,location,event_slots(capacity,slot_rsvps(id))").eq("cycle_id", cycleId).order("starts_at"),
   ]);
-  for (const result of [cycleResult, roundsResult, membersResult, appsResult, assignmentsResult]) if (result.error) throw result.error;
-  if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
-  const roundRubrics = parseRubrics(rubricsResult.data, cycleId);
+  for (const result of [cycleResult, roundsResult, appsResult, assignmentsResult, eventsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
   if (!cycle) redirect("/admin");
 
-  const rounds = (roundsResult.data ?? []).map((round) => ({ id: round.id, label: round.name, status: round.status, kind: round.kind }));
-  const applications = (appsResult.data ?? [])
-    .filter((application) => !["WITHDRAWN", "REJECTED"].includes(application.status))
-    .map((application) => ({ id: application.id, label: application.pnms.name }))
-    .sort((a, b) => a.label.localeCompare(b.label));
-  const accounts = memberAccountsFor(membersResult.data ?? []);
-  const memberNameById = new Map(accounts.map((account) => [account.id, account.name]));
-  const assignments = (assignmentsResult.data ?? []).filter((assignment) => assignment.evaluations.length === 0).map((assignment) => ({
-    id: assignment.id,
-    label: assignment.rounds.name,
-    evaluatorId: assignment.evaluator_id,
-    evaluatorName: memberNameById.get(assignment.evaluator_id) ?? "Unknown evaluator",
-    applicationName: assignment.applications.pnms.name,
-  }));
+  const activeApplications = (appsResult.data ?? []).filter((application) =>
+    !["WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status));
+  const activeApplicationIds = new Set(activeApplications.map((application) => application.id));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
-        title="Rounds"
-        description="Open and freeze evaluation rounds, and assign evaluators to applicants."
+        title="Interviews"
+        description="See every round's readiness, then open one workspace to manage its scoring guide, groups, assignments, and results."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/rounds" />
-      <RoundControls
-        cycleId={cycleId}
-        rounds={rounds}
-        memberAccounts={accounts}
-        applications={applications}
-        assignments={assignments}
-      />
-      {roundRubrics.map((round) => <RubricEditor key={round.roundId} round={round} />)}
+
       <section>
-        <p className="text-[13px] font-semibold text-mecg-navy/50">Coverage</p>
-        <p className="mt-1 text-sm text-mecg-navy/55">Per-applicant assignment and submission state lives on each round board.</p>
-        <div className="mt-3 flex flex-wrap gap-3">
-          {ROUND_BOARDS.filter(([kind]) => rounds.some((round) => round.kind === kind)).map(([kind, href, label]) => (
-            <Link key={kind} href={href} className="button-secondary text-sm">{label}</Link>
-          ))}
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview rounds</h2>
+            <p className="mt-1 text-sm text-mecg-navy/55">Open a round to resolve coverage gaps and manage its evaluation workflow.</p>
+          </div>
+          <p className="tabular text-xs font-semibold text-mecg-navy/55">{activeApplications.length} active applicants</p>
+        </div>
+
+        <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+          {(roundsResult.data ?? []).map((round) => {
+            const assignments = (assignmentsResult.data ?? []).filter((assignment) =>
+              assignment.round_id === round.id && activeApplicationIds.has(assignment.application_id));
+            const submitted = assignments.filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
+            const assignmentCounts = new Map<string, number>();
+            for (const assignment of assignments) {
+              assignmentCounts.set(assignment.application_id, (assignmentCounts.get(assignment.application_id) ?? 0) + 1);
+            }
+            const covered = activeApplications.filter((application) => (assignmentCounts.get(application.id) ?? 0) >= 2).length;
+            return (
+              <Link
+                key={round.id}
+                href={`/admin/rounds/${round.id}`}
+                className="group grid gap-3 py-4 transition-colors hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{round.name}</h3>
+                    <StatusPill tone={round.status === "ACTIVE" ? "navy" : "neutral"}>{roundStatusLabel(round.status)}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-xs text-mecg-navy/55">{roundKindLabel(round.kind)} · weight {round.weight}</p>
+                </div>
+                <dl className="grid grid-cols-2 gap-x-6 text-xs sm:text-right">
+                  <div>
+                    <dt className="text-mecg-navy/50">Coverage</dt>
+                    <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{covered}/{activeApplications.length} twice</dd>
+                  </div>
+                  <div>
+                    <dt className="text-mecg-navy/50">Forms</dt>
+                    <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{submitted}/{assignments.length} submitted</dd>
+                  </div>
+                </dl>
+                <span className="text-sm font-semibold text-mecg-blue">Open →</span>
+              </Link>
+            );
+          })}
+          {!roundsResult.data?.length && (
+            <p className="py-5 text-sm text-mecg-navy/55">No interview rounds are configured for this cycle.</p>
+          )}
+        </div>
+      </section>
+
+      <section>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview events</h2>
+            <p className="mt-1 text-sm text-mecg-navy/55">Scheduling, capacity, attendance, and live operations now live with interviews.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {canExport && <a href={`/api/admin/export?cycleId=${cycleId}`} className="button-secondary text-sm">Export attendance</a>}
+            <Link href="/admin/events/new" className="button-primary text-sm">New event</Link>
+          </div>
+        </div>
+        <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+          {(eventsResult.data ?? []).map((event) => {
+            const capacity = event.event_slots.reduce((sum, slot) => sum + slot.capacity, 0);
+            const reservations = event.event_slots.reduce((sum, slot) => sum + slot.slot_rsvps.length, 0);
+            return (
+              <Link key={event.id} href={`/admin/events/${event.id}`} className="group grid gap-2 py-4 hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{event.name}</h3>
+                    <StatusPill tone={event.status === "PUBLISHED" ? "navy" : "neutral"}>{statusLabel(event.status)}</StatusPill>
+                  </div>
+                  <p className="mt-1 text-xs text-mecg-navy/55">{formatEasternDateTime(event.starts_at)}{event.location ? ` · ${event.location}` : ""}</p>
+                </div>
+                <p className="tabular text-xs font-semibold text-mecg-navy/60">{capacity ? `${reservations}/${capacity} booked` : "No slots"}</p>
+                <span className="text-sm font-semibold text-mecg-blue">Open →</span>
+              </Link>
+            );
+          })}
+          {!eventsResult.data?.length && <p className="py-5 text-sm text-mecg-navy/55">No interview events are scheduled.</p>}
         </div>
       </section>
     </main>

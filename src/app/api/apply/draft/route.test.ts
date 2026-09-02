@@ -12,6 +12,7 @@ const DRAFT_BODY = {
   college: "Engineering",
   uniqname: "adal",
   answers: { why_mecg: "Projects" },
+  currentStep: "responses",
 };
 
 type FakeUser = { id: string; email: string; name: string; active: boolean; memberships: [] };
@@ -44,6 +45,7 @@ function fakeDatabase(actorId: () => string, profiles: Record<string, string | n
   const client = {
     rpc: async (name: string, args?: Record<string, unknown>): Promise<RpcResponse> => {
       calls.push({ name, args });
+      if (name === "application_draft") return { data: DRAFT_BODY, error: null };
       if (name !== "save_application_draft") throw new Error(`unexpected rpc call: ${name}`);
       // scripts/check-sql.py:91-95 compares RPC names only, never argument
       // names, so a call with invented arguments passes check:sql, tsc and
@@ -52,6 +54,7 @@ function fakeDatabase(actorId: () => string, profiles: Record<string, string | n
       // rush.save_application_draft(payload jsonb) in
       // supabase/migrations/20260830100000_harden_applicant_workflow.sql:336.
       assert.deepEqual(Object.keys(args ?? {}), ["payload"], "the draft RPC takes the payload only");
+      assert.equal((args?.payload as { currentStep?: string })?.currentStep, "responses", "the exact form step is saved");
       const owner = actorId();
       const normalized = (profiles[owner] ?? "").trim().toLowerCase();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalized)) {
@@ -88,6 +91,25 @@ test("POST /api/apply/draft returns 401 when unauthenticated", async (t) => {
   const res = await POST(postRequest(DRAFT_BODY));
   assert.equal(res.status, 401);
   assert.equal((await res.json()).error, "Sign in first");
+});
+
+test("POST /api/apply/draft rejects an unknown form step before persistence", async (t) => {
+  const { calls, client } = fakeDatabase(() => "user-invalid", { "user-invalid": "ada@umich.edu" });
+  mockCommon(t, () => fakeUser("user-invalid"), client);
+  const { POST } = await importRoute("invalid-step");
+  const res = await POST(postRequest({ ...DRAFT_BODY, currentStep: "confirmation" }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(calls, []);
+});
+
+test("GET /api/apply/draft loads only through the caller-scoped RPC", async (t) => {
+  const { calls, client } = fakeDatabase(() => "user-get", { "user-get": "ada@umich.edu" });
+  mockCommon(t, () => fakeUser("user-get"), client);
+  const { GET } = await importRoute("get-own-draft");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).draft.currentStep, "responses");
+  assert.deepEqual(calls, [{ name: "application_draft", args: undefined }]);
 });
 
 test("POST /api/apply/draft saves drafts for two different applicants without a contact collision", async (t) => {

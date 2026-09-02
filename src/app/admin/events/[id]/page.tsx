@@ -13,6 +13,7 @@ import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import EventControls from "./event-controls";
 import AssistedCheckinForm from "./assisted-checkin-form";
+import { summarizeEventObservations } from "./observation-summary";
 import { formatEasternDateTime } from "@/lib/date-time";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
@@ -38,34 +39,34 @@ export default async function EventDetailPage({ params, searchParams }: { params
     supabase.from("event_slots").select("id,starts_at,ends_at,capacity").eq("event_id", id),
     supabase.from("checkins").select("pnm_id,checked_in_at,pnms(name)").eq("event_id", id),
     supabase.from("member_checkins").select("id", { count: "exact", head: true }).eq("event_id", id),
-    supabase.from("event_impressions").select("application_id,score").eq("event_id", id),
+    supabase.from("event_impressions").select("application_id,tags,note").eq("event_id", id),
     supabase.from("applications").select("id,pnm_id,status").eq("cycle_id", event.cycle_id),
   ]);
   if (slotsError) console.error("event slot list failed", slotsError);
   if (checkinsError) console.error("event checkin list failed", checkinsError);
   if (memberCheckinsError) console.error("event member checkin count failed", memberCheckinsError);
-  if (impressionsError) console.error("event impression list failed", impressionsError);
+  if (impressionsError) console.error("event observation list failed", impressionsError);
   if (applicationsError) console.error("event application list failed", applicationsError);
   const applicationByPnm = new Map((applications ?? []).filter((application) => application.status !== "DRAFT" && application.status !== "WITHDRAWN").map((application) => [application.pnm_id, application]));
-  const scoresByApplication = new Map<string, number[]>();
-  for (const impression of impressions ?? []) {
-    const scores = scoresByApplication.get(impression.application_id) ?? [];
-    scores.push(impression.score);
-    scoresByApplication.set(impression.application_id, scores);
-  }
+  const observationsByApplication = summarizeEventObservations((impressions ?? []).map((observation) => ({
+    applicationId: observation.application_id,
+    tags: observation.tags,
+    note: observation.note,
+  })));
   const coverage = (checkins ?? [])
     .flatMap((checkin) => {
       const application = applicationByPnm.get(checkin.pnm_id);
       if (!application) return [];
-      const scores = scoresByApplication.get(application.id) ?? [];
+      const observations = observationsByApplication.get(application.id);
       return [{
         applicationId: application.id,
         name: checkin.pnms?.name ?? "Unknown applicant",
-        impressionCount: scores.length,
-        averageScore: scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : null,
+        observationCount: observations?.count ?? 0,
+        tags: observations?.topTags ?? [],
+        notes: observations?.notes ?? [],
       }];
     })
-    .sort((a, b) => a.impressionCount - b.impressionCount);
+    .sort((a, b) => a.name.localeCompare(b.name));
   const headerList = await headers();
   const host = headerList.get("host");
   const protocol = host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https";
@@ -100,7 +101,8 @@ export default async function EventDetailPage({ params, searchParams }: { params
       <AssistedCheckinForm eventId={event.id} locked={event.status === "CLOSED" || event.status === "CANCELLED"} />
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="text-[13px] font-semibold text-mecg-navy/60">Member grading</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">Member observations</p>
+        <p className="mt-2 text-sm leading-6 text-mecg-navy/55">Tags and anonymous notes provide event context. They do not affect applicant scores, readiness, or rank.</p>
         <p className="mt-3 text-sm">
           Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
         </p>
@@ -119,13 +121,21 @@ export default async function EventDetailPage({ params, searchParams }: { params
         </p>
         <ul className="mt-3 flex flex-col gap-1.5">
           {coverage.map((entry) => (
-            <li key={entry.applicationId} className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm ${entry.impressionCount === 0 ? "bg-mecg-orange/[0.1] text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.3)]" : "text-mecg-navy/70"}`}>
-              <span className="font-medium">{entry.name}</span>
-              <span>
-                {entry.impressionCount === 0
-                  ? "No impressions yet"
-                  : `${entry.impressionCount} impression${entry.impressionCount === 1 ? "" : "s"} · avg ${entry.averageScore?.toFixed(1)}`}
-              </span>
+            <li key={entry.applicationId} className="border-t border-mecg-navy/[0.08] py-3 text-sm first:border-t-0">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium text-mecg-navy">{entry.name}</span>
+                <span className="tabular text-mecg-navy/55">{entry.observationCount} observation{entry.observationCount === 1 ? "" : "s"}</span>
+              </div>
+              {entry.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {entry.tags.map((tag) => <span key={tag} className="rounded-full bg-mecg-navy/[0.05] px-2.5 py-1 text-xs text-mecg-navy/60">{tag}</span>)}
+                </div>
+              )}
+              {entry.notes.length > 0 && (
+                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-mecg-navy/60">
+                  {entry.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
+                </ul>
+              )}
             </li>
           ))}
         </ul>

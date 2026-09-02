@@ -58,5 +58,16 @@ export async function POST(request: NextRequest) {
     const { body: errorBody, status } = mapRpcError(result.error);
     return NextResponse.json(errorBody, { status });
   }
-  return NextResponse.json({ data: result.data });
+  let nextAssignmentId: string | null = null;
+  if (body.action === "SUBMIT") {
+    const next = await screeningRpc<unknown>(supabase, "next_screening_assignment", { target_assignment_id: assignmentId });
+    if (next.error) {
+      // The review is already locked. Failure to find the convenience link
+      // must not turn that successful mutation into an apparent failure.
+      console.error("next_screening_assignment failed", next.error);
+    } else if (typeof next.data === "string") {
+      nextAssignmentId = next.data;
+    }
+  }
+  return NextResponse.json({ data: result.data, nextAssignmentId });
 }

@@ -10,6 +10,10 @@ const BOARD = {
   ...OWNER, id: "board-1",
   memberships: [{ ...OWNER.memberships[0], id: "m2", role: "BOARD" }],
 };
+const COMMITTEE = {
+  ...OWNER, id: "committee-1",
+  memberships: [{ ...OWNER.memberships[0], id: "m3", role: "RECRUITMENT_COMMITTEE" }],
+};
 
 function request(body: unknown) {
   return new NextRequest("http://localhost/api/admin/rush", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -99,6 +103,35 @@ test("board can unassign an untouched evaluator assignment", async (t) => {
   const response = await POST(request({ action: "UNASSIGN", cycleId: "cycle-1", assignmentId: "assignment-1" }));
   assert.equal(response.status, 201);
   assert.equal(fake.calls[0]?.name, "unassign_evaluator");
+});
+
+test("board can atomically advance a distinct applicant cohort to Speed Dating", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("advance-speed-dating");
+  const response = await POST(request({
+    action: "ADVANCE_SPEED_DATING",
+    cycleId: "cycle-1",
+    applicationIds: ["application-1", "application-2"],
+  }));
+  assert.equal(response.status, 201);
+  assert.deepEqual(fake.calls, [{
+    name: "advance_to_speed_dating",
+    args: { target_cycle_id: "cycle-1", target_application_ids: ["application-1", "application-2"] },
+  }]);
+});
+
+test("committee cannot advance applicants", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => COMMITTEE } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("advance-speed-dating-forbidden");
+  const forbidden = await POST(request({ action: "ADVANCE_SPEED_DATING", cycleId: "cycle-1", applicationIds: ["application-1"] }));
+  assert.equal(forbidden.status, 403);
+  assert.equal(fake.calls.length, 0);
 });
 
 test("reassignment requires both assignment and replacement evaluator", async (t) => {

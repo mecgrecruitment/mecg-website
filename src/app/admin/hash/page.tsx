@@ -9,15 +9,16 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { hashOutcome } from "@/lib/hash-tally";
-import StatTile from "@/components/stat-tile";
+import { createAdminClient } from "@/lib/supabase/admin";
 import StatusPill from "@/components/status-pill";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, PreviewForm, ReleaseAllButton, ReleaseButton } from "../decision-form";
 import ApplyResultForm from "./apply-result-form";
+import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
 import { applicationStatusLabel, cycleStatusLabel, decisionOutcomeLabel, decisionStatusLabel, roundStatusLabel } from "@/lib/labels";
 
-export const metadata: Metadata = { title: "Hash" };
+export const metadata: Metadata = { title: "Decisions" };
 
 type HashTallyRow = {
   application_id: string;
@@ -124,7 +125,7 @@ export default async function HashBoard() {
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status,reason,communication_preview,decision_approvals(id)").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
-    supabase.from("event_impressions").select("application_id, score, tags, events!inner(cycle_id)").eq("events.cycle_id", cycleId),
+    supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),
     screeningRpc<HashTallyRow[]>(supabase, "hash_tally", { target_cycle_id: cycleId }),
     supabase.rpc("hash_notes", { target_cycle_id: cycleId }),
   ]);
@@ -132,15 +133,35 @@ export default async function HashBoard() {
   if (tallyResult.error) throw new Error(tallyResult.error.message);
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
-  const rounds = (roundsResult.data ?? []).flatMap((round) =>
-    ["SPEED_DATING", "GROUP_CASE"].includes(round.kind)
-      ? [{ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }]
-      : [],
-  );
+  const rounds = (roundsResult.data ?? [])
+    .filter((round) => round.weight > 0)
+    .map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
   const applications = (appsResult.data ?? [])
     .filter((application) => !["DRAFT", "WITHDRAWN"].includes(application.status))
     .map((application) => ({ ...application, displayName: panelOnly ? applicantCode(application.id) : application.pnms.name }))
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  // Readiness is deliberately checked through the service-only database
+  // function after the normal page authorization gate. The function returns
+  // one boolean and cannot expose evaluation or applicant identity data.
+  const admin = createAdminClient();
+  const canonicalReadinessEntries = await Promise.all(applications.map(async (application) => {
+    const result = await screeningRpc<boolean>(admin, "is_decision_ready", { target_application_id: application.id });
+    return [application.id, result.error || typeof result.data !== "boolean" ? undefined : result.data] as const;
+  }));
+  const canonicalReadinessByApplication = new Map(canonicalReadinessEntries);
+  // Managers can see that a recusal exists, but never who declared it or why.
+  // PANEL-only reviewers keep the same blind boundary as the applicant query.
+  const conflictCountsByApplication = new Map<string, number>();
+  if (!panelOnly && applications.length) {
+    const { data: conflicts, error: conflictsError } = await admin
+      .from("conflict_declarations")
+      .select("application_id")
+      .in("application_id", applications.map((application) => application.id));
+    if (conflictsError) throw conflictsError;
+    for (const conflict of conflicts ?? []) {
+      conflictCountsByApplication.set(conflict.application_id, (conflictCountsByApplication.get(conflict.application_id) ?? 0) + 1);
+    }
+  }
   const allDecisions = decisionsResult.data ?? [];
   const decisionByApplication = new Map<string, (typeof allDecisions)[number]>();
   for (const decision of allDecisions) {
@@ -157,249 +178,247 @@ export default async function HashBoard() {
   if (!panelOnly) {
     for (const row of notesResult.data ?? []) notesByApplication.set(row.application_id, [...(notesByApplication.get(row.application_id) ?? []), row.note]);
   }
-  const hashOpen = canPanel && cycle.status === "DECISION_LOCK" && rounds.length >= 2 && rounds.every((round) => ["FROZEN", "FINALIZED"].includes(round.status));
-  const impressionGroups = new Map<string, { total: number; count: number; tagCounts: Map<string, number> }>();
+  const cycleIssues = cycleReadinessIssues(cycle.status, rounds.map((round) => ({
+    id: round.id,
+    name: round.name,
+    status: round.status,
+    weight: round.weight,
+    lockedEvaluations: 0,
+  })));
+  const hashOpen = canPanel && cycleIssues.length === 0;
+  const impressionGroups = new Map<string, { count: number; tagCounts: Map<string, number>; notes: string[] }>();
   for (const impression of impressionsResult.data ?? []) {
-    const group = impressionGroups.get(impression.application_id) ?? { total: 0, count: 0, tagCounts: new Map() };
-    group.total += impression.score;
+    const group = impressionGroups.get(impression.application_id) ?? { count: 0, tagCounts: new Map<string, number>(), notes: [] as string[] };
     group.count += 1;
     for (const tag of impression.tags) group.tagCounts.set(tag, (group.tagCounts.get(tag) ?? 0) + 1);
+    if (!panelOnly && impression.note.trim()) group.notes.push(impression.note.trim());
     impressionGroups.set(impression.application_id, group);
   }
-  const impressionsByApplication = new Map<string, { count: number; avg: number; topTags: string[] }>();
+  const impressionsByApplication = new Map<string, { count: number; topTags: string[]; notes: string[] }>();
   for (const [applicationId, group] of impressionGroups) {
     impressionsByApplication.set(applicationId, {
       count: group.count,
-      avg: group.total / group.count,
       topTags: [...group.tagCounts].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([tag]) => tag),
+      notes: group.notes,
     });
   }
   const rankings = applications.map((application) => {
     const byRound = rounds.map((round) => {
       const criteria = round.rubric?.rubric_criteria ?? [];
       const scored: ReturnType<typeof scoreEvaluation>[] = [];
+      let lockedEvaluations = 0;
       for (const assignment of application.evaluation_assignments) {
         if (assignment.round_id !== round.id) continue;
+        if (assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")) lockedEvaluations += 1;
         for (const evaluation of assignment.evaluations) {
           if (!["SUBMITTED", "LOCKED"].includes(evaluation.status)) continue;
           scored.push(scoreEvaluation(criteria, evaluation.criterion_ratings.map((rating) => ({ criterionId: rating.criterion_id, score: rating.score }))));
         }
       }
-      return { round, aggregate: aggregateRound(scored) };
+      return { round, aggregate: aggregateRound(scored), lockedEvaluations };
     });
-    return { application, rounds: byRound, finalScore: combineRoundScores(byRound.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight }))) };
+    const readiness = applicantReadinessIssues(byRound.map(({ round, aggregate, lockedEvaluations }) => ({
+      id: round.id,
+      name: round.name,
+      status: round.status,
+      weight: round.weight,
+      lockedEvaluations,
+      aggregateStatus: aggregate.status,
+      spread: aggregate.spread,
+    })), canonicalReadinessByApplication.get(application.id));
+    return {
+      application,
+      rounds: byRound,
+      readiness,
+      finalScore: combineRoundScores(byRound.map(({ round, aggregate }) => ({ score: aggregate.score, weight: round.weight }))),
+    };
   }).sort((a, b) => (b.finalScore ?? -1) - (a.finalScore ?? -1));
   const roundReadiness = rounds.map((round) => {
     const assignments = applications.flatMap((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id));
-    const submitted = assignments.filter((assignment) => assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status))).length;
-    const covered = applications.filter((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id && assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status))).length >= 2).length;
-    return { ...round, assignmentCount: assignments.length, submitted, covered };
+    const locked = assignments.filter((assignment) => assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")).length;
+    const covered = applications.filter((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id && assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")).length >= 2).length;
+    return { ...round, assignmentCount: assignments.length, locked, covered };
   });
   const decisions = [...decisionByApplication.values()];
-  const decisionStats = [
-    [String(applications.length), "applicants"],
-    [String(applications.filter((application) => decisionByApplication.has(application.id)).length), "decisions drafted"],
-    [String(decisions.filter((decision) => decision.status === "LOCKED").length), "locked"],
-    [String(decisions.filter((decision) => decision.status === "RELEASED").length), "released"],
-  ] as const;
+  const lockedDecisionCount = decisions.filter((decision) => decision.status === "LOCKED").length;
+  const exceptionRows = rankings.flatMap(({ application, readiness }) => {
+    const decision = decisionByApplication.get(application.id);
+    const tally = tallyByApplication.get(application.id);
+    const voteOutcome = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) : "PENDING";
+    const labels = readiness.issues.map((issue) => issue.label);
+    const conflictCount = conflictCountsByApplication.get(application.id) ?? 0;
+    if (conflictCount) labels.push(`${conflictCount} active recusal${conflictCount === 1 ? "" : "s"}; approver names remain private.`);
+    if (readiness.ready && voteOutcome === "PENDING" && !decision) labels.push("Member vote has not reached quorum.");
+    if (readiness.ready && voteOutcome !== "PENDING" && !decision) labels.push("Vote decided; apply the result.");
+    if (decision && !["LOCKED", "RELEASED"].includes(decision.status)) labels.push(`${decision.decision_approvals.length}/2 approvals recorded.`);
+    if (decision?.status === "LOCKED") labels.push("Outcome is approved and ready to release.");
+    return labels.length ? [{ application, labels, blocked: !readiness.ready }] : [];
+  });
 
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
-        title="Hash"
-        description="Hash is the members' vote on each applicant."
+        title="Decisions"
+        description="Resolve evidence exceptions, apply the members' vote, approve outcomes, and release them."
         action={hashOpen ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Discussion mode</Link> : null}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
-      {canDecide && (
-        <ReleaseAllButton
-          cycleId={cycleId}
-          readyCount={decisions.filter((decision) => decision.status === "LOCKED").length}
-        />
-      )}
-      <section>
+      <section aria-labelledby="readiness-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="max-w-2xl text-sm leading-6 text-mecg-navy/55">Scores come from the interview rounds. The members&apos; vote decides the outcome: an applicant needs {quorum ? `at least ${quorum} votes` : "at least the quorum number of votes"} and more Yes than No to get an offer.</p>
-          <StatusPill tone={hashOpen ? "navy" : "neutral"}>{hashOpen ? "Open" : "Locked"}</StatusPill>
+          <div>
+            <h2 id="readiness-heading" className="text-xl font-semibold text-mecg-navy">Decision readiness</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">Every weighted round must be frozen and every applicant needs two locked evaluations in each round.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusPill tone={hashOpen ? "navy" : "neutral"}>{hashOpen ? "Queue open" : `${cycleIssues.length} blocker${cycleIssues.length === 1 ? "" : "s"}`}</StatusPill>
+            {canRelease && <ReleaseAllButton cycleId={cycleId} readyCount={lockedDecisionCount} />}
+          </div>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {cycleIssues.length > 0 && (
+          <ul className="mt-4 border-l-2 border-mecg-orange pl-4 text-sm text-mecg-navy/70">
+            {cycleIssues.map((issue) => <li key={issue.key}>{issue.label}</li>)}
+          </ul>
+        )}
+        <div className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
           {roundReadiness.map((round) => (
-            <div key={round.id} className="rounded-2xl bg-paper p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-semibold text-mecg-navy">{round.name}</h2>
+            <div key={round.id} className="grid gap-2 py-3 sm:grid-cols-[minmax(12rem,1fr)_auto_auto] sm:items-center sm:gap-6">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-mecg-navy">{round.name}</h3>
                 <StatusPill tone="neutral">{roundStatusLabel(round.status)}</StatusPill>
               </div>
-              <p className="mt-2 text-sm text-mecg-navy/55">{round.submitted}/{round.assignmentCount} forms submitted</p>
-              <p className="mt-1 text-xs text-mecg-navy/60">{round.covered}/{applications.length} applicants have two submitted evaluations</p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-mecg-navy/10">
-                <div className="h-full rounded-full bg-mecg-orange" style={{ width: `${applications.length ? Math.min(100, (round.covered / applications.length) * 100) : 0}%` }} />
-              </div>
+              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{round.locked}/{round.assignmentCount}</span> forms locked</p>
+              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{round.covered}/{applications.length}</span> applicants decision-ready</p>
             </div>
           ))}
         </div>
-        {hashOpen ? (
-          <div className="mt-5 flex flex-col gap-4">
-            <div className="grid gap-3 sm:grid-cols-4">
-              {decisionStats.map(([value, label]) => (
-                <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3">
-                  <StatTile value={value} label={label} tone="dark" />
-                </div>
-              ))}
+      </section>
+
+      {hashOpen ? (
+        <>
+          <section aria-labelledby="exceptions-heading">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <h2 id="exceptions-heading" className="text-xl font-semibold text-mecg-navy">Exception inbox</h2>
+                <p className="mt-1 text-sm text-mecg-navy/55">Only evidence gaps, vote holds, recusal signals, and decisions needing action.</p>
+              </div>
+              <span className="tabular text-sm font-semibold text-mecg-navy/60">{exceptionRows.length} open</span>
             </div>
-            <div className="flex flex-col gap-3 md:hidden">
-              {rankings.map(({ application, rounds: results, finalScore }) => {
+            {exceptionRows.length ? (
+              <ul className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
+                {exceptionRows.map(({ application, labels, blocked }) => (
+                  <li key={application.id} className="grid gap-1 py-3 sm:grid-cols-[minmax(10rem,0.35fr)_1fr_auto] sm:items-start sm:gap-4">
+                    <Link href={`/admin/applications/${application.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
+                    <p className="text-sm leading-6 text-mecg-navy/60">{labels.join(" ")}</p>
+                    <StatusPill tone={blocked ? "neutral" : "navy"}>{blocked ? "Blocked" : "Action"}</StatusPill>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="mt-3 text-sm text-mecg-navy/55">No exceptions. Every outcome has been released.</p>}
+          </section>
+
+          <section aria-labelledby="queue-heading">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 id="queue-heading" className="text-xl font-semibold text-mecg-navy">Ranked decision queue</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">The vote binds: {quorum ? `${quorum} votes` : "quorum"} and more Yes than No produces an offer. Expand one applicant to inspect the evidence and act.</p>
+              </div>
+              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{decisions.length}</span> decisions · <span className="tabular font-semibold text-mecg-navy">{lockedDecisionCount}</span> ready to release</p>
+            </div>
+            <div className="mt-4 divide-y divide-mecg-navy/[0.1] border-y border-mecg-navy/[0.12]">
+              {rankings.map(({ application, rounds: results, finalScore, readiness }, index) => {
                 const decision = decisionByApplication.get(application.id);
                 const impressions = impressionsByApplication.get(application.id);
                 const tally = tallyByApplication.get(application.id);
                 const notes = notesByApplication.get(application.id) ?? [];
                 const voteDecided = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) !== "PENDING" : false;
                 return (
-                  <article key={application.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-                    <div className="flex items-start justify-between gap-3">
+                  <article key={application.id} className="py-4">
+                    <div className="grid gap-3 md:grid-cols-[2rem_minmax(10rem,1.2fr)_minmax(10rem,1fr)_7rem_minmax(10rem,0.8fr)] md:items-start">
+                      <span className="tabular text-sm font-semibold text-mecg-navy/45">{index + 1}</span>
                       <div>
-                        <Link href={`/admin/applications/${application.id}`} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy underline decoration-mecg-navy/30 underline-offset-2">{application.displayName}</Link>
-                        <p className="text-xs text-mecg-navy/60">{applicationStatusLabel(application.status)}</p>
+                        <Link href={`/admin/applications/${application.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
+                        <p className="mt-0.5 text-xs text-mecg-navy/55">{applicationStatusLabel(application.status)}</p>
                       </div>
-                      <p className="tabular text-xl font-bold">{finalScore === null ? "Pending" : finalScore.toFixed(1)}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        {results.map(({ round, aggregate }) => (
+                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : aggregate.score.toFixed(1)}</p>
+                        ))}
+                      </div>
+                      <p className="tabular text-lg font-bold text-mecg-navy">{finalScore == null ? <span className="text-sm font-normal text-mecg-navy/55">Pending</span> : finalScore.toFixed(1)}</p>
+                      <div>
+                        {decision
+                          ? <StatusPill tone={decision.status === "RELEASED" ? "navy" : "neutral"}>{decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}</StatusPill>
+                          : <StatusPill tone={voteDecided && readiness.ready ? "navy" : "neutral"}>{voteDecided ? "Vote decided" : "Vote pending"}</StatusPill>}
+                      </div>
                     </div>
-                    <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                      {results.map(({ round, aggregate }) => (
-                        <div key={round.id}>
-                          <dt className="text-[13px] text-mecg-navy/60">{round.name}</dt>
-                          <dd className="mt-1 text-mecg-navy/70">{aggregate.score === null ? "Pending" : aggregate.score.toFixed(1)} · {aggregate.count} ratings</dd>
-                        </div>
-                      ))}
-                      <div>
-                        <dt className="text-[13px] text-mecg-navy/60">Impressions</dt>
-                        <dd className="mt-1 text-mecg-navy/70">{impressions ? `${impressions.avg.toFixed(1)} · ${impressions.count}` : "—"}</dd>
-                      </div>
-                      <div className="col-span-2">
-                        <dt className="text-[13px] text-mecg-navy/60">Member vote</dt>
-                        <dd className="mt-1"><MemberVote tally={tally} /></dd>
-                      </div>
-                    </dl>
-                    <details className="group mt-4">
-                      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl px-3 text-sm font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                        <span className={!decision && voteDecided ? "text-mecg-orange-ink" : undefined}>
-                          {decision
-                            ? `${decisionOutcomeLabel(decision.outcome)} · ${decisionStatusLabel(decision.status)}`
-                            : voteDecided ? "Vote decided, ready to apply" : "Waiting on the vote"}
-                        </span>
+                    <details className="group mt-3">
+                      <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-mecg-navy marker:content-none">
+                        <span>Evidence and decision</span>
                         <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
                       </summary>
-                      <div className="mt-3 flex flex-col gap-3">
-                        {decision ? (
-                          <>
-                            <p className="text-sm text-mecg-navy/60">{decision.reason}</p>
-                            {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
-                            {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
-                            {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
-                            <MemberNotes notes={notes} />
-                          </>
-                        ) : <PendingDecisionPanel cycleId={cycle.id} applicationId={application.id} tally={tally} notes={notes} canDecide={canDecide} />}
+                      <div className="grid gap-5 border-l-2 border-mecg-navy/[0.1] pl-4 lg:grid-cols-[1fr_minmax(17rem,0.65fr)]">
+                        <div>
+                          <dl className="grid gap-3 sm:grid-cols-2">
+                            {results.map(({ round, aggregate, lockedEvaluations }) => (
+                              <div key={round.id}>
+                                <dt className="text-xs font-semibold text-mecg-navy">{round.name}</dt>
+                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
+                              </div>
+                            ))}
+                            <div>
+                              <dt className="text-xs font-semibold text-mecg-navy">Event observations</dt>
+                              <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{impressions ? `${impressions.count} observation${impressions.count === 1 ? "" : "s"}${impressions.topTags.length ? ` · ${impressions.topTags.join(", ")}` : ""}` : "No observations"}</dd>
+                              {impressions?.notes.length ? (
+                                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-mecg-navy/60">
+                                  {impressions.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
+                                </ul>
+                              ) : null}
+                            </div>
+                            <div>
+                              <dt className="text-xs font-semibold text-mecg-navy">Member vote</dt>
+                              <dd className="mt-1"><MemberVote tally={tally} /></dd>
+                            </div>
+                          </dl>
+                          {readiness.issues.length > 0 && (
+                            <ul className="mt-4 flex flex-col gap-1 text-xs text-mecg-orange-ink">
+                              {readiness.issues.map((issue) => <li key={issue.key}>{issue.label}</li>)}
+                            </ul>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          {decision ? (
+                            <>
+                              <div>
+                                <p className="text-sm font-semibold text-mecg-navy">{decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}</p>
+                                <p className="mt-1 text-xs leading-5 text-mecg-navy/60">{decision.reason}</p>
+                                <p className="mt-1 text-xs text-mecg-navy/55">{decision.decision_approvals.length}/2 approvals</p>
+                              </div>
+                              {readiness.ready && !["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
+                              {readiness.ready && decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
+                              {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
+                              <MemberNotes notes={notes} />
+                            </>
+                          ) : readiness.ready ? (
+                            <PendingDecisionPanel cycleId={cycle.id} applicationId={application.id} tally={tally} notes={notes} canDecide={canDecide} />
+                          ) : (
+                            <>
+                              <p className="text-sm text-mecg-navy/55">Decision controls unlock when the blockers above are cleared.</p>
+                              <MemberNotes notes={notes} />
+                            </>
+                          )}
+                        </div>
                       </div>
                     </details>
                   </article>
                 );
               })}
             </div>
-            <div className="scroll-cue hidden overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:block" tabIndex={0} role="region" aria-label="Hash decision table">
-              <table className="w-full text-left text-sm">
-              <thead className="bg-mecg-navy/[0.03]">
-                <tr>
-                  <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Applicant</th>
-                  {rounds.map((round) => (
-                    <th key={round.id} className="p-3 text-[13px] font-semibold text-mecg-navy/60">{round.name}</th>
-                  ))}
-                  <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Impressions</th>
-                  <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Combined</th>
-                  <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Member vote</th>
-                  <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Decision</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rankings.map(({ application, rounds: results, finalScore }) => {
-                  const decision = decisionByApplication.get(application.id);
-                  const impressions = impressionsByApplication.get(application.id);
-                  const tally = tallyByApplication.get(application.id);
-                  const notes = notesByApplication.get(application.id) ?? [];
-                  const voteDecided = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) !== "PENDING" : false;
-                  return (
-                    <tr key={application.id} className="border-t border-mecg-navy/[0.08] align-top">
-                      <td className="p-3 font-medium">
-                        <Link href={`/admin/applications/${application.id}`} className="text-mecg-navy underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy">{application.displayName}</Link>
-                        <span className="block text-xs font-normal text-mecg-navy/60">{applicationStatusLabel(application.status)}</span>
-                      </td>
-                      {results.map(({ round, aggregate }) => (
-                        <td key={round.id} className="p-3 text-xs text-mecg-navy/55">
-                          {aggregate.score === null ? (aggregate.status === "PENDING" ? "Pending" : "—") : aggregate.score.toFixed(1)}
-                          <span className="block text-[11px] text-mecg-navy/60">{aggregate.count} ratings{aggregate.spread != null ? ` · spread ${aggregate.spread.toFixed(0)}` : ""}{aggregate.status === "REVIEW" ? " · review" : ""}</span>
-                        </td>
-                      ))}
-                      <td className="p-3 text-xs text-mecg-navy/55">
-                        {impressions ? (
-                          <>
-                            <span className="tabular text-base font-semibold text-mecg-navy">{impressions.avg.toFixed(1)}</span>
-                            <span className="block text-[11px] text-mecg-navy/60">{impressions.count} impressions{impressions.topTags.length > 0 ? ` · ${impressions.topTags.join(", ")}` : ""}</span>
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className="p-3 tabular text-lg font-bold text-mecg-navy">
-                        {finalScore === null ? <span className="text-sm font-normal text-mecg-navy/60">Pending</span> : finalScore.toFixed(1)}
-                      </td>
-                      <td className="min-w-40 p-3">
-                        <MemberVote tally={tally} />
-                      </td>
-                      <td className="min-w-72 p-3">
-                        {decision ? (
-                          <details className="group rounded-xl">
-                            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                              <span>
-                                <span className="text-xs font-semibold text-mecg-navy">{decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}</span>
-                                <span className="block text-[11px] text-mecg-navy/60">{decision.decision_approvals.length}/2 approvals</span>
-                              </span>
-                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
-                                <path d="M5 8l5 5 5-5" />
-                              </svg>
-                            </summary>
-                            <div className="mt-2.5 flex flex-col gap-2.5 px-1">
-                              <p className="text-xs text-mecg-navy/55">{decision.reason}</p>
-                              {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
-                              {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
-                              {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
-                              <MemberNotes notes={notes} />
-                            </div>
-                          </details>
-                        ) : (
-                          <details className="group rounded-xl">
-                            <summary className={`flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none ${voteDecided ? "font-semibold text-mecg-orange-ink" : "text-mecg-navy/55"}`}>
-                              {/* A resolved vote that nobody has applied yet is an action item, not an
-                                  absence, so the closed row says so rather than reading "No decision yet". */}
-                              {voteDecided ? "Vote decided, ready to apply" : "Waiting on the vote"}
-                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
-                                <path d="M5 8l5 5 5-5" />
-                              </svg>
-                            </summary>
-                            <div className="mt-2.5 px-1">
-                              <PendingDecisionPanel cycleId={cycle.id} applicationId={application.id} tally={tally} notes={notes} canDecide={canDecide} />
-                            </div>
-                          </details>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <p className="mt-4 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Freeze the quick chats and group interview rounds, then move the cycle to voting and decisions to reveal scores and open decisions.</p>
-        )}
-      </section>
+          </section>
+        </>
+      ) : (
+        <p className="border-l-2 border-mecg-navy/[0.14] pl-4 text-sm leading-6 text-mecg-navy/55">Scores and decision controls stay hidden until the cycle-level blockers above are cleared.</p>
+      )}
     </main>
   );
 }

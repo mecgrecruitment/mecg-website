@@ -26,15 +26,20 @@ export default function ScreeningControls({
   if (!batchId) {
     return (
       <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <h2 className="text-xl font-semibold">Choose reviewers</h2>
-        <p className="mt-2 text-sm text-mecg-navy/55">Only ordinary Members can review. Board, Panel, and Owner accounts remain identity stewards.</p>
+        <h2 className="text-xl font-semibold">Choose Recruitment Committee reviewers</h2>
+        <p className="mt-2 text-sm text-mecg-navy/55">Only active Recruitment Committee members can review. The system assigns every application to exactly three distinct reviewers, balances workload, and excludes conflicts. Board, Panel, and Owner accounts remain identity stewards and are excluded.</p>
+        {members.length === 0 && (
+          <p className="mt-4 rounded-xl bg-mecg-orange/10 px-4 py-3 text-sm text-mecg-orange-ink">
+            No eligible Recruitment Committee reviewers are available. Add committee members before creating the review batch.
+          </p>
+        )}
         <div className="mt-5 flex flex-wrap gap-2">
           {members.map((member) => {
             const checked = reviewerIds.includes(member.id);
             return (
               <label
                 key={member.id}
-                className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   checked
                     ? "bg-mecg-orange/15 text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(168,62,11,0.35)]"
                     : "text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08]"
@@ -51,7 +56,7 @@ export default function ScreeningControls({
             );
           })}
         </div>
-        <button type="button" disabled={pending || reviewerIds.length < 3} onClick={() => void act({ action: "CREATE", reviewerIds })} className="button-primary mt-5 disabled:opacity-50">Send applications to {reviewerIds.length} reviewers</button>
+        <button type="button" disabled={pending || reviewerIds.length < 3} onClick={() => void act({ action: "CREATE", reviewerIds })} className="button-primary mt-5 disabled:opacity-50">Create pool with {reviewerIds.length} reviewers</button>
         <div className="mt-4 space-y-2"><OperationNotice kind="error">{error}</OperationNotice><OperationNotice kind="success">{success}</OperationNotice></div>
       </section>
     );

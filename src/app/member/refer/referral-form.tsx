@@ -8,8 +8,9 @@ import FormField from "@/components/form-field";
 const REASON_LIMIT = 2000;
 
 export default function ReferralForm({ cycleId }: { cycleId: string }) {
-  const { pending, error, success, run } = useAction("/api/member/referrals", "Could not send the referral. Check your connection and try again.");
+  const { pending, error, run } = useAction("/api/member/referrals", "Could not send the referral. Check your connection and try again.");
   const [reason, setReason] = useState("");
+  const [sentName, setSentName] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -23,11 +24,26 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
         yearMajor: data.get("yearMajor"),
         reason: data.get("reason"),
       },
-      { successMessage: "Referral sent. The board reads every one.", fallbackError: "Could not send the referral" },
+      { fallbackError: "Could not send the referral" },
     );
     if (!result.ok) return;
+    setSentName(String(data.get("name") ?? "").trim());
     formRef.current?.reset();
     setReason("");
+  }
+
+  if (sentName) {
+    return (
+      <div role="status" aria-live="polite" className="rounded-2xl bg-emerald-50 p-5 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)] sm:p-6">
+        <p className="text-[15px] font-semibold">Referral received</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-emerald-950/75">
+          {sentName} is now waiting for Board review. You do not need to do anything else; their status appears below.
+        </p>
+        <button type="button" onClick={() => setSentName("")} className="button-secondary mt-4 min-h-11">
+          Refer another person
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -56,7 +72,6 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
       </div>
       <button type="submit" disabled={pending} className="button-primary self-start">{pending ? "Sending…" : "Send referral"}</button>
       <OperationNotice kind="error">{error}</OperationNotice>
-      <OperationNotice kind="success">{success}</OperationNotice>
     </form>
   );
 }

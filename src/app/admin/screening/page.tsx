@@ -20,8 +20,10 @@ export default async function ScreeningAdminPage() {
     supabase.from("memberships").select("user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
   ]);
   if (error) throw new Error(error.message);
-  const privileged = new Set((memberships ?? []).filter((item) => ["BOARD", "PANEL", "OWNER"].includes(item.role)).map((item) => item.user_id));
-  const members = (memberships ?? []).filter((item) => item.role === "MEMBER" && !privileged.has(item.user_id)).map((item) => ({ id: item.user_id, name: item.profiles.display_name }));
+  const identityStewards = new Set((memberships ?? []).filter((item) => ["BOARD", "PANEL", "OWNER"].includes(item.role)).map((item) => item.user_id));
+  const members = (memberships ?? [])
+    .filter((item) => item.role === "RECRUITMENT_COMMITTEE" && !identityStewards.has(item.user_id))
+    .map((item) => ({ id: item.user_id, name: item.profiles.display_name }));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">

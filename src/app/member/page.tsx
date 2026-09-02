@@ -4,17 +4,16 @@ import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import EvaluationForm from "./evaluation-form";
 import ConflictForm from "./conflict-form";
-import PasswordForm from "./password-form";
 import ProfileForm from "./profile-form";
 import BuddySlotForm from "./buddy-slot-form";
 import PillNav from "@/components/pill-nav";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import SectionLabel from "@/components/section-label";
-import { SCORE_ANCHORS } from "@/lib/rubrics";
-import { assignmentStatusLabel, cycleStatusLabel, memberRoleLabel, roundStatusLabel } from "@/lib/labels";
+import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { formatEasternDateTime } from "@/lib/date-time";
+import type { CalibrationState } from "./calibration/types";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -39,15 +38,16 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, screeningReviewer, { data: buddySlots, error: buddySlotsError }, { data: gradingEvents }, { data: profile }, { data: record }] = await Promise.all([
-    supabase.from("evaluation_assignments").select("id, status, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
+  const [{ data: assignments, error }, screeningReviewer, { data: gradingEvents }, calibrationResult, { data: buddySlots, error: buddySlotsError }, { data: profile }] = await Promise.all([
+    supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
-    supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.rpc("my_grading_events"),
+    screeningRpc<CalibrationState[]>(supabase, "my_round_calibrations", { target_cycle_id: cycleMembership.cycleId }),
+    supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
-    supabase.rpc("my_member_record", { target_cycle_id: cycleMembership.cycleId }),
   ]);
   if (error) throw error;
+  if (calibrationResult.error) throw new Error(calibrationResult.error.message);
   if (buddySlotsError) throw buddySlotsError;
   const { data: applications, error: applicantsError } = screeningReviewer.data
     ? { data: [], error: null }
@@ -61,15 +61,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
   const assignmentRows = assignments ?? [];
   const openAssignments = assignmentRows.filter(isReady);
-  const submittedCount = assignmentRows.filter(isSubmitted).length;
-  const waitingCount = assignmentRows.filter((assignment) =>
-    !isSubmitted(assignment)
-    && ["ASSIGNED", "IN_PROGRESS"].includes(assignment.status)
-    && assignment.rounds.status !== "ACTIVE"
-  ).length;
-  const nextDeadline = openAssignments
-    .filter((assignment) => assignment.rounds.closes_at)
-    .sort((a, b) => new Date(a.rounds.closes_at!).getTime() - new Date(b.rounds.closes_at!).getTime())[0];
+  const calibrationStates = calibrationResult.data ?? [];
+  const acknowledgedRubrics = new Set(calibrationStates.filter((state) => state.acknowledgedAt).map((state) => state.rubricId));
   const visible = assignmentRows
     .filter((assignment) => !activeRoundFilter || assignment.rounds.kind === activeRoundFilter)
     .sort((a, b) => {
@@ -80,19 +73,39 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const deadlineB = b.rounds.closes_at ? new Date(b.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY;
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
-  const firstReadyAssignmentId = visible.find(isReady)?.id;
+  const firstReadyAssignmentId = visible.find((assignment) => {
+    if (!isReady(assignment)) return false;
+    const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
+    return Boolean(rubric && acknowledgedRubrics.has(rubric.id));
+  })?.id;
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
+  const calibrationTasks = Array.from(new Map(openAssignments.flatMap((assignment) => {
+    const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
+    return rubric && !acknowledgedRubrics.has(rubric.id)
+      ? [[assignment.rounds.id, {
+        href: `/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`,
+        label: `Calibrate for ${assignment.rounds.name}`,
+        detail: `Review rubric version ${rubric.version} before evaluating applicants`,
+        dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() - 1 : -1,
+      }] as const]
+      : [];
+  })).values());
   // One list of what this member actually owes, ordered by deadline. Before
   // this, learning whether you were behind meant visiting /member,
   // /member/screening and /member/event and comparing three separate views.
   const tasks: Array<{ href: string; label: string; detail: string; dueAt: number }> = [
-    ...openAssignments.map((assignment) => ({
-      href: `#assignment-${assignment.id}`,
-      label: `Evaluate ${assignment.applications.pnms.name}`,
-      detail: assignment.rounds.closes_at ? `${assignment.rounds.name} · closes ${formatDeadline(assignment.rounds.closes_at)}` : assignment.rounds.name,
-      dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
-    })),
+    ...calibrationTasks,
+    ...openAssignments.flatMap((assignment) => {
+      const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
+      if (!rubric || !acknowledgedRubrics.has(rubric.id)) return [];
+      return [{
+        href: `#assignment-${assignment.id}`,
+        label: `Evaluate ${assignment.applications.pnms.name}`,
+        detail: assignment.rounds.closes_at ? `${assignment.rounds.name} · closes ${formatDeadline(assignment.rounds.closes_at)}` : assignment.rounds.name,
+        dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
+      }];
+    }),
     ...(screeningQueue.data ?? [])
       .filter((item) => item.assignment_status === "ASSIGNED")
       .map((item) => ({
@@ -104,33 +117,21 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     ...(gradingEvent?.grading_open
       ? [{
         href: "/member/event",
-        label: `Grade at ${gradingEvent.event_name}`,
-        detail: "Grading is open now",
+        label: `Add observations from ${gradingEvent.event_name}`,
+        detail: "Qualitative observations are open now",
         dueAt: 0,
       }]
       : []),
   ].sort((a, b) => a.dueAt - b.dueAt);
-
-  const recordCounts = record && typeof record === "object" && !Array.isArray(record) ? record as Record<string, unknown> : {};
-  const memberRecord: Array<readonly [string, number]> = [
-    ["evaluations submitted", Number(recordCounts.evaluationsSubmitted ?? 0)],
-    ["assignments open", Number(recordCounts.assignmentsOpen ?? 0)],
-    ["events attended", Number(recordCounts.eventsAttended ?? 0)],
-    ["conflicts declared", Number(recordCounts.conflictsDeclared ?? 0)],
-  ];
+  const recentCompletions = assignmentRows
+    .filter(isSubmitted)
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 6);
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
     ? "Quick chats"
     : activeRoundFilter === "GROUP_CASE"
       ? "Group interview"
       : "All evaluation work";
-  const overviewTitle = openAssignments.length
-    ? `${openAssignments.length} evaluation${openAssignments.length === 1 ? " is" : "s are"} ready for you`
-    : waitingCount
-      ? "You are caught up for now"
-      : assignmentRows.length
-        ? "Your assigned work is complete"
-        : "No evaluations have been assigned yet";
-
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
@@ -170,55 +171,9 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="02">Review overview</SectionLabel>
-        <div className="mt-3.5 overflow-hidden rounded-2xl bg-mecg-navy text-white ring-1 ring-white/12">
-          <div className="grid gap-px bg-white/10 lg:grid-cols-[1.35fr_0.65fr]">
-            <div className="bg-mecg-navy p-5 sm:p-7">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-[13px] font-semibold text-white/50">Your work pulse</p>
-                  <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-balance">{overviewTitle}</h2>
-                </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[13px] font-semibold text-white/70">
-                  {memberRoleLabel(cycleMembership.role)}
-                </span>
-              </div>
-              <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
-                {[
-                  [openAssignments.length, "ready now"],
-                  [submittedCount, "submitted"],
-                  [waitingCount, "waiting to open"],
-                  [assignmentRows.length, "total assigned"],
-                ].map(([value, label]) => (
-                  <div key={label}>
-                    <p className="tabular text-[28px] font-semibold">{value}</p>
-                    <p className="mt-1 text-[12px] leading-4 text-white/50">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-white/5 p-5 sm:p-7">
-              <p className="text-[13px] font-semibold text-white/50">Next deadline</p>
-              {nextDeadline?.rounds.closes_at ? (
-                <div className="mt-4">
-                  <p className="text-lg font-semibold">{formatDeadline(nextDeadline.rounds.closes_at)}</p>
-                  <p className="mt-1.5 text-sm text-white/55">{nextDeadline.rounds.name} · {nextDeadline.applications.pnms.name}</p>
-                  <a href={`#assignment-${nextDeadline.id}`} className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-xs font-semibold text-mecg-navy transition-transform duration-150 ease-out active:scale-[0.96]">
-                    Open evaluation <span aria-hidden="true">↓</span>
-                  </a>
-                </div>
-              ) : (
-                <p className="mt-4 text-sm leading-6 text-white/55">No open evaluation has a deadline right now.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <SectionLabel number="03">Your assignments</SectionLabel>
+            <SectionLabel number="02">Your assignments</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
           </div>
         </div>
@@ -238,7 +193,10 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
             const submitted = isSubmitted(assignment);
             const ready = isReady(assignment);
+            const calibrated = Boolean(rubric && acknowledgedRubrics.has(rubric.id));
             const criteria = (rubric?.rubric_criteria ?? []).sort((a, b) => a.position - b.position);
+            const readyInRound = visible.filter((candidate) => isReady(candidate) && candidate.rounds.id === assignment.rounds.id);
+            const roundPosition = readyInRound.findIndex((candidate) => candidate.id === assignment.id) + 1;
             const statusLabel = submitted
               ? "Submitted"
               : ready
@@ -258,9 +216,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   </span>
                 </div>
                 {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/60">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
+                {ready && roundPosition > 0 && (
+                  <p className="mt-2 text-xs font-semibold text-mecg-navy/55">Applicant {roundPosition} of {readyInRound.length} in this round</p>
+                )}
                 {submitted ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
-                ) : ready && rubric ? (
+                ) : ready && rubric && calibrated ? (
                   <details className="mt-3" open={assignment.id === firstReadyAssignmentId}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] marker:content-none">
                       <span>{assignment.id === firstReadyAssignmentId ? "Continue evaluation" : "Open evaluation"}</span>
@@ -270,8 +231,15 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                     </summary>
                     <div className="disclosure-panel">
                       <EvaluationForm assignmentId={assignment.id} criteria={criteria} />
+                      <p className="mt-3 text-xs leading-5 text-mecg-navy/50">Saving keeps your draft. Review and lock this evaluation when it is complete; the next ready applicant then moves to the top of My Work.</p>
                     </div>
                   </details>
+                ) : ready && rubric ? (
+                  <div className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-4">
+                    <p className="text-sm font-semibold text-mecg-navy">Calibration required before evaluation</p>
+                    <p className="mt-1 text-xs leading-5 text-mecg-navy/60">Review the active rubric anchors once for this round. Calibration is advisory and never adjusts your score.</p>
+                    <Link href={`/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`} className="button-primary mt-3 inline-flex text-sm">Review calibration</Link>
+                  </div>
                 ) : ready ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its scoring guide is unavailable. Contact the Board before evaluating.</p>
                 ) : assignment.status === "RECUSED" ? (
@@ -294,60 +262,44 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section>
-        <SectionLabel number="04">Your record</SectionLabel>
-        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">What you have done this cycle</h2>
-        <dl className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {memberRecord.map(([label, value]) => (
-            <div key={label} className="rounded-2xl bg-paper p-4">
-              <dd className="tabular text-[26px] font-semibold text-mecg-navy">{value}</dd>
-              <dt className="mt-1 text-[12px] leading-4 text-mecg-navy/45">{label}</dt>
+        <SectionLabel number="03">Recent completions</SectionLabel>
+        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Finished evaluation work</h2>
+        <div className="mt-3.5 flex flex-col gap-2">
+          {recentCompletions.map((assignment) => (
+            <div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-paper px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold text-mecg-navy">{assignment.applications.pnms.name}</p>
+                <p className="mt-0.5 text-xs text-mecg-navy/55">{assignment.rounds.name}</p>
+              </div>
+              <span className="text-xs font-semibold text-emerald-800">Submitted</span>
             </div>
           ))}
-        </dl>
-      </section>
-
-      <section>
-        <SectionLabel number="05">Member tools</SectionLabel>
-        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Prepare and manage your work</h2>
-        {gradingEvent && (
-          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-mecg-navy p-5 text-white ring-1 ring-white/12 sm:p-6">
-            <div>
-              <p className="text-[13px] font-semibold text-white/50">Live event</p>
-              <h3 className="mt-2 text-lg font-semibold">{gradingEvent.event_name}</h3>
-              <p className="mt-1 text-sm text-white/55">{gradingEvent.grading_open ? "Grading is open" : "Grading closed"}</p>
+          {!recentCompletions.length && <p className="text-sm text-mecg-navy/55">Completed evaluations will appear here.</p>}
+        </div>
+        {!screeningReviewer.data && (
+          <details className="mt-5 rounded-2xl bg-paper p-5">
+            <summary className="cursor-pointer font-semibold text-mecg-navy">Need to report a conflict?</summary>
+            <div className="mt-4">
+              <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />
             </div>
-            <Link href="/member/event" className="button-primary">Grade applicants</Link>
-          </div>
+          </details>
         )}
-        <div className="mt-3.5 grid gap-4 lg:grid-cols-2">
-          <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
-          <section className="rounded-2xl bg-paper p-5 sm:p-6">
-            <p className="text-[13px] font-semibold text-mecg-navy/65">Before you score</p>
-            <h3 className="mt-2 text-lg font-semibold">Calibration anchors</h3>
-            <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Use the same evidence standard in every live evaluation.</p>
-            <ol className="mt-4 space-y-2 text-sm text-mecg-navy/70">
-              {Object.entries(SCORE_ANCHORS).map(([score, meaning]) => (
-                <li key={score} className="flex gap-3">
-                  <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white tabular text-[11px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">{score}</span>
-                  <span className="pt-0.5">{meaning}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        </div>
-        <div className="mt-4 flex flex-col gap-4">
-          {!screeningReviewer.data && <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />}
-          <ProfileForm
-            initial={{
-              displayName: profile?.display_name ?? user.name,
-              gradTerm: profile?.grad_term ?? "",
-              major: profile?.major ?? "",
-              position: profile?.position_title ?? "",
-              bio: profile?.bio ?? "",
-            }}
-          />
-          <PasswordForm />
-        </div>
+        <details className="mt-3 rounded-2xl bg-paper p-5">
+          <summary className="cursor-pointer font-semibold text-mecg-navy">Profile and availability</summary>
+          <p className="mt-2 text-sm text-mecg-navy/55">Optional account details and buddy availability live here so they do not compete with assigned work.</p>
+          <div className="mt-4 flex flex-col gap-4">
+            <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
+            <ProfileForm
+              initial={{
+                displayName: profile?.display_name ?? user.name,
+                gradTerm: profile?.grad_term ?? "",
+                major: profile?.major ?? "",
+                position: profile?.position_title ?? "",
+                bio: profile?.bio ?? "",
+              }}
+            />
+          </div>
+        </details>
       </section>
     </main>
   );

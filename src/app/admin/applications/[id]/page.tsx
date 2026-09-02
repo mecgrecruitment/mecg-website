@@ -13,6 +13,7 @@ import DecisionForm, { ApprovalButton, OfferDeadlineForm, PreviewForm, ReleaseBu
 import DossierTabs from "./tabs";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel, evaluationStatusLabel, statusLabel } from "@/lib/labels";
+import { applicantDossierHref, filterDossierNavigationRows, validateRecruitmentReturnTo, type DossierNavigationRow } from "./dossier-navigation";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
 
@@ -58,6 +59,28 @@ function resumeSize(size: number | null) {
   return size >= 1024 * 1024
     ? `${(size / 1024 / 1024).toFixed(1)} MB`
     : `${Math.max(1, Math.round(size / 1024))} KB`;
+}
+
+function ApplicantNavigation({ previousId, nextId, returnTo }: { previousId: string | null; nextId: string | null; returnTo: string }) {
+  return (
+    <nav aria-label="Applicant dossier navigation" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mecg-navy/[0.035] p-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+      <Link href={returnTo} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-mecg-orange-ink underline underline-offset-4">
+        Back to Recruitment
+      </Link>
+      <div className="flex gap-2">
+        {previousId ? (
+          <Link href={applicantDossierHref(previousId, returnTo)} rel="prev" className="button-secondary text-sm">← Previous</Link>
+        ) : (
+          <span className="button-secondary pointer-events-none text-sm opacity-45" aria-disabled="true">← Previous</span>
+        )}
+        {nextId ? (
+          <Link href={applicantDossierHref(nextId, returnTo)} rel="next" className="button-secondary text-sm">Next →</Link>
+        ) : (
+          <span className="button-secondary pointer-events-none text-sm opacity-45" aria-disabled="true">Next →</span>
+        )}
+      </div>
+    </nav>
+  );
 }
 
 function ResumePanel({
@@ -122,8 +145,9 @@ function ResumePanel({
   );
 }
 
-export default async function ApplicantDossier({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ApplicantDossier({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ returnTo?: string | string[] }> }) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const returnTo = validateRecruitmentReturnTo(query.returnTo);
   const user = await requireAdmin();
   const supabase = await createClient();
   const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
@@ -160,8 +184,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             ? "Your conflict-of-interest status for this applicant could not be verified, so their file is withheld. Try again in a moment."
             : "You have declared a conflict of interest on this applicant and are recused from viewing their file."}
         </p>
-        <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
-          Back to applicants
+        <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+          Back to Recruitment
         </Link>
       </main>
     );
@@ -172,6 +196,18 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const linkedinHref = person.linkedin_url ? httpUrl(person.linkedin_url) : null;
   const year = person.class_year && person.class_year in CLASS_YEAR_LABELS ? CLASS_YEAR_LABELS[person.class_year as ClassYear] : person.class_year;
   const isTerminal = TERMINAL_STATUSES.has(application.status as (typeof PIPELINE_STATUSES)[number]);
+  const { data: navigationRows, error: navigationError } = await supabase
+    .from("applications")
+    .select("id,submitted_at,status,resume_storage_path,pnms!inner(name,contact)")
+    .eq("cycle_id", cycleId)
+    .neq("status", "DRAFT")
+    .order("submitted_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (navigationError) console.error("applicant dossier navigation lookup failed", navigationError);
+  const filteredNavigationRows = filterDossierNavigationRows((navigationRows ?? []) as unknown as DossierNavigationRow[], returnTo);
+  const navigationIndex = filteredNavigationRows.findIndex((row) => row.id === application.id);
+  const previousId = navigationIndex > 0 ? filteredNavigationRows[navigationIndex - 1]?.id ?? null : null;
+  const nextId = navigationIndex >= 0 ? filteredNavigationRows[navigationIndex + 1]?.id ?? null : null;
   let resumeDocument: ResumeDocumentRow | null = null;
   if (!panelOnly && application.resume_storage_path) {
     const { data: document, error: documentError } = await supabase
@@ -196,6 +232,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
           <LogoutButton />
         </header>
         <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
+        <ApplicantNavigation previousId={previousId} nextId={nextId} returnTo={returnTo} />
         <section className="flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
           <StatusPill tone={isTerminal ? "navy" : "orange"}>{applicationStatusLabel(application.status)}</StatusPill>
           <dl className="grid gap-3 text-sm leading-6 text-mecg-navy/80 sm:grid-cols-2">
@@ -215,7 +252,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             heightClass="h-[560px]"
           />
         </section>
-        <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">Back to applicants</Link>
+        <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">Back to Recruitment</Link>
       </main>
     );
   }
@@ -266,7 +303,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
     decisionIds.length
       ? supabase.from("audit_events").select("id,actor_id,action,resource,resource_id,metadata,created_at").eq("resource", "Decision").in("resource_id", decisionIds)
       : Promise.resolve({ data: [], error: null }),
-    supabase.from("messages").select("id,kind,recipient,subject,delivered,created_at").eq("application_id", id).order("created_at", { ascending: false }),
+    panelOnly
+      ? Promise.resolve({ data: [], error: null })
+      : supabase.from("messages").select("id,kind,recipient,subject,delivered,created_at").eq("application_id", id).order("created_at", { ascending: false }),
     supabase.rpc("applicant_prior_cycles", { target_application_id: id }),
   ]);
   const auditEvents = [...(applicationAuditResult.data ?? []), ...(decisionAuditResult.data ?? [])].sort(
@@ -301,6 +340,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         <LogoutButton />
       </header>
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
+      <ApplicantNavigation previousId={previousId} nextId={nextId} returnTo={returnTo} />
 
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
         <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:sticky lg:top-20 lg:order-none">
@@ -391,7 +431,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         <div className="order-1 lg:order-none">
           <DossierTabs
             panels={{
-              responses: (
+              evidence: (
                 <div className="flex flex-col gap-4">
                   {responses.length === 0 && <p className="text-sm text-mecg-navy/60">No responses on file.</p>}
                   {responses.map((response) => (
@@ -405,7 +445,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                   ))}
                 </div>
               ),
-              evaluations: !canPanel ? (
+              interviews: !canPanel ? (
                 <p className="rounded-2xl bg-mecg-navy/[0.035] p-5 text-sm leading-6 text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                   Round scores and evaluator ratings are visible to the Hash panel only, so nothing is shown here for your role.
                 </p>
@@ -483,7 +523,31 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                   ))}
                 </div>
               ),
-              activity: (
+              messages: panelOnly ? (
+                <p className="rounded-2xl bg-mecg-navy/[0.035] p-5 text-sm leading-6 text-mecg-navy/70 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+                  Message recipients and delivery metadata remain hidden during blind Hash review.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-mecg-navy/55">The delivery log stores message subjects and delivery metadata, but not message bodies.</p>
+                  {messages.map((message) => (
+                    <article key={message.id} className="rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h2 className="break-words text-sm font-semibold text-mecg-navy">{message.subject}</h2>
+                          <p className="mt-1 text-xs text-mecg-navy/65">{statusLabel(message.kind)} · {message.recipient}</p>
+                        </div>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                          {message.delivered ? "Delivered" : "Failed"}
+                        </span>
+                      </div>
+                      <time dateTime={message.created_at} className="mt-2 block tabular text-xs text-mecg-navy/65">{formatEasternDateTime(message.created_at)}</time>
+                    </article>
+                  ))}
+                  {!messages.length && <p className="text-sm text-mecg-navy/65">Nothing has been sent to this applicant yet.</p>}
+                </div>
+              ),
+              history: (
                 <div className="flex flex-col gap-2">
                   {auditUnavailable && <p className="text-sm text-mecg-orange-ink">Activity could not be loaded. What is shown here may be incomplete.</p>}
                   {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/60">No activity recorded, or you do not have permission to view activity for this cycle.</p>}
@@ -503,29 +567,6 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                       </div>
                     </div>
                   )}
-                  <div className="mt-6">
-                    <p className="text-[13px] font-semibold text-mecg-navy/50">Messages sent</p>
-                    <p className="mt-1 text-sm text-mecg-navy/55">Every email this system tried to send to this applicant, delivered or not.</p>
-                    <div className="mt-3 flex flex-col gap-2">
-                      {messages.map((message) => (
-                        <div key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-                          <div className="min-w-0">
-                            <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
-                            <p className="mt-0.5 text-xs text-mecg-navy/65">{statusLabel(message.kind)} · {message.recipient}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
-                              {message.delivered ? "Delivered" : "Failed"}
-                            </span>
-                            <time dateTime={message.created_at} className="tabular text-xs text-mecg-navy/65">
-                              {formatEasternDateTime(message.created_at)}
-                            </time>
-                          </div>
-                        </div>
-                      ))}
-                      {!messages.length && <p className="text-sm text-mecg-navy/65">Nothing has been sent to this applicant yet.</p>}
-                    </div>
-                  </div>
                   {auditEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                       <div>
@@ -542,8 +583,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         </div>
       </div>
 
-      <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
-        Back to applicants
+      <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+        Back to Recruitment
       </Link>
     </main>
   );

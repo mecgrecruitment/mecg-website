@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(264);
+select extensions.plan(294);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -18,6 +18,39 @@ select extensions.has_function('rush','has_cycle_capability',array['text','text'
 select extensions.has_function('rush','submit_application',array['text','text','text','text','text','text','text','text','jsonb','boolean','text','text','text','text'],'application function exists');
 select extensions.has_function('rush','submit_evaluation',array['text','jsonb','text'],'evaluation function exists');
 select extensions.has_function('rush','declare_conflict',array['text','text'],'conflict function exists');
+select extensions.has_function('rush','is_decision_ready',array['text'],'shared decision-readiness predicate exists');
+select extensions.has_function('rush','assert_decision_ready',array['text'],'shared decision-readiness guard exists');
+select extensions.ok(position('assert_decision_ready' in pg_get_functiondef('rush.create_decision(text,text,rush.decision_outcome,text)'::regprocedure)) > 0 and position('assert_decision_ready' in pg_get_functiondef('rush.apply_hash_result(text)'::regprocedure)) > 0 and position('assert_decision_ready' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0, 'manual, vote-derived, and release decision paths share one evidence gate');
+select extensions.ok(position('EVALUATOR_REPLACED_AFTER_CONFLICT' in pg_get_functiondef('rush.declare_conflict(text,text)'::regprocedure)) > 0 and position('EVALUATOR_REPLACEMENT_REQUIRED' in pg_get_functiondef('rush.declare_conflict(text,text)'::regprocedure)) > 0, 'formal evaluator conflicts create or visibly request a replacement');
+select extensions.has_table('rush','evaluation_drafts','private cross-device evaluation drafts exist');
+select extensions.has_function('rush','get_evaluation_draft',array['text'],'evaluator draft retrieval exists');
+select extensions.has_function('rush','save_evaluation_draft',array['text','jsonb','text'],'evaluator draft autosave exists');
+select extensions.has_function('rush','discard_evaluation_draft',array['text'],'evaluator draft cleanup exists');
+select extensions.has_table('rush','round_participations','round participation snapshots exist');
+select extensions.has_function('rush','is_speed_dating_screening_ready',array['text'],'Speed Dating screening gate exists');
+select extensions.has_function('rush','advance_to_speed_dating',array['text','text[]'],'atomic Speed Dating advancement exists');
+select extensions.has_function('rush','application_draft',array[]::text[],'caller-scoped application draft retrieval exists');
+select extensions.has_function('rush','save_application_draft',array['jsonb'],'caller-scoped application draft autosave exists');
+select extensions.has_table('rush','member_onboarding_items','accepted-offer onboarding checklist exists');
+select extensions.has_function('rush','my_member_onboarding',array[]::text[],'applicant onboarding view exists');
+select extensions.has_function('rush','set_member_onboarding_completion',array['text','text','boolean'],'audited Board onboarding completion exists');
+select extensions.has_function('rush','event_observation_roster',array['text'],'qualitative event observation roster exists');
+select extensions.has_function('rush','submit_event_observation',array['text','text','text[]','text'],'qualitative event observation submission exists');
+select extensions.has_table('rush','screening_review_drafts','private anonymous-screening drafts exist');
+select extensions.has_function('rush','save_screening_review_draft',array['text','jsonb','text','text'],'anonymous-screening draft autosave exists');
+select extensions.has_function('rush','next_screening_assignment',array['text'],'reviewers can continue to their next anonymous assignment');
+select extensions.has_function('rush','cancel_my_event_rsvp',array['text'],'applicant event cancellation exists');
+select extensions.has_function('rush','reschedule_my_event_rsvp',array['text','text'],'applicant event rescheduling exists');
+select extensions.has_function('rush','cancel_my_buddy_booking',array['text'],'applicant member-chat cancellation exists');
+select extensions.has_function('rush','reschedule_my_buddy_booking',array['text','text'],'applicant member-chat rescheduling exists');
+select extensions.has_table('rush','round_calibration_acknowledgements','rubric calibration acknowledgements exist');
+select extensions.has_function('rush','acknowledge_round_calibration',array['text','text'],'evaluators can acknowledge the active rubric');
+select extensions.has_function('rush','recruitment_analytics',array['text'],'privacy-safe post-cycle recruitment analytics exist');
+select extensions.ok(not exists(
+  select 1 from pg_proc p
+  join pg_namespace n on n.oid=p.pronamespace
+  where n.nspname='rush' and pg_get_functiondef(p.oid) like '%auth.uid()%'
+), 'all Rush functions use provider-neutral actor identity');
 select extensions.has_function('rush','create_decision',array['text','text','rush.decision_outcome','text'],'decision function exists');
 select extensions.has_function('rush','approve_decision',array['text'],'approval function exists');
 select extensions.has_function('rush','release_decision',array['text'],'release function exists');
@@ -64,7 +97,7 @@ select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.set_r
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) > 0 and position('has_cycle_capability' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) = 0, 'attendance export retains strict board authorization');
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.set_decision_preview(text,text)'::regprocedure)) > 0 and position('DECISION_PREVIEW' in pg_get_functiondef('rush.set_decision_preview(text,text)'::regprocedure)) = 0, 'decision preview retains strict panel authorization');
 select extensions.ok(position('resource' in pg_get_expr((select polqual from pg_policy where polname='audit_events_read_internal' and polrelid='rush.audit_events'::regclass),'rush.audit_events'::regclass)) > 0 and position('''Decision''' in pg_get_expr((select polqual from pg_policy where polname='audit_events_read_internal' and polrelid='rush.audit_events'::regclass),'rush.audit_events'::regclass)) = 0 and position('''Evaluation''' in pg_get_expr((select polqual from pg_policy where polname='audit_events_read_internal' and polrelid='rush.audit_events'::regclass),'rush.audit_events'::regclass)) = 0, 'committee audit policy excludes decision and evaluation evidence');
-select extensions.ok(position('m.role=''MEMBER''' in pg_get_functiondef('rush.is_eligible_screening_reviewer(text,uuid)'::regprocedure)) > 0 and position('RECRUITMENT_COMMITTEE' in pg_get_functiondef('rush.is_eligible_screening_reviewer(text,uuid)'::regprocedure)) > 0 and position('not exists' in lower(pg_get_functiondef('rush.is_eligible_screening_reviewer(text,uuid)'::regprocedure))) > 0, 'screening eligibility requires active member status without a privileged role');
+select extensions.ok(position('m.role=''RECRUITMENT_COMMITTEE''' in pg_get_functiondef('rush.is_eligible_screening_reviewer(text,uuid)'::regprocedure)) > 0 and position('not exists' in lower(pg_get_functiondef('rush.is_eligible_screening_reviewer(text,uuid)'::regprocedure))) > 0, 'screening eligibility requires an active recruitment committee membership without a conflicting privileged role');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.is_active_screening_reviewer(text)'::regprocedure)) > 0, 'active screening reviewer rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.my_screening_queue(text)'::regprocedure)) > 0, 'reviewer queue rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.screening_assignment_detail(text)'::regprocedure)) > 0, 'reviewer detail rechecks current role eligibility');
@@ -324,6 +357,9 @@ select extensions.throws_ok(
 set local role postgres;
 update rush.rubrics set minimum_observed_criteria=1 where id='10000000-0000-4000-8000-000000000052';
 set local role authenticated;
+select extensions.lives_ok(
+  $$select rush.acknowledge_round_calibration('10000000-0000-4000-8000-000000000042','10000000-0000-4000-8000-000000000052')$$,
+  'the assigned evaluator can acknowledge the active rubric before submitting');
 select extensions.lives_ok(
   $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
   'the same ratings pass when the rubric explicitly requires one observation');

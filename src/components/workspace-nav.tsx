@@ -72,14 +72,9 @@ export default async function WorkspaceNav({
   const adminTools: NavLink[] = [
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
-        ["/admin/referrals", "Referrals"],
         ["/admin/screening", "Review setup"],
-        ["/admin/groups", "Group interviews"],
-        ...(can("MANAGE_CYCLE") ? [["/admin/notifications", "Emails & texts"] as const] : []),
       ] as const)
       : []),
-    ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/audit", "Activity"] as const] : []),
-    ...(can("MANAGE_CYCLE") ? [["/admin/projects", "Projects"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
   return (

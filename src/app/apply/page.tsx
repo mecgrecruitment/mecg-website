@@ -14,9 +14,9 @@ import {
   isBeforeApplicationOpen,
 } from "@/lib/public-recruitment";
 import { createClient } from "@/lib/supabase/server";
-import { parseApplicationDraft } from "@/lib/workflow";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
+import { parseApplicationServerDraft } from "./application-server-draft";
 
 export const metadata: Metadata = { title: "Apply" };
 
@@ -91,7 +91,7 @@ export default async function ApplyPage() {
   // A failed or malformed schema is not the same thing as a closed cycle; never say "closed" for it.
   const schemaUnavailable = Boolean(user) && !schema;
   if (schemaUnavailable && !intakeError) console.error("intake_schema returned an unusable payload", intake);
-  const draft = parseApplicationDraft(schema?.draft);
+  const draft = parseApplicationServerDraft(schema?.draft);
   // Before opens_at the cycle is OPEN, it just has not started, and intake_schema
   // still says open:false. Telling that applicant "Applications closed" sends
   // someone who signed up at 19:45 home fifteen minutes early.

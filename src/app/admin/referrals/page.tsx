@@ -43,20 +43,22 @@ export default async function ReferralsPage() {
 
   const countOf = (status: string) => referrals.filter((referral) => referral.status === status).length;
   const stats = [
-    [referrals.length, "total"],
-    [countOf("NEW"), "sent"],
-    [countOf("REVIEWED"), "reviewed"],
-    [countOf("INVITED"), "invited"],
+    [referrals.length, "total referrals"],
+    [countOf("NEW"), "awaiting review"],
+    [countOf("REVIEWED"), "ready for outreach"],
+    [countOf("INVITED") + countOf("PASSED"), "complete"],
   ] as const;
+  const statusPriority: Record<string, number> = { NEW: 0, REVIEWED: 1, INVITED: 2, PASSED: 3 };
+  const orderedReferrals = [...referrals].sort((a, b) => (statusPriority[a.status] ?? 4) - (statusPriority[b.status] ?? 4));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Referrals"
-        description="People your members think should be in MECG."
+        description="Review each member referral, handle outreach, and keep one reliable status."
       />
-      <WorkspaceNav user={user} cycleId={cycleId} current="/admin/referrals" />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
 
       <section>
         <div className="grid gap-3 sm:grid-cols-4">
@@ -67,63 +69,36 @@ export default async function ReferralsPage() {
           ))}
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 md:hidden">
-          {referrals.map((referral) => (
-            <article key={referral.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-              <p className="text-[15px] font-semibold text-mecg-navy">{referral.name}</p>
-              <p className="mt-0.5 break-words text-[13px] text-mecg-navy/65">{referral.email}</p>
-              <p className="mt-1 text-[12px] text-mecg-navy/55">
-                {[referral.year_major, `Referred by ${referrerName.get(referral.referrer_id) ?? "a member"}`].filter(Boolean).join(" · ")}
-              </p>
-              <p className="mt-2 text-[13px] leading-5 text-mecg-navy/70">{referral.reason}</p>
-              <p className="mt-2 text-[12px] text-mecg-navy/55">{formatEasternDateTime(referral.created_at)}</p>
-              <div className="mt-3">
-                <ReferralStatusForm referralId={referral.id} referralName={referral.name} current={referral.status} />
+        <div className="mt-4 flex flex-col gap-3" aria-label="Referral review queue">
+          {orderedReferrals.map((referral) => (
+            <article key={referral.id} className="grid gap-4 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-6">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                  <div>
+                    <p className="text-[15px] font-semibold text-mecg-navy">{referral.name}</p>
+                    <p className="mt-0.5 break-words text-[13px] text-mecg-navy/65">{referral.email}</p>
+                  </div>
+                  <p className="text-[12px] text-mecg-navy/55">Submitted {formatEasternDateTime(referral.created_at)}</p>
+                </div>
+                <p className="mt-2 text-[12px] text-mecg-navy/55">
+                  {[referral.year_major, `Referred by ${referrerName.get(referral.referrer_id) ?? "a member"}`].filter(Boolean).join(" · ")}
+                </p>
+                <div className="mt-3 rounded-xl bg-mecg-navy/[0.035] px-3 py-2.5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/45">Why they may fit</p>
+                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-5 text-mecg-navy/70">{referral.reason}</p>
+                </div>
+              </div>
+              <div className="border-t border-mecg-navy/[0.08] pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                <ReferralStatusForm key={`${referral.id}-${referral.status}`} referralId={referral.id} referralName={referral.name} current={referral.status} />
               </div>
             </article>
           ))}
           {!referrals.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55">
-              No referrals yet. Members send them from Refer someone.
-            </p>
+            <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6">
+              <p className="text-sm font-semibold text-mecg-navy">No referrals to review</p>
+              <p className="mt-1 text-sm leading-6 text-mecg-navy/55">When a member submits a referral, it will appear here at the top of the review queue.</p>
+            </div>
           )}
-        </div>
-
-        <div className="scroll-cue mt-4 hidden overflow-x-auto rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:block" tabIndex={0} role="region" aria-label="Referrals">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-mecg-navy/[0.03]">
-              <tr>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Person</th>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Referred by</th>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Year &amp; major</th>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Why</th>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Submitted</th>
-                <th className="p-3 text-[13px] font-semibold text-mecg-navy/60">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {referrals.map((referral) => (
-                <tr key={referral.id} className="border-t border-mecg-navy/[0.08] align-top">
-                  <td className="p-3">
-                    <span className="block font-semibold text-mecg-navy">{referral.name}</span>
-                    <span className="block text-[12px] text-mecg-navy/60">{referral.email}</span>
-                  </td>
-                  <td className="p-3 text-[13px] text-mecg-navy/70">{referrerName.get(referral.referrer_id) ?? "A member"}</td>
-                  <td className="p-3 text-[13px] text-mecg-navy/70">{referral.year_major || "—"}</td>
-                  <td className="max-w-96 p-3 text-[13px] leading-5 text-mecg-navy/70">{referral.reason}</td>
-                  <td className="p-3 text-[12px] text-mecg-navy/60">{formatEasternDateTime(referral.created_at)}</td>
-                  <td className="p-3">
-                    <ReferralStatusForm referralId={referral.id} referralName={referral.name} current={referral.status} />
-                  </td>
-                </tr>
-              ))}
-              {!referrals.length && (
-                <tr className="border-t border-mecg-navy/[0.08]">
-                  <td colSpan={6} className="p-6 text-sm text-mecg-navy/55">No referrals yet. Members send them from Refer someone.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
       </section>
     </main>

@@ -9,6 +9,8 @@ import WorkspaceNav from "@/components/workspace-nav";
 import { PeopleControls } from "../rush-controls";
 import { memberAccountsFor } from "../member-accounts";
 import { cycleStatusLabel, memberRoleLabel } from "@/lib/labels";
+import { onboardingRpc } from "@/app/applicant/onboarding-data";
+import BoardOnboarding, { type BoardOnboardingItem } from "./onboarding";
 
 export const metadata: Metadata = { title: "People" };
 
@@ -41,6 +43,17 @@ function parseDirectory(value: unknown): DirectoryEntry[] {
   });
 }
 
+function parseOnboarding(value: unknown): BoardOnboardingItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const row = entry as Record<string, unknown>;
+    if (typeof row.applicationId !== "string" || typeof row.applicantName !== "string" || typeof row.key !== "string") return [];
+    const optional = (field: unknown) => typeof field === "string" ? field : null;
+    return [{ applicationId: row.applicationId, applicantName: row.applicantName, contact: optional(row.contact) ?? "", key: row.key, ownerId: optional(row.ownerId), ownerName: optional(row.ownerName), completedAt: optional(row.completedAt), completedByName: optional(row.completedByName) }];
+  });
+}
+
 export default async function PeoplePage() {
   // Any member may read the directory. Only MANAGE_MEMBERSHIPS gets the role
   // controls below it, so this is one page with two audiences rather than a
@@ -49,6 +62,7 @@ export default async function PeoplePage() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "WORKSPACE_ACCESS");
   if (!cycleId) redirect("/member");
   const canManage = hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS");
+  const canOnboard = user.memberships.some((membership) => membership.active && membership.cycleId === cycleId && ["BOARD", "OWNER"].includes(membership.role));
   const supabase = await createClient();
   const [cycleResult, membersResult, directoryResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
@@ -63,6 +77,9 @@ export default async function PeoplePage() {
   const cycle = cycleResult.data;
   if (!cycle) redirect("/member");
   const directory = parseDirectory(directoryResult.data);
+  const onboardingResult = canOnboard ? await onboardingRpc<unknown>(supabase, "cycle_member_onboarding", { target_cycle_id: cycleId }) : { data: [], error: null };
+  if (onboardingResult.error) console.error("cycle member onboarding failed", onboardingResult.error);
+  const onboarding = parseOnboarding(onboardingResult.data);
 
   return (
     <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
@@ -72,6 +89,8 @@ export default async function PeoplePage() {
         description="Who is on the team this cycle."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/people" />
+
+      {canOnboard && <BoardOnboarding cycleId={cycleId} initialItems={onboarding} owners={directory.map(({ id, name }) => ({ id, name }))} />}
 
       <section>
         <p className="text-[13px] font-semibold text-mecg-navy/50">Directory</p>

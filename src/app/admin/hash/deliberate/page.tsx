@@ -28,7 +28,7 @@ export default async function DeliberationPage() {
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
-    supabase.from("event_impressions").select("application_id, score, tags, events!inner(cycle_id)").eq("events.cycle_id", cycleId),
+    supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),
   ]);
   for (const result of [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult]) if (result.error) throw result.error;
   const cycle = cycleResult.data;
@@ -53,12 +53,12 @@ export default async function DeliberationPage() {
   for (const decision of decisionsResult.data ?? []) {
     if (!decisionByApplication.has(decision.application_id)) decisionByApplication.set(decision.application_id, decision);
   }
-  const impressionGroups = new Map<string, { total: number; count: number; tagCounts: Map<string, number> }>();
+  const impressionGroups = new Map<string, { count: number; tagCounts: Map<string, number>; notes: string[] }>();
   for (const impression of impressionsResult.data ?? []) {
-    const group = impressionGroups.get(impression.application_id) ?? { total: 0, count: 0, tagCounts: new Map() };
-    group.total += impression.score;
+    const group = impressionGroups.get(impression.application_id) ?? { count: 0, tagCounts: new Map<string, number>(), notes: [] as string[] };
     group.count += 1;
     for (const tag of impression.tags) group.tagCounts.set(tag, (group.tagCounts.get(tag) ?? 0) + 1);
+    if (!panelOnly && impression.note.trim()) group.notes.push(impression.note.trim());
     impressionGroups.set(impression.application_id, group);
   }
   const entries: DeckEntry[] = applications.map((application) => {
@@ -85,8 +85,8 @@ export default async function DeliberationPage() {
       impressions: group
         ? {
             count: group.count,
-            avg: group.total / group.count,
             topTags: [...group.tagCounts].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([tag]) => tag),
+            notes: group.notes,
           }
         : null,
       decision: decision ? { outcome: decision.outcome, status: decision.status } : null,

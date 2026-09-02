@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import SectionLabel from "@/components/section-label";
 import StatusPill from "@/components/status-pill";
 import { assignmentStatusLabel } from "@/lib/labels";
+import { parseScreeningProgress, screeningDeadlineLabel } from "./screening-draft";
 
 function statusTone(status: ScreeningQueueItem["assignment_status"]) {
   if (status === "ASSIGNED") return "orange" as const;
@@ -16,11 +17,19 @@ function statusTone(status: ScreeningQueueItem["assignment_status"]) {
 
 export default async function ScreeningQueuePage() {
   const user = await requireMember();
-  const cycle = user.memberships.find((membership) => membership.active && membership.role === "MEMBER");
+  const cycle = user.memberships.find((membership) => membership.active && membership.role === "RECRUITMENT_COMMITTEE");
   if (!cycle) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">You are not enrolled as an application reviewer.</p></main>;
   const supabase = await createClient();
-  const { data: queue, error } = await screeningRpc<ScreeningQueueItem[]>(supabase, "my_screening_queue", { target_cycle_id: cycle.cycleId });
+  const [{ data: queue, error }, { data: rawContext, error: contextError }] = await Promise.all([
+    screeningRpc<ScreeningQueueItem[]>(supabase, "my_screening_queue", { target_cycle_id: cycle.cycleId }),
+    screeningRpc<unknown>(supabase, "screening_reviewer_context", { target_cycle_id: cycle.cycleId }),
+  ]);
   if (error) throw new Error(error.message);
+  if (contextError) throw new Error(contextError.message);
+  const context = parseScreeningProgress(rawContext);
+  if (!context) throw new Error("Screening progress is unavailable");
+  const remaining = (queue ?? []).filter((item) => item.assignment_status === "ASSIGNED");
+  const completion = context.total > 0 ? Math.round((context.completed / context.total) * 100) : 100;
   return (
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       <WorkspaceHeader
@@ -29,17 +38,26 @@ export default async function ScreeningQueuePage() {
         description="Review only the evidence in each application. You cannot see who wrote it, so do not try to identify applicants or discuss assignments with other reviewers."
       />
       <WorkspaceNav user={user} cycleId={cycle.cycleId} current="/member/screening" />
+      <section className="grid gap-3 rounded-2xl bg-mecg-navy p-5 text-white sm:grid-cols-[1fr_auto] sm:items-center">
+        <div>
+          <p className="text-sm text-white/65">Your private progress</p>
+          <p className="mt-1 text-2xl font-semibold">{context.completed} of {context.total} complete</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15" aria-hidden="true"><div className="h-full rounded-full bg-mecg-orange" style={{ width: `${completion}%` }} /></div>
+        </div>
+        <p className="rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold">{screeningDeadlineLabel(context.deadline)}</p>
+      </section>
       <section>
         <SectionLabel number="01">Your reading queue</SectionLabel>
+        <p className="mt-2 text-sm text-mecg-navy/60">Open one application at a time. Submitted reviews are locked and removed from this list.</p>
         <div className="mt-3.5 grid gap-4 sm:grid-cols-2">
-          {(queue ?? []).map((item) => (
+          {remaining.map((item) => (
             <article key={item.assignment_id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
               <p className="font-mono text-xs text-mecg-navy/60">{item.candidate_code}</p>
               <div className="mt-2"><StatusPill tone={statusTone(item.assignment_status)}>{assignmentStatusLabel(item.assignment_status)}</StatusPill></div>
-              {item.assignment_status === "ASSIGNED" && <Link href={`/member/screening/${item.assignment_id}`} className="button-primary mt-4">Open review</Link>}
+              <Link href={`/member/screening/${item.assignment_id}`} className="button-primary mt-4">Read and score</Link>
             </article>
           ))}
-          {!queue?.length && <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">No applications are waiting for you to read.</p>}
+          {!remaining.length && <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">You are caught up. No applications are waiting for review.</p>}
         </div>
       </section>
     </main>

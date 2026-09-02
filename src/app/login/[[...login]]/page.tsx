@@ -5,10 +5,11 @@ import PortalShell from "@/components/portal-shell";
 import OperationNotice from "@/components/operation-notice";
 import { currentDestination } from "@/lib/auth";
 import { hasClerkRuntimeConfiguration } from "@/lib/env";
+import { validatedRedirect } from "./redirect";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ redirect_url?: string | string[] }> }) {
   const clerkConfigured = hasClerkRuntimeConfiguration();
   if (!clerkConfigured) {
     return (
@@ -28,6 +29,8 @@ export default async function LoginPage() {
 
   const destination = await currentDestination();
   if (destination) redirect(destination);
+  const { redirect_url: requestedRedirect } = await searchParams;
+  const returnTo = validatedRedirect(requestedRedirect);
 
   return (
     <PortalShell
@@ -40,7 +43,8 @@ export default async function LoginPage() {
       <SignIn
         path="/login"
         routing="path"
-        signUpUrl="/apply"
+        signUpUrl={returnTo ? `/apply?redirect_url=${encodeURIComponent(returnTo)}` : "/apply"}
+        forceRedirectUrl={returnTo}
         fallbackRedirectUrl="/apply"
         // PortalShell already draws the heading and the page draws the Clerk credit, so the
         // widget ships chromeless. Values are style objects, not class names: Clerk merges

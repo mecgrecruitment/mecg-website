@@ -23,6 +23,18 @@ type ClaimedNotification = ClaimedNotificationBase & ({
   eventName: string;
   eventStartsAt: string;
   eventLocation: string | null;
+} | {
+  templateKey: "SPEED_DATING_INVITATION";
+  roundName: string;
+  roundOpensAt: string | null;
+  roundClosesAt: string | null;
+} | {
+  templateKey: "EVALUATION_ASSIGNED";
+  evaluatorName: string;
+  roundName: string;
+  roundOpensAt: string | null;
+  roundClosesAt: string | null;
+  assignmentId: string;
 });
 
 export type NotificationDelivery = {
@@ -37,7 +49,10 @@ function parseClaimedNotification(value: unknown): ClaimedNotification | null {
   if (
     typeof row.id !== "string"
     || typeof row.recipient !== "string"
-    || (row.templateKey !== "DECISION_RELEASED" && row.templateKey !== "EVENT_CANCELLED")
+    || (row.templateKey !== "DECISION_RELEASED"
+      && row.templateKey !== "EVENT_CANCELLED"
+      && row.templateKey !== "SPEED_DATING_INVITATION"
+      && row.templateKey !== "EVALUATION_ASSIGNED")
     || row.templateVersion !== 1
     || typeof row.attemptCount !== "number"
     || typeof row.idempotencyKey !== "string"
@@ -46,6 +61,14 @@ function parseClaimedNotification(value: unknown): ClaimedNotification | null {
   if (row.templateKey === "DECISION_RELEASED" && typeof row.decisionOutcome === "string") return row as ClaimedNotification;
   if (row.templateKey === "EVENT_CANCELLED" && typeof row.eventName === "string" && typeof row.eventStartsAt === "string"
     && (typeof row.eventLocation === "string" || row.eventLocation === null)) return row as ClaimedNotification;
+  const isNullableTimestamp = (field: unknown) => field === null
+    || (typeof field === "string" && field.length > 0 && !Number.isNaN(Date.parse(field)));
+  const hasRoundFields = typeof row.roundName === "string"
+    && isNullableTimestamp(row.roundOpensAt)
+    && isNullableTimestamp(row.roundClosesAt);
+  if (row.templateKey === "SPEED_DATING_INVITATION" && hasRoundFields) return row as ClaimedNotification;
+  if (row.templateKey === "EVALUATION_ASSIGNED" && hasRoundFields
+    && typeof row.evaluatorName === "string" && typeof row.assignmentId === "string") return row as ClaimedNotification;
   return null;
 }
 
@@ -81,6 +104,58 @@ function eventCancellationEmail(notification: Extract<ClaimedNotification, { tem
   };
 }
 
+function formatRoundTiming(opensAt: string | null, closesAt: string | null) {
+  const format = (value: string) => new Date(value).toLocaleString("en-US", {
+    timeZone: "America/Detroit",
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+  if (opensAt && closesAt) return ` It opens ${escapeHtml(format(opensAt))} and closes ${escapeHtml(format(closesAt))}.`;
+  if (opensAt) return ` It opens ${escapeHtml(format(opensAt))}.`;
+  if (closesAt) return ` Please complete it by ${escapeHtml(format(closesAt))}.`;
+  return "";
+}
+
+function speedDatingInvitationEmail(notification: Extract<ClaimedNotification, { templateKey: "SPEED_DATING_INVITATION" }>) {
+  const name = escapeHtml(notification.applicantName);
+  const roundName = escapeHtml(notification.roundName);
+  const timing = formatRoundTiming(notification.roundOpensAt, notification.roundClosesAt);
+  return {
+    subject: "You're invited to MECG Speed Dating",
+    html: wrapEmail(
+      `<p>Hi ${name},</p><p>You've been selected to advance to ${roundName}.${timing} Open your applicant portal for scheduling and next steps.</p>`,
+      { label: "View next steps", href: "https://mecgmichigan.com/applicant" },
+    ),
+  };
+}
+
+function evaluationAssignedEmail(notification: Extract<ClaimedNotification, { templateKey: "EVALUATION_ASSIGNED" }>) {
+  const evaluatorName = escapeHtml(notification.evaluatorName);
+  const applicantName = escapeHtml(notification.applicantName);
+  const roundName = escapeHtml(notification.roundName);
+  const timing = formatRoundTiming(notification.roundOpensAt, notification.roundClosesAt);
+  return {
+    subject: "New MECG Speed Dating evaluation",
+    html: wrapEmail(
+      `<p>Hi ${evaluatorName},</p><p>A ${roundName} evaluation for ${applicantName} was added to My Work.${timing}</p>`,
+      { label: "Open My Work", href: "https://mecgmichigan.com/member" },
+    ),
+  };
+}
+
+function notificationEmail(notification: ClaimedNotification) {
+  switch (notification.templateKey) {
+    case "DECISION_RELEASED":
+      return decisionEmail(notification.decisionOutcome, notification.applicantName);
+    case "EVENT_CANCELLED":
+      return eventCancellationEmail(notification);
+    case "SPEED_DATING_INVITATION":
+      return speedDatingInvitationEmail(notification);
+    case "EVALUATION_ASSIGNED":
+      return evaluationAssignedEmail(notification);
+  }
+}
+
 export async function deliverNotification(client: NotificationClient, notificationId: string): Promise<NotificationDelivery> {
   const claimedResult = await client.rpc("claim_notification", { target_notification_id: notificationId });
   if (claimedResult.error) throw new Error(`claim_notification failed: ${claimedResult.error.code ?? "unknown"}`);
@@ -92,9 +167,7 @@ export async function deliverNotification(client: NotificationClient, notificati
     throw new Error("claim_notification returned an invalid payload");
   }
 
-  const content = notification.templateKey === "DECISION_RELEASED"
-    ? decisionEmail(notification.decisionOutcome, notification.applicantName)
-    : eventCancellationEmail(notification);
+  const content = notificationEmail(notification);
   const result = await sendEmailDetailed({
     to: notification.recipient,
     subject: content.subject,

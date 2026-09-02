@@ -70,5 +70,5 @@ test("move advances the step even when the draft save fails", () => {
   const move = /async function move\(next: Step\) \{([\s\S]*?)\n  \}/.exec(source)?.[1];
   assert.ok(move, "move() not found in application-form.tsx");
   assert.doesNotMatch(move, /if\s*\([^)]*saveDraft/);
-  assert.match(move, /await saveDraft\(draftPayload\);\n\s*changeStep\(next\);/);
+  assert.match(move, /await saveDraft\(\{ \.\.\.draftPayload, currentStep: next \}\);\n\s*changeStep\(next\);/);
 });

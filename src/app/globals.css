@@ -349,17 +349,6 @@ details[open] > summary .disclosure-chevron {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes panel-seat {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   @keyframes step-forward {
     from {
       opacity: 0;
@@ -382,11 +371,6 @@ details[open] > summary .disclosure-chevron {
     }
   }
 
-  .panel-seat,
-  details[open] > .disclosure-panel {
-    animation: panel-seat var(--t-panel) var(--ease-out) both;
-  }
-
   .step-seat[data-direction="forward"] {
     animation: step-forward var(--t-panel) var(--ease-out) both;
   }
@@ -395,9 +379,6 @@ details[open] > summary .disclosure-chevron {
     animation: step-back var(--t-panel) var(--ease-out) both;
   }
 
-  .submission-confirmed {
-    animation: panel-seat var(--t-panel) var(--ease-out) both;
-  }
 }
 
 @media (min-width: 640px) {

@@ -8,8 +8,17 @@ import PillNav from "@/components/pill-nav";
 import SectionLabel from "@/components/section-label";
 import ImpressionForm from "./impression-form";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { screeningRpc } from "@/lib/screening-rpc";
 
-export const metadata: Metadata = { title: "Live Event Grading" };
+export const metadata: Metadata = { title: "Event Observations" };
+
+type ObservationRow = {
+  application_id: string;
+  applicant_name: string;
+  observation_id: string | null;
+  tags: string[] | null;
+  note: string | null;
+};
 
 function formatStart(startsAt: string) {
   return formatEasternDateTime(startsAt);
@@ -24,10 +33,12 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
   const selected = eventRows.find((row) => row.event_id === eventParam)
     ?? eventRows.find((row) => row.grading_open)
     ?? eventRows[0];
-  const roster = selected ? await supabase.rpc("event_grading_roster", { target_event_id: selected.event_id }) : null;
+  const roster = selected
+    ? await screeningRpc<ObservationRow[]>(supabase, "event_observation_roster", { target_event_id: selected.event_id })
+    : null;
   const rosterRows = roster?.data ?? [];
-  const gradedCount = rosterRows.filter((row) => row.impression_id).length;
-  const firstUngradedId = rosterRows.find((row) => !row.impression_id)?.application_id;
+  const observedCount = rosterRows.filter((row) => row.observation_id).length;
+  const firstUnobservedId = rosterRows.find((row) => !row.observation_id)?.application_id;
   const navLinks: Array<readonly [string, string]> = [
     ["/member", "All work"],
     ...eventRows.map((row) => [`/member/event?event=${row.event_id}`, row.event_name] as const),
@@ -38,55 +49,55 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
   return (
     <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
       <WorkspaceHeader
-        eyebrow="Live event grading"
+        eyebrow="Event observations"
         title={selected ? selected.event_name : "No event selected"}
         description={`Signed in as ${user.name}`}
       />
       {workspaceCycleId && <WorkspaceNav user={user} cycleId={workspaceCycleId} current="/member/event" />}
-      <PillNav ariaLabel="Grading events" current={currentWorkspace} links={navLinks} />
+      <PillNav ariaLabel="Observation events" current={currentWorkspace} links={navLinks} />
 
       {!selected ? (
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
-          <p className="font-semibold text-mecg-navy">No events to grade yet</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Check in at a closed rush event to unlock grading.</p>
+          <p className="font-semibold text-mecg-navy">No event observations yet</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">Check in at a rush event to capture factual follow-up context.</p>
           <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
       ) : roster?.error ? (
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
-          <p className="font-semibold text-mecg-navy">The grading window is closed</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Impressions for this event can no longer be added or edited.</p>
+          <p className="font-semibold text-mecg-navy">The observation window is closed</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">Observations for this event can no longer be added or edited.</p>
           <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
       ) : (
         <section>
           <div className="sticky top-0 z-20 -mx-6 border-b border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
-            <SectionLabel>Quick impressions</SectionLabel>
-            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{gradedCount} of {rosterRows.length} applicants graded</h2>
-            <p className="mt-1 text-sm text-mecg-navy/65">Started {formatStart(selected.starts_at)} · you can edit an impression until the grading window closes.</p>
+            <SectionLabel>Qualitative observations</SectionLabel>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{observedCount} of {rosterRows.length} applicants observed</h2>
+            <p className="mt-1 text-sm text-mecg-navy/65">Started {formatStart(selected.starts_at)} · observations never affect applicant scores or attendance decisions.</p>
             <div className="progress-track mt-3 sm:max-w-sm" aria-hidden="true">
-              <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? gradedCount / rosterRows.length : 0})` }} />
+              <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? observedCount / rosterRows.length : 0})` }} />
             </div>
           </div>
           <div className="mt-3.5 flex flex-col gap-4">
             {rosterRows.map((row) => (
               <article key={row.application_id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
                 <h3 className="text-lg font-semibold text-mecg-navy">{row.applicant_name}</h3>
-                {row.impression_id ? (
+                {row.observation_id ? (
                   <details className="group mt-3 rounded-xl">
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                      <span className="text-sm font-semibold text-mecg-navy">Graded · Score {row.score} · edit</span>
+                      <span className="text-sm font-semibold text-mecg-navy">Observation saved · edit</span>
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
                     </summary>
                     <div className="disclosure-panel">
-                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ score: row.score, tags: row.tags ?? [], note: row.note ?? "" }} />
+                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ tags: row.tags ?? [], note: row.note ?? "" }} />
                     </div>
                   </details>
                 ) : (
-                  <details className="group mt-3 rounded-xl" open={row.application_id === firstUngradedId}>
+                  <details className="group mt-3 rounded-xl" open={row.application_id === firstUnobservedId}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                      <span className="text-sm font-semibold text-mecg-navy">Not graded yet</span>
+                      <span className="text-sm font-semibold text-mecg-navy">No observation yet</span>
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
                         <path d="M5 8l5 5 5-5" />
                       </svg>
@@ -100,8 +111,8 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
             ))}
             {!rosterRows.length && (
               <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
-                <p className="font-semibold text-mecg-navy">No applicants to grade</p>
-                <p className="mt-1 text-sm text-mecg-navy/55">Checked-in applicants will appear here, minus your declared conflicts.</p>
+                <p className="font-semibold text-mecg-navy">No applicants available</p>
+                <p className="mt-1 text-sm text-mecg-navy/55">Checked-in applicants will appear here, minus your declared conflicts. Check-in controls visibility only; it is never scoring evidence.</p>
               </div>
             )}
           </div>
