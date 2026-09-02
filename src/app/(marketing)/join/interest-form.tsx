@@ -78,7 +78,7 @@ export default function InterestForm() {
         />
       </label>
       <label className="block text-sm font-medium text-white/80">
-        Uniqname <span className="font-normal text-white/45">optional</span>
+        Uniqname <span className="font-normal text-white/70">optional</span>
         <input
           name="uniqname"
           autoComplete="username"
@@ -88,7 +88,7 @@ export default function InterestForm() {
         />
       </label>
       <label className="block text-sm font-medium text-white/80">
-        Class year <span className="font-normal text-white/45">optional</span>
+        Class year <span className="font-normal text-white/70">optional</span>
         <select name="classYear" defaultValue="" disabled={pending} className={SELECT_CLASS}>
           <option value="">Prefer not to say</option>
           {CLASS_YEARS.map((year) => (
@@ -97,7 +97,7 @@ export default function InterestForm() {
         </select>
       </label>
       <label className="block text-sm font-medium text-white/80 sm:col-span-2">
-        How did you hear about MECG? <span className="font-normal text-white/45">optional</span>
+        How did you hear about MECG? <span className="font-normal text-white/70">optional</span>
         <input
           name="howHeard"
           placeholder="A friend, an event, Instagram…"
@@ -109,7 +109,7 @@ export default function InterestForm() {
         <button type="submit" disabled={pending} className="button-primary disabled:cursor-wait disabled:opacity-60">
           {pending ? "Saving…" : "Join the interest list"}
         </button>
-        <p className="text-xs leading-5 text-white/45">Updates only. Joining this list is not an application.</p>
+        <p className="text-xs leading-5 text-white/70">Updates only. Joining this list is not an application.</p>
       </div>
       <p role={isError ? "alert" : "status"} className={`min-h-5 text-sm sm:col-span-2 ${isError ? "text-mecg-orange" : "text-white/70"}`}>{message}</p>
     </form>

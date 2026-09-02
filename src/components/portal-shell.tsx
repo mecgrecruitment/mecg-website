@@ -29,7 +29,7 @@ export default function PortalShell({
           <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-5">
             <Link
               href="/home"
-              className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange"
+              className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-navy"
               aria-label="MECG home"
             >
               <Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={45} priority className="h-10 w-auto" style={{ width: "auto" }} />
@@ -116,7 +116,7 @@ export default function PortalShell({
             Apply, check your status, complete assigned evaluations, and manage the current rush cycle.
           </p>
         </div>
-        <p className="relative text-[13px] text-white/55">
+        <p className="relative text-[13px] text-white/70">
           Michigan Engineering Consulting Group
         </p>
       </aside>

@@ -71,6 +71,7 @@ test("configured login renders the Clerk flow with visible provider identity", a
   assert.match(markup, /data-sign-up-url="\/apply\?redirect_url=%2Fcheckin%2Ftoken-1%3Ffrom%3Dqr"/);
   assert.equal(seen.forceRedirectUrl, "/checkin/token-1?from=qr");
   assert.match(markup, /Loading secure sign-in/);
+  assert.match(markup, /role="status"/);
   assert.match(markup, /Secure authentication powered by Clerk/);
 
   // The shell already draws the heading and the page draws the Clerk attribution, so the widget ships chromeless.

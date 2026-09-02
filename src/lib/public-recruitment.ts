@@ -11,6 +11,11 @@ export type PublicRecruitment = {
   cycle?: PublicRecruitmentCycle | null;
 };
 
+export type RecruitmentAction = {
+  href: string;
+  label: string;
+};
+
 const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   month: "long",
@@ -91,6 +96,24 @@ export function applicationCycleStatus(cycle: PublicRecruitmentCycle, now = Date
       : "Join the interest list for published dates.",
     isOpen: false,
     opensAt: cycle.opensAt ?? null,
+  };
+}
+
+export function recruitmentAction(
+  cycle?: PublicRecruitmentCycle | null,
+  options: {
+    now?: number;
+    inactiveHref?: string;
+    inactiveLabel?: string;
+  } = {},
+): RecruitmentAction {
+  if (cycle && isApplicationWindowOpen(cycle, options.now)) {
+    return { href: "/apply", label: "Apply now" };
+  }
+
+  return {
+    href: options.inactiveHref ?? "/join",
+    label: options.inactiveLabel ?? "Join MECG",
   };
 }
 

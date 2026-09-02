@@ -33,7 +33,7 @@ export default function SiteFooter() {
           <a href="https://www.linkedin.com/company/michigan-engineering-consulting-group" target="_blank" rel="noreferrer" className="flex min-h-10 items-center text-white/75 transition-colors duration-150 hover:text-white">LinkedIn <span className="sr-only">opens in a new tab</span></a>
         </div>
       </div>
-      <p className="mx-auto mt-4 max-w-6xl text-xs text-white/50">© 2026 Michigan Engineering Consulting Group</p>
+      <p className="mx-auto mt-4 max-w-6xl text-xs text-white/70">© 2026 Michigan Engineering Consulting Group</p>
     </footer>
   );
 }

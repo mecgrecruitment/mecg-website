@@ -75,7 +75,7 @@ export default function SiteHeader() {
             </Link>
           ))}
           <AuthControl className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96" />
-          <Link href="/apply" className="button-primary">Apply now</Link>
+          <Link href="/join" className="button-primary">Join MECG</Link>
         </nav>
         <button
           type="button"
@@ -102,7 +102,7 @@ export default function SiteHeader() {
               </Link>
             ))}
             <AuthControl className="border-b border-white/10 py-4 text-left text-lg text-white" onNavigate={() => setOpen(false)} />
-            <Link href="/apply" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Apply now</Link>
+            <Link href="/join" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Join MECG</Link>
           </div>
         </nav>
       )}

@@ -69,7 +69,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         title={project.title}
         copy={project.decision}
       >
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-white/55">{project.clientLabel}</p>
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-white/70">{project.clientLabel}</p>
       </PageIntro>
 
       <MarketingSection aria-labelledby="context-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">

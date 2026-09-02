@@ -14,6 +14,7 @@ import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { loadCalibrationStates } from "./calibration/load";
+import { evaluationTaskHref, selectedEvaluationAssignment } from "./assignment-navigation";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -32,8 +33,8 @@ function isReady(assignment: { status: string; evaluations: Array<{ status: stri
     && assignment.rounds.status === "ACTIVE";
 }
 
-export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string }> }) {
-  const [user, { round: roundFilter }] = await Promise.all([requireMember(), searchParams]);
+export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string; assignment?: string }> }) {
+  const [user, { round: roundFilter, assignment: requestedAssignmentId }] = await Promise.all([requireMember(), searchParams]);
   const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
   if (!cycleMembership) return null;
 
@@ -71,11 +72,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const deadlineB = b.rounds.closes_at ? new Date(b.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY;
       return deadlineA - deadlineB || a.applications.pnms.name.localeCompare(b.applications.pnms.name);
     });
-  const firstReadyAssignmentId = visible.find((assignment) => {
-    if (!isReady(assignment)) return false;
+  const eligibleAssignmentIds = visible.flatMap((assignment) => {
+    if (!isReady(assignment)) return [];
     const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
-    return Boolean(rubric && acknowledgedRubrics.has(rubric.id));
-  })?.id;
+    return rubric && acknowledgedRubrics.has(rubric.id) ? [assignment.id] : [];
+  });
+  const selectedAssignmentId = selectedEvaluationAssignment(eligibleAssignmentIds, requestedAssignmentId);
   const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
   const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
   const calibrationTasks = Array.from(new Map(openAssignments.flatMap((assignment) => {
@@ -98,7 +100,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
       if (!rubric || !acknowledgedRubrics.has(rubric.id)) return [];
       return [{
-        href: `#assignment-${assignment.id}`,
+        href: evaluationTaskHref(assignment.id),
         label: `Evaluate ${assignment.applications.pnms.name}`,
         detail: assignment.rounds.closes_at ? `${assignment.rounds.name} · closes ${formatDeadline(assignment.rounds.closes_at)}` : assignment.rounds.name,
         dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
@@ -192,6 +194,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             const submitted = isSubmitted(assignment);
             const ready = isReady(assignment);
             const calibrated = Boolean(rubric && acknowledgedRubrics.has(rubric.id));
+            const selected = assignment.id === selectedAssignmentId;
             const criteria = (rubric?.rubric_criteria ?? []).sort((a, b) => a.position - b.position);
             const readyInRound = visible.filter((candidate) => isReady(candidate) && candidate.rounds.id === assignment.rounds.id);
             const roundPosition = readyInRound.findIndex((candidate) => candidate.id === assignment.id) + 1;
@@ -203,11 +206,17 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   ? assignmentStatusLabel(assignment.status)
                   : roundStatusLabel(assignment.rounds.status);
             return (
-              <article id={`assignment-${assignment.id}`} key={assignment.id} className="scroll-mt-6 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
+              <article
+                id={`assignment-${assignment.id}`}
+                key={assignment.id}
+                tabIndex={selected ? -1 : undefined}
+                aria-labelledby={`assignment-heading-${assignment.id}`}
+                className="scroll-mt-24 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] focus:outline-2 focus:outline-offset-3 focus:outline-mecg-navy sm:p-6"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-[13px] font-semibold text-mecg-orange-ink">{assignment.rounds.name}</p>
-                    <h3 className="mt-1.5 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
+                    <h3 id={`assignment-heading-${assignment.id}`} className="mt-1.5 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
                   </div>
                   <span className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ${ready ? "bg-mecg-orange/[0.16] text-mecg-orange-ink" : "bg-mecg-navy/[0.06] text-mecg-navy/55"}`}>
                     {statusLabel}
@@ -220,9 +229,9 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 {submitted ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
                 ) : ready && rubric && calibrated ? (
-                  <details className="mt-3" open={assignment.id === firstReadyAssignmentId}>
+                  <details className="mt-3" open={selected}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] marker:content-none">
-                      <span>{assignment.id === firstReadyAssignmentId ? "Continue evaluation" : "Open evaluation"}</span>
+                      <span>{selected ? "Continue evaluation" : "Open evaluation"}</span>
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
                         <path d="M5 8l5 5 5-5" />
                       </svg>

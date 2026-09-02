@@ -12,6 +12,7 @@ import {
   fetchPublicRecruitment,
   formatRecruitmentEventTime,
   isBeforeApplicationOpen,
+  recruitmentAction,
 } from "@/lib/public-recruitment";
 import InterestForm from "./interest-form";
 
@@ -54,6 +55,10 @@ export default async function JoinPage() {
   const events = recruitment.events ?? [];
   const status = recruitment.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const showInterestForm = status?.isOpen !== true;
+  const action = recruitmentAction(recruitment.cycle, {
+    inactiveHref: "#recruitment-updates",
+    inactiveLabel: "Get recruitment updates",
+  });
   // Only before the window opens. Keyed off isOpen !== true, this countdown also
   // rendered after closes_at, under an "Applications are closed" heading.
   const upcomingCycle = recruitment.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
@@ -61,7 +66,7 @@ export default async function JoinPage() {
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
       <PageIntro title="Join Our Team" copy="MECG is open to University of Michigan students in every major. No previous consulting experience is required.">
-        <Link href="/apply" className="button-primary">Apply now <span aria-hidden="true">→</span></Link>
+        <Link href={action.href} className="button-primary">{action.label} <span aria-hidden="true">→</span></Link>
       </PageIntro>
 
       <MarketingSection spacing="compact">
@@ -114,7 +119,7 @@ export default async function JoinPage() {
       </MarketingSection>
 
       {showInterestForm ? (
-        <MarketingSection tone="navy" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+        <MarketingSection id="recruitment-updates" className="scroll-mt-24" tone="navy" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
             <div>
               <SectionHeading>Get recruitment updates</SectionHeading>
               <p className="mt-4 max-w-md leading-7 text-white/70">We will email you when the Board publishes dates for the active cycle.</p>
@@ -136,8 +141,8 @@ export default async function JoinPage() {
       </MarketingSection>
 
       <MarketingSection tone="blue" spacing="compact" innerClassName="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <SectionHeading>Ready to apply?</SectionHeading>
-          <Link href="/apply" className="button-light">Apply now <span aria-hidden="true">→</span></Link>
+          <SectionHeading>{status?.isOpen ? "Ready to apply?" : "Interested in the next cycle?"}</SectionHeading>
+          <Link href={action.href} className="button-light">{action.label} <span aria-hidden="true">→</span></Link>
       </MarketingSection>
     </main>
   );

@@ -186,7 +186,7 @@ export default function ApplicantSignupForm() {
         {pending ? "Creating account…" : "Create applicant account"}
       </button>
       <div id="clerk-captcha" />
-      <p className="flex min-h-11 items-center justify-center text-center text-sm text-mecg-navy/55">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
+      <p className="flex min-h-11 items-center justify-center text-center text-sm text-mecg-navy/65">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
     </form>
   );
 }

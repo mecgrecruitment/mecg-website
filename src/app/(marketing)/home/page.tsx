@@ -4,7 +4,10 @@ import Link from "next/link";
 import MarketingSection from "@/components/marketing-section";
 import PhotoCarousel from "@/components/photo-carousel";
 import SectionHeading from "@/components/section-heading";
-import { PILLARS } from "@/lib/site-content";
+import { fetchPublicRecruitment, recruitmentAction } from "@/lib/public-recruitment";
+import { PILLARS, STATS } from "@/lib/site-content";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Michigan Engineering Consulting Group",
@@ -22,7 +25,10 @@ const HOME_PHOTOS = [
   { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const recruitment = await fetchPublicRecruitment();
+  const studentAction = recruitmentAction(recruitment.cycle);
+
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
       <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
@@ -41,11 +47,30 @@ export default function HomePage() {
               Michigan Engineering Consulting Group
             </h1>
             <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-white/85 sm:text-lg">
-              Pro-bono consulting group open to all majors at UMich. Each member is united by a shared interest in problem-solving and impact-driven work.
+              Student-led, pro-bono consulting teams helping organizations make clearer decisions through research, analysis, and practical recommendations.
             </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/contact#message" className="button-primary">Discuss a project <span aria-hidden="true">→</span></Link>
+              <Link href={studentAction.href} className="button-ghost-light">{studentAction.label} <span aria-hidden="true">→</span></Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <MarketingSection spacing="compact" tone="navy" aria-labelledby="mecg-proof-title">
+        <h2 id="mecg-proof-title" className="sr-only">MECG at a glance</h2>
+        <dl className="grid gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
+          {STATS.map((stat) => (
+            <div key={stat.label} className="bg-mecg-navy p-5 sm:p-6">
+              <dt className="text-sm font-semibold text-white/75">{stat.label}</dt>
+              <dd className="mt-2">
+                <span className="tabular block text-3xl font-semibold text-white">{stat.value}</span>
+                <span className="mt-1 block text-sm text-white/70">{stat.context}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </MarketingSection>
 
       <MarketingSection innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
           <SectionHeading>Welcome to MECG</SectionHeading>

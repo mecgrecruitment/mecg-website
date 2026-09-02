@@ -18,9 +18,9 @@ export default async function NewEventPage() {
         eyebrow="Attendance event"
         title="New event"
         description="Create check-in details and share the generated QR code only when you are ready."
-        action={<Link href="/admin" className="button-secondary text-sm">Back to applicants</Link>}
+        action={<Link href="/admin/rounds" className="button-secondary text-sm">Back to interviews</Link>}
       />
-      <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
+      <WorkspaceNav user={user} cycleId={cycleId} current="/admin/rounds" />
       <EventForm />
     </main>
   );

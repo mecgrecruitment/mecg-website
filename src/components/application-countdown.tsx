@@ -90,7 +90,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
             <p className="tabular text-3xl font-semibold tracking-tight text-mecg-navy">
               {remaining ? pad(remaining[key]) : "--"}
             </p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/55">{label}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/65">{label}</p>
           </div>
         ))}
       </div>

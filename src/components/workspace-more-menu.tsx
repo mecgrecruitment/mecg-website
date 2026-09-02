@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
-type NavLink = readonly [href: string, label: string];
+import { secondaryDestinationLabel, type WorkspaceNavLink } from "@/lib/workspace-navigation";
 
 export default function WorkspaceMoreMenu({
   current,
@@ -12,15 +11,15 @@ export default function WorkspaceMoreMenu({
   adminTools,
 }: {
   current: string;
-  myTools: readonly NavLink[];
-  adminTools: readonly NavLink[];
+  myTools: readonly WorkspaceNavLink[];
+  adminTools: readonly WorkspaceNavLink[];
 }) {
   const [openPath, setOpenPath] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const open = openPath === pathname;
   const currentPath = current.split(/[?#]/, 1)[0];
-  const currentSecondary = [...myTools, ...adminTools].find(([href]) => href === currentPath)?.[1];
+  const currentSecondary = secondaryDestinationLabel(current, [...myTools, ...adminTools]);
 
   useEffect(() => {
     if (!open) return;
@@ -43,7 +42,7 @@ export default function WorkspaceMoreMenu({
     };
   }, [open]);
 
-  const linkList = (links: readonly NavLink[]) => (
+  const linkList = (links: readonly WorkspaceNavLink[]) => (
     <div className="grid gap-0.5">
       {links.map(([href, label]) => {
         const selected = currentPath === href;
@@ -71,8 +70,8 @@ export default function WorkspaceMoreMenu({
     <div ref={root} className="relative shrink-0">
       <button
         type="button"
-        aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls="workspace-more-destinations"
         onClick={() => setOpenPath(open ? null : pathname)}
         className={`flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           currentSecondary
@@ -80,8 +79,7 @@ export default function WorkspaceMoreMenu({
             : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy focus-visible:outline-mecg-navy"
         }`}
       >
-        More
-        {currentSecondary && <span className="sr-only">Current page: {currentSecondary}</span>}
+        {currentSecondary ?? "More"}
         <svg
           aria-hidden="true"
           width="16"
@@ -97,15 +95,16 @@ export default function WorkspaceMoreMenu({
       </button>
       {open && (
         <nav
+          id="workspace-more-destinations"
           aria-label="More workspace destinations"
           className="absolute right-0 top-[calc(100%+0.5rem)] max-h-[min(70vh,36rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl bg-white p-2 shadow-[0_18px_55px_rgba(7,13,31,0.18),inset_0_0_0_1px_rgba(7,13,31,0.1)]"
         >
-          <p className="px-3 pb-1 pt-2 text-xs font-semibold text-mecg-navy/45">My workspace</p>
+          <p className="px-3 pb-1 pt-2 text-xs font-semibold text-mecg-navy/60">My workspace</p>
           {linkList(myTools)}
           {adminTools.length > 0 && (
             <>
               <div className="mx-3 my-2 border-t border-mecg-navy/[0.08]" />
-              <p className="px-3 pb-1 pt-1 text-xs font-semibold text-mecg-navy/45">Admin tools</p>
+              <p className="px-3 pb-1 pt-1 text-xs font-semibold text-mecg-navy/60">Admin tools</p>
               {linkList(adminTools)}
             </>
           )}

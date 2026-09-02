@@ -139,7 +139,7 @@ export default async function ApplyPage() {
           <div className={user ? "" : "mx-auto"}>
             <p className="text-[13px] text-mecg-orange-ink">Application intake</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
-            <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">
+            <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/65">
               {user
                 ? "Your work saves automatically. Take your time, review everything, then submit once."
                 : cycleStatus && !cycleStatus.isOpen

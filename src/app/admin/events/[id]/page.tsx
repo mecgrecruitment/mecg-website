@@ -80,9 +80,9 @@ export default async function EventDetailPage({ params, searchParams }: { params
         eyebrow="Attendance event"
         title={event.name}
         description={formatEasternDateTime(event.starts_at)}
-        action={<Link href="/admin" className="button-secondary text-sm">Back to applicants</Link>}
+        action={<Link href="/admin/rounds" className="button-secondary text-sm">Back to interviews</Link>}
       />
-      {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
+      {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin/rounds" />}
 
       <EventControls event={{
         id: event.id, name: event.name, kind: event.kind, status: event.status,

@@ -2,10 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { hasPermission } from "@/lib/authorization";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import type { CurrentUser } from "@/lib/auth";
+import { workspaceAdminTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
 import PillNav from "./pill-nav";
 import WorkspaceMoreMenu from "./workspace-more-menu";
-
-type NavLink = readonly [href: string, label: string];
 
 // One nav for the whole internal workspace. Before this, /admin had BoardNav,
 // /member hand-rolled its own link array, and every sub-page had neither: you
@@ -47,8 +46,12 @@ export default async function WorkspaceNav({
   // driven by cycle state rather than by role.
   const votingOpen = user.memberships.some((membership) =>
     membership.active && membership.cycleId === cycleId && membership.cycle.status === "DECISION_LOCK");
+  const isBoard = user.memberships.some((membership) =>
+    membership.active && ["BOARD", "OWNER"].includes(membership.role));
+  const isOwner = user.memberships.some((membership) =>
+    membership.active && membership.role === "OWNER");
 
-  const primary: NavLink[] = [
+  const primary: WorkspaceNavLink[] = [
     ["/member", "My work"],
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
@@ -61,7 +64,7 @@ export default async function WorkspaceNav({
     ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/messages", "Communications"] as const] : []),
   ];
 
-  const myTools: NavLink[] = [
+  const myTools: WorkspaceNavLink[] = [
     ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
     ...(screeningReviewer.data ? [["/member/screening", `Read applications${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
@@ -69,14 +72,12 @@ export default async function WorkspaceNav({
     ["/admin/people", "People"],
   ];
 
-  const adminTools: NavLink[] = [
-    ...(can("RECRUITMENT_OPERATIONS")
-      ? ([
-        ["/admin/screening", "Review setup"],
-      ] as const)
-      : []),
-    ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
-  ];
+  const adminTools = workspaceAdminTools({
+    canRecruitmentOperations: can("RECRUITMENT_OPERATIONS"),
+    canManageCycle: can("MANAGE_CYCLE"),
+    isBoard,
+    isOwner,
+  });
   return (
     <>
       <div className="workspace-nav-shell sticky top-3 z-30 flex items-center gap-1 rounded-2xl bg-white/92 p-1.5 shadow-[0_10px_30px_rgba(7,13,31,0.08),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">

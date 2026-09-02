@@ -6,6 +6,7 @@ import OperationNotice from "@/components/operation-notice";
 import { currentDestination } from "@/lib/auth";
 import { hasClerkRuntimeConfiguration } from "@/lib/env";
 import { validatedRedirect } from "./redirect";
+import ClerkLoadingFallback from "./clerk-loading-fallback";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -77,7 +78,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             formButtonPrimary: { minHeight: "44px", fontWeight: 600, textTransform: "none", letterSpacing: "normal" },
           },
         }}
-        fallback={<p role="status" className="py-8 text-center text-sm text-mecg-navy/60">Loading secure sign-in…</p>}
+        fallback={<ClerkLoadingFallback />}
       />
       <p className="mt-5 text-center text-xs text-mecg-navy/60">Secure authentication powered by Clerk.</p>
     </PortalShell>
