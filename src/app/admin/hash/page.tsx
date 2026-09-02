@@ -246,6 +246,7 @@ export default async function HashBoard() {
                 const impressions = impressionsByApplication.get(application.id);
                 const tally = tallyByApplication.get(application.id);
                 const notes = notesByApplication.get(application.id) ?? [];
+                const voteDecided = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) !== "PENDING" : false;
                 return (
                   <article key={application.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                     <div className="flex items-start justify-between gap-3">
@@ -273,7 +274,11 @@ export default async function HashBoard() {
                     </dl>
                     <details className="group mt-4">
                       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl px-3 text-sm font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                        <span>{decision ? `${decisionOutcomeLabel(decision.outcome)} · ${decisionStatusLabel(decision.status)}` : "Create decision"}</span>
+                        <span className={!decision && voteDecided ? "text-mecg-orange-ink" : undefined}>
+                          {decision
+                            ? `${decisionOutcomeLabel(decision.outcome)} · ${decisionStatusLabel(decision.status)}`
+                            : voteDecided ? "Vote decided, ready to apply" : "Waiting on the vote"}
+                        </span>
                         <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
                       </summary>
                       <div className="mt-3 flex flex-col gap-3">
@@ -312,6 +317,7 @@ export default async function HashBoard() {
                   const impressions = impressionsByApplication.get(application.id);
                   const tally = tallyByApplication.get(application.id);
                   const notes = notesByApplication.get(application.id) ?? [];
+                  const voteDecided = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) !== "PENDING" : false;
                   return (
                     <tr key={application.id} className="border-t border-mecg-navy/[0.08] align-top">
                       <td className="p-3 font-medium">
@@ -362,8 +368,10 @@ export default async function HashBoard() {
                           </details>
                         ) : (
                           <details className="group rounded-xl">
-                            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                              No decision yet
+                            <summary className={`flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none ${voteDecided ? "font-semibold text-mecg-orange-ink" : "text-mecg-navy/55"}`}>
+                              {/* A resolved vote that nobody has applied yet is an action item, not an
+                                  absence, so the closed row says so rather than reading "No decision yet". */}
+                              {voteDecided ? "Vote decided, ready to apply" : "Waiting on the vote"}
                               <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
                                 <path d="M5 8l5 5 5-5" />
                               </svg>
