@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import * as nodeModule from "node:module";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -30,21 +30,26 @@ test("configured login renders the Clerk flow with visible provider identity", a
   t.mock.module("next/link", {
     defaultExport: ({ children, href }: { children: ReactNode; href: string }) => createElement("a", { href }, children),
   });
+  const seen: { appearance?: ClerkAppearance } = {};
   t.mock.module("@clerk/nextjs", {
     namedExports: {
-      SignIn: ({ fallback, path, routing, signUpUrl, fallbackRedirectUrl }: {
+      SignIn: ({ fallback, path, routing, signUpUrl, fallbackRedirectUrl, appearance }: {
         fallback: ReactElement;
         path: string;
         routing: string;
         signUpUrl: string;
         fallbackRedirectUrl: string;
-      }) => createElement("div", {
-        "data-clerk-sign-in": true,
-        "data-path": path,
-        "data-routing": routing,
-        "data-sign-up-url": signUpUrl,
-        "data-fallback-redirect-url": fallbackRedirectUrl,
-      }, fallback),
+        appearance: ClerkAppearance;
+      }) => {
+        seen.appearance = appearance;
+        return createElement("div", {
+          "data-clerk-sign-in": true,
+          "data-path": path,
+          "data-routing": routing,
+          "data-sign-up-url": signUpUrl,
+          "data-fallback-redirect-url": fallbackRedirectUrl,
+        }, fallback);
+      },
     },
   });
   t.mock.module("@/lib/auth", { namedExports: { currentDestination: async () => null } });
@@ -60,4 +65,38 @@ test("configured login renders the Clerk flow with visible provider identity", a
   assert.match(markup, /data-sign-up-url="\/apply"/);
   assert.match(markup, /Loading secure sign-in/);
   assert.match(markup, /Secure authentication powered by Clerk/);
+
+  // The shell already draws the card, the heading and the Clerk attribution, so the widget ships chromeless.
+  const elements = seen.appearance?.elements ?? {};
+  assert.equal(elements.header?.display, "none");
+  assert.equal(elements.footerItem?.display, "none", "Clerk's own 'Secured by Clerk' tag must stay hidden");
+  assert.equal(elements.card?.boxShadow, "none");
+  assert.equal(elements.cardBox?.boxShadow, "none");
+  assert.equal(seen.appearance?.variables?.colorPrimary, "#fe904d");
+  assert.equal(seen.appearance?.variables?.borderRadius, "2px");
+
+  // `appearance` is typed `any`, so a renamed or dropped Clerk element key would fail silently.
+  const config = clerkElementsConfig();
+  for (const key of Object.keys(elements)) {
+    assert.ok(config.has(key), `unknown Clerk appearance element "${key}"`);
+  }
 });
+
+type ClerkAppearance = {
+  variables?: Record<string, string>;
+  elements?: Record<string, Record<string, string | number>>;
+};
+
+/** Element keys Clerk actually supports, read from the installed `ElementsConfig` type. */
+function clerkElementsConfig(): Set<string> {
+  const dir = fileURLToPath(new URL("../../../node_modules/@clerk/react/dist/", import.meta.url));
+  const keys = new Set<string>();
+  for (const file of readdirSync(dir).filter((name) => name.endsWith(".d.mts"))) {
+    const source = readFileSync(`${dir}${file}`, "utf8");
+    const block = source.match(/type ElementsConfig = \{([\s\S]*?)\n\};/)?.[1];
+    if (!block) continue;
+    for (const [, key] of block.matchAll(/^\s{2}([A-Za-z0-9_]+):/gm)) keys.add(key!);
+  }
+  assert.ok(keys.size > 0, "could not read Clerk's ElementsConfig");
+  return keys;
+}
