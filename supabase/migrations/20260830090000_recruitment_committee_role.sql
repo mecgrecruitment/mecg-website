@@ -71,6 +71,24 @@ create or replace function rush.is_active_screening_reviewer(target_cycle_id tex
 returns boolean language sql stable security definer set search_path='' as $$
   select exists(select 1 from rush.screening_reviewers sr join rush.screening_batches b on b.id=sr.batch_id where b.cycle_id=target_cycle_id and b.status='PUBLISHED' and sr.reviewer_id=auth.uid() and sr.active);
 $$;
+-- Restored: 20260831181000_fix_application_policy_parity.sql calls this inside a
+-- CREATE POLICY, and Postgres analyses a policy's USING expression at creation
+-- time. 20260831196000 recreates it, but 15,000 versions too late for a fresh
+-- `supabase db reset`. Production already has it, so this is a repo-only no-op.
+create or replace function rush.actor_is_assigned_evaluator(target_application_id text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from rush.evaluation_assignments ea
+    where ea.application_id = target_application_id and ea.evaluator_id = auth.uid()
+  );
+$$;
+revoke all on function rush.actor_is_assigned_evaluator(text) from public,anon;
+grant execute on function rush.actor_is_assigned_evaluator(text) to authenticated;
 drop policy if exists applications_read_internal on rush.applications;
 create policy applications_read_internal on rush.applications for select to authenticated using (rush.has_cycle_role(cycle_id,array['BOARD','PANEL','OWNER']::rush.member_role[]) or (rush.has_cycle_capability(cycle_id,'CANDIDATE_ACCESS') and not rush.is_active_screening_reviewer(cycle_id)) or (exists(select 1 from rush.evaluation_assignments ea where ea.application_id=applications.id and ea.evaluator_id=auth.uid()) and not rush.is_active_screening_reviewer(cycle_id) and not exists(select 1 from rush.conflict_declarations c where c.application_id=applications.id and c.declarer_id=auth.uid())));
 drop policy if exists pnms_read_internal on rush.pnms;
