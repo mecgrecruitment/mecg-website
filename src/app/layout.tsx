@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { hasClerkFrontendConfiguration } from "@/lib/env";
 import "./globals.css";
 
+const productionClerkProxyUrl = "https://mecgmichigan.com/__clerk";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://mecgmichigan.com"),
   title: {
@@ -42,6 +44,9 @@ const ORGANIZATION_JSON_LD = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const clerkConfigured = hasClerkFrontendConfiguration();
+  const clerkProxyUrl = process.env.VERCEL_ENV === "production"
+    ? productionClerkProxyUrl
+    : undefined;
   const content = (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
@@ -56,7 +61,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className="h-full scroll-smooth antialiased"
     >
       <body className="min-h-full flex flex-col">
-        {clerkConfigured ? <ClerkProvider>{content}</ClerkProvider> : content}
+        {clerkConfigured ? <ClerkProvider proxyUrl={clerkProxyUrl}>{content}</ClerkProvider> : content}
       </body>
     </html>
   );
