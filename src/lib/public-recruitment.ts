@@ -1,6 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
-import { requireEnv } from "@/lib/env";
-import type { Database } from "@/lib/supabase/database.types";
+import { createPublicClient } from "@/lib/supabase/public";
 
 export type PublicRecruitmentCycle = {
   name?: string;
@@ -97,11 +95,7 @@ export function applicationCycleStatus(cycle: PublicRecruitmentCycle, now = Date
 }
 
 export async function fetchPublicRecruitment(): Promise<PublicRecruitment> {
-  const supabase = createClient<Database, "rush">(
-    process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    process.env.NEXT_PUBLIC_MECG_SUPABASE_ANON_KEY ?? requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "rush" } },
-  );
+  const supabase = createPublicClient();
   const { data } = await supabase.rpc("public_recruitment");
   return data && typeof data === "object" ? data as PublicRecruitment : { cycle: null };
 }

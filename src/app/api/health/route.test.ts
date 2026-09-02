@@ -11,9 +11,9 @@ function mockSupabase(
 ) {
   let calls = 0;
   let suppliedSignal: AbortSignal | undefined;
-  t.mock.module("@/lib/supabase/server", {
+  t.mock.module("@/lib/supabase/public", {
     namedExports: {
-      createClient: async () => ({
+      createPublicClient: () => ({
         rpc: () => ({
           abortSignal: (signal: AbortSignal) => {
             calls += 1;

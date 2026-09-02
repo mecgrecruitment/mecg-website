@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { operationalLog } from "@/lib/operational-log";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 // Unauthenticated on purpose (platform health checks cannot sign in), so the
 // probe is memoized: hammering this endpoint costs at most one Supabase RPC per
@@ -40,7 +40,7 @@ export async function GET() {
 
 async function probeSupabase() {
   const started = Date.now();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { error } = await supabase
     .rpc("public_recruitment")
     .abortSignal(AbortSignal.timeout(PROBE_TIMEOUT_MS));
