@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { legalManualApplicationStatuses } from "@/lib/workflow";
 import OperationNotice from "@/components/operation-notice";
+import { applicationStatusLabel } from "@/lib/labels";
 
 export default function PipelineStatusForm({
   applicationId,
@@ -43,7 +44,7 @@ export default function PipelineStatusForm({
         setError(body?.error ?? "Could not update status");
         return;
       }
-      setSuccess("Pipeline status updated.");
+      setSuccess("Application status updated.");
       router.refresh();
     } catch {
       setError("Could not update status. Check your connection and try again.");
@@ -56,19 +57,19 @@ export default function PipelineStatusForm({
     <form className="mt-1 flex flex-col items-start gap-2" onSubmit={submit}>
       <div className="flex items-center gap-1.5">
         <label className="sr-only" htmlFor={`status-${controlId ?? applicationId}`}>
-          Pipeline status
+          Application status
         </label>
         <select
           key={status}
           id={`status-${controlId ?? applicationId}`}
           name="status"
-          aria-label="Pipeline status"
+          aria-label="Application status"
           defaultValue={status}
           disabled={pending}
-          className="operation-control rounded-md bg-mecg-navy/[0.035] px-2 text-[10px] font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none disabled:opacity-60"
+          className="select-control w-40 text-[10px]"
         >
           {legalManualApplicationStatuses(status).map((item) => (
-            <option key={item}>{item}</option>
+            <option key={item} value={item}>{applicationStatusLabel(item)}</option>
           ))}
         </select>
         <button

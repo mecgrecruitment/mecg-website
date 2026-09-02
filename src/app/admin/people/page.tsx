@@ -8,6 +8,7 @@ import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import { PeopleControls } from "../rush-controls";
 import { memberAccountsFor } from "../member-accounts";
+import { cycleStatusLabel, memberRoleLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "People" };
 
@@ -66,14 +67,14 @@ export default async function PeoplePage() {
   return (
     <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycle.status}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="People"
         description="Who is on the team this cycle."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/people" />
 
       <section>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Directory</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/50">Directory</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {directory.map((person) => (
             <article key={person.id} className="rounded-2xl bg-paper p-4">
@@ -85,8 +86,8 @@ export default async function PeoplePage() {
               {person.bio && <p className="mt-2 text-[13px] leading-5 text-mecg-navy/65">{person.bio}</p>}
               <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {person.roles.map((role) => (
-                  <span key={role} className="inline-flex items-center rounded-full bg-white px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-                    {role.replaceAll("_", " ")}
+                  <span key={role} className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[13px] font-semibold text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+                    {memberRoleLabel(role)}
                   </span>
                 ))}
               </div>
@@ -94,7 +95,7 @@ export default async function PeoplePage() {
           ))}
           {!directory.length && (
             <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55 sm:col-span-2 lg:col-span-3">
-              Nobody has filled in a profile yet. Members can add theirs from the Evaluation Hub.
+              Nobody has filled in a profile yet. Members can add theirs from My work.
             </p>
           )}
         </div>

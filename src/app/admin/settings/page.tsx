@@ -10,6 +10,7 @@ import OperationNotice from "@/components/operation-notice";
 import { CloneCycleForm, CycleControls } from "../rush-controls";
 import QuestionEditor, { type IntakeQuestion } from "./question-editor";
 import CycleWindowForm from "./cycle-window-form";
+import { cycleStatusLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Cycle settings" };
 
@@ -76,7 +77,7 @@ export default async function SettingsPage() {
   return (
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycle.status}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Cycle settings"
         description="The workflow state that governs what everyone else in the workspace can do."
       />

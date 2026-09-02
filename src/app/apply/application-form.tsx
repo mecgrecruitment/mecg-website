@@ -31,6 +31,7 @@ const STEPS: { id: Step; label: string; shortLabel: string }[] = [
 // scroll-mb-24 keeps a focused field's ring clear of the sticky Back/Continue bar below `sm`
 // (the bar itself is ~85px tall there); the bar is `sm:static` so no margin is needed at `sm`+.
 const fieldClass = "mt-2 min-h-12 w-full scroll-mb-24 rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy),0_1px_2px_rgba(7,13,31,0.04)] sm:scroll-mb-0";
+const selectClass = "select-control mt-2 scroll-mb-24 sm:scroll-mb-0";
 const labelClass = "block text-sm font-semibold text-mecg-navy";
 
 function guidanceFor(question: IntakeQuestion) {
@@ -311,10 +312,14 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }
 
   // Before opens_at the cycle is open, it just has not started, and intake_schema still reports
-  // open:false. Saying "closed" there would contradict the amber badge and the countdown a few
-  // lines above it on the same screen; the red wording is for a cycle that is genuinely over.
+  // open:false. Saying "closed" there would contradict the countdown a few lines above it on the
+  // same screen; the red wording is for a cycle that is genuinely over.
+  //
+  // The copy no longer tells anyone to reload: ApplicationCountdown calls router.refresh() the
+  // moment it hits zero, so the form arrives on its own. Telling a hall full of students to
+  // refresh at 20:00:00 is also how you turn an opening into a thundering herd.
   if (!cycleOpen) return preOpenLabel
-    ? <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-amber-900"><p className="font-semibold">{preOpenLabel}.</p><p className="mt-2 text-sm leading-6 text-amber-900/80">Keep this page open. Reload once the countdown reaches zero and the application appears here.</p></div>
+    ? <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-amber-900"><p className="font-semibold">{preOpenLabel}.</p><p className="mt-2 text-sm leading-6 text-amber-900/80">Keep this page open. The application appears here on its own when the countdown reaches zero.</p></div>
     : <div className="mt-8 rounded-2xl bg-red-50 p-6 text-red-900"><p className="font-semibold">Applications are currently closed.</p><p className="mt-2 text-sm leading-6 text-red-800/80">Check the recruitment page for the next opening date, or email the MECG board if you expected to apply today.</p></div>;
 
   const currentIndex = STEPS.findIndex((item) => item.id === step);
@@ -326,11 +331,11 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-10">
       <aside className="order-2 hidden lg:order-1 lg:sticky lg:top-8 lg:block">
         <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
+          <p className="text-[13px] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
           <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2" aria-label="Application progress">
             {STEPS.map((item, index) => {
               const active = item.id === step;
-              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || saving} className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs transition-colors sm:flex-col sm:items-start sm:text-sm lg:flex-row lg:gap-3 ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span>{item.shortLabel}</span></button></li>;
+              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || saving} className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs transition-colors sm:flex-col sm:items-start sm:text-sm lg:flex-row lg:gap-3 ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full tabular text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span>{item.shortLabel}</span></button></li>;
             })}
           </ol>
           <div className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/70">
@@ -346,7 +351,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       <section onChangeCapture={handleApplicationChange} className="surface-card order-1 min-w-0 bg-white p-6 sm:p-8 lg:order-2">
         <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-6 rounded-t-[28px] border-b border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
+            <p className="text-[13px] font-semibold text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
             <p className="text-xs font-semibold text-mecg-navy/65" aria-live="polite">
               {saveState.kind === "saving" ? "Saving…" : saveState.kind === "saved" ? "Saved" : saveState.kind === "error" ? "Save failed" : STEPS[currentIndex].label}
             </p>
@@ -357,7 +362,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         </div>
 
         <div key={step} className="step-seat" data-direction={stepDirection}>
-          <p className="hidden font-mono text-xs uppercase tracking-[0.18em] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
+          <p className="hidden text-[13px] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
           {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
           {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
           {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} />}
@@ -382,8 +387,8 @@ function DetailsStep({ values, setters, email, errors }: { values: Record<string
     <div className="sm:col-span-2"><p className={labelClass}>Verified email</p><div className="mt-2 flex min-h-12 items-center justify-between rounded-xl bg-mecg-blue/8 px-4 text-sm"><span>{email}</span><span className="font-semibold text-emerald-700">✓ Verified</span></div></div>
     <label htmlFor="phone" className={labelClass}>Phone <span className="font-normal text-mecg-navy/60">Optional</span><input id="phone" value={values.phone} onChange={(e) => setters.setPhone(e.target.value)} type="tel" autoComplete="tel" className={fieldClass} /></label>
     <div className={labelClass}><label htmlFor="uniqname">Uniqname <span className="text-mecg-orange-ink">(required)</span></label><input id="uniqname" value={values.uniqname} onChange={(e) => setters.setUniqname(e.target.value.toLowerCase())} autoCapitalize="none" required className={fieldClass} aria-invalid={Boolean(errors.uniqname)} aria-describedby={describedBy("uniqname")} /><FieldError id="uniqname-error">{errors.uniqname}</FieldError></div>
-    <div className={labelClass}><label htmlFor="classYear">Year <span className="text-mecg-orange-ink">(required)</span></label><select id="classYear" value={values.classYear} onChange={(e) => setters.setClassYear(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.classYear)} aria-describedby={describedBy("classYear")}><option value="">Select year</option>{CLASS_YEARS.map((year) => <option key={year} value={year}>{CLASS_YEAR_LABELS[year]}</option>)}</select><FieldError id="classYear-error">{errors.classYear}</FieldError></div>
-    <div className={labelClass}><label htmlFor="college">College <span className="text-mecg-orange-ink">(required)</span></label><select id="college" value={values.college} onChange={(e) => setters.setCollege(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.college)} aria-describedby={describedBy("college")}><option value="">Select college</option>{COLLEGES.map((item) => <option key={item}>{item}</option>)}</select><FieldError id="college-error">{errors.college}</FieldError></div>
+    <div className={labelClass}><label htmlFor="classYear">Year <span className="text-mecg-orange-ink">(required)</span></label><select id="classYear" value={values.classYear} onChange={(e) => setters.setClassYear(e.target.value)} required className={selectClass} aria-invalid={Boolean(errors.classYear)} aria-describedby={describedBy("classYear")}><option value="">Select year</option>{CLASS_YEARS.map((year) => <option key={year} value={year}>{CLASS_YEAR_LABELS[year]}</option>)}</select><FieldError id="classYear-error">{errors.classYear}</FieldError></div>
+    <div className={labelClass}><label htmlFor="college">College <span className="text-mecg-orange-ink">(required)</span></label><select id="college" value={values.college} onChange={(e) => setters.setCollege(e.target.value)} required className={selectClass} aria-invalid={Boolean(errors.college)} aria-describedby={describedBy("college")}><option value="">Select college</option>{COLLEGES.map((item) => <option key={item}>{item}</option>)}</select><FieldError id="college-error">{errors.college}</FieldError></div>
     <div className={labelClass}><label htmlFor="major">Major <span className="text-mecg-orange-ink">(required)</span></label><input id="major" value={values.major} onChange={(e) => setters.setMajor(e.target.value)} required className={fieldClass} aria-invalid={Boolean(errors.major)} aria-describedby={describedBy("major")} /><FieldError id="major-error">{errors.major}</FieldError></div>
     <label htmlFor="gradTerm" className={labelClass}>Expected graduation <span className="font-normal text-mecg-navy/60">Optional</span><input id="gradTerm" value={values.gradTerm} onChange={(e) => setters.setGradTerm(e.target.value)} placeholder="Winter 2028" className={fieldClass} /></label>
   </div></>;
@@ -400,10 +405,10 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
     let control: React.ReactNode;
     if (question.inputType === "short_text") control = <input {...common} type="text" maxLength={2400} className={fieldClass} />;
     else if (question.inputType === "url") control = <input {...common} type="url" maxLength={2400} className={fieldClass} />;
-    else if (question.inputType === "select") control = <select {...common} className={fieldClass}><option value="">Select an option</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
+    else if (question.inputType === "select") control = <select {...common} className={selectClass}><option value="">Select an option</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
     else control = <textarea {...common} maxLength={8000} rows={5} className={`${fieldClass} min-h-32 py-3 leading-6`} />;
     const words = countWords(value);
-    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="font-mono text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-mecg-navy/65"><span>{guidanceFor(question)}</span><span className={`tabular-nums ${question.maxWords && words > question.maxWords ? "font-semibold text-red-700" : ""}`}>{question.maxWords ? `${words} / ${question.maxWords} words` : `${words} words`} · {8000 - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
+    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="tabular text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-mecg-navy/65"><span>{guidanceFor(question)}</span><span className={`tabular-nums ${question.maxWords && words > question.maxWords ? "font-semibold text-red-700" : ""}`}>{question.maxWords ? `${words} / ${question.maxWords} words` : `${words} words`} · {8000 - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
   })}</div></>;
 }
 
@@ -423,7 +428,7 @@ function ReviewStep({ values, questions, answers, resumeLabel, consent, consentN
     <ReviewCard title="About you" edit={() => changeStep("details")}><dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2"><ReviewItem label="Full name" value={values.name} /><ReviewItem label="Preferred name" value={values.preferredName} /><ReviewItem label="Email" value={values.email} /><ReviewItem label="Phone" value={values.phone} /><ReviewItem label="Uniqname" value={values.uniqname} /><ReviewItem label="Class year" value={classYearLabel} /><ReviewItem label="College" value={values.college} /><ReviewItem label="Major" value={values.major} /><ReviewItem label="Expected graduation" value={values.gradTerm} /></dl></ReviewCard>
     <ReviewCard title="Written responses" edit={() => changeStep("responses")}><ul className="space-y-4">{questions.map((question) => <li key={question.key}><p className="font-medium">{question.prompt}</p><p className="mt-1 whitespace-pre-wrap break-words text-mecg-navy/70">{answers[question.key] || "Not provided"}</p></li>)}</ul></ReviewCard>
     <ReviewCard title="Materials and access" edit={() => changeStep("materials")}><dl className="space-y-3"><ReviewItem label="Resume" value={resumeLabel} /><ReviewItem label="LinkedIn URL" value={values.linkedinUrl} /><ReviewItem label="Scheduling or access needs" value={values.accessibilityNotes} preserveWhitespace /></dl></ReviewCard>
-  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How blind review works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
+  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How the first read works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
   <label className="mt-6 flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-mecg-orange" /><span className="text-sm leading-6">I reviewed my application and consent to MECG using this information to administer the current recruitment cycle.</span></label>
   {consentNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{consentNotice}</p>}
   {submitState.kind === "error" && <div className="mt-4"><FieldError id="submit-error" alert>{submitState.message}</FieldError></div>}

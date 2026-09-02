@@ -44,7 +44,7 @@ export default function PortalShell({
         <section className="relative overflow-hidden bg-mecg-navy px-6 py-8 text-white sm:px-10 sm:py-10">
           <div className="project-blueprint absolute inset-0 opacity-45" aria-hidden="true" />
           <div className="relative mx-auto max-w-7xl">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">{eyebrow}</p>
+            <p className="text-[13px] font-semibold text-mecg-orange">{eyebrow}</p>
             <h1 className="mt-3 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">{title}</h1>
             <p className="mt-4 max-w-2xl text-pretty leading-7 text-white/65">{description}</p>
             {heroExtra}
@@ -74,7 +74,7 @@ export default function PortalShell({
 
         <section className="flex min-h-[calc(100dvh-5rem)] items-center justify-center px-6 py-10 sm:px-10">
           <div className="w-full max-w-xl text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{eyebrow}</p>
+            <p className="text-[13px] font-semibold text-mecg-orange-ink">{eyebrow}</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
             <p className="mx-auto mt-4 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
             <div className="surface-card mt-7 bg-white p-7 text-left sm:p-9">
@@ -106,7 +106,7 @@ export default function PortalShell({
           />
         </Link>
         <div className="relative max-w-lg">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange">MECG workspace</p>
+          <p className="text-[13px] font-semibold text-mecg-orange">MECG workspace</p>
           <p className="mt-6 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em]">
             One account for every part of the process.
           </p>
@@ -114,7 +114,7 @@ export default function PortalShell({
             Apply, check your status, complete assigned evaluations, and manage the current rush cycle.
           </p>
         </div>
-        <p className="relative font-mono text-xs uppercase tracking-[0.15em] text-white/50">
+        <p className="relative text-[13px] text-white/55">
           Michigan Engineering Consulting Group
         </p>
       </aside>
@@ -129,7 +129,7 @@ export default function PortalShell({
               Back to site
             </Link>
           </div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">{eyebrow}</p>
+          <p className="text-[13px] font-semibold text-mecg-orange-ink">{eyebrow}</p>
           <h1 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
           <p className="mt-5 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
           <div className="surface-card mt-8 bg-white p-6 sm:p-8">{children}</div>

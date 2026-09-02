@@ -45,7 +45,7 @@ export default function DossierTabs({ panels }: { panels: Record<TabKey, ReactNo
             aria-selected={active === key}
             aria-controls={`${id}-${key}-panel`}
             tabIndex={active === key ? 0 : -1}
-            className={`min-h-11 shrink-0 rounded-full px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
+            className={`min-h-11 shrink-0 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
               active === key ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
             }`}
           >

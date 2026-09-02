@@ -21,7 +21,7 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
       <label className="sr-only" htmlFor={`outcome-${applicationId}`}>
         Decision outcome
       </label>
-      <select id={`outcome-${applicationId}`} name="outcome" disabled={pending} className="operation-control min-h-11 rounded-full bg-mecg-navy/[0.035] px-3 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60">
+      <select id={`outcome-${applicationId}`} name="outcome" disabled={pending} className="select-control text-xs">
         <option>OFFER</option>
         <option>WAITLIST</option>
         <option>REJECT</option>

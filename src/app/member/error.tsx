@@ -9,7 +9,7 @@ export default function MemberError({ reset }: { error: Error & { digest?: strin
       description="The problem may be temporary. Try loading your assignments again."
       retry={reset}
       backHref="/member"
-      backLabel="Evaluation Hub"
+      backLabel="My work"
     />
   );
 }

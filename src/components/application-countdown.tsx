@@ -78,7 +78,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
 
   return (
     <div className="mt-6" aria-live="polite">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">
+      <p className="text-[13px] font-semibold text-mecg-orange-ink">
         Applications open in
       </p>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -87,7 +87,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
             key={key}
             className="rounded-2xl bg-mecg-navy/[0.04] px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]"
           >
-            <p className="font-mono text-3xl font-semibold tabular-nums tracking-tight text-mecg-navy">
+            <p className="tabular text-3xl font-semibold tracking-tight text-mecg-navy">
               {remaining ? pad(remaining[key]) : "--"}
             </p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/55">{label}</p>

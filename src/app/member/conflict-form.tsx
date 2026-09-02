@@ -36,12 +36,12 @@ export default function ConflictForm({ applications }: { applications: { id: str
 
   return (
     <form onSubmit={submit} className="rounded-2xl bg-paper p-5 sm:p-6">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-orange-ink">Safety and fairness</p>
+      <p className="text-[13px] font-semibold text-mecg-orange-ink">Safety and fairness</p>
       <h3 className="mt-2 text-lg font-semibold text-mecg-navy">Declare a conflict</h3>
       <p className="mt-1 text-sm leading-6 text-mecg-navy/55">This immediately removes you from this applicant’s evaluations and decision approvals. Existing evaluation work is voided, and you cannot score this applicant afterward.</p>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <label className="sr-only" htmlFor="conflict-applicationId">Applicant to recuse from</label>
-        <select id="conflict-applicationId" name="applicationId" required disabled={pending} className="min-h-11 rounded-xl bg-white px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]">
+        <select id="conflict-applicationId" name="applicationId" required disabled={pending} className="select-control sm:w-56">
           <option value="">Applicant</option>
           {applications.map((application) => <option key={application.id} value={application.id}>{application.name}</option>)}
         </select>

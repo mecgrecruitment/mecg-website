@@ -12,12 +12,9 @@ import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, OfferDeadlineForm, PreviewForm, ReleaseButton } from "../../decision-form";
 import DossierTabs from "./tabs";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel, evaluationStatusLabel, statusLabel } from "@/lib/labels";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
-
-function humanize(value: string) {
-  return value.replaceAll("_", " ");
-}
 
 function httpUrl(value: string) {
   if (!/^https?:\/\//i.test(value)) return null;
@@ -88,9 +85,9 @@ function ResumePanel({
 
   return (
     <div>
-      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Resume</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/60">Resume</p>
       {hidden ? (
-        <p className="mt-2 text-sm text-mecg-navy/60">Contact details and the resume are hidden for blind Hash review.</p>
+        <p className="mt-2 text-sm text-mecg-navy/60">Contact details and the resume are hidden for Hash review.</p>
       ) : document ? (
         <div className="mt-2">
           <p className="break-words text-sm font-semibold text-mecg-navy">{document.original_filename}</p>
@@ -105,7 +102,7 @@ function ResumePanel({
             />
             <div className="border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center">
               <a
-                className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink"
+                className="text-[13px] font-semibold text-mecg-orange-ink"
                 href={`/api/admin/applications/${applicationId}/resume`}
                 target="_blank"
                 rel="noreferrer"
@@ -163,8 +160,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             ? "Your conflict-of-interest status for this applicant could not be verified, so their file is withheld. Try again in a moment."
             : "You have declared a conflict of interest on this applicant and are recused from viewing their file."}
         </p>
-        <Link href="/admin" className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink underline underline-offset-4">
-          Back to pipeline
+        <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+          Back to applicants
         </Link>
       </main>
     );
@@ -193,21 +190,21 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
       <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6 sm:p-10">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Applicant operations</p>
+            <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant operations</p>
             <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{person.name}</h1>
           </div>
           <LogoutButton />
         </header>
         <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
         <section className="flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
-          <StatusPill tone={isTerminal ? "navy" : "orange"}>{humanize(application.status)}</StatusPill>
+          <StatusPill tone={isTerminal ? "navy" : "orange"}>{applicationStatusLabel(application.status)}</StatusPill>
           <dl className="grid gap-3 text-sm leading-6 text-mecg-navy/80 sm:grid-cols-2">
-            {person.preferred_name && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Preferred name</dt><dd>{person.preferred_name}</dd></div>}
-            <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Contact</dt><dd>{person.contact}</dd></div>
-            {person.phone && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Phone</dt><dd>{person.phone}</dd></div>}
-            {year && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Class year</dt><dd>{year}</dd></div>}
-            {person.major && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Major</dt><dd>{person.major}</dd></div>}
-            {person.linkedin_url && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
+            {person.preferred_name && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Preferred name</dt><dd>{person.preferred_name}</dd></div>}
+            <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Contact</dt><dd>{person.contact}</dd></div>
+            {person.phone && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Phone</dt><dd>{person.phone}</dd></div>}
+            {year && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Class year</dt><dd>{year}</dd></div>}
+            {person.major && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Major</dt><dd>{person.major}</dd></div>}
+            {person.linkedin_url && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
           </dl>
           <ResumePanel
             applicationId={application.id}
@@ -218,7 +215,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             heightClass="h-[560px]"
           />
         </section>
-        <Link href="/admin" className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink underline underline-offset-4">Back to pipeline</Link>
+        <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">Back to applicants</Link>
       </main>
     );
   }
@@ -298,7 +295,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Applicant dossier</p>
+          <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant dossier</p>
           <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{displayName}</h1>
         </div>
         <LogoutButton />
@@ -307,11 +304,11 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
 
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,320px)_1fr] lg:items-start lg:gap-8">
         <section className="order-2 flex flex-col gap-4 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] lg:sticky lg:top-20 lg:order-none">
-          <StatusPill tone={isTerminal ? "navy" : "orange"}>{humanize(application.status)}</StatusPill>
+          <StatusPill tone={isTerminal ? "navy" : "orange"}>{applicationStatusLabel(application.status)}</StatusPill>
           {application.offer_response && (
             <div className="rounded-xl bg-white/70 p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Offer response</p>
-              <p className="mt-1 font-semibold text-mecg-navy">{humanize(application.offer_response)}</p>
+              <p className="text-[13px] font-semibold text-mecg-navy/60">Offer response</p>
+              <p className="mt-1 font-semibold text-mecg-navy">{statusLabel(application.offer_response)}</p>
               {application.offer_responded_at && (
                 <time dateTime={application.offer_responded_at} className="mt-1 block text-xs text-mecg-navy/65">
                   Recorded {formatEasternDateTime(application.offer_responded_at)}
@@ -322,43 +319,43 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
           <dl className="flex flex-col gap-2.5 text-sm leading-6 text-mecg-navy/80">
             {!panelOnly && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Applicant code</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Applicant code</dt>
                 <dd className="font-mono">{applicantCode(application.id)}</dd>
               </div>
             )}
             {!panelOnly && person.preferred_name && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Preferred name</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Preferred name</dt>
                 <dd>{person.preferred_name}</dd>
               </div>
             )}
             {!panelOnly && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Contact</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Contact</dt>
                 <dd>{person.contact}</dd>
               </div>
             )}
             {!panelOnly && person.phone && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Phone</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Phone</dt>
                 <dd>{person.phone}</dd>
               </div>
             )}
             {year && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Class year</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Class year</dt>
                 <dd>{year}</dd>
               </div>
             )}
             {person.major && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Major</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">Major</dt>
                 <dd>{person.major}</dd>
               </div>
             )}
             {!panelOnly && person.linkedin_url && (
               <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">LinkedIn</dt>
+                <dt className="text-[13px] font-semibold text-mecg-navy/60">LinkedIn</dt>
                 <dd>
                   {linkedinHref ? (
                     <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">
@@ -375,7 +372,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               is an accessibility failure, not a missing feature. */}
           {person.accessibility_notes && (
             <div className="rounded-xl bg-mecg-blue/[0.07] p-4 shadow-[inset_0_0_0_1px_rgba(63,99,175,0.2)]">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-blue">Accessibility request</p>
+              <p className="text-[13px] font-semibold text-mecg-blue">Accessibility request</p>
               <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/75">{person.accessibility_notes}</p>
               <p className="mt-2 text-xs text-mecg-navy/50">Arrange this before scheduling them for anything timed or in person.</p>
             </div>
@@ -401,7 +398,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                     <article key={response.question_key} className="rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                       <h2 className="font-medium text-mecg-navy">{response.question_text}</h2>
                       <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/70">{response.response_text}</p>
-                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-mecg-navy/50">
+                      <p className="mt-2 text-[13px] text-mecg-navy/50">
                         {countWords(response.response_text)} words{response.question_word_limit ? ` · ${response.question_word_limit}-word limit` : ""}
                       </p>
                     </article>
@@ -415,7 +412,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               ) : (
                 <div className="flex flex-col gap-5">
                   {finalScore !== null && (
-                    <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-navy/55">
+                    <p className="text-[13px] font-semibold text-mecg-navy/55">
                       Combined score <span className="text-mecg-navy">{finalScore.toFixed(1)}</span>
                     </p>
                   )}
@@ -423,7 +420,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                     <section key={round.id} className="rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h2 className="font-semibold text-mecg-navy">{round.name}</h2>
-                        <p className="font-mono text-xs text-mecg-navy/55">
+                        <p className="tabular text-xs text-mecg-navy/55">
                           {aggregate.score === null ? (aggregate.status === "PENDING" ? "Pending" : "—") : aggregate.score.toFixed(1)}
                           <span className="ml-2 text-mecg-navy/60">
                             {aggregate.count} ratings{aggregate.spread != null ? ` · spread ${aggregate.spread.toFixed(0)}` : ""}
@@ -437,7 +434,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                           <div key={evaluation.id} className="rounded-xl bg-white p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <p className="text-sm font-medium text-mecg-navy">{panelOnly ? "Evaluator" : (evaluation.evaluator?.display_name ?? "Evaluator")}</p>
-                              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/60">{evaluation.status}</span>
+                              <span className="text-[13px] font-semibold text-mecg-navy/60">{evaluationStatusLabel(evaluation.status)}</span>
                             </div>
                             <ul className="mt-2 flex flex-col gap-1 text-xs text-mecg-navy/65">
                               {evaluation.criterion_ratings.map((rating) => (
@@ -471,9 +468,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                     <div key={decision.id} className="flex flex-col gap-3 rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm font-semibold text-mecg-navy">
-                          {decision.outcome} · {decision.status}
+                          {decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}
                         </p>
-                        <span className="font-mono text-[11px] text-mecg-navy/60">{decision.decision_approvals.length}/2 approvals</span>
+                        <span className="tabular text-[12px] text-mecg-navy/60">{decision.decision_approvals.length}/2 approvals</span>
                       </div>
                       <p className="text-sm text-mecg-navy/65">{decision.reason}</p>
                       {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
@@ -488,11 +485,11 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
               ),
               activity: (
                 <div className="flex flex-col gap-2">
-                  {auditUnavailable && <p className="text-sm text-mecg-orange-ink">The audit log could not be loaded. What is shown here may be incomplete.</p>}
-                  {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/60">No activity recorded, or you do not have permission to view the audit log for this cycle.</p>}
+                  {auditUnavailable && <p className="text-sm text-mecg-orange-ink">Activity could not be loaded. What is shown here may be incomplete.</p>}
+                  {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-mecg-navy/60">No activity recorded, or you do not have permission to view activity for this cycle.</p>}
                   {priorCycles.length > 0 && (
                     <div className="mt-6">
-                      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Earlier applications</p>
+                      <p className="text-[13px] font-semibold text-mecg-navy/50">Earlier applications</p>
                       <p className="mt-1 text-sm text-mecg-navy/55">
                         Applying again is not held against anyone. Screening reviewers and evaluators never see this.
                       </p>
@@ -500,27 +497,27 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                         {priorCycles.map((prior) => (
                           <div key={`${prior.cycleName}-${prior.status}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                             <span className="text-[13px] font-semibold text-mecg-navy">{prior.cycleName}</span>
-                            <span className="font-mono text-[11px] uppercase tracking-[0.06em] text-mecg-navy/50">{prior.status.replaceAll("_", " ")}</span>
+                            <span className="text-[13px] text-mecg-navy/50">{applicationStatusLabel(prior.status)}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
                   <div className="mt-6">
-                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Messages sent</p>
+                    <p className="text-[13px] font-semibold text-mecg-navy/50">Messages sent</p>
                     <p className="mt-1 text-sm text-mecg-navy/55">Every email this system tried to send to this applicant, delivered or not.</p>
                     <div className="mt-3 flex flex-col gap-2">
                       {messages.map((message) => (
                         <div key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                           <div className="min-w-0">
                             <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
-                            <p className="mt-0.5 text-xs text-mecg-navy/65">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
+                            <p className="mt-0.5 text-xs text-mecg-navy/65">{statusLabel(message.kind)} · {message.recipient}</p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
                               {message.delivered ? "Delivered" : "Failed"}
                             </span>
-                            <time dateTime={message.created_at} className="font-mono text-xs tabular-nums text-mecg-navy/65">
+                            <time dateTime={message.created_at} className="tabular text-xs text-mecg-navy/65">
                               {formatEasternDateTime(message.created_at)}
                             </time>
                           </div>
@@ -532,10 +529,10 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                   {auditEvents.map((event) => (
                     <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                       <div>
-                        <p className="font-medium text-mecg-navy">{humanize(event.action)}</p>
+                        <p className="font-medium text-mecg-navy">{statusLabel(event.action)}</p>
                         <p className="text-xs text-mecg-navy/60">{event.actor_id ? (actorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
                       </div>
-                      <time className="shrink-0 font-mono text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
+                      <time className="shrink-0 tabular text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
                     </div>
                   ))}
                 </div>
@@ -545,8 +542,8 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
         </div>
       </div>
 
-      <Link href="/admin" className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink underline underline-offset-4">
-        Back to pipeline
+      <Link href="/admin" className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+        Back to applicants
       </Link>
     </main>
   );

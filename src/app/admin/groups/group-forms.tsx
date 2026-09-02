@@ -8,28 +8,17 @@ import { initials } from "@/lib/initials";
 
 function ChevronSelect({ id, name, label, children }: { id: string; name: string; label: string; children: ReactNode }) {
   return (
-    <div className="relative flex-1">
+    <div className="flex-1">
       <label className="sr-only" htmlFor={id}>
         {label}
       </label>
       <select
         id={id}
         name={name}
-        className="min-h-10 w-full appearance-none rounded-xl bg-mecg-navy/[0.035] px-3.5 pr-9 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        className="select-control text-sm"
       >
         {children}
       </select>
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 20 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-mecg-navy/60"
-      >
-        <path d="M5 8l5 5 5-5" />
-      </svg>
     </div>
   );
 }
@@ -155,7 +144,7 @@ export default function GroupForms({
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-[17px] font-semibold tracking-[-0.01em]">{group.name}</h3>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">
+                  <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
                     {groupMembers.length}
                   </span>
                   {groupMembers.length === 0 && (
@@ -173,7 +162,7 @@ export default function GroupForms({
                     return (
                       <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
                             {initials(applicant?.name ?? member.application_id)}
                           </span>
                           <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>

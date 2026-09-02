@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import StatusPill from "@/components/status-pill";
 import PacketAction from "./packet-action";
 import ScreeningControls from "./screening-controls";
+import { statusLabel } from "@/lib/labels";
 
 export default async function ScreeningAdminPage() {
   const user = await requireAdmin();
@@ -26,14 +27,14 @@ export default async function ScreeningAdminPage() {
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow="Recruitment operations"
-        title="Blind application screening"
-        description="Review and approve identity-free packets before assigning exactly three independent reviewers."
+        title="Review setup"
+        description="Review and approve identity-free copies of each application before assigning exactly three independent reviewers. Reviewers never see who wrote what."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
       <ScreeningControls cycleId={cycleId} members={members} batchId={overview?.batchId} status={overview?.status} />
       {overview && (
         <p className="rounded-2xl bg-mecg-navy/[0.03] p-4 text-sm text-mecg-navy/70">
-          {overview.packets.length} packets · {overview.assigned} active assignments · {overview.submitted} submitted reviews
+          {overview.packets.length} applications · {overview.assigned} active assignments · {overview.submitted} submitted reviews
         </p>
       )}
       <section className="grid gap-5 lg:grid-cols-2">
@@ -41,10 +42,10 @@ export default async function ScreeningAdminPage() {
           <article key={packet.id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.14em] text-mecg-navy/60">{packet.code}</p>
+                <p className="font-mono text-xs text-mecg-navy/60">{packet.code}</p>
                 <h2 className="mt-1 font-semibold">Identity steward: {packet.applicantName}</h2>
               </div>
-              <StatusPill tone="orange">{packet.status}</StatusPill>
+              <StatusPill tone="orange">{statusLabel(packet.status)}</StatusPill>
             </div>
             <div className="mt-4 space-y-4">{(packet.content.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
             {overview?.status === "DRAFT" && <PacketAction cycleId={cycleId} packetId={packet.id} status={packet.status} responses={packet.content.responses ?? []} />}
@@ -53,13 +54,13 @@ export default async function ScreeningAdminPage() {
       </section>
       {overview?.status === "FROZEN" && (
         <section>
-          <h2 className="text-xl font-semibold">Frozen screening evidence</h2>
+          <h2 className="text-xl font-semibold">Locked review evidence</h2>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {(overview.results ?? []).map((result, index) => (
               <article key={`${result.code}-${index}`} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-                <p className="font-mono text-xs uppercase tracking-[0.14em] text-mecg-navy/60">{result.code}</p>
+                <p className="font-mono text-xs text-mecg-navy/60">{result.code}</p>
                 <h3 className="mt-1 font-semibold">{result.applicantName}</h3>
-                <p className="mt-2 text-sm text-mecg-navy/70">{result.recommendation} · {Number(result.score).toFixed(1)}</p>
+                <p className="mt-2 text-sm text-mecg-navy/70">{statusLabel(result.recommendation)} · {Number(result.score).toFixed(1)}</p>
                 <p className="mt-3 text-sm leading-6 text-mecg-navy/65">{result.evidence}</p>
               </article>
             ))}

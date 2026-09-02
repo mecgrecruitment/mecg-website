@@ -47,7 +47,7 @@ export default function AssistedCheckinForm({ eventId, locked }: { eventId: stri
 
   return (
     <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Staff-assisted applicant check-in</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/60">Staff-assisted applicant check-in</p>
       <p className="mt-2 text-sm text-mecg-navy/60">
         Verify the applicant in person, then enter their exact applicant code, uniqname, or email. This records attendance only and never changes a score.
       </p>
@@ -58,7 +58,7 @@ export default function AssistedCheckinForm({ eventId, locked }: { eventId: stri
           <FormField label="Exact applicant identifier" name="identifier" required maxLength={254} />
           <label className="block text-sm font-medium">
             Reason
-            <select name="reasonCode" required defaultValue="" className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4">
+            <select name="reasonCode" required defaultValue="" className="select-control mt-2">
               <option value="" disabled>Select a reason</option>
               {REASONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>

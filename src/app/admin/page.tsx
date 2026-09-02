@@ -14,6 +14,7 @@ import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
 import { easternDateBadge, formatEasternDateTime } from "@/lib/date-time";
+import { cycleStatusLabel, statusLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Board dashboard" };
 
@@ -113,7 +114,7 @@ export default async function AdminDashboard() {
 
   const STATS = [
     [String(applications.length), "total applicants"],
-    [String(applications.length - decidedCount), "active in pipeline"],
+    [String(applications.length - decidedCount), "still in the running"],
     [String(finalReviewCount), "ready for final review"],
     [String(activeRounds.length), "active rounds"],
     [`${submittedAssignments}/${totalAssignments}`, "evaluations submitted"],
@@ -134,7 +135,7 @@ export default async function AdminDashboard() {
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycle.status}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Board dashboard"
         description={`Signed in as ${user.name}`}
       />
@@ -146,11 +147,11 @@ export default async function AdminDashboard() {
             <div className="bg-mecg-navy p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Cycle pulse</p>
+                  <p className="text-[13px] font-semibold text-white/50">Cycle pulse</p>
                   <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.025em]">{applications.length - decidedCount} applicants are moving through review</h2>
                 </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white/70">
-                  {cycle.status.replaceAll("_", " ")}
+                <span className="rounded-full bg-white/10 px-3 py-1 text-[13px] font-semibold text-white/70">
+                  {cycleStatusLabel(cycle.status)}
                 </span>
               </div>
               <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 lg:grid-cols-5">
@@ -160,13 +161,13 @@ export default async function AdminDashboard() {
               </div>
             </div>
             <div className="bg-white/5 p-4 sm:p-5">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Coming up</p>
+              <p className="text-[13px] font-semibold text-white/50">Coming up</p>
               {nextEvent ? (
                 <div className="mt-4">
                   <p className="text-lg font-semibold">{nextEvent.name}</p>
                   <p className="mt-1.5 text-sm text-white/55">{eventDate(nextEvent.starts_at)}</p>
                   {nextEventCapacity > 0 && (
-                    <p className="mt-1.5 font-mono text-xs text-white/60">{nextEventRsvps}/{nextEventCapacity} RSVPs</p>
+                    <p className="mt-1.5 tabular text-xs text-white/60">{nextEventRsvps}/{nextEventCapacity} RSVPs</p>
                   )}
                   <Link href={`/admin/events/${nextEvent.id}`} className="button-light mt-5 text-xs">
                     Open event
@@ -186,10 +187,10 @@ export default async function AdminDashboard() {
         <div className="mt-4 rounded-2xl bg-paper p-3.5 sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/65">Needs attention</p>
+              <p className="text-[13px] font-semibold text-mecg-navy/65">Needs attention</p>
               <p className="mt-1 text-sm text-mecg-navy/55">The items most likely to slow this cycle down.</p>
             </div>
-            <span className="font-mono text-xs font-semibold tabular-nums text-mecg-navy/65">{attentionItems.length} queues</span>
+            <span className="tabular text-xs font-semibold text-mecg-navy/65">{attentionItems.length} queues</span>
           </div>
           {attentionItems.length ? (
             <div className="mt-3 grid gap-px overflow-hidden rounded-xl bg-mecg-navy/10 sm:grid-cols-3">
@@ -199,7 +200,7 @@ export default async function AdminDashboard() {
                   href={`/admin?filter=${item.filter}#applicants`}
                   className="flex items-center gap-3 bg-white p-3 transition-colors duration-[--t-detent] ease-[--ease-detent] hover:bg-mecg-navy/[0.03]"
                 >
-                  <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-mecg-orange/[0.16] px-2 font-mono text-sm font-bold tabular-nums text-mecg-orange-ink">{item.count}</span>
+                  <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-mecg-orange/[0.16] px-2 tabular text-sm font-bold text-mecg-orange-ink">{item.count}</span>
                   <div>
                     <p className="text-[13px] font-semibold text-mecg-navy">{item.label}</p>
                     <p className="mt-0.5 text-[11.5px] text-mecg-navy/60">{item.detail}</p>
@@ -208,7 +209,7 @@ export default async function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <p className="mt-3 rounded-xl bg-white p-3.5 text-sm text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">No immediate pipeline issues. Everything is moving.</p>
+            <p className="mt-3 rounded-xl bg-white p-3.5 text-sm text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">No immediate issues. Everything is moving.</p>
           )}
         </div>
       </section>
@@ -231,7 +232,7 @@ export default async function AdminDashboard() {
           <div className={`mt-3.5 grid gap-4 ${canHash ? "lg:grid-cols-[0.9fr_1.1fr]" : ""}`}>
             {canHash && (
               <div className="rounded-2xl bg-paper p-4 sm:p-5">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/65">Decision funnel</p>
+                <p className="text-[13px] font-semibold text-mecg-navy/65">Decision funnel</p>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {decisionFunnel.map(([label, value]) => (
                     <StatTile key={label} value={value} label={label} tone="light" />
@@ -240,15 +241,15 @@ export default async function AdminDashboard() {
               </div>
             )}
             <div className="rounded-2xl bg-paper p-4 sm:p-5">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/65">Recent activity</p>
+              <p className="text-[13px] font-semibold text-mecg-navy/65">Recent activity</p>
               <div className="mt-3 flex flex-col gap-2">
                 {auditEvents.length ? auditEvents.map((event) => (
                   <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-white px-3.5 py-2.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                     <div>
-                      <p className="font-medium text-mecg-navy">{event.action.replaceAll("_", " ")}</p>
+                      <p className="font-medium text-mecg-navy">{statusLabel(event.action)}</p>
                       <p className="text-xs text-mecg-navy/60">{event.actor_id ? (auditActorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
                     </div>
-                    <time className="shrink-0 font-mono text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
+                    <time className="shrink-0 tabular text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
                   </div>
                 )) : <p className="text-sm text-mecg-navy/55">No recent activity.</p>}
               </div>
@@ -272,7 +273,7 @@ export default async function AdminDashboard() {
             const isPast = new Date(event.starts_at).getTime() < now;
             return (
               <div key={event.id} className={`flex items-center gap-4 rounded-2xl p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] ${isPast ? "opacity-55" : ""}`}>
-                <div className={`flex h-[52px] w-[52px] flex-shrink-0 flex-col items-center justify-center rounded-xl font-mono text-white ${isPast ? "bg-mecg-navy/50" : "bg-mecg-navy"}`}>
+                <div className={`flex h-[52px] w-[52px] flex-shrink-0 flex-col items-center justify-center rounded-xl tabular text-white ${isPast ? "bg-mecg-navy/50" : "bg-mecg-navy"}`}>
                   <span className="text-[10px] font-semibold tracking-[0.06em]">{month}</span>
                   <span className="text-base font-bold">{day}</span>
                 </div>
@@ -280,7 +281,7 @@ export default async function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-mecg-navy">{event.name}</p>
                     {event.id === nextEventId && (
-                      <span className="inline-flex items-center rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink">Next</span>
+                      <span className="inline-flex items-center rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Next</span>
                     )}
                   </div>
                   <Link href={`/admin/events/${event.id}`} className="mt-1 inline-flex items-center gap-1 text-[12.5px] font-semibold text-mecg-blue hover:text-mecg-orange-ink">

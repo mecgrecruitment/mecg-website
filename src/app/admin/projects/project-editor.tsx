@@ -87,7 +87,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
             className={`inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-[12px] font-semibold ${project.id === selectedId ? "bg-mecg-navy text-white" : "text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}
           >
             {project.title}
-            {project.isPublic && <span className="font-mono text-[9px] uppercase tracking-[0.08em] opacity-70">Public</span>}
+            {project.isPublic && <span className="text-[13px] opacity-70">Public</span>}
           </button>
         ))}
         <button
@@ -126,7 +126,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
           }, "Project saved.");
         }}
       >
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">
+        <p className="text-[13px] font-semibold text-mecg-navy/50">
           {editing.id ? "Edit project" : "New project"}
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -188,7 +188,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
 
       {editing.id && (
         <div className="rounded-2xl bg-paper p-5">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Staffing</p>
+          <p className="text-[13px] font-semibold text-mecg-navy/50">Staffing</p>
           <p className="mt-1 text-sm text-mecg-navy/55">Who worked on {editing.title}.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {staff.map((person) => {

@@ -10,6 +10,7 @@ import { BuddyButton, OfferButtons, SlotButton, SurveyForm, WithdrawButton } fro
 import ApplicantStatusRefresh from "./status-refresh";
 import ResumeReplace from "./resume-replace";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { decisionOutcomeLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Applicant portal" };
 
@@ -38,7 +39,7 @@ function applicationHeadline(application: { display_status: string; released_out
   if (application.released_outcome === "OFFER") return "You have an offer to join MECG.";
   if (application.released_outcome === "WAITLIST") return "You're on the waitlist.";
   if (application.released_outcome === "REJECT") return "We won't be extending an offer this cycle.";
-  if (application.released_outcome) return application.released_outcome.replaceAll("_", " ");
+  if (application.released_outcome) return decisionOutcomeLabel(application.released_outcome);
   return "Your application is moving through review.";
 }
 
@@ -76,7 +77,7 @@ function StatusStepper({ stage, dark = false }: { stage: number; dark?: boolean 
           <li key={label} aria-current={state === "current" ? "step" : undefined} className="flex flex-1 items-center last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <span
-                className={`grid size-7 shrink-0 place-items-center rounded-full font-mono text-xs ${
+                className={`grid size-7 shrink-0 place-items-center rounded-full tabular text-xs ${
                   state === "current"
                     ? "bg-mecg-orange font-semibold text-mecg-navy"
                     : state === "done"
@@ -110,7 +111,7 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   if (outcome === "OFFER") {
     return (
       <div className="mt-1">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange-ink">Decision released</p>
+        <p className="text-[13px] text-mecg-orange-ink">Decision released</p>
         <h2 className="mt-2 text-2xl font-semibold">You have an offer to join MECG.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">The Board reviewed your full file and would like to bring you into the group. Accept below to lock in your spot, or decline if it&rsquo;s not the right fit right now.</p>
       </div>
@@ -119,7 +120,7 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   if (outcome === "WAITLIST") {
     return (
       <div className="mt-1 rounded-xl bg-mecg-blue/[0.06] p-4 shadow-[inset_0_0_0_1px_rgba(63,99,175,0.18)]">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-blue">Waitlisted</p>
+        <p className="text-[13px] text-mecg-blue">Waitlisted</p>
         <h2 className="mt-2 text-xl font-semibold">You&rsquo;re on the waitlist.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">We don&rsquo;t have a spot to offer right now, but your file stays active. If room opens up in this cohort, we&rsquo;ll come back to it, no action needed from you. Anything that changes will show up here first.</p>
       </div>
@@ -128,7 +129,7 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   if (outcome === "REJECT") {
     return (
       <div className="mt-1 rounded-xl bg-mecg-navy/[0.03] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Decision released</p>
+        <p className="text-[13px] text-mecg-navy/65">Decision released</p>
         <h2 className="mt-2 text-xl font-semibold">We won&rsquo;t be extending an offer this cycle.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">This was a genuinely competitive process, and the call came down to cohort fit and the limited spots we had this rush, not a shortfall in what you brought to it. Thank you for the time you put into your application and for showing up to our events, we hope you&rsquo;ll stay in touch.</p>
       </div>
@@ -136,8 +137,8 @@ function OutcomeCard({ outcome }: { outcome: string }) {
   }
   return (
     <div className="mt-1">
-      <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Decision released</p>
-      <h2 className="mt-2 text-xl font-semibold">{outcome.replaceAll("_", " ")}</h2>
+      <p className="text-[13px] text-mecg-navy/65">Decision released</p>
+      <h2 className="mt-2 text-xl font-semibold">{decisionOutcomeLabel(outcome)}</h2>
     </div>
   );
 }
@@ -218,14 +219,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
       <div className="space-y-6">
         {submitted === "1" && (
           <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-6 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-emerald-700">Application received</p>
+            <p className="text-[13px] text-emerald-700">Application received</p>
             <h2 className="mt-3 text-2xl font-semibold">You are all set.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written responses will enter anonymous first-pass review, and any released updates will appear on this page.</p>
           </section>
         )}
         {canStartApplication === true && (
           <section className="rounded-2xl bg-mecg-orange/[0.12] p-6 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.4)]">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-mecg-orange-ink">Applications are open</p>
+            <p className="text-[13px] text-mecg-orange-ink">Applications are open</p>
             <h2 className="mt-3 text-2xl font-semibold">You can apply again this cycle.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">
               A new recruitment cycle is accepting applications and you have not started one yet. Your earlier
@@ -241,7 +242,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         )}
         {timeline.length > 0 && (
           <section className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-            <p className="font-mono text-xs uppercase tracking-[0.12em] text-mecg-navy/65">What happens next</p>
+            <p className="text-[13px] text-mecg-navy/65">What happens next</p>
             <ol className="mt-4 flex flex-col gap-2">
               {timeline.map((event) => {
                 const past = new Date(event.startsAt).getTime() < now;
@@ -269,7 +270,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             <details key={application.application_id} open={isCurrentApplication} className="rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 marker:content-none">
                 <span>
-                  <span className="block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-mecg-navy/65">{application.cycle_name}</span>
+                  <span className="block text-[13px] font-semibold text-mecg-navy/65">{application.cycle_name}</span>
                   <span className="mt-1 block text-sm text-mecg-navy/65">{isCurrentApplication ? "Current application" : "Earlier application"}</span>
                 </span>
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
@@ -280,7 +281,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               {withdrawn ? (
                 <>
                   <p className="mt-3 text-2xl font-semibold">Application withdrawn</p>
-                  <p className="mt-2 text-sm leading-6 text-mecg-navy/60">This application is no longer active in the pipeline.</p>
+                  <p className="mt-2 text-sm leading-6 text-mecg-navy/60">This application is no longer in the running.</p>
                 </>
               ) : application.released_outcome ? (
                 <>
@@ -331,12 +332,12 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               )}
               {(messagesByApplication.get(application.application_id)?.length ?? 0) > 0 && (
                 <div className="mt-5">
-                  <p className="font-mono text-xs uppercase tracking-[0.12em] text-mecg-navy/65">What we have sent you</p>
+                  <p className="text-[13px] text-mecg-navy/65">What we have sent you</p>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {(messagesByApplication.get(application.application_id) ?? []).map((message) => (
                       <li key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
                         <span className="text-[13px] font-medium text-mecg-navy">{message.subject}</span>
-                        <time dateTime={message.created_at} className="font-mono text-xs tabular-nums text-mecg-navy/65">
+                        <time dateTime={message.created_at} className="tabular text-xs text-mecg-navy/65">
                           {formatEasternDateTime(message.created_at)}
                         </time>
                       </li>
@@ -361,7 +362,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
         })}
         <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
           <h2 className="text-lg font-semibold">Your schedule</h2>
-          <p className="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Confirmed</p>
+          <p className="mt-1 text-[13px] text-mecg-navy/65">Confirmed</p>
           <ul className="mt-2 space-y-2">
             {(plan.rsvps ?? []).map((item) => (
               <li key={item.slotId} className="rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
@@ -375,7 +376,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           {plan.buddy && <p className="mt-2 text-sm">Member chat: <DateTimeRange startsAt={plan.buddy.startsAt} endsAt={plan.buddy.endsAt} /></p>}
           {(Boolean(plan.openSlots?.some((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id))) || Boolean(plan.openBuddy?.length)) && (
             <>
-              <p className="mt-5 font-mono text-xs uppercase tracking-[0.16em] text-mecg-navy/65">Open slots</p>
+              <p className="mt-5 text-[13px] text-mecg-navy/65">Open slots</p>
               <div className="mt-2 space-y-2">
                 {(plan.openSlots ?? []).filter((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id)).map((slot) => (
                   <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">

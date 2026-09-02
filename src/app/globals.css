@@ -3,8 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #070d1f;
-  --font-montserrat: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  /*
+   * Two typefaces, both from the system, no webfont to download.
+   * --font-ui carries every word in the interface; --font-numeric is for
+   * figures only (see .tabular). The old names claimed Montserrat and Geist
+   * Mono, neither of which was ever loaded.
+   */
+  --font-ui: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-numeric: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --paper: #f4f1ec;
   --line: rgb(7 13 31 / 12%);
   --shadow-card: 0 18px 55px rgb(7 13 31 / 9%);
@@ -39,15 +45,14 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-paper: #f4f1ec;
-  --font-sans: var(--font-montserrat);
-  --font-serif: var(--font-montserrat);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-numeric);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-montserrat), sans-serif;
+  font-family: var(--font-ui), sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -207,11 +212,8 @@ textarea:focus-visible {
 }
 
 .eyebrow {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 
 .text-link {
@@ -515,4 +517,67 @@ details[open] > summary .disclosure-chevron {
     scale: 1;
   }
 
+}
+
+@layer components {
+  /*
+   * Dropdowns. Native <select> chrome is inconsistent across browsers and reads
+   * as unstyled next to .field-control, so appearance is reset and a chevron is
+   * painted in. Keep the element a real <select>: the platform picker is more
+   * usable on touch and with a screen reader than anything hand-rolled.
+   */
+  .select-control {
+    min-height: 2.75rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    padding: 0.5rem 2.5rem 0.5rem 0.875rem;
+    background-color: rgb(7 13 31 / 3.5%);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23070d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.15rem;
+    box-shadow: inset 0 0 0 1px rgb(7 13 31 / 14%);
+    color: var(--color-mecg-navy);
+    font-weight: 500;
+    outline: none;
+    appearance: none;
+    transition: background-color var(--t-detent) var(--ease-detent), box-shadow var(--t-detent) var(--ease-detent);
+  }
+
+  .select-control:hover {
+    background-color: rgb(63 99 175 / 7%);
+  }
+
+  .select-control:focus {
+    background-color: white;
+    box-shadow: inset 0 0 0 2px var(--color-mecg-navy), 0 0 0 4px rgb(7 13 31 / 10%);
+  }
+
+  .select-control:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .select-control option {
+    background: white;
+    color: var(--color-mecg-navy);
+  }
+
+  /*
+   * One sans face carries the whole interface; the mono face is reserved for
+   * figures (.tabular). Section labels and status chips used to be mono
+   * uppercase with wide tracking, which read as a third typeface and cost
+   * legibility at 10-11px for no gain.
+   */
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: rgb(7 13 31 / 62%);
+  }
+
+  .tabular {
+    font-family: var(--font-numeric), monospace;
+    font-variant-numeric: tabular-nums;
+  }
 }

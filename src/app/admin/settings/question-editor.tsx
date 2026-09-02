@@ -92,12 +92,12 @@ export default function QuestionEditor({
     <section className="rounded-2xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/65">Application questions</p>
+          <p className="text-[13px] font-semibold text-mecg-navy/65">Application questions</p>
           <p className="mt-1 max-w-2xl text-sm text-mecg-navy/65">
             These are the written prompts on the public application, in order.
           </p>
         </div>
-        <span className="font-mono text-xs tabular-nums text-mecg-navy/65">{questions.length} of 25</span>
+        <span className="tabular text-xs text-mecg-navy/65">{questions.length} of 25</span>
       </div>
 
       {locked ? (
@@ -111,7 +111,7 @@ export default function QuestionEditor({
             {questions.map((question, index) => (
               <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-xs font-semibold tabular-nums text-mecg-navy/65">{index + 1}</span>
+                  <span className="tabular text-xs font-semibold text-mecg-navy/65">{index + 1}</span>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move question ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
                     <button type="button" onClick={() => move(index, 1)} disabled={pending || index === questions.length - 1} aria-label={`Move question ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
@@ -137,7 +137,7 @@ export default function QuestionEditor({
                       value={question.key}
                       onChange={(event) => update(index, { key: event.target.value })}
                       aria-invalid={!KEY_PATTERN.test(question.key)}
-                      className="mt-1.5 min-h-11 w-48 rounded-xl bg-mecg-navy/[0.035] px-3 font-mono text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="mt-1.5 min-h-11 w-48 rounded-xl bg-mecg-navy/[0.035] px-3 tabular text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -148,7 +148,7 @@ export default function QuestionEditor({
                         const inputType = event.target.value as IntakeQuestion["inputType"];
                         update(index, { inputType, maxWords: inputType === "long_text" ? question.maxWords : null });
                       }}
-                      className="mt-1.5 min-h-11 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="select-control mt-1.5 w-48 text-sm"
                     >
                       {INPUT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                     </select>

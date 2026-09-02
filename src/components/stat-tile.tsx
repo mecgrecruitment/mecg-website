@@ -11,8 +11,8 @@ export default function StatTile({
   const labelClass = tone === "dark" ? "text-white/50" : "text-mecg-navy/60";
   return (
     <div>
-      <p className={`font-mono text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
-      <p className={`mt-1 text-[10px] uppercase tracking-[0.1em] ${labelClass}`}>{label}</p>
+      <p className={`tabular text-2xl font-semibold ${valueClass}`}>{value}</p>
+      <p className={`mt-1 text-[12px] ${labelClass}`}>{label}</p>
     </div>
   );
 }

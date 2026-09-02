@@ -10,6 +10,7 @@ import WorkspaceNav from "@/components/workspace-nav";
 import { RoundControls } from "../rush-controls";
 import { memberAccountsFor } from "../member-accounts";
 import RubricEditor, { type Criterion, type RoundRubric } from "./rubric-editor";
+import { cycleStatusLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Rounds" };
 
@@ -47,8 +48,8 @@ function parseRubrics(value: unknown, cycleId: string): RoundRubric[] {
 }
 
 const ROUND_BOARDS: ReadonlyArray<readonly [kind: string, href: string, label: string]> = [
-  ["SPEED_DATING", "/admin/speed-dating", "Speed Dating board"],
-  ["GROUP_CASE", "/admin/group-case", "Group Case board"],
+  ["SPEED_DATING", "/admin/speed-dating", "Quick chats board"],
+  ["GROUP_CASE", "/admin/group-case", "Group interview board"],
 ];
 
 export default async function RoundsPage() {
@@ -88,7 +89,7 @@ export default async function RoundsPage() {
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycle.status}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Rounds"
         description="Open and freeze evaluation rounds, and assign evaluators to applicants."
       />
@@ -102,7 +103,7 @@ export default async function RoundsPage() {
       />
       {roundRubrics.map((round) => <RubricEditor key={round.roundId} round={round} />)}
       <section>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Coverage</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/50">Coverage</p>
         <p className="mt-1 text-sm text-mecg-navy/55">Per-applicant assignment and submission state lives on each round board.</p>
         <div className="mt-3 flex flex-wrap gap-3">
           {ROUND_BOARDS.filter(([kind]) => rounds.some((round) => round.kind === kind)).map(([kind, href, label]) => (

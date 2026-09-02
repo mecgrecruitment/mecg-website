@@ -6,6 +6,7 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
+import { cycleStatusLabel, statusLabel } from "@/lib/labels";
 import ComposeForm from "./compose-form";
 import { formatEasternDateTime } from "@/lib/date-time";
 
@@ -44,9 +45,9 @@ export default async function MessagesPage() {
   return (
     <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycle.status}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Messages"
-        description="Write to a slice of the pipeline, and see everything this system has already sent."
+        description="Write to a slice of the applicants, and see everything this system has already sent."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/messages" />
       <ComposeForm cycleId={cycleId} counts={counts} />
@@ -54,11 +55,11 @@ export default async function MessagesPage() {
       <section>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Recent sends</p>
+            <p className="text-[13px] font-semibold text-mecg-navy/50">Recent sends</p>
             <p className="mt-1 text-sm text-mecg-navy/55">The last {LOG_PAGE_SIZE} messages for this cycle.</p>
           </div>
           {failedCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-red-800">
+            <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-[13px] font-semibold text-red-800">
               {failedCount} failed
             </span>
           )}
@@ -68,13 +69,13 @@ export default async function MessagesPage() {
             <article key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
                 <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
-                <p className="mt-0.5 truncate text-[11.5px] text-mecg-navy/50">{message.kind.replaceAll("_", " ")} · {message.recipient}</p>
+                <p className="mt-0.5 truncate text-[11.5px] text-mecg-navy/50">{statusLabel(message.kind)} · {message.recipient}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
                   {message.delivered ? "Delivered" : "Failed"}
                 </span>
-                <time dateTime={message.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
+                <time dateTime={message.created_at} className="tabular text-[11px] text-mecg-navy/45">
                   {formatEasternDateTime(message.created_at)}
                 </time>
               </div>

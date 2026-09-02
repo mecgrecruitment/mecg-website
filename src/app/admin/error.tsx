@@ -14,5 +14,5 @@ export default function AdminError({
     console.error("admin workspace error", error);
   }, [error]);
 
-  return <WorkspaceError title="This board workspace could not be loaded." retry={reset} backHref="/member" backLabel="Evaluation Hub" />;
+  return <WorkspaceError title="This board workspace could not be loaded." retry={reset} backHref="/member" backLabel="My work" />;
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 const NAV_LINKS = [
   { href: "/team", label: "Our Team" },
@@ -11,6 +12,46 @@ const NAV_LINKS = [
   { href: "/join", label: "Join Our Team" },
   { href: "/contact", label: "Contact Us" },
 ];
+
+function SignOutControl({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
+  const clerk = useClerk();
+  const [busy, setBusy] = useState(false);
+
+  async function logout() {
+    if (busy) return;
+    setBusy(true);
+    onNavigate?.();
+    try {
+      await clerk.signOut({ redirectUrl: "/login" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button type="button" onClick={logout} disabled={busy} className={`${className} disabled:cursor-wait disabled:opacity-50 disabled:scale-100`}>
+      {busy ? "Signing out…" : "Sign out"}
+    </button>
+  );
+}
+
+// Core 3 removed <SignedIn>/<SignedOut>; its <Show> replacement renders nothing
+// until Clerk loads, which would blank the log in link on every prerendered
+// marketing page, so read the state directly and default to signed out.
+function ClerkAuthControl({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
+  const { isSignedIn } = useAuth();
+  if (!isSignedIn) return <Link href="/login" onClick={onNavigate} className={className}>Member log in</Link>;
+  return <SignOutControl className={className} onNavigate={onNavigate} />;
+}
+
+// ClerkProvider is only mounted when the publishable key is set (see app/layout.tsx),
+// and Clerk hooks throw without it, so fall back to the plain link.
+function AuthControl({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()) {
+    return <Link href="/login" onClick={onNavigate} className={className}>Member log in</Link>;
+  }
+  return <ClerkAuthControl className={className} onNavigate={onNavigate} />;
+}
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -33,7 +74,7 @@ export default function SiteHeader() {
               {label}
             </Link>
           ))}
-          <Link href="/login" className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96">Member log in</Link>
+          <AuthControl className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96" />
           <Link href="/apply" className="button-primary">Apply now</Link>
         </nav>
         <button
@@ -60,7 +101,7 @@ export default function SiteHeader() {
                 {label}
               </Link>
             ))}
-            <Link href="/login" onClick={() => setOpen(false)} className="border-b border-white/10 py-4 text-lg text-white">Member log in</Link>
+            <AuthControl className="border-b border-white/10 py-4 text-left text-lg text-white" onNavigate={() => setOpen(false)} />
             <Link href="/apply" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Apply now</Link>
           </div>
         </nav>

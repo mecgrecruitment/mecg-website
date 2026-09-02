@@ -57,14 +57,14 @@ export default function RoundAssignmentForm({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end lg:gap-3">
         <label className="min-w-0 text-sm font-medium">
           Applicant
-          <select name="applicationId" required defaultValue="" className="mt-2 min-h-11 w-full rounded-xl bg-white px-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none">
+          <select name="applicationId" required defaultValue="" className="select-control mt-2 text-sm">
             <option value="" disabled>Select an applicant</option>
             {applicants.map((applicant) => <option key={applicant.id} value={applicant.id}>{applicant.label}</option>)}
           </select>
         </label>
         <label className="min-w-0 text-sm font-medium">
           Evaluator
-          <select name="evaluatorId" required defaultValue="" className="mt-2 min-h-11 w-full rounded-xl bg-white px-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none">
+          <select name="evaluatorId" required defaultValue="" className="select-control mt-2 text-sm">
             <option value="" disabled>Select an evaluator</option>
             {evaluators.map((evaluator) => <option key={evaluator.id} value={evaluator.id}>{evaluator.label}</option>)}
           </select>

@@ -12,6 +12,10 @@ import PillNav from "./pill-nav";
 //
 // Capability gating lives here so a page never has to reason about which links
 // a role may see.
+//
+// Labels are plain English on purpose. "Pipeline", "Blind screening",
+// "Delivery" and "Audit log" were internal names that meant nothing to a member
+// on their first day; the routes behind them are unchanged.
 export default async function WorkspaceNav({
   user,
   cycleId,
@@ -36,32 +40,54 @@ export default async function WorkspaceNav({
   const hasGradingEvent = (gradingEvents ?? []).length > 0;
 
   const can = (permission: Parameters<typeof hasPermission>[2]) => hasPermission(user.memberships, cycleId, permission);
+  // Every member votes once the cycle reaches decision lock, so the link is
+  // driven by cycle state rather than by role.
+  const votingOpen = user.memberships.some((membership) =>
+    membership.active && membership.cycleId === cycleId && membership.cycle.status === "DECISION_LOCK");
 
-  const links: Array<readonly [string, string]> = [
+  // Two rows, because a single 16-item bar made "what I owe" and "what I run"
+  // look like one undifferentiated list. Row one is always the member's own
+  // work, so a plain member sees only that row.
+  const mine: Array<readonly [string, string]> = [
     ["/member", "My work"],
-    ...(screeningReviewer.data ? [["/member/screening", `Blind screening${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
+    ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
+    ...(screeningReviewer.data ? [["/member/screening", `Read applications${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
+    ["/member/refer", "Refer someone"],
+    ["/admin/people", "People"],
+  ];
+
+  const board: Array<readonly [string, string]> = [
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
-        ["/admin", "Pipeline"],
-        ["/admin/rounds", "Rounds"],
-        ["/admin/screening", "Screening admin"],
-        ["/admin/groups", "Case teams"],
+        ["/admin", "Applicants"],
+        ["/admin/referrals", "Referrals"],
+        ["/admin/rounds", "Interview rounds"],
+        ["/admin/screening", "Review setup"],
+        ["/admin/groups", "Group interviews"],
         ["/admin/messages", "Messages"],
-        ...(can("MANAGE_CYCLE") ? [["/admin/notifications", "Delivery"] as const] : []),
+        ...(can("MANAGE_CYCLE") ? [["/admin/notifications", "Emails & texts"] as const] : []),
       ] as const)
       : []),
-    ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash"] as const] : []),
-    ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/audit", "Audit log"] as const] : []),
-    ["/admin/people", "People"],
+    ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash results"] as const] : []),
+    ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/audit", "Activity"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/projects", "Projects"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
 
   return (
     <>
-      <div className="workspace-nav-shell sticky top-3 z-30 rounded-2xl bg-white/88 p-1.5 shadow-[0_14px_44px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
-        <PillNav ariaLabel="Workspace" current={current} links={links} />
+      <div className="workspace-nav-shell sticky top-3 z-30 flex flex-col gap-1 rounded-2xl bg-white/88 p-1.5 shadow-[0_14px_44px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <span className="w-14 shrink-0 pl-2 text-[12px] font-semibold text-mecg-navy/55">Mine</span>
+          <PillNav ariaLabel="Your work" current={current} links={mine} />
+        </div>
+        {board.length > 0 && (
+          <div className="flex items-center gap-2 border-t border-mecg-navy/[0.08] pt-1">
+            <span className="w-14 shrink-0 pl-2 text-[12px] font-semibold text-mecg-navy/55">Board</span>
+            <PillNav ariaLabel="Board tools" current={current} links={board} />
+          </div>
+        )}
       </div>
       <span id="workspace-content" tabIndex={-1} className="sr-only">Workspace content</span>
     </>

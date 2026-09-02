@@ -79,7 +79,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
         eyebrow="Attendance event"
         title={event.name}
         description={formatEasternDateTime(event.starts_at)}
-        action={<Link href="/admin" className="button-secondary text-sm">Back to pipeline</Link>}
+        action={<Link href="/admin" className="button-secondary text-sm">Back to applicants</Link>}
       />
       {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin" />}
 
@@ -91,7 +91,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       }} />
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Operational attendance only</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">Operational attendance only</p>
         <p className="mt-3 text-sm text-mecg-navy/60">
           Check-in window: {formatEasternDateTime(event.checkin_opens_at)} to {formatEasternDateTime(event.checkin_closes_at)}
         </p>
@@ -100,7 +100,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       <AssistedCheckinForm eventId={event.id} locked={event.status === "CLOSED" || event.status === "CANCELLED"} />
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Member grading</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">Member grading</p>
         <p className="mt-3 text-sm">
           Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
         </p>
@@ -110,7 +110,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Live attendance</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">Live attendance</p>
         <p className="mt-3 text-sm">
           Applicant check-ins: <strong className="font-semibold text-mecg-navy">{checkins?.length ?? 0}</strong>
         </p>
@@ -133,7 +133,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Check-in QR code</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">Check-in QR code</p>
         {qrDataUrl ? (
           <div className="mt-3 flex flex-col items-start gap-2">
             <Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} className="rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" />
@@ -152,7 +152,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
       {event.cycle_id && <SlotForm cycleId={event.cycle_id} eventId={event.id} />}
 
       <section>
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">RSVP slots</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/60">RSVP slots</p>
         <ul className="mt-3 flex flex-col gap-1.5">
           {(slots ?? []).map((slot) => (
             <li key={slot.id} className="text-sm text-mecg-navy/70">

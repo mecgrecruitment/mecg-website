@@ -21,19 +21,19 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
 
   async function decide(approved: boolean) {
     if (dirty) {
-      setError("Save or discard your redaction changes before changing this packet’s review status.");
+      setError("Save or discard your edits before changing this application's review status.");
       return;
     }
     await run(
       { cycleId, action: "APPROVE_PACKET", packetId, approved },
-      { successMessage: approved ? "Blind packet approved." : "Packet returned for redaction.", fallbackError: "Could not update packet" },
+      { successMessage: approved ? "Application approved for review." : "Application sent back for editing.", fallbackError: "Could not update this application" },
     );
   }
   async function saveRedaction() {
     const content = { responses: responses.map((response, index) => ({ question: response.question ?? "", answer: answers[index] ?? "" })) };
     await run(
       { cycleId, action: "UPDATE_PACKET", packetId, content },
-      { successMessage: "Redaction saved. The packet must be approved again.", fallbackError: "Could not save redaction" },
+      { successMessage: "Edits saved. This application needs approving again.", fallbackError: "Could not save your edits" },
     );
   }
   return (
@@ -61,7 +61,7 @@ export default function PacketAction({ cycleId, packetId, status, responses }: {
         </div>
       </details>
       <div className="flex flex-wrap gap-2">
-        <button disabled={pending || dirty || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">{pending ? "Working…" : "Approve blind packet"}</button>
+        <button disabled={pending || dirty || status === "APPROVED"} onClick={() => void decide(true)} className="button-primary">{pending ? "Working…" : "Approve for review"}</button>
         <button disabled={pending || dirty || status === "REJECTED"} onClick={() => void decide(false)} className="button-secondary">Reject for redaction</button>
       </div>
       <OperationNotice kind="error">{error}</OperationNotice>

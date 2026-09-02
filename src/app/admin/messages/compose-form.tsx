@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
+import { applicationStatusLabel } from "@/lib/labels";
 
 // Bulk send to a pipeline segment. Deliberately plain text rather than a rich
 // editor: the wrapper supplies the layout, and an editor here would be a second
@@ -54,11 +55,11 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
         void send(event.currentTarget);
       }}
     >
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Send to a segment</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/50">Send to a segment</p>
       <p className="mt-1 text-sm text-mecg-navy/55">Every send is recorded on the applicant&rsquo;s dossier, delivered or not.</p>
 
       <fieldset className="mt-4">
-        <legend className="text-sm font-medium">Pipeline status</legend>
+        <legend className="text-sm font-medium">Application status</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {PIPELINE_STATUSES.map((status) => {
             const checked = statuses.includes(status);
@@ -66,7 +67,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
             return (
               <label
                 key={status}
-                className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] ${checked ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"} ${count ? "" : "opacity-45"}`}
+                className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold ${checked ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"} ${count ? "" : "opacity-45"}`}
               >
                 <input
                   type="checkbox"
@@ -75,7 +76,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
                   disabled={!count}
                   onChange={(event) => setStatuses((current) => event.target.checked ? [...current, status] : current.filter((item) => item !== status))}
                 />
-                {status.replaceAll("_", " ")} · {count}
+                {applicationStatusLabel(status)} · {count}
               </label>
             );
           })}
@@ -88,7 +89,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
           name="subject"
           required
           maxLength={200}
-          placeholder="Your Group Case time is confirmed"
+          placeholder="Your group interview time is confirmed"
           className="mt-1.5 min-h-11 w-full rounded-xl bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         />
       </label>

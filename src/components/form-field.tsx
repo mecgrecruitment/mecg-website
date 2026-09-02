@@ -15,7 +15,7 @@ export default function FormField({
     <div className="block text-sm font-semibold text-mecg-navy">
       <span className="flex items-baseline justify-between gap-3">
         <label htmlFor={id}>{label}</label>
-        {props.required && <span className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-mecg-navy/60">Required</span>}
+        {props.required && <span className="text-[12px] font-medium text-mecg-navy/60">Required</span>}
       </span>
       <input
         {...props}

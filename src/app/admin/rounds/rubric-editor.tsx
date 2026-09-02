@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { roundStatusLabel } from "@/lib/labels";
 
 export type Criterion = {
   key: string;
@@ -65,13 +66,13 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
       });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        setError(body?.error ?? "Could not save the rubric");
+        setError(body?.error ?? "Could not save the scoring guide");
         return;
       }
-      setNotice("Rubric saved.");
+      setNotice("Scoring guide saved.");
       router.refresh();
     } catch {
-      setError("Could not save the rubric");
+      setError("Could not save the scoring guide");
     } finally {
       setPending(false);
     }
@@ -81,19 +82,19 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
     <section className="rounded-2xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">
-            {round.roundName} rubric
+          <p className="text-[13px] font-semibold text-mecg-navy/50">
+            {round.roundName} scoring guide
           </p>
           <p className="mt-1 text-sm text-mecg-navy/55">
-            {round.rubricVersion ? `Version ${round.rubricVersion}` : "No rubric yet"} · round is {round.roundStatus.replaceAll("_", " ")}
+            {round.rubricVersion ? `Version ${round.rubricVersion}` : "No scoring guide yet"} · round is {roundStatusLabel(round.roundStatus)}
           </p>
         </div>
-        <span className="font-mono text-xs tabular-nums text-mecg-navy/45">{criteria.length} criteria · {totalWeight} weight</span>
+        <span className="tabular text-xs text-mecg-navy/45">{criteria.length} criteria · {totalWeight} weight</span>
       </div>
 
       {!editable ? (
         <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-mecg-navy/65 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-          This round is already under way, so its rubric is fixed. Evaluators who have scored against it keep the
+          This round is already under way, so its scoring guide is fixed. Evaluators who have scored against it keep the
           wording they saw.
         </p>
       ) : (
@@ -102,7 +103,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
             {criteria.map((item, index) => (
               <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-xs font-semibold tabular-nums text-mecg-navy/65">{index + 1}</span>
+                  <span className="tabular text-xs font-semibold text-mecg-navy/65">{index + 1}</span>
                   <div className="flex items-center gap-1">
                     <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move criterion ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
                     <button type="button" onClick={() => move(index, 1)} disabled={pending || index === criteria.length - 1} aria-label={`Move criterion ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
@@ -137,7 +138,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       value={item.key}
                       onChange={(event) => update(index, { key: event.target.value })}
                       aria-invalid={!KEY_PATTERN.test(item.key)}
-                      className="mt-1.5 min-h-11 w-44 rounded-xl bg-mecg-navy/[0.035] px-3 font-mono text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="mt-1.5 min-h-11 w-44 rounded-xl bg-mecg-navy/[0.035] px-3 tabular text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -151,7 +152,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       className="mt-1.5 min-h-11 w-24 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm tabular-nums shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
                     />
                   </label>
-                  <span className="pb-3 font-mono text-[11px] tabular-nums text-mecg-navy/45">
+                  <span className="pb-3 tabular text-[11px] text-mecg-navy/45">
                     {totalWeight > 0 ? `${Math.round((item.weight / totalWeight) * 100)}% of the round` : ""}
                   </span>
                   <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">
@@ -168,7 +169,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
 
           {!criteria.length && (
             <p className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
-              A rubric needs at least one criterion before evaluators can score.
+              A scoring guide needs at least one criterion before evaluators can score.
             </p>
           )}
 
@@ -182,7 +183,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
               + Add criterion
             </button>
             <button type="button" disabled={pending || invalid} onClick={() => void save()} className="button-primary">
-              {pending ? "Saving…" : "Save rubric"}
+              {pending ? "Saving…" : "Save scoring guide"}
             </button>
             {duplicates.length > 0 && <p className="text-sm text-red-700">Duplicate key: {duplicates[0]}</p>}
           </div>

@@ -140,7 +140,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
         <p id="screening-evidence-help" className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH} characters · at least {MIN_EVIDENCE_LENGTH} required</p>
         <label className="block font-medium" htmlFor="screening-recommendation">
           Recommendation
-          <select id="screening-recommendation" ref={recommendationRef} required value={recommendation} disabled={pending} onChange={(event) => { setRecommendation(event.target.value); setError(""); }} className="mt-2 min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]">
+          <select id="screening-recommendation" ref={recommendationRef} required value={recommendation} disabled={pending} onChange={(event) => { setRecommendation(event.target.value); setError(""); }} className="select-control mt-2">
             <option value="">Choose</option>
             <option value="ADVANCE">Advance</option>
             <option value="HOLD">Hold for structured review</option>
@@ -152,7 +152,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
       </form>
       <section className="rounded-2xl bg-mecg-orange/[0.08] p-5" aria-labelledby="recusal-heading">
         <h2 id="recusal-heading" className="font-semibold text-mecg-orange-ink">Recognize this applicant?</h2>
-        <p className="mt-1 text-sm text-mecg-navy/70">Do not name the applicant. If eligible replacement coverage exists, recusal records a conflict, permanently removes this packet from your queue, and assigns a replacement. If no replacement is available, no recusal is completed.</p>
+        <p className="mt-1 text-sm text-mecg-navy/70">Do not name the applicant. If eligible replacement coverage exists, recusal records a conflict, permanently removes this application from your queue, and assigns a replacement. If no replacement is available, no recusal is completed.</p>
         <label className="mt-3 block text-sm font-medium text-mecg-orange-ink" htmlFor="screening-recusal-reason">Reason for recusal</label>
         <textarea
           id="screening-recusal-reason"
@@ -164,7 +164,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
           className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         />
         <p className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{recusalReason.length} / 1000</p>
-        <button type="button" disabled={pending || recusalReason.trim().length < 5} onClick={() => void act({ action: "RECUSE", reason: recusalReason })} className="button-secondary mt-3">{pending ? "Recusing…" : "Recuse from packet"}</button>
+        <button type="button" disabled={pending || recusalReason.trim().length < 5} onClick={() => void act({ action: "RECUSE", reason: recusalReason })} className="button-secondary mt-3">{pending ? "Stepping back…" : "Step back from this one"}</button>
       </section>
     </div>
   );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
 import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
 import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
+import { cycleStatusLabel, memberRoleLabel, roundStatusLabel } from "@/lib/labels";
 
 type Option = { id: string; label: string };
 type MemberRole = "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTEE";
@@ -36,27 +37,14 @@ function Select({
   return (
     <label className="block text-sm font-medium">
       {label}
-      <div className="relative mt-2">
-        <select
-          name={name}
-          defaultValue={defaultValue}
-          required={required}
-          className="min-h-12 w-full appearance-none rounded-xl bg-mecg-navy/[0.035] px-4 pr-10 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
-        >
-          {children}
-        </select>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-mecg-navy/60"
-        >
-          <path d="M5 8l5 5 5-5" />
-        </svg>
-      </div>
+      <select
+        name={name}
+        defaultValue={defaultValue}
+        required={required}
+        className="select-control mt-2 text-sm"
+      >
+        {children}
+      </select>
     </label>
   );
 }
@@ -178,8 +166,8 @@ export function PeopleControls({
 
       <div className="rounded-2xl bg-paper p-5">
         <div>
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Member roles</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Role changes apply to this recruitment cycle and are recorded in the audit log.</p>
+          <p className="text-[13px] font-semibold text-mecg-navy/50">Member roles</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">Role changes apply to this recruitment cycle and are recorded in Activity.</p>
         </div>
         <div className="mt-4 grid gap-2">
           {memberAccounts.map((member) => {
@@ -205,7 +193,7 @@ export function PeopleControls({
                     defaultValue={member.role}
                     disabled={pending || isCurrentUser || !isActive}
                     aria-label={`Role for ${member.name}`}
-                    className="min-h-11 rounded-full bg-white px-3.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none disabled:opacity-55"
+                    className="select-control w-44 text-[13px]"
                   >
                     {MEMBER_ROLES.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
                   </select>
@@ -272,15 +260,15 @@ export function RoundControls({
             </Select>
             <Select label="Evaluator" name="evaluatorId" required>
               <option value="">Evaluator</option>
-              {memberAccounts.map((member) => <option key={member.id} value={member.id}>{member.name} · {member.role}</option>)}
+              {memberAccounts.map((member) => <option key={member.id} value={member.id}>{member.name} · {memberRoleLabel(member.role)}</option>)}
             </Select>
             <button type="submit" disabled={pending} className="button-primary mt-1 w-full">Create assignment</button>
           </div>
         </form>
 
         <div className="rounded-2xl bg-paper p-5">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Round status</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Evaluation forms open when a round is ACTIVE and lock when it is FROZEN.</p>
+          <p className="text-[13px] font-semibold text-mecg-navy/50">Round status</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">Evaluation forms open when a round is open and lock when it is closed to edits.</p>
           <div className="mt-3 flex flex-col gap-2">
             {rounds.map((round) => (
               <form
@@ -298,9 +286,9 @@ export function RoundControls({
                     name="status"
                     aria-label={`Status for ${round.label}`}
                     defaultValue={round.status}
-                    className="min-h-10 rounded-full px-3 font-mono text-xs font-semibold uppercase tracking-[0.04em] text-mecg-navy/65 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] outline-none"
+                    className="select-control w-44 text-[13px]"
                   >
-                    {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status}>{status}</option>)}
+                    {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status} value={status}>{roundStatusLabel(status)}</option>)}
                   </select>
                   <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]">Save</button>
                 </div>
@@ -311,7 +299,7 @@ export function RoundControls({
         </div>
       </div>
       <div className="rounded-2xl bg-paper p-5">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Open assignments</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/50">Open assignments</p>
         <p className="mt-1 text-sm text-mecg-navy/55">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
         <div className="mt-3 grid gap-2">
           {assignments.map((assignment) => (
@@ -321,7 +309,7 @@ export function RoundControls({
               void act({ action: "REASSIGN", assignmentId: assignment.id, evaluatorId: data.get("evaluatorId") });
             }}>
               <div className="min-w-48 flex-1"><p className="text-[13px] font-semibold">{assignment.applicationName}</p><p className="text-xs text-mecg-navy/55">{assignment.label} · {assignment.evaluatorName}</p></div>
-              <select name="evaluatorId" defaultValue={assignment.evaluatorId} aria-label={`Evaluator for ${assignment.applicationName}`} className="min-h-10 rounded-full bg-white px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">
+              <select name="evaluatorId" defaultValue={assignment.evaluatorId} aria-label={`Evaluator for ${assignment.applicationName}`} className="select-control w-48 text-xs">
                 {memberAccounts.filter((member) => member.active !== false).map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
               </select>
               <button type="submit" disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">Reassign</button>
@@ -342,9 +330,9 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
   return (
     <section className="flex flex-col gap-3">
       <div className="rounded-2xl bg-paper p-5">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Cycle status</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/50">Cycle status</p>
         <p className="mt-1 text-sm text-mecg-navy/55">
-          Currently {cycleStatus.replaceAll("_", " ")}. Only the transitions the workflow allows are listed.
+          Currently {cycleStatusLabel(cycleStatus)}. Only the transitions the workflow allows are listed.
         </p>
         <form
           className="mt-3 flex items-center gap-2"
@@ -358,9 +346,9 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
             name="status"
             aria-label="Cycle status"
             defaultValue={cycleStatus}
-            className="min-h-10 flex-1 rounded-full bg-white px-3.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none sm:max-w-xs"
+            className="select-control flex-1 text-[13px] sm:max-w-xs"
           >
-            {nextStatuses.map((status) => <option key={status}>{status}</option>)}
+            {nextStatuses.map((status) => <option key={status} value={status}>{cycleStatusLabel(status)}</option>)}
           </select>
           <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]">Save</button>
         </form>
@@ -385,9 +373,9 @@ export function CloneCycleForm({ cycleId, cycleName }: ControlProps & { cycleNam
           void act({ action: "CLONE_CYCLE", name: data.get("name") }, event.currentTarget);
         }}
       >
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/50">Start the next cycle</p>
+        <p className="text-[13px] font-semibold text-mecg-navy/50">Start the next cycle</p>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">
-          Copies the rounds, each round&rsquo;s current rubric, the application questions and everyone&rsquo;s access from
+          Copies the rounds, each round&rsquo;s current scoring guide, the application questions and everyone&rsquo;s access from
           {" "}{cycleName}. No applicants, evaluations, decisions or events come across. The new cycle starts as a draft.
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-3">

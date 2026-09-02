@@ -6,6 +6,7 @@ import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 import { EVENT_KINDS } from "@/lib/workflow";
+import { eventStatusLabel } from "@/lib/labels";
 
 type EventData = {
   id: string; name: string; kind: string; location: string | null; visibility: string;
@@ -35,7 +36,9 @@ export default function EventControls({ event }: { event: EventData }) {
       });
       if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Could not update event"); return; }
       router.refresh();
-    } catch { setError("Could not update event"); } finally { setPending(false); }
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : "Could not update event");
+    } finally { setPending(false); }
   }
 
   async function cancel() {
@@ -50,13 +53,13 @@ export default function EventControls({ event }: { event: EventData }) {
 
   return (
     <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Event settings</p>
-      <p className="mt-2 text-sm text-mecg-navy/60">Status: {event.status}</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/60">Event settings</p>
+      <p className="mt-2 text-sm text-mecg-navy/60">Status: {eventStatusLabel(event.status)}</p>
       {!locked && <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={(submission) => { submission.preventDefault(); void update(submission.currentTarget); }}>
         <FormField label="Name" name="name" required defaultValue={event.name} />
-        <label className="block text-sm font-medium">Kind<select name="kind" defaultValue={event.kind} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4">{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label className="block text-sm font-medium">Kind<select name="kind" defaultValue={event.kind} className="select-control mt-2">{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <FormField label="Location" name="location" defaultValue={event.location ?? ""} />
-        <label className="block text-sm font-medium">Visibility<select name="visibility" defaultValue={event.visibility} className="mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4"><option value="PUBLIC">Public</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal</option></select></label>
+        <label className="block text-sm font-medium">Visibility<select name="visibility" defaultValue={event.visibility} className="select-control mt-2"><option value="PUBLIC">Public</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal</option></select></label>
         <FormField label="Starts (Detroit time)" name="startsAt" type="datetime-local" required defaultValue={formatDetroitDateTime(event.startsAt)} />
         <FormField label="Ends (Detroit time)" name="endsAt" type="datetime-local" required defaultValue={formatDetroitDateTime(event.endsAt)} />
         <FormField label="Check-in opens (Detroit time)" name="checkinOpensAt" type="datetime-local" required defaultValue={formatDetroitDateTime(event.checkinOpensAt)} />

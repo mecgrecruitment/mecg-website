@@ -11,12 +11,9 @@ function Select({ label, name, value, onChange, children }: { label: string; nam
   return (
     <label className="block text-sm font-medium">
       {label}
-      <div className="relative mt-2">
-        <select name={name} value={value} onChange={(event) => onChange(event.target.value)} className="min-h-12 w-full appearance-none rounded-xl bg-mecg-navy/[0.035] px-4 pr-10 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]">
-          {children}
-        </select>
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-mecg-navy/40" aria-hidden="true"><path d="M5 8l5 5 5-5" /></svg>
-      </div>
+      <select name={name} value={value} onChange={(event) => onChange(event.target.value)} className="select-control mt-2 text-sm">
+        {children}
+      </select>
     </label>
   );
 }

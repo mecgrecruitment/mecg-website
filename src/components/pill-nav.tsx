@@ -57,7 +57,7 @@ export default function PillNav({
               href={href}
               onNavigate={() => setPending({ from: current, href })}
               aria-current={current === href ? "page" : undefined}
-              className={`relative inline-flex min-h-11 items-center rounded-xl px-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] transition-[color,scale,background-color] duration-[--t-detent] ease-[--ease-detent] active:scale-[0.96] ${
+              className={`relative inline-flex min-h-11 items-center rounded-xl px-3.5 text-[13px] font-semibold transition-[color,scale,background-color] duration-[--t-detent] ease-[--ease-detent] active:scale-[0.96] ${
                 isSelected
                   ? "text-white"
                   : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"

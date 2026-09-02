@@ -90,6 +90,16 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
     ["size", "number"],
     ["pageCount", "number"],
   ),
+  hash_tally: (value) => Array.isArray(value) && value.every((item) =>
+    isRecord(item)
+    && hasString(item, "application_id")
+    && hasNumber(item, "yes_count")
+    && hasNumber(item, "no_count")
+    && hasNumber(item, "unsure_count")
+    && hasNumber(item, "total_votes")
+    && hasNumber(item, "quorum")
+    && ["PENDING", "OFFER", "REJECT"].includes(String(item.outcome)),
+  ),
   reject_resume_upload: (value) => typeof value === "string",
   authorize_resume_access: (value) => typeof value === "string",
 };

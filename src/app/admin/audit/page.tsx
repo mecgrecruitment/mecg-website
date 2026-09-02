@@ -8,8 +8,9 @@ import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { statusLabel } from "@/lib/labels";
 
-export const metadata: Metadata = { title: "Audit log" };
+export const metadata: Metadata = { title: "Activity" };
 
 const PAGE_SIZE = 100;
 
@@ -66,7 +67,7 @@ export default async function AuditPage({
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow="Accountability"
-        title="Audit log"
+        title="Activity"
         description="Every recorded action in this cycle, newest first. Entries cannot be edited or deleted."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/audit" />
@@ -75,7 +76,7 @@ export default async function AuditPage({
         <Link
           href="/admin/audit"
           aria-current={resource ? undefined : "page"}
-          className={`inline-flex min-h-10 items-center rounded-full px-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${resource ? "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]" : "bg-mecg-navy text-white"}`}
+          className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource ? "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]" : "bg-mecg-navy text-white"}`}
         >
           All
         </Link>
@@ -84,9 +85,9 @@ export default async function AuditPage({
             key={name}
             href={`/admin/audit?resource=${encodeURIComponent(name)}`}
             aria-current={resource === name ? "page" : undefined}
-            className={`inline-flex min-h-10 items-center rounded-full px-4 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${resource === name ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}
+            className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource === name ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}
           >
-            {name}
+            {statusLabel(name)}
           </Link>
         ))}
       </nav>
@@ -96,28 +97,28 @@ export default async function AuditPage({
           <article key={event.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
             <div className="min-w-0">
               <p className="text-[13px] font-semibold text-mecg-navy">
-                {event.action.replaceAll("_", " ")}
-                <span className="ml-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/45">{event.resource}</span>
+                {statusLabel(event.action)}
+                <span className="ml-2 text-[13px] font-semibold text-mecg-navy/45">{event.resource}</span>
               </p>
               <p className="mt-0.5 truncate text-[12px] text-mecg-navy/55">
                 {event.actor_id ? actorNames.get(event.actor_id) ?? "Account removed" : "System"}
                 {event.resource_id ? ` · ${event.resource_id}` : ""}
               </p>
             </div>
-            <time dateTime={event.created_at} className="font-mono text-[11px] tabular-nums text-mecg-navy/45">
+            <time dateTime={event.created_at} className="tabular text-[11px] text-mecg-navy/45">
               {formatEasternDateTime(event.created_at)}
             </time>
           </article>
         ))}
         {!events.length && (
           <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center text-sm text-mecg-navy/55">
-            No audit entries match this view.
+            No activity matches this view.
           </p>
         )}
       </section>
 
       {(pageIndex > 0 || hasNextPage) && (
-        <nav aria-label="Audit log pages" className="flex items-center justify-between">
+        <nav aria-label="Activity pages" className="flex items-center justify-between">
           {pageIndex > 0
             ? <Link href={pageHref(pageIndex - 1)} className="button-secondary text-sm">Newer</Link>
             : <span />}

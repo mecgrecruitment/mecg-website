@@ -49,13 +49,13 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
           <p className="font-semibold text-mecg-navy">No events to grade yet</p>
           <p className="mt-1 text-sm text-mecg-navy/55">Check in at a closed rush event to unlock grading.</p>
-          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to the Evaluation Hub</Link>
+          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
       ) : roster?.error ? (
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
           <p className="font-semibold text-mecg-navy">The grading window is closed</p>
           <p className="mt-1 text-sm text-mecg-navy/55">Impressions for this event can no longer be added or edited.</p>
-          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to the Evaluation Hub</Link>
+          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
       ) : (
         <section>

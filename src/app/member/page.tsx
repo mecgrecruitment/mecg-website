@@ -12,10 +12,11 @@ import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import SectionLabel from "@/components/section-label";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
+import { assignmentStatusLabel, cycleStatusLabel, memberRoleLabel, roundStatusLabel } from "@/lib/labels";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { formatEasternDateTime } from "@/lib/date-time";
 
-export const metadata: Metadata = { title: "Evaluation Hub" };
+export const metadata: Metadata = { title: "My work" };
 
 function formatDeadline(closesAt: string) {
   return formatEasternDateTime(closesAt);
@@ -97,7 +98,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       .map((item) => ({
         href: `/member/screening/${item.assignment_id}`,
         label: `Screen candidate ${item.candidate_code}`,
-        detail: "Blind first-pass review",
+        detail: "First read",
         dueAt: Number.POSITIVE_INFINITY,
       })),
     ...(gradingEvent?.grading_open
@@ -118,9 +119,9 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     ["conflicts declared", Number(recordCounts.conflictsDeclared ?? 0)],
   ];
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
-    ? "Speed Dating"
+    ? "Quick chats"
     : activeRoundFilter === "GROUP_CASE"
-      ? "Group Case"
+      ? "Group interview"
       : "All evaluation work";
   const overviewTitle = openAssignments.length
     ? `${openAssignments.length} evaluation${openAssignments.length === 1 ? " is" : "s are"} ready for you`
@@ -133,8 +134,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycleMembership.cycle.name} · ${cycleMembership.cycle.status}`}
-        title="Evaluation Hub"
+        eyebrow={`${cycleMembership.cycle.name} · ${cycleStatusLabel(cycleMembership.cycle.status)}`}
+        title="My work"
         description={`Signed in as ${user.name}`}
       />
       <WorkspaceNav user={user} cycleId={cycleMembership.cycleId} current={currentWorkspace} />
@@ -162,7 +163,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
           ))}
           {!tasks.length && (
             <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
-              You are caught up. New work appears here when the Board opens a round or assigns a packet.
+              You are caught up. New work appears here when the Board opens a round or assigns an application.
             </p>
           )}
         </div>
@@ -175,11 +176,11 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             <div className="bg-mecg-navy p-5 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Your work pulse</p>
+                  <p className="text-[13px] font-semibold text-white/50">Your work pulse</p>
                   <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-balance">{overviewTitle}</h2>
                 </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white/70">
-                  {cycleMembership.role.replaceAll("_", " ")}
+                <span className="rounded-full bg-white/10 px-3 py-1 text-[13px] font-semibold text-white/70">
+                  {memberRoleLabel(cycleMembership.role)}
                 </span>
               </div>
               <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
@@ -190,14 +191,14 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   [assignmentRows.length, "total assigned"],
                 ].map(([value, label]) => (
                   <div key={label}>
-                    <p className="font-mono text-[28px] font-semibold tabular-nums">{value}</p>
-                    <p className="mt-1 text-[10px] uppercase leading-4 tracking-[0.1em] text-white/50">{label}</p>
+                    <p className="tabular text-[28px] font-semibold">{value}</p>
+                    <p className="mt-1 text-[12px] leading-4 text-white/50">{label}</p>
                   </div>
                 ))}
               </div>
             </div>
             <div className="bg-white/5 p-5 sm:p-7">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Next deadline</p>
+              <p className="text-[13px] font-semibold text-white/50">Next deadline</p>
               {nextDeadline?.rounds.closes_at ? (
                 <div className="mt-4">
                   <p className="text-lg font-semibold">{formatDeadline(nextDeadline.rounds.closes_at)}</p>
@@ -227,8 +228,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             current={currentWorkspace}
             links={[
               ["/member", "All work"],
-              ["/member?round=SPEED_DATING", "Speed Dating"],
-              ["/member?round=GROUP_CASE", "Group Case"],
+              ["/member?round=SPEED_DATING", "Quick chats"],
+              ["/member?round=GROUP_CASE", "Group interview"],
             ]}
           />
         </div>
@@ -243,17 +244,17 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               : ready
                 ? "Ready now"
                 : ["RECUSED", "MISSED"].includes(assignment.status)
-                  ? assignment.status
-                  : assignment.rounds.status;
+                  ? assignmentStatusLabel(assignment.status)
+                  : roundStatusLabel(assignment.rounds.status);
             return (
               <article id={`assignment-${assignment.id}`} key={assignment.id} className="scroll-mt-6 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-orange-ink">{assignment.rounds.name}</p>
+                    <p className="text-[13px] font-semibold text-mecg-orange-ink">{assignment.rounds.name}</p>
                     <h3 className="mt-1.5 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
                   </div>
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] ${ready ? "bg-mecg-orange/[0.16] text-mecg-orange-ink" : "bg-mecg-navy/[0.06] text-mecg-navy/55"}`}>
-                    {statusLabel.replaceAll("_", " ")}
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ${ready ? "bg-mecg-orange/[0.16] text-mecg-orange-ink" : "bg-mecg-navy/[0.06] text-mecg-navy/55"}`}>
+                    {statusLabel}
                   </span>
                 </div>
                 {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/60">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
@@ -272,7 +273,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                     </div>
                   </details>
                 ) : ready ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its rubric is unavailable. Contact the Board before evaluating.</p>
+                  <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its scoring guide is unavailable. Contact the Board before evaluating.</p>
                 ) : assignment.status === "RECUSED" ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">You are recused from this applicant. No evaluation is required.</p>
                 ) : assignment.status === "MISSED" ? (
@@ -298,8 +299,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <dl className="mt-3.5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {memberRecord.map(([label, value]) => (
             <div key={label} className="rounded-2xl bg-paper p-4">
-              <dd className="font-mono text-[26px] font-semibold tabular-nums text-mecg-navy">{value}</dd>
-              <dt className="mt-1 text-[11px] uppercase leading-4 tracking-[0.1em] text-mecg-navy/45">{label}</dt>
+              <dd className="tabular text-[26px] font-semibold text-mecg-navy">{value}</dd>
+              <dt className="mt-1 text-[12px] leading-4 text-mecg-navy/45">{label}</dt>
             </div>
           ))}
         </dl>
@@ -311,7 +312,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         {gradingEvent && (
           <div className="mt-3.5 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-mecg-navy p-5 text-white ring-1 ring-white/12 sm:p-6">
             <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">Live event</p>
+              <p className="text-[13px] font-semibold text-white/50">Live event</p>
               <h3 className="mt-2 text-lg font-semibold">{gradingEvent.event_name}</h3>
               <p className="mt-1 text-sm text-white/55">{gradingEvent.grading_open ? "Grading is open" : "Grading closed"}</p>
             </div>
@@ -321,13 +322,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="mt-3.5 grid gap-4 lg:grid-cols-2">
           <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
           <section className="rounded-2xl bg-paper p-5 sm:p-6">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/65">Before you score</p>
+            <p className="text-[13px] font-semibold text-mecg-navy/65">Before you score</p>
             <h3 className="mt-2 text-lg font-semibold">Calibration anchors</h3>
             <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Use the same evidence standard in every live evaluation.</p>
             <ol className="mt-4 space-y-2 text-sm text-mecg-navy/70">
               {Object.entries(SCORE_ANCHORS).map(([score, meaning]) => (
                 <li key={score} className="flex gap-3">
-                  <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white font-mono text-[11px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">{score}</span>
+                  <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-white tabular text-[11px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">{score}</span>
                   <span className="pt-0.5">{meaning}</span>
                 </li>
               ))}

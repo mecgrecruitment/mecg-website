@@ -40,7 +40,7 @@ export default function SetupForm() {
     <form onSubmit={submit} className="flex max-w-md flex-col gap-3 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
       <h2 className="font-semibold">Create the first rush cycle</h2>
       <p className="text-sm text-gray-600">
-        This also creates the approved Speed Dating and Group Case rubrics.
+        This also creates the approved scoring guides for quick chats and group interviews.
       </p>
       <label className="flex flex-col gap-1 text-sm font-medium">
         Cycle name

@@ -7,6 +7,7 @@ import PipelineStatusForm from "./pipeline-status-form";
 import StatusPill from "@/components/status-pill";
 import SegmentedControl from "@/components/segmented-control";
 import { initials } from "@/lib/initials";
+import { applicationStatusLabel } from "@/lib/labels";
 import {
   DECIDED_PIPELINE_STATUSES,
   PIPELINE_STATUSES,
@@ -31,10 +32,6 @@ type StatusFilter = "ALL" | PipelineStatus;
 const ACTIVE_STATUSES = PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status));
 const DECIDED_STATUSES = PIPELINE_STATUSES.filter((status) => DECIDED_PIPELINE_STATUSES.has(status));
 
-function statusLabel(status: PipelineStatus) {
-  return status.replaceAll("_", " ");
-}
-
 function ApplicantCard({
   application,
   canOperate,
@@ -49,7 +46,7 @@ function ApplicantCard({
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-[0_1px_2px_rgba(7,13,31,0.06)]">
       <div className="flex items-center gap-2">
-        <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[10px] font-semibold text-white">
+        <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
           {initials(application.name)}
         </span>
         <Link href={`/admin/applications/${application.id}`} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
@@ -111,11 +108,11 @@ function ApplicantRoster({
                 const value = event.target.value;
                 onStatusFilterChange(isPipelineStatus(value) ? value : "ALL");
               }}
-              className="operation-control min-w-40 bg-white px-3 text-sm text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+              className="select-control w-48 text-sm"
             >
               <option value="ALL">All statuses</option>
               {PIPELINE_STATUSES.map((status) => (
-                <option key={status} value={status}>{statusLabel(status)}</option>
+                <option key={status} value={status}>{applicationStatusLabel(status)}</option>
               ))}
             </select>
           </label>
@@ -127,7 +124,7 @@ function ApplicantRoster({
                 const value = event.target.value;
                 onResumeFilterChange(value === "ON_FILE" || value === "MISSING" ? value : "ALL");
               }}
-              className="operation-control min-w-40 bg-white px-3 text-sm text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+              className="select-control w-48 text-sm"
             >
               <option value="ALL">All resumes</option>
               <option value="ON_FILE">Resume on file</option>
@@ -143,7 +140,7 @@ function ApplicantRoster({
           {applications.map((application) => (
             <li key={application.id} className="grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto] md:items-center">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mecg-navy font-mono text-[11px] font-semibold text-white">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[11px] font-semibold text-white">
                   {initials(application.name)}
                 </span>
                 <div className="min-w-0">
@@ -154,7 +151,7 @@ function ApplicantRoster({
                 </div>
               </div>
               <div>
-                <StatusPill tone="orange">{statusLabel(application.status)}</StatusPill>
+                <StatusPill tone="orange">{applicationStatusLabel(application.status)}</StatusPill>
                 <p className="mt-1 text-[11px] text-mecg-navy/60">
                   Submitted <time dateTime={application.submittedAt}>{application.submittedLabel}</time>
                 </p>
@@ -250,7 +247,7 @@ function PipelineBoardInner({
           onChange={(value) => setView(value === "PIPELINE" ? "PIPELINE" : "ALL")}
           options={[
             { value: "ALL", label: "All applicants" },
-            { value: "PIPELINE", label: "Pipeline" },
+            { value: "PIPELINE", label: "By stage" },
           ]}
         />
       </div>
@@ -270,14 +267,14 @@ function PipelineBoardInner({
         </div>
       ) : (
         <div key="pipeline" className="panel-seat">
-          <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(190px,1fr)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicant pipeline by stage">
+          <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(190px,1fr)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicants by stage">
             {ACTIVE_STATUSES.map((status) => {
               const column = searchResults.filter((application) => application.status === status);
               return (
                 <article key={status} className="flex flex-col gap-1.5 rounded-2xl bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
                   <div className="flex items-center justify-between">
-                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">{statusLabel(status)}</p>
-                    <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 font-mono text-[11px] font-bold text-mecg-orange-ink">
+                    <p className="text-[13px] font-semibold text-mecg-navy/55">{applicationStatusLabel(status)}</p>
+                    <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
                       {column.length}
                     </span>
                   </div>
@@ -302,7 +299,7 @@ function PipelineBoardInner({
           </div>
           <div className="mt-4 rounded-2xl bg-mecg-navy/[0.025] p-4">
             <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between gap-4 text-left">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/55">Decided · {decidedCount}</span>
+              <span className="text-[13px] font-semibold text-mecg-navy/55">Decided · {decidedCount}</span>
               <span className="inline-flex items-center gap-2 text-xs font-semibold text-mecg-blue">
                 {showDecided ? "Hide" : "Show"}
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className={`disclosure-chevron ${showDecided ? "rotate-180" : ""}`} aria-hidden="true">
@@ -314,7 +311,7 @@ function PipelineBoardInner({
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {DECIDED_STATUSES.map((status) => (
                   <StatusPill key={status} tone="neutral">
-                    {statusLabel(status)} · {applications.filter((application) => application.status === status).length}
+                    {applicationStatusLabel(status)} · {applications.filter((application) => application.status === status).length}
                   </StatusPill>
                 ))}
               </div>
@@ -324,8 +321,8 @@ function PipelineBoardInner({
                   const column = searchResults.filter((application) => application.status === status);
                   return (
                     <div key={status}>
-                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/60">
-                        {statusLabel(status)} · {column.length}
+                      <p className="text-[13px] font-semibold text-mecg-navy/60">
+                        {applicationStatusLabel(status)} · {column.length}
                       </p>
                       <div className="mt-1.5 flex flex-col gap-1.5">
                         {column.map((application) => (

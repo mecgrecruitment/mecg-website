@@ -60,7 +60,7 @@ export default function ProfileForm({ initial }: { initial: MemberProfile }) {
         void save(event.currentTarget);
       }}
     >
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/45">Your profile</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/45">Your profile</p>
       <h3 className="mt-2 text-lg font-semibold">How you appear in the directory</h3>
       <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Only your name is required. Nothing here is shown to applicants.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">

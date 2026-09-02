@@ -11,7 +11,7 @@ export default function StatusPill({
     neutral: "bg-mecg-navy/10 text-mecg-navy/70",
   }[tone];
   return (
-    <span className={`inline-flex w-fit items-center rounded-[2px] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] ${toneClass}`}>
+    <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[12px] font-semibold ${toneClass}`}>
       {children}
     </span>
   );

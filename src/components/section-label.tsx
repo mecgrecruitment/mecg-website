@@ -10,7 +10,7 @@ export default function SectionLabel({
   dark?: boolean;
 }) {
   return (
-    <p className={`font-mono text-[11px] font-semibold uppercase tracking-[0.16em] ${className}`}>
+    <p className={`section-label ${className}`}>
       {number ? (
         <>
           <span className={dark ? "text-mecg-orange" : "text-mecg-orange-ink"}>{number}</span> /{" "}

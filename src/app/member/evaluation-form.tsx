@@ -85,7 +85,7 @@ export default function EvaluationForm({
     const totalWeight = criteria.reduce((total, criterion) => total + criterion.weight, 0);
     if (totalWeight > 0 && observedWeight / totalWeight < 0.75) {
       const firstUnobserved = criteria.find((criterion) => scores[criterion.id] === "NO");
-      setError("Observe at least 75% of the rubric weight before submitting an evaluation.");
+      setError("Observe at least 75% of the scoring guide weight before submitting an evaluation.");
       if (firstUnobserved) criterionRefs.current[firstUnobserved.id]?.focus();
       return;
     }
@@ -175,7 +175,7 @@ export default function EvaluationForm({
               <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>
             )}
             <label className="mt-3 block text-sm font-medium" htmlFor={`note-${assignmentId}-${criterion.id}`}>
-              Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-mecg-orange-ink">Required</span>}
+              Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Required</span>}
             </label>
             <textarea
               id={`note-${assignmentId}-${criterion.id}`}

@@ -23,7 +23,7 @@ export default function WorkspaceHeader({
       <div className="relative max-w-3xl">
         <div className="flex items-center gap-3">
           <span className="h-2 w-2 rounded-full bg-mecg-orange shadow-[0_0_0_5px_rgba(254,144,77,0.12)]" aria-hidden="true" />
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-mecg-orange">{eyebrow}</p>
+          <p className="text-[13px] font-semibold text-mecg-orange">{eyebrow}</p>
         </div>
         <h1 className="mt-4 text-balance text-[2rem] font-semibold leading-[1.02] tracking-[-0.045em] sm:text-[2.65rem]">{title}</h1>
         {description && <p className="mt-3 max-w-2xl text-pretty text-[14px] leading-6 text-white/62 sm:text-[15px]">{description}</p>}

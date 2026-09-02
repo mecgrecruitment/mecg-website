@@ -8,8 +8,9 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 import RetryButton from "./retry-button";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { statusLabel } from "@/lib/labels";
 
-export const metadata: Metadata = { title: "Notification delivery" };
+export const metadata: Metadata = { title: "Emails & texts" };
 
 export default async function NotificationsPage() {
   const user = await requireAdmin();
@@ -30,7 +31,7 @@ export default async function NotificationsPage() {
     <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
         eyebrow="Operations"
-        title="Notification delivery"
+        title="Emails & texts"
         description="Recruitment state is independent from email delivery. Failed sends stay visible here and can be retried safely."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/notifications" />
@@ -41,15 +42,15 @@ export default async function NotificationsPage() {
             <h2 id="failed-notifications" className="text-lg font-semibold text-mecg-navy">Needs attention</h2>
             <p className="mt-1 text-sm text-mecg-navy/65">Only terminal failures appear here. Temporary failures retry automatically.</p>
           </div>
-          <span className="rounded-full bg-red-50 px-3 py-1 font-mono text-xs font-semibold text-red-800">{needsAttention.length} failed</span>
+          <span className="rounded-full bg-red-50 px-3 py-1 tabular text-xs font-semibold text-red-800">{needsAttention.length} failed</span>
         </div>
         <div className="mt-3 flex flex-col gap-2">
           {needsAttention.map((item) => (
             <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                <p className="mt-0.5 font-mono text-xs text-mecg-navy/65">
-                  {item.last_error_category ?? "UNKNOWN"} · attempt {item.attempt_count} of {item.max_attempts}
+                <p className="mt-0.5 text-xs text-mecg-navy/65">
+                  {statusLabel(item.last_error_category ?? "UNKNOWN")} · attempt {item.attempt_count} of {item.max_attempts}
                 </p>
               </div>
               {item.attempt_count < 8 && <RetryButton notificationId={item.id} />}
@@ -60,17 +61,17 @@ export default async function NotificationsPage() {
       </section>
 
       <section aria-labelledby="recent-notifications">
-        <h2 id="recent-notifications" className="text-lg font-semibold text-mecg-navy">Recent delivery state</h2>
+        <h2 id="recent-notifications" className="text-lg font-semibold text-mecg-navy">Recently sent</h2>
         <div className="mt-3 flex flex-col gap-2">
           {rows.map((item) => (
             <article key={item.id} className="flex flex-wrap items-baseline justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                <p className="mt-0.5 text-xs text-mecg-navy/65">Attempt {item.attempt_count} of {item.max_attempts}{item.last_error_category ? ` · ${item.last_error_category}` : ""}</p>
+                <p className="mt-0.5 text-xs text-mecg-navy/65">Attempt {item.attempt_count} of {item.max_attempts}{item.last_error_category ? ` · ${statusLabel(item.last_error_category)}` : ""}</p>
               </div>
               <div className="text-right">
-                <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold ${item.status === "SENT" ? "bg-emerald-50 text-emerald-800" : item.status === "FAILED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"}`}>{item.status}</span>
-                <time className="ml-3 font-mono text-xs text-mecg-navy/65" dateTime={item.sent_at ?? item.next_attempt_at}>
+                <span className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${item.status === "SENT" ? "bg-emerald-50 text-emerald-800" : item.status === "FAILED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"}`}>{statusLabel(item.status)}</span>
+                <time className="ml-3 tabular text-xs text-mecg-navy/65" dateTime={item.sent_at ?? item.next_attempt_at}>
                   {formatEasternDateTime(item.sent_at ?? item.next_attempt_at)}
                 </time>
               </div>

@@ -54,10 +54,12 @@ export function detroitDateTimeToIso(localValue: string, originalInstant?: strin
   const day = 86_400_000;
   const sampleInstants = [wallClock, wallClock - day, wallClock + day, wallClock - 180 * day, wallClock + 180 * day];
   const offsets = new Set(sampleInstants.map(offsetAt));
-  const candidates = [...offsets]
-    .map((offset) => wallClock - offset)
-    .filter((instant) => formatDetroitDateTime(new Date(instant).toISOString()) === localValue)
-    .sort((left, right) => left - right);
+  const candidates: number[] = [];
+  for (const offset of offsets) {
+    const instant = wallClock - offset;
+    if (formatDetroitDateTime(new Date(instant).toISOString()) === localValue) candidates.push(instant);
+  }
+  candidates.sort((left, right) => left - right);
   if (!candidates.length) throw new Error("This Detroit time does not exist because of daylight saving time");
   if (candidates.length > 1) throw new Error("This Detroit time occurs twice because of daylight saving time; choose a different time");
   return new Date(candidates[0]).toISOString();

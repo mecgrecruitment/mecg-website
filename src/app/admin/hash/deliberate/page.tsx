@@ -9,7 +9,7 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
 import DeliberationDeck, { type DeckEntry } from "./deliberation-deck";
 
-export const metadata: Metadata = { title: "Deliberation" };
+export const metadata: Metadata = { title: "Discussion" };
 
 export default async function DeliberationPage() {
   const user = await requireAdmin();
@@ -42,8 +42,8 @@ export default async function DeliberationPage() {
   if (!hashOpen) {
     return (
       <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6 sm:p-10">
-        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Deliberation</h1>
-        <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Deliberation mode opens once every evaluated round is frozen and the cycle enters decision lock.</p>
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Discussion</h1>
+        <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Discussion mode opens once every scored round is closed to edits and the cycle moves into voting and decisions.</p>
         <Link href="/admin/hash" className="button-secondary self-start text-sm">Back to Hash</Link>
       </main>
     );

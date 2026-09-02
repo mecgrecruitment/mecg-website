@@ -68,7 +68,7 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
 
   return (
     <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
-      <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-mecg-navy/60">Applicant conversations</p>
+      <p className="text-[13px] font-semibold text-mecg-navy/60">Applicant conversations</p>
       <h3 className="mt-2 text-lg font-semibold">Offer a member chat</h3>
       <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Choose a local start time. The hub publishes a 20-minute slot for applicants to book.</p>
       <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" onSubmit={submit}>
@@ -85,11 +85,11 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
       </div>
       {slots.length > 0 && (
         <div className="mt-5 border-t border-mecg-navy/10 pt-4">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/60">Published slots</p>
+          <p className="text-[13px] font-semibold text-mecg-navy/60">Published slots</p>
           <ul className="mt-2 space-y-2 text-sm text-mecg-navy/60">
             {slots.map((slot) => (
               <li key={slot.id} className="flex items-center gap-3 rounded-xl bg-mecg-navy/[0.035] px-3.5 py-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white font-mono text-[10px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white tabular text-[10px] font-bold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
                   {new Date(slot.startsAt).toLocaleDateString([], { day: "2-digit" })}
                 </span>
                 <span>
