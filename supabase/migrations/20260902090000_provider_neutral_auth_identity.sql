@@ -251,6 +251,9 @@ on conflict (issuer, subject) do update set app_user_id = excluded.app_user_id, 
 
 -- Move all effective authorization functions and policies through the single
 -- provider-neutral boundary. Guard counts make catalog drift fail loudly.
+-- The linked production project retains an older, equivalent inline form of
+-- pnms_read_internal even though its migration ledger is current. Accept only
+-- that exact known variant; never count or rewrite policies outside rush.
 do $$
 declare
   function_count integer;
@@ -291,18 +294,65 @@ $migration$;
 
 do $$
 declare
-  policy_count integer;
+  coupled_policies text[];
+  expected_policies text[] := array[
+    'rush.application_documents:application_documents_internal_read',
+    'rush.application_documents:application_documents_owner_read',
+    'rush.buddy_bookings:buddy_bookings_read',
+    'rush.buddy_slots:buddy_slots_read',
+    'rush.checkins:checkins_read_owner_or_board',
+    'rush.conflict_declarations:conflicts_read_own_or_manager',
+    'rush.criterion_ratings:ratings_read_with_evaluation',
+    'rush.evaluation_assignments:assignments_read_evaluator_or_manager',
+    'rush.evaluations:evaluations_read_author_or_locked_panel',
+    'rush.event_impressions:event_impressions_read_own_or_staff',
+    'rush.member_checkins:member_checkins_read_own_or_staff',
+    'rush.memberships:memberships_read_own_or_manager',
+    'rush.messages:messages_read_internal',
+    'rush.mutation_receipts:receipts_read_own',
+    'rush.pnms:pnms_read_self',
+    'rush.profiles:profiles_read_self',
+    'rush.project_members:project_members_read_internal',
+    'rush.projects:projects_read_internal'
+  ];
+  legacy_production_policies text[] := array[
+    'rush.application_documents:application_documents_internal_read',
+    'rush.application_documents:application_documents_owner_read',
+    'rush.buddy_bookings:buddy_bookings_read',
+    'rush.buddy_slots:buddy_slots_read',
+    'rush.checkins:checkins_read_owner_or_board',
+    'rush.conflict_declarations:conflicts_read_own_or_manager',
+    'rush.criterion_ratings:ratings_read_with_evaluation',
+    'rush.evaluation_assignments:assignments_read_evaluator_or_manager',
+    'rush.evaluations:evaluations_read_author_or_locked_panel',
+    'rush.event_impressions:event_impressions_read_own_or_staff',
+    'rush.member_checkins:member_checkins_read_own_or_staff',
+    'rush.memberships:memberships_read_own_or_manager',
+    'rush.messages:messages_read_internal',
+    'rush.mutation_receipts:receipts_read_own',
+    'rush.pnms:pnms_read_internal',
+    'rush.pnms:pnms_read_self',
+    'rush.profiles:profiles_read_self',
+    'rush.project_members:project_members_read_internal',
+    'rush.projects:projects_read_internal'
+  ];
   item record;
   statement text;
   using_expression text;
   check_expression text;
 begin
-  select count(*) into policy_count
+  select array_agg(format('%s.%s:%s', n.nspname, c.relname, p.polname)
+                   order by n.nspname, c.relname, p.polname)
+  into coupled_policies
   from pg_policy p
-  where (pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
+  join pg_class c on c.oid = p.polrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'rush'
+    and (pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
       or pg_get_expr(p.polwithcheck, p.polrelid) like '%auth.uid()%');
-  if policy_count <> 22 then
-    raise exception 'expected 22 auth.uid()-coupled policies, found %', policy_count;
+  if coupled_policies is distinct from expected_policies
+     and coupled_policies is distinct from legacy_production_policies then
+    raise exception 'unexpected auth.uid()-coupled Rush policy set: %', coupled_policies;
   end if;
   for item in
     select p.polname, n.nspname, c.relname, p.polcmd,
@@ -311,7 +361,8 @@ begin
     from pg_policy p
     join pg_class c on c.oid = p.polrelid
     join pg_namespace n on n.oid = c.relnamespace
-    where (pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
+    where n.nspname = 'rush'
+      and (pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
         or pg_get_expr(p.polwithcheck, p.polrelid) like '%auth.uid()%')
   loop
     statement := format('alter policy %I on %I.%I', item.polname, item.nspname, item.relname);
@@ -412,8 +463,11 @@ begin
   if retained <> 0 then raise exception '% Rush functions still call auth.uid()', retained; end if;
   select count(*) into retained
   from pg_policy p
-  where pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
-     or pg_get_expr(p.polwithcheck, p.polrelid) like '%auth.uid()%';
-  if retained <> 0 then raise exception '% policies still call auth.uid()', retained; end if;
+  join pg_class c on c.oid = p.polrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'rush'
+    and (pg_get_expr(p.polqual, p.polrelid) like '%auth.uid()%'
+      or pg_get_expr(p.polwithcheck, p.polrelid) like '%auth.uid()%');
+  if retained <> 0 then raise exception '% Rush policies still call auth.uid()', retained; end if;
 end;
 $$;
