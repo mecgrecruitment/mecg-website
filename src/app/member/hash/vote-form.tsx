@@ -47,7 +47,7 @@ export default function VoteForm({
           value={note}
           onChange={(event) => setNote(event.target.value)}
           disabled={pending}
-          placeholder="Anything the board should know. Only the board reads this."
+          placeholder="Anything the board should know. Shown to the board without your name."
           className="field-control mt-2 min-h-20 py-3 text-[14px] font-normal leading-6 text-mecg-navy placeholder:text-mecg-navy/35 disabled:opacity-60"
         />
       </div>
