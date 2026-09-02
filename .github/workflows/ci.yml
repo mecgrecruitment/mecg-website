@@ -55,6 +55,16 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.116.0
+      - name: Disable remote Clerk discovery for isolated database
+        run: |
+          node --input-type=module -e '
+            import { readFileSync, writeFileSync } from "node:fs";
+            const path = "supabase/config.toml";
+            const config = readFileSync(path, "utf8");
+            const clerk = /\[auth\.third_party\.clerk\]\nenabled = true\ndomain = "env\(SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN\)"/;
+            if (!clerk.test(config)) throw new Error("Expected Clerk configuration was not found");
+            writeFileSync(path, config.replace(clerk, `[auth.third_party.clerk]\nenabled = false\ndomain = "env(SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN)"`));
+          '
       - name: Start isolated database and apply every migration
         run: >-
           supabase start
