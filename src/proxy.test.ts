@@ -58,10 +58,9 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
     assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
   }
-  assert.equal(shouldBypassClerk(request("/__clerk/npm/@clerk/clerk-js/dist/clerk.browser.js")), false);
-  assert.deepEqual(clerkMiddlewareOptions, {
-    frontendApiProxy: { enabled: true, path: "/__clerk" },
-  });
+  // Clerk's production instance serves from clerk.mecgmichigan.com directly;
+  // passing no options is what keeps the SDK off the retired /__clerk proxy.
+  assert.equal(clerkMiddlewareOptions, undefined);
 
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: "sk_test" }), true);
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: undefined }), false);

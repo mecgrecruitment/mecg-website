@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import type { NextFetchEvent } from "next/server";
 import { hasClerkConfiguration } from "@/lib/env";
 
-export const CLERK_PROXY_PATH = "/__clerk";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -31,8 +30,6 @@ const isPublicRoute = createRouteMatcher([
   "/api/maintenance(.*)",
 ]);
 
-const isClerkProxyRoute = createRouteMatcher([`${CLERK_PROXY_PATH}(.*)`]);
-
 const isAuthDependentRoute = createRouteMatcher([
   "/login(.*)",
   "/sign-up(.*)",
@@ -58,8 +55,7 @@ function isProtectedPage(pathname: string) {
 
 export function shouldBypassClerk(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  return !isClerkProxyRoute(request)
-    && !isAuthDependentRoute(request)
+  return !isAuthDependentRoute(request)
     && !isProtectedApi(pathname)
     && !isProtectedPage(pathname);
 }
@@ -85,12 +81,7 @@ export function handleUnconfiguredProxy(request: NextRequest) {
   return handleProxy(async () => ({ userId: null }), request);
 }
 
-const configuredProxy = clerkMiddleware(handleProxy, {
-  frontendApiProxy: {
-    enabled: true,
-    path: CLERK_PROXY_PATH,
-  },
-});
+const configuredProxy = clerkMiddleware(handleProxy);
 
 export function proxy(request: NextRequest, event: NextFetchEvent) {
   if (shouldBypassClerk(request)) return NextResponse.next();
@@ -102,6 +93,5 @@ export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
-    "/__clerk/(.*)",
   ],
 };
