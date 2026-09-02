@@ -24,11 +24,20 @@ jobs:
           # values. The artifact is discarded and never receives a secret.
           NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          # Clerk-backed client components must render under ClerkProvider.
+          # These format-valid placeholders exercise that path without granting
+          # CI access to a real Clerk instance.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY2kuaW52YWxpZCQ
+          CLERK_SECRET_KEY: sk_test_ci-placeholder
+          CLERK_ISSUER: https://clerk.ci.invalid
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY2kuaW52YWxpZCQ
+          CLERK_SECRET_KEY: sk_test_ci-placeholder
+          CLERK_ISSUER: https://clerk.ci.invalid
 
   database:
     runs-on: ubuntu-latest
