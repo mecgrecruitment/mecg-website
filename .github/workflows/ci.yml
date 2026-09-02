@@ -19,7 +19,9 @@ jobs:
       - run: npm test
       - run: npx tsc --noEmit
       # check-sql.py parses every migration with libpg_query and exits 2 without it.
-      - run: pip3 install --quiet pglast
+      # Keep libpg_query behavior deterministic. Newer pglast releases can
+      # reject valid legacy PL/pgSQL bodies that PostgreSQL itself accepts.
+      - run: pip3 install --quiet pglast==7.18
       - run: npm run check:sql
       - run: npm run build
         env:
@@ -44,6 +46,10 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
+    env:
+      # The local database job excludes GoTrue, but the Supabase CLI still
+      # validates every configured third-party issuer before starting.
+      SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN: ci-placeholder.clerk.accounts.dev
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
@@ -66,6 +72,10 @@ jobs:
     # matches the live project. Missing credentials are a failure, not a skip.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      # Migration commands parse config.toml even though they do not contact
+      # Clerk. Use a format-valid, non-secret placeholder for that parse.
+      SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN: ci-placeholder.clerk.accounts.dev
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
