@@ -10,9 +10,16 @@ export type PdfValidationResult =
   | { ok: true; byteSize: number; pageCount: number; sha256: string }
   | { ok: false; message: string };
 
+// These run over the raw bytes, compressed streams included, so a short marker
+// matches by chance inside image data: /JS fired on 7.5% of benign 512 KB
+// resumes with a photo and told the applicant their file contained scripts.
+// Every marker here is long enough that a chance match is impossible in
+// practice, and nothing is lost by dropping /JS: a JavaScript action dictionary
+// always carries /S /JavaScript alongside it, and the parsed-document checks
+// below (getJSActions, getOpenAction, getAttachments) are the authoritative
+// pass anyway.
 const ACTIVE_CONTENT_MARKERS = [
   /\/JavaScript\b/i,
-  /\/JS\b/i,
   /\/Launch\b/i,
   /\/EmbeddedFile\b/i,
   /\/RichMedia\b/i,

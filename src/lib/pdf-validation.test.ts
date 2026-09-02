@@ -1,6 +1,26 @@
 import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
 import test from "node:test";
 import { MAX_RESUME_BYTES, validateResumePdf } from "./pdf-validation.ts";
+
+// An incompressible stream stands in for the photo or scanned page a real
+// resume carries: deflate leaves that data close to uniform bytes.
+function pdfWithImageStream(image: Buffer) {
+  const head = Buffer.from(
+    "%PDF-1.7\n"
+      + "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"
+      + "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"
+      + "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n"
+      + `4 0 obj\n<< /Type /XObject /Subtype /Image /Width 512 /Height 512 /ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode /Length ${image.byteLength} >>\nstream\n`,
+    "latin1",
+  );
+  const tail = Buffer.from(
+    "\nendstream\nendobj\n5 0 obj\n<< /Length 0 >>\nstream\n\nendstream\nendobj\n"
+      + "trailer\n<< /Size 6 /Root 1 0 R >>\n%%EOF",
+    "latin1",
+  );
+  return new Uint8Array(Buffer.concat([head, image, tail]));
+}
 
 function pdf(pageCount = 1, extra = "") {
   const pageObjectIds = Array.from({ length: pageCount }, (_, index) => index + 3);
@@ -52,6 +72,20 @@ test("rejects truncated, encrypted, and active PDFs", async () => {
   assert.equal((await validateResumePdf(new TextEncoder().encode("%PDF-1.7\n/Encrypt 1 0 R\n%%EOF"))).ok, false);
   assert.equal((await validateResumePdf(new TextEncoder().encode("%PDF-1.7\n/JavaScript 1 0 R\n%%EOF"))).ok, false);
   assert.equal((await validateResumePdf(new TextEncoder().encode("%PDF-1.7\n/EmbeddedFile 1 0 R\n%%EOF"))).ok, false);
+});
+
+test("does not mistake compressed image data for active content", async () => {
+  // The raw marker scan reads compressed streams too, so any marker short
+  // enough to appear by chance rejects a resume that carries a photo or a
+  // scanned page. Fifty 512 KB image streams caught a 3-character marker on
+  // roughly four of them; none may be rejected now.
+  const rejected: string[] = [];
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const image = randomBytes(512 * 1024);
+    const result = await validateResumePdf(pdfWithImageStream(image));
+    if (!result.ok) rejected.push(result.message);
+  }
+  assert.deepEqual(rejected, []);
 });
 
 test("rejects oversized and overlong resumes", async () => {
