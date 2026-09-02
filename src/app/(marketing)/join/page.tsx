@@ -19,7 +19,9 @@ import InterestForm from "./interest-form";
 // ISR cache instead of rendering cold on every visit. The Supabase client is
 // built here rather than via lib/supabase/server so it never touches
 // cookies(), which is the only thing that was forcing dynamic rendering.
-export const revalidate = 300;
+// One minute, not five: the cached copy states whether applications are open,
+// so a longer window leaves the page contradicting /apply after the cycle flips.
+export const revalidate = 60;
 
 const TITLE = "Join Our Team";
 const DESCRIPTION = "See the MECG recruitment timeline and learn why students join the team.";

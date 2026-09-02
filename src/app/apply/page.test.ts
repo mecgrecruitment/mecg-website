@@ -49,7 +49,13 @@ async function mockPage(t: TestContext) {
       fetchPublicRecruitment: async () => ({ cycle: { name: "Fall 2026", status: "OPEN", opensAt: OPENS_AT, closesAt: CLOSES_AT } }),
     },
   });
-  t.mock.module("next/navigation", { namedExports: { redirect: () => { throw new Error("unexpected redirect"); } } });
+  t.mock.module("next/navigation", {
+    namedExports: {
+      redirect: () => { throw new Error("unexpected redirect"); },
+      // ApplicationCountdown refreshes the server render when the window opens.
+      useRouter: () => ({ refresh() {} }),
+    },
+  });
   t.mock.module("next/image", { defaultExport: () => null });
   t.mock.module("next/link", { defaultExport: () => null });
   t.mock.module("@/lib/auth", {

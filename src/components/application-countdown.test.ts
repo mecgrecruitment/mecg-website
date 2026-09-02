@@ -25,9 +25,18 @@ registerHooks({
 });
 
 const { default: ApplicationCountdown } = await import("./application-countdown.tsx");
+const { AppRouterContext } = await import("next/dist/shared/lib/app-router-context.shared-runtime.js");
 
+// The component calls useRouter() to refresh the server render when the window
+// opens, and next/navigation throws unless the app router context is mounted.
+// Next mounts it for real SSR; a bare renderToStaticMarkup has to supply it.
+// refresh is a no-op here because effects never run during a server render.
 function serverMarkup(opensAt: string) {
-  return renderToStaticMarkup(createElement(ApplicationCountdown, { opensAt }));
+  return renderToStaticMarkup(createElement(
+    AppRouterContext.Provider,
+    { value: { refresh() {} } as never },
+    createElement(ApplicationCountdown, { opensAt }),
+  ));
 }
 
 test("the server render before opens_at never claims applications are open", () => {
