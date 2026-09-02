@@ -21,3 +21,14 @@ test("verification errors without Retry-After are not replayed", async () => {
   await assert.rejects(retryClerkRateLimit(async () => { calls += 1; throw { status: 429 }; }));
   assert.equal(calls, 1);
 });
+
+test("new Clerk hook errors expose rate-limit metadata through their cause", async () => {
+  let calls = 0;
+  const result = await retryClerkRateLimit(async () => {
+    calls += 1;
+    if (calls === 1) throw { code: "rate_limited", cause: { status: 429, retryAfter: 0 } };
+    return "created";
+  }, { sleep: async () => undefined, jitter: () => 0 });
+  assert.equal(result, "created");
+  assert.equal(calls, 2);
+});

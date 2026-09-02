@@ -1,7 +1,15 @@
 type ClerkRateLimitError = {
   status?: number;
   retryAfter?: number;
+  cause?: unknown;
 };
+
+function rateLimitDetails(error: unknown): ClerkRateLimitError {
+  if (!error || typeof error !== "object") return {};
+  const clerkError = error as ClerkRateLimitError;
+  if (clerkError.status !== undefined || clerkError.retryAfter !== undefined) return clerkError;
+  return rateLimitDetails(clerkError.cause);
+}
 
 export async function retryClerkRateLimit<T>(
   operation: () => Promise<T>,
@@ -19,7 +27,7 @@ export async function retryClerkRateLimit<T>(
     try {
       return await operation();
     } catch (error) {
-      const clerkError = error as ClerkRateLimitError;
+      const clerkError = rateLimitDetails(error);
       const seconds = Number(clerkError.retryAfter);
       if (clerkError.status !== 429 || !Number.isFinite(seconds) || seconds < 0 || attempt >= maxRetries) throw error;
       options.onWait?.(seconds);

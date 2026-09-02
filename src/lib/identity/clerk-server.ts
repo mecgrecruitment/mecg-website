@@ -2,6 +2,7 @@ import "server-only";
 
 import { auth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 import { hasClerkConfiguration, requireClerkIssuer } from "@/lib/env";
+import { migratedUserId } from "@/lib/identity/clerk-migration";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,35 +48,17 @@ export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null>
   const primaryEmail = clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
   if (!primaryEmail) throw new Error("A verified primary email is required");
 
-  // A Board member or prior applicant whose Clerk account was never linked by
-  // scripts/migrate-auth-users.mjs still has a prepared ledger row. Claim that
-  // existing domain UUID, exactly as the migration script does, or they are
-  // minted a fresh membership-less profile and routed as a new applicant.
-  //
-  // expected_email carries no unique constraint (source_user_id is the primary
-  // key, provider_subject the only unique column), so two rows can legitimately
-  // share an address. A bare maybeSingle() turned that into PGRST116, which
-  // this function throws, which locks that person out of sign-in permanently
-  // with no recovery path in the UI. Pick deterministically instead: ascending
-  // status puts 'LINKED' before 'PREPARED', so the already-claimed identity
-  // wins. A genuine query error still fails closed below.
+  // Migrated users carry their application UUID in Clerk externalId. Never
+  // infer legacy ownership from an email address: addresses can be reused or
+  // duplicated, while externalId is assigned by the controlled migration and
+  // is unique within the Clerk instance.
   const admin = createAdminClient();
-  const { data: ledgerEntry, error: ledgerError } = await admin
-    .from("auth_migration_ledger")
-    .select("source_user_id")
-    .eq("expected_email", primaryEmail.trim().toLowerCase())
-    .in("status", ["PREPARED", "LINKED"])
-    .order("status", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (ledgerError) throw ledgerError;
-
   const { data: appUserId, error: provisionError } = await admin.rpc("ensure_external_identity", {
     identity_issuer: issuer,
     identity_subject: session.userId,
     identity_email: primaryEmail,
     identity_display_name: displayName(clerkUser, primaryEmail),
-    existing_app_user_id: ledgerEntry?.source_user_id,
+    existing_app_user_id: migratedUserId(clerkUser.externalId),
   });
   if (provisionError) throw provisionError;
   return { appUserId, issuer, subject: session.userId };

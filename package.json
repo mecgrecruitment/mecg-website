@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test",
     "test:e2e": "playwright test",
+    "test:e2e:clerk": "CLERK_E2E_ENABLED=1 playwright test --project=authenticated-clerk",
     "verify:backend": "node scripts/verify-backend.mjs",
     "verify:infrastructure": "node scripts/verify-public-infrastructure.mjs",
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
@@ -38,6 +39,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@clerk/testing": "^2.2.32",
     "@next/env": "16.3.1",
     "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",

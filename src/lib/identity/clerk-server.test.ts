@@ -3,37 +3,25 @@ import test, { type TestContext } from "node:test";
 
 const ISSUER = "https://clerk.mecg.test";
 const SESSION = { userId: "user_2clerk", sessionClaims: { iss: `${ISSUER}/`, sub: "user_2clerk" } };
-const CLERK_USER = {
+const CLERK_USER: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: null;
+  primaryEmailAddressId: string;
+  emailAddresses: Array<{ id: string; emailAddress: string }>;
+  externalId: string | null;
+} = {
   id: "user_2clerk",
   firstName: "Riley",
   lastName: "Board",
   username: null,
   primaryEmailAddressId: "idn_1",
   emailAddresses: [{ id: "idn_1", emailAddress: "Riley.Board@umich.edu" }],
+  externalId: null,
 };
 
 type Result = { data: unknown; error: unknown };
-
-// Chainable enough for .select().eq().in().order().limit().maybeSingle().
-// When `rows` is supplied the builder actually applies the recorded ordering,
-// so a test can prove which of several duplicate rows the query picks.
-function table(result: Result, rows?: Array<Record<string, unknown>>) {
-  const builder: Record<string, unknown> = {};
-  let order: { column: string; ascending: boolean } | null = null;
-  for (const method of ["select", "eq", "in", "limit"]) builder[method] = () => builder;
-  builder.order = (column: string, options?: { ascending?: boolean }) => {
-    order = { column, ascending: options?.ascending !== false };
-    return builder;
-  };
-  builder.maybeSingle = async () => {
-    if (!rows) return result;
-    const column = order?.column ?? "";
-    const direction = order?.ascending === false ? -1 : 1;
-    const sorted = [...rows].sort((a, b) => String(a[column]).localeCompare(String(b[column])) * direction);
-    return { data: sorted[0] ?? null, error: null };
-  };
-  return builder;
-}
 
 function importModule(testCase: string) {
   return import(`./clerk-server.ts?case=${testCase}`) as Promise<typeof import("./clerk-server.ts")>;
@@ -41,14 +29,12 @@ function importModule(testCase: string) {
 
 function mockEnvironment(t: TestContext, options: {
   rpc: (name: string, args?: Record<string, unknown>) => Result;
-  ledger?: Result;
-  ledgerRows?: Array<Record<string, unknown>>;
-  profiles?: Result;
+  clerkUser?: typeof CLERK_USER;
 }) {
   // clerk-server.ts is a server module; the real marker package throws on import.
   t.mock.module("server-only", { namedExports: {} });
   t.mock.module("@clerk/nextjs/server", {
-    namedExports: { auth: async () => SESSION, currentUser: async () => CLERK_USER },
+    namedExports: { auth: async () => SESSION, currentUser: async () => options.clerkUser ?? CLERK_USER },
   });
   t.mock.module("@/lib/env", {
     namedExports: { hasClerkConfiguration: () => true, requireClerkIssuer: () => ISSUER },
@@ -57,7 +43,6 @@ function mockEnvironment(t: TestContext, options: {
     namedExports: {
       createClient: async () => ({
         rpc: async (name: string) => options.rpc(name),
-        from: () => table(options.profiles ?? { data: null, error: { code: "PGRST116", message: "multiple rows" } }),
       }),
     },
   });
@@ -65,7 +50,6 @@ function mockEnvironment(t: TestContext, options: {
     namedExports: {
       createAdminClient: () => ({
         rpc: async (name: string, args?: Record<string, unknown>) => options.rpc(name, args),
-        from: () => table(options.ledger ?? { data: null, error: null }, options.ledgerRows),
       }),
     },
   });
@@ -88,10 +72,10 @@ test("a multi-row profiles response no longer throws for a mapped identity", asy
   });
 });
 
-test("an unlinked migrated user claims the app user id from the migration ledger", async (t) => {
+test("a migrated user claims only the UUID assigned in Clerk externalId", async (t) => {
   const calls: Array<Record<string, unknown> | undefined> = [];
   mockEnvironment(t, {
-    ledger: { data: { source_user_id: "legacy-uuid" }, error: null },
+    clerkUser: { ...CLERK_USER, externalId: "10000000-0000-4000-8000-000000000001" },
     rpc: (name, args) => {
       if (name === "actor_id") return { data: null, error: null };
       if (name === "ensure_external_identity") {
@@ -101,10 +85,10 @@ test("an unlinked migrated user claims the app user id from the migration ledger
       throw new Error(`unexpected rpc call: ${name}`);
     },
   });
-  const { resolveCurrentIdentity } = await importModule("ledger-hit");
+  const { resolveCurrentIdentity } = await importModule("external-id");
   const identity = await resolveCurrentIdentity();
-  assert.equal(identity?.appUserId, "legacy-uuid");
-  assert.equal(calls[0]?.existing_app_user_id, "legacy-uuid");
+  assert.equal(identity?.appUserId, "10000000-0000-4000-8000-000000000001");
+  assert.equal(calls[0]?.existing_app_user_id, "10000000-0000-4000-8000-000000000001");
   assert.equal(calls[0]?.identity_email, "Riley.Board@umich.edu");
 });
 
@@ -119,45 +103,22 @@ test("a new applicant with no ledger row still provisions a fresh identity", asy
       throw new Error(`unexpected rpc call: ${name}`);
     },
   });
-  const { resolveCurrentIdentity } = await importModule("ledger-miss");
+  const { resolveCurrentIdentity } = await importModule("new-user");
   assert.equal((await resolveCurrentIdentity())?.appUserId, "fresh-uuid");
 });
 
-// expected_email has no unique constraint, so duplicate rows for one address
-// are legal. maybeSingle() alone made that PGRST116, which this module throws,
-// which locked that person out of sign-in for good. The LINKED row is the
-// identity already claimed, so it must win, deterministically.
-test("duplicate ledger rows for one email resolve to the LINKED row", async (t) => {
-  const calls: Array<Record<string, unknown> | undefined> = [];
+test("a malformed externalId cannot claim a legacy profile", async (t) => {
   mockEnvironment(t, {
-    ledgerRows: [
-      { source_user_id: "prepared-uuid", status: "PREPARED" },
-      { source_user_id: "linked-uuid", status: "LINKED" },
-    ],
+    clerkUser: { ...CLERK_USER, externalId: "not-a-domain-uuid" },
     rpc: (name, args) => {
       if (name === "actor_id") return { data: null, error: null };
       if (name === "ensure_external_identity") {
-        calls.push(args);
-        return { data: args?.existing_app_user_id ?? "fresh-uuid", error: null };
+        assert.equal(args?.existing_app_user_id, undefined);
+        return { data: "fresh-uuid", error: null };
       }
       throw new Error(`unexpected rpc call: ${name}`);
     },
   });
-  const { resolveCurrentIdentity } = await importModule("ledger-duplicate");
-  assert.equal((await resolveCurrentIdentity())?.appUserId, "linked-uuid");
-  assert.equal(calls[0]?.existing_app_user_id, "linked-uuid");
-});
-
-// Fail closed: a broken ledger read must never mint a second identity for a
-// Board member whose old row still owns their email.
-test("a failed ledger lookup surfaces instead of provisioning a new identity", async (t) => {
-  mockEnvironment(t, {
-    ledger: { data: null, error: { code: "57014", message: "canceling statement due to statement timeout" } },
-    rpc: (name) => {
-      if (name === "actor_id") return { data: null, error: null };
-      throw new Error(`unexpected rpc call: ${name}`);
-    },
-  });
-  const { resolveCurrentIdentity } = await importModule("ledger-error");
-  await assert.rejects(resolveCurrentIdentity(), (error: { code?: string }) => error.code === "57014");
+  const { resolveCurrentIdentity } = await importModule("invalid-external-id");
+  assert.equal((await resolveCurrentIdentity())?.appUserId, "fresh-uuid");
 });
