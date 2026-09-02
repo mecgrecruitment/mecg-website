@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(251);
+select extensions.plan(255);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -598,12 +598,24 @@ set local role postgres;
 set local role postgres;
 select extensions.has_column('rush','applications','offer_expires_at','applications carry an offer deadline');
 select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='set_offer_deadline' and p.prosecdef and p.proconfig @> array['search_path=""']), 'deadline setter exists and is security definer with empty search path');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.set_offer_deadline(text,timestamptz)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.set_offer_deadline(text,timestamptz)'::regprocedure)) = 0, 'deadline setter uses provider-neutral identity');
 select extensions.ok(position('offer expired' in pg_get_functiondef('rush.respond_to_offer(text,boolean)'::regprocedure)) > 0, 'respond_to_offer enforces the deadline itself');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000-8000-000000000031', now() + interval '7 days')$$,'42501','panel role required','a non-panel member cannot set an offer deadline');
+set local role postgres;
+
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
+set local role authenticated;
+select extensions.throws_ok($$select rush.set_offer_deadline('10000000-0000-4000-8000-000000000032', now() + interval '7 days')$$,'55000','active offer decision required','an owner cannot add an offer deadline without an active offer decision');
+set local role postgres;
+insert into rush.decisions(id,cycle_id,application_id,outcome,status,reason,created_by_id)
+values('10000000-0000-4000-8000-000000000041','10000000-0000-4000-8000-000000000014','10000000-0000-4000-8000-000000000032','OFFER','LOCKED','pgTAP offer','10000000-0000-4000-8000-000000000001');
+set local role authenticated;
+select extensions.ok(rush.set_offer_deadline('10000000-0000-4000-8000-000000000032', now() + interval '7 days'),'an owner sets a deadline on an active locked offer');
 set local role postgres;
 
 
@@ -722,6 +734,7 @@ select extensions.has_table('rush','auth_migration_ledger','auth migration ledge
 select extensions.has_function('rush','actor_id',array[]::text[],'provider-neutral actor helper exists');
 select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.set_application_questions(text,jsonb)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.set_application_questions(text,jsonb)'::regprocedure)) = 0, 'application question writes use provider-neutral identity');
 select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) = 0, 'application intake uses provider-neutral identity');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.submit_application(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text)'::regprocedure)) = 0, 'application submission uses provider-neutral identity');
 select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.clone_cycle(text,text)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.clone_cycle(text,text)'::regprocedure)) = 0, 'cycle cloning uses provider-neutral identity');
 select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.set_cycle_application_window(text,timestamptz,timestamptz)'::regprocedure)) > 0 and position('auth.uid()' in pg_get_functiondef('rush.set_cycle_application_window(text,timestamptz,timestamptz)'::regprocedure)) = 0, 'application window writes use provider-neutral identity');
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';

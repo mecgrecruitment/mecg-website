@@ -51,6 +51,9 @@ const RPC_ERROR_STATUSES: Record<string, number> = {
   "55000": 409,
   "23505": 409,
   "23514": 400,
+  // Raised by RPCs that enforce their own throttle because they are reachable
+  // directly through PostgREST, bypassing the route handler's rate limit.
+  "53400": 429,
 };
 
 export function mapRpcError(

@@ -1,6 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 
 type CountdownParts = {
   days: number;
@@ -53,6 +54,19 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
   // mismatch. Both callers only mount this while isBeforeApplicationOpen.
   const now = useSyncExternalStore<number | null>(subscribe, getNow, () => null);
   const remaining = now === null ? null : formatRemaining(Date.parse(opensAt) - now);
+
+  // /apply is a server component, so the applicant sits on the stale "reload
+  // once the countdown reaches zero" panel until they refresh by hand. Pull the
+  // fresh server render for them the moment the window opens. The ref latch
+  // matters: the store ticks every second and refresh() re-renders us, so an
+  // unguarded effect would loop the server once a second at 20:00 under load.
+  const router = useRouter();
+  const refreshed = useRef(false);
+  useEffect(() => {
+    if (!remaining?.done || refreshed.current) return;
+    refreshed.current = true;
+    router.refresh();
+  }, [remaining?.done, router]);
 
   if (remaining?.done) {
     return (
