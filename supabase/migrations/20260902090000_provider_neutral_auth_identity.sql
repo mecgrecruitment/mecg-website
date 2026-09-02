@@ -236,10 +236,13 @@ $$;
 
 revoke all on function rush.handle_new_auth_user() from public, anon, authenticated;
 
--- Seed mappings for users that predate this migration.
+-- Seed mappings only for provider users that already own a domain profile.
+-- Supabase Auth may retain abandoned or administrative accounts with no Rush
+-- profile, and auth_identities deliberately cannot point at those accounts.
 insert into rush.auth_identities (issuer, subject, app_user_id)
 select issuer, u.id::text, u.id
 from auth.users u
+join rush.profiles p on p.id = u.id
 cross join (values
   ('https://chrxtsohxazngabdcpzb.supabase.co/auth/v1'),
   ('http://127.0.0.1:54321/auth/v1')
