@@ -1,0 +1,445 @@
+# One system: admin, member, recruitment
+
+Brainstorm and organization plan. Grounded in the code at `979616e`, not a greenfield sketch.
+
+---
+
+## 1. What exists today
+
+Four surfaces, four different shells:
+
+| Surface | Routes | Shell | Nav |
+|---|---|---|---|
+| Marketing | `(marketing)/{home,join,work,team,contact}` | `MarketingSection` etc | site header |
+| Applicant | `/apply`, `/applicant`, `/applicant/[token]`, `/checkin/[token]` | `PortalShell` | none |
+| Member | `/member`, `/member/screening`, `/member/event` | hand-rolled `<main>` | inline `navLinks` array |
+| Board | `/admin` + 8 subpages | hand-rolled `<main>` | `BoardNav` |
+
+Backing model (schema `rush`, 69 migrations, `public` schema already dropped):
+
+- `rush_cycles` -> `rounds` -> `evaluation_assignments` -> `evaluations` -> `criterion_ratings`
+- `pnms` -> `applications` -> `application_documents`, `decisions` -> `decision_approvals`
+- `events` -> event slots, `checkins`, `member_checkins`, `event_impressions`
+- `screening_batches` -> `screening_packets` -> `screening_assignments` -> `screening_reviews`
+- `profiles`, `memberships` (per cycle), `case_groups`, `conflict_declarations`
+- `audit_events`, `mutation_receipts`, `rate_limits`
+
+Authorization is 8 capabilities over 5 roles in `src/lib/authorization.ts`. Every mutation goes through a `SECURITY DEFINER` RPC (44 of them called from the app). That layer is in good shape and none of this plan needs to touch it.
+
+### What already works well and should not be rebuilt
+
+- Blind screening end to end (candidate codes, reviewer RPCs that never join `pnms`, redaction on frozen batches). This is the strongest thing in the codebase.
+- Resume upload with real byte validation (magic number, EOF, encryption, embedded JS scan, SHA-256) plus a cron reaper for abandoned uploads.
+- Token check-in (256-bit tokens, SHA-256 at rest, rotatable per event).
+- Decision approval chain: `PENDING -> APPROVED -> LOCKED -> RELEASED`, with outcomes hidden from the applicant until release.
+- The applicant dossier tabs at `/admin/applications/[id]`.
+- Cycle and round state machines in `src/lib/workflow.ts`.
+
+---
+
+## 2. The structural problem
+
+The app is organized by **role**. The domain is organized by **stage of a cycle**.
+
+That mismatch is where all the duplication comes from:
+
+1. **Board members live in two apps.** `/admin` has a button "Evaluation Hub" and `/member` has a button "Board dashboard". A board member who also evaluates crosses that bridge many times a day and has to hold two mental models of where things are.
+2. **Three shells for the same person.** `PortalShell` already has a `workspace` variant. `/admin` and `/member` do not use it; they each hand-roll a `<main className="mx-auto flex max-w-7xl ...">` plus a header plus `LogoutButton`. That block is copied across roughly ten pages.
+3. **Two nav systems.** `BoardNav` and the `navLinks` array inside `member/page.tsx` both render `PillNav` and both encode capability rules by hand.
+4. **`/admin` is a mega-page.** 312 lines covering stats, an attention queue, the pipeline board, the events list, and a `<details>` element titled "Quick actions and cycle settings" that holds cycle status changes, membership grants, round status changes, and evaluator assignment. That collapsed block is a junk drawer, and it is where the highest-consequence actions in the system live.
+5. **"Member" means "evaluator during an active rush."** `MEMBER` role grants exactly one capability, `WORKSPACE_ACCESS`, whose only use is reaching evaluation forms. Between cycles a member logs in and sees an empty page. For a system that claims to be the org's home, that is the largest hole.
+
+### The organizing decision
+
+**Merge admin and member into one internal workspace. Keep the applicant surface separate.**
+
+The admin/member split is accidental: same people, same data, same trust boundary, duplicated chrome. Merge it.
+
+The applicant/internal split is real: different RLS posture, no shared data, and every leak in the system would be an applicant seeing internal state. Merging that would save a shell and buy a class of bug. Keep it apart.
+
+So: three shells become two, and one of them is already written (`PortalShell workspace`).
+
+---
+
+## 3. Target route model
+
+```
+PUBLIC
+  /home /work /work/[slug] /team /contact
+  /join                 timeline, FAQ, interest form
+  /apply                application (account required)
+
+APPLICANT  (PortalShell, unchanged trust boundary)
+  /applicant            status, schedule, offer, survey
+  /applicant/[token]    tokened access
+  /checkin/[token]      event check-in
+
+INTERNAL  (one shell, one sidebar, items filtered by hasPermission)
+  /portal               home: your tasks, next event, cycle pulse
+  /portal/evaluate      your assignments            WORKSPACE_ACCESS
+    /screening /screening/[id] /event
+  /portal/recruit       pipeline + saved views      RECRUITMENT_OPERATIONS
+    /applicants/[id]    dossier
+    /rounds             rounds, assignment, coverage
+    /screening          batch admin
+  /portal/hash          deliberation + decisions    HASH_PANEL_ACCESS
+  /portal/events        calendar, detail, slots, check-in desk
+  /portal/people        directory; roles editable   MANAGE_MEMBERSHIPS
+  /portal/settings      cycle, rubrics, questions, comms  MANAGE_CYCLE
+  /portal/me            profile, password, conflicts, notifications
+```
+
+`/admin/*` and `/member/*` become permanent redirects. Nobody has bookmarks worth breaking, but redirects cost one file.
+
+Nav becomes one array with a capability per entry:
+
+```ts
+const NAV = [
+  ["/portal",            "Home",       null],
+  ["/portal/evaluate",   "My work",    "WORKSPACE_ACCESS"],
+  ["/portal/recruit",    "Pipeline",   "RECRUITMENT_OPERATIONS"],
+  ["/portal/hash",       "Hash",       "HASH_PANEL_ACCESS"],
+  ["/portal/events",     "Events",     "WORKSPACE_ACCESS"],
+  ["/portal/people",     "People",     "WORKSPACE_ACCESS"],
+  ["/portal/settings",   "Settings",   "MANAGE_CYCLE"],
+] as const;
+```
+
+`BoardNav`, the inline `navLinks`, and both cross-link buttons get deleted.
+
+---
+
+## 4. Feature brainstorm: board and recruitment operations
+
+Ranked by how much pain each removes, not by how interesting it is to build.
+
+### 4.1 Break up the junk drawer (highest value, lowest risk)
+
+The `<details>` block becomes three real pages:
+
+- **`/portal/rounds`**: create round, publish, activate, freeze, finalize; assign evaluators; a coverage grid showing applicant x evaluator with submitted / open / recused / missed. Today `round-board.tsx` almost does this but is reachable only through two kind-specific URLs.
+- **`/portal/people`**: every membership in the cycle, role editing, plus per-person evaluation load, submission rate, declared conflicts, and missed assignments.
+- **`/portal/settings`**: cycle status transitions with the legal next states from `canTransitionCycle`, open/close dates, rubrics, application questions, comms templates.
+
+### 4.2 Cycle clone
+
+The single biggest annual time sink. Right now rounds, rubrics, criteria, questions, and the event schedule are seeded by migration (`20260831230000_fall_2026_recruitment_schedule.sql`). That means next fall's setup needs a developer.
+
+Clone last cycle into a `DRAFT` cycle: rounds, rubrics and criteria, application questions, event template with dates shifted, membership roster, comms templates. Carry over nothing applicant-shaped.
+
+### 4.3 Rubric and question editors
+
+`rubrics` / `rubric_criteria` / intake schema all exist in the database with no UI. The board cannot change a scoring criterion or an essay prompt without a migration. A minimal editor (add, reorder, weight, mark required, bump version) removes the developer from the loop. Versioning already exists in the schema, so old evaluations stay pinned to the rubric they were scored against.
+
+### 4.4 Comms center
+
+Today the system sends three emails: application received, contact form relay, decision release. Everything else is somebody in a group chat.
+
+Build:
+- **Templates** per trigger, editable, with a preview. `communication_preview` on `decisions` is already the beginning of this idea.
+- **Automatic sends**: application received, needs-info request, event invite, RSVP confirmation, event reminder at T-24h, evaluation assigned, evaluation due at T-24h, decision released, offer expiring.
+- **Bulk send** to a pipeline segment straight from the filtered applicant list.
+- **Send log** per applicant on the dossier, so "did anyone tell them?" is answerable.
+- **Batch decision release**: `release_decision` is one call per decision today. Releasing 60 outcomes one at a time on decision night is the wrong shape.
+
+Resend is already wired in `src/lib/email.ts` and fails soft, which is the correct posture for this.
+
+### 4.5 Audit trail viewer
+
+`rush.audit_events` and `rush.mutation_receipts` are written and never read by a human. Add a filterable log, plus a per-applicant "history" tab on the dossier: status changes, who, when, from what. For a process that rejects people, being able to reconstruct a decision is not optional.
+
+### 4.6 Pipeline that scales past 40 applicants
+
+- Multi-select with bulk actions: advance status, assign evaluator, add to a case group, send an email.
+- Saved views (URL state is enough; no new table): "missing resume", "no evaluator assigned", "submitted more than 5 days ago", "ready for final review".
+- Sort by days-in-stage, not just name. Stale applicants are the ones that fall through.
+- Keyboard navigation. `hash/deliberate` already proves the pattern works.
+
+### 4.7 Coverage and calibration dashboard
+
+`docs/RUSH_PLATFORM_PLAN.md` designs calibration (severity adjustment, inter-rater spread, tie handling) and none of it has a screen. Add:
+- Assignments outstanding by evaluator, with a nudge button.
+- Score distribution per evaluator against the cohort, to surface a rater who scores everyone a 4.
+- Spread between evaluators on the same applicant, flagged past a threshold.
+- Conflict coverage: applicants whose remaining evaluator pool is too small after recusals.
+
+### 4.8 Exports and archive
+
+One CSV exists (attendance). Add applications, scores, decisions, and a full cycle archive bundle at `ARCHIVED`. The CSV injection guard in `export/route.ts` is already correct; reuse `csvEscape` rather than writing a second one.
+
+### 4.9 Event operations
+
+Exists: create, slots, RSVP, token check-in, rotation, grading toggle, single-event ICS.
+Missing: a check-in desk view (live roster, search by name, manual check-in for the person whose phone died), capacity and waitlist on slots, no-show marking, a cycle-wide ICS feed instead of one file per event, and a post-event summary (attended, graded, impressions filed).
+
+---
+
+## 5. Feature brainstorm: member
+
+The rule to apply here: **a member should have a reason to open this between rush cycles.** Everything below is chosen against that test.
+
+### 5.1 Task inbox
+
+One list on `/portal`, ordered by deadline: evaluations due, screening packets waiting, impressions to file after an event, conflicts to declare on a new roster, RSVP requests. Today a member has to visit `/member`, `/member/screening`, and `/member/event` to learn whether they owe anything.
+
+### 5.2 Real profiles
+
+`profiles` holds `display_name` and `active`. Extend with grad year, major, role in the org, photo, and a short bio. This is also what the marketing `/team` page needs, so one edit updates both instead of a content file drifting from reality.
+
+### 5.3 Member directory
+
+Search the org by name, year, project team, committee. Cheap to build on top of 5.2 and it is the most-used feature of every org tool that has one.
+
+### 5.4 Your record
+
+Evaluations submitted, events attended (`member_checkins` already records this), rounds served, conflicts declared. Useful to the member, and useful to the board when picking a panel.
+
+### 5.5 Project and client staffing
+
+`src/content/projects.public.ts` is a static file driving the marketing site. Members have no view of who is on what team. Moving projects into the database and adding a staffing table turns the marketing page into a byproduct of real data and gives members a year-round reason to log in.
+
+Decided: yes. Staffing hangs off `profiles`; see section 9 for why no new identity table is needed, and for the public/private split this requires.
+
+### 5.6 Handbook and resources
+
+Case prep material, rubric anchors (`SCORE_ANCHORS` is already on the member page), onboarding for new members, past deliverable templates. Static MDX is enough; do not build a CMS.
+
+### 5.7 Calendar feed
+
+One ICS URL per member covering their events, their evaluation deadlines, and their buddy slots. The single-event `api/events/[id]/ics` route already has the generation code.
+
+---
+
+## 6. Feature brainstorm: recruitment (applicant-facing)
+
+The applicant portal is the best-designed surface in the app. These are gaps, not a rewrite.
+
+### 6.1 Timeline instead of a stepper
+
+`StatusStepper` shows four stages. Applicants ask "what happens next and when". Show the dated schedule for the cycle with their position on it, past items dimmed, next item with a date and a location.
+
+### 6.2 Document center
+
+Resume replacement before the deadline closes. The full validated upload pipeline exists; it just is not reachable after submission. Also show what the board actually holds: resume, responses, accessibility notes.
+
+### 6.3 Messages
+
+Every email the board sent them, readable in the portal. Removes the "check your spam folder" support load, and pairs with the send log in 4.4.
+
+### 6.4 Offer mechanics
+
+An offer today is accept or decline with no deadline shown. Add an expiry, a visible countdown, and a downloadable decision letter. Add a withdraw button available at any stage, which is both kinder and cleaner than an applicant emailing to ask.
+
+### 6.5 Interest to application
+
+`submit_interest` collects interest on `/join` and nothing connects it forward. Add source attribution, a nurture email when applications open, and a board-visible conversion number: interest submitted, applications started, applications submitted, per source.
+
+### 6.6 Accessibility requests
+
+`accessibilityNotes` is collected at intake and never surfaced. Show the applicant that the request was received, and route it to a named person on the board rather than into a text column nobody reads.
+
+### 6.7 Attendance visible to the applicant
+
+They check in with a token and get no confirmation of what the org recorded. Show the list. It is one query and it prevents the "I was there" dispute.
+
+---
+
+## 7. Cross-cutting
+
+| System | Why | Size |
+|---|---|---|
+| One shell + one nav | Kills three duplicated headers and two nav systems | Small |
+| Command palette (`cmd+k`) | Jump to applicant, member, event. The fastest fix for a deep route tree | Small |
+| Notification inbox | One table, read by member tasks and applicant messages both | Medium |
+| Audit viewer | Data already written, zero read path | Small |
+| Comms engine | The largest genuinely new subsystem here | Large |
+| Cycle clone | Removes the developer from annual setup | Medium |
+| Mobile-first on three screens | Check-in, live grading, and hash all happen on phones in a room | Small |
+
+---
+
+## 8. What not to build
+
+Named explicitly so it does not creep back in:
+
+- **In-app chat.** The org has GroupMe or Slack. Losing that fight costs months.
+- **A permissions editor.** Five roles and eight capabilities in one 30-line file is right for a group this size. A UI for editing them is a way to lock everyone out at 2am.
+- **Drag-and-drop kanban with persisted positions.** The pipeline order comes from status and days-in-stage. Dragging cards adds a column that means nothing.
+- **An analytics warehouse.** Four CSV exports cover every question anyone will actually ask.
+- **AI resume scoring.** Bias exposure on a real admissions decision, against a schema that was deliberately built for auditability.
+- **Real-time presence and live cursors.** Nothing here is collaborative editing.
+- **A native mobile app.** Three responsive screens cover the phone use cases.
+
+---
+
+## 9. Reapplication and the person spine
+
+Requirement: an applicant may reapply next semester.
+
+I traced this against the schema and the routing code rather than assuming. The result splits cleanly: **the database already supports reapplication correctly, and the application layer forbids it.**
+
+### The database is already right
+
+`rush.pnms` is not per-cycle. It is one row per person, globally:
+
+```sql
+create table rush.pnms (
+  id text primary key ...,
+  auth_user_id uuid unique references auth.users (id) on delete set null,
+  normalized_contact text not null unique,
+  ...
+);
+create table rush.applications (
+  pnm_id text not null references rush.pnms (id),
+  cycle_id text not null references rush.rush_cycles (id),
+  ...
+  unique (pnm_id, cycle_id)
+);
+```
+
+One person, many applications, at most one per cycle. That is exactly the reapplication model.
+
+The write path honors it. `save_application_draft` resolves the open cycle, reuses the existing pnm and only inserts one when missing, then:
+
+```sql
+insert into rush.applications (pnm_id, cycle_id, status, draft_payload)
+values (person_id, v_cycle_id, 'DRAFT', payload)
+on conflict (pnm_id, cycle_id) do update ...
+```
+
+A new cycle means a new application row for the same person. `submit_application` scopes its lookup to `(pnm_id, v_cycle_id)`. `intake_schema` scopes the draft to the currently open cycle. All correct.
+
+The read path is correct too. `applicant_dashboard()` returns every application ordered by `created_at desc`, and `applicant/page.tsx` already renders one card per application labeled with `cycle_name`. `applicant_schedule()` uses `distinct on (a.cycle_id)` and filters to `c.status in ('OPEN','IN_PROCESS','DECISION_LOCK')`, so a closed prior cycle contributes no stale events. Someone already thought about multiple cycles here.
+
+### The bug: routing makes reapplication unreachable
+
+`rush.is_applicant()` asks "have you ever applied", not "do you have live business":
+
+```sql
+select exists(
+  select 1 from rush.pnms p
+  join rush.applications a on a.pnm_id = p.id
+  where p.auth_user_id = auth.uid() and a.status not in ('DRAFT', 'NEEDS_INFO')
+);
+```
+
+That feeds `resolveAuthDestination`, where `hasApplication` true routes to `/applicant`. And `apply/page.tsx` opens with:
+
+```ts
+const destination = await currentDestination();
+if (destination && destination !== "/apply") redirect(destination);
+```
+
+So a student rejected in Fall 2026 who returns in Winter 2027 is redirected to `/applicant`, shown last cycle's rejection, and has no route to a new application. Permanently. The one flow the requirement names is the one flow the router forbids.
+
+### The fix
+
+Change the question from "have you ever applied" to "is there an open cycle you have not applied to yet". Three small edits, no schema change, no data migration:
+
+1. Add `rush.can_start_application()`: true when a cycle is OPEN and within its window and the caller has no application row for that cycle. This mirrors the cycle selection already written in `save_application_draft` and `intake_schema`, so reuse that predicate rather than writing a fourth copy.
+2. In `resolveAuthDestination`, prefer `/apply` when that is true, and fall back to `/applicant` when the caller has past applications. Memberships keep priority, so an accepted applicant who became a member still lands in the workspace.
+3. On `/applicant`, when a new cycle is open, show a "Applications for {cycle} are open. Start a new application." card linking to `/apply`. Without it the returning applicant has no way to discover the new cycle.
+
+`src/lib/auth-destination.test.ts` already exists and is pure, so the routing table for these cases is a test-only change on the app side.
+
+### The person spine already exists
+
+I previously recommended a new `people` table for cross-cycle identity. That was based on a wrong reading of `pnms` and it is not needed. The anchor is already there:
+
+- `rush.profiles.id` **is** `auth.users.id`.
+- `rush.pnms.auth_user_id` references `auth.users.id` and is `unique`.
+
+So `profiles.id = pnms.auth_user_id` is the join, and an applicant who becomes a member is already one identity in two tables. Cross-cycle applicant history is a query against `applications` grouped by `pnm_id`, available today. The member directory and project staffing from section 5 hang off `profiles`, which needs new columns, not a new anchor table.
+
+This deletes the riskiest migration in the plan. It also deletes the unblinding risk that migration would have created, since no new join path to applicant identity gets introduced. Keep the pgTAP guard anyway as a regression test: it is a test file, and screening staying blind is worth pinning.
+
+The one real identity gap left: a person who applies with a personal address and later joins with a umich address is two `auth.users` rows. That is an account merge tool, small and rare, not a schema problem. Defer until someone hits it.
+
+### Two things to check before launch
+
+- `rush.application_portal_allowlist` currently holds exactly one address (`rbhavan@umich.edu`, noted "Portal closed to everyone else pending launch"). `application_portal_allows` returns false for everyone else, so **no applications can be submitted at all** until that row is removed or the allowlist is filled. This blocks first-time applicants and reapplicants alike.
+- Reapplication needs a stated policy, not just a working button: may an applicant who declined an offer reapply, and does the board see prior-cycle history when scoring? The data supports either answer. Section 4.5's audit viewer is where prior history would surface, gated behind `RECRUITMENT_OPERATIONS` so screening reviewers never see it.
+
+---
+
+## 10. Status
+
+All seven phases are implemented on branch `fix/applicant-reapplication` (18 commits, 9 migrations). What each one turned into:
+
+**Phase 0. Reapplication.** `can_start_application`, the routing fix, history kept reachable, both pages cross-linked. The database already supported reapplication; only the router forbade it.
+
+**Phase 1. One shell, one nav.** `WorkspaceHeader` and `WorkspaceNav` back all workspace pages. `board-nav.tsx`, the inline `navLinks`, and both cross-link buttons are gone. Routes stayed at `/admin/*` and `/member/*`; see the deviation note below.
+
+**Phase 2. The junk drawer.** `/admin/people`, `/admin/rounds`, `/admin/settings`, each gated on the capability its actions need rather than merely collapsed behind a `<summary>`.
+
+**Phase 3. Audit viewer.** `/admin/audit`, cycle-wide, filterable, paged. No migration needed.
+
+**Phase 4. Comms.** `rush.messages` logs every send attempt, delivered or not. Bulk send to a pipeline segment at `/admin/messages`. Batch decision release. Automatic evaluation-due reminders on the existing Vercel Cron pattern, idempotent through `reminders_sent`.
+
+**Phase 5. Editors and clone.** Application questions and rubric criteria are both editable without a deploy. Rubric edits publish a new version when the current one has been scored against. `clone_cycle` carries rounds, rubrics, questions and the roster, and nothing applicant-shaped.
+
+**Phase 6. Member year-round.** Task inbox, profile fields, cycle directory, personal record. Projects and staffing moved into the database, with the marketing pages reading from it and the old static file kept as a fallback.
+
+**Phase 7. Applicant.** Withdrawal (a status that was previously unreachable), the message list, the dated timeline, offer deadlines with expiry enforced in the RPC, and accessibility requests finally surfaced to the board.
+
+### The one deviation
+
+Routes stayed at `/admin/*` and `/member/*` rather than moving to `/portal/*`. The move touches 90 string references plus the proxy matcher and the `AuthDestination` union, all inside the auth-routing surface, and buys nothing visible once the shell and nav are shared. It is a mechanical follow-up whenever you want it.
+
+### Deliberately not built
+
+- **The applicant document center.** Replacing a resume after submission is not a UI gap: `begin_resume_upload` is scoped to a DRAFT or NEEDS_INFO application, and letting someone swap a resume after a blind screening packet is built is a fairness question, not a coding one. Decide the policy first.
+- **Editable comms templates.** Bulk send lets the board write and send; stored per-trigger templates only pay off once the same message is being sent repeatedly. Worth revisiting after a cycle of real use.
+- **Everything in section 8**, unchanged.
+
+---
+
+## 11. Verification status
+
+Everything now runs against a real database. A local Supabase stack (OrbStack plus the Supabase CLI) applied all 11 migrations to Postgres, and every check passes:
+
+| Check | Result |
+|---|---|
+| `supabase db reset` (11 new migrations) | applies clean |
+| `npm run test:supabase` | **188/188 pgTAP assertions pass** |
+| `npm run verify:workflow` | passes end to end |
+| `npm run verify:auth` | passes, 5 account states, against a production build |
+| `npm run check:sql` | 81 files, 211 function bodies |
+| `tsc`, `eslint`, `npm test` (42), `next build` | pass |
+| `database.types.ts` | regenerated from the applied schema, compiles with zero errors |
+
+Running it found four defects that no static check could see:
+
+- `respond_to_offer` could not be created at all: the original returns `void`, mine returned `boolean`, and `create or replace` cannot change a return type.
+- `set_application_questions` and `set_rubric_criteria` used `entry` as both a plpgsql loop variable and a table alias. plpgsql refuses that at runtime, so both created fine and would have failed on first use.
+- `update_my_profile` named its parameters after the columns they set, making every right-hand-side reference ambiguous.
+- Four pgTAP expectations were wrong in an instructive way: they asserted a function's internal service-role guard, but `EXECUTE` is revoked from `authenticated`, so the grant refuses first. The real protection is stronger than the tests assumed.
+
+`verify:auth` also asserted HTTP 307 for a Server Component redirect. Next 16 answers 200 with a `__next-page-redirect` meta refresh in both dev and production, and never renders the body. That was testing the framework's transport rather than the security property; it now accepts either transport and requires both that the caller is redirected and that the page is not served.
+
+### Still required before merging to main
+
+Main is the Vercel production branch, so merging deploys. The code calls 21 functions and 3 tables that exist locally but **not yet in the production database**, so the order matters:
+
+1. Apply the 11 migrations to production (`supabase db push`).
+2. Clear `rush.application_portal_allowlist`; it holds one address and blocks every applicant.
+3. Set `CRON_SECRET` and `RECRUITMENT_REPLY_TO`.
+4. Then merge.
+
+`destinationForUser` was hardened so a missing `can_start_application` degrades to the previous routing rather than breaking sign-in, which makes the critical path tolerate either order. That protects login only; the rest of the branch still needs its migrations first.
+
+---
+
+## 12. Decisions, now made
+
+All four were open questions in earlier drafts. Each is now enforced in the database rather than left as convention.
+
+**Reapplication after declining an offer: allowed.** Declining is a legitimate choice about timing or workload, and barring someone for it punishes honesty. `can_start_application` already permitted it; an assertion now pins that it never learns to care about `offer_response`.
+
+**Prior-cycle history: board only.** `applicant_prior_cycles` gates on `APPLICANT_OPERATIONS` and appears on the dossier. Screening reviewers and evaluators never see it. "They applied last year too" is exactly the context that becomes bias in the hands of someone holding a rubric.
+
+**Resume replacement: until review starts, not until submission.** The fairness line is review. Everyone gets the same chance to fix a wrong file before the deadline; nobody swaps the document a reviewer is already reading. The gate is whether a screening packet exists for the application. `attach_ready_resume` then points the application at the new file, which nothing did after intake.
+
+**Retention: anonymise two years after the cycle is archived.** Monthly via pg_cron. Anonymised rather than deleted, because deleting the rows takes the audit trail with them and the point of that trail is reconstructing a decision that affected someone. Names, contacts, free text and the auth link go; counts and outcomes stay. Two years covers a realistic return window (first-year applies, junior reapplies) without keeping a rejected applicant's essays for the rest of their twenties.
+
+**Comms ownership: a shared reply-to.** Outbound applicant email defaults `reply_to` to `RECRUITMENT_REPLY_TO`, falling back to `CONTACT_TO_EMAIL`. Naming the human owner is still an org choice; this makes the address institutional either way, so an applicant answering a decision email reaches the board rather than someone who has since graduated.
