@@ -24,6 +24,52 @@ function client() {
   return { calls, value: { rpc: async (name: string, args: Record<string, unknown>) => { calls.push({ name, args }); return { data: true, error: null }; } } };
 }
 
+test("admin account creation enforces Clerk's 15-character password boundary", async (t) => {
+  const fake = client();
+  const createdPasswords: string[] = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+    rpc: async () => ({ data: "app-user-1", error: null }),
+    from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+  }) } });
+  t.mock.module("@/lib/env", { namedExports: {
+    requireClerkIssuer: () => "https://test.clerk.accounts.dev",
+    requireEnv: () => "sk_test",
+  } });
+  t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+    createUser: async ({ password }: { password: string }) => {
+      createdPasswords.push(password);
+      return { id: "user_clerk" };
+    },
+    deleteUser: async () => undefined,
+  } }) } });
+  const { POST } = await route("clerk-password-boundary");
+
+  const tooShort = await POST(request({
+    action: "ADD_USER",
+    cycleId: "cycle-1",
+    name: "Test Member",
+    email: "member@example.com",
+    password: "a".repeat(14),
+    role: "MEMBER",
+  }));
+  assert.equal(tooShort.status, 400);
+  assert.match((await tooShort.json()).error, /15/);
+  assert.deepEqual(createdPasswords, []);
+
+  const accepted = await POST(request({
+    action: "ADD_USER",
+    cycleId: "cycle-1",
+    name: "Test Member",
+    email: "member@example.com",
+    password: "a".repeat(15),
+    role: "MEMBER",
+  }));
+  assert.equal(accepted.status, 201);
+  assert.deepEqual(createdPasswords, ["a".repeat(15)]);
+});
+
 test("owner can deactivate a cycle membership with an audit reason", async (t) => {
   const fake = client();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
