@@ -7,7 +7,7 @@ as $$
 declare
   actor uuid := auth.uid();
   normalized text := lower(trim(applicant_contact));
-  v_cycle_id text;
+  cycle_id text;
   person_id text;
   application_id text;
 begin
@@ -16,10 +16,10 @@ begin
     or char_length(normalized) not between 3 and 254 then
     raise exception 'invalid applicant details' using errcode = '22023';
   end if;
-  select id into v_cycle_id from rush.rush_cycles
+  select id into cycle_id from rush.rush_cycles
   where status = 'OPEN' and (opens_at is null or opens_at <= now()) and (closes_at is null or closes_at >= now())
   order by created_at desc limit 1;
-  if v_cycle_id is null then raise exception 'applications are not open' using errcode = '55000'; end if;
+  if cycle_id is null then raise exception 'applications are not open' using errcode = '55000'; end if;
 
   select id into person_id from rush.pnms where auth_user_id = actor for update;
   if person_id is null then
@@ -35,15 +35,14 @@ begin
   end if;
 
   insert into rush.applications (pnm_id, cycle_id, status, submitted_at)
-  values (person_id, v_cycle_id, 'SUBMITTED', now())
+  values (person_id, cycle_id, 'SUBMITTED', now())
   on conflict (pnm_id, cycle_id) do update set updated_at = rush.applications.updated_at
   returning id into application_id;
   insert into rush.audit_events (actor_id, cycle_id, action, resource, resource_id)
-  values (actor, v_cycle_id, 'APPLICATION_SUBMITTED', 'Application', application_id);
+  values (actor, cycle_id, 'APPLICATION_SUBMITTED', 'Application', application_id);
   return application_id;
 end;
 $$;
-
 create function rush.event_for_token(raw_token text)
 returns table (id text, name text, starts_at timestamptz, is_open boolean)
 language sql
@@ -57,7 +56,6 @@ as $$
   from rush.events e left join rush.rush_cycles c on c.id = e.cycle_id
   where e.checkin_token_digest = encode(extensions.digest(raw_token, 'sha256'), 'hex');
 $$;
-
 create function rush.check_in(raw_token text)
 returns boolean
 language plpgsql
@@ -96,7 +94,6 @@ begin
   return inserted_count = 0;
 end;
 $$;
-
 revoke all on function rush.submit_application(text, text) from public, anon;
 revoke all on function rush.event_for_token(text) from public;
 revoke all on function rush.check_in(text) from public, anon;
