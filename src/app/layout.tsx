@@ -42,11 +42,11 @@ const ORGANIZATION_JSON_LD = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const clerkConfigured = hasClerkConfiguration();
-  const body = (
-    <body className="min-h-full flex flex-col">
+  const content = (
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
       {children}
-    </body>
+    </>
   );
 
   return (
@@ -55,7 +55,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       data-scroll-behavior="smooth"
       className="h-full scroll-smooth antialiased"
     >
-      {clerkConfigured ? <ClerkProvider>{body}</ClerkProvider> : body}
+      <body className="min-h-full flex flex-col">
+        {clerkConfigured ? <ClerkProvider>{content}</ClerkProvider> : content}
+      </body>
     </html>
   );
 }
