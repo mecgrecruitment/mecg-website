@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { parseOffsetDateTime } from "@/lib/date-time";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -10,20 +11,16 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS", typeof body?.cycleId === "string" ? body.cycleId : null);
   if (!cycleId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  // Reject offset-less date-times: they parse as the server's local zone (UTC), not the
-  // admin's, which silently shifts the event. Clients send UTC ISO strings.
-  const dates = [body?.date, body?.endsAt, body?.checkinOpensAt, body?.checkinClosesAt].map((value) =>
-    typeof value === "string" && /(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? new Date(value) : new Date(NaN),
-  );
-  if (typeof body?.name !== "string" || !body.name.trim() || dates.some((date) => Number.isNaN(date.getTime())) || dates[1] <= dates[0]) return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
+  const dates = [body?.date, body?.endsAt, body?.checkinOpensAt, body?.checkinClosesAt].map(parseOffsetDateTime);
+  if (typeof body?.name !== "string" || !body.name.trim() || dates.some((date) => !date) || !dates[0] || !dates[1] || dates[1] <= dates[0]) return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_event", {
     target_cycle_id: cycleId,
     event_name: body.name,
     event_starts_at: dates[0].toISOString(),
     event_ends_at: dates[1].toISOString(),
-    opens_at: dates[2].toISOString(),
-    closes_at: dates[3].toISOString(),
+    opens_at: dates[2]!.toISOString(),
+    closes_at: dates[3]!.toISOString(),
     event_kind: typeof body?.kind === "string" ? body.kind : "GENERAL",
     event_location: typeof body?.location === "string" ? body.location : undefined,
     event_visibility: typeof body?.visibility === "string" ? body.visibility : "INTERNAL",

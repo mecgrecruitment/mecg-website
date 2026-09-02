@@ -1,32 +1,40 @@
 "use client";
 
 import { useAction } from "@/lib/use-action";
+import { detroitDateTimeToIso } from "@/lib/detroit-date-time";
 import OperationNotice from "@/components/operation-notice";
 
 export default function SlotForm({ cycleId, eventId }: { cycleId: string; eventId: string }) {
-  const { pending, error, success, run } = useAction("/api/admin/rush", "Could not create slot. Check the times and try again.");
+  const { pending, error, success, run, setError } = useAction("/api/admin/rush", "Could not create slot. Check the times and try again.");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
-    const result = await run(
-      {
-        action: "CREATE_SLOT",
-        cycleId,
-        eventId,
-        startsAt: new Date(String(data.get("startsAt"))).toISOString(),
-        endsAt: new Date(String(data.get("endsAt"))).toISOString(),
-        capacity: Number(data.get("capacity") ?? 8),
-      },
-      { successMessage: "RSVP slot saved.", fallbackError: "Could not create slot" },
-    );
+    let result;
+    try {
+      result = await run(
+        {
+          action: "CREATE_SLOT",
+          cycleId,
+          eventId,
+          startsAt: detroitDateTimeToIso(String(data.get("startsAt"))),
+          endsAt: detroitDateTimeToIso(String(data.get("endsAt"))),
+          capacity: Number(data.get("capacity") ?? 8),
+        },
+        { successMessage: "RSVP slot saved.", fallbackError: "Could not create slot" },
+      );
+    } catch (dateError) {
+      setError(dateError instanceof Error ? dateError.message : "Could not create slot");
+      return;
+    }
     if (result.ok) form.reset();
   }
 
   return (
     <form className="mt-4 flex flex-col gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" onSubmit={submit}>
       <p className="text-sm font-medium">Add RSVP slot</p>
+      <p className="text-xs text-mecg-navy/60">Times are entered in Detroit time.</p>
       <label className="text-sm">
         Starts at
         <input name="startsAt" type="datetime-local" required disabled={pending} className="field-control mt-1 block text-sm disabled:opacity-60" />

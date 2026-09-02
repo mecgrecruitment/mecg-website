@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { EVENT_KINDS } from "@/lib/workflow";
 import { useAction } from "@/lib/use-action";
+import { detroitDateTimeToIso } from "@/lib/detroit-date-time";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
 
@@ -33,11 +34,25 @@ export default function EventForm() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const utc = (value: string) => new Date(value).toISOString();
-    const result = await run(
-      { name, date: utc(date), endsAt: utc(endsAt), checkinOpensAt: utc(opensAt), checkinClosesAt: utc(closesAt), kind, location, visibility },
-      { skipRefresh: true, fallbackError: "Could not create event." },
-    );
+    let result;
+    try {
+      result = await run(
+        {
+          name,
+          date: detroitDateTimeToIso(date),
+          endsAt: detroitDateTimeToIso(endsAt),
+          checkinOpensAt: detroitDateTimeToIso(opensAt),
+          checkinClosesAt: detroitDateTimeToIso(closesAt),
+          kind,
+          location,
+          visibility,
+        },
+        { skipRefresh: true, fallbackError: "Could not create event." },
+      );
+    } catch (dateError) {
+      setError(dateError instanceof Error ? dateError.message : "Could not create event.");
+      return;
+    }
     if (!result.ok) return;
     const data = result.body as { id?: string; checkinToken?: string } | null;
     if (!data?.id || !data?.checkinToken) {
@@ -54,6 +69,7 @@ export default function EventForm() {
         <Select label="Kind" name="kind" value={kind} onChange={setKind}>{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select>
         <Select label="Visibility" name="visibility" value={visibility} onChange={setVisibility}><option value="PUBLIC">Public (shows on /join)</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal / check-in only</option></Select>
         <FormField label="Location" name="location" type="text" value={location} onChange={(event) => setLocation(event.target.value)} />
+        <p className="text-sm text-mecg-navy/60">Times are entered in Detroit time.</p>
         <FormField label="Date" name="date" type="datetime-local" required value={date} onChange={(event) => setDate(event.target.value)} />
         <FormField label="Event ends at" name="endsAt" type="datetime-local" required value={endsAt} onChange={(event) => setEndsAt(event.target.value)} />
         <p className="rounded-xl bg-mecg-navy/[0.035] p-3 text-sm text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">Attendance is tracked for operations and does not affect applicant rankings.</p>

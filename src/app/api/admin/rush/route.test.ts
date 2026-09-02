@@ -24,7 +24,7 @@ function client() {
   return { calls, value: { rpc: async (name: string, args: Record<string, unknown>) => { calls.push({ name, args }); return { data: true, error: null }; } } };
 }
 
-test("admin account creation enforces Clerk's 15-character password boundary", async (t) => {
+test("admin account creation enforces Clerk's 8-character password boundary", async (t) => {
   const fake = client();
   const createdPasswords: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
@@ -51,11 +51,11 @@ test("admin account creation enforces Clerk's 15-character password boundary", a
     cycleId: "cycle-1",
     name: "Test Member",
     email: "member@example.com",
-    password: "a".repeat(14),
+    password: "a".repeat(7),
     role: "MEMBER",
   }));
   assert.equal(tooShort.status, 400);
-  assert.match((await tooShort.json()).error, /15/);
+  assert.match((await tooShort.json()).error, /8/);
   assert.deepEqual(createdPasswords, []);
 
   const accepted = await POST(request({
@@ -63,11 +63,11 @@ test("admin account creation enforces Clerk's 15-character password boundary", a
     cycleId: "cycle-1",
     name: "Test Member",
     email: "member@example.com",
-    password: "a".repeat(15),
+    password: "a".repeat(8),
     role: "MEMBER",
   }));
   assert.equal(accepted.status, 201);
-  assert.deepEqual(createdPasswords, ["a".repeat(15)]);
+  assert.deepEqual(createdPasswords, ["a".repeat(8)]);
 });
 
 test("owner can deactivate a cycle membership with an audit reason", async (t) => {
@@ -149,4 +149,52 @@ test("application window rejects malformed or reversed dates before the RPC", as
   }));
   assert.equal(response.status, 400);
   assert.equal(fake.calls.length, 0);
+});
+
+test("RSVP slots require offset-aware ordered times and a bounded integer capacity", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("slot-boundary");
+
+  const offsetless = await POST(request({
+    action: "CREATE_SLOT",
+    cycleId: "cycle-1",
+    eventId: "event-1",
+    startsAt: "2026-09-10T18:00",
+    endsAt: "2026-09-10T18:30",
+    capacity: 8,
+  }));
+  assert.equal(offsetless.status, 400);
+
+  const fractionalCapacity = await POST(request({
+    action: "CREATE_SLOT",
+    cycleId: "cycle-1",
+    eventId: "event-1",
+    startsAt: "2026-09-10T22:00:00.000Z",
+    endsAt: "2026-09-10T22:30:00.000Z",
+    capacity: 8.5,
+  }));
+  assert.equal(fractionalCapacity.status, 400);
+  assert.equal(fake.calls.length, 0);
+
+  const accepted = await POST(request({
+    action: "CREATE_SLOT",
+    cycleId: "cycle-1",
+    eventId: "event-1",
+    startsAt: "2026-09-10T22:00:00.000Z",
+    endsAt: "2026-09-10T22:30:00.000Z",
+    capacity: 8,
+  }));
+  assert.equal(accepted.status, 201);
+  assert.deepEqual(fake.calls, [{
+    name: "create_event_slot",
+    args: {
+      target_event_id: "event-1",
+      slot_starts_at: "2026-09-10T22:00:00.000Z",
+      slot_ends_at: "2026-09-10T22:30:00.000Z",
+      slot_capacity: 8,
+    },
+  }]);
 });
