@@ -6,7 +6,7 @@ Base commit inspected: `ff4f036793d48e1a39bdd877819e75573454a743`
 
 **Code readiness: PASS. Production release: NO-GO until the protected environment gates, policy approvals, and human release checks below are completed.**
 
-The repository builds, its deterministic suites pass, the complete local database migration chain is valid, and the public browser smoke matrix passes on desktop and mobile. After the audit, the release owner authorized the production configuration changes recorded below. No deployment, production message, or linked-production database mutation has been performed.
+The repository builds, its deterministic suites pass, the complete local database migration chain is valid, and the public browser smoke matrix passes on desktop and mobile. After the audit, the release owner authorized the production configuration changes and merge recorded below. Commit `f8b9bf5` is deployed to Vercel Production; no production message or linked-production database mutation has been performed.
 
 ## Rush application requirements
 
@@ -52,7 +52,7 @@ The limits are stored with the question definitions, returned by the intake and 
 | `npm test` | 0 | 246/246 Node unit and route tests passed. |
 | `npx tsc --noEmit` | 0 | TypeScript passed. |
 | `npm run lint` | 0 | ESLint passed with no findings. |
-| `npm run check:sql` | 0 | Parsed 102 SQL files and 263 function bodies; checked 80 RPCs and 24 tables. It also rejects duplicate migration versions. |
+| `npm run check:sql` | 0 | Parsed 103 SQL files and 265 function bodies; checked 80 RPCs and 24 tables. It also rejects duplicate migration versions. |
 | `supabase db lint --local --schema rush --level error --fail-on error` | 0 | The complete disposable `rush` schema returned no errors. |
 | `supabase db lint --linked --schema rush --level error --fail-on error` | 0 | The currently deployed linked `rush` schema returned no errors. |
 | `supabase test db … supabase/tests/rush_foundation.sql` | 0 | 251/251 pgTAP assertions passed in a fresh isolated stack after the uniquely ordered full migration chain, including the provider-neutral workflow, Storage fixes, and application draft limits. The exact stack and temporary files were then removed. |
@@ -63,17 +63,19 @@ The limits are stored with the question definitions, returned by the intake and 
 | `CI=1 PLAYWRIGHT_PORT=3199 npm run test:e2e` | 0 | 8/8 production-mode Chromium desktop/mobile smoke tests passed in isolation from another session's stale server on port 3100. |
 | `npx react-doctor@latest --verbose --scope changed` | 0 | Scanned 52 changed React files and reported no diagnostics. |
 | `npx next build --webpack` | 0 | Next.js 16.3.1 production build compiled, type-checked, and generated all 78 pages. |
+| GitHub Actions application and isolated-database jobs at `f8b9bf5` | 0 | Application lint, 246 tests, type-check, SQL validation, production build, and 8 browser tests passed; the isolated database applied the full migration chain, passed schema lint, and passed 251 pgTAP assertions. The separate live-migration parity job correctly failed on the protected production drift below. |
+| Production smoke check at `f8b9bf5` | mixed | `/home`, `/login`, and `/__clerk/v1/environment` return HTTP 200. `/api/health` returns HTTP 503 while the linked production database is missing the eleven migrations listed below. |
 | `git diff --check` | 0 | No whitespace errors. |
 
 The production build could not reach the linked Supabase hostname from the restricted sandbox while collecting public project data. That path failed closed and the build completed. The normal Turbopack build could not bind its sandbox worker port (`EPERM`), so the documented Next.js webpack fallback was used to validate the production compilation.
 
 ## Protected gates still required
 
-- Redeploy Preview and Production so the newly added `CLERK_WEBHOOK_SIGNING_SECRET`, `CRON_SECRET`, `CONTACT_TO_EMAIL`, `RESEND_FROM_EMAIL`, and `RESEND_API_KEY` values are available to running deployments. No deployment was performed as part of this configuration pass.
+- Vercel Production successfully deployed commit `f8b9bf5` with the configured environment values. Repeat the smoke matrix after the production database migration gate is completed.
 - Resolve and re-test direct TLS access to `clerk.mecgmichigan.com`. Its five DNS records pass the infrastructure preflight and the main-site Clerk proxy renders, but direct OpenSSL, curl, and Supabase CLI validation currently receive a TLS handshake/certificate error. The isolated migration rehearsal therefore disabled only the temporary stack's external Clerk validator; hosted Clerk-token verification remains a protected gate.
 - Click **Verify DNS Records** for `mecgmichigan.com` in Resend and wait for provider status `Verified` before relying on `noreply@mecgmichigan.com` for production delivery. All four required/recommended values already resolve correctly in public DNS.
 - Provision or identify an approved staging Supabase project, then run `npm run supabase:verify-project`, `npm run supabase:lint`, `npm run test:supabase`, `npm run verify:backend`, `npm run verify:auth`, and `npm run verify:workflow` against it. The disposable local staging rehearsal passed, but it is not a substitute for the protected hosted environment.
-- Apply the unique pending migrations `20260902100000`, `20260902110000`, `20260902120000`, `20260902130000`, `20260902135000`, `20260902145000`, `20260902150000`, `20260902160000`, `20260902170000`, and `20260902180000` to staging before deploying this code. Re-read the migration directory first in case another session adds a later file. Do not push them to the linked production project without explicit production change approval. Migration `20260902120000` is a safety hold: do not re-enable applicant-data retention until policy approval is recorded and encoded in a later migration.
+- Apply the unique pending migrations `20260902100000`, `20260902110000`, `20260902120000`, `20260902130000`, `20260902135000`, `20260902145000`, `20260902150000`, `20260902160000`, `20260902170000`, `20260902180000`, and `20260902190000` to an approved staging project, complete the hosted checks above, and obtain explicit production-change approval before pushing them to the linked production project. Until then, the live-migration parity job and `/api/health` correctly fail. Migration `20260902120000` is a safety hold: do not re-enable applicant-data retention until policy approval is recorded and encoded in a later migration.
 - Confirm the intended portal open/restricted state, scheduled-job history, one controlled recruitment email, and a recent resume-cleanup run.
 - Complete and approve every unresolved item in `docs/policies/recruitment-policy.md`, including quorum, correction workflows, missed-round handling, applicant feedback, and retention. The code defaults are not Board approval.
 - Decide whether Rush requires a sensitive applicant-response export. The implemented export is attendance-only. A broad applicant export is deliberately absent because the plan requires purpose limitation, audit logging, and break-glass governance that have not been approved or built.
