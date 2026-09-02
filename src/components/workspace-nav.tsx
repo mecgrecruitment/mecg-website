@@ -3,6 +3,9 @@ import { hasPermission } from "@/lib/authorization";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import type { CurrentUser } from "@/lib/auth";
 import PillNav from "./pill-nav";
+import WorkspaceMoreMenu from "./workspace-more-menu";
+
+type NavLink = readonly [href: string, label: string];
 
 // One nav for the whole internal workspace. Before this, /admin had BoardNav,
 // /member hand-rolled its own link array, and every sub-page had neither: you
@@ -45,11 +48,20 @@ export default async function WorkspaceNav({
   const votingOpen = user.memberships.some((membership) =>
     membership.active && membership.cycleId === cycleId && membership.cycle.status === "DECISION_LOCK");
 
-  // Two rows, because a single 16-item bar made "what I owe" and "what I run"
-  // look like one undifferentiated list. Row one is always the member's own
-  // work, so a plain member sees only that row.
-  const mine: Array<readonly [string, string]> = [
+  const primary: NavLink[] = [
     ["/member", "My work"],
+    ...(can("RECRUITMENT_OPERATIONS")
+      ? ([
+        ["/admin", "Recruitment"],
+        ["/admin/rounds", "Interviews"],
+      ] as const)
+      : []),
+    ...(!can("RECRUITMENT_OPERATIONS") && can("HASH_PANEL_ACCESS") ? [["/admin", "Overview"] as const] : []),
+    ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Decisions"] as const] : []),
+    ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/messages", "Communications"] as const] : []),
+  ];
+
+  const myTools: NavLink[] = [
     ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
     ...(screeningReviewer.data ? [["/member/screening", `Read applications${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
@@ -57,37 +69,26 @@ export default async function WorkspaceNav({
     ["/admin/people", "People"],
   ];
 
-  const board: Array<readonly [string, string]> = [
+  const adminTools: NavLink[] = [
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
-        ["/admin", "Applicants"],
         ["/admin/referrals", "Referrals"],
-        ["/admin/rounds", "Interview rounds"],
         ["/admin/screening", "Review setup"],
         ["/admin/groups", "Group interviews"],
-        ["/admin/messages", "Messages"],
         ...(can("MANAGE_CYCLE") ? [["/admin/notifications", "Emails & texts"] as const] : []),
       ] as const)
       : []),
-    ...(can("HASH_PANEL_ACCESS") ? [["/admin/hash", "Hash results"] as const] : []),
     ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/audit", "Activity"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/projects", "Projects"] as const] : []),
     ...(can("MANAGE_CYCLE") ? [["/admin/settings", "Settings"] as const] : []),
   ];
-
   return (
     <>
-      <div className="workspace-nav-shell sticky top-3 z-30 flex flex-col gap-1 rounded-2xl bg-white/88 p-1.5 shadow-[0_14px_44px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <span className="w-14 shrink-0 pl-2 text-[12px] font-semibold text-mecg-navy/55">Mine</span>
-          <PillNav ariaLabel="Your work" current={current} links={mine} />
+      <div className="workspace-nav-shell sticky top-3 z-30 flex items-center gap-1 rounded-2xl bg-white/92 p-1.5 shadow-[0_10px_30px_rgba(7,13,31,0.08),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
+        <div className="min-w-0 flex-1">
+          <PillNav ariaLabel="Workspace" current={current} links={primary} matchPathOnly />
         </div>
-        {board.length > 0 && (
-          <div className="flex items-center gap-2 border-t border-mecg-navy/[0.08] pt-1">
-            <span className="w-14 shrink-0 pl-2 text-[12px] font-semibold text-mecg-navy/55">Board</span>
-            <PillNav ariaLabel="Board tools" current={current} links={board} />
-          </div>
-        )}
+        <WorkspaceMoreMenu current={current} myTools={myTools} adminTools={adminTools} />
       </div>
       <span id="workspace-content" tabIndex={-1} className="sr-only">Workspace content</span>
     </>

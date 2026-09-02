@@ -141,75 +141,81 @@ export default async function AdminDashboard() {
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
       <section>
-        <SectionLabel>Recruitment overview</SectionLabel>
-        <div className="mt-3.5 overflow-hidden rounded-2xl bg-mecg-navy text-white ring-1 ring-white/12">
-          <div className="grid gap-px bg-white/10 lg:grid-cols-[1.35fr_0.65fr]">
-            <div className="bg-mecg-navy p-4 sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-[13px] font-semibold text-white/50">Cycle pulse</p>
-                  <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.025em]">{applications.length - decidedCount} applicants are moving through review</h2>
-                </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[13px] font-semibold text-white/70">
-                  {cycleStatusLabel(cycle.status)}
-                </span>
-              </div>
-              <div className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SectionLabel>Recruitment overview</SectionLabel>
+          <span className="rounded-full bg-mecg-navy/[0.07] px-2.5 py-1 text-xs font-semibold text-mecg-navy/65">
+            {cycleStatusLabel(cycle.status)}
+          </span>
+        </div>
+        <div className="mt-3.5 border-y border-mecg-navy/10">
+          <div className="grid lg:grid-cols-[1fr_18rem]">
+            <div className="py-4 lg:pr-6">
+              <p className="text-xs font-semibold text-mecg-navy/55">Cycle pulse</p>
+              <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-mecg-navy">
+                {applications.length - decidedCount > 0
+                  ? `${applications.length - decidedCount} applicants are moving through review`
+                  : "No applicants are currently in review"}
+              </h2>
+              <dl className="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
                 {STATS.map(([value, label]) => (
-                  <StatTile key={label} value={value} label={label} tone="dark" />
+                  <div key={label}>
+                    <dt className="text-xs leading-4 text-mecg-navy/55">{label}</dt>
+                    <dd className="tabular text-lg font-semibold text-mecg-navy">{value}</dd>
+                  </div>
                 ))}
-              </div>
+              </dl>
             </div>
-            <div className="bg-white/5 p-4 sm:p-5">
-              <p className="text-[13px] font-semibold text-white/50">Coming up</p>
+            <div className="border-t border-mecg-navy/10 py-4 lg:border-l lg:border-t-0 lg:pl-6">
+              <p className="text-xs font-semibold text-mecg-navy/55">Coming up</p>
               {nextEvent ? (
-                <div className="mt-4">
-                  <p className="text-lg font-semibold">{nextEvent.name}</p>
-                  <p className="mt-1.5 text-sm text-white/55">{eventDate(nextEvent.starts_at)}</p>
-                  {nextEventCapacity > 0 && (
-                    <p className="mt-1.5 tabular text-xs text-white/60">{nextEventRsvps}/{nextEventCapacity} RSVPs</p>
-                  )}
-                  <Link href={`/admin/events/${nextEvent.id}`} className="button-light mt-5 text-xs">
-                    Open event
-                    <span aria-hidden="true">→</span>
-                  </Link>
+                <div className="mt-2">
+                  <p className="font-semibold text-mecg-navy">{nextEvent.name}</p>
+                  <p className="mt-1 text-sm text-mecg-navy/55">{eventDate(nextEvent.starts_at)}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    {nextEventCapacity > 0 && (
+                      <p className="tabular text-xs text-mecg-navy/60">{nextEventRsvps}/{nextEventCapacity} RSVPs</p>
+                    )}
+                    <Link href={`/admin/events/${nextEvent.id}`} className="text-sm font-semibold text-mecg-blue hover:text-mecg-orange-ink">
+                      Open event →
+                    </Link>
+                  </div>
                 </div>
               ) : (
-                <div className="mt-4">
-                  <p className="text-sm leading-6 text-white/55">No upcoming events are scheduled.</p>
-                  {canOperate && <Link href="/admin/events/new" className="mt-4 inline-flex text-sm font-semibold text-mecg-orange">Schedule an event →</Link>}
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-mecg-navy/55">No upcoming events are scheduled.</p>
+                  {canOperate && <Link href="/admin/events/new" className="text-sm font-semibold text-mecg-blue hover:text-mecg-orange-ink">Schedule an event →</Link>}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-paper p-3.5 sm:p-4">
+        <div className="mt-3.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[13px] font-semibold text-mecg-navy/65">Needs attention</p>
-              <p className="mt-1 text-sm text-mecg-navy/55">The items most likely to slow this cycle down.</p>
+              {attentionItems.length > 0 && <p className="mt-0.5 text-sm text-mecg-navy/55">The items most likely to slow this cycle down.</p>}
             </div>
             <span className="tabular text-xs font-semibold text-mecg-navy/65">{attentionItems.length} queues</span>
           </div>
           {attentionItems.length ? (
-            <div className="mt-3 grid gap-px overflow-hidden rounded-xl bg-mecg-navy/10 sm:grid-cols-3">
+            <div className="mt-2.5 grid border-y border-mecg-navy/10 sm:grid-cols-3 sm:divide-x sm:divide-mecg-navy/10">
               {attentionItems.map((item) => (
                 <Link
                   key={item.label}
                   href={`/admin?filter=${item.filter}#applicants`}
-                  className="flex items-center gap-3 bg-white p-3 transition-colors duration-[--t-detent] ease-[--ease-detent] hover:bg-mecg-navy/[0.03]"
+                  className="flex items-center gap-3 border-b border-mecg-navy/10 py-2.5 transition-colors duration-[--t-detent] ease-[--ease-detent] last:border-b-0 hover:bg-mecg-navy/[0.03] sm:border-b-0 sm:px-3 sm:first:pl-0 sm:last:pr-0"
                 >
-                  <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-mecg-orange/[0.16] px-2 tabular text-sm font-bold text-mecg-orange-ink">{item.count}</span>
+                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-mecg-orange/[0.16] px-2 tabular text-sm font-bold text-mecg-orange-ink">{item.count}</span>
                   <div>
                     <p className="text-[13px] font-semibold text-mecg-navy">{item.label}</p>
-                    <p className="mt-0.5 text-[11.5px] text-mecg-navy/60">{item.detail}</p>
+                    <p className="mt-0.5 text-xs text-mecg-navy/60">{item.detail}</p>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="mt-3 rounded-xl bg-white p-3.5 text-sm text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">No immediate issues. Everything is moving.</p>
+            <p className="mt-1 text-sm text-mecg-navy/55">No immediate issues. Everything is moving.</p>
           )}
         </div>
       </section>
@@ -229,29 +235,29 @@ export default async function AdminDashboard() {
       {canOperate && (
         <section>
           <SectionLabel>Activity</SectionLabel>
-          <div className={`mt-3.5 grid gap-4 ${canHash ? "lg:grid-cols-[0.9fr_1.1fr]" : ""}`}>
+          <div className={`mt-3.5 grid gap-8 ${canHash ? "lg:grid-cols-[0.9fr_1.1fr]" : ""}`}>
             {canHash && (
-              <div className="rounded-2xl bg-paper p-4 sm:p-5">
+              <div>
                 <p className="text-[13px] font-semibold text-mecg-navy/65">Decision funnel</p>
-                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="mt-2.5 grid grid-cols-2 gap-3 border-y border-mecg-navy/10 py-3 sm:grid-cols-4">
                   {decisionFunnel.map(([label, value]) => (
                     <StatTile key={label} value={value} label={label} tone="light" />
                   ))}
                 </div>
               </div>
             )}
-            <div className="rounded-2xl bg-paper p-4 sm:p-5">
+            <div>
               <p className="text-[13px] font-semibold text-mecg-navy/65">Recent activity</p>
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-2.5 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
                 {auditEvents.length ? auditEvents.map((event) => (
-                  <div key={event.id} className="flex items-start justify-between gap-3 rounded-xl bg-white px-3.5 py-2.5 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                  <div key={event.id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
                     <div>
                       <p className="font-medium text-mecg-navy">{statusLabel(event.action)}</p>
                       <p className="text-xs text-mecg-navy/60">{event.actor_id ? (auditActorNameById.get(event.actor_id) ?? "Unknown board member") : "System"}</p>
                     </div>
                     <time className="shrink-0 tabular text-xs text-mecg-navy/65">{formatEasternDateTime(event.created_at)}</time>
                   </div>
-                )) : <p className="text-sm text-mecg-navy/55">No recent activity.</p>}
+                )) : <p className="py-3 text-sm text-mecg-navy/55">No recent activity.</p>}
               </div>
             </div>
           </div>
@@ -267,35 +273,34 @@ export default async function AdminDashboard() {
             {canOperate && <Link href="/admin/events/new" className="button-secondary text-sm">+ New event</Link>}
           </div>
         </div>
-        <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3.5 grid border-t border-mecg-navy/10 sm:grid-cols-2 sm:gap-x-6">
           {events.map((event) => {
             const { month, day } = eventBadge(event.starts_at);
             const isPast = new Date(event.starts_at).getTime() < now;
             return (
-              <div key={event.id} className={`flex items-center gap-4 rounded-2xl p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] ${isPast ? "opacity-55" : ""}`}>
-                <div className={`flex h-[52px] w-[52px] flex-shrink-0 flex-col items-center justify-center rounded-xl tabular text-white ${isPast ? "bg-mecg-navy/50" : "bg-mecg-navy"}`}>
-                  <span className="text-[10px] font-semibold tracking-[0.06em]">{month}</span>
-                  <span className="text-base font-bold">{day}</span>
+              <div key={event.id} className={`flex min-w-0 items-center gap-3 border-b border-mecg-navy/10 py-3 ${isPast ? "opacity-55" : ""}`}>
+                <div className={`flex h-11 w-11 flex-shrink-0 flex-col items-center justify-center rounded-lg tabular text-white ${isPast ? "bg-mecg-navy/50" : "bg-mecg-navy"}`}>
+                  <span className="text-xs font-semibold leading-none">{month}</span>
+                  <span className="text-sm font-bold">{day}</span>
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-mecg-navy">{event.name}</p>
+                    <p className="truncate text-sm font-semibold text-mecg-navy">{event.name}</p>
                     {event.id === nextEventId && (
-                      <span className="inline-flex items-center rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Next</span>
+                      <span className="inline-flex items-center rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-xs font-semibold text-mecg-orange-ink">Next</span>
                     )}
                   </div>
-                  <Link href={`/admin/events/${event.id}`} className="mt-1 inline-flex items-center gap-1 text-[12.5px] font-semibold text-mecg-blue hover:text-mecg-orange-ink">
-                    View details
-                    <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M6 4l6 6-6 6" />
-                    </svg>
-                  </Link>
+                  <p className="mt-0.5 truncate text-xs text-mecg-navy/55">{eventDate(event.starts_at)}</p>
                 </div>
+                <Link href={`/admin/events/${event.id}`} className="shrink-0 text-xs font-semibold text-mecg-blue hover:text-mecg-orange-ink">
+                  View →
+                  <span className="sr-only"> {event.name}</span>
+                </Link>
               </div>
             );
           })}
           {!events.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55 sm:col-span-2">
+            <p className="border-b border-mecg-navy/10 py-4 text-sm text-mecg-navy/55 sm:col-span-2">
               No events yet. Add one to start tracking RSVPs and check-ins.
             </p>
           )}

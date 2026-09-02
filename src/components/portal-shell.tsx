@@ -7,6 +7,7 @@ export default function PortalShell({
   description,
   children,
   centered = false,
+  compact = false,
   workspace = false,
   headerAction,
   heroExtra,
@@ -16,6 +17,7 @@ export default function PortalShell({
   description: string;
   children: React.ReactNode;
   centered?: boolean;
+  compact?: boolean;
   workspace?: boolean;
   headerAction?: React.ReactNode;
   heroExtra?: React.ReactNode;
@@ -61,10 +63,10 @@ export default function PortalShell({
   if (centered) {
     return (
       <main className="min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
-        <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
-          <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-4">
+        <header className={`border-b border-mecg-navy/8 bg-white ${compact ? "px-5 py-2.5 sm:px-8" : "px-6 py-3 sm:px-10"}`}>
+          <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 ${compact ? "min-h-12" : "min-h-14"}`}>
             <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
-              <Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={45} priority className="h-10 w-auto" style={{ width: "auto" }} />
+              <Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={45} priority className={`${compact ? "h-9" : "h-10"} w-auto`} style={{ width: "auto" }} />
             </Link>
             <Link href="/home" className="flex min-h-11 items-center text-sm text-mecg-navy/60 transition-colors duration-150 hover:text-mecg-navy">
               Back to site
@@ -72,12 +74,12 @@ export default function PortalShell({
           </div>
         </header>
 
-        <section className="flex min-h-[calc(100dvh-5rem)] items-center justify-center px-6 py-10 sm:px-10">
-          <div className="w-full max-w-xl text-center">
+        <section className={`flex justify-center ${compact ? "items-start px-5 py-10 sm:px-8 sm:py-14 lg:py-16" : "min-h-[calc(100dvh-5rem)] items-center px-6 py-10 sm:px-10"}`}>
+          <div className={`w-full ${compact ? "max-w-md text-left" : "max-w-xl text-center"}`}>
             <p className="text-[13px] font-semibold text-mecg-orange-ink">{eyebrow}</p>
-            <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">{title}</h1>
-            <p className="mx-auto mt-4 max-w-lg text-pretty leading-7 text-mecg-navy/60">{description}</p>
-            <div className="surface-card mt-7 bg-white p-7 text-left sm:p-9">
+            <h1 className={`${compact ? "mt-2.5 text-4xl sm:text-[2.5rem]" : "mt-3 text-4xl sm:text-5xl"} text-balance font-semibold tracking-[-0.04em]`}>{title}</h1>
+            <p className={`${compact ? "mt-3 max-w-md leading-6" : "mx-auto mt-4 max-w-lg leading-7"} text-pretty text-mecg-navy/60`}>{description}</p>
+            <div className={compact ? "mt-7 border-t border-mecg-navy/10 pt-7 text-left" : "surface-card mt-7 bg-white p-7 text-left sm:p-9"}>
               {children}
             </div>
           </div>

@@ -14,7 +14,7 @@ Decision record (2026-08-22): three directions were evaluated — precision spec
 4. **Proof before people.** Home order: hero, stats, clients, featured engagement, semester spec, people, alumni, CTA.
 5. **Two audiences, one CTA each.** "Discuss a project" (clients) and "Join MECG" (students). Never more than these two actions per view.
 6. **One label grammar.** `NN[.N] / LABEL`, number in orange (ink on light, orange on dark). Every section on every page is numbered, including home. `SectionLabel` is the only way to write one. On the public site it sets in mono, ~11px, uppercase, tracking 0.16em; in the workspace it sets in sans at 12px sentence case (`.section-label`), per principle 1.
-7. **Motion seats content, never decorates.** Named tokens only: `--t-detent 150ms` (hover/press), `--t-shift 420ms` (state/page transitions), `--t-seat 700ms` (viewport reveals), eases `--ease-seat` / `--ease-detent`. Reveals are opacity + small translate, staggered 60ms in DOM order. Nothing loops, nothing counts up from zero, real numbers render server-side.
+7. **Motion clarifies state, never delays work.** Use `--t-control` / `--t-detent` at 150ms for hover, focus, press, and selected-state feedback; use `--t-panel` at 200ms only when direction or disclosure helps explain a state change. Workspace routes, routine lists, notices, and sections render immediately—no page entrances, blur, stagger, or looping decoration. Real numbers render server-side and never count up from zero.
 8. **Real artifacts, never stock.** Photos get a hairline frame (`outline-mecg-navy/10` on light, `outline-white/12` on dark) and a mono figure caption: `FIG. NN — PLACE, CONTEXT`. Empty proof gets a status line (`STATUS / CASE STUDY PENDING CLIENT APPROVAL`), never an apology sentence.
 9. **Square, not pill.** Buttons are 2px radius: `.button-primary` (filled orange, navy text), `.button-secondary` (outline on light), `.button-dark` (outline on dark). Cards square or `rounded-2xl` max; nothing at `rounded-[2rem]`. Scoped exception: the portal's elevated outer card — `portal-shell.tsx`, `workspace-state.tsx`, `/apply`, `/applicant` — uses `rounded-[28px]` with a heavy shadow, centralized as a single utility class, reserved for the single outermost card of a full-bleed auth/workspace screen; content cards inside a workspace still stay `rounded-2xl` and hairline.
 10. **Hairlines are the structure.** `border-mecg-navy/10` on light, `border-white/12` on dark, `gap-px` grids on tinted backgrounds. No shadows for structure.
@@ -61,7 +61,7 @@ Focus ring (audited 2026-09-01): default `:focus-visible` outline is `mecg-navy`
 
 ## 6. Toolbox
 
-Installed: three + @react-three/fiber (splash scene only). Motion is CSS + a small IntersectionObserver reveal — no animation library until a section genuinely needs scroll-pinned choreography (then GSAP/lenis, per the old doc's research). shadcn/ui remains the fallback base for complex form UI.
+Motion is implemented with CSS only; no animation or 3D runtime is installed. Do not add one for routine interface feedback. shadcn/ui remains the fallback base for complex form UI.
 
 ## 7. Open debt (owner: board, not code)
 

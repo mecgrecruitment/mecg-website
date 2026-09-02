@@ -17,6 +17,7 @@ export default async function LoginPage() {
         title="Sign-in is temporarily unavailable."
         description="The authentication service is not configured on this deployment."
         centered
+        compact
       >
         <OperationNotice kind="error">
           No credentials were accepted or transmitted. Contact <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a> if you need immediate access.
@@ -32,15 +33,16 @@ export default async function LoginPage() {
     <PortalShell
       eyebrow="Account access"
       title="Sign in to MECG."
-      description="Applicants, members, Board operators, and Hash panelists use one account. MECG sends you to the workspace assigned to that account."
+      description="Use the email attached to your application or member account. We’ll send you to the right workspace."
       centered
+      compact
     >
       <SignIn
         path="/login"
         routing="path"
         signUpUrl="/apply"
         fallbackRedirectUrl="/apply"
-        // PortalShell already draws the card, the heading and the Clerk credit, so the
+        // PortalShell already draws the heading and the page draws the Clerk credit, so the
         // widget ships chromeless. Values are style objects, not class names: Clerk merges
         // them into its own generated class, while a Tailwind class sits in a cascade layer
         // that Clerk's unlayered styles outrank (that is why `header: "hidden"` looked ignored).
@@ -66,6 +68,8 @@ export default async function LoginPage() {
             footer: { background: "none", boxShadow: "none", padding: "1.25rem 0 0" },
             footerItem: { display: "none" },
             footerAction: { justifyContent: "center" },
+            footerActionLink: { display: "inline-flex", minHeight: "44px", alignItems: "center" },
+            formFieldInput: { minHeight: "44px", fontSize: "1rem" },
             formButtonPrimary: { minHeight: "44px", fontWeight: 600, textTransform: "none", letterSpacing: "normal" },
           },
         }}

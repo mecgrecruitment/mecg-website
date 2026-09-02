@@ -1,65 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function PillNav({
   ariaLabel,
   current,
   links,
+  matchPathOnly = false,
 }: {
   ariaLabel: string;
   current: string;
   links: ReadonlyArray<readonly [href: string, label: string]>;
+  matchPathOnly?: boolean;
 }) {
-  const [pending, setPending] = useState<{ from: string; href: string } | null>(null);
-  const selected = pending?.from === current ? pending.href : current;
-  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
+  const selectedLink = useRef<HTMLAnchorElement>(null);
+  const selectedValue = matchPathOnly ? current.split(/[?#]/, 1)[0] : current;
 
-  useLayoutEffect(() => {
-    const selectedLink = linkRefs.current.get(selected);
-    if (!selectedLink) return;
-
-    const updateIndicator = () => {
-      setIndicator({
-        left: selectedLink.offsetLeft,
-        width: selectedLink.offsetWidth,
-        ready: true,
-      });
-    };
-
-    updateIndicator();
-    selectedLink.scrollIntoView({ block: "nearest", inline: "center", behavior: "auto" });
-    const observer = new ResizeObserver(updateIndicator);
-    observer.observe(selectedLink);
-    if (selectedLink.parentElement) observer.observe(selectedLink.parentElement);
-    return () => observer.disconnect();
-  }, [selected]);
+  useEffect(() => {
+    selectedLink.current?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [current]);
 
   return (
     <nav aria-label={ariaLabel} className="scroll-cue overflow-x-auto">
-      <div className="relative flex min-w-max gap-1">
-        <span
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 left-0 rounded-xl bg-mecg-navy shadow-[0_7px_18px_rgba(7,13,31,0.18)] transition-[transform,width,opacity] duration-[--t-detent] ease-[--ease-detent] ${indicator.ready ? "opacity-100" : "opacity-0"}`}
-          style={{ transform: `translateX(${indicator.left}px)`, width: `${indicator.width}px` }}
-        />
+      <div className="flex min-w-max gap-1">
         {links.map(([href, label]) => {
-          const isSelected = selected === href;
+          const linkValue = matchPathOnly ? href.split(/[?#]/, 1)[0] : href;
+          const isSelected = selectedValue === linkValue;
           return (
             <Link
               key={href}
-              ref={(node) => {
-                if (node) linkRefs.current.set(href, node);
-                else linkRefs.current.delete(href);
-              }}
+              ref={isSelected ? selectedLink : undefined}
               href={href}
-              onNavigate={() => setPending({ from: current, href })}
-              aria-current={current === href ? "page" : undefined}
-              className={`relative inline-flex min-h-11 items-center rounded-xl px-3.5 text-[13px] font-semibold transition-[color,scale,background-color] duration-[--t-detent] ease-[--ease-detent] active:scale-[0.96] ${
+              aria-current={isSelected ? "page" : undefined}
+              className={`inline-flex min-h-11 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 ${
                 isSelected
-                  ? "text-white"
+                  ? "bg-mecg-navy text-white"
                   : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"
               }`}
             >
