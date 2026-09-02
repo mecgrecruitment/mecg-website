@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(24);
+select extensions.plan(27);
 
 select extensions.has_table('rush', 'referrals', 'referrals are stored');
 select extensions.has_table('rush', 'hash_votes', 'hash votes are stored');
@@ -115,6 +115,25 @@ select extensions.ok(
   (select prosrc from pg_proc where oid = 'rush.hash_ballot(text)'::regprocedure) like '%conflict_declarations%'
     and (select prosrc from pg_proc where oid = 'rush.hash_ballot(text)'::regprocedure) like '%WITHDRAWN%',
   'hash_ballot filters conflicts and non-votable applications'
+);
+
+-- The bug this guards: a tally-derived decision has no rows in
+-- decision_approvals, and approve_decision refuses anything already LOCKED, so
+-- without the hash_derived branch in release_decision it could never be sent.
+select extensions.ok(
+  exists(select 1 from information_schema.columns
+    where table_schema = 'rush' and table_name = 'decisions' and column_name = 'hash_derived'),
+  'decisions carries the hash_derived flag'
+);
+select extensions.ok(
+  (select prosrc from pg_proc where oid = 'rush.release_decision(text)'::regprocedure) like '%hash_derived%',
+  'release_decision accepts a tally in place of two approvals'
+);
+-- The audit row must not name the voter or the applicant; the pair of those two
+-- next to a board-readable tally reconstructs the ballot.
+select extensions.ok(
+  (select prosrc from pg_proc where oid = 'rush.cast_hash_vote(text,text,text)'::regprocedure) not like '%HASH_VOTE_CAST'', ''Application''%',
+  'the vote audit row does not record the applicant'
 );
 
 select * from extensions.finish();

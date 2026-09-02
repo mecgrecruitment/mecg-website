@@ -2,7 +2,7 @@
 
 import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
@@ -30,6 +30,12 @@ async function requireClerkSuccess(operation: () => Promise<{ error: unknown | n
 
 export default function ApplicantSignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Event check-in sends walk-ups here to create an account, so return them to
+  // the scan instead of the application they cannot submit yet. Relative paths
+  // only, and never protocol-relative: this value comes from the query string.
+  const requestedReturn = searchParams.get("redirect_url");
+  const returnTo = requestedReturn?.startsWith("/") && !requestedReturn.startsWith("//") ? requestedReturn : null;
   const { signUp, fetchStatus } = useSignUp();
   const [stage, setStage] = useState<"details" | "verification">("details");
   const [name, setName] = useState("");
@@ -52,7 +58,7 @@ export default function ApplicantSignupForm() {
   async function finalizeSignUp() {
     await requireClerkSuccess(() => signUp.finalize({
       navigate: ({ session, decorateUrl }) => {
-        const destination = session.currentTask ? `/login/tasks/${session.currentTask.key}` : "/apply";
+        const destination = session.currentTask ? `/login/tasks/${session.currentTask.key}` : (returnTo ?? "/apply");
         const url = decorateUrl(destination);
         if (url.startsWith("http")) window.location.href = url;
         else router.replace(url);

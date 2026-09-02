@@ -32,7 +32,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
       {event.is_open ? (
         <>
           {user && <p className="mb-4 text-sm text-mecg-navy/65">Checking in as <span className="font-semibold text-mecg-navy">{user.email}</span>.</p>}
-          <CheckinForm token={token} />
+          <CheckinForm token={token} signedIn={Boolean(user)} />
         </>
       ) : (
         <p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">Check-in is not open for this event right now.</p>

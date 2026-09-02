@@ -754,6 +754,7 @@ export type Database = {
           created_by_id: string
           cycle_id: string
           id: string
+          hash_derived: boolean
           locked_at: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
@@ -768,6 +769,7 @@ export type Database = {
           created_by_id: string
           cycle_id: string
           id?: string
+          hash_derived?: boolean
           locked_at?: string | null
           outcome: Database["rush"]["Enums"]["decision_outcome"]
           reason: string
@@ -782,6 +784,7 @@ export type Database = {
           created_by_id?: string
           cycle_id?: string
           id?: string
+          hash_derived?: boolean
           locked_at?: string | null
           outcome?: Database["rush"]["Enums"]["decision_outcome"]
           reason?: string

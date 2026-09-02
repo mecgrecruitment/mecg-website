@@ -148,8 +148,15 @@ export default async function HashBoard() {
   }
   const tallyByApplication = new Map((tallyResult.data ?? []).map((row) => [row.application_id, row]));
   const quorum = tallyResult.data?.[0]?.quorum ?? 0;
+  // Blind review and free text do not mix. A note saying "Sarah interviewed
+  // really well" undoes the applicant code two lines above it, and the members
+  // writing these notes saw the real name, so nothing stops them. A PANEL-only
+  // viewer gets the counts and no prose; whoever can already see names reads
+  // the notes.
   const notesByApplication = new Map<string, string[]>();
-  for (const row of notesResult.data ?? []) notesByApplication.set(row.application_id, [...(notesByApplication.get(row.application_id) ?? []), row.note]);
+  if (!panelOnly) {
+    for (const row of notesResult.data ?? []) notesByApplication.set(row.application_id, [...(notesByApplication.get(row.application_id) ?? []), row.note]);
+  }
   const hashOpen = canPanel && cycle.status === "DECISION_LOCK" && rounds.length >= 2 && rounds.every((round) => ["FROZEN", "FINALIZED"].includes(round.status));
   const impressionGroups = new Map<string, { total: number; count: number; tagCounts: Map<string, number> }>();
   for (const impression of impressionsResult.data ?? []) {
