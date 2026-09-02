@@ -307,10 +307,14 @@ begin
   if existing_id is not null then return existing_id; end if;
 
   computed_outcome := case when yes_votes > no_votes then 'OFFER' else 'REJECT' end;
-  insert into rush.decisions (cycle_id, application_id, outcome, status, reason, created_by_id, locked_at)
-  values (app_row.cycle_id, app_row.id, computed_outcome, 'LOCKED',
+  -- PENDING, not LOCKED. The decision then goes through the existing two-approval
+  -- path: approve_decision only accepts PENDING or APPROVED, and release_decision
+  -- demands status LOCKED with at least two approvals. Inserting a LOCKED row with
+  -- zero approvals produces a decision that can never be approved and never released.
+  insert into rush.decisions (cycle_id, application_id, outcome, status, reason, created_by_id)
+  values (app_row.cycle_id, app_row.id, computed_outcome, 'PENDING',
           format('Member vote: %s yes, %s no, %s unsure', yes_votes, no_votes, unsure_votes),
-          actor, now())
+          actor)
   returning id into result_id;
 
   insert into rush.audit_events (actor_id, cycle_id, action, resource, resource_id, metadata)
