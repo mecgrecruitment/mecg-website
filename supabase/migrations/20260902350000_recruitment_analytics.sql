@@ -243,6 +243,7 @@ begin
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'rush'
+    and p.prokind in ('f', 'p')
     and pg_get_functiondef(p.oid) like '%auth.uid()%';
   if retained <> 0 then
     raise exception '% Rush functions still call auth.uid()', retained;

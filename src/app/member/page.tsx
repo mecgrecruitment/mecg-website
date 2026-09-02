@@ -13,7 +13,7 @@ import SectionLabel from "@/components/section-label";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
 import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { formatEasternDateTime } from "@/lib/date-time";
-import type { CalibrationState } from "./calibration/types";
+import { loadCalibrationStates } from "./calibration/load";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -38,16 +38,15 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, screeningReviewer, { data: gradingEvents }, calibrationResult, { data: buddySlots, error: buddySlotsError }, { data: profile }] = await Promise.all([
+  const [{ data: assignments, error }, screeningReviewer, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
     supabase.rpc("my_grading_events"),
-    screeningRpc<CalibrationState[]>(supabase, "my_round_calibrations", { target_cycle_id: cycleMembership.cycleId }),
+    loadCalibrationStates(supabase, cycleMembership.cycleId),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
   ]);
   if (error) throw error;
-  if (calibrationResult.error) throw new Error(calibrationResult.error.message);
   if (buddySlotsError) throw buddySlotsError;
   const { data: applications, error: applicantsError } = screeningReviewer.data
     ? { data: [], error: null }
@@ -61,7 +60,6 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
   const assignmentRows = assignments ?? [];
   const openAssignments = assignmentRows.filter(isReady);
-  const calibrationStates = calibrationResult.data ?? [];
   const acknowledgedRubrics = new Set(calibrationStates.filter((state) => state.acknowledgedAt).map((state) => state.rubricId));
   const visible = assignmentRows
     .filter((assignment) => !activeRoundFilter || assignment.rounds.kind === activeRoundFilter)

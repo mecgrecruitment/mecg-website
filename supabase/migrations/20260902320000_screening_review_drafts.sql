@@ -218,20 +218,20 @@ set search_path = ''
 as $$
 declare
   actor uuid := rush.actor_id();
-  batch_id text;
+  target_batch_id text;
   next_id text;
 begin
   if actor is null then raise exception 'unauthorized' using errcode = '42501'; end if;
-  select p.batch_id into batch_id
+  select p.batch_id into target_batch_id
   from rush.screening_assignments a
   join rush.screening_packets p on p.id = a.packet_id
   where a.id = target_assignment_id and a.reviewer_id = actor;
-  if batch_id is null then raise exception 'assignment not found' using errcode = 'P0002'; end if;
+  if target_batch_id is null then raise exception 'assignment not found' using errcode = 'P0002'; end if;
   select a.id into next_id
   from rush.screening_assignments a
   join rush.screening_packets p on p.id = a.packet_id
   join rush.screening_batches b on b.id = p.batch_id
-  where p.batch_id = batch_id
+  where p.batch_id = target_batch_id
     and a.reviewer_id = actor
     and a.status = 'ASSIGNED'
     and b.status = 'PUBLISHED'
