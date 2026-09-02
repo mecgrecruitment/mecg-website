@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
+import { hasClerkConfiguration } from "./lib/env.ts";
 
 function request(pathname: string) {
   return new NextRequest("http://localhost" + pathname);
@@ -10,16 +11,23 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   t.mock.module("@clerk/nextjs/server", {
     namedExports: {
       clerkMiddleware: (handler: unknown) => handler,
-      createRouteMatcher: () => (req: NextRequest) =>
-        ["/login", "/apply", "/api/auth/login", "/api/webhooks/clerk"].includes(req.nextUrl.pathname),
+      createRouteMatcher: (patterns: string[]) => (req: NextRequest) => patterns.some((pattern) => {
+        const wildcard = pattern.endsWith("(.*)");
+        const prefix = wildcard ? pattern.slice(0, -4) : pattern;
+        return wildcard ? req.nextUrl.pathname.startsWith(prefix) : req.nextUrl.pathname === prefix;
+      }),
     },
   });
   const proxyModule = "./proxy.ts?case=clerk";
-  const { handleProxy } = await import(proxyModule) as typeof import("./proxy.ts");
+  const {
+    handleProxy,
+    handleUnconfiguredProxy,
+    shouldBypassClerk,
+  } = await import(proxyModule) as typeof import("./proxy.ts");
   const signedOut = async () => ({ userId: null });
   const signedIn = async () => ({ userId: "user_clerk" });
 
-  for (const pathname of ["/login", "/apply", "/api/auth/login", "/api/webhooks/clerk"]) {
+  for (const pathname of ["/design-preview", "/login", "/apply", "/api/auth/login", "/api/webhooks/clerk"]) {
     const response = await handleProxy(signedOut, request(pathname));
     assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
   }
@@ -36,4 +44,27 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
 
   const signedInResponse = await handleProxy(signedIn, request("/member"));
   assert.equal(signedInResponse.headers.get("x-middleware-next"), "1");
+
+  const unknownResponse = await handleProxy(signedOut, request("/this-route-does-not-exist"));
+  assert.equal(unknownResponse.headers.get("x-middleware-next"), "1");
+
+  for (const pathname of ["/design-preview", "/home", "/work/sample", "/this-route-does-not-exist", "/api/contact"]) {
+    assert.equal(shouldBypassClerk(request(pathname)), true, pathname);
+  }
+  for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
+    assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
+  }
+
+  assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: "sk_test" }), true);
+  assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: undefined }), false);
+
+  const unconfiguredPublicResponse = await handleUnconfiguredProxy(request("/design-preview"));
+  assert.equal(unconfiguredPublicResponse.headers.get("x-middleware-next"), "1");
+
+  const unconfiguredProtectedResponse = await handleUnconfiguredProxy(request("/member"));
+  assert.equal(unconfiguredProtectedResponse.status, 307);
+  assert.equal(unconfiguredProtectedResponse.headers.get("location"), "http://localhost/login");
+
+  const unconfiguredApiResponse = await handleUnconfiguredProxy(request("/api/member/profile"));
+  assert.equal(unconfiguredApiResponse.status, 401);
 });

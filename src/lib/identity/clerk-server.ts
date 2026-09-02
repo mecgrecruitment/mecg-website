@@ -1,7 +1,7 @@
 import "server-only";
 
 import { auth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
-import { requireClerkIssuer } from "@/lib/env";
+import { hasClerkConfiguration, requireClerkIssuer } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,6 +17,7 @@ function displayName(user: NonNullable<Awaited<ReturnType<typeof clerkCurrentUse
 }
 
 export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null> {
+  if (!hasClerkConfiguration()) return null;
   const session = await auth();
   if (!session.userId) return null;
 

@@ -4,9 +4,9 @@ import type { NextConfig } from "next";
 // <script> tags, and nonces would force every page to render dynamically
 // (see node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md).
 // This is the documented no-nonce policy: 'unsafe-inline' for scripts and
-// styles, everything else locked to same-origin. It still blocks the thing
-// that matters here, an injected <script src> pulling code from an attacker's
-// host into /admin, where applicant free text is rendered back.
+// styles. External sources remain limited to the exact services the browser
+// uses, so an injected script cannot load code from an arbitrary host into
+// /admin, where applicant free text is rendered back.
 const supabaseOrigin = (() => {
   const url = process.env.NEXT_PUBLIC_MECG_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   try {
@@ -16,16 +16,37 @@ const supabaseOrigin = (() => {
   }
 })();
 
+const clerkOrigin = (() => {
+  const issuer = process.env.CLERK_ISSUER;
+  try {
+    return issuer ? new URL(issuer).origin : null;
+  } catch {
+    return null;
+  }
+})();
+
+const clerkScriptSources = clerkOrigin
+  ? ` ${clerkOrigin} https://challenges.cloudflare.com https://*.protect.clerk.com`
+  : "";
+const clerkConnectSources = clerkOrigin
+  ? ` ${clerkOrigin} https://*.protect.clerk.com:*`
+  : "";
+const clerkFrameSources = clerkOrigin
+  ? " https://challenges.cloudflare.com https://*.protect.clerk.com"
+  : "";
+const clerkImageSources = clerkOrigin ? " https://img.clerk.com" : "";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}${clerkScriptSources}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  `img-src 'self' blob: data:${clerkImageSources}`,
   "font-src 'self'",
   // The apply form uploads resumes straight to Supabase Storage from the browser.
-  `connect-src 'self' ${supabaseOrigin}`,
+  `connect-src 'self' ${supabaseOrigin}${clerkConnectSources}`,
+  `worker-src 'self' blob:`,
   // The admin dossier renders resumes in a same-origin iframe.
-  "frame-src 'self'",
+  `frame-src 'self'${clerkFrameSources}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

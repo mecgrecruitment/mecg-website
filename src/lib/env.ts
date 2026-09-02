@@ -53,6 +53,15 @@ export function requireClerkIssuer() {
   return requireEnv("CLERK_ISSUER").replace(/\/+$/, "");
 }
 
+export function hasClerkConfiguration(
+  environment: Record<string, string | undefined> = process.env,
+) {
+  return Boolean(
+    environment.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim()
+    && environment.CLERK_SECRET_KEY?.trim(),
+  );
+}
+
 export function requireClerkWebhookSigningSecret() {
   return requireEnv("CLERK_WEBHOOK_SIGNING_SECRET");
 }

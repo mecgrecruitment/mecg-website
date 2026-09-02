@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
+import { hasClerkConfiguration } from "@/lib/env";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,18 +41,21 @@ const ORGANIZATION_JSON_LD = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const clerkConfigured = hasClerkConfiguration();
+  const body = (
+    <body className="min-h-full flex flex-col">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
+      {children}
+    </body>
+  );
+
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       className="h-full scroll-smooth antialiased"
     >
-      <ClerkProvider>
-        <body className="min-h-full flex flex-col">
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
-          {children}
-        </body>
-      </ClerkProvider>
+      {clerkConfigured ? <ClerkProvider>{body}</ClerkProvider> : body}
     </html>
   );
 }

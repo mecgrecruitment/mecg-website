@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
+import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
 import { retryClerkRateLimit } from "@/lib/clerk-retry";
 
 function readableError(error: unknown) {
@@ -83,6 +84,25 @@ export default function ApplicantSignupForm() {
     }
   }
 
+  async function resendCode() {
+    if (!isLoaded || pending) return;
+    setPending(true);
+    setError("");
+    setMessage("");
+    try {
+      await retryClerkRateLimit(
+        () => signUp.prepareEmailAddressVerification({ strategy: "email_code" }),
+        { onWait: retryNotice },
+      );
+      setMessage("We sent a new verification code. Check spam or promotions if it is missing.");
+    } catch (caught) {
+      setError(readableError(caught));
+      setMessage("");
+    } finally {
+      setPending(false);
+    }
+  }
+
   if (stage === "verification") {
     return (
       <form onSubmit={verify} className="mt-7 space-y-5">
@@ -91,6 +111,9 @@ export default function ApplicantSignupForm() {
         <OperationNotice kind="error">{error}</OperationNotice>
         <button type="submit" disabled={!isLoaded || pending} className="button-primary w-full disabled:opacity-50">
           {pending ? "Verifying…" : "Verify email"}
+        </button>
+        <button type="button" onClick={() => void resendCode()} disabled={!isLoaded || pending} className="flex min-h-11 w-full items-center justify-center font-semibold underline disabled:opacity-50">
+          Send a new code
         </button>
         <button type="button" onClick={() => { setStage("details"); setCode(""); setError(""); setMessage(""); }} className="flex min-h-11 w-full items-center justify-center font-semibold underline">
           Change account details
@@ -103,12 +126,13 @@ export default function ApplicantSignupForm() {
     <form onSubmit={createAccount} className="mt-7 space-y-5">
       <FormField label="Full name" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" />
       <FormField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
-      <FormField label="Create a password" type="password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" hint="Use at least 8 characters. You will verify your email before submitting." />
+      <FormField label="Create a password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" hint={`Use at least ${CLERK_PASSWORD_MIN_LENGTH} characters. You will verify your email before submitting.`} />
       <OperationNotice kind="info">{message}</OperationNotice>
       <OperationNotice kind="error">{error}</OperationNotice>
       <button type="submit" disabled={!isLoaded || pending} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
         {pending ? "Creating account…" : "Create applicant account"}
       </button>
+      <div id="clerk-captcha" />
       <p className="flex min-h-11 items-center justify-center text-center text-sm text-mecg-navy/55">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
     </form>
   );

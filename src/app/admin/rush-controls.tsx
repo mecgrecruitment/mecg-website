@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
+import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
 import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
 
 type Option = { id: string; label: string };
@@ -147,7 +148,7 @@ export function PeopleControls({
           <div className="mt-3 flex flex-col gap-2.5">
             <FormField label="Full name" name="name" required placeholder="Full name" />
             <FormField label="Email" name="email" type="email" required placeholder="Email" />
-            <FormField label="Temporary password" name="password" type="password" minLength={8} required placeholder="At least 8 characters" />
+            <FormField label="Temporary password" name="password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} required placeholder={`At least ${CLERK_PASSWORD_MIN_LENGTH} characters`} />
             <Select label="Role" name="role" defaultValue="MEMBER">
               {MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}
             </Select>
