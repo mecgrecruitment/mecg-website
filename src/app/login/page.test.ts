@@ -32,13 +32,15 @@ test("configured login renders the Clerk flow with visible provider identity", a
   });
   t.mock.module("@clerk/nextjs", {
     namedExports: {
-      SignIn: ({ fallback, routing, signUpUrl, fallbackRedirectUrl }: {
+      SignIn: ({ fallback, path, routing, signUpUrl, fallbackRedirectUrl }: {
         fallback: ReactElement;
+        path: string;
         routing: string;
         signUpUrl: string;
         fallbackRedirectUrl: string;
       }) => createElement("div", {
         "data-clerk-sign-in": true,
+        "data-path": path,
         "data-routing": routing,
         "data-sign-up-url": signUpUrl,
         "data-fallback-redirect-url": fallbackRedirectUrl,
@@ -48,12 +50,13 @@ test("configured login renders the Clerk flow with visible provider identity", a
   t.mock.module("@/lib/auth", { namedExports: { currentDestination: async () => null } });
   t.mock.module("@/lib/env", { namedExports: { hasClerkRuntimeConfiguration: () => true } });
 
-  const specifier = "./page.tsx?case=configured-clerk";
+  const specifier = "./[[...login]]/page.tsx?case=configured-clerk";
   const { default: LoginPage } = await import(specifier) as { default: () => Promise<ReactElement> };
   const markup = renderToStaticMarkup(await LoginPage());
 
   assert.match(markup, /data-clerk-sign-in="true"/);
-  assert.match(markup, /data-routing="hash"/);
+  assert.match(markup, /data-path="\/login"/);
+  assert.match(markup, /data-routing="path"/);
   assert.match(markup, /data-sign-up-url="\/apply"/);
   assert.match(markup, /Loading secure sign-in/);
   assert.match(markup, /Secure authentication powered by Clerk/);

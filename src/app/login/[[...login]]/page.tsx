@@ -36,9 +36,23 @@ export default async function LoginPage() {
       centered
     >
       <SignIn
-        routing="hash"
+        path="/login"
+        routing="path"
         signUpUrl="/apply"
         fallbackRedirectUrl="/apply"
+        appearance={{
+          options: { logoPlacement: "none" },
+          elements: {
+            rootBox: "w-full",
+            cardBox: "w-full max-w-none rounded-none border-none bg-transparent shadow-none",
+            card: "w-full gap-6 rounded-none border-none bg-transparent p-0 shadow-none",
+            header: "hidden",
+            footer: "rounded-none bg-transparent bg-none p-0 shadow-none [&>*:not(.cl-footerAction)]:hidden",
+            footerAction: "justify-center",
+            formButtonPrimary:
+              "button-primary rounded-[2px] bg-mecg-orange text-mecg-navy shadow-none hover:bg-mecg-orange",
+          },
+        }}
         fallback={<p role="status" className="py-8 text-center text-sm text-mecg-navy/60">Loading secure sign-in…</p>}
       />
       <p className="mt-5 text-center text-xs text-mecg-navy/60">Secure authentication powered by Clerk.</p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import LogoutButton from "@/components/logout-button";
 
 export default function ApplyError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -12,7 +13,10 @@ export default function ApplyError({ error, reset }: { error: Error & { digest?:
       <section className="surface-card mx-auto max-w-2xl bg-white p-8" role="alert">
         <h1 className="text-2xl font-semibold">We could not load the application.</h1>
         <p className="mt-3 leading-6 text-mecg-navy/65">Try again in a moment. If this keeps happening, email mecg-board@umich.edu.</p>
-        <button type="button" onClick={reset} className="button-primary mt-6">Try again</button>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={reset} className="button-primary">Try again</button>
+          <LogoutButton className="button-secondary" />
+        </div>
       </section>
     </main>
   );

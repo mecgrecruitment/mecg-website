@@ -311,10 +311,14 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }
 
   // Before opens_at the cycle is open, it just has not started, and intake_schema still reports
-  // open:false. Saying "closed" there would contradict the amber badge and the countdown a few
-  // lines above it on the same screen; the red wording is for a cycle that is genuinely over.
+  // open:false. Saying "closed" there would contradict the countdown a few lines above it on the
+  // same screen; the red wording is for a cycle that is genuinely over.
+  //
+  // The copy no longer tells anyone to reload: ApplicationCountdown calls router.refresh() the
+  // moment it hits zero, so the form arrives on its own. Telling a hall full of students to
+  // refresh at 20:00:00 is also how you turn an opening into a thundering herd.
   if (!cycleOpen) return preOpenLabel
-    ? <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-amber-900"><p className="font-semibold">{preOpenLabel}.</p><p className="mt-2 text-sm leading-6 text-amber-900/80">Keep this page open. Reload once the countdown reaches zero and the application appears here.</p></div>
+    ? <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-amber-900"><p className="font-semibold">{preOpenLabel}.</p><p className="mt-2 text-sm leading-6 text-amber-900/80">Keep this page open. The application appears here on its own when the countdown reaches zero.</p></div>
     : <div className="mt-8 rounded-2xl bg-red-50 p-6 text-red-900"><p className="font-semibold">Applications are currently closed.</p><p className="mt-2 text-sm leading-6 text-red-800/80">Check the recruitment page for the next opening date, or email the MECG board if you expected to apply today.</p></div>;
 
   const currentIndex = STEPS.findIndex((item) => item.id === step);
