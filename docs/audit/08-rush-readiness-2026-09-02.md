@@ -4,9 +4,9 @@ Base commit inspected: `ff4f036793d48e1a39bdd877819e75573454a743`
 
 ## Verdict
 
-**Code readiness: PASS. Production release: NO-GO until the protected environment gates, policy approvals, and human release checks below are completed.**
+**Technical production readiness: PASS. Formal release sign-off: NO-GO until the remaining policy approvals and human release checks below are completed.**
 
-The repository builds, its deterministic suites pass, the complete local database migration chain is valid, and the public browser smoke matrix passes on desktop and mobile. After the audit, the release owner authorized the production configuration changes and merge recorded below. Commit `f8b9bf5` is deployed to Vercel Production; no production message or linked-production database mutation has been performed.
+The repository builds, its deterministic suites pass, the complete local and linked-production database migration chains are valid, and the public browser smoke matrix passes on desktop and mobile. After the audit, the release owner authorized the production configuration changes, merge, and linked-production migrations recorded below. Commit `ca2dd53` is deployed to Vercel Production; no production message has been sent.
 
 ## Rush application requirements
 
@@ -34,7 +34,7 @@ The limits are stored with the question definitions, returned by the intake and 
 - Added generated `CRON_SECRET` and the approved `CONTACT_TO_EMAIL` to both Vercel Preview and Production without recording their values.
 - Added `RESEND_FROM_EMAIL` as `MECG Recruitment <noreply@mecgmichigan.com>` to both Vercel Preview and Production.
 - Added the release-owner-supplied sending-only `RESEND_API_KEY` to both Vercel Preview and Production; its value is not recorded here. The release owner explicitly accepted continued use after it was pasted in the task conversation.
-- Created the `mecgmichigan.com` sending domain in Resend and published its DKIM TXT, `rsend`/`send` CNAME, and DMARC TXT records in Wix. Independent public DNS queries return all four expected values; Resend's provider-side verification remains pending.
+- Created the `mecgmichigan.com` sending domain in Resend and published its DKIM TXT, `rsend`/`send` CNAME, and DMARC TXT records in Wix. Independent public DNS queries return all four expected values, and Resend reports the domain as `verified`.
 - Added the static SQL boundary check to application CI.
 - Centralized constant-time cron bearer authentication across all scheduled routes.
 - Kept failed reminder deliveries retryable; malformed reminder payloads now fail closed; scheduled workers return degraded status when delivery, recording, or storage cleanup fails.
@@ -63,19 +63,17 @@ The limits are stored with the question definitions, returned by the intake and 
 | `CI=1 PLAYWRIGHT_PORT=3199 npm run test:e2e` | 0 | 8/8 production-mode Chromium desktop/mobile smoke tests passed in isolation from another session's stale server on port 3100. |
 | `npx react-doctor@latest --verbose --scope changed` | 0 | Scanned 52 changed React files and reported no diagnostics. |
 | `npx next build --webpack` | 0 | Next.js 16.3.1 production build compiled, type-checked, and generated all 78 pages. |
-| GitHub Actions application and isolated-database jobs at `f8b9bf5` | 0 | Application lint, 246 tests, type-check, SQL validation, production build, and 8 browser tests passed; the isolated database applied the full migration chain, passed schema lint, and passed 251 pgTAP assertions. The separate live-migration parity job correctly failed on the protected production drift below. |
-| Production smoke check at `f8b9bf5` | mixed | `/home`, `/login`, and `/__clerk/v1/environment` return HTTP 200. `/api/health` returns HTTP 503 while the linked production database is missing the eleven migrations listed below. |
+| GitHub Actions at `ca2dd53` | 0 | Application lint, 246 tests, type-check, SQL validation, production build, and 8 browser tests passed; the isolated database applied the full migration chain, passed schema lint, and passed 251 pgTAP assertions; live production migration parity passed. |
+| Production smoke check at `ca2dd53` | 0 | `/api/health`, `/home`, `/login`, `/join`, and `/__clerk/v1/environment` return HTTP 200. The health database probe completed in 180 ms. |
+| Clerk production deployment status | 0 | Clerk reports DNS, proxy, mail, and OAuth deployment complete. The instance deliberately uses `https://mecgmichigan.com/__clerk`; direct custom-host SSL is not required in proxy mode. |
+| Resend domain status | 0 | The authenticated Resend dashboard reports `mecgmichigan.com` as `verified`. |
 | `git diff --check` | 0 | No whitespace errors. |
 
 The production build could not reach the linked Supabase hostname from the restricted sandbox while collecting public project data. That path failed closed and the build completed. The normal Turbopack build could not bind its sandbox worker port (`EPERM`), so the documented Next.js webpack fallback was used to validate the production compilation.
 
 ## Protected gates still required
 
-- Vercel Production successfully deployed commit `f8b9bf5` with the configured environment values. Repeat the smoke matrix after the production database migration gate is completed.
-- Resolve and re-test direct TLS access to `clerk.mecgmichigan.com`. Its five DNS records pass the infrastructure preflight and the main-site Clerk proxy renders, but direct OpenSSL, curl, and Supabase CLI validation currently receive a TLS handshake/certificate error. The isolated migration rehearsal therefore disabled only the temporary stack's external Clerk validator; hosted Clerk-token verification remains a protected gate.
-- Click **Verify DNS Records** for `mecgmichigan.com` in Resend and wait for provider status `Verified` before relying on `noreply@mecgmichigan.com` for production delivery. All four required/recommended values already resolve correctly in public DNS.
 - Provision or identify an approved staging Supabase project, then run `npm run supabase:verify-project`, `npm run supabase:lint`, `npm run test:supabase`, `npm run verify:backend`, `npm run verify:auth`, and `npm run verify:workflow` against it. The disposable local staging rehearsal passed, but it is not a substitute for the protected hosted environment.
-- Apply the unique pending migrations `20260902100000`, `20260902110000`, `20260902120000`, `20260902130000`, `20260902135000`, `20260902145000`, `20260902150000`, `20260902160000`, `20260902170000`, `20260902180000`, and `20260902190000` to an approved staging project, complete the hosted checks above, and obtain explicit production-change approval before pushing them to the linked production project. Until then, the live-migration parity job and `/api/health` correctly fail. Migration `20260902120000` is a safety hold: do not re-enable applicant-data retention until policy approval is recorded and encoded in a later migration.
 - Confirm the intended portal open/restricted state, scheduled-job history, one controlled recruitment email, and a recent resume-cleanup run.
 - Complete and approve every unresolved item in `docs/policies/recruitment-policy.md`, including quorum, correction workflows, missed-round handling, applicant feedback, and retention. The code defaults are not Board approval.
 - Decide whether Rush requires a sensitive applicant-response export. The implemented export is attendance-only. A broad applicant export is deliberately absent because the plan requires purpose limitation, audit logging, and break-glass governance that have not been approved or built.
