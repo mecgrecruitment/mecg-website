@@ -8,9 +8,13 @@ function request(pathname: string) {
 }
 
 test("Clerk proxy preserves public, protected-page, protected-API, and signed-in behavior", async (t) => {
+  let clerkMiddlewareOptions: unknown;
   t.mock.module("@clerk/nextjs/server", {
     namedExports: {
-      clerkMiddleware: (handler: unknown) => handler,
+      clerkMiddleware: (handler: unknown, options: unknown) => {
+        clerkMiddlewareOptions = options;
+        return handler;
+      },
       createRouteMatcher: (patterns: string[]) => (req: NextRequest) => patterns.some((pattern) => {
         const wildcard = pattern.endsWith("(.*)");
         const prefix = wildcard ? pattern.slice(0, -4) : pattern;
@@ -54,6 +58,10 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
     assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
   }
+  assert.equal(shouldBypassClerk(request("/__clerk/npm/@clerk/clerk-js/dist/clerk.browser.js")), false);
+  assert.deepEqual(clerkMiddlewareOptions, {
+    frontendApiProxy: { enabled: true, path: "/__clerk" },
+  });
 
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: "sk_test" }), true);
   assert.equal(hasClerkConfiguration({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test", CLERK_SECRET_KEY: undefined }), false);
