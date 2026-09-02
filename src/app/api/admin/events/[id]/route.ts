@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
+import { parseOffsetDateTime } from "@/lib/date-time";
 import { createClient } from "@/lib/supabase/server";
-
-function parseDate(value: unknown) {
-  if (typeof value !== "string" || !/(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
 
 async function context(id: string) {
   const user = await currentUser();
@@ -32,10 +27,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Invalid payload" }, { status: parsed.error === "too_large" ? 413 : 400 });
   }
   const body = parsed.data as Record<string, unknown>;
-  const startsAt = parseDate(body.startsAt);
-  const endsAt = parseDate(body.endsAt);
-  const opensAt = parseDate(body.checkinOpensAt);
-  const closesAt = parseDate(body.checkinClosesAt);
+  const startsAt = parseOffsetDateTime(body.startsAt);
+  const endsAt = parseOffsetDateTime(body.endsAt);
+  const opensAt = parseOffsetDateTime(body.checkinOpensAt);
+  const closesAt = parseOffsetDateTime(body.checkinClosesAt);
   if (!startsAt || !endsAt || !opensAt || !closesAt || endsAt <= startsAt || typeof body.name !== "string" || !body.name.trim()) {
     return NextResponse.json({ error: "Missing or invalid fields" }, { status: 400 });
   }

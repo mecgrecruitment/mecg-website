@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
+import { parseOffsetDateTime } from "@/lib/date-time";
 import { deliverNotification } from "@/lib/notifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +11,9 @@ import type { Database } from "@/lib/supabase/database.types";
 type DecisionOutcome = Database["rush"]["Enums"]["decision_outcome"];
 
 const DECISION_OUTCOMES = new Set<DecisionOutcome>(["OFFER", "WAITLIST", "REJECT", "PROCEDURAL_REVIEW"]);
+const DECISION_ACTIONS = new Set(["CREATE", "APPROVE", "RELEASE", "RELEASE_ALL", "SET_DEADLINE", "PREVIEW"]);
+const DECISION_SCOPED_ACTIONS = new Set(["APPROVE", "RELEASE", "PREVIEW"]);
+const RELEASE_ACTIONS = new Set(["RELEASE", "RELEASE_ALL"]);
 
 export async function POST(req: NextRequest) {
   const user = await currentUser();
@@ -21,14 +25,15 @@ export async function POST(req: NextRequest) {
   }
   const body = parsedBody.data as Record<string, unknown>;
   const action = typeof body.action === "string" ? body.action : "";
-  if (!["CREATE", "APPROVE", "RELEASE", "PREVIEW"].includes(action)) return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+  if (!DECISION_ACTIONS.has(action)) return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   const supabase = await createClient();
   let cycleId = typeof body.cycleId === "string" ? body.cycleId : "";
-  // PREVIEW must re-derive the decision's real cycle from the DB, same as APPROVE/RELEASE:
+  // Decision-scoped actions must re-derive the decision's real cycle from the DB:
   // trusting a client-supplied cycleId here would let a caller satisfy this app-layer check
   // against any cycle they hold DECIDE in, regardless of which cycle the target decision
-  // actually belongs to. Only CREATE has no existing decisionId to look the cycle up from.
-  if (action !== "CREATE") {
+  // actually belongs to. RELEASE_ALL and CREATE are cycle-scoped; SET_DEADLINE is scoped
+  // directly to an application and therefore resolves that application's cycle instead.
+  if (DECISION_SCOPED_ACTIONS.has(action)) {
     const { data: decision, error: decisionError } = await supabase.from("decisions").select("application_id").eq("id", String(body.decisionId ?? "")).maybeSingle();
     const { data: application, error: applicationError } = decision?.application_id
       ? await supabase.from("applications").select("cycle_id").eq("id", decision.application_id).maybeSingle()
@@ -38,8 +43,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Decision lookup is unavailable, try again" }, { status: 503 });
     }
     cycleId = application?.cycle_id ?? "";
+  } else if (action === "SET_DEADLINE") {
+    const applicationId = typeof body.applicationId === "string" ? body.applicationId : "";
+    if (!applicationId) return NextResponse.json({ error: "Application is required" }, { status: 400 });
+    const { data: application, error: applicationError } = await supabase
+      .from("applications")
+      .select("cycle_id")
+      .eq("id", applicationId)
+      .maybeSingle();
+    if (applicationError) {
+      console.error("application cycle lookup failed", applicationError);
+      return NextResponse.json({ error: "Application lookup is unavailable, try again" }, { status: 503 });
+    }
+    cycleId = application?.cycle_id ?? "";
   }
-  const allowed = hasPermission(user.memberships, cycleId, action === "RELEASE" ? "RELEASE" : "DECIDE");
+  const allowed = hasPermission(user.memberships, cycleId, RELEASE_ACTIONS.has(action) ? "RELEASE" : "DECIDE");
   if (!cycleId || !allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   let data: unknown;
   let error: { code?: string; message: string } | null = null;
@@ -52,8 +70,8 @@ export async function POST(req: NextRequest) {
   else if (body?.action === "RELEASE") ({ data, error } = await supabase.rpc("release_decision", { target_decision_id: String(body.decisionId ?? "") }));
   else if (body?.action === "RELEASE_ALL") ({ data, error } = await supabase.rpc("release_ready_decisions", { target_cycle_id: String(body.cycleId ?? "") }));
   else if (body?.action === "SET_DEADLINE") {
-    const expiresAt = typeof body.expiresAt === "string" && body.expiresAt ? new Date(body.expiresAt) : null;
-    if (expiresAt && Number.isNaN(expiresAt.getTime())) return NextResponse.json({ error: "Invalid deadline" }, { status: 400 });
+    const expiresAt = body.expiresAt === "" ? null : parseOffsetDateTime(body.expiresAt);
+    if (body.expiresAt !== "" && !expiresAt) return NextResponse.json({ error: "Invalid deadline" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_offer_deadline", {
       target_application_id: String(body.applicationId ?? ""),
       expires_at: expiresAt ? expiresAt.toISOString() : null as unknown as string,
@@ -65,6 +83,10 @@ export async function POST(req: NextRequest) {
     console.error("decision action failed", error);
     const { body, status } = mapRpcError(error);
     return NextResponse.json(body, { status });
+  }
+  if (body.action === "RELEASE_ALL") {
+    const result = data && typeof data === "object" && !Array.isArray(data) ? data as Record<string, unknown> : {};
+    return NextResponse.json({ ...result, delivery: "QUEUED" }, { status: 202 });
   }
   if (body.action === "RELEASE") {
     // release_decision committed the durable outbox row in the same transaction.

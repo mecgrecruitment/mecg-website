@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAction } from "@/lib/use-action";
+import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 import OperationNotice from "@/components/operation-notice";
 
 export default function DecisionForm({ cycleId, applicationId }: { cycleId: string; applicationId: string }) {
@@ -116,16 +117,17 @@ export function ReleaseAllButton({ cycleId, readyCount }: { cycleId: string; rea
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "RELEASE_ALL", cycleId }),
       });
-      const body = await response.json().catch(() => null);
       if (!response.ok) {
+        const body = await response.json().catch(() => null);
         setError(body?.error ?? "Could not release the outcomes");
         return;
       }
+      const body = await response.json().catch(() => null);
       const released = Number(body?.released ?? 0);
       const skipped = Number(body?.skipped ?? 0);
       setSuccess(skipped
-        ? `Released ${released}. Skipped ${skipped} that were not ready or that you are conflicted on.`
-        : `Released ${released} outcome${released === 1 ? "" : "s"}.`);
+        ? `Released ${released} and queued their emails. Skipped ${skipped} that were not ready or that you are conflicted on.`
+        : `Released ${released} outcome${released === 1 ? "" : "s"}; applicant emails are queued for delivery.`);
       router.refresh();
     } catch {
       setError("Could not release the outcomes. Check your connection and try again.");
@@ -160,20 +162,21 @@ export function OfferDeadlineForm({ applicationId, current }: { applicationId: s
     setError("");
     setSuccess("");
     try {
+      const expiresAt = value ? detroitDateTimeToIso(value, current ?? undefined) : "";
       const response = await fetch("/api/admin/decisions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt: value }),
+        body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt }),
       });
-      const body = await response.json().catch(() => null);
       if (!response.ok) {
+        const body = await response.json().catch(() => null);
         setError(body?.error ?? "Could not set the deadline");
         return;
       }
       setSuccess(value ? "Deadline saved." : "Deadline cleared.");
       router.refresh();
-    } catch {
-      setError("Could not set the deadline");
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Could not set the deadline");
     } finally {
       setPending(false);
     }
@@ -188,11 +191,11 @@ export function OfferDeadlineForm({ applicationId, current }: { applicationId: s
       }}
     >
       <label className="text-xs font-semibold text-mecg-navy/60">
-        Offer deadline
+        Offer deadline (Detroit time)
         <input
           type="datetime-local"
           name="expiresAt"
-          defaultValue={current ? current.slice(0, 16) : ""}
+          defaultValue={current ? formatDetroitDateTime(current) : ""}
           className="mt-1.5 block min-h-10 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
         />
       </label>

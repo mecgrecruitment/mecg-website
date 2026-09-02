@@ -479,7 +479,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                       {!["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
                       {decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
                       {canDecide && <PreviewForm decisionId={decision.id} cycleId={cycleId} current={decision.communication_preview} />}
-                      {canDecide && decision.outcome === "OFFER" && !application.offer_response && (
+                      {canDecide && decision.outcome === "OFFER" && ["LOCKED", "RELEASED"].includes(decision.status) && !application.offer_response && (
                         <OfferDeadlineForm applicationId={application.id} current={application.offer_expires_at} />
                       )}
                     </div>

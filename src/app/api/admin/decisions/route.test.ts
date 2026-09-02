@@ -83,6 +83,103 @@ test("PREVIEW succeeds based on the decision's real cycle even when the client o
   assert.equal(rpcCalls[0]!.name, "set_decision_preview");
 });
 
+test("RELEASE_ALL is accepted as a cycle-scoped release action", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({
+    rpcHandlers: {
+      release_ready_decisions: (args) => ({ data: { released: 3, skipped: 1, args }, error: null }),
+    },
+  });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("release-all");
+  const res = await POST(postRequest({ action: "RELEASE_ALL", cycleId: "real-cycle" }));
+  assert.equal(res.status, 202);
+  assert.deepEqual(await res.json(), { released: 3, skipped: 1, args: { target_cycle_id: "real-cycle" }, delivery: "QUEUED" });
+  assert.deepEqual(rpcCalls, [{ name: "release_ready_decisions", args: { target_cycle_id: "real-cycle" } }]);
+});
+
+test("SET_DEADLINE rejects an impossible calendar date at the API boundary", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({ realCycleId: "real-cycle" });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("deadline-impossible-date");
+  const res = await POST(postRequest({
+    action: "SET_DEADLINE",
+    applicationId: "application-1",
+    expiresAt: "2030-02-30T20:00:00.000Z",
+  }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(rpcCalls, []);
+});
+
+test("SET_DEADLINE is forbidden when the caller only belongs to a client-claimed cycle", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({ realCycleId: "real-cycle" });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("attacker-claimed-cycle") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("deadline-forbidden");
+  const res = await POST(postRequest({
+    action: "SET_DEADLINE",
+    applicationId: "application-1",
+    cycleId: "attacker-claimed-cycle",
+    expiresAt: "2030-09-10T20:00:00.000Z",
+  }));
+  assert.equal(res.status, 403);
+  assert.deepEqual(rpcCalls, []);
+});
+
+test("SET_DEADLINE resolves the application's real cycle and reaches the audited RPC", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({
+    realCycleId: "real-cycle",
+    rpcHandlers: { set_offer_deadline: () => ({ data: true, error: null }) },
+  });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("deadline-allowed");
+  const res = await POST(postRequest({
+    action: "SET_DEADLINE",
+    applicationId: "application-1",
+    cycleId: "bogus-cycle",
+    expiresAt: "2030-09-10T20:00:00.000Z",
+  }));
+  assert.equal(res.status, 200);
+  assert.deepEqual(rpcCalls, [{
+    name: "set_offer_deadline",
+    args: { target_application_id: "application-1", expires_at: "2030-09-10T20:00:00.000Z" },
+  }]);
+});
+
+test("SET_DEADLINE rejects a missing application before querying the database", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: { createClient: async () => ({ from: () => { throw new Error("database should not be queried"); } }) },
+  });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("deadline-missing-application");
+  const res = await POST(postRequest({ action: "SET_DEADLINE", expiresAt: "2030-09-10T20:00:00.000Z" }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(await res.json(), { error: "Application is required" });
+});
+
+test("SET_DEADLINE rejects an offset-less wall time at the API boundary", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({ realCycleId: "real-cycle" });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  const { POST } = await importRoute("deadline-offset-required");
+  const res = await POST(postRequest({
+    action: "SET_DEADLINE",
+    applicationId: "application-1",
+    expiresAt: "2030-09-10T20:00",
+  }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(await res.json(), { error: "Invalid deadline" });
+  assert.deepEqual(rpcCalls, []);
+});
+
 test("POST /api/admin/decisions rejects payloads over the 16 KiB cap before parsing", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });

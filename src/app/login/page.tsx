@@ -35,7 +35,13 @@ export default async function LoginPage() {
       description="Applicants, members, Board operators, and Hash panelists use one account. MECG sends you to the workspace assigned to that account."
       centered
     >
-      <SignIn routing="hash" signUpUrl="/apply" fallbackRedirectUrl="/apply" />
+      <SignIn
+        routing="hash"
+        signUpUrl="/apply"
+        fallbackRedirectUrl="/apply"
+        fallback={<p role="status" className="py-8 text-center text-sm text-mecg-navy/60">Loading secure sign-in…</p>}
+      />
+      <p className="mt-5 text-center text-xs text-mecg-navy/60">Secure authentication powered by Clerk.</p>
     </PortalShell>
   );
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission, type Permission } from "@/lib/authorization";
+import { parseOffsetDateTime } from "@/lib/date-time";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database, Json } from "@/lib/supabase/database.types";
@@ -162,9 +163,9 @@ export async function POST(req: NextRequest) {
   } else if (action === "SET_CYCLE_STATUS") {
     ({ data, error } = await supabase.rpc("set_cycle_status", { target_cycle_id: cycleId, next_status: status as CycleStatus }));
   } else if (action === "SET_CYCLE_WINDOW") {
-    const opensAt = typeof body.opensAt === "string" ? new Date(body.opensAt) : null;
-    const closesAt = typeof body.closesAt === "string" ? new Date(body.closesAt) : null;
-    if (!opensAt || !closesAt || Number.isNaN(opensAt.getTime()) || Number.isNaN(closesAt.getTime()) || closesAt <= opensAt) {
+    const opensAt = parseOffsetDateTime(body.opensAt);
+    const closesAt = parseOffsetDateTime(body.closesAt);
+    if (!opensAt || !closesAt || closesAt <= opensAt) {
       return NextResponse.json({ error: "Applications must have a valid opening and later closing time" }, { status: 400 });
     }
     ({ data, error } = await supabase.rpc("set_cycle_application_window", {
@@ -191,7 +192,18 @@ export async function POST(req: NextRequest) {
   } else if (action === "SET_APPLICATION_STATUS") {
     ({ data, error } = await supabase.rpc("set_application_status", { target_application_id: String(body.applicationId ?? ""), next_status: status as ApplicationStatus }));
   } else if (action === "CREATE_SLOT") {
-    ({ data, error } = await supabase.rpc("create_event_slot", { target_event_id: String(body.eventId ?? ""), slot_starts_at: String(body.startsAt ?? ""), slot_ends_at: String(body.endsAt ?? ""), slot_capacity: Number(body.capacity ?? 8) }));
+    const startsAt = parseOffsetDateTime(body.startsAt);
+    const endsAt = parseOffsetDateTime(body.endsAt);
+    const capacity = Number(body.capacity ?? 8);
+    if (!startsAt || !endsAt || endsAt <= startsAt || !Number.isInteger(capacity) || capacity < 1 || capacity > 80) {
+      return NextResponse.json({ error: "Slot times or capacity are invalid" }, { status: 400 });
+    }
+    ({ data, error } = await supabase.rpc("create_event_slot", {
+      target_event_id: String(body.eventId ?? ""),
+      slot_starts_at: startsAt.toISOString(),
+      slot_ends_at: endsAt.toISOString(),
+      slot_capacity: capacity,
+    }));
   } else if (action === "SET_EVENT_GRADING") {
     ({ data, error } = await supabase.rpc("set_event_grading", { target_event_id: String(body.eventId ?? ""), enabled: Boolean(body.enabled) }));
   } else if (action === "CREATE_GROUP") {

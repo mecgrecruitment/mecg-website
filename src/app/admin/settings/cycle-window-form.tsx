@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
-import { eventDateTimeToIso, formatEventDateTime } from "../events/[id]/event-datetime";
+import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 
 export default function CycleWindowForm({
   cycleId,
@@ -28,8 +28,8 @@ export default function CycleWindowForm({
     setNotice("");
     try {
       const data = new FormData(form);
-      const opens = eventDateTimeToIso(String(data.get("opensAt") ?? ""), opensAt ?? undefined);
-      const closes = eventDateTimeToIso(String(data.get("closesAt") ?? ""), closesAt ?? undefined);
+      const opens = detroitDateTimeToIso(String(data.get("opensAt") ?? ""), opensAt ?? undefined);
+      const closes = detroitDateTimeToIso(String(data.get("closesAt") ?? ""), closesAt ?? undefined);
       if (new Date(closes).getTime() <= new Date(opens).getTime()) {
         throw new Error("Applications must close after they open.");
       }
@@ -38,8 +38,10 @@ export default function CycleWindowForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "SET_CYCLE_WINDOW", cycleId, opensAt: opens, closesAt: closes }),
       });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(body?.error ?? "Could not save the application window.");
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Could not save the application window.");
+      }
       setNotice("Application window saved in Detroit time.");
       router.refresh();
     } catch (submitError) {
@@ -72,7 +74,7 @@ export default function CycleWindowForm({
             name="opensAt"
             type="datetime-local"
             required
-            defaultValue={opensAt ? formatEventDateTime(opensAt) : ""}
+            defaultValue={opensAt ? formatDetroitDateTime(opensAt) : ""}
             disabled={pending}
           />
           <FormField
@@ -80,7 +82,7 @@ export default function CycleWindowForm({
             name="closesAt"
             type="datetime-local"
             required
-            defaultValue={closesAt ? formatEventDateTime(closesAt) : ""}
+            defaultValue={closesAt ? formatDetroitDateTime(closesAt) : ""}
             disabled={pending}
           />
           <div className="sm:col-span-2">
