@@ -30,10 +30,18 @@ const isPublicRoute = createRouteMatcher([
   "/api/maintenance(.*)",
 ]);
 
+// Any route whose handler reads the Clerk session belongs here, public or not.
+// shouldBypassClerk skips clerkMiddleware for everything else, and a page that
+// then calls auth() throws "Clerk can't detect usage of clerkMiddleware()".
+// Check-in is the case that bites: it is public, so isPublicRoute lets it
+// through, but both the page and the POST route call currentUser() to decide
+// whether to show the scan or the sign-in prompt.
 const isAuthDependentRoute = createRouteMatcher([
   "/login(.*)",
   "/sign-up(.*)",
   "/apply(.*)",
+  "/checkin(.*)",
+  "/api/checkin(.*)",
   "/forgot-password",
   "/reset-password",
   "/auth/callback(.*)",

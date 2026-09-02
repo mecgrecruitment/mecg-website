@@ -58,6 +58,16 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
     assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
   }
+
+  // Check-in is public and was therefore bypassed, but both handlers call
+  // currentUser(), so every QR scan 500d on "Clerk can't detect usage of
+  // clerkMiddleware()". Public and session-reading are independent: it must not
+  // bypass Clerk, and it must still pass through without a redirect.
+  for (const pathname of ["/checkin/some-token", "/api/checkin/some-token"]) {
+    assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
+    const response = await handleProxy(signedOut, request(pathname));
+    assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
+  }
   // Clerk's production instance serves from clerk.mecgmichigan.com directly;
   // passing no options is what keeps the SDK off the retired /__clerk proxy.
   assert.equal(clerkMiddlewareOptions, undefined);
