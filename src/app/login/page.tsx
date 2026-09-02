@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import { SignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import PortalShell from "@/components/portal-shell";
 import { currentDestination } from "@/lib/auth";
-import LoginForm from "./login-form";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const [destination, { error }] = await Promise.all([currentDestination(), searchParams]);
+export default async function LoginPage() {
+  const destination = await currentDestination();
   if (destination) redirect(destination);
 
   return (
@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       description="Applicants, members, Board operators, and Hash panelists use one account. MECG sends you to the workspace assigned to that account."
       centered
     >
-      <LoginForm callbackError={error} />
+      <SignIn routing="hash" signUpUrl="/apply" fallbackRedirectUrl="/apply" />
     </PortalShell>
   );
 }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { resolveAuthDestination, type AccessRole, type AuthDestination } from "@/lib/auth-destination";
 import { hasPermission } from "@/lib/authorization";
+import { resolveCurrentIdentity } from "@/lib/identity/clerk-server";
 
 export type CurrentUser = {
   id: string;
@@ -61,34 +62,34 @@ export async function destinationForUser(
 }
 
 export async function currentDestination(): Promise<AuthDestination | null> {
+  const identity = await resolveCurrentIdentity();
+  if (!identity) return null;
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return null;
-  return destinationForUser(supabase, data.user.id);
+  return destinationForUser(supabase, identity.appUserId);
 }
 
 export async function currentUser(): Promise<CurrentUser | null> {
+  const identity = await resolveCurrentIdentity();
+  if (!identity) return null;
   const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError || !authData.user) return null;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, display_name, active")
-    .eq("id", authData.user.id)
+    .select("id, display_name, primary_email, active")
+    .eq("id", identity.appUserId)
     .maybeSingle();
   if (profileError || !profile?.active) return null;
 
   const { data: membershipRows, error: membershipError } = await supabase
     .from("memberships")
     .select("id, cycle_id, role, active, rush_cycles!inner(id, name, status, created_at)")
-    .eq("user_id", authData.user.id)
+    .eq("user_id", identity.appUserId)
     .eq("active", true);
   if (membershipError) throw membershipError;
 
   return {
-    id: authData.user.id,
-    email: authData.user.email ?? "",
+    id: identity.appUserId,
+    email: profile.primary_email ?? "",
     name: profile.display_name,
     active: profile.active,
     memberships: (membershipRows ?? []).map((membership) => ({

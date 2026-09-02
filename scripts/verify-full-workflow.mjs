@@ -1,53 +1,61 @@
 import { resolve } from "node:path";
+import { createClerkClient } from "@clerk/backend";
 import { createClient } from "@supabase/supabase-js";
-import {
-  fetchWithTimeout,
-  loadSupabaseEnv,
-  requireServiceRoleKey,
-} from "./lib/supabase-env.mjs";
+import { loadSupabaseEnv, requireServiceRoleKey } from "./lib/supabase-env.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const { url, anonKey, serviceRoleKey } = loadSupabaseEnv(root);
+const { url, serviceRoleKey } = loadSupabaseEnv(root);
 const serviceKey = requireServiceRoleKey(serviceRoleKey);
-const options = {
+const secretKey = process.env.CLERK_SECRET_KEY?.trim();
+const issuer = process.env.CLERK_ISSUER?.trim().replace(/\/+$/, "");
+if (!secretKey || !issuer) throw new Error("CLERK_SECRET_KEY and CLERK_ISSUER are required");
+const clerk = createClerkClient({ secretKey });
+const client = createClient(url, serviceKey, {
   db: { schema: "rush" },
   auth: { persistSession: false, autoRefreshToken: false },
-  global: { fetch: fetchWithTimeout },
-};
-const client = createClient(url, serviceKey, options);
+});
 const suffix = crypto.randomUUID();
-const password = `${crypto.randomUUID()}Aa1!`;
-const ids = [];
+const identities = [];
 let primaryError;
 
 try {
   for (const label of ["owner", "panel", "applicant"]) {
-    const { data, error } = await client.auth.admin.createUser({ email: `workflow-${label}-${suffix}@example.invalid`, password, email_confirm: true, user_metadata: { display_name: `Workflow ${label}` } });
-    if (error || !data.user) throw new Error(`Could not create ${label} test identity: ${error?.message}`);
-    ids.push(data.user.id);
+    const email = `workflow-${label}-${suffix}@example.invalid`;
+    const clerkUser = await clerk.users.createUser({
+      emailAddress: [email],
+      firstName: "Workflow",
+      lastName: label,
+      skipPasswordRequirement: true,
+    });
+    const { data: appUserId, error } = await client.rpc("ensure_external_identity", {
+      identity_issuer: issuer,
+      identity_subject: clerkUser.id,
+      identity_email: email,
+      identity_display_name: `Workflow ${label}`,
+    });
+    if (error) throw new Error(`Could not provision ${label}: ${error.message}`);
+    identities.push({ clerkUserId: clerkUser.id, appUserId });
   }
-  for (let index = 0; index < ids.length; index += 1) {
-    const userClient = createClient(url, anonKey, options);
-    const label = ["owner", "panel", "applicant"][index];
-    const { error: loginError } = await userClient.auth.signInWithPassword({ email: `workflow-${label}-${suffix}@example.invalid`, password });
-    if (loginError) throw new Error(`Test identity could not sign in: ${loginError.message}`);
-    const { data: visibleProfile, error: profileError } = await userClient.from("profiles").select("id").eq("id", ids[index]).single();
-    if (profileError || visibleProfile.id !== ids[index]) throw new Error(`Profile RLS did not expose the authenticated user: ${profileError?.message ?? "unexpected profile"}`);
-    await userClient.auth.signOut();
+  const { error } = await client.rpc("verify_full_workflow", {
+    owner_id: identities[0].appUserId,
+    panel_id: identities[1].appUserId,
+    applicant_id: identities[2].appUserId,
+  });
+  if (!error || error.message !== "WORKFLOW_SELF_TEST_PASSED") {
+    throw new Error(`Workflow self-test failed: ${JSON.stringify(error)}`);
   }
-  const { error } = await client.rpc("verify_full_workflow", { owner_id: ids[0], panel_id: ids[1], applicant_id: ids[2] });
-  if (!error || error.message !== "WORKFLOW_SELF_TEST_PASSED") throw new Error(`Workflow self-test failed: ${JSON.stringify(error)}`);
-  console.log("Full Supabase workflow passed and its database transaction was rolled back.");
+  console.log("Full Clerk-backed workflow passed and its workflow transaction was rolled back.");
 } catch (error) {
   primaryError = error;
   throw error;
 } finally {
-  const cleanup = await Promise.allSettled(ids.map((id) => client.auth.admin.deleteUser(id)));
-  const cleanupErrors = cleanup
-    .map((result) => result.status === "rejected" ? result.reason : result.value.error)
-    .filter(Boolean);
+  const cleanup = await Promise.allSettled(identities.flatMap((identity) => [
+    clerk.users.deleteUser(identity.clerkUserId),
+    client.from("profiles").delete().eq("id", identity.appUserId),
+  ]));
+  const cleanupErrors = cleanup.filter((result) => result.status === "rejected").map((result) => result.reason);
   if (cleanupErrors.length) {
-    const cleanupError = new AggregateError(cleanupErrors, "Could not clean up every workflow test identity");
+    const cleanupError = new AggregateError(cleanupErrors, "Could not clean up every Clerk workflow identity");
     if (primaryError) console.error(cleanupError);
     else throw cleanupError;
   }

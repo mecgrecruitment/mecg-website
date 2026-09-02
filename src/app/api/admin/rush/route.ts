@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
+import { createClerkClient } from "@clerk/backend";
+import { requireClerkIssuer, requireEnv } from "@/lib/env";
 
 type CycleStatus = Database["rush"]["Enums"]["cycle_status"];
 type RoundStatus = Database["rush"]["Enums"]["round_status"];
@@ -79,25 +81,55 @@ export async function POST(req: NextRequest) {
     const role = typeof body.role === "string" && ["MEMBER", "BOARD", "PANEL", "RECRUITMENT_COMMITTEE"].includes(body.role) ? body.role as "MEMBER" | "BOARD" | "PANEL" | "RECRUITMENT_COMMITTEE" : "MEMBER";
     if (!email || !name || password.length < 8 || password.length > 1024) return NextResponse.json({ error: "Valid name, email, and an 8-character password are required" }, { status: 400 });
     const admin = createAdminClient();
-    const { data: created, error: createError } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { display_name: name } });
-    if (createError || !created.user) {
+    const clerk = createClerkClient({ secretKey: requireEnv("CLERK_SECRET_KEY") });
+    const [firstName, ...lastName] = name.split(/\s+/);
+    let created: Awaited<ReturnType<typeof clerk.users.createUser>>;
+    try {
+      created = await clerk.users.createUser({
+        emailAddress: [email], password, firstName, lastName: lastName.join(" ") || undefined,
+      });
+    } catch (createError) {
       console.error("admin add_user failed", createError);
-      return NextResponse.json({ error: createError?.message ?? "Could not create user" }, { status: 409 });
+      return NextResponse.json({ error: "Could not create user" }, { status: 409 });
     }
-    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: created.user.id, target_cycle_id: cycleId, target_role: role }));
-    if (error) await admin.auth.admin.deleteUser(created.user.id);
+    const { data: appUserId, error: identityError } = await admin.rpc("ensure_external_identity", {
+      identity_issuer: requireClerkIssuer(), identity_subject: created.id,
+      identity_email: email, identity_display_name: name,
+    });
+    if (identityError) {
+      await clerk.users.deleteUser(created.id).catch(() => undefined);
+      return NextResponse.json({ error: "Could not provision user" }, { status: 500 });
+    }
+    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: role }));
+    if (error) {
+      await clerk.users.deleteUser(created.id).catch(() => undefined);
+      await admin.from("profiles").delete().eq("id", appUserId);
+    }
   } else if (action === "ADD_EXISTING_USER") {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     if (!email || !memberRole) return NextResponse.json({ error: "Valid email and role are required" }, { status: 400 });
     const admin = createAdminClient();
-    const { data: users, error: usersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    if (usersError) {
+    const clerk = createClerkClient({ secretKey: requireEnv("CLERK_SECRET_KEY") });
+    let existingUser: Awaited<ReturnType<typeof clerk.users.getUserList>>["data"][number] | undefined;
+    try {
+      existingUser = (await clerk.users.getUserList({ emailAddress: [email], limit: 2 })).data
+        .find((candidate) => candidate.emailAddresses.some((address) => address.emailAddress.toLowerCase() === email));
+    } catch (usersError) {
       console.error("admin find_existing_user failed", usersError);
       return NextResponse.json({ error: "Could not look up the account" }, { status: 500 });
     }
-    const existingUser = users.users.find((candidate) => candidate.email?.toLowerCase() === email);
     if (!existingUser) return NextResponse.json({ error: "No authentication account uses that email" }, { status: 404 });
-    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: existingUser.id, target_cycle_id: cycleId, target_role: memberRole }));
+    const existingName = [existingUser.firstName, existingUser.lastName].filter(Boolean).join(" ") || existingUser.username || email.split("@")[0];
+    const externalId = typeof existingUser.externalId === "string" && /^[0-9a-f-]{36}$/i.test(existingUser.externalId)
+      ? existingUser.externalId
+      : undefined;
+    const { data: appUserId, error: identityError } = await admin.rpc("ensure_external_identity", {
+      identity_issuer: requireClerkIssuer(), identity_subject: existingUser.id,
+      identity_email: email, identity_display_name: existingName,
+      existing_app_user_id: externalId,
+    });
+    if (identityError) return NextResponse.json({ error: "Could not provision the account" }, { status: 409 });
+    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: memberRole }));
   } else if (action === "SET_MEMBER_ROLE") {
     if (!memberRole) return NextResponse.json({ error: "Invalid member role" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_membership_role", { target_user_id: String(body.userId), target_cycle_id: cycleId, target_role: memberRole }));

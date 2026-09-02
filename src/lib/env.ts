@@ -48,3 +48,11 @@ export function requireSupabaseServiceRoleKey() {
     "MECG_SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_ROLE_KEY",
   );
 }
+
+export function requireClerkIssuer() {
+  return requireEnv("CLERK_ISSUER").replace(/\/+$/, "");
+}
+
+export function requireClerkWebhookSigningSecret() {
+  return requireEnv("CLERK_WEBHOOK_SIGNING_SECRET");
+}

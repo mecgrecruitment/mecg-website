@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -45,10 +46,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       data-scroll-behavior="smooth"
       className="h-full scroll-smooth antialiased"
     >
-      <body className="min-h-full flex flex-col">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
-        {children}
-      </body>
+      <ClerkProvider>
+        <body className="min-h-full flex flex-col">
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }} />
+          {children}
+        </body>
+      </ClerkProvider>
     </html>
   );
 }

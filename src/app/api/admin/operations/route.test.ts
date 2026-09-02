@@ -32,12 +32,16 @@ function mockConfiguredEnv(t: test.TestContext, serviceRole = true) {
       getSupabaseServiceRoleKey: () => serviceRole ? "service" : undefined,
     },
   });
-  const keys = ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_TO_EMAIL", "CRON_SECRET"] as const;
+  const keys = ["RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTACT_TO_EMAIL", "CRON_SECRET", "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY", "CLERK_ISSUER", "CLERK_WEBHOOK_SIGNING_SECRET"] as const;
   const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
   process.env.RESEND_API_KEY = "resend";
   process.env.RESEND_FROM_EMAIL = "MECG <mecg@example.com>";
   process.env.CONTACT_TO_EMAIL = "board@example.com";
   process.env.CRON_SECRET = "cron";
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_example";
+  process.env.CLERK_SECRET_KEY = "sk_test_example";
+  process.env.CLERK_ISSUER = "https://example.clerk.accounts.dev";
+  process.env.CLERK_WEBHOOK_SIGNING_SECRET = "whsec_example";
   t.after(() => {
     for (const key of keys) {
       const value = previous[key];
@@ -73,6 +77,7 @@ test("operations readiness reports a healthy configuration without exposing valu
   assert.deepEqual(body.configuration, {
     publicSupabase: true,
     serviceRole: true,
+    clerk: true,
     resend: true,
     contactRecipient: true,
     cronSecret: true,
