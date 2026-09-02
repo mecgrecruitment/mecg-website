@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignUp } from "@clerk/nextjs/legacy";
+import { useSignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,6 +10,9 @@ import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
 import { retryClerkRateLimit } from "@/lib/clerk-retry";
 
 function readableError(error: unknown) {
+  if (error && typeof error === "object" && "longMessage" in error && typeof error.longMessage === "string") {
+    return error.longMessage;
+  }
   if (error && typeof error === "object" && "errors" in error && Array.isArray(error.errors)) {
     const first = error.errors[0];
     if (first && typeof first === "object") {
@@ -19,9 +22,15 @@ function readableError(error: unknown) {
   }
   return "Account creation is temporarily unavailable. Try signing in if you already have an account.";
 }
+
+async function requireClerkSuccess(operation: () => Promise<{ error: unknown | null }>) {
+  const result = await operation();
+  if (result.error) throw result.error;
+}
+
 export default function ApplicantSignupForm() {
   const router = useRouter();
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { signUp, fetchStatus } = useSignUp();
   const [stage, setStage] = useState<"details" | "verification">("details");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -30,31 +39,63 @@ export default function ApplicantSignupForm() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const busy = pending || fetchStatus === "fetching";
 
   function retryNotice(seconds: number) {
     setMessage(`Clerk is handling a signup burst. Retrying automatically in ${seconds} second${seconds === 1 ? "" : "s"}…`);
   }
 
+  // Clerk drops the sign-up attempt as soon as it completes, so any call that
+  // touches it afterwards fails with "no sign up attempt was found". When email
+  // verification is switched off in the Clerk dashboard the attempt completes
+  // inside signUp.password(), which is why both paths finalize through here.
+  async function finalizeSignUp() {
+    await requireClerkSuccess(() => signUp.finalize({
+      navigate: ({ session, decorateUrl }) => {
+        const destination = session.currentTask ? `/login/tasks/${session.currentTask.key}` : "/apply";
+        const url = decorateUrl(destination);
+        if (url.startsWith("http")) window.location.href = url;
+        else router.replace(url);
+      },
+    }));
+    router.refresh();
+  }
+
   async function createAccount(event: React.FormEvent) {
     event.preventDefault();
-    if (!isLoaded || pending) return;
+    if (busy) return;
     setPending(true);
     setError("");
     setMessage("");
     try {
       const [firstName, ...lastName] = name.trim().split(/\s+/);
       await retryClerkRateLimit(
-        () => signUp.create({ emailAddress: email.trim(), password, firstName, lastName: lastName.join(" ") || undefined }),
+        () => requireClerkSuccess(() => signUp.password({
+          emailAddress: email.trim(),
+          password,
+          firstName,
+          lastName: lastName.join(" ") || undefined,
+        })),
         { onWait: retryNotice },
       );
+      if (signUp.isTransferable) {
+        setError("An account already uses that email. Sign in instead, or reset the password if needed.");
+        return;
+      }
+      if (signUp.status === "complete") {
+        await finalizeSignUp();
+        return;
+      }
       await retryClerkRateLimit(
-        () => signUp.prepareEmailAddressVerification({ strategy: "email_code" }),
+        () => requireClerkSuccess(() => signUp.verifications.sendEmailCode()),
         { onWait: retryNotice },
       );
       setStage("verification");
       setMessage("We sent a verification code. Check spam or promotions if it is missing.");
     } catch (caught) {
-      setError(readableError(caught));
+      setError(signUp.isTransferable
+        ? "An account already uses that email. Sign in instead, or reset the password if needed."
+        : readableError(caught));
       setMessage("");
     } finally {
       setPending(false);
@@ -63,20 +104,18 @@ export default function ApplicantSignupForm() {
 
   async function verify(event: React.FormEvent) {
     event.preventDefault();
-    if (!isLoaded || pending) return;
+    if (busy) return;
     setPending(true);
     setError("");
     try {
       // Verification attempts are never automatically replayed: one typed code
       // must consume at most one Clerk attempt.
-      const result = await signUp.attemptEmailAddressVerification({ code: code.trim() });
-      if (result.status !== "complete" || !result.createdSessionId) {
+      await requireClerkSuccess(() => signUp.verifications.verifyEmailCode({ code: code.trim() }));
+      if (signUp.status !== "complete") {
         setError("That code did not complete verification. Request a new code and try again.");
         return;
       }
-      await setActive({ session: result.createdSessionId });
-      router.replace("/apply");
-      router.refresh();
+      await finalizeSignUp();
     } catch (caught) {
       setError(readableError(caught));
     } finally {
@@ -85,13 +124,13 @@ export default function ApplicantSignupForm() {
   }
 
   async function resendCode() {
-    if (!isLoaded || pending) return;
+    if (busy) return;
     setPending(true);
     setError("");
     setMessage("");
     try {
       await retryClerkRateLimit(
-        () => signUp.prepareEmailAddressVerification({ strategy: "email_code" }),
+        () => requireClerkSuccess(() => signUp.verifications.sendEmailCode()),
         { onWait: retryNotice },
       );
       setMessage("We sent a new verification code. Check spam or promotions if it is missing.");
@@ -103,19 +142,27 @@ export default function ApplicantSignupForm() {
     }
   }
 
+  async function changeAccountDetails() {
+    await signUp.reset();
+    setStage("details");
+    setCode("");
+    setError("");
+    setMessage("");
+  }
+
   if (stage === "verification") {
     return (
       <form onSubmit={verify} className="mt-7 space-y-5">
         <FormField label="Verification code" value={code} onChange={(event) => setCode(event.target.value)} required autoComplete="one-time-code" />
         <OperationNotice kind="info">{message}</OperationNotice>
         <OperationNotice kind="error">{error}</OperationNotice>
-        <button type="submit" disabled={!isLoaded || pending} className="button-primary w-full disabled:opacity-50">
+        <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">
           {pending ? "Verifying…" : "Verify email"}
         </button>
-        <button type="button" onClick={() => void resendCode()} disabled={!isLoaded || pending} className="flex min-h-11 w-full items-center justify-center font-semibold underline disabled:opacity-50">
+        <button type="button" onClick={() => void resendCode()} disabled={busy} className="flex min-h-11 w-full items-center justify-center font-semibold underline disabled:opacity-50">
           Send a new code
         </button>
-        <button type="button" onClick={() => { setStage("details"); setCode(""); setError(""); setMessage(""); }} className="flex min-h-11 w-full items-center justify-center font-semibold underline">
+        <button type="button" onClick={() => void changeAccountDetails()} disabled={busy} className="flex min-h-11 w-full items-center justify-center font-semibold underline disabled:opacity-50">
           Change account details
         </button>
       </form>
@@ -126,10 +173,10 @@ export default function ApplicantSignupForm() {
     <form onSubmit={createAccount} className="mt-7 space-y-5">
       <FormField label="Full name" value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" />
       <FormField label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
-      <FormField label="Create a password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" hint={`Use at least ${CLERK_PASSWORD_MIN_LENGTH} characters. You will verify your email before submitting.`} />
+      <FormField label="Create a password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="new-password" hint={`Use at least ${CLERK_PASSWORD_MIN_LENGTH} characters.`} />
       <OperationNotice kind="info">{message}</OperationNotice>
       <OperationNotice kind="error">{error}</OperationNotice>
-      <button type="submit" disabled={!isLoaded || pending} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
+      <button type="submit" disabled={busy} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
         {pending ? "Creating account…" : "Create applicant account"}
       </button>
       <div id="clerk-captcha" />

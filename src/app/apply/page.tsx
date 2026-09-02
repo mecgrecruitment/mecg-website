@@ -131,16 +131,20 @@ export default async function ApplyPage() {
       </header>
 
       <div className={`mx-auto px-6 py-10 sm:px-10 sm:py-14 ${user ? "max-w-7xl" : "max-w-2xl"}`}>
-        <div className={`flex flex-wrap items-end justify-between gap-5 ${user ? "" : "text-center"}`}>
+        {/* items-start, not items-end: the left column grows tall once the countdown
+            mounts under the heading, and bottom-aligning left the status pill stranded
+            in whitespace at the far right, level with nothing. Top alignment reads it
+            against the eyebrow, which is what a status pill is for. */}
+        <div className={`flex flex-wrap items-start justify-between gap-5 ${user ? "" : "text-center"}`}>
           <div className={user ? "" : "mx-auto"}>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-mecg-orange-ink">Application intake</p>
+            <p className="text-[13px] text-mecg-orange-ink">Application intake</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
             <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/55">
               {user
                 ? "Your work saves automatically. Take your time, review everything, then submit once."
                 : cycleStatus && !cycleStatus.isOpen
                   ? cycleStatus.detail
-                  : "Create an account and verify your email to begin the application."}
+                  : "Create an account to begin the application."}
             </p>
             {upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
