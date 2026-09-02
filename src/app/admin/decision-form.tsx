@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAction } from "@/lib/use-action";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
+import { decisionOutcomeLabel } from "@/lib/labels";
 import OperationNotice from "@/components/operation-notice";
+
+const DECISION_OUTCOMES = ["OFFER", "WAITLIST", "REJECT", "PROCEDURAL_REVIEW"] as const;
 
 export default function DecisionForm({ cycleId, applicationId }: { cycleId: string; applicationId: string }) {
   const { pending, error, success, run } = useAction("/api/admin/decisions", "Could not create decision. Check your connection and try again.");
@@ -22,10 +25,12 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
         Decision outcome
       </label>
       <select id={`outcome-${applicationId}`} name="outcome" disabled={pending} className="select-control text-xs">
-        <option>OFFER</option>
-        <option>WAITLIST</option>
-        <option>REJECT</option>
-        <option>PROCEDURAL_REVIEW</option>
+        {/* The value is set explicitly: without it the option's visible text is
+            what the form posts, so humanizing the label would have changed the
+            outcome sent to the server. */}
+        {DECISION_OUTCOMES.map((outcome) => (
+          <option key={outcome} value={outcome}>{decisionOutcomeLabel(outcome)}</option>
+        ))}
       </select>
       <label className="sr-only" htmlFor={`reason-${applicationId}`}>Evidence-based reason</label>
       <input id={`reason-${applicationId}`} name="reason" required disabled={pending} placeholder="Evidence-based reason" className="operation-control min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
