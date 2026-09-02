@@ -6,6 +6,7 @@ import ApplicationCountdown from "@/components/application-countdown";
 import LogoutButton from "@/components/logout-button";
 import OperationNotice from "@/components/operation-notice";
 import { currentDestination, currentUser } from "@/lib/auth";
+import { hasClerkRuntimeConfiguration } from "@/lib/env";
 import {
   applicationCycleStatus,
   fetchPublicRecruitment,
@@ -69,6 +70,7 @@ function parseIntakeSchema(value: unknown): IntakeSchema | null {
 }
 
 export default async function ApplyPage() {
+  const clerkConfigured = hasClerkRuntimeConfiguration();
   const destination = await currentDestination();
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
@@ -174,9 +176,15 @@ export default async function ApplyPage() {
             questions={schema?.questions ?? []}
             initialDraft={draft}
           />
-        ) : (
+        ) : clerkConfigured ? (
           <div className="surface-card mx-auto mt-8 max-w-xl bg-white p-7 text-left sm:p-9">
             <ApplicantSignupForm />
+          </div>
+        ) : (
+          <div className="mx-auto mt-8 max-w-xl">
+            <OperationNotice kind="error">
+              Account creation is temporarily unavailable because authentication is not configured on this deployment. No credentials were accepted or transmitted. Contact <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a> if you need help.
+            </OperationNotice>
           </div>
         )}
       </div>

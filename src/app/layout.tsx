@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
-import { hasClerkConfiguration } from "@/lib/env";
 import { serializeJsonLd } from "@/lib/json-ld";
+import { hasClerkFrontendConfiguration } from "@/lib/env";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,7 +42,7 @@ const ORGANIZATION_JSON_LD = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  const clerkConfigured = hasClerkConfiguration();
+  const clerkConfigured = hasClerkFrontendConfiguration();
   const content = (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(ORGANIZATION_JSON_LD) }} />
