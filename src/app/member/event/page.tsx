@@ -36,7 +36,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
   const currentWorkspace = selected ? `/member/event?event=${selected.event_id}` : "/member/event";
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-3xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
       <WorkspaceHeader
         eyebrow="Live event grading"
         title={selected ? selected.event_name : "No event selected"}

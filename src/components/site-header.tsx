@@ -28,12 +28,12 @@ export default function SiteHeader() {
               key={href}
               href={href}
               aria-current={pathname === href ? "page" : undefined}
-              className={`inline-flex min-h-10 items-center border-b transition-colors ${pathname === href ? "border-mecg-orange text-white" : "border-transparent text-white/60 hover:text-white"}`}
+              className={`inline-flex min-h-10 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${pathname === href ? "border-mecg-orange text-white" : "border-transparent text-white/60 hover:border-white/35 hover:text-white"}`}
             >
               {label}
             </Link>
           ))}
-          <Link href="/login" className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-colors hover:text-white">Member log in</Link>
+          <Link href="/login" className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96">Member log in</Link>
           <Link href="/apply" className="button-primary">Apply now</Link>
         </nav>
         <button
@@ -41,7 +41,7 @@ export default function SiteHeader() {
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((value) => !value)}
-          className="flex min-h-11 min-w-11 items-center justify-center border border-white/20 text-sm md:hidden"
+          className="flex min-h-11 min-w-11 items-center justify-center border border-white/20 text-sm transition-[background-color,transform] duration-150 hover:bg-white/8 active:scale-96 md:hidden"
         >
           {open ? "Close" : "Menu"}
         </button>
@@ -55,7 +55,7 @@ export default function SiteHeader() {
                 href={href}
                 aria-current={pathname === href ? "page" : undefined}
                 onClick={() => setOpen(false)}
-                className={`border-b border-white/10 py-4 text-lg ${pathname === href ? "text-mecg-orange" : "text-white"}`}
+                className={`border-b border-white/10 py-4 text-lg transition-[color,transform] duration-150 active:translate-x-0.5 ${pathname === href ? "text-mecg-orange" : "text-white"}`}
               >
                 {label}
               </Link>

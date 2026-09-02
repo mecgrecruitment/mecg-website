@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
   if (countError) throw countError;
   if (!cycleCount) {
     return (
-      <main className="mx-auto flex max-w-5xl flex-col gap-8 p-8">
+      <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
         <WorkspaceHeader eyebrow="Setup" title="MECG rush setup" description={`Signed in as ${user.name}`} />
         <SetupForm />
       </main>
@@ -132,7 +132,7 @@ export default async function AdminDashboard() {
   ].filter((item): item is { count: number; label: string; detail: string; filter: string } => Boolean(item));
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-7xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Board dashboard"

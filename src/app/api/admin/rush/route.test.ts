@@ -111,3 +111,42 @@ test("reassignment requires both assignment and replacement evaluator", async (t
   assert.equal(response.status, 400);
   assert.equal(fake.calls.length, 0);
 });
+
+test("board can set a validated application window through the audited RPC", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("cycle-window");
+  const response = await POST(request({
+    action: "SET_CYCLE_WINDOW",
+    cycleId: "cycle-1",
+    opensAt: "2026-09-08T23:30:00.000Z",
+    closesAt: "2026-09-11T15:00:00.000Z",
+  }));
+  assert.equal(response.status, 201);
+  assert.deepEqual(fake.calls, [{
+    name: "set_cycle_application_window",
+    args: {
+      target_cycle_id: "cycle-1",
+      application_opens_at: "2026-09-08T23:30:00.000Z",
+      application_closes_at: "2026-09-11T15:00:00.000Z",
+    },
+  }]);
+});
+
+test("application window rejects malformed or reversed dates before the RPC", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("cycle-window-invalid");
+  const response = await POST(request({
+    action: "SET_CYCLE_WINDOW",
+    cycleId: "cycle-1",
+    opensAt: "2026-09-11T15:00:00.000Z",
+    closesAt: "not-a-date",
+  }));
+  assert.equal(response.status, 400);
+  assert.equal(fake.calls.length, 0);
+});

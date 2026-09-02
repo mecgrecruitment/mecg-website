@@ -106,6 +106,11 @@ const MAX_ANSWERS = 50;
 const MAX_ANSWER_LENGTH = 8000;
 const MAX_ANSWERS_LENGTH = 40000;
 
+export function countWords(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
+
 export function normalizePersonInput(nameValue: unknown, contactValue: unknown) {
   const name = typeof nameValue === "string" ? nameValue.trim() : "";
   const contact = typeof contactValue === "string" ? contactValue.trim().toLowerCase() : "";

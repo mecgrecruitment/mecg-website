@@ -39,7 +39,7 @@ export default function SlotForm({ cycleId, eventId }: { cycleId: string; eventI
         Capacity
         <input name="capacity" type="number" min={1} defaultValue={8} disabled={pending} className="field-control mt-1 block text-sm disabled:opacity-60" />
       </label>
-      <button disabled={pending} className="button-secondary self-start text-sm">
+      <button type="submit" disabled={pending} className="button-secondary self-start text-sm">
         {pending ? "Saving…" : "Save slot"}
       </button>
       <OperationNotice kind="error">{error}</OperationNotice>

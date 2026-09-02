@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
-import { CLASS_YEAR_LABELS, PIPELINE_STATUSES, type ClassYear } from "@/lib/workflow";
+import { CLASS_YEAR_LABELS, PIPELINE_STATUSES, countWords, type ClassYear } from "@/lib/workflow";
 import { applicantCode } from "@/lib/applicant-code";
 import LogoutButton from "@/components/logout-button";
 import StatusPill from "@/components/status-pill";
@@ -48,6 +48,82 @@ type ApplicationDossierRow = {
     accessibility_notes: string | null;
   };
 };
+
+type ResumeDocumentRow = {
+  original_filename: string;
+  verified_size: number | null;
+  page_count: number | null;
+  ready_at: string | null;
+};
+
+function resumeSize(size: number | null) {
+  if (size === null) return null;
+  return size >= 1024 * 1024
+    ? `${(size / 1024 / 1024).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(size / 1024))} KB`;
+}
+
+function ResumePanel({
+  applicationId,
+  applicantName,
+  hasResumePath,
+  document,
+  hidden,
+  heightClass,
+}: {
+  applicationId: string;
+  applicantName: string;
+  hasResumePath: boolean;
+  document: ResumeDocumentRow | null;
+  hidden: boolean;
+  heightClass: string;
+}) {
+  const details = document
+    ? [
+      resumeSize(document.verified_size),
+      document.page_count ? `${document.page_count} ${document.page_count === 1 ? "page" : "pages"}` : null,
+      document.ready_at ? `Verified ${formatEasternDateTime(document.ready_at)}` : null,
+    ].filter(Boolean)
+    : [];
+
+  return (
+    <div>
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Resume</p>
+      {hidden ? (
+        <p className="mt-2 text-sm text-mecg-navy/60">Contact details and the resume are hidden for blind Hash review.</p>
+      ) : document ? (
+        <div className="mt-2">
+          <p className="break-words text-sm font-semibold text-mecg-navy">{document.original_filename}</p>
+          {details.length > 0 && <p className="mt-1 text-xs text-mecg-navy/60">{details.join(" · ")}</p>}
+          <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+            <iframe
+              sandbox=""
+              loading="lazy"
+              src={`/api/admin/applications/${applicationId}/resume`}
+              title={`${applicantName} resume`}
+              className={`${heightClass} w-full bg-white`}
+            />
+            <div className="border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center">
+              <a
+                className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink"
+                href={`/api/admin/applications/${applicationId}/resume`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open in new tab ↗
+              </a>
+              <p className="mt-1 text-[11px] text-mecg-navy/50">If the preview does not load, open the PDF in a new tab.</p>
+            </div>
+          </div>
+        </div>
+      ) : hasResumePath ? (
+        <p className="mt-2 text-sm text-red-700" role="alert">The resume record is unavailable. Retry this page before review.</p>
+      ) : (
+        <p className="mt-2 text-sm text-mecg-navy/60">No resume on file.</p>
+      )}
+    </div>
+  );
+}
 
 export default async function ApplicantDossier({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -99,6 +175,18 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const linkedinHref = person.linkedin_url ? httpUrl(person.linkedin_url) : null;
   const year = person.class_year && person.class_year in CLASS_YEAR_LABELS ? CLASS_YEAR_LABELS[person.class_year as ClassYear] : person.class_year;
   const isTerminal = TERMINAL_STATUSES.has(application.status as (typeof PIPELINE_STATUSES)[number]);
+  let resumeDocument: ResumeDocumentRow | null = null;
+  if (!panelOnly && application.resume_storage_path) {
+    const { data: document, error: documentError } = await supabase
+      .from("application_documents")
+      .select("original_filename,verified_size,page_count,ready_at")
+      .eq("application_id", application.id)
+      .eq("object_path", application.resume_storage_path)
+      .eq("status", "ATTACHED")
+      .maybeSingle();
+    if (documentError) console.error("resume metadata lookup failed", documentError);
+    resumeDocument = document;
+  }
 
   if (committeeOnly) {
     return (
@@ -121,15 +209,14 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             {person.major && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Major</dt><dd>{person.major}</dd></div>}
             {person.linkedin_url && <div><dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
           </dl>
-          <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Resume</p>
-            {application.resume_storage_path ? (
-              <div className="mt-2 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
-                <iframe src={`/api/admin/applications/${application.id}/resume`} title={`${person.name} resume`} className="h-[560px] w-full bg-white" />
-                <a className="block border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink" href={`/api/admin/applications/${application.id}/resume`} target="_blank" rel="noreferrer">Open in new tab ↗</a>
-              </div>
-            ) : <p className="mt-2 text-sm text-mecg-navy/60">No resume on file.</p>}
-          </div>
+          <ResumePanel
+            applicationId={application.id}
+            applicantName={person.name}
+            hasResumePath={Boolean(application.resume_storage_path)}
+            document={resumeDocument}
+            hidden={false}
+            heightClass="h-[560px]"
+          />
         </section>
         <Link href="/admin" className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink underline underline-offset-4">Back to pipeline</Link>
       </main>
@@ -139,7 +226,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const offerSelect: string = "offer_response,offer_responded_at,offer_expires_at";
   const [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult] = await Promise.all([
     supabase.from("applications").select(offerSelect).eq("id", id).single(),
-    supabase.from("application_responses").select("question_key,question_text,response_text").eq("application_id", id),
+    supabase.from("application_responses").select("question_key,question_text,question_word_limit,response_text").eq("application_id", id),
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase
       .from("applications")
@@ -208,7 +295,7 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
   const actorNameById = new Map((actorProfiles ?? []).map((profile) => [profile.id, profile.display_name]));
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-6xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-mecg-orange-ink">Applicant dossier</p>
@@ -294,26 +381,14 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
             </div>
           )}
 
-          <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-mecg-navy/60">Resume</p>
-            {panelOnly ? (
-              <p className="mt-2 text-sm text-mecg-navy/60">Contact details and the resume are hidden for blind Hash review.</p>
-            ) : application.resume_storage_path ? (
-              <div className="mt-2 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
-                <iframe src={`/api/admin/applications/${application.id}/resume`} title={`${displayName} resume`} className="h-[440px] w-full bg-white" />
-                <a
-                  className="block border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink"
-                  href={`/api/admin/applications/${application.id}/resume`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open in new tab ↗
-                </a>
-              </div>
-            ) : (
-              <p className="mt-2 text-sm text-mecg-navy/60">No resume on file.</p>
-            )}
-          </div>
+          <ResumePanel
+            applicationId={application.id}
+            applicantName={displayName}
+            hasResumePath={Boolean(application.resume_storage_path)}
+            document={resumeDocument}
+            hidden={panelOnly}
+            heightClass="h-[440px]"
+          />
         </section>
 
         <div className="order-1 lg:order-none">
@@ -326,6 +401,9 @@ export default async function ApplicantDossier({ params }: { params: Promise<{ i
                     <article key={response.question_key} className="rounded-2xl bg-mecg-navy/[0.035] p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                       <h2 className="font-medium text-mecg-navy">{response.question_text}</h2>
                       <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/70">{response.response_text}</p>
+                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-mecg-navy/50">
+                        {countWords(response.response_text)} words{response.question_word_limit ? ` · ${response.question_word_limit}-word limit` : ""}
+                      </p>
                     </article>
                   ))}
                 </div>

@@ -71,7 +71,7 @@ export default async function RoundBoardPage({ kind, title, nav }: { kind: strin
   const evaluatorLoadList = Array.from(evaluatorLoad.entries()).sort(([, a], [, b]) => b.open - a.open);
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+    <main className="workspace-stack mx-auto flex w-full max-w-7xl flex-col">
       <WorkspaceHeader eyebrow={`${cycle.name} · ${cycle.status}`} title={title} />
       <WorkspaceNav user={user} cycleId={cycleId} current={nav} />
       {!round ? (

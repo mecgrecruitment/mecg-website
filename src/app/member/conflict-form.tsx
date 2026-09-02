@@ -47,7 +47,7 @@ export default function ConflictForm({ applications }: { applications: { id: str
         </select>
         <label className="sr-only" htmlFor="conflict-reason">Relationship or conflict reason</label>
         <input id="conflict-reason" name="reason" required maxLength={1000} disabled={pending} placeholder="Relationship or conflict" className="min-h-11 min-w-56 flex-1 rounded-xl bg-white px-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
-        <button disabled={pending} className="button-primary">{pending ? "Declaring…" : "Declare conflict"}</button>
+        <button type="submit" disabled={pending} className="button-primary">{pending ? "Declaring…" : "Declare conflict"}</button>
       </div>
       <div className="mt-3 space-y-2">
         <OperationNotice kind="error">{error}</OperationNotice>

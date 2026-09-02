@@ -131,7 +131,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         : "No evaluations have been assigned yet";
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-7xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycleMembership.cycle.name} · ${cycleMembership.cycle.status}`}
         title="Evaluation Hub"
@@ -258,7 +258,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 </div>
                 {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/60">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
                 {submitted ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. A Board Member can create an audited correction if needed.</p>
+                  <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
                 ) : ready && rubric ? (
                   <details className="mt-3" open={assignment.id === firstReadyAssignmentId}>
                     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] marker:content-none">

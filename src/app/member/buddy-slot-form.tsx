@@ -76,7 +76,7 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
           Start time{timeZone ? ` (${timeZone})` : ""}
           <input name="startsAt" type="datetime-local" required min={minimum || undefined} className="field-control mt-2" aria-describedby="buddy-slot-help" />
         </label>
-        <button disabled={pending} className="button-primary disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Publishing…" : "Publish slot"}</button>
+        <button type="submit" disabled={pending} className="button-primary disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Publishing…" : "Publish slot"}</button>
       </form>
       <p id="buddy-slot-help" className="mt-2 text-xs leading-5 text-mecg-navy/60">Times are shown in your current time zone and saved with the correct offset.</p>
       <div className="mt-3 space-y-2">

@@ -12,6 +12,7 @@ import Link from "next/link";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import EventControls from "./event-controls";
+import AssistedCheckinForm from "./assisted-checkin-form";
 import { formatEasternDateTime } from "@/lib/date-time";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
@@ -73,7 +74,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
   const qrDataUrl = checkinUrl ? await QRCode.toDataURL(checkinUrl) : null;
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex w-full max-w-4xl flex-col">
       <WorkspaceHeader
         eyebrow="Attendance event"
         title={event.name}
@@ -95,6 +96,8 @@ export default async function EventDetailPage({ params, searchParams }: { params
           Check-in window: {formatEasternDateTime(event.checkin_opens_at)} to {formatEasternDateTime(event.checkin_closes_at)}
         </p>
       </section>
+
+      <AssistedCheckinForm eventId={event.id} locked={event.status === "CLOSED" || event.status === "CANCELLED"} />
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-mecg-navy/60">Member grading</p>

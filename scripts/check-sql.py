@@ -13,18 +13,17 @@ Two passes, because they cover different things:
                  SECURITY DEFINER plpgsql functions, so without this pass the
                  riskiest code is the only code not checked.
 
+Migration filenames are also checked for duplicate 14-digit versions. Supabase
+uses that prefix as the migration identity, so two otherwise valid SQL files
+with the same prefix cannot be released safely.
+
 What this does not do: it is a parser, not a database. It will not catch a
 missing column, a wrong type, or a policy that does not do what it claims.
 Those still need `npm run test:supabase` against a real project.
 
 Run it with `npm run check:sql` (needs `pip3 install pglast`).
 
-Not wired into .github/workflows/ci.yml yet: pushing a workflow edit needs a
-token with the `workflow` scope, which the account that pushed this branch does
-not have. To add it, put these two lines after `npm ci`:
-
-    - run: pip3 install --quiet pglast
-    - run: npm run check:sql
+This check is wired into `.github/workflows/ci.yml` after `pglast` is installed.
 """
 
 import re
@@ -39,6 +38,20 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent.parent
 TARGETS = sorted(ROOT.glob("supabase/migrations/*.sql")) + sorted(ROOT.glob("supabase/tests/*.sql"))
+
+
+def migration_version_problems(root: Path):
+    """Reject migration identities that Supabase cannot distinguish."""
+    by_version = {}
+    for path in sorted(root.glob("supabase/migrations/*.sql")):
+        match = re.match(r"^(\d{14})_.*\.sql$", path.name)
+        if match:
+            by_version.setdefault(match.group(1), []).append(path.name)
+    return [
+        f"duplicate migration version {version}: {', '.join(names)}"
+        for version, names in sorted(by_version.items())
+        if len(names) > 1
+    ]
 
 
 def sql_surface(root: Path):
@@ -101,7 +114,7 @@ def main() -> int:
         print("No SQL files found under supabase/", file=sys.stderr)
         return 2
 
-    failures = []
+    failures = migration_version_problems(ROOT)
     bodies = 0
     for path in TARGETS:
         name = path.relative_to(ROOT)

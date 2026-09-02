@@ -119,6 +119,7 @@ export type Database = {
           prompt: string
           required: boolean
           sort_order: number
+          word_limit: number | null
         }
         Insert: {
           cycle_id: string
@@ -129,6 +130,7 @@ export type Database = {
           prompt: string
           required?: boolean
           sort_order?: number
+          word_limit?: number | null
         }
         Update: {
           cycle_id?: string
@@ -139,6 +141,7 @@ export type Database = {
           prompt?: string
           required?: boolean
           sort_order?: number
+          word_limit?: number | null
         }
         Relationships: [
           {
@@ -157,6 +160,7 @@ export type Database = {
           id: string
           question_key: string
           question_text: string
+          question_word_limit: number | null
           response_text: string
         }
         Insert: {
@@ -165,6 +169,7 @@ export type Database = {
           id?: string
           question_key: string
           question_text: string
+          question_word_limit?: number | null
           response_text: string
         }
         Update: {
@@ -173,6 +178,7 @@ export type Database = {
           id?: string
           question_key?: string
           question_text?: string
+          question_word_limit?: number | null
           response_text?: string
         }
         Relationships: [
@@ -511,24 +517,40 @@ export type Database = {
       }
       checkins: {
         Row: {
+          checked_in_by: string | null
           checked_in_at: string
+          checkin_method: string
           event_id: string
           id: string
           pnm_id: string
+          reason_code: string | null
         }
         Insert: {
+          checked_in_by?: string | null
           checked_in_at?: string
+          checkin_method?: string
           event_id: string
           id?: string
           pnm_id: string
+          reason_code?: string | null
         }
         Update: {
+          checked_in_by?: string | null
           checked_in_at?: string
+          checkin_method?: string
           event_id?: string
           id?: string
           pnm_id?: string
+          reason_code?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "checkins_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "checkins_event_id_fkey"
             columns: ["event_id"]
@@ -2200,6 +2222,14 @@ export type Database = {
         Returns: undefined
       }
       check_in: { Args: { raw_token: string }; Returns: boolean }
+      staff_assisted_check_in: {
+        Args: {
+          applicant_identifier: string
+          reason_code: string
+          target_event_id: string
+        }
+        Returns: Json
+      }
       check_rate_limit: { Args: { p_bucket: string }; Returns: boolean }
       claim_notification: {
         Args: { target_notification_id: string }
@@ -2537,6 +2567,14 @@ export type Database = {
           target_cycle_id: string
         }
         Returns: undefined
+      }
+      set_cycle_application_window: {
+        Args: {
+          application_closes_at: string
+          application_opens_at: string
+          target_cycle_id: string
+        }
+        Returns: Json
       }
       set_decision_preview: {
         Args: { preview_text: string; target_decision_id: string }

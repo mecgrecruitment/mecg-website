@@ -60,7 +60,7 @@ export default async function WorkspaceNav({
 
   return (
     <>
-      <div className="sticky top-0 z-30 -mx-6 border-y border-mecg-navy/8 bg-white/95 px-6 py-2 backdrop-blur sm:-mx-10 sm:px-10">
+      <div className="workspace-nav-shell sticky top-3 z-30 rounded-2xl bg-white/88 p-1.5 shadow-[0_14px_44px_rgba(7,13,31,0.09),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
         <PillNav ariaLabel="Workspace" current={current} links={links} />
       </div>
       <span id="workspace-content" tabIndex={-1} className="sr-only">Workspace content</span>

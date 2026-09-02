@@ -100,7 +100,7 @@ export default async function HashBoard() {
   ] as const;
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-7xl flex-col p-6 sm:p-10">
+    <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycle.status}`}
         title="Hash"

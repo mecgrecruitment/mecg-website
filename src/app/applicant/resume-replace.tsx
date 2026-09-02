@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/lib/supabase/client";
+import { uploadResumeFile } from "@/lib/resume-upload";
 
 type State =
   | { kind: "idle" }
@@ -18,7 +18,6 @@ type State =
 // refused once a screening packet exists. This is only the client half.
 export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
   const router = useRouter();
-  const supabase = useSupabase();
   const inputRef = useRef<HTMLInputElement>(null);
   const inFlight = useRef(false);
   const [state, setState] = useState<State>({ kind: "idle" });
@@ -31,46 +30,12 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
     }
     inFlight.current = true;
     setState({ kind: "working", label: file.name });
-    let documentId = "";
     try {
-      const startResponse = await fetch("/api/apply/resume/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, size: file.size }),
-      });
-      const startBody = await startResponse.json().catch(() => null);
-      if (!startResponse.ok || typeof startBody?.documentId !== "string" || typeof startBody?.path !== "string") {
-        throw new Error(startBody?.error ?? "We could not start the upload.");
-      }
-      documentId = startBody.documentId;
+      const finalized = await uploadResumeFile(file, { attach: true });
 
-      const { error: uploadError } = await supabase.storage
-        .from("resumes")
-        .upload(startBody.path, file, { contentType: "application/pdf", upsert: false });
-      if (uploadError) throw new Error("We could not upload your resume. Please try again.");
-
-      const finalizeResponse = await fetch("/api/apply/resume/finalize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId }),
-      });
-      const finalized = await finalizeResponse.json().catch(() => null);
-      if (!finalizeResponse.ok) throw new Error(finalized?.error ?? "We could not verify your resume.");
-
-      const attachResponse = await fetch("/api/apply/resume/attach", { method: "POST" });
-      const attached = await attachResponse.json().catch(() => null);
-      if (!attachResponse.ok) throw new Error(attached?.error ?? "We could not update your resume.");
-
-      setState({ kind: "done", label: finalized?.filename ?? file.name });
+      setState({ kind: "done", label: finalized.filename });
       router.refresh();
     } catch (error) {
-      if (documentId) {
-        void fetch("/api/apply/resume/cancel", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ documentId }),
-        });
-      }
       setState({ kind: "error", message: error instanceof Error ? error.message : "We could not upload your resume." });
     } finally {
       inFlight.current = false;

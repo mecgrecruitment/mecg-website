@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { createClerkClient } from "@clerk/backend";
 import { createClient } from "@supabase/supabase-js";
 import { loadSupabaseEnv, requireServiceRoleKey } from "./lib/supabase-env.mjs";
+import { clerkTestEmail } from "./lib/clerk-test-email.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const { url, serviceRoleKey } = loadSupabaseEnv(root);
@@ -20,7 +21,7 @@ let primaryError;
 
 try {
   for (const label of ["owner", "panel", "applicant"]) {
-    const email = `workflow-${label}-${suffix}@example.invalid`;
+    const email = clerkTestEmail(`workflow-${label}`, suffix);
     const clerkUser = await clerk.users.createUser({
       emailAddress: [email],
       firstName: "Workflow",

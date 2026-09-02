@@ -21,7 +21,12 @@ export async function POST(req: NextRequest) {
   if (!draft) return NextResponse.json({ error: "Invalid draft payload" }, { status: 400 });
   const supabase = await createClient();
   const ip = clientIp(req);
-  if (!(await checkRateLimit(`apply-draft:${ip}`))) {
+  // Same both-buckets rule as /api/apply: the per-user key spares a shared NAT,
+  // the IP-only key is the ceiling a per-account key cannot provide. Autosave
+  // means far more requests per student, so the IP limit here is sized to the
+  // sum of the per-user caps for a full hall
+  // (supabase/migrations/20260902160000_apply_ip_rate_limit_ceiling.sql).
+  if (!(await checkRateLimit(`apply-draft:${user.id}:${ip}`)) || !(await checkRateLimit(`apply-draft-ip:${ip}`))) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
   }
   const { error } = await supabase.rpc("save_application_draft", { payload: draft });

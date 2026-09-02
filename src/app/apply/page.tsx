@@ -9,6 +9,7 @@ import { currentDestination, currentUser } from "@/lib/auth";
 import {
   applicationCycleStatus,
   fetchPublicRecruitment,
+  formatRecruitmentTime,
   isBeforeApplicationOpen,
 } from "@/lib/public-recruitment";
 import { createClient } from "@/lib/supabase/server";
@@ -18,18 +19,19 @@ import ApplicationForm from "./application-form";
 
 export const metadata: Metadata = { title: "Apply" };
 
-type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[] };
-type IntakeSchema = { open?: boolean; needsInfo?: boolean; cycleName?: string | null; questions?: IntakeQuestion[]; draft?: unknown };
+type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[]; maxWords: number | null };
+type IntakeSchema = { open?: boolean; needsInfo?: boolean; cycleId?: string | null; cycleName?: string | null; questions?: IntakeQuestion[]; draft?: unknown };
+const INPUT_TYPES = new Set(["short_text", "long_text", "url", "select"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function parseOptions(value: unknown) {
-  if (!Array.isArray(value) || value.length > 50) return [];
+function parseOptions(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length > 50) return null;
   const options: string[] = [];
   for (const option of value) {
-    if (typeof option !== "string" || !option.trim() || option.trim().length > 200) return [];
+    if (typeof option !== "string" || !option.trim() || option.trim().length > 200) return null;
     if (!options.includes(option.trim())) options.push(option.trim());
   }
   return options;
@@ -44,12 +46,22 @@ function parseIntakeSchema(value: unknown): IntakeSchema | null {
     if (!Array.isArray(value.questions)) return null;
     for (const question of value.questions) {
       if (!isRecord(question) || typeof question.key !== "string" || !question.key || typeof question.prompt !== "string" || !question.prompt) return null;
-      questions.push({ key: question.key, prompt: question.prompt, inputType: typeof question.inputType === "string" ? question.inputType : "long_text", required: question.required === true, options: parseOptions(question.options) });
+      if (typeof question.inputType !== "string" || !INPUT_TYPES.has(question.inputType)) return null;
+      const options = parseOptions(question.options);
+      if (!options || (question.inputType === "select" && options.length === 0)) return null;
+      const maxWords = question.maxWords == null
+        ? null
+        : typeof question.maxWords === "number" && Number.isInteger(question.maxWords) && question.maxWords >= 1 && question.maxWords <= 2000
+          ? question.maxWords
+          : undefined;
+      if (maxWords === undefined) return null;
+      questions.push({ key: question.key, prompt: question.prompt, inputType: question.inputType, required: question.required === true, options, maxWords });
     }
   }
   return {
     open: typeof value.open === "boolean" ? value.open : undefined,
     needsInfo: value.needsInfo === true,
+    cycleId: typeof value.cycleId === "string" ? value.cycleId : null,
     cycleName: typeof value.cycleName === "string" ? value.cycleName : null,
     questions,
     draft: value.draft,
@@ -60,19 +72,28 @@ export default async function ApplyPage() {
   const destination = await currentDestination();
   if (destination && destination !== "/apply") redirect(destination);
   const user = destination === "/apply" ? await currentUser() : null;
-  const recruitment = user ? null : await fetchPublicRecruitment();
+  const supabase = user ? await createClient() : null;
+  // Signed-in applicants need the cycle window too: intake_schema reports
+  // open:false for the whole period before opens_at, which is indistinguishable
+  // from a closed cycle without it. Fetched alongside the RPCs, not before them,
+  // so the extra anon call costs nothing on the wall clock.
+  const [recruitment, { data: intake, error: intakeError }, { data: hasPastApplication }] = await Promise.all([
+    fetchPublicRecruitment(),
+    supabase ? supabase.rpc("intake_schema") : Promise.resolve({ data: null, error: null }),
+    supabase ? supabase.rpc("is_applicant") : Promise.resolve({ data: false }),
+  ]);
   const cycleStatus = recruitment?.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const upcomingCycle = recruitment?.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
-  const supabase = user ? await createClient() : null;
-  const [{ data: intake, error: intakeError }, { data: hasPastApplication }] = supabase
-    ? await Promise.all([supabase.rpc("intake_schema"), supabase.rpc("is_applicant")])
-    : [{ data: null, error: null }, { data: false }];
   if (intakeError) console.error("intake_schema failed", intakeError);
   const schema = intakeError ? null : parseIntakeSchema(intake);
   // A failed or malformed schema is not the same thing as a closed cycle; never say "closed" for it.
   const schemaUnavailable = Boolean(user) && !schema;
   if (schemaUnavailable && !intakeError) console.error("intake_schema returned an unusable payload", intake);
   const draft = parseApplicationDraft(schema?.draft);
+  // Before opens_at the cycle is OPEN, it just has not started, and intake_schema
+  // still says open:false. Telling that applicant "Applications closed" sends
+  // someone who signed up at 19:45 home fifteen minutes early.
+  const preOpenLabel = upcomingCycle?.opensAt ? `Applications open at ${formatRecruitmentTime(upcomingCycle.opensAt)}` : null;
 
   return (
     <main className="min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
@@ -119,11 +140,11 @@ export default async function ApplyPage() {
                   ? cycleStatus.detail
                   : "Create an account and verify your email to begin the application."}
             </p>
-            {!user && upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
+            {upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
-          {user && !schemaUnavailable && typeof schema?.open === "boolean" && (
-            <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema.open ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
-              {schema.open ? "Applications open · About 15 minutes" : "Applications closed"}
+          {user && !schemaUnavailable && (typeof schema?.open === "boolean" || preOpenLabel) && (
+            <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema?.open ? "bg-emerald-50 text-emerald-800" : preOpenLabel ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800"}`}>
+              {schema?.open ? "Applications open · About 15 minutes" : preOpenLabel ?? "Applications closed"}
             </div>
           )}
         </div>
@@ -145,7 +166,10 @@ export default async function ApplyPage() {
           <ApplicationForm
             initialName={user.name}
             email={user.email}
+            userId={user.id}
             cycleOpen={schema?.open === true}
+            preOpenLabel={preOpenLabel}
+            cycleId={schema?.cycleId ?? null}
             cycleName={schema?.cycleName ?? null}
             questions={schema?.questions ?? []}
             initialDraft={draft}

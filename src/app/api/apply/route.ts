@@ -24,7 +24,12 @@ export async function POST(req: NextRequest) {
   }
   const supabase = await createClient();
   const ip = clientIp(req);
-  if (!(await checkRateLimit(`apply:${ip}`))) {
+  // Two buckets, not one. The per-user key keeps a shared campus NAT from 429ing
+  // a whole lecture hall, but it cannot be the ceiling: with user.id in the key
+  // the IP is only a discriminator, so one host minting Clerk accounts gets one
+  // full bucket per account. The IP-only bucket is the ceiling that survives
+  // that (limits: supabase/migrations/20260902160000_apply_ip_rate_limit_ceiling.sql).
+  if (!(await checkRateLimit(`apply:${user.id}:${ip}`)) || !(await checkRateLimit(`apply-ip:${ip}`))) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });
   }
   const { data, error } = await supabase.rpc("submit_application", {

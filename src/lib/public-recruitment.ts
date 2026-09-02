@@ -34,6 +34,10 @@ export function formatRecruitmentDate(value: string) {
   return DATE_FORMAT.format(new Date(value));
 }
 
+export function formatRecruitmentTime(value: string) {
+  return TIME_FORMAT.format(new Date(value));
+}
+
 export function formatRecruitmentEventTime(startsAt: string, endsAt?: string | null) {
   const start = formatRecruitmentDate(startsAt);
   return endsAt ? `${start} to ${TIME_FORMAT.format(new Date(endsAt))}` : start;
