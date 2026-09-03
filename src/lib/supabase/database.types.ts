@@ -202,6 +202,7 @@ export type Database = {
           offer_response: string | null
           pnm_id: string
           process_survey_submitted_at: string | null
+          headshot_storage_path: string | null
           resume_storage_path: string | null
           status: Database["rush"]["Enums"]["application_status"]
           submitted_at: string | null
@@ -217,6 +218,7 @@ export type Database = {
           offer_response?: string | null
           pnm_id: string
           process_survey_submitted_at?: string | null
+          headshot_storage_path?: string | null
           resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -232,6 +234,7 @@ export type Database = {
           offer_response?: string | null
           pnm_id?: string
           process_survey_submitted_at?: string | null
+          headshot_storage_path?: string | null
           resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -2389,15 +2392,22 @@ export type Database = {
         Returns: string
       }
       attach_ready_resume: { Args: never; Returns: string }
+      attach_headshot: { Args: { target_path: string }; Returns: Json }
+      authorize_headshot_access: {
+        Args: { target_application_id: string }
+        Returns: string
+      }
       authorize_resume_access: {
         Args: { target_application_id: string }
         Returns: string
       }
+      begin_headshot_upload: { Args: Record<PropertyKey, never>; Returns: Json }
       begin_resume_upload: {
         Args: { upload_filename: string; upload_size: number }
         Returns: Json
       }
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
+      my_headshot: { Args: Record<PropertyKey, never>; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       can_start_application: { Args: never; Returns: boolean }
       cancel_event: {

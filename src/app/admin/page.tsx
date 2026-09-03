@@ -51,7 +51,7 @@ export default async function AdminDashboard() {
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
     supabase
       .from("applications")
-      .select("id,status,submitted_at,resume_storage_path,pnms!inner(id,name,contact)")
+      .select("id,status,submitted_at,resume_storage_path,headshot_storage_path,pnms!inner(id,name,contact)")
       .eq("cycle_id", cycleId)
       .not("submitted_at", "is", null)
       .neq("status", "DRAFT"),
@@ -203,6 +203,7 @@ export default async function AdminDashboard() {
           submittedAt: application.submitted_at,
           submittedLabel: submittedDate(application.submitted_at),
           hasResume: Boolean(application.resume_storage_path),
+          hasHeadshot: Boolean(application.headshot_storage_path),
         }))}
         canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
         canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}

@@ -8,6 +8,7 @@ import PortalShell from "@/components/portal-shell";
 import LogoutButton from "@/components/logout-button";
 import { BuddyButton, OfferButtons, SlotButton, SurveyForm, WithdrawButton } from "./actions";
 import ApplicantStatusRefresh from "./status-refresh";
+import HeadshotUpload from "./headshot-upload";
 import ResumeReplace from "./resume-replace";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { decisionOutcomeLabel } from "@/lib/labels";
@@ -399,7 +400,10 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   the window closes; this only hides the control for files that
                   are already finished either way. */}
               {!withdrawn && !application.released_outcome && !["DRAFT", "REJECTED"].includes(application.display_status) && (
-                <ResumeReplace hasResume={application.has_resume} />
+                <>
+                  <ResumeReplace hasResume={application.has_resume} />
+                  <HeadshotUpload />
+                </>
               )}
               {application.released_outcome === "OFFER" && (
                 <>

@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(294);
+select extensions.plan(306);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -69,6 +69,13 @@ select extensions.has_function('rush','finalize_resume_upload',array['text','int
 select extensions.has_function('rush','reject_resume_upload',array['text','text'],'resume rejection function exists');
 select extensions.has_function('rush','my_ready_resume',array['text'],'applicant ready-resume lookup exists');
 select extensions.has_function('rush','authorize_resume_access',array['text'],'internal resume authorization exists');
+select extensions.has_function('rush','begin_headshot_upload',array[]::text[],'headshot upload start function exists');
+select extensions.has_function('rush','attach_headshot',array['text'],'headshot attach function exists');
+select extensions.has_function('rush','authorize_headshot_access',array['text'],'internal headshot authorization exists');
+select extensions.has_function('rush','my_headshot',array[]::text[],'applicant headshot lookup exists');
+select extensions.ok(position('CANDIDATE_ACCESS' in pg_get_functiondef('rush.authorize_headshot_access(text)'::regprocedure)) > 0 and position('actor_has_application_conflict' in pg_get_functiondef('rush.authorize_headshot_access(text)'::regprocedure)) > 0, 'headshot access uses the same candidate-access and recusal rules as the resume');
+select extensions.ok((select not public and file_size_limit = 1048576 and allowed_mime_types = array['image/webp'] from storage.buckets where id='candidate-photos'), 'the candidate-photos bucket is private, capped, and webp only');
+select extensions.ok(not exists(select 1 from pg_policy where polrelid='storage.objects'::regclass and pg_get_expr(coalesce(polqual,polwithcheck),'storage.objects'::regclass) like '%candidate-photos%'), 'candidate-photos has no storage policies: every read and write is server-side');
 select extensions.has_function('rush','create_screening_batch',array['text','uuid[]'],'screening batch function exists');
 select extensions.has_function('rush','screening_admin_overview',array['text'],'screening overview function exists');
 select extensions.has_function('rush','freeze_screening_batch',array['text'],'screening freeze function exists');
@@ -884,6 +891,43 @@ set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":
 select extensions.throws_ok(
   $$select rush.authorize_resume_access('10000000-0000-4000-8000-000000000057')$$,
   '42501','forbidden','a regular member cannot open a resume'
+);
+
+
+-- Applicant headshots. A face is candidate material, so it must obey exactly
+-- the rules the resume already obeys: capability, recusal, and blindness.
+-- Claims are still the regular member from the test above; this block needs the
+-- owner, or the not-found case is masked by the forbidden case.
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000051","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.authorize_headshot_access('10000000-0000-4000-8000-000000000057')$$,
+  'P0002','headshot not found','an application with no headshot reports not found, not forbidden'
+);
+
+set local role postgres;
+update rush.applications set headshot_storage_path='10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000060.webp' where id='10000000-0000-4000-8000-000000000057';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000051","role":"authenticated"}';
+set local role authenticated;
+select extensions.is(
+  (select rush.authorize_headshot_access('10000000-0000-4000-8000-000000000057')), '10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000060.webp',
+  'an owner with candidate access gets the headshot path'
+);
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000052","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.authorize_headshot_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','a panel-only reviewer cannot see a face: Hash review stays blind'
+);
+
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000054","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.authorize_headshot_access('10000000-0000-4000-8000-000000000057')$$,
+  '42501','forbidden','a regular member cannot open a headshot'
+);
+
+select extensions.throws_ok(
+  $$select rush.attach_headshot('10000000-0000-4000-8000-000000000051/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000061.webp')$$,
+  '22023','invalid headshot path','attach refuses a path that is not the caller own prefix'
 );
 
 set local role postgres;

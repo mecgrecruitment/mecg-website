@@ -23,6 +23,7 @@ type PipelineApplication = {
   submittedAt: string;
   submittedLabel: string;
   hasResume: boolean;
+  hasHeadshot: boolean;
 };
 
 type ApplicantView = "ALL" | "PIPELINE";
@@ -45,12 +46,25 @@ function ApplicantCard({
   controlId: string;
   returnTo: string;
 }) {
+  // Plain <img>: same-origin route, no images.remotePatterns configured, and the
+  // initials stay as the fallback for a missing or unreadable photo.
+  const [photoFailed, setPhotoFailed] = useState(false);
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-[0_1px_2px_rgba(7,13,31,0.06)]">
       <div className="flex items-center gap-2">
-        <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
-          {initials(application.name)}
-        </span>
+        {application.hasHeadshot && !photoFailed ? (
+          // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route, no images.remotePatterns
+          <img
+            src={`/api/admin/applications/${application.id}/headshot`}
+            alt=""
+            onError={() => setPhotoFailed(true)}
+            className="h-[26px] w-[26px] shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
+            {initials(application.name)}
+          </span>
+        )}
         <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
           {application.name}
         </Link>

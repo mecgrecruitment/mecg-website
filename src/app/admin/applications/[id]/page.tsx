@@ -31,6 +31,7 @@ type ApplicationDossierRow = {
   id: string;
   status: string;
   resume_storage_path: string | null;
+  headshot_storage_path: string | null;
   cycle_id: string;
   offer_response: string | null;
   offer_responded_at: string | null;
@@ -150,7 +151,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   const returnTo = validateRecruitmentReturnTo(query.returnTo);
   const user = await requireAdmin();
   const supabase = await createClient();
-  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
+  const applicationSelect: string = "id,status,resume_storage_path,headshot_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
   const { data, error } = await supabase
     .from("applications")
     .select(applicationSelect)
@@ -333,9 +334,21 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant dossier</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{displayName}</h1>
+        {/* Never in the panelOnly branch: that view hides contact and the resume,
+            and a face is candidate material. Plain <img>, same-origin route. */}
+        <div className="flex items-center gap-4">
+          {!panelOnly && application.headshot_storage_path && (
+            // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route, no images.remotePatterns
+            <img
+              src={`/api/admin/applications/${application.id}/headshot`}
+              alt=""
+              className="size-14 shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(7,13,31,0.12)]"
+            />
+          )}
+          <div>
+            <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant dossier</p>
+            <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{displayName}</h1>
+          </div>
         </div>
         <LogoutButton />
       </header>
