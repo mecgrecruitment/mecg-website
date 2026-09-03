@@ -14,6 +14,7 @@ import PipelineBoard from "./pipeline-board";
 import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { cycleStatusLabel } from "@/lib/labels";
+import { isMissingSchemaObject } from "@/lib/schema-availability";
 
 export const metadata: Metadata = { title: "Board dashboard" };
 
@@ -51,7 +52,7 @@ export default async function AdminDashboard() {
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
     supabase
       .from("applications")
-      .select("id,status,submitted_at,resume_storage_path,headshot_storage_path,pnms!inner(id,name,contact)")
+      .select("id,status,submitted_at,resume_storage_path,pnms!inner(id,name,contact)")
       .eq("cycle_id", cycleId)
       .not("submitted_at", "is", null)
       .neq("status", "DRAFT"),
@@ -60,6 +61,18 @@ export default async function AdminDashboard() {
     supabase.from("event_slots").select("id,capacity,event_id,slot_rsvps(id),events!inner(cycle_id)").eq("events.cycle_id", cycleId),
     supabase.from("referrals").select("id", { count: "exact", head: true }).eq("cycle_id", cycleId),
   ]);
+  // Deliberately separate and deliberately not fatal: this column arrives with a
+  // migration, and a dashboard that 500s for everyone until someone runs
+  // `supabase db push` is a worse failure than a roster showing initials.
+  const headshotResult = await supabase
+    .from("applications")
+    .select("id,headshot_storage_path")
+    .eq("cycle_id", cycleId)
+    .not("headshot_storage_path", "is", null);
+  if (headshotResult.error && !isMissingSchemaObject(headshotResult.error)) {
+    console.error("headshot roster lookup failed", headshotResult.error);
+  }
+  const headshotIds = new Set((headshotResult.data ?? []).map((row) => row.id));
   for (const result of [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, eventSlotsResult, referralsResult]) {
     if (result.error) throw result.error;
   }
@@ -206,7 +219,7 @@ export default async function AdminDashboard() {
           // Gated on the same audience the headshot route allows: a panel-only
           // member loads this board, and would otherwise fire a 403 image
           // request per card and log an access denial for each one.
-          hasHeadshot: canOperate && Boolean(application.headshot_storage_path),
+          hasHeadshot: canOperate && headshotIds.has(application.id),
         }))}
         canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
         canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}

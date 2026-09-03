@@ -67,7 +67,7 @@ function FieldError({ id, children, alert = false }: { id: string; children?: st
   return children ? <p id={id} className="mt-2 text-sm text-red-700" role={alert ? "alert" : undefined}>{children}</p> : null;
 }
 
-export default function ApplicationForm({ initialName, email, userId, cycleOpen, preOpenLabel, cycleId, cycleName, questions, initialDraft, initialHasHeadshot = false }: {
+export default function ApplicationForm({ initialName, email, userId, cycleOpen, preOpenLabel, cycleId, cycleName, questions, initialDraft, initialHasHeadshot = false, headshotSupported = true }: {
   initialName: string;
   email: string;
   userId: string;
@@ -78,6 +78,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   questions: IntakeQuestion[];
   initialDraft: ApplicationServerDraft | null;
   initialHasHeadshot?: boolean;
+  headshotSupported?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>(initialDraft?.currentStep ?? "details");
@@ -299,7 +300,9 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       }
     }
     if (target === "materials" && (uploadState.kind === "uploading" || !resumePath)) next.resume = uploadState.kind === "uploading" ? "Wait for your resume upload to finish." : "Upload your resume before continuing.";
-    if (target === "materials" && !headshotReady) next.headshot = "Upload a photo of yourself before continuing.";
+    // headshotSupported is false only when the photo RPCs are not deployed yet.
+    // Requiring a photo the backend cannot accept would block every submission.
+    if (target === "materials" && headshotSupported && !headshotReady) next.headshot = "Upload a photo of yourself before continuing.";
     setErrors(next);
     const first = Object.keys(next)[0];
     if (first) window.requestAnimationFrame(() => document.getElementById(first === "resume" || first === "headshot" ? first : questions.some((question) => question.key === first) ? answerId(first) : first)?.focus());
@@ -392,7 +395,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
           <p className="hidden text-[13px] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
           {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
           {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
-          {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} initialHasHeadshot={initialHasHeadshot} setHeadshotReady={setHeadshotReady} headshotError={errors.headshot} />}
+          {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} initialHasHeadshot={initialHasHeadshot} setHeadshotReady={setHeadshotReady} headshotError={errors.headshot} headshotSupported={headshotSupported} />}
           {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
         </div>
 
@@ -439,12 +442,12 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
   })}</div></>;
 }
 
-function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error, initialHasHeadshot, setHeadshotReady, headshotError }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string; initialHasHeadshot: boolean; setHeadshotReady: (ready: boolean) => void; headshotError?: string }) {
+function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error, initialHasHeadshot, setHeadshotReady, headshotError, headshotSupported }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string; initialHasHeadshot: boolean; setHeadshotReady: (ready: boolean) => void; headshotError?: string; headshotSupported: boolean }) {
   const resumeDescription = ["resume-guidance", error ? "resume-error" : "", uploadState.kind === "error" ? "resume-upload-error" : ""].filter(Boolean).join(" ");
   return <><StepHeading>Add your materials.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
     <label htmlFor="resume" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy"><input id="resume" type="file" accept="application/pdf" required={!resumePath} disabled={uploadState.kind === "uploading"} className="sr-only" aria-invalid={Boolean(error || uploadState.kind === "error")} aria-describedby={resumeDescription} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume (required)"}</span><span id="resume-guidance" className="mt-1 block text-sm text-mecg-navy/65">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
     {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/65" role="status" aria-live="polite">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status" aria-live="polite">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError id="resume-upload-error" alert>{uploadState.message}</FieldError>}<FieldError id="resume-error">{error}</FieldError>
-    <div><HeadshotField onUploaded={setHeadshotReady} initialHasHeadshot={initialHasHeadshot} /><FieldError id="headshot-error">{headshotError}</FieldError></div>
+    {headshotSupported ? <div><HeadshotField onUploaded={setHeadshotReady} initialHasHeadshot={initialHasHeadshot} /><FieldError id="headshot-error">{headshotError}</FieldError></div> : null}
     <label htmlFor="linkedinUrl" className={labelClass}>LinkedIn profile <span className="font-normal text-mecg-navy/60">Optional</span><input id="linkedinUrl" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} type="url" placeholder="https://linkedin.com/in/..." className={fieldClass} /></label>
     <label htmlFor="accessibilityNotes" className={labelClass}>Scheduling or access needs <span className="font-normal text-mecg-navy/60">Optional and never scored</span><textarea id="accessibilityNotes" value={accessibilityNotes} onChange={(e) => setAccessibilityNotes(e.target.value)} rows={4} className={`${fieldClass} py-3`} aria-describedby="accessibilityNotes-guidance" /><span id="accessibilityNotes-guidance" className="mt-2 block text-xs font-normal leading-5 text-mecg-navy/65">Only the operations team uses this information to arrange an accessible recruitment process.</span></label>
   </div></>;

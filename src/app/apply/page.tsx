@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
 import { parseApplicationServerDraft } from "./application-server-draft";
+import { isMissingSchemaObject } from "@/lib/schema-availability";
 
 export const metadata: Metadata = { title: "Apply" };
 
@@ -79,13 +80,13 @@ export default async function ApplyPage() {
   // open:false for the whole period before opens_at, which is indistinguishable
   // from a closed cycle without it. Fetched alongside the RPCs, not before them,
   // so the extra anon call costs nothing on the wall clock.
-  const [recruitment, { data: intake, error: intakeError }, { data: hasPastApplication }, { data: hasHeadshot }] = await Promise.all([
+  const [recruitment, { data: intake, error: intakeError }, { data: hasPastApplication }, { data: hasHeadshot, error: headshotError }] = await Promise.all([
     fetchPublicRecruitment(),
     supabase ? supabase.rpc("intake_schema") : Promise.resolve({ data: null, error: null }),
     supabase ? supabase.rpc("is_applicant") : Promise.resolve({ data: false }),
     // The photo is stored outside the draft row, so the form has no other way to
     // know a returning applicant already uploaded one and would re-block the step.
-    supabase ? supabase.rpc("my_headshot") : Promise.resolve({ data: false }),
+    supabase ? supabase.rpc("my_headshot") : Promise.resolve({ data: false, error: null }),
   ]);
   const cycleStatus = recruitment?.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const upcomingCycle = recruitment?.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
@@ -183,6 +184,7 @@ export default async function ApplyPage() {
             questions={schema?.questions ?? []}
             initialDraft={draft}
             initialHasHeadshot={hasHeadshot === true}
+            headshotSupported={!isMissingSchemaObject(headshotError)}
           />
         ) : clerkConfigured ? (
           <div className="surface-card mx-auto mt-8 max-w-xl bg-white p-7 text-left sm:p-9">
