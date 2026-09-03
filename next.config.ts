@@ -69,6 +69,12 @@ const nextConfig: NextConfig = {
   // surfaced to applicants as "The uploaded file is not a valid PDF."
   // Keeping it external makes Node resolve it from node_modules as it expects.
   serverExternalPackages: ["pdfjs-dist"],
+  // pdf.mjs loads its worker through a runtime import that output-file tracing
+  // cannot discover. Include it in the one serverless route that parses PDFs;
+  // otherwise deployments contain pdf.mjs but omit pdf.worker.mjs.
+  outputFileTracingIncludes: {
+    "/api/apply/resume/finalize": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
   deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
   poweredByHeader: false,
   async redirects() {
