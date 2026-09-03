@@ -196,6 +196,7 @@ export type Database = {
           created_at: string
           cycle_id: string
           draft_payload: Json | null
+          headshot_storage_path: string | null
           id: string
           offer_expires_at: string | null
           offer_responded_at: string | null
@@ -211,6 +212,7 @@ export type Database = {
           created_at?: string
           cycle_id: string
           draft_payload?: Json | null
+          headshot_storage_path?: string | null
           id?: string
           offer_expires_at?: string | null
           offer_responded_at?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           created_at?: string
           cycle_id?: string
           draft_payload?: Json | null
+          headshot_storage_path?: string | null
           id?: string
           offer_expires_at?: string | null
           offer_responded_at?: string | null
@@ -2388,11 +2391,17 @@ export type Database = {
         }
         Returns: string
       }
+      attach_headshot: { Args: { target_path: string }; Returns: Json }
       attach_ready_resume: { Args: never; Returns: string }
+      authorize_headshot_access: {
+        Args: { target_application_id: string }
+        Returns: string
+      }
       authorize_resume_access: {
         Args: { target_application_id: string }
         Returns: string
       }
+      begin_headshot_upload: { Args: { upload_extension?: string }; Returns: Json }
       begin_resume_upload: {
         Args: { upload_filename: string; upload_size: number }
         Returns: Json
@@ -2684,6 +2693,7 @@ export type Database = {
           starts_at: string
         }[]
       }
+      my_headshot: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
       my_offer_deadlines: { Args: never; Returns: Json }
       my_ready_resume: { Args: { target_path?: string }; Returns: Json }

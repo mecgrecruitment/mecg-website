@@ -14,6 +14,7 @@ import DossierTabs from "./tabs";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel, evaluationStatusLabel, statusLabel } from "@/lib/labels";
 import { applicantDossierHref, filterDossierNavigationRows, validateRecruitmentReturnTo, type DossierNavigationRow } from "./dossier-navigation";
+import { isMissingSchemaObject } from "@/lib/schema-availability";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
 
@@ -159,6 +160,18 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   if (error) throw error;
   if (!data) notFound();
   const application = data as unknown as ApplicationDossierRow;
+  // Read separately and never fatally: this column arrives with a migration,
+  // and a dossier that 500s for every operator until someone runs `db push` is
+  // a far worse failure than a dossier without a photo.
+  const headshotLookup = await supabase
+    .from("applications")
+    .select("headshot_storage_path")
+    .eq("id", id)
+    .maybeSingle();
+  if (headshotLookup.error && !isMissingSchemaObject(headshotLookup.error)) {
+    console.error("dossier headshot lookup failed", headshotLookup.error);
+  }
+  const headshotStoragePath = headshotLookup.data?.headshot_storage_path ?? null;
   const cycleId = application.cycle_id;
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
@@ -333,9 +346,21 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant dossier</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{displayName}</h1>
+        {/* Never in the panelOnly branch: that view hides contact and the resume,
+            and a face is candidate material. Plain <img>, same-origin route. */}
+        <div className="flex items-center gap-4">
+          {!panelOnly && headshotStoragePath && (
+            // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route, no images.remotePatterns
+            <img
+              src={`/api/admin/applications/${application.id}/headshot`}
+              alt=""
+              className="size-14 shrink-0 rounded-full object-cover shadow-[0_1px_2px_rgba(7,13,31,0.12)]"
+            />
+          )}
+          <div>
+            <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant dossier</p>
+            <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">{displayName}</h1>
+          </div>
         </div>
         <LogoutButton />
       </header>

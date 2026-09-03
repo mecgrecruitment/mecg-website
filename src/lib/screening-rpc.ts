@@ -75,6 +75,11 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   screening_admin_overview: isScreeningOverview,
   screening_assignment_detail: isScreeningDetail,
   screening_assignment_inputs: isScreeningAssignmentInputs,
+  begin_headshot_upload: objectWith(["path", "string"]),
+  attach_headshot: (value) =>
+    isRecord(value) && (value.previousPath === null || typeof value.previousPath === "string"),
+  authorize_headshot_access: (value) => typeof value === "string",
+  my_headshot: (value) => typeof value === "boolean",
   begin_resume_upload: objectWith(["documentId", "string"], ["path", "string"]),
   my_ready_resume: objectWith(["path", "string"], ["filename", "string"]),
   pending_resume_upload: objectWith(
