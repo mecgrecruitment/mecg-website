@@ -2401,7 +2401,7 @@ export type Database = {
         Args: { target_application_id: string }
         Returns: string
       }
-      begin_headshot_upload: { Args: Record<PropertyKey, never>; Returns: Json }
+      begin_headshot_upload: { Args: { upload_extension?: string }; Returns: Json }
       begin_resume_upload: {
         Args: { upload_filename: string; upload_size: number }
         Returns: Json

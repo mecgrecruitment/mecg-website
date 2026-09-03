@@ -12,7 +12,10 @@
 alter table rush.applications add column if not exists headshot_storage_path text;
 
 -- Same path shape as resumes ({actor}/{cycle}/{uuid}) so one glance says who
--- owns an object, but .webp: the browser always re-encodes before upload.
+-- owns an object. WebP or JPEG: the browser re-encodes before upload and
+-- prefers WebP, but falls back to JPEG where WebP encoding is missing, because
+-- the photo is required and a browser that cannot encode it would otherwise
+-- lock that applicant out of applying.
 -- Added NOT VALID then validated: every existing row is NULL and so trivially
 -- passes, and this way the check never takes a validating scan under ACCESS
 -- EXCLUSIVE on a table the open intake is writing to.
@@ -26,7 +29,7 @@ begin
     alter table rush.applications add constraint applications_headshot_storage_path_check
       check (
         headshot_storage_path is null
-        or headshot_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.webp$'
+        or headshot_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.(webp|jpg)$'
       ) not valid;
     alter table rush.applications validate constraint applications_headshot_storage_path_check;
   end if;
@@ -40,15 +43,15 @@ $$;
 -- here. (The dead member-photos bucket keys its policies to functions that the
 -- public-schema drop removed; do not copy that pattern.)
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('candidate-photos', 'candidate-photos', false, 1048576, array['image/webp'])
+values ('candidate-photos', 'candidate-photos', false, 1048576, array['image/webp', 'image/jpeg'])
 on conflict (id) do update set
   public = false,
   file_size_limit = 1048576,
-  allowed_mime_types = array['image/webp'];
+  allowed_mime_types = array['image/webp', 'image/jpeg'];
 
 -- Mints the object path. The caller never proposes one: same rule the resume
 -- flow follows, for the same reason.
-create or replace function rush.begin_headshot_upload()
+create or replace function rush.begin_headshot_upload(upload_extension text default 'webp')
 returns jsonb
 language plpgsql
 security definer
@@ -60,6 +63,9 @@ declare
   target_application rush.applications%rowtype;
 begin
   if actor is null then raise exception 'unauthorized' using errcode = '42501'; end if;
+  if upload_extension is null or upload_extension not in ('webp', 'jpg') then
+    raise exception 'invalid photo format' using errcode = '22023';
+  end if;
 
   select id into target_cycle_id
   from rush.rush_cycles
@@ -107,12 +113,12 @@ begin
 
   return jsonb_build_object(
     'path',
-    actor::text || '/' || target_cycle_id || '/' || gen_random_uuid()::text || '.webp'
+    actor::text || '/' || target_cycle_id || '/' || gen_random_uuid()::text || '.' || upload_extension
   );
 end;
 $$;
-revoke all on function rush.begin_headshot_upload() from public, anon;
-grant execute on function rush.begin_headshot_upload() to authenticated, service_role;
+revoke all on function rush.begin_headshot_upload(text) from public, anon;
+grant execute on function rush.begin_headshot_upload(text) to authenticated, service_role;
 
 -- Records the uploaded object against the caller's own application and returns
 -- the path it replaced, so the route can delete the superseded object.

@@ -10,14 +10,23 @@ const MAX_HEADSHOT_BYTES = 1024 * 1024;
 // Headroom over the file limit for the multipart envelope, checked against the
 // declared length so an oversized body is refused before it is buffered.
 const MAX_REQUEST_BYTES = 2 * 1024 * 1024;
-const INVALID_FILE = "Choose a WebP photo smaller than 1 MB";
+const INVALID_FILE = "Choose a photo smaller than 1 MB";
 
-// The multipart part's declared MIME type is client-controlled, so it proves
-// nothing. A real WebP is a RIFF container: "RIFF" <4 length bytes> "WEBP".
-function isWebp(bytes: Uint8Array) {
-  if (bytes.byteLength < 12) return false;
-  const tag = (start: number) => String.fromCharCode(...bytes.subarray(start, start + 4));
-  return tag(0) === "RIFF" && tag(8) === "WEBP";
+// The browser prefers WebP and falls back to JPEG where WebP encoding is
+// missing, so both arrive here. The declared MIME type is client-controlled and
+// proves nothing; these are the real container signatures.
+// WebP: "RIFF" <4 length bytes> "WEBP". JPEG: FF D8 FF.
+const ENCODINGS = {
+  "image/webp": { extension: "webp", matches: (b: Uint8Array) =>
+    b.byteLength >= 12
+    && String.fromCharCode(...b.subarray(0, 4)) === "RIFF"
+    && String.fromCharCode(...b.subarray(8, 12)) === "WEBP" },
+  "image/jpeg": { extension: "jpg", matches: (b: Uint8Array) =>
+    b.byteLength >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
+} as const;
+
+function encodingFor(type: string): (typeof ENCODINGS)[keyof typeof ENCODINGS] | null {
+  return (ENCODINGS as Record<string, (typeof ENCODINGS)[keyof typeof ENCODINGS]>)[type] ?? null;
 }
 
 export async function POST(req: NextRequest) {
@@ -37,14 +46,15 @@ export async function POST(req: NextRequest) {
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("headshot");
-  if (!(file instanceof File) || file.type !== "image/webp" || file.size < 1 || file.size > MAX_HEADSHOT_BYTES) {
+  const encoding = file instanceof File ? encodingFor(file.type) : null;
+  if (!(file instanceof File) || !encoding || file.size < 1 || file.size > MAX_HEADSHOT_BYTES) {
     return NextResponse.json({ error: INVALID_FILE }, { status: 400 });
   }
   const bytes = new Uint8Array(await file.arrayBuffer());
-  if (!isWebp(bytes)) return NextResponse.json({ error: INVALID_FILE }, { status: 400 });
+  if (!encoding.matches(bytes)) return NextResponse.json({ error: INVALID_FILE }, { status: 400 });
 
   const supabase = await createClient();
-  const { data: target, error } = await screeningRpc<{ path: string }>(supabase, "begin_headshot_upload", {});
+  const { data: target, error } = await screeningRpc<{ path: string }>(supabase, "begin_headshot_upload", { upload_extension: encoding.extension });
   if (error || typeof target?.path !== "string") {
     if (error) console.error("begin_headshot_upload failed", error);
     const mapped = error ? mapRpcError(error, "Could not start photo upload") : { body: { error: "Could not start photo upload" }, status: 500 };
@@ -56,7 +66,7 @@ export async function POST(req: NextRequest) {
   // `target.path` comes from the RPC, never the request, so the browser cannot
   // steer the upload at another applicant's object.
   const storage = createAdminClient().storage.from("candidate-photos");
-  const { error: uploadError } = await storage.upload(target.path, bytes, { contentType: "image/webp" });
+  const { error: uploadError } = await storage.upload(target.path, bytes, { contentType: file.type });
   if (uploadError) {
     console.error("headshot upload failed", uploadError);
     return NextResponse.json({ error: "Could not save the photo. Try again." }, { status: 502 });

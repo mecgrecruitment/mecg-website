@@ -24,6 +24,16 @@ function webpRequest(bytes = webpBytes()) {
   return uploadRequest(new File([bytes], "headshot.webp", { type: "image/webp" }));
 }
 
+function jpegBytes(size = 32) {
+  const bytes = new Uint8Array(Math.max(size, 3));
+  bytes.set([0xff, 0xd8, 0xff], 0);
+  return bytes;
+}
+
+function jpegRequest(bytes = jpegBytes()) {
+  return uploadRequest(new File([bytes], "headshot.jpg", { type: "image/jpeg" }));
+}
+
 function adminRequest() {
   return new NextRequest(`http://localhost/api/admin/applications/${APPLICATION_ID}/headshot`);
 }
@@ -218,4 +228,48 @@ test("admin headshot route streams the bytes to an authorized reviewer", async (
   assert.equal(response.headers.get("content-type"), "image/webp");
   assert.equal(response.headers.get("cache-control"), "private, no-store");
   assert.deepEqual(new Uint8Array(await response.arrayBuffer()), bytes);
+});
+
+// A browser that cannot encode WebP falls back to JPEG. The photo is required
+// to submit, so if the server rejected that fallback those applicants could not
+// apply at all. These pin the whole fallback path end to end.
+test("headshot upload accepts the JPEG fallback and mints a .jpg path", async (t) => {
+  const JPG_PATH = `${USER.id}/cycle/55555555-5555-5555-5555-555555555555.jpg`;
+  const calls: { name: string; args: Record<string, unknown> }[] = [];
+  const userClient = {
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      calls.push({ name, args });
+      if (name === "begin_headshot_upload") return { data: { path: JPG_PATH }, error: null };
+      return { data: { previousPath: null }, error: null };
+    },
+  };
+  const { client, uploaded } = adminStorage();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
+  const { POST } = await importUploadRoute("jpeg-success");
+
+  const response = await POST(jpegRequest());
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(calls[0]?.args, { upload_extension: "jpg" });
+  assert.equal(uploaded[0]?.path, JPG_PATH);
+  assert.equal(uploaded[0]?.contentType, "image/jpeg");
+});
+
+test("headshot upload still refuses a PNG, and a JPEG that is not really a JPEG", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await importUploadRoute("jpeg-reject");
+
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const asPng = await POST(uploadRequest(new File([png], "headshot.png", { type: "image/png" })));
+  assert.equal(asPng.status, 400);
+
+  // Declared image/jpeg, actually PNG bytes: the magic check must still catch it.
+  const lying = await POST(uploadRequest(new File([png], "headshot.jpg", { type: "image/jpeg" })));
+  assert.equal(lying.status, 400);
 });

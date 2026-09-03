@@ -27,7 +27,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     console.error("headshot download failed", downloadError);
     return NextResponse.json({ error: "The photo is temporarily unavailable" }, { status: 502 });
   }
+  // Follow the stored object: the browser encodes WebP where it can and JPEG
+  // where it cannot, so both extensions exist in the bucket.
   return new NextResponse(blob, {
-    headers: { "Content-Type": "image/webp", "Cache-Control": "private, no-store" },
+    headers: {
+      "Content-Type": path.endsWith(".jpg") ? "image/jpeg" : "image/webp",
+      "Cache-Control": "private, no-store",
+    },
   });
 }

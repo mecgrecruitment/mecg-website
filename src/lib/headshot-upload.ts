@@ -21,11 +21,19 @@ export async function resizeHeadshot(file: File): Promise<File> {
     const context = canvas.getContext("2d");
     if (!context || !side) throw new Error("We could not process that image. Try a different photo.");
     context.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, HEADSHOT_SIZE, HEADSHOT_SIZE);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
-    // A browser without WebP encoding silently hands back a PNG; the route only
-    // accepts image/webp, so catch that here instead of at the upload.
-    if (!blob || blob.type !== "image/webp") throw new Error("We could not process that image. Try a different photo.");
-    return new File([blob], "headshot.webp", { type: "image/webp" });
+    // A browser that cannot encode WebP ignores the type and hands back a PNG.
+    // The photo is required to submit, so treating that as failure would lock
+    // those applicants out of the application entirely. JPEG encoding is
+    // universal, so fall back to it and accept the slightly larger file.
+    const encode = (type: string) =>
+      new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.82));
+    let blob = await encode("image/webp");
+    if (blob?.type !== "image/webp") blob = await encode("image/jpeg");
+    if (!blob || (blob.type !== "image/webp" && blob.type !== "image/jpeg")) {
+      throw new Error("We could not process that image. Try a different photo.");
+    }
+    const extension = blob.type === "image/webp" ? "webp" : "jpg";
+    return new File([blob], `headshot.${extension}`, { type: blob.type });
   } finally {
     bitmap.close();
   }
