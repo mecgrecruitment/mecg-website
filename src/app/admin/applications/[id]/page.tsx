@@ -14,6 +14,7 @@ import DossierTabs from "./tabs";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel, evaluationStatusLabel, statusLabel } from "@/lib/labels";
 import { applicantDossierHref, filterDossierNavigationRows, validateRecruitmentReturnTo, type DossierNavigationRow } from "./dossier-navigation";
+import { isMissingSchemaObject } from "@/lib/schema-availability";
 
 const TERMINAL_STATUSES = new Set<(typeof PIPELINE_STATUSES)[number]>(["OFFERED", "WAITLISTED", "REJECTED", "WITHDRAWN"]);
 
@@ -31,7 +32,6 @@ type ApplicationDossierRow = {
   id: string;
   status: string;
   resume_storage_path: string | null;
-  headshot_storage_path: string | null;
   cycle_id: string;
   offer_response: string | null;
   offer_responded_at: string | null;
@@ -151,7 +151,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   const returnTo = validateRecruitmentReturnTo(query.returnTo);
   const user = await requireAdmin();
   const supabase = await createClient();
-  const applicationSelect: string = "id,status,resume_storage_path,headshot_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
+  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
   const { data, error } = await supabase
     .from("applications")
     .select(applicationSelect)
@@ -160,6 +160,18 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   if (error) throw error;
   if (!data) notFound();
   const application = data as unknown as ApplicationDossierRow;
+  // Read separately and never fatally: this column arrives with a migration,
+  // and a dossier that 500s for every operator until someone runs `db push` is
+  // a far worse failure than a dossier without a photo.
+  const headshotLookup = await supabase
+    .from("applications")
+    .select("headshot_storage_path")
+    .eq("id", id)
+    .maybeSingle();
+  if (headshotLookup.error && !isMissingSchemaObject(headshotLookup.error)) {
+    console.error("dossier headshot lookup failed", headshotLookup.error);
+  }
+  const headshotStoragePath = headshotLookup.data?.headshot_storage_path ?? null;
   const cycleId = application.cycle_id;
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
@@ -337,7 +349,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
         {/* Never in the panelOnly branch: that view hides contact and the resume,
             and a face is candidate material. Plain <img>, same-origin route. */}
         <div className="flex items-center gap-4">
-          {!panelOnly && application.headshot_storage_path && (
+          {!panelOnly && headshotStoragePath && (
             // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route, no images.remotePatterns
             <img
               src={`/api/admin/applications/${application.id}/headshot`}

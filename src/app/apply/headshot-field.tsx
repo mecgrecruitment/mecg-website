@@ -14,7 +14,7 @@ function byteLabel(bytes: number) {
 }
 
 // accept="image/*" is what gives phones the "Take Photo" option; no camera library needed.
-export default function HeadshotField({ onUploaded, initialHasHeadshot = false }: { onUploaded: (done: boolean) => void; initialHasHeadshot?: boolean }) {
+export default function HeadshotField({ onUploaded, initialHasHeadshot = false, onBusyChange, validationError }: { onUploaded: (done: boolean) => void; initialHasHeadshot?: boolean; onBusyChange?: (busy: boolean) => void; validationError?: string }) {
   const [state, setState] = useState<State>({ kind: "idle" });
   const previewUrl = useRef<string | null>(null);
   const inFlight = useRef(false);
@@ -40,6 +40,7 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false }
     }
     inFlight.current = true;
     setState({ kind: "working" });
+    onBusyChange?.(true);
     try {
       // Same deterministic resize the upload sends, so the preview and the size
       // note describe exactly what is stored.
@@ -53,6 +54,7 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false }
       onUploaded(false);
     } finally {
       inFlight.current = false;
+      onBusyChange?.(false);
     }
   }
 
@@ -67,8 +69,8 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false }
           required={!uploaded}
           disabled={state.kind === "working"}
           className="sr-only"
-          aria-invalid={state.kind === "error"}
-          aria-describedby={["headshot-guidance", state.kind === "error" ? "headshot-upload-error" : ""].filter(Boolean).join(" ")}
+          aria-invalid={state.kind === "error" || Boolean(validationError)}
+          aria-describedby={["headshot-guidance", state.kind === "error" ? "headshot-upload-error" : "", validationError ? "headshot-error" : ""].filter(Boolean).join(" ")}
           onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void choose(file); }}
         />
         {state.kind === "done"

@@ -16,9 +16,12 @@ alter table rush.applications add column if not exists headshot_storage_path tex
 -- prefers WebP, but falls back to JPEG where WebP encoding is missing, because
 -- the photo is required and a browser that cannot encode it would otherwise
 -- lock that applicant out of applying.
--- Added NOT VALID then validated: every existing row is NULL and so trivially
--- passes, and this way the check never takes a validating scan under ACCESS
--- EXCLUSIVE on a table the open intake is writing to.
+-- Added NOT VALID then validated. Note this does not dodge the lock: the CLI
+-- runs the whole file in one transaction, so ACCESS EXCLUSIVE is held across
+-- the validation regardless. It is safe here because every existing row is NULL
+-- and the add column above already takes that lock for the file's duration; the
+-- table is small enough that the scan is immaterial. On a large table this
+-- would need to be a separate migration to be worth anything.
 do $$
 begin
   if not exists (

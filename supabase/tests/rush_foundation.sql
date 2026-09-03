@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(308);
+select extensions.plan(313);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -940,6 +940,31 @@ select extensions.throws_ok(
   '23514',null,'the column constraint still refuses any other extension'
 );
 set local role authenticated;
+
+-- begin_headshot_upload and attach_headshot sit on the applicant's critical
+-- path: if either wrongly refuses, the applicant cannot submit at all. These
+-- pin the gates that decide that.
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000055","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.begin_headshot_upload('png')$$,
+  '22023','invalid photo format','only the two formats the browser can encode are accepted'
+);
+select extensions.throws_ok(
+  $$select rush.begin_headshot_upload(null)$$,
+  '22023','invalid photo format','a null format is refused rather than minting a pathless object'
+);
+select extensions.ok(
+  (rush.begin_headshot_upload('jpg')->>'path') like '%.jpg',
+  'a browser without WebP encoding still gets a usable upload path'
+);
+select extensions.ok(
+  (rush.begin_headshot_upload('webp')->>'path') like ('10000000-0000-4000-8000-000000000055/%' || '.webp'),
+  'the minted path is owned by the caller and defaults to webp'
+);
+select extensions.throws_ok(
+  $$select rush.attach_headshot('10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000063.webp')$$,
+  'P0002','headshot upload not found','attach refuses a path whose object was never uploaded'
+);
 
 set local role postgres;
 insert into rush.conflict_declarations(application_id,declarer_id,reason) values

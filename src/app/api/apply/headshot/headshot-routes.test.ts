@@ -226,7 +226,7 @@ test("admin headshot route streams the bytes to an authorized reviewer", async (
 
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("content-type"), "image/webp");
-  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.equal(response.headers.get("cache-control"), "private, max-age=60");
   assert.deepEqual(new Uint8Array(await response.arrayBuffer()), bytes);
 });
 

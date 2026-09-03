@@ -32,7 +32,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   return new NextResponse(blob, {
     headers: {
       "Content-Type": path.endsWith(".jpg") ? "image/jpeg" : "image/webp",
-      "Cache-Control": "private, no-store",
+      // private keeps it out of shared caches; the short max-age stops the
+      // roster refetching every face on every navigation without holding a
+      // stale one long after a conflict declaration revokes access.
+      "Cache-Control": "private, max-age=60",
     },
   });
 }
