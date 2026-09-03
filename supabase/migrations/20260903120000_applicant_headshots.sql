@@ -9,15 +9,29 @@
 -- chunked signed uploads), and reusing that machinery would mean editing the
 -- live intake to get it.
 
-alter table rush.applications add column headshot_storage_path text;
+alter table rush.applications add column if not exists headshot_storage_path text;
 
 -- Same path shape as resumes ({actor}/{cycle}/{uuid}) so one glance says who
 -- owns an object, but .webp: the browser always re-encodes before upload.
-alter table rush.applications add constraint applications_headshot_storage_path_check
-  check (
-    headshot_storage_path is null
-    or headshot_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.webp$'
-  );
+-- Added NOT VALID then validated: every existing row is NULL and so trivially
+-- passes, and this way the check never takes a validating scan under ACCESS
+-- EXCLUSIVE on a table the open intake is writing to.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'applications_headshot_storage_path_check'
+      and conrelid = 'rush.applications'::regclass
+  ) then
+    alter table rush.applications add constraint applications_headshot_storage_path_check
+      check (
+        headshot_storage_path is null
+        or headshot_storage_path ~ '^[0-9a-f-]{36}/[A-Za-z0-9_-]+/[0-9a-f-]{36}\.webp$'
+      ) not valid;
+    alter table rush.applications validate constraint applications_headshot_storage_path_check;
+  end if;
+end
+$$;
 
 -- Private, and deliberately without storage.objects policies: writes happen
 -- only through the /api/apply/headshot route on the service-role client, and
@@ -27,7 +41,10 @@ alter table rush.applications add constraint applications_headshot_storage_path_
 -- public-schema drop removed; do not copy that pattern.)
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('candidate-photos', 'candidate-photos', false, 1048576, array['image/webp'])
-on conflict (id) do nothing;
+on conflict (id) do update set
+  public = false,
+  file_size_limit = 1048576,
+  allowed_mime_types = array['image/webp'];
 
 -- Mints the object path. The caller never proposes one: same rule the resume
 -- flow follows, for the same reason.
@@ -107,6 +124,7 @@ set search_path = ''
 as $$
 declare
   actor uuid := rush.actor_id();
+  target_cycle_id text;
   target_application rush.applications%rowtype;
   previous_path text;
 begin
@@ -118,13 +136,25 @@ begin
     raise exception 'invalid headshot path' using errcode = '22023';
   end if;
 
+  select id into target_cycle_id
+  from rush.rush_cycles
+  where status = 'OPEN'
+    and (opens_at is null or opens_at <= now())
+    and (closes_at is null or closes_at >= now())
+  order by created_at desc
+  limit 1;
+  if target_cycle_id is null then
+    raise exception 'applications are not open' using errcode = '55000';
+  end if;
+
+  -- Scoped to the same open cycle begin_headshot_upload minted the path for.
+  -- Without this a path carrying cycle X could be written onto a row in cycle Y.
   select a.* into target_application
   from rush.applications a
   join rush.pnms p on p.id = a.pnm_id
   where p.auth_user_id = actor
+    and a.cycle_id = target_cycle_id
     and a.status in ('DRAFT', 'NEEDS_INFO', 'SUBMITTED')
-  order by a.created_at desc
-  limit 1
   for update of a;
   if target_application.id is null then
     raise exception 'save the application before uploading' using errcode = '55000';
@@ -166,8 +196,12 @@ as $$
     select 1
     from rush.applications a
     join rush.pnms p on p.id = a.pnm_id
+    join rush.rush_cycles c on c.id = a.cycle_id
     where p.auth_user_id = rush.actor_id()
       and a.headshot_storage_path is not null
+      and c.status = 'OPEN'
+      and (c.opens_at is null or c.opens_at <= now())
+      and (c.closes_at is null or c.closes_at >= now())
   );
 $$;
 revoke all on function rush.my_headshot() from public, anon;

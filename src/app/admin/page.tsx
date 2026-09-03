@@ -203,7 +203,10 @@ export default async function AdminDashboard() {
           submittedAt: application.submitted_at,
           submittedLabel: submittedDate(application.submitted_at),
           hasResume: Boolean(application.resume_storage_path),
-          hasHeadshot: Boolean(application.headshot_storage_path),
+          // Gated on the same audience the headshot route allows: a panel-only
+          // member loads this board, and would otherwise fire a 403 image
+          // request per card and log an access denial for each one.
+          hasHeadshot: canOperate && Boolean(application.headshot_storage_path),
         }))}
         canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
         canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}

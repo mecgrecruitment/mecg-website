@@ -67,9 +67,15 @@ export async function POST(req: NextRequest) {
   });
   if (attachError || !attached) {
     if (attachError) console.error("attach_headshot failed", attachError);
-    // Nothing references the object now, so drop it rather than orphan it.
-    const { error: cleanupError } = await storage.remove([target.path]);
-    if (cleanupError) console.error("orphaned headshot cleanup failed", cleanupError);
+    // Only a classified rejection proves the attach did not commit. A transport
+    // failure (timeout, reset) resolves with no code and the write may well have
+    // landed, so deleting here would strand a row pointing at a missing object
+    // that a screening packet then blocks the applicant from replacing. An
+    // orphaned object is the cheaper mistake.
+    if (!attachError || attachError.code) {
+      const { error: cleanupError } = await storage.remove([target.path]);
+      if (cleanupError) console.error("orphaned headshot cleanup failed", cleanupError);
+    }
     const mapped = attachError ? mapRpcError(attachError, "Could not save the photo") : { body: { error: "Could not save the photo" }, status: 500 };
     return NextResponse.json(mapped.body, { status: mapped.status });
   }

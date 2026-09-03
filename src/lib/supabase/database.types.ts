@@ -196,13 +196,13 @@ export type Database = {
           created_at: string
           cycle_id: string
           draft_payload: Json | null
+          headshot_storage_path: string | null
           id: string
           offer_expires_at: string | null
           offer_responded_at: string | null
           offer_response: string | null
           pnm_id: string
           process_survey_submitted_at: string | null
-          headshot_storage_path: string | null
           resume_storage_path: string | null
           status: Database["rush"]["Enums"]["application_status"]
           submitted_at: string | null
@@ -212,13 +212,13 @@ export type Database = {
           created_at?: string
           cycle_id: string
           draft_payload?: Json | null
+          headshot_storage_path?: string | null
           id?: string
           offer_expires_at?: string | null
           offer_responded_at?: string | null
           offer_response?: string | null
           pnm_id: string
           process_survey_submitted_at?: string | null
-          headshot_storage_path?: string | null
           resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -228,13 +228,13 @@ export type Database = {
           created_at?: string
           cycle_id?: string
           draft_payload?: Json | null
+          headshot_storage_path?: string | null
           id?: string
           offer_expires_at?: string | null
           offer_responded_at?: string | null
           offer_response?: string | null
           pnm_id?: string
           process_survey_submitted_at?: string | null
-          headshot_storage_path?: string | null
           resume_storage_path?: string | null
           status?: Database["rush"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -2391,8 +2391,8 @@ export type Database = {
         }
         Returns: string
       }
-      attach_ready_resume: { Args: never; Returns: string }
       attach_headshot: { Args: { target_path: string }; Returns: Json }
+      attach_ready_resume: { Args: never; Returns: string }
       authorize_headshot_access: {
         Args: { target_application_id: string }
         Returns: string
@@ -2407,7 +2407,6 @@ export type Database = {
         Returns: Json
       }
       board_can_view_resume: { Args: { target_path: string }; Returns: boolean }
-      my_headshot: { Args: Record<PropertyKey, never>; Returns: boolean }
       book_buddy_slot: { Args: { target_slot_id: string }; Returns: string }
       can_start_application: { Args: never; Returns: boolean }
       cancel_event: {
@@ -2694,6 +2693,7 @@ export type Database = {
           starts_at: string
         }[]
       }
+      my_headshot: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
       my_offer_deadlines: { Args: never; Returns: Json }
       my_ready_resume: { Args: { target_path?: string }; Returns: Json }
