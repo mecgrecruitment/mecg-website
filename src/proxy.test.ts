@@ -26,7 +26,6 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   const {
     handleProxy,
     handleUnconfiguredProxy,
-    shouldBypassClerk,
   } = await import(proxyModule) as typeof import("./proxy.ts");
   const signedOut = async () => ({ userId: null });
   const signedIn = async () => ({ userId: "user_clerk" });
@@ -52,19 +51,19 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   const unknownResponse = await handleProxy(signedOut, request("/this-route-does-not-exist"));
   assert.equal(unknownResponse.headers.get("x-middleware-next"), "1");
 
-  for (const pathname of ["/home", "/work/sample", "/this-route-does-not-exist", "/api/contact"]) {
-    assert.equal(shouldBypassClerk(request(pathname)), true, pathname);
-  }
-  for (const pathname of ["/login", "/apply", "/admin", "/member", "/api/member/profile", "/api/auth/login"]) {
-    assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
+  // Check-in is public and its handlers call currentUser(). Those are
+  // independent: clerkMiddleware now runs for every matched request, so the
+  // session is always readable, and handleProxy still lets check-in through
+  // without a redirect.
+  for (const pathname of ["/checkin/some-token", "/api/checkin/some-token"]) {
+    const response = await handleProxy(signedOut, request(pathname));
+    assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
   }
 
-  // Check-in is public and was therefore bypassed, but both handlers call
-  // currentUser(), so every QR scan 500d on "Clerk can't detect usage of
-  // clerkMiddleware()". Public and session-reading are independent: it must not
-  // bypass Clerk, and it must still pass through without a redirect.
-  for (const pathname of ["/checkin/some-token", "/api/checkin/some-token"]) {
-    assert.equal(shouldBypassClerk(request(pathname)), false, pathname);
+  // Both build a Supabase client, which calls auth(). Skipping clerkMiddleware
+  // made GET /api/events/<uuid>/ics 500 in production before the handler ran a
+  // single line; they are public and must pass straight through.
+  for (const pathname of ["/api/interest", "/api/events/abc/ics"]) {
     const response = await handleProxy(signedOut, request(pathname));
     assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
   }
@@ -84,4 +83,34 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
 
   const unconfiguredApiResponse = await handleUnconfiguredProxy(request("/api/member/profile"));
   assert.equal(unconfiguredApiResponse.status, 401);
+});
+
+// The mocked createRouteMatcher above only fakes route matchers, so exercise
+// config.matcher directly. Next anchors it against the pathname.
+test("the proxy matcher skips static assets without skipping dotted app routes", async (t) => {
+  // Only config is under test, so the Clerk stubs can be inert.
+  t.mock.module("@clerk/nextjs/server", {
+    namedExports: {
+      clerkMiddleware: (handler: unknown) => handler,
+      createRouteMatcher: () => () => false,
+    },
+  });
+  const matcherModule = "./proxy.ts?case=matcher";
+  const { config } = await import(matcherModule) as typeof import("./proxy.ts");
+  const matcher = new RegExp(`^${config.matcher[0]}$`);
+
+  // An extension mid-path used to exclude the whole route from the proxy, so a
+  // protected page under a dotted segment ran with no auth check at all.
+  for (const pathname of ["/admin/rounds/abc.png/edit", "/work/report.v2/details", "/home", "/api/interest"]) {
+    assert.equal(matcher.test(pathname), true, pathname);
+  }
+
+  for (const pathname of ["/logo.png", "/fonts/x.woff2", "/_next/static/chunk.js"]) {
+    assert.equal(matcher.test(pathname), false, pathname);
+  }
+
+  // Known ceiling: a path ENDING in a known extension is still treated as a
+  // static asset, so /admin/rounds/abc.png would skip the proxy. No route takes
+  // an id that ends in one today; tightening it means listing asset prefixes.
+  assert.equal(matcher.test("/admin/rounds/abc.png"), false);
 });

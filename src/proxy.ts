@@ -30,27 +30,6 @@ const isPublicRoute = createRouteMatcher([
   "/api/maintenance(.*)",
 ]);
 
-// Any route whose handler reads the Clerk session belongs here, public or not.
-// shouldBypassClerk skips clerkMiddleware for everything else, and a page that
-// then calls auth() throws "Clerk can't detect usage of clerkMiddleware()".
-// Check-in is the case that bites: it is public, so isPublicRoute lets it
-// through, but both the page and the POST route call currentUser() to decide
-// whether to show the scan or the sign-in prompt.
-const isAuthDependentRoute = createRouteMatcher([
-  "/login(.*)",
-  "/sign-up(.*)",
-  "/apply(.*)",
-  "/checkin(.*)",
-  "/api/checkin(.*)",
-  "/forgot-password",
-  "/reset-password",
-  "/auth/callback(.*)",
-  "/admin/login",
-  "/api/auth(.*)",
-  "/api/admin/login",
-  "/api/webhooks/clerk",
-]);
-
 function isProtectedApi(pathname: string) {
   return ["/api/admin", "/api/member", "/api/account", "/api/applicant", "/api/apply"]
     .some((prefix) => pathname.startsWith(prefix));
@@ -59,13 +38,6 @@ function isProtectedApi(pathname: string) {
 function isProtectedPage(pathname: string) {
   return ["/admin", "/member", "/applicant"]
     .some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
-
-export function shouldBypassClerk(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  return !isAuthDependentRoute(request)
-    && !isProtectedApi(pathname)
-    && !isProtectedPage(pathname);
 }
 
 export async function handleProxy(
@@ -91,15 +63,20 @@ export function handleUnconfiguredProxy(request: NextRequest) {
 
 const configuredProxy = clerkMiddleware(handleProxy);
 
+// clerkMiddleware wraps every matched request, including public ones. A public
+// route's handler may still read the session -- /checkin renders a scan or a
+// sign-in prompt, and /api/interest and /api/events/[id]/ics build a Supabase
+// client that calls auth() -- and skipping the middleware made those handlers
+// throw "Clerk can't detect usage of clerkMiddleware()" instead of falling back
+// to a signed-out session. handleProxy still decides who gets redirected.
 export function proxy(request: NextRequest, event: NextFetchEvent) {
-  if (shouldBypassClerk(request)) return NextResponse.next();
   if (!hasClerkConfiguration()) return handleUnconfiguredProxy(request);
   return configuredProxy(request, event);
 }
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)(?:$|\\?)).*)",
     "/(api|trpc)(.*)",
   ],
 };

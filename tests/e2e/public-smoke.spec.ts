@@ -39,6 +39,20 @@ test("responses keep the expected browser security boundaries", async ({ request
   expect(response.headers()["content-security-policy"]).not.toContain("upgrade-insecure-requests");
 });
 
+test("public API routes reach their handlers instead of throwing in the proxy", async ({ request }) => {
+  // Not a stricter assertion because CI points NEXT_PUBLIC_SUPABASE_URL at
+  // https://ci.invalid, so the RPC fails and the handler correctly answers 503.
+  // The regression guarded here is the 500 thrown before any handler logic ran,
+  // back when the proxy skipped clerkMiddleware and createClient's auth() call
+  // threw "Clerk can't detect usage of clerkMiddleware()".
+  const ics = await request.get("/api/events/00000000-0000-0000-0000-000000000000/ics");
+  expect(ics.status()).not.toBe(500);
+
+  // Body validation runs before Supabase is touched, so this one is exact.
+  const interest = await request.post("/api/interest", { data: {} });
+  expect(interest.status()).toBe(400);
+});
+
 test("unknown routes use the MECG recovery page", async ({ page }) => {
   const response = await page.goto("/this-route-does-not-exist");
 
