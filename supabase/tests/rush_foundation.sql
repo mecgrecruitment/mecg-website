@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(313);
+select extensions.plan(315);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -116,6 +116,7 @@ select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functio
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.commit_screening_assignments(text,jsonb,text,jsonb)'::regprocedure)) > 0, 'assignment commit rejects reviewers whose roles changed');
 select extensions.ok(position('update rush.applications' in pg_get_functiondef('rush.approve_decision(text)'::regprocedure)) = 0 and position('LOCKED' in pg_get_functiondef('rush.approve_decision(text)'::regprocedure)) > 0, 'decision approval locks without exposing the application outcome');
 select extensions.ok(position('update rush.applications' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0 and position('OFFERED' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0 and position('RELEASED' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0, 'decision release atomically applies the application outcome');
+select extensions.ok(position('application withdrawn' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0, 'releasing a decision re-checks withdrawal under the row lock');
 select extensions.ok(position('has_cycle_capability' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0 and position('RECRUITMENT_COMMITTEE' in pg_get_functiondef('rush.actor_can_read_colleague_profile(uuid)'::regprocedure)) > 0, 'committee colleague profiles follow active-cycle capability');
 select extensions.ok(position('c.event_id=e.id' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) > 0 and position('BOARD' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) > 0, 'attendance export counts only events in the target cycle and remains board-only');
 select extensions.has_function('rush','grant_membership',array['uuid','text','rush.member_role'],'membership grant function retains its signature');
@@ -288,6 +289,7 @@ select extensions.ok(not exists(select 1 from pg_proc p join pg_namespace n on n
 select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='events' and indexname='events_cycle_id_idx'), 'events cycle_id index exists');
 select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='case_groups' and indexname='case_groups_cycle_id_idx'), 'case_groups cycle_id index exists');
 select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='application_documents' and indexname='application_documents_application_id_idx'), 'application_documents application_id index exists');
+select extensions.ok(exists(select 1 from pg_indexes where schemaname='rush' and tablename='pnms' and indexname='pnms_uniqname_lower_idx' and indexdef like '%UNIQUE%'), 'applicant uniqnames are unique case-insensitively');
 select extensions.ok(position('has_cycle_capability' in pg_get_expr((select polqual from pg_policy where polname='application_documents_internal_read' and polrelid='rush.application_documents'::regclass),'rush.application_documents'::regclass)) > 0 and position('m.role::text in' in pg_get_expr((select polqual from pg_policy where polname='application_documents_internal_read' and polrelid='rush.application_documents'::regclass),'rush.application_documents'::regclass)) = 0, 'application_documents internal read is capability-gated instead of a raw committee role check');
 select extensions.ok(position('has_cycle_capability' in pg_get_expr((select polqual from pg_policy where polname='storage_resumes_internal_select' and polrelid='storage.objects'::regclass),'storage.objects'::regclass)) > 0 and position('m.role::text in' in pg_get_expr((select polqual from pg_policy where polname='storage_resumes_internal_select' and polrelid='storage.objects'::regclass),'storage.objects'::regclass)) = 0, 'storage resume internal select is capability-gated instead of a raw committee role check');
 
