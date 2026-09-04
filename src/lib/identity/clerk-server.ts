@@ -2,6 +2,7 @@ import "server-only";
 
 import { auth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 import { hasClerkConfiguration, requireClerkIssuer } from "@/lib/env";
+import { withClerkTimeout } from "@/lib/clerk-retry";
 import { migratedUserId } from "@/lib/identity/clerk-migration";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -43,7 +44,7 @@ export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null>
   // Webhooks reconcile identity metadata, but the first authenticated request
   // is the synchronous correctness path so a delayed webhook cannot strand a
   // new user between Clerk and the Rush database.
-  const clerkUser = await clerkCurrentUser();
+  const clerkUser = await withClerkTimeout(() => clerkCurrentUser());
   if (!clerkUser || clerkUser.id !== session.userId) throw new Error("Clerk user could not be loaded");
   const primaryEmail = clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
   if (!primaryEmail) throw new Error("A verified primary email is required");
