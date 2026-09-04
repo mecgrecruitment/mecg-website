@@ -53,7 +53,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   // Browsers otherwise rewrite the local http:// dev server to https://,
   // which breaks assets and makes browser smoke tests report false failures.
-  ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
+  ...(process.env.NODE_ENV === "production" && process.env.E2E_LOCAL_HTTP !== "1" ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
 const nextConfig: NextConfig = {
