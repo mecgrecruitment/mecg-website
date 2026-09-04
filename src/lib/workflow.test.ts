@@ -7,6 +7,7 @@ import {
   countWords,
   hasExactCriterionSet,
   isPipelineStatus,
+  isValidUniqname,
   legalManualApplicationStatuses,
   normalizePersonInput,
   parseApplicationDraft,
@@ -142,4 +143,32 @@ test("application drafts truncate answer count, item length, and total length", 
   assert.equal(Object.keys(restored).length, 5);
   assert.equal(restored.q0.length, 8000);
   assert.equal(Object.values(restored).reduce((total, answer) => total + answer.length, 0), 40000);
+});
+
+// These cases are the ones that reached production and were refused by
+// submit_application after the applicant had filled in the whole form, with only
+// a generic "Could not submit application" to go on. The rule here must stay
+// identical to the SQL: `^[a-z][a-z0-9]{1,15}$` on lower(trim(uniqname)).
+test("uniqname accepts what the database accepts", () => {
+  for (const good of ["jsmith", "ab", "a1", "j2smith", "abcdefghijklmnop"]) {
+    assert.equal(isValidUniqname(good), true, good);
+  }
+  assert.equal(isValidUniqname("  JSmith  "), true, "trimmed and lowercased");
+});
+
+test("uniqname rejects what the database rejects, before the applicant submits", () => {
+  for (const bad of [
+    "j",                       // too short
+    "abcdefghijklmnopq",       // 17 chars
+    "j.smith",                 // punctuation
+    "jo-smith",
+    "j_smith",
+    "jsmith@umich.edu",        // the whole email
+    "2smith",                  // leading digit
+    "jsmith ",                 // trailing space is trimmed, so this one passes
+    "",
+  ]) {
+    if (bad === "jsmith ") { assert.equal(isValidUniqname(bad), true); continue; }
+    assert.equal(isValidUniqname(bad), false, bad);
+  }
 });

@@ -18,6 +18,7 @@ import {
   type ApplicationStep,
 } from "./application-server-draft";
 import HeadshotField from "./headshot-field";
+import { isValidUniqname } from "@/lib/workflow";
 
 type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[]; maxWords: number | null };
 type Step = ApplicationStep;
@@ -294,6 +295,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       if (!name.trim()) next.name = "Enter your full name.";
       if (!classYear) next.classYear = "Select your year.";
       if (!uniqname.trim()) next.uniqname = "Enter your uniqname.";
+      else if (!isValidUniqname(uniqname)) next.uniqname = "A uniqname is letters and numbers only, starting with a letter (for example: jsmith). Do not include @umich.edu.";
       if (!college) next.college = "Select your college.";
       if (!major.trim()) next.major = "Enter your major.";
     }
