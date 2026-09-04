@@ -40,7 +40,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
 
   const supabase = await createClient();
   const [{ data: assignments, error }, screeningReviewer, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }] = await Promise.all([
-    supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
+    supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics!rubrics_round_id_fkey(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleMembership.cycleId }),
     supabase.rpc("my_grading_events"),
     loadCalibrationStates(supabase, cycleMembership.cycleId),

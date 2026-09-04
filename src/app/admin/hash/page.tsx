@@ -122,7 +122,7 @@ export default async function HashBoard() {
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult, tallyResult, notesResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
-    supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
+    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status,reason,communication_preview,decision_approvals(id)").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
     supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),

@@ -274,7 +274,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   const [offerResult, responsesResult, roundsResult, evalAppResult, decisionsResult] = await Promise.all([
     supabase.from("applications").select(offerSelect).eq("id", id).single(),
     supabase.from("application_responses").select("question_key,question_text,question_word_limit,response_text").eq("application_id", id),
-    supabase.from("rounds").select("id,name,kind,status,weight,rubrics(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
+    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase
       .from("applications")
       .select("id,evaluation_assignments(id,round_id,evaluations(id,status,submitted_at,criterion_ratings(criterion_id,score,note),evaluator:profiles(display_name)))")
