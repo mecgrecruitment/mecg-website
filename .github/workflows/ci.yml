@@ -25,6 +25,13 @@ jobs:
       - run: npm run check:sql
       - run: npm run build
         env:
+          # next.config.ts computes the CSP at build time, so this has to be set
+          # for the build and not just for the server playwright starts. That
+          # server is plain http on 127.0.0.1, and upgrade-insecure-requests
+          # rewrites every asset URL to https and fails the run. This artifact is
+          # only ever served to playwright; Vercel builds separately and never
+          # sets this, so deployments keep the header.
+          E2E_LOCAL_HTTP: "1"
           # /join is prerendered, so the build reads these browser-visible
           # values. The artifact is discarded and never receives a secret.
           NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
