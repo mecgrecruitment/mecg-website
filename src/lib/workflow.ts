@@ -166,6 +166,18 @@ function restoreAnswers(raw: unknown) {
   return answers;
 }
 
+// submit_application enforces `^[a-z][a-z0-9]{1,15}$` on lower(trim(uniqname)).
+// The form used to check only that the field was non-empty and this parser only
+// capped the length, so "j.smith", an email address, or a leading digit passed
+// both and was refused by the database at the final step. mapRpcError returns a
+// generic message, so the applicant was told "Could not submit application" with
+// no way to know why. Keep this identical to the SQL.
+export const UNIQNAME_PATTERN = /^[a-z][a-z0-9]{1,15}$/;
+
+export function isValidUniqname(value: string): boolean {
+  return UNIQNAME_PATTERN.test(value.trim().toLowerCase());
+}
+
 export function parseApplicationIntake(body: unknown, email: string) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   const input = body as Record<string, unknown>;
@@ -181,7 +193,7 @@ export function parseApplicationIntake(body: unknown, email: string) {
   const gradTerm = optionalText(input.gradTerm, 40);
   const accessibilityNotes = optionalText(input.accessibilityNotes, 2000);
   if ([preferredName, phone, major, linkedinUrl, resumeStoragePath, uniqname, college, gradTerm, accessibilityNotes].includes(undefined)) return null;
-  if (!major || !uniqname || !college || !COLLEGES.includes(college as (typeof COLLEGES)[number]) || !validUrl(linkedinUrl ?? null)) return null;
+  if (!major || !uniqname || !isValidUniqname(uniqname) || !college || !COLLEGES.includes(college as (typeof COLLEGES)[number]) || !validUrl(linkedinUrl ?? null)) return null;
   const classYear = CLASS_YEARS.includes(input.classYear as ClassYear) ? (input.classYear as ClassYear) : undefined;
   if (classYear === undefined || !resumeStoragePath) return null;
   const answers = parseAnswers(input.answers);
