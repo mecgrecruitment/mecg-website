@@ -128,12 +128,7 @@ function optionalText(value: unknown, max: number) {
 }
 
 function validUrl(value: string | null) {
-  if (!value) return true;
-  try {
-    return ["http:", "https:"].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
+  return isValidOptionalUrl(value ?? "");
 }
 
 function parseAnswers(value: unknown) {
@@ -178,6 +173,26 @@ export function isValidUniqname(value: string): boolean {
   return UNIQNAME_PATTERN.test(value.trim().toLowerCase());
 }
 
+// submit_application requires char_length(trim(phone)) between 7 and 32 when a
+// phone is given. optionalText only capped the maximum, so a short number was
+// accepted here and refused by the database at the final step, the same silent
+// failure the uniqname rule had. Blank stays allowed: the field is optional.
+export function isValidOptionalPhone(value: string): boolean {
+  const text = value.trim();
+  return text.length === 0 || (text.length >= 7 && text.length <= 32);
+}
+
+// submit_application requires `^https?://[^[:space:]]+$` and length 8..400.
+// new URL() silently percent-encodes an embedded space, so it accepted values
+// the database then rejected.
+const URL_PATTERN = /^https?:\/\/\S+$/;
+
+export function isValidOptionalUrl(value: string): boolean {
+  const text = value.trim();
+  if (text.length === 0) return true;
+  return text.length >= 8 && text.length <= 400 && URL_PATTERN.test(text);
+}
+
 export function parseApplicationIntake(body: unknown, email: string) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   const input = body as Record<string, unknown>;
@@ -193,6 +208,7 @@ export function parseApplicationIntake(body: unknown, email: string) {
   const gradTerm = optionalText(input.gradTerm, 40);
   const accessibilityNotes = optionalText(input.accessibilityNotes, 2000);
   if ([preferredName, phone, major, linkedinUrl, resumeStoragePath, uniqname, college, gradTerm, accessibilityNotes].includes(undefined)) return null;
+  if (phone !== null && phone !== undefined && !isValidOptionalPhone(phone)) return null;
   if (!major || !uniqname || !isValidUniqname(uniqname) || !college || !COLLEGES.includes(college as (typeof COLLEGES)[number]) || !validUrl(linkedinUrl ?? null)) return null;
   const classYear = CLASS_YEARS.includes(input.classYear as ClassYear) ? (input.classYear as ClassYear) : undefined;
   if (classYear === undefined || !resumeStoragePath) return null;

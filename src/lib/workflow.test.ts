@@ -7,6 +7,8 @@ import {
   countWords,
   hasExactCriterionSet,
   isPipelineStatus,
+  isValidOptionalPhone,
+  isValidOptionalUrl,
   isValidUniqname,
   legalManualApplicationStatuses,
   normalizePersonInput,
@@ -170,5 +172,31 @@ test("uniqname rejects what the database rejects, before the applicant submits",
   ]) {
     if (bad === "jsmith ") { assert.equal(isValidUniqname(bad), true); continue; }
     assert.equal(isValidUniqname(bad), false, bad);
+  }
+});
+
+// Same failure shape as the uniqname rule: the database refused these at the
+// final step while the form and the parser accepted them, and mapRpcError told
+// the applicant only "Could not submit application".
+test("phone matches submit_application: blank, or 7 to 32 characters", () => {
+  for (const good of ["", "   ", "5551234", "+1 (555) 123-4567"]) {
+    assert.equal(isValidOptionalPhone(good), true, JSON.stringify(good));
+  }
+  for (const bad of ["12345", "555-12", "1".repeat(33)]) {
+    assert.equal(isValidOptionalPhone(bad), false, bad);
+  }
+});
+
+test("linkedin matches submit_application, including the whitespace the URL parser hid", () => {
+  for (const good of ["", "https://linkedin.com/in/ab", "http://x.example"]) {
+    assert.equal(isValidOptionalUrl(good), true, JSON.stringify(good));
+  }
+  for (const bad of [
+    "https://linkedin.com/in/a b", // new URL() encodes the space and accepted this
+    "linkedin.com/in/ab",         // no scheme
+    "ftp://example.com",
+    "https://" + "a".repeat(400),  // over 400
+  ]) {
+    assert.equal(isValidOptionalUrl(bad), false, bad);
   }
 });
