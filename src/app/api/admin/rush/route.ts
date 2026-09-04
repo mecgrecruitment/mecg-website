@@ -100,14 +100,27 @@ export async function POST(req: NextRequest) {
       identity_issuer: requireClerkIssuer(), identity_subject: created.id,
       identity_email: email, identity_display_name: name,
     });
+    // A Clerk account left behind without a membership is a dead end: createUser
+    // rejects that email forever, so a rollback that fails has to be reported
+    // with the email and Clerk id instead of swallowed, or a bulk import just
+    // sees an unexplained 409 on the retry.
+    const orphanMessage = `An authentication account was created for ${email} but not granted membership, and automatic cleanup failed. Remove ${email} in Clerk before retrying that email.`;
     if (identityError) {
-      await clerk.users.deleteUser(created.id).catch(() => undefined);
+      const rollbackError = await clerk.users.deleteUser(created.id).then(() => null, (deleteError: unknown) => deleteError);
+      if (rollbackError) {
+        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError, identityError);
+        return NextResponse.json({ error: orphanMessage }, { status: 500 });
+      }
       return NextResponse.json({ error: "Could not provision user" }, { status: 500 });
     }
     ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: role }));
     if (error) {
-      await clerk.users.deleteUser(created.id).catch(() => undefined);
-      await admin.from("profiles").delete().eq("id", appUserId);
+      const rollbackError = await clerk.users.deleteUser(created.id).then(() => null, (deleteError: unknown) => deleteError);
+      const { error: profileError } = await admin.from("profiles").delete().eq("id", appUserId);
+      if (rollbackError || profileError) {
+        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError ?? profileError, error);
+        return NextResponse.json({ error: orphanMessage }, { status: 500 });
+      }
     }
   } else if (action === "ADD_EXISTING_USER") {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
