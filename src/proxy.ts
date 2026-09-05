@@ -63,13 +63,31 @@ export function handleUnconfiguredProxy(request: NextRequest) {
 
 const configuredProxy = clerkMiddleware(handleProxy);
 
-// clerkMiddleware wraps every matched request, including public ones. A public
-// route's handler may still read the session -- /checkin renders a scan or a
-// sign-in prompt, and /api/interest and /api/events/[id]/ics build a Supabase
-// client that calls auth() -- and skipping the middleware made those handlers
-// throw "Clerk can't detect usage of clerkMiddleware()" instead of falling back
-// to a signed-out session. handleProxy still decides who gets redirected.
+// Every route falls on one side of a line: it never reads the session, so it
+// must not depend on Clerk being reachable and the public site keeps serving
+// through a Clerk outage; or it reads the session and has to run
+// clerkMiddleware, because auth() throws "Clerk can't detect usage of
+// clerkMiddleware()" without it. The default is to run it, so adding a handler
+// that calls auth() cannot break the way /api/interest and /api/events/[id]/ics
+// did.
+//
+// Listing a route below is an assertion that its handler never touches the
+// session -- not that skipping Clerk is convenient there. Adding one without
+// reading the handler first is exactly how the original bug shipped.
+const isSessionFreeRoute = createRouteMatcher([
+  "/",
+  "/home",
+  "/contact",
+  "/join",
+  "/team",
+  "/work(.*)",
+  "/api/contact",
+  "/api/health",
+  "/api/interest",
+]);
+
 export function proxy(request: NextRequest, event: NextFetchEvent) {
+  if (isSessionFreeRoute(request)) return NextResponse.next();
   if (!hasClerkConfiguration()) return handleUnconfiguredProxy(request);
   return configuredProxy(request, event);
 }
