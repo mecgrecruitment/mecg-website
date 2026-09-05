@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(331);
+select extensions.plan(337);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -705,21 +705,29 @@ select extensions.has_table('rush','reminders_sent','reminder bookkeeping table 
 select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has row level security enabled and forced');
 select extensions.ok(not exists(select 1 from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='reminders_sent'), 'reminder table has no policies, so only service_role reaches it');
 select extensions.ok(position('reminders_sent' in pg_get_functiondef('rush.pending_reminders()'::regprocedure)) > 0, 'pending_reminders excludes anyone already reminded');
-select extensions.ok(position('on conflict on constraint reminders_sent_kind_subject_id_recipient_id_key' in pg_get_functiondef('rush.mark_reminder_sent(text,text,uuid)'::regprocedure)) > 0, 'reminder idempotency uses an unambiguous conflict target');
+select extensions.ok(position('on conflict on constraint reminders_sent_kind_subject_id_recipient_id_key' in pg_get_functiondef('rush.claim_reminder(text,text,uuid)'::regprocedure)) > 0, 'reminder idempotency uses an unambiguous conflict target');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='claim_reminder' and p.prosecdef and p.proconfig @> array['search_path=""']), 'claim_reminder exists and is security definer with empty search path');
+select extensions.ok(exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='rush' and p.proname='release_reminder' and p.prosecdef and p.proconfig @> array['search_path=""']), 'release_reminder exists and is security definer with empty search path');
 
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
-select extensions.throws_ok($$select rush.mark_reminder_sent('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function mark_reminder_sent','an authenticated caller cannot record a reminder');
+select extensions.throws_ok($$select rush.claim_reminder('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function claim_reminder','an authenticated caller cannot claim a reminder');
+select extensions.throws_ok($$select rush.release_reminder('EVALUATION_DUE','x','10000000-0000-4000-8000-000000000001'::uuid)$$,'42501','permission denied for function release_reminder','an authenticated caller cannot release a reminder');
 select extensions.throws_ok($$select rush.pending_reminders()$$,'42501','permission denied for function pending_reminders','an authenticated caller cannot read pending reminders');
 set local role postgres;
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"sub":"10000000-0000-4000-8000-000000000001","role":"service_role"}';
 set local role service_role;
-select rush.mark_reminder_sent('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid);
-select rush.mark_reminder_sent('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid);
+-- Two overlapping cron runs, in order. Only the first may send.
+select extensions.ok(rush.claim_reminder('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid), 'the first run claims the reminder');
+select extensions.ok(not rush.claim_reminder('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid), 'a second run loses the claim and must not send');
 set local role postgres;
 select extensions.is((select count(*) from rush.reminders_sent where kind='EVALUATION_DUE' and subject_id='pgtap-round' and recipient_id='10000000-0000-4000-8000-000000000001'::uuid),1::bigint,'recording the same reminder twice stays idempotent');
+set local role service_role;
+select rush.release_reminder('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid);
+select extensions.ok(rush.claim_reminder('EVALUATION_DUE','pgtap-round','10000000-0000-4000-8000-000000000001'::uuid), 'releasing a failed send lets the next run claim it again');
+set local role postgres;
 
 
 -- Policy decisions. Each of these encodes a rule that was previously left to

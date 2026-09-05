@@ -73,7 +73,25 @@ async function run(request: NextRequest) {
   let sent = 0;
   let failed = 0;
   let recordingFailed = 0;
+  let skipped = 0;
   for (const reminder of reminders) {
+    const args = {
+      reminder_kind: reminder.kind,
+      subject_id: reminder.subjectId,
+      recipient_id: reminder.recipientId,
+    };
+    // Claim before sending. Two overlapping cron runs read the same pending
+    // list, and only the run that inserts the bookkeeping row may deliver.
+    const { data: claimed, error: claimError } = await supabase.rpc("claim_reminder", args);
+    if (claimError) {
+      recordingFailed += 1;
+      console.error("claim_reminder failed", claimError);
+      continue;
+    }
+    if (!claimed) {
+      skipped += 1;
+      continue;
+    }
     const due = reminder.dueAt
       ? new Date(reminder.dueAt).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", timeZone: "America/Detroit" })
       : "soon";
@@ -87,19 +105,16 @@ async function run(request: NextRequest) {
     });
     if (!delivered) {
       failed += 1;
+      // Hand the claim back so the next run retries. Losing the reminder takes
+      // this release failing too, which is the trade for never duplicating.
+      const { error: releaseError } = await supabase.rpc("release_reminder", args);
+      if (releaseError) {
+        recordingFailed += 1;
+        console.error("release_reminder failed", releaseError);
+      }
       continue;
     }
-    const { error: markError } = await supabase.rpc("mark_reminder_sent", {
-      reminder_kind: reminder.kind,
-      subject_id: reminder.subjectId,
-      recipient_id: reminder.recipientId,
-    });
-    if (markError) {
-      recordingFailed += 1;
-      console.error("mark_reminder_sent failed", markError);
-    } else {
-      sent += 1;
-    }
+    sent += 1;
   }
 
   if (failed > 0 || recordingFailed > 0) {
@@ -110,7 +125,7 @@ async function run(request: NextRequest) {
     });
   }
   return NextResponse.json(
-    { sent, failed, recordingFailed },
+    { sent, failed, recordingFailed, skipped },
     { status: failed > 0 || recordingFailed > 0 ? 503 : 200 },
   );
 }

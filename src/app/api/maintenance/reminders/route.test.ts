@@ -56,28 +56,41 @@ function degradedRecords(t: test.TestContext) {
   return records;
 }
 
-test("reminders remain retryable when the email provider fails", async (t) => {
-  const rpcCalls: string[] = [];
+// The claim is what arbitrates two overlapping cron runs, so every case here
+// has to say what claim_reminder returned.
+function mockRpc(
+  t: test.TestContext,
+  calls: Array<{ name: string; args?: Record<string, unknown> }>,
+  results: Record<string, { data: unknown; error: unknown }>,
+) {
   t.mock.module("@/lib/supabase/admin", {
     namedExports: {
       createAdminClient: () => ({
-        rpc: async (name: string) => {
-          rpcCalls.push(name);
-          return name === "pending_reminders"
-            ? { data: [reminder], error: null }
-            : { data: null, error: null };
+        rpc: async (name: string, args?: Record<string, unknown>) => {
+          calls.push({ name, args });
+          if (name === "pending_reminders") return { data: [reminder], error: null };
+          return results[name] ?? { data: null, error: null };
         },
       }),
     },
   });
+}
+
+const claimArgs = { reminder_kind: "EVALUATION_DUE", subject_id: "round-1", recipient_id: "member-1" };
+
+test("reminders remain retryable when the email provider fails", async (t) => {
+  const rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = [];
+  mockRpc(t, rpcCalls, { claim_reminder: { data: true, error: null } });
   mockEmail(t, async () => false);
   const records = degradedRecords(t);
   const { GET } = await withCronSecret(() => importRoute("provider-failure"));
   const response = await withCronSecret(() => GET(request()));
 
   assert.equal(response.status, 503);
-  assert.deepEqual(await response.json(), { sent: 0, failed: 1, recordingFailed: 0 });
-  assert.deepEqual(rpcCalls, ["pending_reminders"]);
+  assert.deepEqual(await response.json(), { sent: 0, failed: 1, recordingFailed: 0, skipped: 0 });
+  // A failed send hands the claim back, so the next run sends it again.
+  assert.deepEqual(rpcCalls.map((call) => call.name), ["pending_reminders", "claim_reminder", "release_reminder"]);
+  assert.deepEqual(rpcCalls[2].args, claimArgs);
   assert.equal(records.length, 1);
   assert.deepEqual(
     { event: records[0].event, code: records[0].code, detail: records[0].detail },
@@ -85,24 +98,18 @@ test("reminders remain retryable when the email provider fails", async (t) => {
   );
 });
 
-test("reminders log a degraded run when mark_reminder_sent fails", async (t) => {
-  t.mock.module("@/lib/supabase/admin", {
-    namedExports: {
-      createAdminClient: () => ({
-        rpc: async (name: string) =>
-          name === "pending_reminders"
-            ? { data: [reminder], error: null }
-            : { data: null, error: { code: "P0001" } },
-      }),
-    },
-  });
-  mockEmail(t, async () => true);
+test("reminders log a degraded run when the claim fails", async (t) => {
+  const rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = [];
+  mockRpc(t, rpcCalls, { claim_reminder: { data: null, error: { code: "P0001" } } });
+  let emailCalls = 0;
+  mockEmail(t, async () => { emailCalls += 1; return true; });
   const records = degradedRecords(t);
   const { GET } = await withCronSecret(() => importRoute("record-failure"));
   const response = await withCronSecret(() => GET(request()));
 
   assert.equal(response.status, 503);
-  assert.deepEqual(await response.json(), { sent: 0, failed: 0, recordingFailed: 1 });
+  assert.deepEqual(await response.json(), { sent: 0, failed: 0, recordingFailed: 1, skipped: 0 });
+  assert.equal(emailCalls, 0);
   assert.equal(records.length, 1);
   assert.deepEqual(
     { event: records[0].event, code: records[0].code, detail: records[0].detail },
@@ -110,32 +117,35 @@ test("reminders log a degraded run when mark_reminder_sent fails", async (t) => 
   );
 });
 
-test("reminders are recorded only after successful delivery", async (t) => {
+test("a reminder another run already claimed is not sent again", async (t) => {
   const rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = [];
-  t.mock.module("@/lib/supabase/admin", {
-    namedExports: {
-      createAdminClient: () => ({
-        rpc: async (name: string, args?: Record<string, unknown>) => {
-          rpcCalls.push({ name, args });
-          return name === "pending_reminders"
-            ? { data: [reminder], error: null }
-            : { data: null, error: null };
-        },
-      }),
-    },
-  });
+  mockRpc(t, rpcCalls, { claim_reminder: { data: false, error: null } });
+  let emailCalls = 0;
+  mockEmail(t, async () => { emailCalls += 1; return true; });
+  const records = degradedRecords(t);
+  const { GET } = await withCronSecret(() => importRoute("lost-claim"));
+  const response = await withCronSecret(() => GET(request()));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { sent: 0, failed: 0, recordingFailed: 0, skipped: 1 });
+  assert.equal(emailCalls, 0);
+  assert.deepEqual(rpcCalls.map((call) => call.name), ["pending_reminders", "claim_reminder"]);
+  assert.equal(records.length, 0);
+});
+
+test("reminders are claimed before delivery and kept once delivered", async (t) => {
+  const rpcCalls: Array<{ name: string; args?: Record<string, unknown> }> = [];
+  mockRpc(t, rpcCalls, { claim_reminder: { data: true, error: null } });
   mockEmail(t, async () => true);
   const records = degradedRecords(t);
   const { GET } = await withCronSecret(() => importRoute("success"));
   const response = await withCronSecret(() => GET(request()));
 
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { sent: 1, failed: 0, recordingFailed: 0 });
+  assert.deepEqual(await response.json(), { sent: 1, failed: 0, recordingFailed: 0, skipped: 0 });
   assert.equal(records.length, 0);
-  assert.deepEqual(rpcCalls[1], {
-    name: "mark_reminder_sent",
-    args: { reminder_kind: "EVALUATION_DUE", subject_id: "round-1", recipient_id: "member-1" },
-  });
+  assert.deepEqual(rpcCalls[1], { name: "claim_reminder", args: claimArgs });
+  assert.deepEqual(rpcCalls.map((call) => call.name), ["pending_reminders", "claim_reminder"]);
 });
 
 test("reminders fail closed on a malformed database payload", async (t) => {
