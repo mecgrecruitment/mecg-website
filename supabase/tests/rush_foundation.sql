@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(315);
+select extensions.plan(321);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -803,6 +803,19 @@ select extensions.is(
   '10000000-0000-4000-8000-000000000003'::uuid,
   'prepared imports retain their existing domain UUID');
 select extensions.ok(rush.disable_external_identity('https://clerk.test','user_new'),'external identity deletion revokes only the provider mapping');
+-- The membership allowlist decides who becomes Board on the strength of an
+-- email address, so it must stay unreachable except through service_role and
+-- must never be able to mint an owner.
+select extensions.has_table('rush','membership_allowlist','membership allowlist table exists');
+select extensions.ok((select relrowsecurity and relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='membership_allowlist') and not exists(select 1 from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='rush' and c.relname='membership_allowlist'), 'membership allowlist forces row level security and has no policies, so only service_role reaches it');
+select extensions.has_function('rush','claim_membership_allowlist',array['uuid','text'],'allowlist claim function exists');
+select extensions.ok(has_function_privilege('service_role','rush.claim_membership_allowlist(uuid,text)','EXECUTE') and not has_function_privilege('authenticated','rush.claim_membership_allowlist(uuid,text)','EXECUTE') and not has_function_privilege('anon','rush.claim_membership_allowlist(uuid,text)','EXECUTE'), 'the allowlist claim is service-role only');
+select extensions.ok(position('claim_membership_allowlist' in pg_get_functiondef('rush.ensure_external_identity(text,text,text,text,uuid)'::regprocedure)) > 0, 'first sign-in claims the allowlist entry instead of stranding a new user with no membership');
+set local role postgres;
+select extensions.throws_ok(
+  $$insert into rush.membership_allowlist(email,role) values('owner-by-email@example.invalid','OWNER')$$,
+  '23514',null,'an allowlist row can never grant ownership');
+set local role service_role;
 select extensions.has_table('rush','clerk_webhook_events','Clerk webhook delivery ledger exists');
 select extensions.has_table('rush','clerk_webhook_identity_state','Clerk webhook ordering cursor exists');
 select extensions.has_function('rush','reconcile_clerk_webhook',array['text','text','text','text','timestamptz','text','text','uuid'],'atomic Clerk webhook reconciler exists');

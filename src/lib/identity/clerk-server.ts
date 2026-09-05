@@ -46,7 +46,11 @@ export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null>
   // new user between Clerk and the Rush database.
   const clerkUser = await withClerkTimeout(() => clerkCurrentUser());
   if (!clerkUser || clerkUser.id !== session.userId) throw new Error("Clerk user could not be loaded");
-  const primaryEmail = clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId)?.emailAddress;
+  // Verification is load-bearing, not decorative: rush.membership_allowlist
+  // grants a role on the strength of this address alone, so an unverified one
+  // would let anyone claim someone else's Board membership by typing it in.
+  const primary = clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId);
+  const primaryEmail = primary?.verification?.status === "verified" ? primary.emailAddress : undefined;
   if (!primaryEmail) throw new Error("A verified primary email is required");
 
   // Migrated users carry their application UUID in Clerk externalId. Never
