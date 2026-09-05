@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasValidCronAuthorization } from "@/lib/cron-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { operationalLog } from "@/lib/operational-log";
 
 // Removes resume uploads that were started but never finalized or cancelled.
 // Supabase forbids deleting storage.objects from SQL, so the storage half has to
@@ -39,10 +40,12 @@ async function prune(request: NextRequest) {
   // row is only retired when its own delete actually succeeded.
   let removed = 0;
   const failed: string[] = [];
+  let deleteFailed = 0;
   for (const row of stale) {
     const { error: removeError } = await supabase.storage.from("resumes").remove([row.object_path]);
     if (removeError) {
       console.error("prune-resumes: storage delete failed", { path: row.object_path, removeError });
+      deleteFailed += 1;
       failed.push(row.document_id);
       continue;
     }
@@ -55,6 +58,14 @@ async function prune(request: NextRequest) {
       continue;
     }
     removed += 1;
+  }
+  if (failed.length > 0) {
+    const retireFailed = failed.length - deleteFailed;
+    operationalLog("error", {
+      event: "cron.prune_resumes_degraded",
+      code: deleteFailed >= retireFailed ? "STORAGE_DELETE_FAILED" : "ROW_RETIRE_FAILED",
+      detail: { removed, failed: failed.length, deleteFailed, retireFailed },
+    });
   }
   return NextResponse.json(
     { ok: failed.length === 0, removed, failed: failed.length },

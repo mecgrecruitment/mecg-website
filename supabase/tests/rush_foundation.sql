@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(321);
+select extensions.plan(331);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -1000,6 +1000,80 @@ select extensions.throws_ok(
   '42501','forbidden','recruitment committee resume access ends when the cycle closes'
 );
 set local role postgres;
+
+
+-- RLS behaviour, not policy text. hash_votes_read_own is the secret ballot and
+-- decisions_read_owner_or_panel is the unreleased-outcome gate. Until now both
+-- were pinned only by their SQL, so a rewrite to using (true) would have passed.
+set local role postgres;
+insert into auth.users(id,email,raw_user_meta_data) values
+  ('10000000-0000-4000-8000-0000000000a1','rls-voter-a@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-0000000000a2','rls-voter-b@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-0000000000a3','rls-panel@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-0000000000a4','rls-conflicted-owner@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-0000000000a5','rls-applicant@example.invalid','{}'::jsonb),
+  ('10000000-0000-4000-8000-0000000000a6','rls-bystander@example.invalid','{}'::jsonb);
+-- CLOSED keeps the single-non-terminal-cycle index satisfied; neither policy
+-- reads cycle status.
+insert into rush.rush_cycles(id,name,status) values
+  ('10000000-0000-4000-8000-0000000000a9','pgTAP RLS behaviour cycle','CLOSED');
+insert into rush.memberships(user_id,cycle_id,role) values
+  ('10000000-0000-4000-8000-0000000000a1','10000000-0000-4000-8000-0000000000a9','MEMBER'),
+  ('10000000-0000-4000-8000-0000000000a2','10000000-0000-4000-8000-0000000000a9','MEMBER'),
+  ('10000000-0000-4000-8000-0000000000a3','10000000-0000-4000-8000-0000000000a9','PANEL'),
+  ('10000000-0000-4000-8000-0000000000a4','10000000-0000-4000-8000-0000000000a9','OWNER'),
+  ('10000000-0000-4000-8000-0000000000a6','10000000-0000-4000-8000-0000000000a9','MEMBER');
+insert into rush.pnms(id,auth_user_id,name,contact,normalized_contact) values
+  ('10000000-0000-4000-8000-0000000000b1','10000000-0000-4000-8000-0000000000a5','RLS Applicant','rls-applicant@example.invalid','rls-applicant@example.invalid');
+insert into rush.applications(id,pnm_id,cycle_id,status,submitted_at) values
+  ('10000000-0000-4000-8000-0000000000b3','10000000-0000-4000-8000-0000000000b1','10000000-0000-4000-8000-0000000000a9','SUBMITTED',now());
+insert into rush.hash_votes(cycle_id,application_id,voter_id,vote) values
+  ('10000000-0000-4000-8000-0000000000a9','10000000-0000-4000-8000-0000000000b3','10000000-0000-4000-8000-0000000000a1','YES'),
+  ('10000000-0000-4000-8000-0000000000a9','10000000-0000-4000-8000-0000000000b3','10000000-0000-4000-8000-0000000000a2','NO');
+insert into rush.conflict_declarations(application_id,declarer_id,reason) values
+  ('10000000-0000-4000-8000-0000000000b3','10000000-0000-4000-8000-0000000000a4','pgTAP RLS conflict');
+insert into rush.decisions(id,cycle_id,application_id,outcome,status,reason,created_by_id) values
+  ('10000000-0000-4000-8000-0000000000b5','10000000-0000-4000-8000-0000000000a9','10000000-0000-4000-8000-0000000000b3','OFFER','LOCKED','pgTAP unreleased decision','10000000-0000-4000-8000-0000000000a3');
+select extensions.is((select count(*) from rush.hash_votes where cycle_id='10000000-0000-4000-8000-0000000000a9'),2::bigint,'the ballot fixture holds one vote from each of two members');
+
+-- hash_votes_read_own: voter_id = rush.actor_id(), and nothing else.
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a1","role":"authenticated"}';
+set local role authenticated;
+insert into rush_foundation_results values ('hash_votes_own',(select count(*) from rush.hash_votes where cycle_id='10000000-0000-4000-8000-0000000000a9'));
+insert into rush_foundation_results values ('hash_votes_other',(select count(*) from rush.hash_votes where voter_id='10000000-0000-4000-8000-0000000000a2'::uuid));
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a4","role":"authenticated"}';
+insert into rush_foundation_results values ('hash_votes_owner_role',(select count(*) from rush.hash_votes where cycle_id='10000000-0000-4000-8000-0000000000a9'));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='hash_votes_own'),1::bigint,'a member reads exactly their own hash vote');
+select extensions.is((select value from rush_foundation_results where key='hash_votes_other'),0::bigint,'a member cannot read another member''s hash vote');
+select extensions.is((select value from rush_foundation_results where key='hash_votes_owner_role'),0::bigint,'the cycle owner reads no individual ballots: the vote is secret from the board too');
+
+-- decisions_read_owner_or_panel: (RELEASED and owns_application) or
+-- (PANEL/OWNER and no declared conflict).
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a5","role":"authenticated"}';
+set local role authenticated;
+insert into rush_foundation_results values ('decision_locked_applicant',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a3","role":"authenticated"}';
+insert into rush_foundation_results values ('decision_locked_panel',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a6","role":"authenticated"}';
+insert into rush_foundation_results values ('decision_locked_bystander',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a4","role":"authenticated"}';
+insert into rush_foundation_results values ('decision_locked_conflicted_owner',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='decision_locked_applicant'),0::bigint,'an applicant cannot see their decision before it is released');
+select extensions.is((select value from rush_foundation_results where key='decision_locked_panel'),1::bigint,'a panel member sees the unreleased decision');
+select extensions.is((select value from rush_foundation_results where key='decision_locked_bystander'),0::bigint,'an unrelated member of the same cycle cannot see the decision');
+select extensions.is((select value from rush_foundation_results where key='decision_locked_conflicted_owner'),0::bigint,'a cycle owner with a declared conflict cannot see the decision');
+
+update rush.decisions set status='RELEASED', released_at=now() where id='10000000-0000-4000-8000-0000000000b5';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a5","role":"authenticated"}';
+set local role authenticated;
+insert into rush_foundation_results values ('decision_released_applicant',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-0000000000a6","role":"authenticated"}';
+insert into rush_foundation_results values ('decision_released_bystander',(select count(*) from rush.decisions where id='10000000-0000-4000-8000-0000000000b5'));
+set local role postgres;
+select extensions.is((select value from rush_foundation_results where key='decision_released_applicant'),1::bigint,'release makes the decision visible to the applicant who owns it');
+select extensions.is((select value from rush_foundation_results where key='decision_released_bystander'),0::bigint,'release does not make the decision visible to anyone else');
 
 select * from extensions.finish();
 rollback;

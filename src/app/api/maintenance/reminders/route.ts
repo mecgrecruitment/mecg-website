@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasValidCronAuthorization } from "@/lib/cron-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { escapeHtml, sendEmail, wrapEmail } from "@/lib/email";
+import { operationalLog } from "@/lib/operational-log";
 
 // Sends the nudges rush.pending_reminders identifies. Postgres cannot call the
 // email provider, so the database decides who is owed a reminder and this sends
@@ -101,6 +102,13 @@ async function run(request: NextRequest) {
     }
   }
 
+  if (failed > 0 || recordingFailed > 0) {
+    operationalLog("error", {
+      event: "cron.reminders_degraded",
+      code: failed >= recordingFailed ? "SEND_FAILED" : "RECORD_FAILED",
+      detail: { sent, failed, recordingFailed },
+    });
+  }
   return NextResponse.json(
     { sent, failed, recordingFailed },
     { status: failed > 0 || recordingFailed > 0 ? 503 : 200 },
