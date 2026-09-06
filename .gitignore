@@ -71,3 +71,7 @@ next-env.d.ts
 /.claude/worktrees/
 .clerk-migration-manifest.json
 .clerk-migration-manifest.json.tmp
+
+# Local backup of the team headshots that the LinkedIn-sourced set replaced.
+# 1.3M of .webp kept for comparison, not part of the site.
+/.assets-backup/
