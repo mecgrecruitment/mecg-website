@@ -28,11 +28,12 @@ export default async function WorkspaceNav({
   current: string;
 }) {
   const supabase = await createClient();
-  // Two links depend on live state rather than on a role, so they are looked up
+  // Three links depend on live state rather than on a role, so they are looked up
   // rather than derived. Cheap, and it keeps callers from plumbing flags through.
-  const [screeningReviewer, { data: gradingEvents }] = await Promise.all([
+  const [screeningReviewer, { data: gradingEvents }, { data: speedDatingRounds }] = await Promise.all([
     screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleId }),
     supabase.rpc("my_grading_events"),
+    supabase.from("rounds").select("id").eq("cycle_id", cycleId).eq("kind", "SPEED_DATING").in("status", ["PUBLISHED", "ACTIVE"]).limit(1),
   ]);
 
   const screeningQueue = screeningReviewer.data
@@ -40,6 +41,7 @@ export default async function WorkspaceNav({
     : { data: [], error: null };
   const openScreening = (screeningQueue.data ?? []).filter((item) => item.assignment_status === "ASSIGNED").length;
   const hasGradingEvent = (gradingEvents ?? []).length > 0;
+  const hasSpeedDatingRound = (speedDatingRounds ?? []).length > 0 && !screeningReviewer.data;
 
   const can = (permission: Parameters<typeof hasPermission>[2]) => hasPermission(user.memberships, cycleId, permission);
   // Every member votes once the cycle reaches decision lock, so the link is
@@ -65,6 +67,7 @@ export default async function WorkspaceNav({
   ];
 
   const myTools: WorkspaceNavLink[] = [
+    ...(hasSpeedDatingRound ? [["/member/speed-dating", "Speed Dating"] as const] : []),
     ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
     ...(screeningReviewer.data ? [["/member/screening", `Read applications${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),

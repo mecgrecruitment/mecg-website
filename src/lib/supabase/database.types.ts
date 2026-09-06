@@ -2307,6 +2307,126 @@ export type Database = {
           },
         ]
       }
+      speed_dating_pair_claims: {
+        Row: {
+          claimed_at: string
+          evaluator_id: string
+          pair_id: string
+          submitted_at: string | null
+        }
+        Insert: {
+          claimed_at?: string
+          evaluator_id: string
+          pair_id: string
+          submitted_at?: string | null
+        }
+        Update: {
+          claimed_at?: string
+          evaluator_id?: string
+          pair_id?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "speed_dating_pair_claims_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "speed_dating_pair_claims_pair_id_fkey"
+            columns: ["pair_id"]
+            isOneToOne: false
+            referencedRelation: "speed_dating_pairs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      speed_dating_pair_members: {
+        Row: {
+          application_id: string
+          pair_id: string
+          position: number
+          round_id: string
+        }
+        Insert: {
+          application_id: string
+          pair_id: string
+          position: number
+          round_id: string
+        }
+        Update: {
+          application_id?: string
+          pair_id?: string
+          position?: number
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "speed_dating_pair_members_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "speed_dating_pair_members_pair_id_round_id_fkey"
+            columns: ["pair_id", "round_id"]
+            isOneToOne: false
+            referencedRelation: "speed_dating_pairs"
+            referencedColumns: ["id", "round_id"]
+          },
+        ]
+      }
+      speed_dating_pairs: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          published_at: string | null
+          round_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          published_at?: string | null
+          round_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          published_at?: string | null
+          round_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "speed_dating_pairs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "speed_dating_pairs_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2438,6 +2558,10 @@ export type Database = {
           subject_id: string
         }
         Returns: boolean
+      }
+      claim_speed_dating_pair: {
+        Args: { target_pair_id: string }
+        Returns: Json
       }
       clone_cycle: {
         Args: { cycle_name: string; source_cycle_id: string }
@@ -2705,6 +2829,10 @@ export type Database = {
           candidate_code: string
         }[]
       }
+      my_speed_dating_pairs: {
+        Args: { target_round_id: string }
+        Returns: Json
+      }
       owns_application: {
         Args: { target_application_id: string }
         Returns: boolean
@@ -2724,6 +2852,14 @@ export type Database = {
       reassign_evaluator: {
         Args: { replacement_evaluator_id: string; target_assignment_id: string }
         Returns: string
+      }
+      replace_speed_dating_pairs: {
+        Args: {
+          publish_pairs?: boolean
+          submitted_pairs: Json
+          target_round_id: string
+        }
+        Returns: Json
       }
       recuse_screening_assignment: {
         Args: { recusal_reason: string; target_assignment_id: string }

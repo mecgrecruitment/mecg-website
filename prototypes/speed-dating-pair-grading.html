@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speed Dating pair grading prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #070d1f;
+      --blue: #3f63af;
+      --orange: #fe904d;
+      --orange-ink: #a83e0b;
+      --paper: #f4f1ec;
+      --muted: #626675;
+      --line: rgba(7, 13, 31, 0.14);
+      --success: #146c43;
+      --danger: #b42318;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #fff 0, #faf9f6 100%);
+      color: var(--navy);
+    }
+
+    button, input, textarea { font: inherit; }
+
+    button, input, textarea, [tabindex] { outline-offset: 3px; }
+    :focus-visible { outline: 3px solid var(--navy); }
+
+    .shell {
+      width: min(100% - 32px, 1040px);
+      margin: 0 auto;
+      padding: 28px 0 120px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--orange-ink);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    h1 {
+      margin: 8px 0 0;
+      font-size: clamp(30px, 5vw, 44px);
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .lede {
+      max-width: 660px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .prototype-note {
+      margin-top: 20px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      color: #454958;
+      font-size: 13px;
+    }
+
+    .panel {
+      margin-top: 28px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .search-panel { padding: 22px; }
+
+    label, legend { font-weight: 700; }
+
+    .search-wrap { position: relative; margin-top: 10px; }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--blue);
+      pointer-events: none;
+    }
+
+    #pair-search {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0 48px;
+      background: rgba(7, 13, 31, 0.025);
+      color: var(--navy);
+      font-size: 16px;
+    }
+
+    #clear-search {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      min-width: 44px;
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .search-help, .microcopy {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .results {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .result {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #fff;
+      color: var(--navy);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .result:hover { background: rgba(63, 99, 175, 0.06); }
+    .result:disabled { cursor: default; opacity: 0.68; }
+
+    .pair-label {
+      color: var(--orange-ink);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .pair-names {
+      display: block;
+      margin-top: 4px;
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    mark {
+      padding: 0 2px;
+      border-radius: 3px;
+      background: rgba(254, 144, 77, 0.32);
+      color: inherit;
+    }
+
+    .state {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(7, 13, 31, 0.06);
+      color: #4f5360;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .state.open { background: rgba(254, 144, 77, 0.18); color: var(--orange-ink); }
+    .state.done { background: #e8f5ee; color: var(--success); }
+
+    .empty {
+      padding: 22px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .workspace { display: none; }
+    .workspace.active { display: block; }
+
+    .workspace-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 22px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .workspace-header h2 { margin: 5px 0 0; font-size: 25px; letter-spacing: -0.025em; }
+    .workspace-header .pair-label { color: var(--orange); }
+
+    .saved {
+      flex: 0 0 auto;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .confirm-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+      font-size: 14px;
+    }
+
+    .link-button {
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      color: var(--orange-ink);
+      font-weight: 750;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .applicant-card { padding: 24px; background: #fff; }
+
+    .applicant-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .applicant-heading h3 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+
+    .completion-dot {
+      min-width: 22px;
+      height: 22px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: transparent;
+      font-size: 13px;
+      line-height: 20px;
+      text-align: center;
+    }
+
+    .completion-dot.complete { border-color: var(--success); background: var(--success); color: #fff; }
+
+    fieldset { margin: 22px 0 0; padding: 0; border: 0; }
+    legend { padding: 0; font-size: 14px; }
+
+    .ratings {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .rating { position: relative; }
+    .rating input {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .rating span {
+      display: grid;
+      min-height: 48px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+    }
+
+    .rating span:active { transform: scale(0.96); }
+    .rating input:focus-visible + span { outline: 3px solid var(--navy); outline-offset: 2px; }
+    .rating input:checked + span { border-color: var(--navy); background: var(--navy); color: #fff; }
+
+    .anchor {
+      min-height: 56px;
+      margin: 10px 0 0;
+      color: #555a68;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .note-label { display: block; margin-top: 15px; font-size: 14px; }
+
+    textarea {
+      width: 100%;
+      min-height: 92px;
+      margin-top: 8px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      background: rgba(7, 13, 31, 0.025);
+      color: var(--navy);
+    }
+
+    .required-note { color: var(--danger); }
+
+    .conflict {
+      min-height: 44px;
+      margin-top: 10px;
+      border: 0;
+      background: transparent;
+      color: #555a68;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .sticky-action {
+      position: fixed;
+      z-index: 5;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 -8px 28px rgba(7, 13, 31, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .sticky-action-inner {
+      display: flex;
+      width: min(100% - 32px, 1040px);
+      min-height: 84px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 0 auto;
+    }
+
+    #readiness { margin: 0; color: #555a68; font-size: 14px; }
+
+    .primary, .secondary {
+      min-height: 46px;
+      border-radius: 2px;
+      padding: 0 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary { border: 1px solid var(--orange); background: var(--orange); color: var(--navy); }
+    .primary:disabled { cursor: not-allowed; opacity: 0.45; }
+    .secondary { border: 1px solid var(--navy); background: #fff; color: var(--navy); }
+
+    dialog {
+      width: min(100% - 32px, 620px);
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      box-shadow: 0 24px 80px rgba(7, 13, 31, 0.32);
+    }
+
+    dialog::backdrop { background: rgba(7, 13, 31, 0.58); }
+
+    .dialog-body { padding: 24px; }
+    .dialog-body h2 { margin: 0; font-size: 24px; }
+
+    .review-list { display: grid; gap: 10px; margin-top: 18px; }
+
+    .review-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .review-card strong { display: block; }
+    .review-card p { margin: 5px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+    .receipt {
+      display: none;
+      margin-top: 28px;
+      border: 1px solid #acd5bf;
+      border-radius: 16px;
+      padding: 28px;
+      background: #f0faf5;
+      text-align: center;
+    }
+
+    .receipt.active { display: block; }
+    .receipt h2 { margin: 0; color: var(--success); font-size: 25px; }
+    .receipt p { margin: 8px 0 0; color: #47534d; }
+    .receipt .primary { margin-top: 20px; }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 24px, 1040px); padding-top: 20px; }
+      .search-panel { padding: 18px; }
+      .cards { grid-template-columns: 1fr; }
+      .applicant-card { padding: 20px 18px; }
+      .workspace-header { padding: 18px; }
+      .confirm-row { align-items: flex-start; padding: 12px 18px; }
+      .result { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .sticky-action-inner { width: min(100% - 24px, 1040px); min-height: 96px; }
+      #readiness { max-width: 52%; }
+      .dialog-actions { align-items: stretch; flex-direction: column-reverse; }
+      .dialog-actions button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">Fall 2026 · live grading</p>
+      <h1>Speed Dating</h1>
+      <p class="lede">Search either applicant's name, confirm the pair, and rate both people before moving to the next group.</p>
+    </header>
+
+    <p class="prototype-note">Interactive prototype. Ratings reset when this file reloads and do not save to MECG.</p>
+
+    <section id="search-view" class="panel search-panel">
+      <label for="pair-search">Search either applicant's name</label>
+      <div class="search-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+        </svg>
+        <input id="pair-search" type="search" autocomplete="off" placeholder="First, preferred, or last name" aria-describedby="search-help">
+        <button id="clear-search" type="button" aria-label="Clear search">×</button>
+      </div>
+      <p id="search-help" class="search-help">Try Jordan, Maya, Devon, Priya, Sam, or Alex. Searching either name returns the whole pair.</p>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <section id="grade-view" class="panel workspace" aria-labelledby="pair-heading">
+      <div class="workspace-header">
+        <div>
+          <p id="active-pair-label" class="pair-label"></p>
+          <h2 id="pair-heading"></h2>
+        </div>
+        <span id="saved-state" class="saved" role="status">No changes yet</span>
+      </div>
+      <div class="confirm-row">
+        <span>Confirm that these are the two people you met.</span>
+        <button id="wrong-pair" type="button" class="link-button">Wrong pair</button>
+      </div>
+      <form id="pair-form">
+        <div id="applicant-cards" class="cards"></div>
+      </form>
+    </section>
+
+    <section id="receipt" class="receipt" aria-live="polite">
+      <h2>Both ratings submitted</h2>
+      <p id="receipt-copy"></p>
+      <button id="next-pair" type="button" class="primary">Search the next group</button>
+    </section>
+  </main>
+
+  <footer id="action-bar" class="sticky-action" hidden>
+    <div class="sticky-action-inner">
+      <p id="readiness">Rate both applicants.</p>
+      <button id="review-button" type="button" class="primary" disabled>Review both ratings</button>
+    </div>
+  </footer>
+
+  <dialog id="review-dialog" aria-labelledby="review-heading">
+    <div class="dialog-body">
+      <h2 id="review-heading">Review both ratings</h2>
+      <p class="microcopy">Submission locks both applicant evaluations. Check the names before continuing.</p>
+      <div id="review-list" class="review-list"></div>
+      <div class="dialog-actions">
+        <button id="keep-editing" type="button" class="secondary">Keep editing</button>
+        <button id="submit-pair" type="button" class="primary">Submit both ratings</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const anchors = {
+      1: "Serious concern. The interaction showed behavior that conflicts with MECG's expectations.",
+      2: "Below the expected bar. The interaction had a material concern or lacked enough positive evidence.",
+      3: "Meets the expected bar. The applicant communicated clearly and engaged constructively.",
+      4: "Strong. The applicant listened, reasoned, and contributed with clear positive evidence.",
+      5: "Exceptional. The applicant adapted to the conversation and showed unusually strong judgment or collaboration."
+    };
+
+    const pairs = [
+      { id: "07", names: ["Jordan Lee", "Maya Patel"], state: "Not started", ratings: [{ score: 0, note: "" }, { score: 0, note: "" }] },
+      { id: "12", names: ["Devon Williams", "Priya Shah"], state: "1 of 2 rated", ratings: [{ score: 4, note: "" }, { score: 0, note: "" }] },
+      { id: "15", names: ["Sam Rivera", "Alex Kim"], state: "Submitted", submitted: true, ratings: [{ score: 3, note: "" }, { score: 4, note: "" }] }
+    ];
+
+    const searchView = document.querySelector("#search-view");
+    const gradeView = document.querySelector("#grade-view");
+    const receipt = document.querySelector("#receipt");
+    const searchInput = document.querySelector("#pair-search");
+    const results = document.querySelector("#results");
+    const cards = document.querySelector("#applicant-cards");
+    const actionBar = document.querySelector("#action-bar");
+    const readiness = document.querySelector("#readiness");
+    const reviewButton = document.querySelector("#review-button");
+    const reviewDialog = document.querySelector("#review-dialog");
+    let activePair = null;
+    let saveTimer = null;
+
+    function normalize(value) {
+      return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/gi, " ").trim().toLowerCase();
+    }
+
+    function escaped(value) {
+      const node = document.createElement("span");
+      node.textContent = value;
+      return node.innerHTML;
+    }
+
+    function highlighted(name, query) {
+      if (!query) return escaped(name);
+      const normalizedQuery = normalize(query);
+      const index = name.toLowerCase().indexOf(normalizedQuery);
+      if (index < 0) return escaped(name);
+      return `${escaped(name.slice(0, index))}<mark>${escaped(name.slice(index, index + normalizedQuery.length))}</mark>${escaped(name.slice(index + normalizedQuery.length))}`;
+    }
+
+    function pairState(pair) {
+      if (pair.submitted) return "Submitted";
+      const count = pair.ratings.filter((rating) => rating.score).length;
+      if (count === 2) return "Ready to submit";
+      if (count === 1) return "1 of 2 rated";
+      return "Not started";
+    }
+
+    function renderResults() {
+      const query = normalize(searchInput.value);
+      const matches = pairs.filter((pair) => !query || pair.names.some((name) => normalize(name).includes(query)));
+      results.innerHTML = "";
+      if (!matches.length) {
+        results.innerHTML = `<div class="empty"><strong>No matching pair</strong><p class="microcopy">Check the spelling or report a missing name to the event operator.</p></div>`;
+        return;
+      }
+      for (const pair of matches) {
+        const button = document.createElement("button");
+        const state = pairState(pair);
+        button.type = "button";
+        button.className = "result";
+        button.disabled = pair.submitted;
+        button.innerHTML = `<span><span class="pair-label">Pair ${escaped(pair.id)}</span><span class="pair-names">${highlighted(pair.names[0], searchInput.value)} + ${highlighted(pair.names[1], searchInput.value)}</span></span><span class="state ${pair.submitted ? "done" : "open"}">${state}</span>`;
+        button.addEventListener("click", () => openPair(pair));
+        results.append(button);
+      }
+    }
+
+    function applicantCard(pair, index) {
+      const applicant = pair.names[index];
+      const rating = pair.ratings[index];
+      const choices = [1, 2, 3, 4, 5].map((score) => `
+        <label class="rating">
+          <input type="radio" name="rating-${index}" value="${score}" ${rating.score === score ? "checked" : ""}>
+          <span>${score}</span>
+        </label>
+      `).join("");
+      return `
+        <article class="applicant-card" data-index="${index}">
+          <div class="applicant-heading">
+            <h3>${escaped(applicant)}</h3>
+            <span class="completion-dot" aria-label="Rating incomplete">✓</span>
+          </div>
+          <fieldset>
+            <legend>Overall rating from 1 to 5</legend>
+            <div class="ratings">${choices}</div>
+            <p class="anchor" aria-live="polite">${rating.score ? escaped(anchors[rating.score]) : "Choose the rating that best matches what you observed."}</p>
+          </fieldset>
+          <label class="note-label" for="note-${index}">Evidence note <span class="note-requirement">optional</span></label>
+          <textarea id="note-${index}" maxlength="500" placeholder="What did ${escaped(applicant.split(" ")[0])} say or do?">${escaped(rating.note)}</textarea>
+          <p class="microcopy"><span class="note-count">${rating.note.length}</span> / 500 characters</p>
+          <button type="button" class="conflict">I know this applicant</button>
+        </article>
+      `;
+    }
+
+    function openPair(pair) {
+      activePair = pair;
+      searchView.hidden = true;
+      receipt.classList.remove("active");
+      gradeView.classList.add("active");
+      actionBar.hidden = false;
+      document.querySelector("#active-pair-label").textContent = `Pair ${pair.id}`;
+      document.querySelector("#pair-heading").textContent = pair.names.join(" + ");
+      cards.innerHTML = pair.names.map((_, index) => applicantCard(pair, index)).join("");
+      bindCardEvents();
+      updateReadiness();
+      document.querySelector("#pair-heading").focus?.();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function bindCardEvents() {
+      cards.querySelectorAll(".applicant-card").forEach((card) => {
+        const index = Number(card.dataset.index);
+        card.querySelectorAll("input[type=radio]").forEach((input) => input.addEventListener("change", () => {
+          activePair.ratings[index].score = Number(input.value);
+          card.querySelector(".anchor").textContent = anchors[Number(input.value)];
+          queueSave();
+          updateReadiness();
+        }));
+        const note = card.querySelector("textarea");
+        note.addEventListener("input", () => {
+          activePair.ratings[index].note = note.value;
+          card.querySelector(".note-count").textContent = String(note.value.length);
+          queueSave();
+          updateReadiness();
+        });
+        card.querySelector(".conflict").addEventListener("click", () => {
+          alert(`Prototype conflict path for ${activePair.names[index]}. Production must confirm the conflict, protect this applicant's evidence, and keep the other draft.`);
+        });
+      });
+    }
+
+    function queueSave() {
+      const saved = document.querySelector("#saved-state");
+      saved.textContent = "Saving...";
+      window.clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        saved.textContent = `Saved ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+      }, 450);
+    }
+
+    function issueFor(index) {
+      const rating = activePair.ratings[index];
+      if (!rating.score) return `Rate ${activePair.names[index]}`;
+      if ([1, 5].includes(rating.score) && rating.note.trim().length < 10) return `Add evidence for ${activePair.names[index]}'s ${rating.score}`;
+      return null;
+    }
+
+    function updateReadiness() {
+      cards.querySelectorAll(".applicant-card").forEach((card) => {
+        const index = Number(card.dataset.index);
+        const issue = issueFor(index);
+        const dot = card.querySelector(".completion-dot");
+        const requirement = card.querySelector(".note-requirement");
+        const noteRequired = [1, 5].includes(activePair.ratings[index].score);
+        requirement.textContent = noteRequired ? "required for this rating" : "optional";
+        requirement.classList.toggle("required-note", noteRequired);
+        dot.classList.toggle("complete", !issue);
+        dot.setAttribute("aria-label", issue ? "Rating incomplete" : "Rating complete");
+      });
+      const issue = issueFor(0) || issueFor(1);
+      readiness.textContent = issue || "Both ratings are ready to review.";
+      reviewButton.disabled = Boolean(issue);
+    }
+
+    function returnToSearch() {
+      activePair = null;
+      gradeView.classList.remove("active");
+      receipt.classList.remove("active");
+      actionBar.hidden = true;
+      searchView.hidden = false;
+      renderResults();
+      searchInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    searchInput.addEventListener("input", renderResults);
+    document.querySelector("#clear-search").addEventListener("click", () => { searchInput.value = ""; renderResults(); searchInput.focus(); });
+    document.querySelector("#wrong-pair").addEventListener("click", returnToSearch);
+    document.querySelector("#next-pair").addEventListener("click", () => { searchInput.value = ""; returnToSearch(); });
+
+    reviewButton.addEventListener("click", () => {
+      document.querySelector("#review-list").innerHTML = activePair.names.map((name, index) => {
+        const rating = activePair.ratings[index];
+        return `<div class="review-card"><strong>${escaped(name)} · ${rating.score} of 5</strong><p>${escaped(anchors[rating.score])}</p>${rating.note ? `<p>Evidence: ${escaped(rating.note)}</p>` : ""}</div>`;
+      }).join("");
+      reviewDialog.showModal();
+    });
+
+    document.querySelector("#keep-editing").addEventListener("click", () => reviewDialog.close());
+    document.querySelector("#submit-pair").addEventListener("click", () => {
+      activePair.submitted = true;
+      activePair.state = "Submitted";
+      reviewDialog.close();
+      gradeView.classList.remove("active");
+      actionBar.hidden = true;
+      document.querySelector("#receipt-copy").textContent = `${activePair.names.join(" and ")} are locked. Pair ${activePair.id} is complete.`;
+      receipt.classList.add("active");
+      document.querySelector("#next-pair").focus();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "/" && !searchView.hidden && document.activeElement !== searchInput) {
+        event.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    renderResults();
+    searchInput.focus();
+  </script>
+</body>
+</html>
