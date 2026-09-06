@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 const MAX_BODY_BYTES = 8 * 1024;
 const MAX_OPTIONAL_LENGTH = 200;
@@ -27,7 +27,11 @@ export async function POST(req: NextRequest) {
     }
     optional[field] = value.trim() || undefined;
   }
-  const supabase = await createClient();
+  // submit_interest is a public RPC, so this route never needs a session. That
+  // is what lets src/proxy.ts list it as session-free: the anon client keeps the
+  // interest form working even when Clerk is unreachable. checkRateLimit is
+  // unaffected -- it builds its own service-role client.
+  const supabase = createPublicClient();
   const ip = clientIp(req);
   if (!(await checkRateLimit(`interest:${ip}`))) {
     return NextResponse.json({ error: "Too many requests, try again later" }, { status: 429 });

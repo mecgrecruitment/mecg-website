@@ -231,3 +231,89 @@ test("RSVP slots require offset-aware ordered times and a bounded integer capaci
     },
   }]);
 });
+
+test("a failed Clerk rollback after grant_membership names the orphaned account", async (t) => {
+  const deleted: string[] = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
+    rpc: async () => ({ data: null, error: { code: "42501", message: "denied" } }),
+  }) } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+    rpc: async () => ({ data: "app-user-1", error: null }),
+    from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+  }) } });
+  t.mock.module("@/lib/env", { namedExports: {
+    requireClerkIssuer: () => "https://test.clerk.accounts.dev",
+    requireEnv: () => "sk_test",
+  } });
+  t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+    createUser: async () => ({ id: "user_clerk" }),
+    deleteUser: async (id: string) => { deleted.push(id); throw new Error("clerk unreachable"); },
+  } }) } });
+  const { POST } = await route("grant-rollback-failed");
+  const response = await POST(request({
+    action: "ADD_USER", cycleId: "cycle-1", name: "Test Member",
+    email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
+  }));
+  assert.equal(response.status, 500);
+  const { error } = await response.json();
+  assert.match(error, /member@example\.com/);
+  assert.match(error, /Clerk/);
+  assert.deepEqual(deleted, ["user_clerk"]);
+});
+
+test("a successful rollback after grant_membership still reports the RPC's own error", async (t) => {
+  const deleted: string[] = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
+    rpc: async () => ({ data: null, error: { code: "42501", message: "denied" } }),
+  }) } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+    rpc: async () => ({ data: "app-user-1", error: null }),
+    from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+  }) } });
+  t.mock.module("@/lib/env", { namedExports: {
+    requireClerkIssuer: () => "https://test.clerk.accounts.dev",
+    requireEnv: () => "sk_test",
+  } });
+  t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+    createUser: async () => ({ id: "user_clerk" }),
+    deleteUser: async (id: string) => { deleted.push(id); },
+  } }) } });
+  const { POST } = await route("grant-rollback-succeeded");
+  const response = await POST(request({
+    action: "ADD_USER", cycleId: "cycle-1", name: "Test Member",
+    email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
+  }));
+  assert.equal(response.status, 403);
+  assert.deepEqual(await response.json(), { error: "Request could not be completed" });
+  assert.deepEqual(deleted, ["user_clerk"]);
+});
+
+test("a failed Clerk rollback after ensure_external_identity names the orphaned account", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+    rpc: async () => ({ data: null, error: { code: "23505", message: "duplicate identity" } }),
+    from: () => { throw new Error("not called"); },
+  }) } });
+  t.mock.module("@/lib/env", { namedExports: {
+    requireClerkIssuer: () => "https://test.clerk.accounts.dev",
+    requireEnv: () => "sk_test",
+  } });
+  t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+    createUser: async () => ({ id: "user_clerk" }),
+    deleteUser: async () => { throw new Error("clerk unreachable"); },
+  } }) } });
+  const { POST } = await route("identity-rollback-failed");
+  const response = await POST(request({
+    action: "ADD_USER", cycleId: "cycle-1", name: "Test Member",
+    email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
+  }));
+  assert.equal(response.status, 500);
+  const { error } = await response.json();
+  assert.match(error, /member@example\.com/);
+  assert.match(error, /Clerk/);
+  assert.equal(fake.calls.length, 0);
+});

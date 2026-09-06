@@ -9,7 +9,7 @@ const CLERK_USER: {
   lastName: string;
   username: null;
   primaryEmailAddressId: string;
-  emailAddresses: Array<{ id: string; emailAddress: string }>;
+  emailAddresses: Array<{ id: string; emailAddress: string; verification: { status: string } | null }>;
   externalId: string | null;
 } = {
   id: "user_2clerk",
@@ -17,7 +17,7 @@ const CLERK_USER: {
   lastName: "Board",
   username: null,
   primaryEmailAddressId: "idn_1",
-  emailAddresses: [{ id: "idn_1", emailAddress: "Riley.Board@umich.edu" }],
+  emailAddresses: [{ id: "idn_1", emailAddress: "Riley.Board@umich.edu", verification: { status: "verified" } }],
   externalId: null,
 };
 
@@ -121,4 +121,18 @@ test("a malformed externalId cannot claim a legacy profile", async (t) => {
   });
   const { resolveCurrentIdentity } = await importModule("invalid-external-id");
   assert.equal((await resolveCurrentIdentity())?.appUserId, "fresh-uuid");
+});
+
+// The allowlist grants a role on the strength of an email address, so an
+// unverified one must never reach ensure_external_identity.
+test("an unverified primary email cannot provision an identity", async (t) => {
+  mockEnvironment(t, {
+    clerkUser: { ...CLERK_USER, emailAddresses: [{ id: "idn_1", emailAddress: "Riley.Board@umich.edu", verification: null }] },
+    rpc: (name) => {
+      if (name === "actor_id") return { data: null, error: null };
+      throw new Error(`unexpected rpc call: ${name}`);
+    },
+  });
+  const { resolveCurrentIdentity } = await importModule("unverified-email");
+  await assert.rejects(resolveCurrentIdentity(), /A verified primary email is required/);
 });

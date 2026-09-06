@@ -17,11 +17,16 @@ const supabaseOrigin = (() => {
 })();
 
 const clerkOrigin = (() => {
+  // A build that ships Clerk to the browser must put Clerk's origin in the
+  // CSP. Falling back to null here produced a green build whose CSP blocked
+  // every Clerk script, so sign-in failed with nothing in the logs.
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) return null;
   const issuer = process.env.CLERK_ISSUER;
+  if (!issuer) throw new Error("CLERK_ISSUER is required whenever NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is set, otherwise the CSP omits Clerk and sign-in silently fails.");
   try {
-    return issuer ? new URL(issuer).origin : null;
+    return new URL(issuer).origin;
   } catch {
-    return null;
+    throw new Error(`CLERK_ISSUER must be an absolute URL, received: ${issuer}`);
   }
 })();
 

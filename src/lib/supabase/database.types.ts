@@ -2431,6 +2431,14 @@ export type Database = {
         Args: { target_notification_id: string }
         Returns: Json
       }
+      claim_reminder: {
+        Args: {
+          recipient_id: string
+          reminder_kind: string
+          subject_id: string
+        }
+        Returns: boolean
+      }
       clone_cycle: {
         Args: { cycle_name: string; source_cycle_id: string }
         Returns: string
@@ -2669,14 +2677,6 @@ export type Database = {
         }
         Returns: string
       }
-      mark_reminder_sent: {
-        Args: {
-          recipient_id: string
-          reminder_kind: string
-          subject_id: string
-        }
-        Returns: boolean
-      }
       member_applicants: {
         Args: { target_cycle_id: string }
         Returns: {
@@ -2740,6 +2740,14 @@ export type Database = {
       release_ready_decisions: {
         Args: { target_cycle_id: string }
         Returns: Json
+      }
+      release_reminder: {
+        Args: {
+          recipient_id: string
+          reminder_kind: string
+          subject_id: string
+        }
+        Returns: undefined
       }
       respond_to_offer: {
         Args: { accept: boolean; target_application_id: string }

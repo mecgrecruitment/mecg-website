@@ -30,27 +30,6 @@ const isPublicRoute = createRouteMatcher([
   "/api/maintenance(.*)",
 ]);
 
-// Any route whose handler reads the Clerk session belongs here, public or not.
-// shouldBypassClerk skips clerkMiddleware for everything else, and a page that
-// then calls auth() throws "Clerk can't detect usage of clerkMiddleware()".
-// Check-in is the case that bites: it is public, so isPublicRoute lets it
-// through, but both the page and the POST route call currentUser() to decide
-// whether to show the scan or the sign-in prompt.
-const isAuthDependentRoute = createRouteMatcher([
-  "/login(.*)",
-  "/sign-up(.*)",
-  "/apply(.*)",
-  "/checkin(.*)",
-  "/api/checkin(.*)",
-  "/forgot-password",
-  "/reset-password",
-  "/auth/callback(.*)",
-  "/admin/login",
-  "/api/auth(.*)",
-  "/api/admin/login",
-  "/api/webhooks/clerk",
-]);
-
 function isProtectedApi(pathname: string) {
   return ["/api/admin", "/api/member", "/api/account", "/api/applicant", "/api/apply"]
     .some((prefix) => pathname.startsWith(prefix));
@@ -59,13 +38,6 @@ function isProtectedApi(pathname: string) {
 function isProtectedPage(pathname: string) {
   return ["/admin", "/member", "/applicant"]
     .some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
-
-export function shouldBypassClerk(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  return !isAuthDependentRoute(request)
-    && !isProtectedApi(pathname)
-    && !isProtectedPage(pathname);
 }
 
 export async function handleProxy(
@@ -91,15 +63,38 @@ export function handleUnconfiguredProxy(request: NextRequest) {
 
 const configuredProxy = clerkMiddleware(handleProxy);
 
+// Every route falls on one side of a line: it never reads the session, so it
+// must not depend on Clerk being reachable and the public site keeps serving
+// through a Clerk outage; or it reads the session and has to run
+// clerkMiddleware, because auth() throws "Clerk can't detect usage of
+// clerkMiddleware()" without it. The default is to run it, so adding a handler
+// that calls auth() cannot break the way /api/interest and /api/events/[id]/ics
+// did.
+//
+// Listing a route below is an assertion that its handler never touches the
+// session -- not that skipping Clerk is convenient there. Adding one without
+// reading the handler first is exactly how the original bug shipped.
+const isSessionFreeRoute = createRouteMatcher([
+  "/",
+  "/home",
+  "/contact",
+  "/join",
+  "/team",
+  "/work(.*)",
+  "/api/contact",
+  "/api/health",
+  "/api/interest",
+]);
+
 export function proxy(request: NextRequest, event: NextFetchEvent) {
-  if (shouldBypassClerk(request)) return NextResponse.next();
+  if (isSessionFreeRoute(request)) return NextResponse.next();
   if (!hasClerkConfiguration()) return handleUnconfiguredProxy(request);
   return configuredProxy(request, event);
 }
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)(?:$|\\?)).*)",
     "/(api|trpc)(.*)",
   ],
 };

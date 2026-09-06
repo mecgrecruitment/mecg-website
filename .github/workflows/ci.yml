@@ -47,8 +47,21 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          # CLERK_SECRET_KEY is deliberately absent, which is what makes
+          # hasClerkConfiguration() false and runs handleUnconfiguredProxy
+          # instead of clerkMiddleware. With it set, the middleware issues a
+          # handshake redirect to clerk.ci.invalid, which resolves nowhere: the
+          # browser reports ERR_NAME_NOT_RESOLVED and every Clerk-covered route
+          # fails. There is no reachable Clerk instance in this job, so the only
+          # honest thing to exercise here is the unconfigured path. The
+          # configured proxy is covered by src/proxy.test.ts against a mocked
+          # clerkMiddleware, and end to end by authenticated-clerk on main.
+          #
+          # The other two stay: next start re-evaluates next.config.ts, which
+          # throws when CLERK_ISSUER is missing while the publishable key is
+          # set, and the key itself is baked into the client bundle at build
+          # time regardless of what this step sets.
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY2kuaW52YWxpZCQ
-          CLERK_SECRET_KEY: sk_test_ci-placeholder
           CLERK_ISSUER: https://clerk.ci.invalid
 
   database:

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasValidCronAuthorization } from "@/lib/cron-auth";
 import { deliverNotification } from "@/lib/notifications";
+import { operationalLog } from "@/lib/operational-log";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ async function run(request: NextRequest) {
   let deferred = 0;
   let failed = 0;
   let skipped = 0;
+  let category: string | null = null; // last thrown category, a sample rather than a tally
   for (const item of data ?? []) {
     try {
       const result = await deliverNotification(supabase, item.id);
@@ -38,11 +40,19 @@ async function run(request: NextRequest) {
       else skipped += 1;
     } catch (deliveryError) {
       failed += 1;
+      category = deliveryError instanceof Error ? deliveryError.message : "unknown";
       console.error("notification retry worker failed", {
         notificationId: item.id,
         category: deliveryError instanceof Error ? deliveryError.message : "unknown",
       });
     }
+  }
+  if (deferred > 0 || failed > 0) {
+    operationalLog("error", {
+      event: "cron.notifications_degraded",
+      code: failed > 0 ? "DELIVERY_FAILED" : "DEFERRED",
+      detail: { processed: (data ?? []).length, delivered, deferred, failed, skipped, category },
+    });
   }
   return NextResponse.json(
     { processed: (data ?? []).length, delivered, deferred, failed, skipped },

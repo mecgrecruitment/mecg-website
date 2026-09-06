@@ -9,6 +9,7 @@ import type { Database, Json } from "@/lib/supabase/database.types";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
 import { createClerkClient } from "@clerk/backend";
 import { CLERK_PASSWORD_MAX_LENGTH, CLERK_PASSWORD_MIN_LENGTH, hasValidClerkPasswordLength } from "@/lib/clerk-password";
+import { withClerkTimeout } from "@/lib/clerk-retry";
 import { requireClerkIssuer, requireEnv } from "@/lib/env";
 
 type CycleStatus = Database["rush"]["Enums"]["cycle_status"];
@@ -89,9 +90,9 @@ export async function POST(req: NextRequest) {
     const [firstName, ...lastName] = name.split(/\s+/);
     let created: Awaited<ReturnType<typeof clerk.users.createUser>>;
     try {
-      created = await clerk.users.createUser({
+      created = await withClerkTimeout(() => clerk.users.createUser({
         emailAddress: [email], password, firstName, lastName: lastName.join(" ") || undefined,
-      });
+      }));
     } catch (createError) {
       console.error("admin add_user failed", createError);
       return NextResponse.json({ error: "Could not create user" }, { status: 409 });
@@ -100,14 +101,27 @@ export async function POST(req: NextRequest) {
       identity_issuer: requireClerkIssuer(), identity_subject: created.id,
       identity_email: email, identity_display_name: name,
     });
+    // A Clerk account left behind without a membership is a dead end: createUser
+    // rejects that email forever, so a rollback that fails has to be reported
+    // with the email and Clerk id instead of swallowed, or a bulk import just
+    // sees an unexplained 409 on the retry.
+    const orphanMessage = `An authentication account was created for ${email} but not granted membership, and automatic cleanup failed. Remove ${email} in Clerk before retrying that email.`;
     if (identityError) {
-      await clerk.users.deleteUser(created.id).catch(() => undefined);
+      const rollbackError = await withClerkTimeout(() => clerk.users.deleteUser(created.id)).then(() => null, (deleteError: unknown) => deleteError);
+      if (rollbackError) {
+        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError, identityError);
+        return NextResponse.json({ error: orphanMessage }, { status: 500 });
+      }
       return NextResponse.json({ error: "Could not provision user" }, { status: 500 });
     }
     ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: role }));
     if (error) {
-      await clerk.users.deleteUser(created.id).catch(() => undefined);
-      await admin.from("profiles").delete().eq("id", appUserId);
+      const rollbackError = await withClerkTimeout(() => clerk.users.deleteUser(created.id)).then(() => null, (deleteError: unknown) => deleteError);
+      const { error: profileError } = await admin.from("profiles").delete().eq("id", appUserId);
+      if (rollbackError || profileError) {
+        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError ?? profileError, error);
+        return NextResponse.json({ error: orphanMessage }, { status: 500 });
+      }
     }
   } else if (action === "ADD_EXISTING_USER") {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -116,7 +130,7 @@ export async function POST(req: NextRequest) {
     const clerk = createClerkClient({ secretKey: requireEnv("CLERK_SECRET_KEY") });
     let existingUser: Awaited<ReturnType<typeof clerk.users.getUserList>>["data"][number] | undefined;
     try {
-      existingUser = (await clerk.users.getUserList({ emailAddress: [email], limit: 2 })).data
+      existingUser = (await withClerkTimeout(() => clerk.users.getUserList({ emailAddress: [email], limit: 2 }))).data
         .find((candidate) => candidate.emailAddresses.some((address) => address.emailAddress.toLowerCase() === email));
     } catch (usersError) {
       console.error("admin find_existing_user failed", usersError);

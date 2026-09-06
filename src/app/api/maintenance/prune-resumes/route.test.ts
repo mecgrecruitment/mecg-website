@@ -23,6 +23,18 @@ function withCronSecret<T>(value: string | undefined, fn: () => T): T {
   }
 }
 
+// operationalLog writes one JSON line per record through console.error; keep
+// only those so the loop's ad hoc console.error calls do not pollute the check.
+function degradedRecords(t: test.TestContext) {
+  const records: Array<Record<string, unknown>> = [];
+  t.mock.method(console, "error", (value: unknown) => {
+    if (typeof value !== "string" || !value.startsWith("{")) return;
+    const record = JSON.parse(value);
+    if (record.service === "mecg-recruitment" && record.level === "error") records.push(record);
+  });
+  return records;
+}
+
 test("GET /api/maintenance/prune-resumes rejects a wrong secret of the same length", async (t) => {
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("should not run"); } } });
   const { GET } = await withCronSecret(SECRET, () => importRoute("wrong-same-length"));
@@ -62,10 +74,12 @@ test("GET /api/maintenance/prune-resumes accepts the correct secret", async (t) 
       }),
     },
   });
+  const records = degradedRecords(t);
   const { GET } = await withCronSecret(SECRET, () => importRoute("correct"));
   const res = await withCronSecret(SECRET, () => GET(request({ authorization: `Bearer ${SECRET}` })));
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), { ok: true, removed: 0, failed: 0 });
+  assert.equal(records.length, 0);
 });
 
 test("GET /api/maintenance/prune-resumes reports deletion failures as degraded", async (t) => {
@@ -77,8 +91,46 @@ test("GET /api/maintenance/prune-resumes reports deletion failures as degraded",
       }),
     },
   });
+  const records = degradedRecords(t);
   const { GET } = await withCronSecret(SECRET, () => importRoute("delete-failure"));
   const res = await withCronSecret(SECRET, () => GET(request({ authorization: `Bearer ${SECRET}` })));
   assert.equal(res.status, 503);
   assert.deepEqual(await res.json(), { ok: false, removed: 0, failed: 1 });
+  assert.equal(records.length, 1);
+  assert.deepEqual(
+    { event: records[0].event, code: records[0].code, detail: records[0].detail },
+    {
+      event: "cron.prune_resumes_degraded",
+      code: "STORAGE_DELETE_FAILED",
+      detail: { removed: 0, failed: 1, deleteFailed: 1, retireFailed: 0 },
+    },
+  );
+});
+
+test("GET /api/maintenance/prune-resumes logs a degraded run when the row retire fails after delete", async (t) => {
+  t.mock.module("@/lib/supabase/admin", {
+    namedExports: {
+      createAdminClient: () => ({
+        rpc: async (name: string) =>
+          name === "stale_pending_resume_uploads"
+            ? { data: [{ document_id: "document-1", object_path: "stale.pdf" }], error: null }
+            : { data: null, error: { code: "P0001" } },
+        storage: { from: () => ({ remove: async () => ({ error: null }) }) },
+      }),
+    },
+  });
+  const records = degradedRecords(t);
+  const { GET } = await withCronSecret(SECRET, () => importRoute("retire-failure"));
+  const res = await withCronSecret(SECRET, () => GET(request({ authorization: `Bearer ${SECRET}` })));
+  assert.equal(res.status, 503);
+  assert.deepEqual(await res.json(), { ok: false, removed: 0, failed: 1 });
+  assert.equal(records.length, 1);
+  assert.deepEqual(
+    { event: records[0].event, code: records[0].code, detail: records[0].detail },
+    {
+      event: "cron.prune_resumes_degraded",
+      code: "ROW_RETIRE_FAILED",
+      detail: { removed: 0, failed: 1, deleteFailed: 0, retireFailed: 1 },
+    },
+  );
 });
