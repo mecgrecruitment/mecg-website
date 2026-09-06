@@ -43,8 +43,14 @@ test("public API routes reach their handlers instead of throwing in the proxy", 
   // Not a stricter assertion because CI points NEXT_PUBLIC_SUPABASE_URL at
   // https://ci.invalid, so the RPC fails and the handler correctly answers 503.
   // The regression guarded here is the 500 thrown before any handler logic ran,
-  // back when the proxy skipped clerkMiddleware and createClient's auth() call
-  // threw "Clerk can't detect usage of clerkMiddleware()".
+  // from createClient's auth() call throwing "Clerk can't detect usage of
+  // clerkMiddleware()".
+  //
+  // This job runs with Clerk unconfigured, so what it proves is that the
+  // unconfigured path reaches the handler. Whether the configured proxy routes
+  // the same request to clerkMiddleware is asserted in src/proxy.test.ts,
+  // which can mock it; there is no reachable Clerk instance here to assert it
+  // against.
   const ics = await request.get("/api/events/00000000-0000-0000-0000-000000000000/ics");
   expect(ics.status()).not.toBe(500);
 
