@@ -1,4 +1,4 @@
-import { isSpeedDatingPairQueue } from "@/lib/speed-dating-pairs";
+import { isSpeedDatingPairQueue, isSpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
 
 type RpcError = { code?: string; message: string };
 type RpcResult<T> = Promise<{ data: T | null; error: RpcError | null }>;
@@ -16,6 +16,34 @@ function hasString(value: Record<string, unknown>, key: string) {
 
 function hasNumber(value: Record<string, unknown>, key: string) {
   return typeof value[key] === "number" && Number.isFinite(value[key]);
+}
+
+function hasBoolean(value: Record<string, unknown>, key: string) {
+  return typeof value[key] === "boolean";
+}
+
+function isWorkspaceContext(value: unknown) {
+  if (!isRecord(value)) return false;
+  return hasString(value, "cycleId")
+    && hasBoolean(value, "isScreeningReviewer")
+    && hasNumber(value, "openScreeningCount")
+    && Number.isInteger(value.openScreeningCount)
+    && Number(value.openScreeningCount) >= 0
+    && hasNumber(value, "openEvaluationCount")
+    && Number.isInteger(value.openEvaluationCount)
+    && Number(value.openEvaluationCount) >= 0
+    && hasNumber(value, "openCalibrationCount")
+    && Number.isInteger(value.openCalibrationCount)
+    && Number(value.openCalibrationCount) >= 0
+    && hasNumber(value, "openLiveEventCount")
+    && Number.isInteger(value.openLiveEventCount)
+    && Number(value.openLiveEventCount) >= 0
+    && hasNumber(value, "openTaskCount")
+    && Number.isInteger(value.openTaskCount)
+    && Number(value.openTaskCount) >= 0
+    && hasBoolean(value, "hasGradingEvent")
+    && hasBoolean(value, "hasSpeedDatingRound")
+    && hasBoolean(value, "hasGroupCaseWork");
 }
 
 function isScreeningQueue(value: unknown) {
@@ -71,6 +99,7 @@ function objectWith(...fields: Array<[string, "string" | "number"]>): RpcValidat
 // their results here before a caller can treat an assertion as trusted data.
 // Mutation RPCs whose return values are not consumed do not need a validator.
 const RPC_VALIDATORS: Record<string, RpcValidator> = {
+  workspace_context: isWorkspaceContext,
   is_active_screening_reviewer: (value) => typeof value === "boolean",
   check_rate_limit: (value) => typeof value === "boolean",
   my_screening_queue: isScreeningQueue,
@@ -110,8 +139,11 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   reject_resume_upload: (value) => typeof value === "string",
   authorize_resume_access: (value) => typeof value === "string",
   my_speed_dating_pairs: isSpeedDatingPairQueue,
+  speed_dating_pair_setup: isSpeedDatingPairSetup,
   claim_speed_dating_pair: (value) =>
     isRecord(value) && hasString(value, "pairId") && value.claimed === true,
+  report_wrong_speed_dating_pair: (value) =>
+    isRecord(value) && hasString(value, "pairId") && value.reported === true,
 };
 
 export async function screeningRpc<T>(client: unknown, name: string, args?: Record<string, unknown>) {
@@ -154,6 +186,19 @@ export type ScreeningQueueItem = {
   assignment_id: string;
   candidate_code: string;
   assignment_status: "ASSIGNED" | "SUBMITTED" | "RECUSED" | "LOCKED";
+};
+
+export type WorkspaceContext = {
+  cycleId: string;
+  isScreeningReviewer: boolean;
+  openScreeningCount: number;
+  openEvaluationCount: number;
+  openCalibrationCount: number;
+  openLiveEventCount: number;
+  openTaskCount: number;
+  hasGradingEvent: boolean;
+  hasSpeedDatingRound: boolean;
+  hasGroupCaseWork: boolean;
 };
 
 export type ScreeningDetail = {

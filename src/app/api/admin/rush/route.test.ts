@@ -134,6 +134,39 @@ test("committee cannot advance applicants", async (t) => {
   assert.equal(fake.calls.length, 0);
 });
 
+test("board publishes only distinct two-person Speed Dating pairs", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("publish-speed-dating-pairs");
+  const pairs = [
+    { applicationIds: ["application-1", "application-2"] },
+    { applicationIds: ["application-3", "application-4"] },
+  ];
+  const response = await POST(request({
+    action: "SET_SPEED_DATING_PAIRS",
+    cycleId: "cycle-1",
+    roundId: "round-1",
+    pairs,
+    publish: true,
+  }));
+  assert.equal(response.status, 201);
+  assert.deepEqual(fake.calls, [{
+    name: "replace_speed_dating_pairs",
+    args: { target_round_id: "round-1", submitted_pairs: pairs, publish_pairs: true },
+  }]);
+
+  const duplicate = await POST(request({
+    action: "SET_SPEED_DATING_PAIRS",
+    cycleId: "cycle-1",
+    roundId: "round-1",
+    pairs: [{ applicationIds: ["application-1", "application-1"] }],
+  }));
+  assert.equal(duplicate.status, 400);
+  assert.equal(fake.calls.length, 1);
+});
+
 test("reassignment requires both assignment and replacement evaluator", async (t) => {
   const fake = client();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });

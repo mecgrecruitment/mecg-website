@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { parseScreeningDraft } from "../screening-draft";
+import { screeningRecommendationWarning, screeningReviewBlocker } from "../screening-review-readiness";
 
 type Criterion = { id: string; name: string; description: string; weight: number; required: boolean };
 
@@ -21,6 +22,8 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
   const [evidence, setEvidence] = useState("");
   const [recommendation, setRecommendation] = useState("");
   const [recusalReason, setRecusalReason] = useState("");
+  const [reviewing, setReviewing] = useState(false);
+  const [confirmingRecusal, setConfirmingRecusal] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
@@ -29,6 +32,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
   const [draftSaveError, setDraftSaveError] = useState("");
   const [retryNonce, setRetryNonce] = useState(0);
   const criterionRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
+  const noteRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const evidenceRef = useRef<HTMLTextAreaElement>(null);
   const recommendationRef = useRef<HTMLSelectElement>(null);
   const lastSavedSignature = useRef<string | null>(null);
@@ -134,6 +138,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
   }, [assignmentId, draftPayload, draftReady, draftSignature, pending, retryNonce]);
 
   function markDraftChanged() {
+    setReviewing(false);
     setDraftSaveState("idle");
     setDraftSaveError("");
   }
@@ -162,27 +167,54 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const missingScore = criteria.find((criterion) => !scores[criterion.id]);
-    if (missingScore) {
-      setError(`Choose a rating for ${missingScore.name}.`);
-      criterionRefs.current[missingScore.id]?.focus();
+    const blocker = screeningReviewBlocker(criteria, { scores, notes, evidence, recommendation }, MIN_EVIDENCE_LENGTH);
+    if (blocker) {
+      setReviewing(false);
+      setError(blocker.message);
+      if (blocker.field === "score") criterionRefs.current[blocker.criterionId]?.focus();
+      if (blocker.field === "note") noteRefs.current[blocker.criterionId]?.focus();
+      if (blocker.field === "evidence") evidenceRef.current?.focus();
+      if (blocker.field === "recommendation") recommendationRef.current?.focus();
       return;
     }
-    if (evidence.trim().length < MIN_EVIDENCE_LENGTH) {
-      setError(`Overall evidence must be at least ${MIN_EVIDENCE_LENGTH} characters.`);
-      evidenceRef.current?.focus();
-      return;
-    }
-    if (!recommendation) {
-      setError("Choose a recommendation.");
-      recommendationRef.current?.focus();
+    if (!reviewing) {
+      setReviewing(true);
+      setError("");
       return;
     }
     void act({ action: "SUBMIT", evidence, recommendation, ratings: criteria.map((criterion) => ({ criterionId: criterion.id, score: Number(scores[criterion.id]), note: notes[criterion.id] ?? "" })) });
   }
 
+  const recommendationWarning = screeningRecommendationWarning(scores, recommendation);
+
   return (
     <div className="space-y-8">
+      <details className="rounded-2xl bg-mecg-orange/[0.08] p-4" onToggle={(event) => { if (!(event.currentTarget as HTMLDetailsElement).open) setConfirmingRecusal(false); }}>
+        <summary className="min-h-11 cursor-pointer list-none content-center font-semibold text-mecg-orange-ink">Recognize this applicant? Step back</summary>
+        <p className="mt-2 text-sm text-mecg-navy/70">Do not name the applicant. A confirmed recusal removes this application from your queue and deletes its private draft only when replacement coverage is available.</p>
+        <label className="mt-3 block text-sm font-medium text-mecg-orange-ink" htmlFor="screening-recusal-reason">Reason for recusal</label>
+        <textarea
+          id="screening-recusal-reason"
+          value={recusalReason}
+          maxLength={1000}
+          disabled={pending || !draftReady}
+          onChange={(event) => { setRecusalReason(event.target.value); setConfirmingRecusal(false); }}
+          placeholder="Brief reason, such as a prior close relationship or an identity revealed in the response"
+          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        />
+        <p className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{recusalReason.length} / 1000</p>
+        {confirmingRecusal ? (
+          <div className="mt-3 rounded-xl bg-white p-3">
+            <p className="text-sm font-medium">This permanently removes the application and its draft from your queue.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" disabled={pending} onClick={() => void act({ action: "RECUSE", reason: recusalReason })} className="button-primary">{pending ? "Stepping back…" : "Confirm recusal"}</button>
+              <button type="button" disabled={pending} onClick={() => setConfirmingRecusal(false)} className="button-secondary">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" disabled={pending || !draftReady || recusalReason.trim().length < 5} onClick={() => setConfirmingRecusal(true)} className="button-secondary mt-3">Review recusal</button>
+        )}
+      </details>
       <form onSubmit={submit} className="space-y-5" noValidate>
         <div
           className={`rounded-xl px-4 py-3 text-sm ${draftSaveState === "error" ? "bg-red-50 text-red-900" : "bg-mecg-navy/[0.045] text-mecg-navy/70"}`}
@@ -210,34 +242,36 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
               <legend className="px-2 font-semibold">{criterion.name} · {criterion.weight}%</legend>
               <p className="text-sm text-mecg-navy/55">{criterion.description}</p>
               <div className="mt-4 text-sm font-medium" id={`screening-rating-label-${criterion.id}`}>Rating</div>
-              <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5" role="group" aria-labelledby={`screening-rating-label-${criterion.id}`}>
+              <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5" role="radiogroup" aria-labelledby={`screening-rating-label-${criterion.id}`}>
                 {SCORE_OPTIONS.map((score) => {
                   const selected = scores[criterion.id] === String(score);
                   const label = `Score ${score}: ${SCORE_ANCHORS[score]}`;
                   return (
-                    <button
-                      key={score}
-                      type="button"
-                      aria-pressed={selected}
-                      aria-label={label}
-                      title={label}
-                      disabled={pending || !draftReady}
-                      onClick={() => { setScores((current) => ({ ...current, [criterion.id]: String(score) })); markDraftChanged(); setError(""); }}
-                      className={`min-h-11 rounded-xl text-sm font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
+                    <label key={score} title={label} className={`relative min-h-11 cursor-pointer rounded-xl text-center text-sm font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                         selected
                           ? "bg-mecg-navy text-white"
                           : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
-                      }`}
-                    >
-                      {score}
-                    </button>
+                      }`}>
+                      <input
+                        type="radio"
+                        name={`screening-rating-${criterion.id}`}
+                        value={score}
+                        checked={selected}
+                        aria-label={label}
+                        disabled={pending || !draftReady}
+                        onChange={() => { setScores((current) => ({ ...current, [criterion.id]: String(score) })); markDraftChanged(); setError(""); }}
+                        className="peer absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+                      />
+                      <span className="relative inline-flex min-h-11 items-center justify-center">{score}</span>
+                    </label>
                   );
                 })}
               </div>
               {scores[criterion.id] && <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>}
-              <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note (optional)</label>
+              <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note {(["1", "2", "5"].includes(scores[criterion.id])) ? "(required for this rating)" : "(optional)"}</label>
               <textarea
                 id={`screening-note-${criterion.id}`}
+                ref={(node) => { noteRefs.current[criterion.id] = node; }}
                 value={note}
                 maxLength={MAX_NOTE_LENGTH}
                 disabled={pending || !draftReady}
@@ -250,7 +284,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
           );
         })}
         <label className="block font-medium" htmlFor="screening-evidence">
-          Overall evidence
+          Recommendation rationale and overall evidence
           <textarea
             id="screening-evidence"
             ref={evidenceRef}
@@ -273,26 +307,24 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
             <option value="DECLINE">Do not advance</option>
           </select>
         </label>
+        {recommendationWarning && <OperationNotice kind="info">Consistency check: {recommendationWarning}</OperationNotice>}
+        {reviewing && (
+          <section className="rounded-2xl bg-mecg-navy p-5 text-white" aria-labelledby="screening-review-summary">
+            <h2 id="screening-review-summary" className="font-semibold">Review before locking</h2>
+            <dl className="mt-3 space-y-3 text-sm">
+              {criteria.map((criterion) => <div key={criterion.id}><dt className="font-semibold">{criterion.name}: {scores[criterion.id]} — {SCORE_ANCHORS[Number(scores[criterion.id])]}</dt><dd className="mt-1 text-white/70">{notes[criterion.id]?.trim() || "No criterion note"}</dd></div>)}
+              <div><dt className="font-semibold">Recommendation</dt><dd className="mt-1 text-white/70">{recommendation === "ADVANCE" ? "Advance" : recommendation === "DECLINE" ? "Do not advance" : "Hold for structured review"}</dd></div>
+              <div><dt className="font-semibold">Rationale</dt><dd className="mt-1 whitespace-pre-wrap text-white/70">{evidence.trim()}</dd></div>
+            </dl>
+          </section>
+        )}
         <OperationNotice kind="error">{error}</OperationNotice>
-        <p className="text-sm leading-6 text-mecg-navy/60">Submitting locks this review permanently, then opens your next unread application when one remains.</p>
-        <button type="submit" disabled={pending || !draftReady} className="button-primary">{pending ? "Submitting…" : "Submit and open next"}</button>
+        <p className="text-sm leading-6 text-mecg-navy/60">The final submit locks this review permanently, then opens your next unread application when one remains.</p>
+        <div className="flex flex-wrap gap-2">
+          <button type="submit" disabled={pending || !draftReady} className="button-primary">{pending ? "Submitting…" : reviewing ? "Submit locked review" : "Review before submitting"}</button>
+          {reviewing && <button type="button" disabled={pending} className="button-secondary" onClick={() => setReviewing(false)}>Keep editing</button>}
+        </div>
       </form>
-      <section className="rounded-2xl bg-mecg-orange/[0.08] p-5" aria-labelledby="recusal-heading">
-        <h2 id="recusal-heading" className="font-semibold text-mecg-orange-ink">Recognize this applicant?</h2>
-        <p className="mt-1 text-sm text-mecg-navy/70">Do not name the applicant. If eligible replacement coverage exists, recusal records a conflict, permanently removes this application from your queue, and assigns a replacement. If no replacement is available, no recusal is completed.</p>
-        <label className="mt-3 block text-sm font-medium text-mecg-orange-ink" htmlFor="screening-recusal-reason">Reason for recusal</label>
-        <textarea
-          id="screening-recusal-reason"
-          value={recusalReason}
-          maxLength={1000}
-          disabled={pending || !draftReady}
-          onChange={(event) => setRecusalReason(event.target.value)}
-          placeholder="Brief reason, such as a prior close relationship or an identity revealed in the response"
-          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
-        />
-        <p className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{recusalReason.length} / 1000</p>
-        <button type="button" disabled={pending || !draftReady || recusalReason.trim().length < 5} onClick={() => void act({ action: "RECUSE", reason: recusalReason })} className="button-secondary mt-3">{pending ? "Stepping back…" : "Step back from this one"}</button>
-      </section>
     </div>
   );
 }

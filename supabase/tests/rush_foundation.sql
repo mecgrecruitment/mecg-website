@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(337);
+select extensions.plan(360);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -111,9 +111,36 @@ select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functio
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.my_screening_queue(text)'::regprocedure)) > 0, 'reviewer queue rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.screening_assignment_detail(text)'::regprocedure)) > 0, 'reviewer detail rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.submit_screening_review(text,jsonb,text,text)'::regprocedure)) > 0, 'review submission rechecks current role eligibility');
+select extensions.ok(
+  exists(
+    select 1 from pg_constraint
+    where conrelid = 'rush.screening_ratings'::regclass
+      and conname = 'screening_ratings_extreme_score_note_check'
+  ),
+  'screening ratings enforce evidence notes for scores 1, 2, and 5'
+);
+select extensions.has_table('rush', 'speed_dating_pair_reports', 'wrong-pair reports have a durable operator-visible record');
+select extensions.has_function('rush', 'report_wrong_speed_dating_pair', array['text'], 'an evaluator can report a claimed wrong pair without deleting drafts');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.recuse_screening_assignment(text,text)'::regprocedure)) > 0, 'reviewer recusal rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.screening_assignment_inputs(text)'::regprocedure)) > 0, 'assignment inputs exclude reviewers whose roles changed');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.commit_screening_assignments(text,jsonb,text,jsonb)'::regprocedure)) > 0, 'assignment commit rejects reviewers whose roles changed');
+select extensions.has_function('rush','workspace_context',array['text'],'workspace context retains its cycle-bound signature');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.workspace_context(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'workspace context is a security definer with an empty search path');
+select extensions.ok(has_function_privilege('authenticated','rush.workspace_context(text)','EXECUTE') and not has_function_privilege('anon','rush.workspace_context(text)','EXECUTE'), 'workspace context ACL excludes anonymous callers');
+select extensions.ok(position('rush.actor_id()' in pg_get_functiondef('rush.workspace_context(text)'::regprocedure)) > 0 and position('target_cycle_id' in pg_get_functiondef('rush.workspace_context(text)'::regprocedure)) > 0, 'workspace context binds authorization and results to the requested cycle');
+select extensions.has_function('rush','export_group_case_backup',array['text','text'],'Group Case backup export retains its cycle and round signature');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.export_group_case_backup(text,text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'Group Case backup export is a security definer with an empty search path');
+select extensions.ok(has_function_privilege('authenticated','rush.export_group_case_backup(text,text)','EXECUTE') and not has_function_privilege('anon','rush.export_group_case_backup(text,text)','EXECUTE'), 'Group Case backup export ACL excludes anonymous callers');
+select extensions.ok(position('GROUP_CASE_BACKUP_EXPORTED' in pg_get_functiondef('rush.export_group_case_backup(text,text)'::regprocedure)) > 0 and position('BOARD' in pg_get_functiondef('rush.export_group_case_backup(text,text)'::regprocedure)) > 0 and position('OWNER' in pg_get_functiondef('rush.export_group_case_backup(text,text)'::regprocedure)) > 0, 'Group Case backup downloads are Board-gated and audited');
+select extensions.has_function('rush','submit_speed_dating_pair',array['text','jsonb'],'Speed Dating pair submission exists');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.submit_speed_dating_pair(text,jsonb)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'Speed Dating pair submission is a security definer with an empty search path');
+select extensions.ok(has_function_privilege('authenticated','rush.submit_speed_dating_pair(text,jsonb)','EXECUTE') and not has_function_privilege('anon','rush.submit_speed_dating_pair(text,jsonb)','EXECUTE'), 'Speed Dating pair submission ACL excludes anonymous callers');
+select extensions.ok(position('rush.submit_evaluation' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0 and position('jsonb_array_length(submitted_members) <> 2' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0, 'pair submission validates two applicants and uses the locked individual evaluation contract');
+select extensions.ok(position('SPEED_DATING_PAIR_SUBMITTED' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0 and position('update rush.speed_dating_pair_claims' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0, 'pair submission closes the claim and records an audit event in the same transaction');
+select extensions.has_function('rush','speed_dating_pair_setup',array['text'],'Board Speed Dating pair setup query exists');
+select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.speed_dating_pair_setup(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'pair setup query is a security definer with an empty search path');
+select extensions.ok(has_function_privilege('authenticated','rush.speed_dating_pair_setup(text)','EXECUTE') and not has_function_privilege('anon','rush.speed_dating_pair_setup(text)','EXECUTE') and position('BOARD' in pg_get_functiondef('rush.speed_dating_pair_setup(text)'::regprocedure)) > 0 and position('OWNER' in pg_get_functiondef('rush.speed_dating_pair_setup(text)'::regprocedure)) > 0, 'pair setup query is authenticated and Board-gated');
+select extensions.ok(position('Overall Speed Dating assessment' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) > 0 and position('100, true, 0' in pg_get_functiondef('rush.create_cycle(text)'::regprocedure)) > 0, 'new cycles default Speed Dating to one required overall criterion');
 select extensions.ok(position('update rush.applications' in pg_get_functiondef('rush.approve_decision(text)'::regprocedure)) = 0 and position('LOCKED' in pg_get_functiondef('rush.approve_decision(text)'::regprocedure)) > 0, 'decision approval locks without exposing the application outcome');
 select extensions.ok(position('update rush.applications' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0 and position('OFFERED' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0 and position('RELEASED' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0, 'decision release atomically applies the application outcome');
 select extensions.ok(position('application withdrawn' in pg_get_functiondef('rush.release_decision(text)'::regprocedure)) > 0, 'releasing a decision re-checks withdrawal under the row lock');
@@ -180,6 +207,14 @@ insert into rush.memberships(user_id,cycle_id,role) values
 set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
+select extensions.is(
+  rush.workspace_context('10000000-0000-4000-8000-000000000011')->>'cycleId',
+  '10000000-0000-4000-8000-000000000011',
+  'a member receives workspace context for their active cycle');
+select extensions.is(
+  (rush.workspace_context('10000000-0000-4000-8000-000000000011')->>'openTaskCount')::integer,
+  0,
+  'workspace context returns the member task total');
 select extensions.throws_ok(
   $$select rush.set_cycle_application_window('10000000-0000-4000-8000-000000000011','2026-09-08T23:30:00Z','2026-09-11T15:00:00Z')$$,
   '42501','forbidden','a regular member cannot change the application window');
@@ -192,6 +227,11 @@ select extensions.throws_ok(
 select extensions.lives_ok(
   $$select rush.set_cycle_application_window('10000000-0000-4000-8000-000000000011','2026-09-08T23:30:00Z','2026-09-11T15:00:00Z')$$,
   'an owner can set a valid application window');
+set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000003';
+set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000003","role":"authenticated"}';
+select extensions.throws_ok(
+  $$select rush.workspace_context('10000000-0000-4000-8000-000000000011')$$,
+  '42501','forbidden','workspace context rejects a member from another cycle');
 set local role postgres;
 select extensions.is(
   (select opens_at from rush.rush_cycles where id='10000000-0000-4000-8000-000000000011'),

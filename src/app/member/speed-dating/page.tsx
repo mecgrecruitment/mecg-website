@@ -11,8 +11,8 @@ import SpeedDatingPairSearch from "./speed-dating-pair-search";
 
 export const metadata: Metadata = { title: "Speed Dating" };
 
-export default async function SpeedDatingPage() {
-  const user = await requireMember();
+export default async function SpeedDatingPage({ searchParams }: { searchParams: Promise<{ pair?: string; submitted?: string; reported?: string }> }) {
+  const [{ pair: requestedPairId, submitted, reported }, user] = await Promise.all([searchParams, requireMember()]);
   const membership = user.memberships.find((item) =>
     item.active && ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(item.role));
   if (!membership) return null;
@@ -43,11 +43,11 @@ export default async function SpeedDatingPage() {
       <WorkspaceHeader
         eyebrow={`${membership.cycle.name} · ${cycleStatusLabel(membership.cycle.status)}`}
         title="Speed Dating"
-        description="Find the two applicants in front of you, then claim their pair."
+        description="Search either name, confirm the pair, and submit two independent 1–5 ratings together."
       />
       <WorkspaceNav user={user} cycleId={membership.cycleId} current="/member/speed-dating" />
       {queue ? (
-        <SpeedDatingPairSearch initialQueue={queue} />
+        <SpeedDatingPairSearch initialQueue={queue} requestedPairId={requestedPairId} submitted={submitted === "1"} reported={reported === "1"} />
       ) : (
         <section className="rounded-2xl bg-white p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
           <h2 className="text-xl font-semibold text-mecg-navy">No Speed Dating round is ready</h2>

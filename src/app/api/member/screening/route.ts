@@ -17,7 +17,9 @@ function parseScreeningRatings(value: unknown) {
     if (typeof criterionId !== "string" || !criterionId || criterionId.length > 200) return null;
     if (typeof score !== "number" || !Number.isInteger(score) || score < 1 || score > 5) return null;
     if (note != null && (typeof note !== "string" || note.length > MAX_NOTE_LENGTH)) return null;
-    ratings.push({ criterionId, score, note: typeof note === "string" ? note : "" });
+    const normalizedNote = typeof note === "string" ? note : "";
+    if ((score === 1 || score === 2 || score === 5) && !normalizedNote.trim()) return null;
+    ratings.push({ criterionId, score, note: normalizedNote });
   }
   if (new Set(ratings.map((rating) => rating.criterionId)).size !== ratings.length) return null;
   return ratings;
@@ -34,25 +36,25 @@ export async function POST(request: NextRequest) {
   const body = parsedBody.data as Record<string, unknown>;
   const assignmentId = typeof body.assignmentId === "string" ? body.assignmentId : "";
   if (!assignmentId) return NextResponse.json({ error: "Assignment required" }, { status: 400 });
+  const ratings = body.action === "SUBMIT" ? parseScreeningRatings(body.ratings) : null;
+  if (body.action === "SUBMIT" && !ratings) {
+    return NextResponse.json({ error: "Every criterion needs one score from 1 to 5, with evidence notes for ratings 1, 2, and 5" }, { status: 400 });
+  }
+  if (body.action !== "SUBMIT" && body.action !== "RECUSE") {
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+  }
   const supabase = await createClient();
-  let result: { data: unknown; error: { code?: string; message: string } | null };
-  if (body.action === "SUBMIT") {
-    const ratings = parseScreeningRatings(body.ratings);
-    if (!ratings) return NextResponse.json({ error: "Every criterion needs one score from 1 to 5" }, { status: 400 });
-    result = await screeningRpc(supabase, "submit_screening_review", {
+  const result: { data: unknown; error: { code?: string; message: string } | null } = body.action === "SUBMIT"
+    ? await screeningRpc(supabase, "submit_screening_review", {
       target_assignment_id: assignmentId,
-      ratings,
+      ratings: ratings!,
       review_evidence: String(body.evidence ?? ""),
       review_recommendation: String(body.recommendation ?? ""),
-    });
-  } else if (body.action === "RECUSE") {
-    result = await screeningRpc(supabase, "recuse_screening_assignment", {
+    })
+    : await screeningRpc(supabase, "recuse_screening_assignment", {
       target_assignment_id: assignmentId,
       recusal_reason: String(body.reason ?? ""),
     });
-  } else {
-    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  }
   if (result.error) {
     console.error(`member screening ${body.action} failed`, result.error);
     const { body: errorBody, status } = mapRpcError(result.error);

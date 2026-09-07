@@ -673,17 +673,19 @@ Exit after a blinded usability run and authorization tests prove that reviewers 
 
 ### Phase 3: redesign Speed Dating
 
-Implementation started in the separate `worktree-grading-redesign-plan` worktree. The first vertical slice adds the pair schema, atomic Board publication contract, conflict-filtered member queue, search by either applicant name, and an idempotent self-claim action. Pair scoring, cross-device drafts, and atomic two-evaluation submission remain the next slice; the search-and-claim UI does not pretend that a claim is a submitted grade.
+Implementation is underway in the separate `worktree-grading-redesign-plan` worktree. The Board can build deterministic draft pairs, correct them with accessible selects, see duplicate/unpaired blockers, and publish only a complete cohort. The member flow now has conflict-filtered search by either name, idempotent self-claim, two independent cross-device drafts on one responsive screen, review-before-lock, atomic two-evaluation submission, and a durable wrong-pair report that preserves both drafts. Claims create or recover exactly two private assignments, while the general one-applicant inbox excludes Speed Dating so a member cannot submit half a pair through the legacy form. The active rubric must be one required 100% overall criterion and the evaluator must acknowledge calibration before grading. The operator view is pair-shaped, keeps scores private, and surfaces one-sided assignment failures before ordinary coverage gaps. Exception resolution and a venue load test remain.
 
-1. Add two-person pairs, pair publication validation, and audit history.
-2. Change the Speed Dating rubric to one required criterion weighted at 100 after Board approval.
-3. Add an idempotent evaluator-specific pair claim. Create or find both individual assignments atomically when the pair is submitted, so claimed work cannot leak into the old one-applicant form.
-4. Build name search with duplicate-name handling and pair-shaped results.
-5. Build the responsive two-applicant grading screen and pair review.
-6. Add wrong-pair reporting separate from conflict declaration.
-7. Keep a valid draft when the other applicant is blocked by conflict or an operator issue.
-8. Submit both individual evaluations in one transaction during the normal path.
+1. Add two-person pairs, pair publication validation, and audit history. **Implemented:** the Board pair builder creates drafts, supports non-drag corrections, names every blocker, and publishes through the atomic audited replacement contract.
+2. Change the Speed Dating rubric to one required criterion weighted at 100 after Board approval. **Implemented:** new cycles use the overall criterion and untouched pre-event rubrics migrate safely; active and historical rubrics never change in place.
+3. Add an idempotent evaluator-specific pair claim. Create or find both individual assignments atomically when the pair is submitted, so claimed work cannot leak into the old one-applicant form. **Implemented:** claim creates or recovers both private assignments, and the old form excludes them.
+4. Build name search with duplicate-name handling and pair-shaped results. **Implemented:** search resolves either normalized name to the same two-person result and keeps unfinished/recent work available.
+5. Build the responsive two-applicant grading screen and pair review. **Implemented:** both cards stay together, use native keyboard-accessible 1–5 radio controls, autosave independently, and require explicit review.
+6. Add wrong-pair reporting separate from conflict declaration. **Implemented:** a claimed evaluator can create an idempotent, audited operator report without deleting either draft.
+7. Keep a valid draft when the other applicant is blocked by conflict or an operator issue. **Started:** drafts remain private and independent when submission is blocked; the operator resolution UI remains.
+8. Submit both individual evaluations in one transaction during the normal path. **Implemented:** the pair RPC calls the existing locked individual submission contract twice inside one database transaction and audits the pair receipt.
 9. Load-test search and draft saves at the expected simultaneous evaluator count.
+
+The operator pair coverage view is implemented alongside these steps: it counts an evaluator only after both independent forms submit, targets two complete evaluators per pair, excludes recused or missed work, and flags any one-sided assignment as a data-recovery problem without exposing a score.
 
 Exit after a full live-round dry run on the oldest supported phone and the event venue's actual network. The run must include duplicate names, a wrong pair, a conflict affecting one applicant, and recovery of a half-finished pair.
 
@@ -691,12 +693,12 @@ Exit after a full live-round dry run on the oldest supported phone and the event
 
 1. Approve the dimension weights and the **Not observed** rule in `docs/design/group-case-grading-plan.md`.
 2. Add a member-safe RPC that returns group context, prompt, allowed applicants, assignments, and private draft summaries.
-3. Add structured observation items to drafts.
-4. Build the observation board and applicant switcher.
-5. Build the post-case individual finish queue.
+3. Add structured observation items to drafts. **Implemented within the existing versioned evaluation-draft contract:** timestamped observations stay attached to one applicant and criterion.
+4. Build the observation board and applicant switcher. **Implemented:** the live board supports fast switching, keyboard capture, server saves, and visible save state.
+5. Build the post-case individual finish queue. **Implemented:** observation mode hands off to one selected grading form at a time.
 6. Hide co-judge scores until both judges submit independently.
-7. Build the operator coverage grid without live scores.
-8. Add an audited `.xlsx` export and Excel-ready CSV fallback before the live rehearsal.
+7. Build the operator coverage grid without live scores. **Implemented.**
+8. Add an audited `.xlsx` export and Excel-ready CSV fallback before the live rehearsal. **Implemented:** the workbook contains `START_HERE`, `GROUPS`, `SCORES`, `RUBRIC`, and `CHANGE_LOG` sheets.
 9. Verify that every locked evaluation remains individual and uses the frozen rubric version.
 
 Exit after a six-applicant dry run proves that evaluators can recover who they observed and finish every assigned evaluation without cross-applicant note leakage.

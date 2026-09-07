@@ -15,6 +15,40 @@ test("screeningRpc accepts a valid registered RPC response", async () => {
   assert.deepEqual(result, { data: true, error: null });
 });
 
+test("screeningRpc accepts a complete workspace context", async () => {
+  const context = {
+    cycleId: "cycle-1",
+    isScreeningReviewer: true,
+    openScreeningCount: 3,
+    openEvaluationCount: 2,
+    openCalibrationCount: 1,
+    openLiveEventCount: 1,
+    openTaskCount: 7,
+    hasGradingEvent: false,
+    hasSpeedDatingRound: false,
+    hasGroupCaseWork: true,
+  };
+  const result = await screeningRpc(client(context), "workspace_context", { target_cycle_id: "cycle-1" });
+  assert.deepEqual(result, { data: context, error: null });
+});
+
+test("screeningRpc rejects a malformed workspace count", async () => {
+  const result = await screeningRpc(client({
+    cycleId: "cycle-1",
+    isScreeningReviewer: false,
+    openScreeningCount: -1,
+    openEvaluationCount: 0,
+    openCalibrationCount: 0,
+    openLiveEventCount: 0,
+    openTaskCount: 0,
+    hasGradingEvent: false,
+    hasSpeedDatingRound: true,
+    hasGroupCaseWork: false,
+  }), "workspace_context", { target_cycle_id: "cycle-1" });
+  assert.equal(result.data, null);
+  assert.equal(result.error?.code, "RPC_SHAPE");
+});
+
 test("screeningRpc rejects a malformed registered RPC response", async () => {
   const result = await screeningRpc<boolean>(client("true"), "check_rate_limit", { p_bucket: "test" });
   assert.equal(result.data, null);

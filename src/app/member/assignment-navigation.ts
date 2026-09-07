@@ -1,6 +1,7 @@
-export function evaluationTaskHref(assignmentId: string) {
+export function evaluationTaskHref(assignmentId: string, roundKind?: "SPEED_DATING" | "GROUP_CASE") {
   const encodedId = encodeURIComponent(assignmentId);
-  return `/member?assignment=${encodedId}#assignment-${encodedId}`;
+  const roundQuery = roundKind ? `&round=${roundKind}` : "";
+  return `/member?assignment=${encodedId}${roundQuery}#assignment-${encodedId}`;
 }
 
 export function selectedEvaluationAssignment(

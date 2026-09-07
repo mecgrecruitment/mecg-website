@@ -3,13 +3,9 @@ export const ROUND_DEFINITIONS = [
     kind: "SPEED_DATING",
     name: "Speed Dating",
     weight: 40,
-    minimumObservedCriteria: 3,
+    minimumObservedCriteria: 1,
     criteria: [
-      ["communication", "Clear communication and concision", 25, true, "Answers clearly, concisely, and adapts to the listener."],
-      ["listening", "Listening and question quality", 20, false, "Listens, follows up, and builds on the conversation."],
-      ["reasoning", "Structured reasoning", 20, false, "States assumptions and works through tradeoffs."],
-      ["coachability", "Collaboration and coachability", 20, false, "Receives feedback respectfully and incorporates it."],
-      ["judgment", "Judgment and integrity", 15, false, "Separates facts from assumptions and acknowledges limits."],
+      ["overall", "Overall Speed Dating assessment", 100, true, "Rate the full interaction: listening, clear communication, reasoning, collaboration, and judgment."],
     ],
   },
   {
@@ -34,4 +30,12 @@ export const SCORE_ANCHORS: Record<number, string> = {
   3: "Meets the expected bar with ordinary evidence",
   4: "Strong and repeated evidence",
   5: "Exceptional, adaptive, and constructive evidence",
+};
+
+export const SPEED_DATING_SCORE_ANCHORS: Record<number, string> = {
+  1: "Serious concern: behavior conflicted with MECG’s expectations.",
+  2: "Below the bar: a material concern or too little positive evidence.",
+  3: "Meets the bar: communicated clearly and engaged constructively.",
+  4: "Strong: listened, reasoned, and contributed with clear positive evidence.",
+  5: "Exceptional: adapted well and showed unusually strong judgment or collaboration.",
 };

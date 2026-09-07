@@ -1,8 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
 import { hasPermission } from "@/lib/authorization";
-import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import type { CurrentUser } from "@/lib/auth";
-import { workspaceAdminTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
+import { loadWorkspaceContext } from "@/lib/workspace-context";
+import { workspaceAdminTools, workspaceMemberTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
 import PillNav from "./pill-nav";
 import WorkspaceMoreMenu from "./workspace-more-menu";
 
@@ -27,21 +26,16 @@ export default async function WorkspaceNav({
   cycleId: string;
   current: string;
 }) {
-  const supabase = await createClient();
-  // Three links depend on live state rather than on a role, so they are looked up
-  // rather than derived. Cheap, and it keeps callers from plumbing flags through.
-  const [screeningReviewer, { data: gradingEvents }, { data: speedDatingRounds }] = await Promise.all([
-    screeningRpc<boolean>(supabase, "is_active_screening_reviewer", { target_cycle_id: cycleId }),
-    supabase.rpc("my_grading_events"),
-    supabase.from("rounds").select("id").eq("cycle_id", cycleId).eq("kind", "SPEED_DATING").in("status", ["PUBLISHED", "ACTIVE"]).limit(1),
-  ]);
-
-  const screeningQueue = screeningReviewer.data
-    ? await screeningRpc<ScreeningQueueItem[]>(supabase, "my_screening_queue", { target_cycle_id: cycleId })
-    : { data: [], error: null };
-  const openScreening = (screeningQueue.data ?? []).filter((item) => item.assignment_status === "ASSIGNED").length;
-  const hasGradingEvent = (gradingEvents ?? []).length > 0;
-  const hasSpeedDatingRound = (speedDatingRounds ?? []).length > 0 && !screeningReviewer.data;
+  // One cycle-bound contract keeps live navigation state consistent and avoids
+  // repeating independent screening, grading-event, and round queries on every
+  // internal page. Safe defaults preserve role-based navigation if it fails.
+  const { data: workspaceContext } = await loadWorkspaceContext(cycleId);
+  const currentContext = workspaceContext?.cycleId === cycleId ? workspaceContext : null;
+  const isScreeningReviewer = currentContext?.isScreeningReviewer ?? false;
+  const openScreening = currentContext?.openScreeningCount ?? 0;
+  const hasGradingEvent = currentContext?.hasGradingEvent ?? false;
+  const hasSpeedDatingRound = currentContext?.hasSpeedDatingRound ?? false;
+  const hasGroupCaseWork = currentContext?.hasGroupCaseWork ?? false;
 
   const can = (permission: Parameters<typeof hasPermission>[2]) => hasPermission(user.memberships, cycleId, permission);
   // Every member votes once the cycle reaches decision lock, so the link is
@@ -54,7 +48,7 @@ export default async function WorkspaceNav({
     membership.active && membership.role === "OWNER");
 
   const primary: WorkspaceNavLink[] = [
-    ["/member", "My work"],
+    ["/member", `My work${currentContext?.openTaskCount ? ` · ${currentContext.openTaskCount}` : ""}`],
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
         ["/admin", "Recruitment"],
@@ -66,14 +60,14 @@ export default async function WorkspaceNav({
     ...(can("RECRUITMENT_OPERATIONS") ? [["/admin/messages", "Communications"] as const] : []),
   ];
 
-  const myTools: WorkspaceNavLink[] = [
-    ...(hasSpeedDatingRound ? [["/member/speed-dating", "Speed Dating"] as const] : []),
-    ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
-    ...(screeningReviewer.data ? [["/member/screening", `Read applications${openScreening ? ` · ${openScreening}` : ""}`] as const] : []),
-    ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
-    ["/member/refer", "Refer someone"],
-    ["/admin/people", "People"],
-  ];
+  const myTools = workspaceMemberTools({
+    hasSpeedDatingRound,
+    hasGroupCaseWork,
+    votingOpen,
+    isScreeningReviewer,
+    openScreeningCount: openScreening,
+    hasGradingEvent,
+  });
 
   const adminTools = workspaceAdminTools({
     canRecruitmentOperations: can("RECRUITMENT_OPERATIONS"),

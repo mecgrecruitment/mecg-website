@@ -2563,6 +2563,10 @@ export type Database = {
         Args: { target_pair_id: string }
         Returns: Json
       }
+      report_wrong_speed_dating_pair: {
+        Args: { target_pair_id: string }
+        Returns: Json
+      }
       clone_cycle: {
         Args: { cycle_name: string; source_cycle_id: string }
         Returns: string
@@ -2859,6 +2863,14 @@ export type Database = {
           submitted_pairs: Json
           target_round_id: string
         }
+        Returns: Json
+      }
+      submit_speed_dating_pair: {
+        Args: { submitted_members: Json; target_pair_id: string }
+        Returns: Json
+      }
+      speed_dating_pair_setup: {
+        Args: { target_round_id: string }
         Returns: Json
       }
       recuse_screening_assignment: {

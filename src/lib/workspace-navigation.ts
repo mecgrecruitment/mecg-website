@@ -1,5 +1,33 @@
 export type WorkspaceNavLink = readonly [href: string, label: string];
 
+export function workspaceMemberTools({
+  hasSpeedDatingRound,
+  hasGroupCaseWork,
+  votingOpen,
+  isScreeningReviewer,
+  openScreeningCount,
+  hasGradingEvent,
+}: {
+  hasSpeedDatingRound: boolean;
+  hasGroupCaseWork: boolean;
+  votingOpen: boolean;
+  isScreeningReviewer: boolean;
+  openScreeningCount: number;
+  hasGradingEvent: boolean;
+}): WorkspaceNavLink[] {
+  return [
+    ...(hasSpeedDatingRound ? [["/member/speed-dating", "Speed Dating"] as const] : []),
+    ...(hasGroupCaseWork ? [["/member?round=GROUP_CASE", "Group Case"] as const] : []),
+    ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
+    ...(isScreeningReviewer
+      ? [["/member/screening", `Read applications${openScreeningCount ? ` · ${openScreeningCount}` : ""}`] as const]
+      : []),
+    ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
+    ["/member/refer", "Refer someone"],
+    ["/admin/people", "People"],
+  ];
+}
+
 export function workspaceAdminTools({
   canRecruitmentOperations,
   canManageCycle,

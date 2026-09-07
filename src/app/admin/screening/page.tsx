@@ -9,6 +9,7 @@ import StatusPill from "@/components/status-pill";
 import PacketAction from "./packet-action";
 import ScreeningControls from "./screening-controls";
 import { statusLabel } from "@/lib/labels";
+import { groupScreeningResults } from "./screening-result-groups";
 
 export default async function ScreeningAdminPage() {
   const user = await requireAdmin();
@@ -24,6 +25,7 @@ export default async function ScreeningAdminPage() {
   const members = (memberships ?? [])
     .filter((item) => item.role === "RECRUITMENT_COMMITTEE" && !identityStewards.has(item.user_id))
     .map((item) => ({ id: item.user_id, name: item.profiles.display_name }));
+  const resultGroups = groupScreeningResults(overview?.results ?? []);
 
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
@@ -57,13 +59,22 @@ export default async function ScreeningAdminPage() {
       {overview?.status === "FROZEN" && (
         <section>
           <h2 className="text-xl font-semibold">Locked review evidence</h2>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {(overview.results ?? []).map((result, index) => (
-              <article key={`${result.code}-${index}`} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-                <p className="font-mono text-xs text-mecg-navy/60">{result.code}</p>
-                <h3 className="mt-1 font-semibold">{result.applicantName}</h3>
-                <p className="mt-2 text-sm text-mecg-navy/70">{statusLabel(result.recommendation)} · {Number(result.score).toFixed(1)}</p>
-                <p className="mt-3 text-sm leading-6 text-mecg-navy/65">{result.evidence}</p>
+          <div className="mt-4 space-y-4">
+            {resultGroups.map((group) => (
+              <article key={group.code} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div><p className="font-mono text-xs text-mecg-navy/60">{group.code}</p><h3 className="mt-1 font-semibold">{group.applicantName}</h3></div>
+                  <div className="text-right"><p className="text-xs text-mecg-navy/55">{group.reviews.length} independent reviews</p><p className="mt-1 text-lg font-semibold tabular-nums">{group.averageScore.toFixed(1)} average</p></div>
+                </div>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  {group.reviews.map((result, index) => (
+                    <section key={result.key} className="rounded-xl bg-paper p-4" aria-label={`Reviewer ${index + 1}`}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-mecg-orange-ink">Reviewer {index + 1}</p>
+                      <p className="mt-2 text-sm font-semibold text-mecg-navy">{statusLabel(result.recommendation)} · <span className="tabular-nums">{Number(result.score).toFixed(1)}</span></p>
+                      <p className="mt-2 text-sm leading-6 text-mecg-navy/65">{result.evidence}</p>
+                    </section>
+                  ))}
+                </div>
               </article>
             ))}
           </div>

@@ -34,6 +34,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   REASSIGN: "RECRUITMENT_OPERATIONS",
   SET_APPLICATION_STATUS: "RECRUITMENT_OPERATIONS",
   ADVANCE_SPEED_DATING: "MANAGE_CYCLE",
+  SET_SPEED_DATING_PAIRS: "MANAGE_CYCLE",
   CREATE_SLOT: "RECRUITMENT_OPERATIONS",
   SET_EVENT_GRADING: "RECRUITMENT_OPERATIONS",
   CREATE_GROUP: "RECRUITMENT_OPERATIONS",
@@ -219,6 +220,27 @@ export async function POST(req: NextRequest) {
     ) => PromiseLike<{ data: unknown; error: { code?: string; message: string } | null }>)("advance_to_speed_dating", {
       target_cycle_id: cycleId,
       target_application_ids: applicationIds,
+    }));
+  } else if (action === "SET_SPEED_DATING_PAIRS") {
+    const pairs = Array.isArray(body.pairs) ? body.pairs : [];
+    const validPairs = pairs.length >= 1 && pairs.length <= 200 && pairs.every((pair) => {
+      if (!pair || typeof pair !== "object" || Array.isArray(pair)) return false;
+      const ids = (pair as Record<string, unknown>).applicationIds;
+      return Array.isArray(ids)
+        && ids.length === 2
+        && ids.every((id) => typeof id === "string" && id.length > 0 && id.length <= 200)
+        && ids[0] !== ids[1];
+    });
+    const allIds = validPairs
+      ? pairs.flatMap((pair) => (pair as { applicationIds: string[] }).applicationIds)
+      : [];
+    if (typeof body.roundId !== "string" || !body.roundId || !validPairs || new Set(allIds).size !== allIds.length) {
+      return NextResponse.json({ error: "Every draft pair needs two distinct applicants, and no applicant can appear twice" }, { status: 400 });
+    }
+    ({ data, error } = await supabase.rpc("replace_speed_dating_pairs", {
+      target_round_id: body.roundId,
+      submitted_pairs: pairs as Json,
+      publish_pairs: body.publish === true,
     }));
   } else if (action === "CREATE_SLOT") {
     const startsAt = parseOffsetDateTime(body.startsAt);

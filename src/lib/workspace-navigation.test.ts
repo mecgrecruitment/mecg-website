@@ -1,6 +1,39 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { secondaryDestinationLabel, workspaceAdminTools } from "./workspace-navigation";
+import { secondaryDestinationLabel, workspaceAdminTools, workspaceMemberTools } from "./workspace-navigation";
+
+test("live member tools expose screening, voting, and event tasks with the open count", () => {
+  assert.deepEqual(workspaceMemberTools({
+    hasSpeedDatingRound: false,
+    hasGroupCaseWork: true,
+    votingOpen: true,
+    isScreeningReviewer: true,
+    openScreeningCount: 3,
+    hasGradingEvent: true,
+  }), [
+    ["/member?round=GROUP_CASE", "Group Case"],
+    ["/member/hash", "Hash vote"],
+    ["/member/screening", "Read applications · 3"],
+    ["/member/event", "Live event"],
+    ["/member/refer", "Refer someone"],
+    ["/admin/people", "People"],
+  ]);
+});
+
+test("Speed Dating appears for an eligible member without screening access", () => {
+  assert.deepEqual(workspaceMemberTools({
+    hasSpeedDatingRound: true,
+    hasGroupCaseWork: false,
+    votingOpen: false,
+    isScreeningReviewer: false,
+    openScreeningCount: 0,
+    hasGradingEvent: false,
+  }), [
+    ["/member/speed-dating", "Speed Dating"],
+    ["/member/refer", "Refer someone"],
+    ["/admin/people", "People"],
+  ]);
+});
 
 test("recruitment operators can discover setup and activity without receiving Board tools", () => {
   assert.deepEqual(workspaceAdminTools({

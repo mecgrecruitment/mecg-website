@@ -9,6 +9,13 @@ test("evaluation task links identify and target the exact assignment", () => {
   );
 });
 
+test("evaluation task links preserve the active round queue", () => {
+  assert.equal(
+    evaluationTaskHref("assignment 2", "GROUP_CASE"),
+    "/member?assignment=assignment%202&round=GROUP_CASE#assignment-assignment%202",
+  );
+});
+
 test("a requested eligible assignment is selected instead of the first assignment", () => {
   assert.equal(
     selectedEvaluationAssignment(["assignment-1", "assignment-2"], "assignment-2"),

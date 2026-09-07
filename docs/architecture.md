@@ -96,3 +96,7 @@ Use the layers in this order:
 8. Production smoke checks after deployment.
 
 The [release checklist](release-checklist.md) names the required commands.
+
+## Target design
+
+The current architecture remains the production truth. The proposed product and system changes are sequenced in `docs/design/application-system-redesign-plan.md`.

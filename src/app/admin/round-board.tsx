@@ -15,6 +15,11 @@ import { memberAccountsFor } from "./member-accounts";
 import RubricEditor, { type Criterion, type RoundRubric } from "./rounds/rubric-editor";
 import GroupForms from "./groups/group-forms";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
+import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState } from "./group-case-coverage";
+import { screeningRpc } from "@/lib/screening-rpc";
+import type { SpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
+import SpeedDatingPairBuilder from "./rounds/speed-dating-pair-builder";
+import { speedDatingCoverageRank, speedDatingPairCoverage } from "./speed-dating-coverage";
 
 function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; name: string; status: string }): RoundRubric | null {
   if (!Array.isArray(value)) return null;
@@ -53,6 +58,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const canManage = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
+  const canExport = hasPermission(user.memberships, cycleId, "EXPORT");
   const supabase = await createClient();
   const [cycleResult, roundResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
@@ -70,7 +76,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   const round = roundResult.data;
   if (!round) notFound();
   const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
-  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult] = await Promise.all([
+  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingSetupResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),
     supabase.from("memberships").select("user_id,role,active,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     round.kind === "GROUP_CASE"
@@ -82,9 +88,13 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
     canOperate
       ? supabase.rpc("cycle_rubrics", { target_cycle_id: cycleId })
       : Promise.resolve({ data: [], error: null }),
+    round.kind === "SPEED_DATING" && canManage
+      ? screeningRpc<SpeedDatingPairSetup>(supabase, "speed_dating_pair_setup", { target_round_id: round.id })
+      : Promise.resolve({ data: null, error: null }),
   ]);
   for (const result of [applicationsResult, membersResult, groupMembersResult, groupsResult]) if (result.error) throw result.error;
   if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
+  if (speedDatingSetupResult.error) throw new Error(speedDatingSetupResult.error.message);
   const rubric = parseRoundRubric(rubricsResult.data, cycleId, round);
   const assignments = canOperate ? round?.evaluation_assignments ?? [] : [];
   const allApplications = (applicationsResult.data ?? [])
@@ -112,27 +122,64 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
     member.application_id,
     Array.isArray(member.case_groups) ? member.case_groups[0]?.name : member.case_groups.name,
   ]));
-  const assignmentCounts = new Map<string, { total: number; submitted: number }>();
+  const assignmentsByApplication = new Map<string, typeof assignments>();
   for (const assignment of assignments) {
     const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
     if (!application) continue;
-    const counts = assignmentCounts.get(application.id) ?? { total: 0, submitted: 0 };
-    counts.total += 1;
-    if (["SUBMITTED", "LOCKED"].includes(assignment.status)) counts.submitted += 1;
-    assignmentCounts.set(application.id, counts);
+    const applicationAssignments = assignmentsByApplication.get(application.id) ?? [];
+    applicationAssignments.push(assignment);
+    assignmentsByApplication.set(application.id, applicationAssignments);
   }
-  const coveredApplicants = activeApplications.filter((application) => (assignmentCounts.get(application.id)?.total ?? 0) >= 2).length;
+  const coverageByApplication = new Map(activeApplications.map((application) => [
+    application.id,
+    groupCaseCoverageState((assignmentsByApplication.get(application.id) ?? []).map((assignment) => assignment.status)),
+  ]));
+  const coveredApplicants = activeApplications.filter((application) => (coverageByApplication.get(application.id)?.assigned ?? 0) >= 2).length;
   const submittedAssignments = assignments.filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
-  const uncoveredApplicants = activeApplications.filter((application) => (assignmentCounts.get(application.id)?.total ?? 0) === 0);
+  const openAssignments = assignments.filter((assignment) => ["ASSIGNED", "IN_PROGRESS"].includes(assignment.status)).length;
+  const undercoveredApplicants = activeApplications.filter((application) => (coverageByApplication.get(application.id)?.assigned ?? 0) < 2);
   const evaluatorLoad = new Map<string, { name: string; open: number; total: number }>();
   for (const assignment of assignments) {
+    if (!countsTowardCoverage(assignment.status)) continue;
     const evaluatorName = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
     const entry = evaluatorLoad.get(assignment.evaluator_id) ?? { name: evaluatorName ?? "Unassigned", open: 0, total: 0 };
     entry.total += 1;
-    if (!["SUBMITTED", "LOCKED"].includes(assignment.status)) entry.open += 1;
+    if (["ASSIGNED", "IN_PROGRESS"].includes(assignment.status)) entry.open += 1;
     evaluatorLoad.set(assignment.evaluator_id, entry);
   }
   const evaluatorLoadList = Array.from(evaluatorLoad.entries()).sort(([, a], [, b]) => b.open - a.open);
+  const groupCaseCoverageRows = round.kind === "GROUP_CASE"
+    ? activeApplications.map((application) => ({
+      ...application,
+      groupName: groupByApplication.get(application.id) ?? "Unassigned group",
+      assignments: (assignmentsByApplication.get(application.id) ?? []).filter((assignment) => countsTowardCoverage(assignment.status)),
+      coverage: coverageByApplication.get(application.id) ?? groupCaseCoverageState([]),
+    })).sort((a, b) =>
+      groupCaseCoverageRank(a.coverage.state) - groupCaseCoverageRank(b.coverage.state)
+      || a.groupName.localeCompare(b.groupName)
+      || a.label.localeCompare(b.label))
+    : [];
+  const applicationNameById = new Map(allApplications.map((application) => [application.id, application.name]));
+  const speedDatingCoverageRows = round.kind === "SPEED_DATING" && speedDatingSetupResult.data
+    ? speedDatingSetupResult.data.pairs.map((pair) => {
+      const pairAssignments = assignments.flatMap((assignment) => {
+        const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
+        if (!application || !pair.applicationIds.includes(application.id)) return [];
+        const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0] : assignment.evaluator;
+        return [{
+          applicationId: application.id,
+          evaluatorId: assignment.evaluator_id,
+          evaluatorName: evaluator?.display_name ?? "Unknown evaluator",
+          status: assignment.status,
+        }];
+      });
+      return {
+        ...pair,
+        names: pair.applicationIds.map((applicationId) => applicationNameById.get(applicationId) ?? "Applicant") as [string, string],
+        coverage: speedDatingPairCoverage(pair.applicationIds, pairAssignments),
+      };
+    }).sort((a, b) => speedDatingCoverageRank(a.coverage) - speedDatingCoverageRank(b.coverage) || a.label.localeCompare(b.label))
+    : [];
 
   return (
     <main className="workspace-stack mx-auto flex w-full max-w-7xl flex-col">
@@ -163,7 +210,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                 {[
                   [String(activeApplications.length), "applicants"],
                   [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
-                  [String(assignments.length - submittedAssignments), "open forms"],
+                  [String(openAssignments), "open forms"],
                   [String(submittedAssignments), "submitted"],
                 ].map(([value, label]) => (
                   <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 sm:py-3">
@@ -171,19 +218,19 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                   </div>
                 ))}
             </div>
-            {(uncoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
+            {(undercoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
               <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-                  {uncoveredApplicants.length > 0 && (
+                  {undercoveredApplicants.length > 0 && (
                     <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
-                      <p className="text-[13px] font-semibold text-mecg-navy/60">Needs an evaluator · {uncoveredApplicants.length}</p>
+                      <p className="text-[13px] font-semibold text-mecg-navy/60">Needs coverage · {undercoveredApplicants.length}</p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {uncoveredApplicants.map((application) => (
+                        {undercoveredApplicants.map((application) => (
                           <Link
                             key={application.id}
                             href={`/admin/applications/${application.id}`}
                             className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
                           >
-                            {application.label}
+                            {application.label} · {coverageByApplication.get(application.id)?.assigned ?? 0}/2
                           </Link>
                         ))}
                       </div>
@@ -207,6 +254,123 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
           </>
         )}
       </section>
+
+      {canOperate && round.kind === "GROUP_CASE" && (
+        <section>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <SectionLabel>Group Case coverage</SectionLabel>
+              <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Who still needs attention</h2>
+              <p className="mt-1 text-sm text-mecg-navy/55">Applicants needing judges appear first. Scores stay hidden while grading is underway.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
+                {groupCaseCoverageRows.filter((row) => ["UNASSIGNED", "PARTIAL"].includes(row.coverage.state)).length} need coverage
+              </span>
+              {canExport && ["PUBLISHED", "ACTIVE"].includes(round.status) && (
+                <>
+                  <a
+                    href={`/api/admin/export?kind=group-case&format=xlsx&cycleId=${encodeURIComponent(cycleId)}&roundId=${encodeURIComponent(round.id)}`}
+                    className="button-primary text-sm"
+                    download
+                  >
+                    Download Excel backup
+                  </a>
+                  <a
+                    href={`/api/admin/export?kind=group-case&cycleId=${encodeURIComponent(cycleId)}&roundId=${encodeURIComponent(round.id)}`}
+                    className="button-secondary text-sm"
+                    download
+                  >
+                    Excel-ready CSV
+                  </a>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(16rem,1.4fr)_8rem] gap-3 border-b border-mecg-navy/10 bg-paper px-4 py-3 text-[13px] font-semibold text-mecg-navy/55 md:grid">
+              <span>Applicant</span>
+              <span>Group</span>
+              <span>Judges</span>
+              <span>Status</span>
+            </div>
+            <div className="divide-y divide-mecg-navy/10">
+              {groupCaseCoverageRows.map((row) => {
+                const stateLabel = row.coverage.state === "UNASSIGNED"
+                  ? "No judges"
+                  : row.coverage.state === "PARTIAL"
+                    ? "Needs 1 judge"
+                    : row.coverage.state === "SUBMITTED"
+                      ? "Complete"
+                      : `${row.coverage.submitted}/2 submitted`;
+                return (
+                  <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(16rem,1.4fr)_8rem] md:items-center md:py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">{initials(row.label)}</span>
+                      <Link href={`/admin/applications/${row.id}`} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.label}</Link>
+                    </div>
+                    <p className="text-xs text-mecg-navy/60"><span className="mr-1 font-semibold md:hidden">Group:</span>{row.groupName}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {row.assignments.map((assignment) => {
+                        const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
+                        return (
+                          <span key={assignment.id} className="inline-flex items-center gap-1.5 rounded-full bg-mecg-navy/[0.055] px-2.5 py-1 text-xs text-mecg-navy/70">
+                            <span className="font-semibold">{evaluator ?? "Unknown judge"}</span>
+                            <span aria-hidden="true">·</span>
+                            {assignmentStatusLabel(assignment.status)}
+                          </span>
+                        );
+                      })}
+                      {!row.assignments.length && <span className="text-xs font-semibold text-red-700">Assign two judges</span>}
+                    </div>
+                    <StatusPill tone={row.coverage.state === "SUBMITTED" ? "navy" : row.coverage.state === "IN_PROGRESS" ? "neutral" : "orange"}>{stateLabel}</StatusPill>
+                  </article>
+                );
+              })}
+              {!groupCaseCoverageRows.length && (
+                <p className="bg-white p-6 text-center text-sm text-mecg-navy/55">No active Group Case applicants yet.</p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {round.kind === "SPEED_DATING" && canManage && speedDatingSetupResult.data && (
+        <>
+          {speedDatingCoverageRows.length > 0 && (
+            <section>
+              <SectionLabel>Speed Dating coverage</SectionLabel>
+              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Complete both halves of every pair</h2>
+                  <p className="mt-1 text-sm text-mecg-navy/55">Incomplete and one-sided evaluator work appears first. Live scores stay private.</p>
+                </div>
+                <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
+                  {speedDatingCoverageRows.filter((row) => row.coverage.completeEvaluators < 2).length} pairs need coverage
+                </span>
+              </div>
+              <div className="mt-4 divide-y divide-mecg-navy/10 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                {speedDatingCoverageRows.map((row) => (
+                  <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[7rem_minmax(12rem,1fr)_minmax(16rem,1.4fr)_8rem] md:items-center md:py-3">
+                    <p className="text-xs font-semibold text-mecg-orange-ink">{row.label}</p>
+                    <p className="text-sm font-semibold text-mecg-navy">{row.names[0]} <span className="font-normal text-mecg-navy/35">+</span> {row.names[1]}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {row.coverage.evaluators.map((evaluator) => (
+                        <span key={evaluator.evaluatorId} className={`rounded-full px-2.5 py-1 text-xs ${evaluator.state === "BROKEN" ? "bg-red-50 font-semibold text-red-700" : "bg-mecg-navy/[0.055] text-mecg-navy/70"}`}>
+                          {evaluator.evaluatorName} · {evaluator.submitted}/2 submitted{evaluator.state === "BROKEN" ? " · one-sided" : ""}
+                        </span>
+                      ))}
+                      {!row.coverage.evaluators.length && <span className="text-xs font-semibold text-red-700">No evaluator has started</span>}
+                    </div>
+                    <StatusPill tone={row.coverage.completeEvaluators >= 2 ? "navy" : "orange"}>{row.coverage.completeEvaluators}/2 complete</StatusPill>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+          <SpeedDatingPairBuilder cycleId={cycleId} setup={speedDatingSetupResult.data} />
+        </>
+      )}
 
       {canOperate && (
         <RoundControls
@@ -251,6 +415,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                   const person = application?.pnms && (Array.isArray(application.pnms) ? application.pnms[0] : application.pnms);
                   const applicantName = person?.name ?? "Applicant";
                   const submitted = ["SUBMITTED", "LOCKED"].includes(assignment.status);
+                  const evaluationState = submitted
+                    ? "Submitted"
+                    : ["RECUSED", "MISSED"].includes(assignment.status)
+                      ? assignmentStatusLabel(assignment.status)
+                      : "Open";
                   const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
                   return (
                     <article key={assignment.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
@@ -259,7 +428,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">{initials(applicantName)}</span>
                           <p className="font-semibold text-mecg-navy">{applicantName}</p>
                         </div>
-                        <StatusPill tone={submitted ? "navy" : "neutral"}>{submitted ? "Submitted" : "Open"}</StatusPill>
+                        <StatusPill tone={submitted ? "navy" : "neutral"}>{evaluationState}</StatusPill>
                       </div>
                       <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
                         <div>
@@ -299,6 +468,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                   const person = application?.pnms && (Array.isArray(application.pnms) ? application.pnms[0] : application.pnms);
                   const applicantName = person?.name ?? "Applicant";
                   const submitted = ["SUBMITTED", "LOCKED"].includes(assignment.status);
+                  const evaluationState = submitted
+                    ? "Submitted"
+                    : ["RECUSED", "MISSED"].includes(assignment.status)
+                      ? assignmentStatusLabel(assignment.status)
+                      : "Open";
                   return (
                     <tr key={assignment.id} className="border-b border-mecg-navy/10">
                       <td className="px-4 py-3">
@@ -313,7 +487,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
                       <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{assignmentStatusLabel(assignment.status)}</td>
                       <td className="px-4 py-3">
-                        <StatusPill tone={submitted ? "navy" : "neutral"}>{submitted ? "Submitted" : "Open"}</StatusPill>
+                        <StatusPill tone={submitted ? "navy" : "neutral"}>{evaluationState}</StatusPill>
                       </td>
                     </tr>
                   );

@@ -29,6 +29,7 @@ export default async function ScreeningQueuePage() {
   const context = parseScreeningProgress(rawContext);
   if (!context) throw new Error("Screening progress is unavailable");
   const remaining = (queue ?? []).filter((item) => item.assignment_status === "ASSIGNED");
+  const [nextApplication, ...laterApplications] = remaining;
   const completion = context.total > 0 ? Math.round((context.completed / context.total) * 100) : 100;
   return (
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
@@ -49,14 +50,32 @@ export default async function ScreeningQueuePage() {
       <section>
         <SectionLabel number="01">Your reading queue</SectionLabel>
         <p className="mt-2 text-sm text-mecg-navy/60">Open one application at a time. Submitted reviews are locked and removed from this list.</p>
-        <div className="mt-3.5 grid gap-4 sm:grid-cols-2">
-          {remaining.map((item) => (
-            <article key={item.assignment_id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-              <p className="font-mono text-xs text-mecg-navy/60">{item.candidate_code}</p>
-              <div className="mt-2"><StatusPill tone={statusTone(item.assignment_status)}>{assignmentStatusLabel(item.assignment_status)}</StatusPill></div>
-              <Link href={`/member/screening/${item.assignment_id}`} className="button-primary mt-4">Read and score</Link>
+        <div className="mt-3.5 space-y-4">
+          {nextApplication && (
+            <article className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Up next</p>
+                <p className="mt-1 font-mono text-sm text-mecg-navy/65">{nextApplication.candidate_code}</p>
+              </div>
+              <Link href={`/member/screening/${nextApplication.assignment_id}`} className="button-primary">Continue application</Link>
             </article>
-          ))}
+          )}
+          {laterApplications.length > 0 && (
+            <details className="rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+              <summary className="min-h-11 cursor-pointer list-none px-5 py-4 font-semibold">View {laterApplications.length} later {laterApplications.length === 1 ? "application" : "applications"}</summary>
+              <div className="divide-y divide-mecg-navy/10 px-5 pb-3">
+                {laterApplications.map((item) => (
+                  <article key={item.assignment_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div className="flex items-center gap-3">
+                      <p className="font-mono text-xs text-mecg-navy/60">{item.candidate_code}</p>
+                      <StatusPill tone={statusTone(item.assignment_status)}>{assignmentStatusLabel(item.assignment_status)}</StatusPill>
+                    </div>
+                    <Link href={`/member/screening/${item.assignment_id}`} className="button-secondary text-sm">Open</Link>
+                  </article>
+                ))}
+              </div>
+            </details>
+          )}
           {!remaining.length && <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">You are caught up. No applications are waiting for review.</p>}
         </div>
       </section>

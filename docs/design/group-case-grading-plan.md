@@ -212,9 +212,9 @@ Store observation drafts on the server and in the browser. Show **Saved**, **Sav
 2. Approve the weight contradiction, the **Not observed** rule, and the note rule.
 3. Add the session, judge assignment, and observation contracts.
 4. Build server and browser draft recovery.
-5. Build the independent finish queue on the existing evaluation contract.
-6. Add the operator coverage grid.
-7. Add the audited `.xlsx` and CSV exports.
+5. Build the independent finish queue on the existing evaluation contract. **Implemented:** the Group Case workspace captures criterion-linked observations first, then presents a progress queue and mounts exactly one grading form at a time.
+6. Add the operator coverage grid. **Implemented:** the round page sorts missing and partial judge coverage first, shows judge workflow states without scores, and excludes recused or missed assignments from coverage.
+7. Add the audited `.xlsx` and CSV exports. **Implemented:** the Board can download a five-sheet workbook with validated rating cells or a formula-safe, UTF-8 Excel-ready CSV with stable recovery IDs and rubric-generated blank columns.
 8. Run a full 90-minute rehearsal with one device offline.
 9. Add the import only after the Board has approved the exported columns and recovery procedure.
 
