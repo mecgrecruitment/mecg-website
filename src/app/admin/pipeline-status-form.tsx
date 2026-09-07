@@ -11,16 +11,22 @@ export default function PipelineStatusForm({
   cycleId,
   status,
   controlId,
+  compact = false,
+  disabled = false,
 }: {
   applicationId: string;
   cycleId: string;
   status: string;
   controlId?: string;
+  compact?: boolean;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const destinations = legalManualApplicationStatuses(status).filter((item) => item !== status);
+  const busy = pending || disabled;
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,9 +59,11 @@ export default function PipelineStatusForm({
     }
   }
 
+  if (destinations.length === 0) return null;
+
   return (
-    <form className="mt-1 flex flex-col items-start gap-2" onSubmit={submit}>
-      <div className="flex items-center gap-1.5">
+    <form className="mt-1 flex w-full flex-col items-start gap-2" onSubmit={submit}>
+      <div className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 ${compact ? "" : "sm:w-auto sm:grid-cols-[10rem_auto]"}`}>
         <label className="sr-only" htmlFor={`status-${controlId ?? applicationId}`}>
           Application status
         </label>
@@ -64,20 +72,22 @@ export default function PipelineStatusForm({
           id={`status-${controlId ?? applicationId}`}
           name="status"
           aria-label="Application status"
-          defaultValue={status}
-          disabled={pending}
-          className="select-control w-40 text-[10px]"
+          defaultValue={destinations.length === 1 ? destinations[0] : ""}
+          required
+          disabled={busy}
+          className="select-control min-w-0 w-full text-[10px]"
         >
-          {legalManualApplicationStatuses(status).map((item) => (
+          {destinations.length > 1 && <option value="" disabled>Move to…</option>}
+          {destinations.map((item) => (
             <option key={item} value={item}>{applicationStatusLabel(item)}</option>
           ))}
         </select>
         <button
           type="submit"
-          disabled={pending}
+          disabled={busy}
           className="operation-control rounded-md px-2.5 text-[10px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Moving…" : "Move"}
+          {busy ? "Moving…" : "Move"}
         </button>
       </div>
       <OperationNotice kind="error">{error}</OperationNotice>

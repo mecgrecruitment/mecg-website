@@ -1,9 +1,22 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  type DragStart,
+  type DraggableProvidedDragHandleProps,
+  type DropResult,
+} from "@hello-pangea/dnd";
 import PipelineStatusForm from "./pipeline-status-form";
+import {
+  canMoveApplication,
+  kanbanDropStatuses,
+  moveApplicationInBoard,
+} from "./pipeline-kanban";
 import StatusPill from "@/components/status-pill";
 import SegmentedControl from "@/components/segmented-control";
 import { initials } from "@/lib/initials";
@@ -39,19 +52,46 @@ function ApplicantCard({
   cycleId,
   controlId,
   returnTo,
+  dragHandleProps,
+  dragHandleRef,
+  isDragging = false,
+  isMoving = false,
 }: {
   application: PipelineApplication;
   canOperate: boolean;
   cycleId: string;
   controlId: string;
   returnTo: string;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  dragHandleRef?: (element: HTMLButtonElement | null) => void;
+  isDragging?: boolean;
+  isMoving?: boolean;
 }) {
   // Plain <img>: same-origin route, no images.remotePatterns configured, and the
   // initials stay as the fallback for a missing or unreadable photo.
   const [photoFailed, setPhotoFailed] = useState(false);
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-[0_1px_2px_rgba(7,13,31,0.06)]">
+    <div className={`flex flex-col gap-2 rounded-xl bg-white p-3 transition-[box-shadow,opacity] ${isDragging ? "shadow-[0_14px_32px_rgba(7,13,31,0.2)]" : "shadow-[0_1px_2px_rgba(7,13,31,0.06)]"} ${isMoving ? "opacity-60" : ""}`}>
       <div className="flex items-center gap-2">
+        {dragHandleProps && (
+          <button
+            type="button"
+            ref={dragHandleRef}
+            {...dragHandleProps}
+            data-drag-handle-id={application.id}
+            aria-label={`Move ${application.name}`}
+            className="hidden h-10 w-10 shrink-0 touch-none items-center justify-center rounded-lg text-mecg-navy/45 transition-[background-color,transform] hover:bg-mecg-blue/[0.08] hover:text-mecg-navy active:scale-[0.96] sm:inline-flex"
+          >
+            <svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="4" r="1.25" />
+              <circle cx="11" cy="4" r="1.25" />
+              <circle cx="5" cy="9" r="1.25" />
+              <circle cx="11" cy="9" r="1.25" />
+              <circle cx="5" cy="14" r="1.25" />
+              <circle cx="11" cy="14" r="1.25" />
+            </svg>
+          </button>
+        )}
         {application.hasHeadshot && !photoFailed ? (
           // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route, no images.remotePatterns
           <img
@@ -87,6 +127,8 @@ function ApplicantCard({
           cycleId={cycleId}
           status={application.status}
           controlId={controlId}
+          compact
+          disabled={isMoving}
         />
       )}
     </div>
@@ -234,6 +276,8 @@ function PipelineBoardInner({
   const searchParams = useSearchParams();
   const router = useRouter();
   const filterParam = searchParams.get("filter");
+  const [boardApplications, setBoardApplications] = useState(applications);
+  const [applicationSource, setApplicationSource] = useState(applications);
   const [view, setView] = useState<ApplicantView>(searchParams.get("view") === "PIPELINE" ? "PIPELINE" : "ALL");
   const [query, setQuery] = useState(searchParams.get("query") ?? "");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
@@ -249,6 +293,89 @@ function PipelineBoardInner({
   const [confirmingAdvance, setConfirmingAdvance] = useState(false);
   const [advancePending, setAdvancePending] = useState(false);
   const [advanceNotice, setAdvanceNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  const [draggingApplicationId, setDraggingApplicationId] = useState<string | null>(null);
+  const [movingIds, setMovingIds] = useState<Set<string>>(new Set());
+  const [pendingMoveTargets, setPendingMoveTargets] = useState<Map<string, PipelineStatus>>(new Map());
+  const [moveNotice, setMoveNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  const dragHandleElements = useRef(new Map<string, HTMLButtonElement>());
+
+  if (applicationSource !== applications) {
+    setApplicationSource(applications);
+    setBoardApplications(applications.map((application) => {
+      const pendingStatus = pendingMoveTargets.get(application.id);
+      return pendingStatus ? { ...application, status: pendingStatus } : application;
+    }));
+  }
+
+  function rememberDragHandle(applicationId: string, element: HTMLButtonElement | null) {
+    if (element) dragHandleElements.current.set(applicationId, element);
+    else dragHandleElements.current.delete(applicationId);
+  }
+
+  function startDragging(start: DragStart) {
+    setDraggingApplicationId(start.draggableId);
+    setMoveNotice(null);
+  }
+
+  async function finishDragging(result: DropResult) {
+    setDraggingApplicationId(null);
+    const destinationStatus = result.destination?.droppableId;
+    if (!destinationStatus || result.source.droppableId === destinationStatus) return;
+
+    const application = boardApplications.find((candidate) => candidate.id === result.draggableId);
+    if (!application || movingIds.has(application.id) || !canMoveApplication(application.status, destinationStatus)) return;
+
+    const previousStatus = application.status;
+    setMoveNotice(null);
+    setPendingMoveTargets((current) => new Map(current).set(application.id, destinationStatus));
+    setMovingIds((current) => new Set(current).add(application.id));
+    setBoardApplications((current) => moveApplicationInBoard(current, application.id, destinationStatus));
+
+    try {
+      const response = await fetch("/api/admin/rush", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "SET_APPLICATION_STATUS",
+          cycleId,
+          applicationId: application.id,
+          status: destinationStatus,
+        }),
+      });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(body?.error ?? "Could not update status");
+
+      setMoveNotice({
+        kind: "success",
+        message: `${application.name} moved to ${applicationStatusLabel(destinationStatus)}.`,
+      });
+      router.refresh();
+    } catch (error) {
+      setBoardApplications((current) => current.map((candidate) =>
+        candidate.id === application.id && candidate.status === destinationStatus
+          ? { ...candidate, status: previousStatus }
+          : candidate,
+      ));
+      setMoveNotice({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Could not update status. Check your connection and try again.",
+      });
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => dragHandleElements.current.get(application.id)?.focus());
+      });
+    } finally {
+      setPendingMoveTargets((current) => {
+        const next = new Map(current);
+        next.delete(application.id);
+        return next;
+      });
+      setMovingIds((current) => {
+        const next = new Set(current);
+        next.delete(application.id);
+        return next;
+      });
+    }
+  }
 
   function toggleSelected(applicationId: string) {
     setSelectedIds((current) => {
@@ -290,11 +417,11 @@ function PipelineBoardInner({
 
   const searchResults = useMemo(() => {
     const term = query.trim().toLowerCase();
-    if (!term) return applications;
-    return applications.filter((application) =>
+    if (!term) return boardApplications;
+    return boardApplications.filter((application) =>
       application.name.toLowerCase().includes(term) || application.contact.toLowerCase().includes(term),
     );
-  }, [applications, query]);
+  }, [boardApplications, query]);
 
   const rosterApplications = useMemo(() => searchResults.filter((application) => {
     if (statusFilter !== "ALL" && application.status !== statusFilter) return false;
@@ -303,7 +430,13 @@ function PipelineBoardInner({
     return true;
   }), [resumeFilter, searchResults, statusFilter]);
 
-  const decidedCount = applications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
+  const decidedCount = boardApplications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
+  const draggingApplication = draggingApplicationId
+    ? boardApplications.find((application) => application.id === draggingApplicationId) ?? null
+    : null;
+  const legalDropStatuses = draggingApplication
+    ? new Set(kanbanDropStatuses(draggingApplication.status))
+    : null;
   const returnTo = useMemo(() => {
     const params = new URLSearchParams();
     if (query.trim()) params.set("query", query.trim());
@@ -320,7 +453,7 @@ function PipelineBoardInner({
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Applicants</h2>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
-          <p className="text-sm text-mecg-navy/60">{applications.length} submitted applicants in this cycle</p>
+          <p className="text-sm text-mecg-navy/60">{boardApplications.length} submitted applicants in this cycle</p>
           <label>
             <span className="sr-only">Search applicants by name or contact</span>
             <input
@@ -383,7 +516,7 @@ function PipelineBoardInner({
         <div key="all-applicants" className="panel-seat">
           <ApplicantRoster
             applications={rosterApplications}
-            total={applications.length}
+            total={boardApplications.length}
             canOperate={canOperate}
             canAdvance={canAdvance}
             cycleId={cycleId}
@@ -398,37 +531,91 @@ function PipelineBoardInner({
         </div>
       ) : (
         <div key="pipeline" className="panel-seat">
-          <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(190px,1fr)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicants by stage">
-            {ACTIVE_STATUSES.map((status) => {
-              const column = searchResults.filter((application) => application.status === status);
-              return (
-                <article key={status} className="flex flex-col gap-1.5 rounded-2xl bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[13px] font-semibold text-mecg-navy/55">{applicationStatusLabel(status)}</p>
-                    <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
-                      {column.length}
-                    </span>
-                  </div>
-                  {column.length === 0 ? (
-                    <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-3 text-center">
-                      <p className="text-[11.5px] text-mecg-navy/60">{query ? "No matches" : "No applicants yet"}</p>
+          {moveNotice && (
+            <p
+              role={moveNotice.kind === "error" ? "alert" : "status"}
+              aria-live={moveNotice.kind === "error" ? "assertive" : "polite"}
+              className={`mt-3 rounded-xl px-4 py-3 text-sm ${moveNotice.kind === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-900"}`}
+            >
+              {moveNotice.message}
+            </p>
+          )}
+          <DragDropContext onDragStart={startDragging} onDragEnd={finishDragging}>
+            <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(240px,280px)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicants by stage">
+              {ACTIVE_STATUSES.map((status) => {
+                const column = searchResults.filter((application) => application.status === status);
+                const acceptsDraggedCard = legalDropStatuses?.has(status) ?? true;
+                return (
+                  <article
+                    key={status}
+                    className={`flex min-h-40 flex-col rounded-2xl bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] transition-opacity ${draggingApplication && !acceptsDraggedCard ? "opacity-45" : ""}`}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-2 px-0.5">
+                      <p className="text-[13px] font-semibold text-mecg-navy/55">{applicationStatusLabel(status)}</p>
+                      <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
+                        {column.length}
+                      </span>
                     </div>
-                  ) : (
-                    column.map((application) => (
-                      <ApplicantCard
-                        key={application.id}
-                        application={application}
-                        canOperate={canOperate}
-                        cycleId={cycleId}
-                        controlId={application.id}
-                        returnTo={returnTo}
-                      />
-                    ))
-                  )}
-                </article>
-              );
-            })}
-          </div>
+                    <Droppable
+                      droppableId={status}
+                      isDropDisabled={Boolean(draggingApplication && !acceptsDraggedCard)}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`flex min-h-28 max-h-[68vh] flex-1 flex-col gap-1.5 overflow-y-auto rounded-xl transition-[background-color,box-shadow] ${snapshot.isDraggingOver ? "bg-mecg-blue/[0.08] shadow-[inset_0_0_0_2px_rgba(38,91,174,0.35)]" : ""}`}
+                        >
+                          {column.length === 0 && (
+                            <div className={`flex min-h-28 flex-1 items-center justify-center rounded-xl border-[1.5px] border-dashed p-3 text-center ${snapshot.isDraggingOver ? "border-mecg-blue/45" : "border-mecg-navy/[0.14]"}`}>
+                              <p className="text-[11.5px] text-mecg-navy/60">
+                                {snapshot.isDraggingOver ? "Drop here" : draggingApplication && !acceptsDraggedCard ? "Not a legal next stage" : query ? "No matches" : "No applicants yet"}
+                              </p>
+                            </div>
+                          )}
+                          {column.map((application, index) => {
+                            const isMoving = movingIds.has(application.id);
+                            const hasDestination = kanbanDropStatuses(application.status).some(
+                              (candidate) => candidate !== application.status,
+                            );
+                            return (
+                              <Draggable
+                                key={application.id}
+                                draggableId={application.id}
+                                index={index}
+                                isDragDisabled={!canOperate || isMoving || !hasDestination}
+                              >
+                                {(draggableProvided, draggableSnapshot) => (
+                                  <div
+                                    ref={draggableProvided.innerRef}
+                                    {...draggableProvided.draggableProps}
+                                    style={draggableProvided.draggableProps.style}
+                                  >
+                                    <ApplicantCard
+                                      application={application}
+                                      canOperate={canOperate}
+                                      cycleId={cycleId}
+                                      controlId={application.id}
+                                      returnTo={returnTo}
+                                      dragHandleProps={draggableProvided.dragHandleProps}
+                                      dragHandleRef={(element) => rememberDragHandle(application.id, element)}
+                                      isDragging={draggableSnapshot.isDragging}
+                                      isMoving={isMoving}
+                                    />
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          })}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </article>
+                );
+              })}
+            </div>
+          </DragDropContext>
           <div className="mt-4 rounded-2xl bg-mecg-navy/[0.025] p-4">
             <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between gap-4 text-left">
               <span className="text-[13px] font-semibold text-mecg-navy/55">Decided · {decidedCount}</span>
@@ -443,7 +630,7 @@ function PipelineBoardInner({
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {DECIDED_STATUSES.map((status) => (
                   <StatusPill key={status} tone="neutral">
-                    {applicationStatusLabel(status)} · {applications.filter((application) => application.status === status).length}
+                    {applicationStatusLabel(status)} · {boardApplications.filter((application) => application.status === status).length}
                   </StatusPill>
                 ))}
               </div>

@@ -450,6 +450,8 @@ A wrong-pair report alerts the event operator and preserves both drafts. A confl
 
 Group Case needs an observation board first and individual evaluations second.
 
+The detailed workflow, six-dimension rubric, independent judge sequence, and Excel recovery format live in `docs/design/group-case-grading-plan.md`. That plan incorporates the attached Fall Recruitment redesign and resolves its conflicting weight descriptions before implementation.
+
 ### Observation board
 
 Load the case group, prompt, assigned applicants, and evaluation assignments in one workspace. The evaluator may see only applicants they are allowed to observe.
@@ -687,12 +689,15 @@ Exit after a full live-round dry run on the oldest supported phone and the event
 
 ### Phase 4: redesign Group Case
 
-1. Add a member-safe RPC that returns group context, prompt, allowed applicants, assignments, and private draft summaries.
-2. Add structured observation items to drafts.
-3. Build the observation board and applicant switcher.
-4. Build the post-case individual finish queue.
-5. Build the operator coverage grid without live scores.
-6. Verify that every locked evaluation remains individual and uses the frozen rubric version.
+1. Approve the dimension weights and the **Not observed** rule in `docs/design/group-case-grading-plan.md`.
+2. Add a member-safe RPC that returns group context, prompt, allowed applicants, assignments, and private draft summaries.
+3. Add structured observation items to drafts.
+4. Build the observation board and applicant switcher.
+5. Build the post-case individual finish queue.
+6. Hide co-judge scores until both judges submit independently.
+7. Build the operator coverage grid without live scores.
+8. Add an audited `.xlsx` export and Excel-ready CSV fallback before the live rehearsal.
+9. Verify that every locked evaluation remains individual and uses the frozen rubric version.
 
 Exit after a six-applicant dry run proves that evaluators can recover who they observed and finish every assigned evaluation without cross-applicant note leakage.
 
