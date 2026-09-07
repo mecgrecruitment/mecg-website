@@ -1,6 +1,6 @@
 # MECG marketing photography
 
-The photographs listed below come from the repository's `mecg-pictures` folder. The dated filenames for the replacement set intentionally invalidate caches that may still contain the previous generated artwork. The legacy `community-formal-pair.jpeg` asset is retained specifically for the homepage history section.
+The photographs listed below come from the repository's `mecg-pictures` folder. The dated filenames for the replacement set intentionally invalidate caches that may still contain the previous generated artwork. The legacy `members-professional.jpeg` and `community-formal-pair.jpeg` assets are retained specifically for the homepage hero and history sections.
 
 | Public asset | Original photo |
 | --- | --- |

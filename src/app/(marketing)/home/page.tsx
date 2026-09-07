@@ -33,8 +33,8 @@ export default async function HomePage() {
     <main id="main-content" className="bg-white text-mecg-navy">
       <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
         <Image
-          src="/mecg/chapter-presentation-2026.jpeg"
-          alt="MECG members presenting together at a formal chapter event"
+          src="/mecg/members-professional.jpeg"
+          alt="MECG members visiting PwC in Chicago"
           fill
           preload
           sizes="100vw"
