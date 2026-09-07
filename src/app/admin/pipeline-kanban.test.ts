@@ -1,10 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  KANBAN_TRACK_CLASS_NAME,
   canMoveApplication,
   kanbanDropStatuses,
   moveApplicationInBoard,
 } from "./pipeline-kanban.ts";
+
+test("Kanban removes the single-column template before desktop column flow", () => {
+  assert.match(KANBAN_TRACK_CLASS_NAME, /sm:grid-cols-none/);
+  assert.match(KANBAN_TRACK_CLASS_NAME, /sm:grid-flow-col/);
+});
 
 test("Kanban destinations contain the current and legal active stages", () => {
   assert.deepEqual(kanbanDropStatuses("SUBMITTED"), ["SUBMITTED", "NEEDS_INFO", "ELIGIBLE"]);

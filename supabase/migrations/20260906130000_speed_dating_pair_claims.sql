@@ -110,13 +110,13 @@ begin
   end if;
   if (
     select count(*) from (
-      select value
+      select item.value
       from jsonb_array_elements(submitted_pairs) p,
            jsonb_array_elements_text(p->'applicationIds') item(value)
     ) all_members
   ) <> (
-    select count(distinct value) from (
-      select value
+    select count(distinct all_members.value) from (
+      select item.value
       from jsonb_array_elements(submitted_pairs) p,
            jsonb_array_elements_text(p->'applicationIds') item(value)
     ) all_members

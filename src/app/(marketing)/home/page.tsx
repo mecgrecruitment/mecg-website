@@ -16,12 +16,12 @@ export const metadata: Metadata = {
 };
 
 const HOME_PHOTOS = [
-  { src: "/mecg/members-board-professional.jpeg", alt: "MECG executive board in a professional group portrait" },
-  { src: "/mecg/members-chicago-professional.jpeg", alt: "MECG members on a professional visit to Chicago" },
-  { src: "/mecg/members-professional.jpeg", alt: "MECG members visiting PwC in Chicago" },
+  { src: "/mecg/chapter-presentation-2026.jpeg", alt: "MECG members presenting together at a formal chapter event" },
+  { src: "/mecg/chicago-community-2026.jpeg", alt: "MECG members exploring downtown Chicago together" },
+  { src: "/mecg/formal-group-2026.jpeg", alt: "MECG members together at a formal chapter event" },
   { src: "/mecg/community-formal-group.jpeg", alt: "MECG members dressed for a formal event" },
   { src: "/mecg/community-maize-day.jpeg", alt: "MECG members celebrating in Michigan colors" },
-  { src: "/mecg/community-formal-pair.jpeg", alt: "MECG members celebrating Michigan's national championship" },
+  { src: "/mecg/formal-social-2026.jpeg", alt: "Three MECG members at a formal social event" },
   { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
 ] as const;
 
@@ -33,8 +33,8 @@ export default async function HomePage() {
     <main id="main-content" className="bg-white text-mecg-navy">
       <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
         <Image
-          src="/mecg/members-professional.jpeg"
-          alt="MECG members visiting PwC in Chicago"
+          src="/mecg/chapter-presentation-2026.jpeg"
+          alt="MECG members presenting together at a formal chapter event"
           fill
           preload
           sizes="100vw"
@@ -104,8 +104,8 @@ export default async function HomePage() {
             </div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
               <Image
-                src="/mecg/community-formal-pair.jpeg"
-                alt="MECG members celebrating Michigan's national championship"
+                src="/mecg/formal-social-2026.jpeg"
+                alt="Three MECG members at a formal social event"
                 fill
                 className="object-cover object-center"
                 sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, 100vw"

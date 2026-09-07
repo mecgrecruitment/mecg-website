@@ -13,6 +13,7 @@ import {
 } from "@hello-pangea/dnd";
 import PipelineStatusForm from "./pipeline-status-form";
 import {
+  KANBAN_TRACK_CLASS_NAME,
   canMoveApplication,
   kanbanDropStatuses,
   moveApplicationInBoard,
@@ -541,7 +542,7 @@ function PipelineBoardInner({
             </p>
           )}
           <DragDropContext onDragStart={startDragging} onDragEnd={finishDragging}>
-            <div className="scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(240px,280px)] sm:overflow-x-auto sm:pb-2" tabIndex={0} role="region" aria-label="Applicants by stage">
+            <div className={KANBAN_TRACK_CLASS_NAME} tabIndex={0} role="region" aria-label="Applicants by stage">
               {ACTIVE_STATUSES.map((status) => {
                 const column = searchResults.filter((application) => application.status === status);
                 const acceptsDraggedCard = legalDropStatuses?.has(status) ?? true;

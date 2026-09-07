@@ -5,6 +5,11 @@ import {
   type PipelineStatus,
 } from "@/lib/workflow";
 
+// `grid-cols-1` is the mobile layout. It must be cleared when the board switches
+// to column auto-flow, otherwise the explicit first track collapses and its
+// stage content paints over the first generated column.
+export const KANBAN_TRACK_CLASS_NAME = "scroll-cue mt-3.5 grid grid-cols-1 gap-3 sm:grid-cols-none sm:grid-flow-col sm:auto-cols-[minmax(240px,280px)] sm:overflow-x-auto sm:pb-2";
+
 export function kanbanDropStatuses(status: PipelineStatus): PipelineStatus[] {
   return legalManualApplicationStatuses(status).filter(
     (candidate): candidate is PipelineStatus =>
