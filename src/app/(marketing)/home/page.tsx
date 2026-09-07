@@ -104,8 +104,8 @@ export default async function HomePage() {
             </div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
               <Image
-                src="/mecg/formal-social-2026.jpeg"
-                alt="Three MECG members at a formal social event"
+                src="/mecg/community-formal-pair.jpeg"
+                alt="MECG members celebrating Michigan's national championship"
                 fill
                 className="object-cover object-center"
                 sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, 100vw"
