@@ -6,7 +6,7 @@ import OperationNotice from "@/components/operation-notice";
 
 type Status = "idle" | "submitting" | "success" | "already" | "error";
 
-export default function CheckinForm({ token, eventName, signedIn }: { token: string; eventName: string; signedIn: boolean }) {
+export default function CheckinForm({ token, eventName, signedIn, identityUnavailable }: { token: string; eventName: string; signedIn: boolean; identityUnavailable: boolean }) {
   const returnTo = encodeURIComponent(`/checkin/${token}`);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,10 +30,18 @@ export default function CheckinForm({ token, eventName, signedIn }: { token: str
       }
       setStatus(data.alreadyCheckedIn ? "already" : "success");
     } catch {
-      setErrorMessage("Something went wrong");
+      setErrorMessage("We could not confirm the result. It is safe to try again. If the first request succeeded, you will see that you are already checked in.");
       setUnauthorized(false);
       setStatus("error");
     }
+  }
+
+  if (identityUnavailable) {
+    return (
+      <OperationNotice kind="error">
+        Sign-in status is temporarily unavailable. Ask an MECG Board Member to record an assisted check-in so you do not have to wait here.
+      </OperationNotice>
+    );
   }
 
   if (status === "success") {
@@ -89,7 +97,7 @@ export default function CheckinForm({ token, eventName, signedIn }: { token: str
         disabled={status === "submitting"}
         className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "submitting" ? "Checking in…" : "Check in"}
+        {status === "submitting" ? "Checking in…" : status === "error" ? "Try check-in again" : "Check in"}
       </button>
     </form>
   );

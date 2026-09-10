@@ -72,10 +72,10 @@ select extensions.has_function('rush','authorize_resume_access',array['text'],'i
 select extensions.has_function('rush','my_application_submission_status',array[]::text[],'ambiguous submission reconciliation exists');
 select extensions.ok(has_function_privilege('authenticated','rush.my_application_submission_status()','EXECUTE') and not has_function_privilege('anon','rush.my_application_submission_status()','EXECUTE'), 'submission reconciliation is authenticated and not anonymous');
 select extensions.ok(exists(select 1 from pg_constraint where conrelid='rush.notification_outbox'::regclass and conname='notification_outbox_template_key_check' and pg_get_constraintdef(oid) like '%APPLICATION_RECEIVED%'), 'the durable outbox accepts application receipts');
-select extensions.ok(exists(select 1 from pg_trigger where tgrelid='rush.applications'::regclass and tgname='applications_enqueue_receipt' and not tgisinternal), 'application submission has an outbox trigger in its transaction');
+select extensions.has_function('rush','submit_application_reliable',array['text','text','text','text','text','text','text','text','jsonb','boolean','text','text','text','text'],'versioned application submission with transactional receipt exists');
 select extensions.ok(position('APPLICATION_RECEIVED' in pg_get_functiondef('rush.claim_notification(text)'::regprocedure)) > 0, 'notification claims expose application receipts to the existing delivery worker');
-select extensions.ok(position('savedAt' in pg_get_functiondef('rush.application_draft()'::regprocedure)) > 0, 'standalone draft reads expose server-owned freshness');
-select extensions.ok(position('savedAt' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) > 0, 'intake draft reads expose server-owned freshness');
+select extensions.ok(position('savedAt' in pg_get_functiondef('rush.application_draft()'::regprocedure)) = 0, 'standalone draft reads remain compatible with old application parsers');
+select extensions.ok(position('savedAt' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) = 0, 'intake draft reads remain compatible with old application parsers');
 select extensions.ok(
   position('join rush.application_questions' in lower(pg_get_functiondef('rush.application_draft()'::regprocedure))) > 0
   and position('join rush.application_questions' in lower(pg_get_functiondef('rush.intake_schema()'::regprocedure))) > 0,
@@ -959,14 +959,17 @@ select
   now() - interval '2 days'
 from generate_series(1,20) attempts(attempt);
 
--- Re-running the status write simulates an idempotent submission path. The
--- receipt trigger must keep exactly one durable obligation.
-update rush.applications set status='SUBMITTED'
-where id='10000000-0000-4000-8000-000000000057';
+insert into rush.notification_outbox(
+  cycle_id, application_id, recipient, template_key, template_version, idempotency_key
+) values (
+  '10000000-0000-4000-8000-000000000059','10000000-0000-4000-8000-000000000057',
+  'resume-applicant@example.invalid','APPLICATION_RECEIVED',1,
+  'application-received:10000000-0000-4000-8000-000000000057'
+);
 select extensions.is(
   (select count(*) from rush.notification_outbox where application_id='10000000-0000-4000-8000-000000000057' and template_key='APPLICATION_RECEIVED'),
   1::bigint,
-  'submission enqueues exactly one durable application receipt'
+  'application receipt uniqueness preserves one durable obligation'
 );
 
 set local "request.jwt.claim.role" = 'service_role';

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { rateLimitRouteResponse, readJsonBody, requestReference, routeJsonResponse } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
+import { scheduleApplicationReceiptDelivery } from "@/lib/application-receipt-delivery";
 import { checkRateLimitStatus, clientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { parseApplicationIntake } from "@/lib/workflow";
@@ -41,27 +42,33 @@ export async function POST(req: NextRequest) {
   // full bucket per account. The IP-only bucket is the ceiling that survives
   // that (limits: supabase/migrations/20260902160000_apply_ip_rate_limit_ceiling.sql).
   const userLimit = await checkRateLimitStatus(`apply:${user.id}:${ip}`);
-  if (userLimit !== "allowed") return rateLimitRouteResponse("application.submit", requestId, startedAt, userLimit);
+  if (userLimit !== "allowed") return rateLimitRouteResponse("application.submit", requestId, startedAt, userLimit, undefined, 3600);
   const ipLimit = await checkRateLimitStatus(`apply-ip:${ip}`);
-  if (ipLimit !== "allowed") return rateLimitRouteResponse("application.submit", requestId, startedAt, ipLimit);
+  if (ipLimit !== "allowed") return rateLimitRouteResponse("application.submit", requestId, startedAt, ipLimit, undefined, 3600);
+  const rpcArgs = {
+    applicant_name: intake.name,
+    applicant_contact: user.email,
+    preferred_name: intake.preferredName ?? undefined,
+    phone: intake.phone ?? undefined,
+    class_year: intake.classYear,
+    major: intake.major,
+    linkedin_url: intake.linkedinUrl ?? undefined,
+    resume_storage_path: intake.resumeStoragePath,
+    answers: intake.answers,
+    consent: true,
+    uniqname: intake.uniqname,
+    college: intake.college,
+    grad_term: intake.gradTerm ?? undefined,
+    accessibility_notes: intake.accessibilityNotes ?? undefined,
+  };
   let rpcResult;
+  let durableOutbox = true;
   try {
-    rpcResult = await supabase.rpc("submit_application", {
-      applicant_name: intake.name,
-      applicant_contact: user.email,
-      preferred_name: intake.preferredName ?? undefined,
-      phone: intake.phone ?? undefined,
-      class_year: intake.classYear,
-      major: intake.major,
-      linkedin_url: intake.linkedinUrl ?? undefined,
-      resume_storage_path: intake.resumeStoragePath,
-      answers: intake.answers,
-      consent: true,
-      uniqname: intake.uniqname,
-      college: intake.college,
-      grad_term: intake.gradTerm ?? undefined,
-      accessibility_notes: intake.accessibilityNotes ?? undefined,
-    });
+    rpcResult = await supabase.rpc("submit_application_reliable", rpcArgs);
+    if (rpcResult.error?.code === "PGRST202") {
+      durableOutbox = false;
+      rpcResult = await supabase.rpc("submit_application", rpcArgs);
+    }
   } catch {
     return routeJsonResponse("application.submit", requestId, startedAt, { error: "Submission services are temporarily unavailable. Try again shortly." }, 503, {
       code: "SERVICE_UNAVAILABLE",
@@ -87,7 +94,11 @@ export async function POST(req: NextRequest) {
     return respond({ error: "An unexpected error occurred" }, 500, "INVALID_SUBMISSION_RESPONSE");
   }
   const { applicationId, submittedNow } = result;
-  // submit_application queues the confirmation in the durable outbox in the
-  // same transaction. Do not hold the applicant response open for delivery.
+  if (submittedNow) scheduleApplicationReceiptDelivery({
+    applicationId,
+    applicantName: intake.name,
+    recipient: user.email,
+    durableOutbox,
+  });
   return respond({ applicationId }, submittedNow ? 201 : 200);
 }

@@ -12,7 +12,6 @@ import { fetchWithTimeout, reconcileSubmittedApplication, RequestTimeoutError } 
 import { uploadResumeFile } from "@/lib/resume-upload";
 import { APPLICATION_FIELD_LIMITS, CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, countWords } from "@/lib/workflow";
 import {
-  browserRecoveryIsNewer,
   clearApplicationStepRecovery,
   loadApplicationStepRecovery,
   saveApplicationStepRecovery,
@@ -59,7 +58,7 @@ function answerId(key: string) {
 
 function isHttpUrl(value: string) {
   const trimmed = value.trim();
-  if (!/^https?:\/\//i.test(trimmed)) return false;
+  if (/\s/.test(trimmed) || !/^https?:\/\//i.test(trimmed)) return false;
   try {
     const url = new URL(trimmed);
     return ["http:", "https:"].includes(url.protocol) && Boolean(url.hostname);
@@ -101,9 +100,10 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   const [accessibilityNotes, setAccessibilityNotes] = useState(initialDraft?.accessibilityNotes ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(initialDraft?.linkedinUrl ?? "");
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
-    const restored = { ...(initialDraft?.answers ?? {}) };
-    for (const question of questions) if (question.inputType === "select" && restored[question.key] && !question.options.includes(restored[question.key])) restored[question.key] = "";
-    return restored;
+    return Object.fromEntries(questions.map((question) => {
+      const value = initialDraft?.answers[question.key] ?? "";
+      return [question.key, question.inputType === "select" && value && !question.options.includes(value) ? "" : value];
+    }));
   });
   const [resumePath, setResumePath] = useState(initialDraft?.resumeStoragePath ?? "");
   // The photo lives outside the draft row (its own RPC), so it is a boolean here, not a path.
@@ -161,6 +161,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       if (sequence === saveSequence.current) {
         setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
         setDraftDirty(false);
+        if (recoveryScope) clearApplicationDraftRecovery(window.sessionStorage);
       }
     } catch (error) {
       if (sequence === saveSequence.current) {
@@ -174,7 +175,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       saveInFlight.current = false;
       if (pendingSave.current) void drainSaveQueue();
     }
-  }, []);
+  }, [recoveryScope]);
 
   const saveDraft = useCallback((payload: typeof draftPayload, focusFailure = false) => {
     const sequence = ++saveSequence.current;
@@ -204,9 +205,9 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       return;
     }
     const snapshot = loadApplicationDraftRecoverySnapshot(window.sessionStorage, recoveryScope);
-    const recovered = snapshot && browserRecoveryIsNewer(snapshot.savedAt, initialDraft)
-      ? snapshot.draft
-      : null;
+    // A successful matching save clears this snapshot. If it remains, it is
+    // an unacknowledged browser copy and must win without comparing clocks.
+    const recovered = snapshot?.draft ?? null;
     const recoveredStep = loadApplicationStepRecovery(window.sessionStorage, recoveryScope);
     recoveryInitialized.current = true;
     if (!recovered) return;
@@ -229,7 +230,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       setDraftDirty(true);
     }, 0);
     return () => window.clearTimeout(restoreTimer);
-  }, [initialDraft, questions, recoveryScope]);
+  }, [questions, recoveryScope]);
 
   useEffect(() => {
     if (!cycleOpen || !draftDirty || !recoveryInitialized.current || !recoveryScope) return;
@@ -410,6 +411,10 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         throw new RequestTimeoutError();
       }
       if (!response.ok) {
+        if ([502, 503, 504].includes(response.status) && await reconcileSubmittedApplication()) {
+          finishSubmission();
+          return;
+        }
         const body = await response.json().catch(() => null);
         throw new Error(body?.error ?? "The application could not be submitted.");
       }

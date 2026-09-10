@@ -3036,6 +3036,25 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_application_reliable: {
+        Args: {
+          accessibility_notes?: string
+          answers?: Json
+          applicant_contact: string
+          applicant_name: string
+          class_year?: string
+          college?: string
+          consent?: boolean
+          grad_term?: string
+          linkedin_url?: string
+          major?: string
+          phone?: string
+          preferred_name?: string
+          resume_storage_path?: string
+          uniqname?: string
+        }
+        Returns: Json
+      }
       submit_application_self_test: {
         Args: { applicant_contact: string; applicant_name: string }
         Returns: string

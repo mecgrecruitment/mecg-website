@@ -179,6 +179,26 @@ test("resume finalize verifies bytes and records the digest", async (t) => {
   assert.match(String(finalize?.args?.content_sha256), /^[0-9a-f]{64}$/);
 });
 
+test("resume finalize keeps a pending upload retryable when storage is unavailable", async (t) => {
+  let removed = false;
+  const client = {
+    rpc: async () => ({ data: { documentId: DOCUMENT_ID, path: PATH, declaredSize: 26, filename: "resume.pdf" }, error: null }),
+    storage: { from: () => ({
+      download: async () => ({ data: null, error: { message: "temporary outage" } }),
+      remove: async () => { removed = true; return { data: [], error: null }; },
+    }) },
+  };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importFinalizeRoute("storage-unavailable");
+  const response = await POST(request("/api/apply/resume/finalize", { documentId: DOCUMENT_ID }));
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("retry-after"), "15");
+  assert.equal((await response.json()).code, "STORAGE_UNAVAILABLE");
+  assert.equal(removed, false);
+});
+
 test("resume finalize rejects and removes non-PDF content", async (t) => {
   let removed: string[] = [];
   const bytes = new TextEncoder().encode("not a PDF");

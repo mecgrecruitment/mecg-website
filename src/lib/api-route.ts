@@ -110,11 +110,12 @@ export function rateLimitRouteResponse(
   startedAt: number,
   status: "limited" | "unavailable",
   limitedMessage = "Too many requests. Wait a minute and try again.",
+  retryAfterSeconds = 60,
 ) {
   return status === "limited"
     ? routeJsonResponse(event, requestId, startedAt, { error: limitedMessage }, 429, {
         code: "RATE_LIMITED",
-        retryAfterSeconds: 60,
+        retryAfterSeconds,
       })
     : routeJsonResponse(event, requestId, startedAt, { error: "This service is temporarily unavailable. Try again shortly." }, 503, {
         code: "SERVICE_UNAVAILABLE",

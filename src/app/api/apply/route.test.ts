@@ -73,10 +73,14 @@ function fakeSupabaseClient(handlers: RpcHandlers) {
   };
 }
 
-function mockCommon(t: test.TestContext, client: unknown, options: { rateLimitStatus?: "allowed" | "limited" | "unavailable" } = {}) {
+function mockCommon(t: test.TestContext, client: unknown, options: {
+  rateLimitStatus?: "allowed" | "limited" | "unavailable";
+  schedule?: (input: unknown) => void;
+} = {}) {
   const rateLimitKeys: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => FAKE_USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.module("@/lib/application-receipt-delivery", { namedExports: { scheduleApplicationReceiptDelivery: options.schedule ?? (() => undefined) } });
   t.mock.module("@/lib/rate-limit", {
     namedExports: {
       checkRateLimitStatus: async (key: string) => { rateLimitKeys.push(key); return options.rateLimitStatus ?? "allowed"; },
@@ -90,7 +94,7 @@ function mockCommon(t: test.TestContext, client: unknown, options: { rateLimitSt
 // IP is only a discriminator, so N minted accounts on one host buy N buckets.
 test("POST /api/apply rate limits per user and per IP, not either alone", async (t) => {
   const { client } = fakeSupabaseClient({
-    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
+    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
   });
   const keys = mockCommon(t, client);
   const { POST } = await importRoute("rate-limit-key");
@@ -187,7 +191,7 @@ test("POST /api/apply returns 429 without persisting when rate limited", async (
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 429);
   assert.equal((await res.json()).code, "RATE_LIMITED");
-  assert.equal(res.headers.get("retry-after"), "60");
+  assert.equal(res.headers.get("retry-after"), "3600");
   assert.deepEqual(calls, []);
 });
 
@@ -205,7 +209,7 @@ test("POST /api/apply returns 503 when rate limiting is unavailable", async (t) 
 
 test("POST /api/apply submits all fields in one persistence call", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
+    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("success");
@@ -215,7 +219,7 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
   assert.equal(calls.length, 1);
   assert.deepEqual(Object.keys(calls[0].args ?? {}), SUBMIT_APPLICATION_ARGUMENTS);
   assert.deepEqual(calls[0], {
-    name: "submit_application",
+    name: "submit_application_reliable",
     args: {
       applicant_name: "Ada Lovelace",
       applicant_contact: "ada@umich.edu",
@@ -237,7 +241,7 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
 
 test("POST /api/apply does not resend confirmation for an idempotent retry", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
+    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("retry");
@@ -247,10 +251,29 @@ test("POST /api/apply does not resend confirmation for an idempotent retry", asy
   assert.equal(calls.length, 1);
 });
 
+test("POST /api/apply falls back safely when the reliable RPC is not deployed yet", async (t) => {
+  const scheduled: unknown[] = [];
+  const { calls, client } = fakeSupabaseClient({
+    submit_application_reliable: () => ({ data: null, error: { code: "PGRST202", message: "function missing" } }),
+    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
+  });
+  mockCommon(t, client, { schedule: (input) => scheduled.push(input) });
+  const { POST } = await importRoute("old-database-fallback");
+  const res = await POST(postRequest(VALID_BODY));
+  assert.equal(res.status, 201);
+  assert.deepEqual(calls.map((call) => call.name), ["submit_application_reliable", "submit_application"]);
+  assert.deepEqual(scheduled, [{
+    applicationId: "application-1",
+    applicantName: "Ada Lovelace",
+    recipient: "ada@umich.edu",
+    durableOutbox: false,
+  }]);
+});
+
 test("POST /api/apply maps RPC failures without leaking database messages", async (t) => {
   const secret = "duplicate normalized_contact ada@umich.edu";
   const { client } = fakeSupabaseClient({
-    submit_application: () => ({ data: null, error: { code: "23505", message: secret } }),
+    submit_application_reliable: () => ({ data: null, error: { code: "23505", message: secret } }),
   });
   mockCommon(t, client);
   t.mock.method(console, "error", () => undefined);
@@ -264,7 +287,7 @@ test("POST /api/apply maps RPC failures without leaking database messages", asyn
 
 test("POST /api/apply returns a generic error for unknown RPC failures", async (t) => {
   const { client } = fakeSupabaseClient({
-    submit_application: () => ({ data: null, error: { code: "XX000", message: "internal table detail" } }),
+    submit_application_reliable: () => ({ data: null, error: { code: "XX000", message: "internal table detail" } }),
   });
   mockCommon(t, client);
   t.mock.method(console, "error", () => undefined);
@@ -276,7 +299,7 @@ test("POST /api/apply returns a generic error for unknown RPC failures", async (
 
 test("POST /api/apply does not wait for notification delivery after commit", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
+    submit_application_reliable: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("email-failure");

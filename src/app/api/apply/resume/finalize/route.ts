@@ -56,21 +56,33 @@ export async function POST(req: NextRequest) {
     startedAt,
     limit,
     "Too many resume uploads. Wait a few minutes and try again.",
+    300,
   );
 
   const supabase = await createClient();
   const { data: pending, error: pendingError } = await screeningRpc<PendingUpload>(supabase, "pending_resume_upload", {
     target_document_id: documentId,
   });
-  if (pendingError || !pending?.path) {
-    if (pendingError) console.error("pending_resume_upload failed", pendingError);
+  if (pendingError) {
+    console.error("pending_resume_upload failed", pendingError);
+    if (pendingError.code !== "P0002") {
+      return routeJsonResponse("application.resume.finalize", requestId, startedAt, { error: "Resume verification is temporarily unavailable. Try again shortly." }, 503, {
+        code: "VERIFICATION_UNAVAILABLE",
+        retryAfterSeconds: 15,
+      });
+    }
+  }
+  if (!pending?.path) {
     return respond({ error: "The upload expired. Choose the file again." }, 409, "UPLOAD_EXPIRED");
   }
 
   const { data: blob, error: downloadError } = await supabase.storage.from("resumes").download(pending.path);
   if (downloadError || !blob) {
     if (downloadError) console.error("resume verification download failed", downloadError);
-    return respond({ error: "The upload did not finish. Try again." }, 409, "UPLOAD_INCOMPLETE");
+    return routeJsonResponse("application.resume.finalize", requestId, startedAt, { error: "Resume storage is temporarily unavailable. Try again shortly." }, 503, {
+      code: "STORAGE_UNAVAILABLE",
+      retryAfterSeconds: 15,
+    });
   }
 
   const bytes = new Uint8Array(await blob.arrayBuffer());

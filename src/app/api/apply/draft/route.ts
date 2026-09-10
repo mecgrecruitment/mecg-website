@@ -70,9 +70,9 @@ export async function POST(req: NextRequest) {
   // sum of the per-user caps for a full hall
   // (supabase/migrations/20260902160000_apply_ip_rate_limit_ceiling.sql).
   const userLimit = await checkRateLimitStatus(`apply-draft:${user.id}:${ip}`);
-  if (userLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, userLimit);
+  if (userLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, userLimit, undefined, 3600);
   const ipLimit = await checkRateLimitStatus(`apply-draft-ip:${ip}`);
-  if (ipLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, ipLimit);
+  if (ipLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, ipLimit, undefined, 3600);
   const { error } = await supabase.rpc("save_application_draft", { payload: draft });
   if (error) {
     const { body: errorBody, status } = mapRpcError(error, "Could not save draft");

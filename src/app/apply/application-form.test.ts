@@ -80,6 +80,12 @@ test("submission does not wait for autosave and reconciles an ambiguous response
   assert.ok(submit, "submit() not found in application-form.tsx");
   assert.doesNotMatch(submit, /saveQueue|await saveDraft/);
   assert.match(submit, /reconcileSubmittedApplication\(\)/);
+  assert.match(submit, /\[502, 503, 504\]\.includes\(response\.status\)/);
+});
+
+test("question URL validation rejects whitespace before the database does", () => {
+  const source = readFileSync(new URL("./application-form.tsx", import.meta.url), "utf8");
+  assert.match(source, /if \(\/\\s\/\.test\(trimmed\)/);
 });
 
 test("resume selection allows browsers that omit the PDF MIME type", () => {

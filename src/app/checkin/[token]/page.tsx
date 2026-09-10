@@ -5,12 +5,21 @@ import CheckinForm from "./checkin-form";
 import PortalShell from "@/components/portal-shell";
 import { formatEasternDateTime } from "@/lib/date-time";
 
-export const metadata: Metadata = { title: "Check in" };
+export const metadata: Metadata = { title: "Check in", robots: { index: false, follow: false } };
 
 export default async function CheckinPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const [supabase, user] = await Promise.all([createClient(), currentUser()]);
-  const { data, error } = await supabase.rpc("event_for_token", { raw_token: token });
+  const supabase = await createClient();
+  const [{ data, error }, identity] = await Promise.all([
+    supabase.rpc("event_for_token", { raw_token: token }),
+    currentUser()
+      .then((user) => ({ user, unavailable: false }))
+      .catch((identityError) => {
+        console.error("check-in identity lookup failed", identityError);
+        return { user: null, unavailable: true };
+      }),
+  ]);
+  const { user, unavailable: identityUnavailable } = identity;
   if (error) {
     console.error("event_for_token failed", error);
     return (
@@ -32,7 +41,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ token:
       {event.is_open ? (
         <>
           {user && <p className="mb-4 text-sm text-mecg-navy/65">Checking in as <span className="font-semibold text-mecg-navy">{user.email}</span>.</p>}
-          <CheckinForm token={token} eventName={event.name} signedIn={Boolean(user)} />
+          <CheckinForm token={token} eventName={event.name} signedIn={Boolean(user)} identityUnavailable={identityUnavailable} />
         </>
       ) : (
         <p className="rounded-xl bg-mecg-navy/[0.035] p-5 text-sm text-mecg-navy/60">Check-in is not open for this event right now.</p>

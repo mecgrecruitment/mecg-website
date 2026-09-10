@@ -107,6 +107,26 @@ test("an upload failure cancels the pending document", async () => {
   ]);
 });
 
+test("a transient finalize failure is retried without cancelling the uploaded document", async () => {
+  const calls: Array<RequestInfo | URL> = [];
+  let finalizeAttempts = 0;
+  const fetcher: typeof fetch = async (input) => {
+    calls.push(input);
+    if (input === "/api/apply/resume/start") return jsonResponse({ documentId: DOCUMENT_ID, uploadUrl: UPLOAD_URL }, 201);
+    if (input === UPLOAD_URL) return new Response(null, { status: 200 });
+    if (input === "/api/apply/resume/finalize") {
+      finalizeAttempts += 1;
+      return jsonResponse({ error: "storage unavailable" }, 503);
+    }
+    if (input === "/api/apply/resume/cancel") throw new Error("retryable finalization must not cancel");
+    throw new Error(`Unexpected request ${String(input)}`);
+  };
+
+  await assert.rejects(uploadResumeFile(resumeFile(), { fetcher }), /storage unavailable/i);
+  assert.equal(finalizeAttempts, 2);
+  assert.equal(calls.includes("/api/apply/resume/cancel"), false);
+});
+
 test("an attach failure preserves the finalized document", async () => {
   const calls: Array<RequestInfo | URL> = [];
   const fetcher: typeof fetch = async (input) => {

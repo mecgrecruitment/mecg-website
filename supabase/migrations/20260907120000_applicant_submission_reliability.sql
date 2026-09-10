@@ -119,33 +119,54 @@ create unique index notification_outbox_application_receipt_key
   on rush.notification_outbox(application_id, template_key, template_version)
   where template_key = 'APPLICATION_RECEIVED';
 
-create or replace function rush.enqueue_application_receipt()
-returns trigger
+-- A versioned wrapper is the rollout capability handshake. Old application
+-- instances keep calling submit_application and sending their legacy receipt;
+-- new instances call this function and get submission + outbox atomically.
+create or replace function rush.submit_application_reliable(
+  applicant_name text,
+  applicant_contact text,
+  preferred_name text default null,
+  phone text default null,
+  class_year text default null,
+  major text default null,
+  linkedin_url text default null,
+  resume_storage_path text default null,
+  answers jsonb default '{}'::jsonb,
+  consent boolean default true,
+  uniqname text default null,
+  college text default null,
+  grad_term text default null,
+  accessibility_notes text default null
+)
+returns jsonb
 language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  result jsonb;
 begin
-  if new.status = 'SUBMITTED'
-    and (tg_op = 'INSERT' or old.status is distinct from 'SUBMITTED')
-  then
+  result := rush.submit_application(
+    applicant_name, applicant_contact, preferred_name, phone, class_year,
+    major, linkedin_url, resume_storage_path, answers, consent, uniqname,
+    college, grad_term, accessibility_notes
+  );
+  if coalesce((result->>'submittedNow')::boolean, false) then
     insert into rush.notification_outbox(
       cycle_id, application_id, recipient, template_key, template_version, idempotency_key
     )
-    select new.cycle_id, new.id, p.contact, 'APPLICATION_RECEIVED', 1,
-      'application-received:' || new.id
-    from rush.pnms p
-    where p.id = new.pnm_id
+    select a.cycle_id, a.id, p.contact, 'APPLICATION_RECEIVED', 1,
+      'application-received:' || a.id
+    from rush.applications a
+    join rush.pnms p on p.id = a.pnm_id
+    where a.id = result->>'applicationId'
     on conflict (idempotency_key) do nothing;
   end if;
-  return new;
+  return result;
 end;
 $$;
-revoke all on function rush.enqueue_application_receipt() from public, anon, authenticated;
-drop trigger if exists applications_enqueue_receipt on rush.applications;
-create trigger applications_enqueue_receipt
-after insert or update on rush.applications
-for each row execute function rush.enqueue_application_receipt();
+revoke all on function rush.submit_application_reliable(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text) from public, anon;
+grant execute on function rush.submit_application_reliable(text,text,text,text,text,text,text,text,jsonb,boolean,text,text,text,text) to authenticated, service_role;
 
 create or replace function rush.claim_notification(target_notification_id text)
 returns jsonb
@@ -242,8 +263,9 @@ begin
 end;
 $$;
 
--- savedAt comes from the row timestamp maintained by the applications trigger;
--- it is never stored inside the caller-supplied payload.
+-- Keep the returned draft shape compatible with old application instances.
+-- Browser recovery is cleared only after a matching save, so no cross-clock
+-- timestamp fields are required. Filter removed question keys on every path.
 create or replace function rush.application_draft()
 returns jsonb
 language plpgsql
@@ -286,8 +308,16 @@ begin
     'resumeStoragePath', coalesce(a.resume_storage_path, ''),
     'currentStep', 'details'
   )) || jsonb_build_object(
-    'savedAt', a.updated_at,
-    'serverNow', now(),
+    'answers', coalesce((
+      select jsonb_object_agg(candidate.key, candidate.value)
+      from jsonb_each(coalesce(a.draft_payload->'answers', (
+        select coalesce(jsonb_object_agg(r.question_key, r.response_text), '{}'::jsonb)
+        from rush.application_responses r
+        where r.application_id = a.id
+      ))) candidate
+      join rush.application_questions q
+        on q.cycle_id = a.cycle_id and q.key = candidate.key
+    ), '{}'::jsonb),
     'resumeStoragePath', coalesce((
       select d.object_path
       from rush.application_documents d
@@ -351,8 +381,16 @@ begin
     'resumeStoragePath', coalesce(a.resume_storage_path, ''),
     'currentStep', 'details'
   )) || jsonb_build_object(
-    'savedAt', a.updated_at,
-    'serverNow', now(),
+    'answers', coalesce((
+      select jsonb_object_agg(candidate.key, candidate.value)
+      from jsonb_each(coalesce(a.draft_payload->'answers', (
+        select coalesce(jsonb_object_agg(r.question_key, r.response_text), '{}'::jsonb)
+        from rush.application_responses r
+        where r.application_id = a.id
+      ))) candidate
+      join rush.application_questions q
+        on q.cycle_id = a.cycle_id and q.key = candidate.key
+    ), '{}'::jsonb),
     'resumeStoragePath', coalesce((
       select d.object_path
       from rush.application_documents d

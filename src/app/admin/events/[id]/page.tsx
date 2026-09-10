@@ -15,6 +15,7 @@ import EventControls from "./event-controls";
 import AssistedCheckinForm from "./assisted-checkin-form";
 import { summarizeEventObservations } from "./observation-summary";
 import { formatEasternDateTime } from "@/lib/date-time";
+import AttendanceRefresh from "./attendance-refresh";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
@@ -112,12 +113,20 @@ export default async function EventDetailPage({ params, searchParams }: { params
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="text-[13px] font-semibold text-mecg-navy/60">Live attendance</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[13px] font-semibold text-mecg-navy/60">Live attendance</p>
+          <AttendanceRefresh />
+        </div>
+        {(checkinsError || memberCheckinsError || applicationsError) && (
+          <p role="alert" className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-3 text-sm text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.3)]">
+            Attendance data could not be fully refreshed. The counts below may be stale. Try Refresh now before recording someone again.
+          </p>
+        )}
         <p className="mt-3 text-sm">
-          Applicant check-ins: <strong className="font-semibold text-mecg-navy">{checkins?.length ?? 0}</strong>
+          Applicant check-ins: <strong className="font-semibold text-mecg-navy">{checkinsError ? "Unavailable" : checkins?.length ?? 0}</strong>
         </p>
         <p className="mt-1.5 text-sm">
-          Member check-ins: <strong className="font-semibold text-mecg-navy">{memberCheckinCount ?? 0}</strong>
+          Member check-ins: <strong className="font-semibold text-mecg-navy">{memberCheckinsError ? "Unavailable" : memberCheckinCount ?? 0}</strong>
         </p>
         <ul className="mt-3 flex flex-col gap-1.5">
           {coverage.map((entry) => (
@@ -139,7 +148,11 @@ export default async function EventDetailPage({ params, searchParams }: { params
             </li>
           ))}
         </ul>
-        {!coverage.length && <p className="mt-3 text-sm text-mecg-navy/60">No applicant check-ins yet.</p>}
+        {!checkinsError && !coverage.length && (
+          <p className="mt-3 text-sm text-mecg-navy/60">
+            {checkins?.length ? "Check-ins are recorded, but applicant details are not available yet." : "No applicant check-ins yet."}
+          </p>
+        )}
       </section>
 
       <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">

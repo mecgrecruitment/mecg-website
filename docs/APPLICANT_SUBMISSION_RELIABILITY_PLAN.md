@@ -42,8 +42,9 @@ leave the interface waiting forever.
 
 ### Gate 2 — preserve authoritative state
 
-1. Give browser and server drafts comparable revisions/timestamps and select
-   the newest valid snapshot on reload.
+1. Clear browser recovery only after a matching server save; any remaining
+   scoped browser snapshot is unacknowledged and wins on reload without relying
+   on unrelated device and server clocks.
 2. Resolve the current READY resume from the document lifecycle rather than
    accepting a draft path as proof that a file exists.
 3. Compensate a failed signed-upload setup so it cannot orphan an undiscoverable
@@ -83,9 +84,10 @@ leave the interface waiting forever.
 
 - Completed bounded, coalesced autosave and independent full-payload submit.
 - Completed server-authoritative draft/resume recovery, including NEEDS_INFO
-  reconstruction and device-clock-skew handling.
+  reconstruction, removed-question filtering, and clock-independent recovery.
 - Completed bounded ambiguous-submit polling with idempotent retry guidance.
-- Completed durable transactional application-receipt outbox delivery.
+- Completed versioned, durable transactional application-receipt enqueueing,
+  with immediate post-response delivery and the scheduled worker as fallback.
 - Completed truthful rate-limit/auth dependency statuses and correlated,
   privacy-safe draft, submit, reconciliation, and primary upload events.
 - Added an environment-gated Playwright harness that runs the interrupted
@@ -93,8 +95,9 @@ leave the interface waiting forever.
 
 ## Release and incident checks
 
-1. Apply the forward-only database migration before code that depends on its
-   new outbox and lifecycle behavior.
+1. The versioned submission RPC is a rollout handshake: database-first keeps
+   old instances on their legacy receipt path; application-first falls back to
+   the legacy RPC and direct receipt until the migration is present.
 2. Run one controlled staging application from fresh Clerk signup through the
    applicant confirmation page.
 3. During an active-cycle incident, extend the application deadline or provide

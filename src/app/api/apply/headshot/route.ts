@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     startedAt,
     limit,
     "Too many photo uploads. Wait a few minutes and try again.",
+    300,
   );
 
   const form = await req.formData().catch(() => null);

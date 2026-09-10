@@ -4,8 +4,6 @@ export const APPLICATION_STEPS = ["details", "responses", "materials", "review"]
 export type ApplicationStep = (typeof APPLICATION_STEPS)[number];
 export type ApplicationServerDraft = ApplicationDraft & {
   currentStep: ApplicationStep;
-  savedAt?: string;
-  serverNow?: string;
 };
 
 const MAX_LENGTHS: Record<Exclude<keyof ApplicationDraft, "answers">, number> = {
@@ -21,7 +19,7 @@ const MAX_LENGTHS: Record<Exclude<keyof ApplicationDraft, "answers">, number> = 
   linkedinUrl: APPLICATION_FIELD_LIMITS.linkedinUrl,
   resumeStoragePath: APPLICATION_FIELD_LIMITS.resumeStoragePath,
 };
-const ALLOWED_KEYS = new Set([...Object.keys(MAX_LENGTHS), "answers", "currentStep", "consent", "savedAt", "serverNow"]);
+const ALLOWED_KEYS = new Set([...Object.keys(MAX_LENGTHS), "answers", "currentStep", "consent"]);
 const ANSWER_KEY = /^[a-z][a-z0-9_]*$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -38,8 +36,6 @@ export function parseApplicationServerDraft(value: unknown): ApplicationServerDr
   if (value.college && !COLLEGES.includes(value.college as (typeof COLLEGES)[number])) return null;
   if (value.consent !== undefined && value.consent !== false) return null;
   if (value.currentStep !== undefined && !APPLICATION_STEPS.includes(value.currentStep as ApplicationStep)) return null;
-  if (value.savedAt !== undefined && (typeof value.savedAt !== "string" || !Number.isFinite(Date.parse(value.savedAt)))) return null;
-  if (value.serverNow !== undefined && (typeof value.serverNow !== "string" || !Number.isFinite(Date.parse(value.serverNow)))) return null;
   if (value.answers !== undefined) {
     if (!isRecord(value.answers)) return null;
     const entries = Object.entries(value.answers);
@@ -58,26 +54,7 @@ export function parseApplicationServerDraft(value: unknown): ApplicationServerDr
     currentStep: APPLICATION_STEPS.includes(value.currentStep as ApplicationStep)
       ? value.currentStep as ApplicationStep
       : "details",
-    ...(typeof value.savedAt === "string" ? { savedAt: value.savedAt } : {}),
-    ...(typeof value.serverNow === "string" ? { serverNow: value.serverNow } : {}),
   };
-}
-
-export function browserRecoveryIsNewer(
-  browserSavedAt: number,
-  serverDraft: Pick<ApplicationServerDraft, "savedAt" | "serverNow"> | null,
-  clientNow = Date.now(),
-) {
-  if (!serverDraft?.savedAt) return true;
-  if (!serverDraft.serverNow) return false;
-  const serverSavedAt = Date.parse(serverDraft.savedAt);
-  const serverNow = Date.parse(serverDraft.serverNow);
-  if (![browserSavedAt, clientNow, serverSavedAt, serverNow].every(Number.isFinite)) return false;
-  // Compare ages measured by each clock. Absolute timestamps would let a
-  // device clock that is fast or slow overwrite a newer database draft.
-  const browserAge = Math.max(0, clientNow - browserSavedAt);
-  const serverAge = Math.max(0, serverNow - serverSavedAt);
-  return browserAge < serverAge;
 }
 
 const STEP_STORAGE_KEY = "mecg.application-step-recovery.v1";

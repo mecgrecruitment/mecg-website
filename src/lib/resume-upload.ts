@@ -16,6 +16,8 @@ type ResumeUploadOptions = {
 
 type ResumeUploadPhase = "start" | "upload" | "finalize" | "attach" | "cancel";
 
+class RetryableFinalizeError extends Error {}
+
 const DEFAULT_PHASE_TIMEOUTS: Record<ResumeUploadPhase, number> = {
   start: 15_000,
   upload: 60_000,
@@ -103,15 +105,29 @@ export async function uploadResumeFile(
       throw new Error("We could not upload your resume. Please try again.");
     }
 
-    const { response: finalizeResponse, body: result } = await runPhase("finalize", timeout.finalize, async (signal) => {
-      const response = await fetcher("/api/apply/resume/finalize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId }),
-        signal,
-      });
-      return { response, body: await responseBody(response) };
-    });
+    let finalizeResponse: Response | null = null;
+    let result: Record<string, unknown> | null = null;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const finalizedAttempt = await runPhase("finalize", timeout.finalize, async (signal) => {
+          const response = await fetcher("/api/apply/resume/finalize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ documentId }),
+            signal,
+          });
+          return { response, body: await responseBody(response) };
+        });
+        finalizeResponse = finalizedAttempt.response;
+        result = finalizedAttempt.body;
+        if (finalizeResponse.ok || finalizeResponse.status < 500) break;
+      } catch (error) {
+        if (attempt === 1) throw new RetryableFinalizeError(error instanceof Error ? error.message : PHASE_TIMEOUT_MESSAGES.finalize);
+      }
+    }
+    if (!finalizeResponse || finalizeResponse.status >= 500) {
+      throw new RetryableFinalizeError(responseError(result, "We could not verify your resume. Please try again."));
+    }
     if (
       !finalizeResponse.ok
       || typeof result?.documentId !== "string"
@@ -142,7 +158,7 @@ export async function uploadResumeFile(
       pageCount: result.pageCount,
     };
   } catch (error) {
-    if (documentId && !finalized) {
+    if (documentId && !finalized && !(error instanceof RetryableFinalizeError)) {
       await runPhase("cancel", timeout.cancel, (signal) => fetcher("/api/apply/resume/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

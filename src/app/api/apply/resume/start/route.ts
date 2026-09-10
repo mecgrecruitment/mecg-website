@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     startedAt,
     limit,
     "Too many resume uploads. Wait a few minutes and try again.",
+    300,
   );
 
   const supabase = await createClient();
