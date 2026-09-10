@@ -181,6 +181,7 @@ test("POST /api/apply/draft maps a contact conflict without leaking database det
   const res = await POST(postRequest(DRAFT_BODY));
   assert.equal(res.status, 409);
   const body = await res.json();
-  assert.equal(body.error, "Could not save draft");
+  assert.equal(body.error, "This email is already linked to another account. Email mecg-board@umich.edu and we will merge them.");
+  assert.equal(body.code, "APPLICANT_IDENTITY_CONFLICT");
   assert.equal(JSON.stringify(body).includes("pnms_normalized_contact_key"), false);
 });

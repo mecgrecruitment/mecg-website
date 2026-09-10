@@ -73,15 +73,22 @@ function parseIntakeSchema(value: unknown): IntakeSchema | null {
 export default async function ApplyPage() {
   const clerkConfigured = hasClerkRuntimeConfiguration();
   let authUnavailable = false;
+  // An unverified primary email throws like an outage but is not one: the
+  // applicant has to act, and "reload in a moment" would never come true.
+  let emailUnverified = false;
+  const isEmailUnverified = (error: unknown) =>
+    typeof error === "object" && error !== null && (error as { code?: unknown }).code === "EMAIL_UNVERIFIED";
   let destination: Awaited<ReturnType<typeof currentDestination>> = null;
-  try { destination = await currentDestination(); } catch {
-    authUnavailable = true;
+  try { destination = await currentDestination(); } catch (error) {
+    if (isEmailUnverified(error)) emailUnverified = true;
+    else authUnavailable = true;
   }
   if (destination && destination !== "/apply") redirect(destination);
   let user: Awaited<ReturnType<typeof currentUser>> = null;
-  if (!authUnavailable && destination === "/apply") {
-    try { user = await currentUser(); } catch {
-      authUnavailable = true;
+  if (!authUnavailable && !emailUnverified && destination === "/apply") {
+    try { user = await currentUser(); } catch (error) {
+      if (isEmailUnverified(error)) emailUnverified = true;
+      else authUnavailable = true;
     }
   }
   const supabase = user ? await createClient() : null;
@@ -174,7 +181,14 @@ export default async function ApplyPage() {
           </div>
         )}
 
-        {authUnavailable ? (
+        {emailUnverified ? (
+          <div className="mt-5">
+            <OperationNotice kind="error">
+              Your account&apos;s email address has not been verified yet. Open the verification link sent to that
+              address, or resend it from your account, then reload this page. Email <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a> if you cannot find it.
+            </OperationNotice>
+          </div>
+        ) : authUnavailable ? (
           <div className="mt-5">
             <OperationNotice kind="error">
               Sign-in services are temporarily unavailable. Reload in a moment; your browser recovery copy has not been removed.

@@ -109,7 +109,10 @@ export async function validateResumePdf(
       document.getOpenAction(),
       document.getAnnotationsByType(ACTIVE_ANNOTATION_TYPES, new Set()),
     ]);
-    if (attachments?.size || documentActions?.size || openAction || activeAnnotations.length) {
+    // Only "action" is hostile. pdf.js sets "dest" when the catalog OpenAction
+    // is just an initial view (LaTeX hyperref, Word, Pages and Canva all emit
+    // one), so treating any non-null Map as active rejected 21 real resumes.
+    if (attachments?.size || documentActions?.size || openAction?.get("action") || activeAnnotations.length) {
       return { ok: false, message: "PDFs containing scripts, actions, or embedded files are not supported." };
     }
 

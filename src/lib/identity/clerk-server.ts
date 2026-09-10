@@ -51,7 +51,9 @@ export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null>
   // would let anyone claim someone else's Board membership by typing it in.
   const primary = clerkUser.emailAddresses.find((email) => email.id === clerkUser.primaryEmailAddressId);
   const primaryEmail = primary?.verification?.status === "verified" ? primary.emailAddress : undefined;
-  if (!primaryEmail) throw new Error("A verified primary email is required");
+  // Tagged so callers can tell this apart from an actual Clerk outage: the
+  // person has to verify their address, reloading forever will not fix it.
+  if (!primaryEmail) throw Object.assign(new Error("A verified primary email is required"), { code: "EMAIL_UNVERIFIED" });
 
   // Migrated users carry their application UUID in Clerk externalId. Never
   // infer legacy ownership from an email address: addresses can be reused or

@@ -75,6 +75,10 @@ export async function POST(req: NextRequest) {
   if (ipLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, ipLimit, undefined, 3600);
   const { error } = await supabase.rpc("save_application_draft", { payload: draft });
   if (error) {
+    // save_application_draft raises 23505 when the applicant's email still
+    // belongs to an account that can sign in. Generic "Could not save draft"
+    // gives them nothing to do about it.
+    if (error.code === "23505") return respond({ error: "This email is already linked to another account. Email mecg-board@umich.edu and we will merge them." }, 409, "APPLICANT_IDENTITY_CONFLICT");
     const { body: errorBody, status } = mapRpcError(error, "Could not save draft");
     return status >= 500
       ? respond({ error: "Draft service is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE")

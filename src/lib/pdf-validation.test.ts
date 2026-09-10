@@ -74,6 +74,19 @@ test("rejects truncated, encrypted, and active PDFs", async () => {
   assert.equal((await validateResumePdf(new TextEncoder().encode("%PDF-1.7\n/EmbeddedFile 1 0 R\n%%EOF"))).ok, false);
 });
 
+test("accepts a destination-only OpenAction", async () => {
+  // Every common exporter writes /OpenAction [page /Fit] for the initial view.
+  // pdf.js reports it as a Map keyed "dest", and rejecting that turned away
+  // real resumes.
+  const result = await validateResumePdf(pdf(1, "/OpenAction [3 0 R /Fit]"));
+  assert.equal(result.ok, true);
+});
+
+test("rejects a JavaScript OpenAction", async () => {
+  const result = await validateResumePdf(pdf(1, "/OpenAction << /S /JavaScript /JS (app.alert\\(1\\)) >>"));
+  assert.equal(result.ok, false);
+});
+
 test("does not mistake compressed image data for active content", async () => {
   // The raw marker scan reads compressed streams too, so any marker short
   // enough to appear by chance rejects a resume that carries a photo or a
