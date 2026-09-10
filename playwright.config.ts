@@ -48,6 +48,7 @@ export default defineConfig({
       // flag below; the CSP is computed at build time, so the build is what
       // actually decides. Deployments never set it.
       E2E_LOCAL_HTTP: "1",
+      PLAYWRIGHT_APPLICATION_HARNESS: "1",
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://ci.invalid",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "ci-placeholder",
       ...((process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? process.env.CLERK_PUBLISHABLE_KEY)

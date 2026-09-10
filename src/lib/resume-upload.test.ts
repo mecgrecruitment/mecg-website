@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { uploadResumeFile } from "./resume-upload.ts";
+import { isAcceptableResumeFile, uploadResumeFile } from "./resume-upload.ts";
 
 const DOCUMENT_ID = "22222222-2222-2222-2222-222222222222";
 const PATH = `11111111-1111-1111-1111-111111111111/cycle/${DOCUMENT_ID}.pdf`;
@@ -16,6 +16,21 @@ function jsonResponse(body: unknown, status = 200) {
 function resumeFile() {
   return new File(["%PDF-1.7\n%%EOF"], "Ada Resume.pdf", { type: "application/pdf" });
 }
+
+function pendingRequest(init?: RequestInit): Promise<Response> {
+  return new Promise((_, reject) => {
+    const keepAlive = setTimeout(() => reject(new Error("test request did not abort")), 1_000);
+    init?.signal?.addEventListener("abort", () => {
+      clearTimeout(keepAlive);
+      reject(init.signal?.reason);
+    }, { once: true });
+  });
+}
+
+test("accepts PDFs when the browser leaves the MIME type empty", () => {
+  assert.equal(isAcceptableResumeFile(new File(["pdf"], "resume.PDF", { type: "" })), true);
+  assert.equal(isAcceptableResumeFile(new File(["pdf"], "resume.docx", { type: "" })), false);
+});
 
 test("signed resume upload sends Supabase multipart form data and finalizes", async () => {
   const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = [];
@@ -109,4 +124,53 @@ test("an attach failure preserves the finalized document", async () => {
     /attach failed/i,
   );
   assert.equal(calls.includes("/api/apply/resume/cancel"), false);
+});
+
+test("reports the upload phase that timed out and cancels its pending document", async () => {
+  const calls: Array<RequestInfo | URL> = [];
+  const fetcher: typeof fetch = async (input, init) => {
+    calls.push(input);
+    if (input === "/api/apply/resume/start") return jsonResponse({ documentId: DOCUMENT_ID, uploadUrl: UPLOAD_URL }, 201);
+    if (input === UPLOAD_URL) return pendingRequest(init);
+    if (input === "/api/apply/resume/cancel") return jsonResponse({ ok: true });
+    throw new Error(`Unexpected request ${String(input)}`);
+  };
+
+  await assert.rejects(
+    uploadResumeFile(resumeFile(), { fetcher, phaseTimeouts: { upload: 5 } }),
+    /uploading your resume took too long/i,
+  );
+  assert.deepEqual(calls, ["/api/apply/resume/start", UPLOAD_URL, "/api/apply/resume/cancel"]);
+});
+
+test("uses clear timeout errors for start, verification, and attachment", async (t) => {
+  const cases = [
+    { phase: "start", expected: /starting the resume upload took too long/i },
+    { phase: "finalize", expected: /checking your resume took too long/i },
+    { phase: "attach", expected: /updating your resume took too long/i },
+  ] as const;
+
+  for (const { phase, expected } of cases) {
+    await t.test(phase, async () => {
+      const fetcher: typeof fetch = async (input, init) => {
+        if (phase === "start" && input === "/api/apply/resume/start") return pendingRequest(init);
+        if (input === "/api/apply/resume/start") return jsonResponse({ documentId: DOCUMENT_ID, uploadUrl: UPLOAD_URL }, 201);
+        if (input === UPLOAD_URL) return new Response(null, { status: 200 });
+        if (phase === "finalize" && input === "/api/apply/resume/finalize") return pendingRequest(init);
+        if (input === "/api/apply/resume/finalize") return jsonResponse({ documentId: DOCUMENT_ID, path: PATH, filename: "resume.pdf", size: 15, pageCount: 1 });
+        if (phase === "attach" && input === "/api/apply/resume/attach") return pendingRequest(init);
+        if (input === "/api/apply/resume/cancel") return jsonResponse({ ok: true });
+        throw new Error(`Unexpected request ${String(input)}`);
+      };
+
+      await assert.rejects(
+        uploadResumeFile(resumeFile(), {
+          attach: phase === "attach",
+          fetcher,
+          phaseTimeouts: { [phase]: 5 },
+        }),
+        expected,
+      );
+    });
+  }
 });

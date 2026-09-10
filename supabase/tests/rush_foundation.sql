@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(360);
+select extensions.plan(373);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -69,6 +69,19 @@ select extensions.has_function('rush','finalize_resume_upload',array['text','int
 select extensions.has_function('rush','reject_resume_upload',array['text','text'],'resume rejection function exists');
 select extensions.has_function('rush','my_ready_resume',array['text'],'applicant ready-resume lookup exists');
 select extensions.has_function('rush','authorize_resume_access',array['text'],'internal resume authorization exists');
+select extensions.has_function('rush','my_application_submission_status',array[]::text[],'ambiguous submission reconciliation exists');
+select extensions.ok(has_function_privilege('authenticated','rush.my_application_submission_status()','EXECUTE') and not has_function_privilege('anon','rush.my_application_submission_status()','EXECUTE'), 'submission reconciliation is authenticated and not anonymous');
+select extensions.ok(exists(select 1 from pg_constraint where conrelid='rush.notification_outbox'::regclass and conname='notification_outbox_template_key_check' and pg_get_constraintdef(oid) like '%APPLICATION_RECEIVED%'), 'the durable outbox accepts application receipts');
+select extensions.ok(exists(select 1 from pg_trigger where tgrelid='rush.applications'::regclass and tgname='applications_enqueue_receipt' and not tgisinternal), 'application submission has an outbox trigger in its transaction');
+select extensions.ok(position('APPLICATION_RECEIVED' in pg_get_functiondef('rush.claim_notification(text)'::regprocedure)) > 0, 'notification claims expose application receipts to the existing delivery worker');
+select extensions.ok(position('savedAt' in pg_get_functiondef('rush.application_draft()'::regprocedure)) > 0, 'standalone draft reads expose server-owned freshness');
+select extensions.ok(position('savedAt' in pg_get_functiondef('rush.intake_schema()'::regprocedure)) > 0, 'intake draft reads expose server-owned freshness');
+select extensions.ok(
+  position('join rush.application_questions' in lower(pg_get_functiondef('rush.application_draft()'::regprocedure))) > 0
+  and position('join rush.application_questions' in lower(pg_get_functiondef('rush.intake_schema()'::regprocedure))) > 0,
+  'NEEDS_INFO recovery excludes answers for questions that no longer exist'
+);
+select extensions.ok(position('24 hours' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0 and position('READY' in pg_get_functiondef('rush.begin_resume_upload(text,integer)'::regprocedure)) > 0, 'resume replacement quota combines an expiring attempt window with live-document counting');
 select extensions.has_function('rush','begin_headshot_upload',array['text'],'headshot upload start function exists');
 select extensions.has_function('rush','attach_headshot',array['text'],'headshot attach function exists');
 select extensions.has_function('rush','authorize_headshot_access',array['text'],'internal headshot authorization exists');
@@ -929,7 +942,44 @@ update rush.applications
 set resume_storage_path='10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/10000000-0000-4000-8000-000000000058.pdf'
 where id='10000000-0000-4000-8000-000000000057';
 
+-- Failed and superseded attempts remain useful abuse evidence for a day, but
+-- cannot strand an applicant for the rest of the recruitment cycle.
+insert into rush.application_documents(
+  id,application_id,owner_user_id,cycle_id,object_path,original_filename,
+  declared_size,status,created_at
+)
+select
+  gen_random_uuid()::text,
+  '10000000-0000-4000-8000-000000000057',
+  '10000000-0000-4000-8000-000000000055',
+  '10000000-0000-4000-8000-000000000059',
+  '10000000-0000-4000-8000-000000000055/10000000-0000-4000-8000-000000000059/' || gen_random_uuid()::text || '.pdf',
+  'failed-resume.pdf', 100,
+  case when attempt % 2 = 0 then 'REJECTED' else 'SUPERSEDED' end,
+  now() - interval '2 days'
+from generate_series(1,20) attempts(attempt);
+
+-- Re-running the status write simulates an idempotent submission path. The
+-- receipt trigger must keep exactly one durable obligation.
+update rush.applications set status='SUBMITTED'
+where id='10000000-0000-4000-8000-000000000057';
+select extensions.is(
+  (select count(*) from rush.notification_outbox where application_id='10000000-0000-4000-8000-000000000057' and template_key='APPLICATION_RECEIVED'),
+  1::bigint,
+  'submission enqueues exactly one durable application receipt'
+);
+
+set local "request.jwt.claim.role" = 'service_role';
+set local "request.jwt.claims" = '{"role":"service_role"}';
+set local role service_role;
+select extensions.is(
+  (select rush.claim_notification(id)->>'templateKey' from rush.notification_outbox where application_id='10000000-0000-4000-8000-000000000057' and template_key='APPLICATION_RECEIVED'),
+  'APPLICATION_RECEIVED',
+  'the existing notification worker can claim an application receipt'
+);
+
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000051","role":"authenticated"}';
+set local "request.jwt.claim.role" = 'authenticated';
 set local role authenticated;
 select extensions.is(
   rush.authorize_resume_access('10000000-0000-4000-8000-000000000057'),
@@ -1008,6 +1058,15 @@ set local role authenticated;
 -- path: if either wrongly refuses, the applicant cannot submit at all. These
 -- pin the gates that decide that.
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000055","role":"authenticated"}';
+select extensions.lives_ok(
+  $$select rush.begin_resume_upload('replacement.pdf',100)$$,
+  'old rejected and superseded resumes do not consume the cycle quota forever'
+);
+select extensions.is(
+  rush.my_application_submission_status()->>'applicationId',
+  '10000000-0000-4000-8000-000000000057',
+  'an applicant can reconcile an ambiguous submit response'
+);
 select extensions.throws_ok(
   $$select rush.begin_headshot_upload('png')$$,
   '22023','invalid photo format','only the two formats the browser can encode are accepted'

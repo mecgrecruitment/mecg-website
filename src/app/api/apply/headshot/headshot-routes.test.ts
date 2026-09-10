@@ -76,7 +76,7 @@ function adminStorage(uploadError: unknown = null) {
 
 test("headshot upload requires authentication", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => null } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
   const { POST } = await importUploadRoute("unauthorized");
@@ -86,9 +86,23 @@ test("headshot upload requires authentication", async (t) => {
   assert.equal(response.status, 401);
 });
 
+test("headshot upload reports a limiter outage as retryable service unavailability", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "unavailable", clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await importUploadRoute("limiter-unavailable");
+
+  const response = await POST(webpRequest());
+
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("retry-after"), "30");
+  assert.equal((await response.json()).code, "SERVICE_UNAVAILABLE");
+});
+
 test("headshot upload rejects a file that is not declared as WebP", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
   const { POST } = await importUploadRoute("wrong-mime");
@@ -100,7 +114,7 @@ test("headshot upload rejects a file that is not declared as WebP", async (t) =>
 
 test("headshot upload rejects a file over the 1 MB limit", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
   const { POST } = await importUploadRoute("oversize");
@@ -112,7 +126,7 @@ test("headshot upload rejects a file over the 1 MB limit", async (t) => {
 
 test("headshot upload rejects bytes that only claim to be WebP", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
   const { POST } = await importUploadRoute("wrong-magic");
@@ -136,7 +150,7 @@ test("headshot upload stores the object the database chose and clears the old on
   };
   const { client, uploaded, removed } = adminStorage();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
   const { POST } = await importUploadRoute("success");
@@ -163,7 +177,7 @@ test("headshot upload removes the object when attaching it fails", async (t) => 
   };
   const { client, uploaded, removed } = adminStorage();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
   const { POST } = await importUploadRoute("attach-failure");
@@ -245,7 +259,7 @@ test("headshot upload accepts the JPEG fallback and mints a .jpg path", async (t
   };
   const { client, uploaded } = adminStorage();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
   const { POST } = await importUploadRoute("jpeg-success");
@@ -260,7 +274,7 @@ test("headshot upload accepts the JPEG fallback and mints a .jpg path", async (t
 
 test("headshot upload still refuses a PNG, and a JPEG that is not really a JPEG", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
   const { POST } = await importUploadRoute("jpeg-reject");

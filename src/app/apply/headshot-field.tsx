@@ -7,7 +7,7 @@ type State =
   | { kind: "idle" }
   | { kind: "working" }
   | { kind: "done"; url: string; note: string }
-  | { kind: "error"; message: string };
+  | { kind: "error"; message: string; hasUploaded: boolean };
 
 function byteLabel(bytes: number) {
   return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
@@ -30,12 +30,15 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false, 
 
   async function choose(file: File) {
     if (inFlight.current) return;
+    const hadUploaded = state.kind === "done"
+      || (state.kind === "error" && state.hasUploaded)
+      || (state.kind === "idle" && initialHasHeadshot);
     releasePreview();
     // Guard before createImageBitmap: decoding a 40 MP original on a phone is
     // what runs the tab out of memory, and nothing that large is a headshot.
     if (file.size > 25 * 1024 * 1024) {
-      setState({ kind: "error", message: "Choose a photo smaller than 25 MB." });
-      onUploaded(false);
+      setState({ kind: "error", message: "Choose a photo smaller than 25 MB.", hasUploaded: hadUploaded });
+      onUploaded(hadUploaded);
       return;
     }
     inFlight.current = true;
@@ -50,15 +53,17 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false, 
       setState({ kind: "done", url: previewUrl.current, note: `${byteLabel(file.size)} → ${byteLabel(resized.size)}` });
       onUploaded(true);
     } catch (error) {
-      setState({ kind: "error", message: error instanceof Error ? error.message : "We could not upload your photo. Please try again." });
-      onUploaded(false);
+      setState({ kind: "error", message: error instanceof Error ? error.message : "We could not upload your photo. Please try again.", hasUploaded: hadUploaded });
+      onUploaded(hadUploaded);
     } finally {
       inFlight.current = false;
       onBusyChange?.(false);
     }
   }
 
-  const uploaded = state.kind === "done" || (state.kind === "idle" && initialHasHeadshot);
+  const uploaded = state.kind === "done"
+    || (state.kind === "error" && state.hasUploaded)
+    || (state.kind === "idle" && initialHasHeadshot);
   return (
     <div>
       <label htmlFor="headshot" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy">

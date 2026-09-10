@@ -16,6 +16,8 @@ type ClaimedNotificationBase = {
 };
 
 type ClaimedNotification = ClaimedNotificationBase & ({
+  templateKey: "APPLICATION_RECEIVED";
+} | {
   templateKey: "DECISION_RELEASED";
   decisionOutcome: string;
 } | {
@@ -49,7 +51,8 @@ function parseClaimedNotification(value: unknown): ClaimedNotification | null {
   if (
     typeof row.id !== "string"
     || typeof row.recipient !== "string"
-    || (row.templateKey !== "DECISION_RELEASED"
+    || (row.templateKey !== "APPLICATION_RECEIVED"
+      && row.templateKey !== "DECISION_RELEASED"
       && row.templateKey !== "EVENT_CANCELLED"
       && row.templateKey !== "SPEED_DATING_INVITATION"
       && row.templateKey !== "EVALUATION_ASSIGNED")
@@ -58,6 +61,7 @@ function parseClaimedNotification(value: unknown): ClaimedNotification | null {
     || typeof row.idempotencyKey !== "string"
     || typeof row.applicantName !== "string"
   ) return null;
+  if (row.templateKey === "APPLICATION_RECEIVED") return row as ClaimedNotification;
   if (row.templateKey === "DECISION_RELEASED" && typeof row.decisionOutcome === "string") return row as ClaimedNotification;
   if (row.templateKey === "EVENT_CANCELLED" && typeof row.eventName === "string" && typeof row.eventStartsAt === "string"
     && (typeof row.eventLocation === "string" || row.eventLocation === null)) return row as ClaimedNotification;
@@ -90,6 +94,17 @@ function decisionEmail(outcome: string, rawName: string) {
   return {
     subject: "Your MECG rush decision",
     html: wrapEmail(`<p>Hi ${name},</p><p>Your MECG rush application status has been updated. Reach out to the board with any questions.</p>`, cta),
+  };
+}
+
+function applicationReceivedEmail(rawName: string) {
+  const name = escapeHtml(rawName);
+  return {
+    subject: "We received your MECG application",
+    html: wrapEmail(
+      `<p>Hi ${name},</p><p>We've received your MECG application. Our board will review it and follow up with next steps.</p>`,
+      { label: "View your application", href: "https://mecgmichigan.com/applicant" },
+    ),
   };
 }
 
@@ -145,6 +160,8 @@ function evaluationAssignedEmail(notification: Extract<ClaimedNotification, { te
 
 function notificationEmail(notification: ClaimedNotification) {
   switch (notification.templateKey) {
+    case "APPLICATION_RECEIVED":
+      return applicationReceivedEmail(notification.applicantName);
     case "DECISION_RELEASED":
       return decisionEmail(notification.decisionOutcome, notification.applicantName);
     case "EVENT_CANCELLED":

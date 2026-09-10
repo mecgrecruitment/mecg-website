@@ -46,6 +46,36 @@ test("deliverNotification uses the stable idempotency key and completes a succes
   assert.equal(rpcCalls[1]?.args?.provider_id, "provider-1");
 });
 
+test("deliverNotification sends a durable application receipt", async (t) => {
+  const sent: Array<Record<string, unknown>> = [];
+  t.mock.module("@/lib/email", {
+    namedExports: {
+      escapeHtml: (value: string) => value.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+      wrapEmail: (html: string, cta?: { label: string }) => `${html}${cta?.label ?? ""}`,
+      sendEmailDetailed: async (params: Record<string, unknown>) => {
+        sent.push(params);
+        return { delivered: true, providerMessageId: "provider-receipt", errorCategory: null, retryable: false };
+      },
+    },
+  });
+  const receiptClaim = {
+    id: "notification-receipt",
+    recipient: "applicant@example.com",
+    templateKey: "APPLICATION_RECEIVED",
+    templateVersion: 1,
+    attemptCount: 1,
+    idempotencyKey: "application-received:application-1",
+    applicantName: "<Applicant>",
+  };
+  const client = { rpc: async (name: string) => name === "claim_notification" ? { data: receiptClaim, error: null } : { data: "SENT", error: null } };
+  const { deliverNotification } = await importNotifications("application-received");
+  assert.equal((await deliverNotification(client, receiptClaim.id)).status, "SENT");
+  assert.equal(sent[0]?.subject, "We received your MECG application");
+  assert.equal(sent[0]?.idempotencyKey, receiptClaim.idempotencyKey);
+  assert.match(String(sent[0]?.html), /&lt;Applicant&gt;/);
+  assert.match(String(sent[0]?.html), /View your application/);
+});
+
 test("deliverNotification records a retryable provider failure as pending", async (t) => {
   t.mock.module("@/lib/email", {
     namedExports: {

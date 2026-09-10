@@ -73,20 +73,14 @@ function fakeSupabaseClient(handlers: RpcHandlers) {
   };
 }
 
-function mockCommon(t: test.TestContext, client: unknown, options: { rateLimited?: boolean; sendEmail?: () => Promise<void> } = {}) {
+function mockCommon(t: test.TestContext, client: unknown, options: { rateLimitStatus?: "allowed" | "limited" | "unavailable" } = {}) {
   const rateLimitKeys: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => FAKE_USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   t.mock.module("@/lib/rate-limit", {
     namedExports: {
-      checkRateLimit: async (key: string) => { rateLimitKeys.push(key); return !options.rateLimited; },
+      checkRateLimitStatus: async (key: string) => { rateLimitKeys.push(key); return options.rateLimitStatus ?? "allowed"; },
       clientIp: () => "203.0.113.7",
-    },
-  });
-  t.mock.module("@/lib/email", {
-    namedExports: {
-      sendEmail: options.sendEmail ?? (async () => undefined),
-      wrapEmail: (html: string) => html,
     },
   });
   return rateLimitKeys;
@@ -113,6 +107,18 @@ test("POST /api/apply returns 401 when unauthenticated", async (t) => {
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 401);
   assert.equal((await res.json()).error, "Sign in before applying");
+});
+
+test("POST /api/apply returns 503 rather than 401 when authentication dependencies fail", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => { throw new Error("profile query unavailable"); } } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: { createClient: async () => { throw new Error("createClient should not be called"); } },
+  });
+  const { POST } = await importRoute("auth-unavailable");
+  const res = await POST(postRequest(VALID_BODY));
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).code, "AUTH_SERVICE_UNAVAILABLE");
+  assert.equal(res.headers.get("retry-after"), "30");
 });
 
 test("POST /api/apply rejects declared payloads over 64 KiB before parsing", async (t) => {
@@ -176,27 +182,37 @@ test("POST /api/apply returns 400 when required fields are missing", async (t) =
 
 test("POST /api/apply returns 429 without persisting when rate limited", async (t) => {
   const { calls, client } = fakeSupabaseClient({});
-  mockCommon(t, client, { rateLimited: true });
+  mockCommon(t, client, { rateLimitStatus: "limited" });
   const { POST } = await importRoute("429");
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 429);
-  assert.equal((await res.json()).error, "Too many requests, try again later");
+  assert.equal((await res.json()).code, "RATE_LIMITED");
+  assert.equal(res.headers.get("retry-after"), "60");
+  assert.deepEqual(calls, []);
+});
+
+test("POST /api/apply returns 503 when rate limiting is unavailable", async (t) => {
+  const { calls, client } = fakeSupabaseClient({});
+  mockCommon(t, client, { rateLimitStatus: "unavailable" });
+  const { POST } = await importRoute("limiter-unavailable");
+  const res = await POST(postRequest(VALID_BODY, { "x-request-id": "apply-test-1" }));
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).code, "SERVICE_UNAVAILABLE");
+  assert.equal(res.headers.get("x-request-id"), "apply-test-1");
+  assert.equal(res.headers.get("retry-after"), "30");
   assert.deepEqual(calls, []);
 });
 
 test("POST /api/apply submits all fields in one persistence call", async (t) => {
   const { calls, client } = fakeSupabaseClient({
     submit_application: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
-    log_message: () => ({ data: "message-1", error: null }),
   });
-  let emailCount = 0;
-  mockCommon(t, client, { sendEmail: async () => { emailCount += 1; } });
+  mockCommon(t, client);
   const { POST } = await importRoute("success");
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 201);
   assert.deepEqual(await res.json(), { applicationId: "application-1" });
-  assert.equal(calls.length, 2);
-  assert.equal(calls[1].name, "log_message");
+  assert.equal(calls.length, 1);
   assert.deepEqual(Object.keys(calls[0].args ?? {}), SUBMIT_APPLICATION_ARGUMENTS);
   assert.deepEqual(calls[0], {
     name: "submit_application",
@@ -217,21 +233,18 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
       accessibility_notes: "Step-free access",
     },
   });
-  assert.equal(emailCount, 1);
 });
 
 test("POST /api/apply does not resend confirmation for an idempotent retry", async (t) => {
   const { calls, client } = fakeSupabaseClient({
     submit_application: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
   });
-  let emailCount = 0;
-  mockCommon(t, client, { sendEmail: async () => { emailCount += 1; } });
+  mockCommon(t, client);
   const { POST } = await importRoute("retry");
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), { applicationId: "application-1" });
   assert.equal(calls.length, 1);
-  assert.equal(emailCount, 0);
 });
 
 test("POST /api/apply maps RPC failures without leaking database messages", async (t) => {
@@ -245,7 +258,7 @@ test("POST /api/apply maps RPC failures without leaking database messages", asyn
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 409);
   const body = await res.json();
-  assert.equal(body.error, "Could not submit application");
+  assert.equal(body.code, "APPLICANT_IDENTITY_CONFLICT");
   assert.equal(JSON.stringify(body).includes(secret), false);
 });
 
@@ -258,29 +271,17 @@ test("POST /api/apply returns a generic error for unknown RPC failures", async (
   const { POST } = await importRoute("unknown-rpc-failure");
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 500);
-  assert.deepEqual(await res.json(), { error: "An unexpected error occurred" });
+  assert.equal((await res.json()).code, "SUBMISSION_FAILED");
 });
 
-test("POST /api/apply succeeds when confirmation email delivery fails", async (t) => {
+test("POST /api/apply does not wait for notification delivery after commit", async (t) => {
   const { calls, client } = fakeSupabaseClient({
     submit_application: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
-    log_message: () => ({ data: "message-1", error: null }),
   });
-  mockCommon(t, client, { sendEmail: async () => { throw new Error("SMTP unavailable"); } });
-  t.mock.method(console, "error", () => undefined);
+  mockCommon(t, client);
   const { POST } = await importRoute("email-failure");
   const res = await POST(postRequest(VALID_BODY));
   assert.equal(res.status, 201);
   assert.deepEqual(await res.json(), { applicationId: "application-2" });
-  assert.equal(calls.length, 2);
-  assert.deepEqual(calls[1], {
-    name: "log_message",
-    args: {
-      target_application_id: "application-2",
-      message_kind: "APPLICATION_RECEIVED",
-      message_recipient: "ada@umich.edu",
-      message_subject: "We received your MECG application",
-      was_delivered: false,
-    },
-  });
+  assert.equal(calls.length, 1);
 });

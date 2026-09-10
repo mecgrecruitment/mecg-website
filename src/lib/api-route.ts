@@ -1,3 +1,6 @@
+import { randomUUID } from "node:crypto";
+import { operationalLog } from "@/lib/operational-log";
+
 type RpcError = { code?: string; message?: string };
 
 export type JsonBodyResult =
@@ -63,4 +66,68 @@ export function mapRpcError(
   const status = error.code ? RPC_ERROR_STATUSES[error.code] : undefined;
   if (status) return { body: { error: fallback }, status };
   return { body: { error: "An unexpected error occurred" }, status: 500 };
+}
+
+export function requestReference(request: { headers: Headers }): string {
+  const supplied = request.headers.get("x-request-id")?.trim();
+  return supplied && /^[A-Za-z0-9._:-]{1,100}$/.test(supplied) ? supplied : randomUUID();
+}
+
+type RouteResponseOptions = {
+  code?: string;
+  retryAfterSeconds?: number;
+  detail?: Record<string, string | number | boolean | null>;
+};
+
+export function routeJsonResponse(
+  event: string,
+  requestId: string,
+  startedAt: number,
+  body: Record<string, unknown>,
+  status: number,
+  options: RouteResponseOptions = {},
+): Response {
+  const durationMs = performance.now() - startedAt;
+  const level = status >= 500 ? "error" : status >= 400 ? "warn" : "info";
+  operationalLog(level, {
+    event,
+    requestId,
+    code: options.code,
+    durationMs,
+    detail: { status, ...options.detail },
+  });
+  const headers = new Headers({ "x-request-id": requestId });
+  if (options.retryAfterSeconds) headers.set("retry-after", String(options.retryAfterSeconds));
+  return Response.json(
+    options.code ? { ...body, code: options.code, reference: requestId } : body,
+    { status, headers },
+  );
+}
+
+export function rateLimitRouteResponse(
+  event: string,
+  requestId: string,
+  startedAt: number,
+  status: "limited" | "unavailable",
+  limitedMessage = "Too many requests. Wait a minute and try again.",
+) {
+  return status === "limited"
+    ? routeJsonResponse(event, requestId, startedAt, { error: limitedMessage }, 429, {
+        code: "RATE_LIMITED",
+        retryAfterSeconds: 60,
+      })
+    : routeJsonResponse(event, requestId, startedAt, { error: "This service is temporarily unavailable. Try again shortly." }, 503, {
+        code: "SERVICE_UNAVAILABLE",
+        retryAfterSeconds: 30,
+      });
+}
+
+export function authServiceUnavailableResponse() {
+  return Response.json(
+    {
+      error: "Sign-in services are temporarily unavailable. Try again shortly.",
+      code: "AUTH_SERVICE_UNAVAILABLE",
+    },
+    { status: 503, headers: { "retry-after": "30" } },
+  );
 }

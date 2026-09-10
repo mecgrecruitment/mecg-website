@@ -4,6 +4,7 @@ import {
   clearApplicationDraftRecovery,
   createApplicationDraftRecoveryScope,
   loadApplicationDraftRecovery,
+  loadApplicationDraftRecoverySnapshot,
   saveApplicationDraftRecovery,
   type ApplicationDraftRecovery,
 } from "./application-draft-recovery.ts";
@@ -39,6 +40,7 @@ test("restores safe draft fields for the same user, cycle, and schema", () => {
   assert.equal(saveApplicationDraftRecovery(storage, scope, draft, 1_000), true);
   assert.deepEqual(loadApplicationDraftRecovery(storage, scope, 2_000), draft);
   assert.equal(scope.userIdentity, "applicant@umich.edu");
+  assert.deepEqual(loadApplicationDraftRecoverySnapshot(storage, scope, 2_000), { draft, savedAt: 1_000 });
 });
 
 test("never serializes a resume path or consent", () => {

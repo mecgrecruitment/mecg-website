@@ -72,13 +72,13 @@ function fakeDatabase(actorId: () => string, profiles: Record<string, string | n
   return { pnms, calls, client };
 }
 
-function mockCommon(t: test.TestContext, user: () => FakeUser | null, client: unknown, options: { rateLimited?: boolean } = {}) {
+function mockCommon(t: test.TestContext, user: () => FakeUser | null, client: unknown, options: { rateLimitStatus?: "allowed" | "limited" | "unavailable" } = {}) {
   const rateLimitKeys: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user() } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   t.mock.module("@/lib/rate-limit", {
     namedExports: {
-      checkRateLimit: async (key: string) => { rateLimitKeys.push(key); return !options.rateLimited; },
+      checkRateLimitStatus: async (key: string) => { rateLimitKeys.push(key); return options.rateLimitStatus ?? "allowed"; },
       clientIp: () => "203.0.113.7",
     },
   });
@@ -106,7 +106,7 @@ test("GET /api/apply/draft loads only through the caller-scoped RPC", async (t) 
   const { calls, client } = fakeDatabase(() => "user-get", { "user-get": "ada@umich.edu" });
   mockCommon(t, () => fakeUser("user-get"), client);
   const { GET } = await importRoute("get-own-draft");
-  const res = await GET();
+  const res = await GET(new NextRequest("http://localhost/api/apply/draft"));
   assert.equal(res.status, 200);
   assert.equal((await res.json()).draft.currentStep, "responses");
   assert.deepEqual(calls, [{ name: "application_draft", args: undefined }]);
@@ -152,11 +152,21 @@ test("POST /api/apply/draft rate limits per user and per IP, not either alone", 
 
 test("POST /api/apply/draft returns 429 without persisting when rate limited", async (t) => {
   const { calls, client } = fakeDatabase(() => "user-5", { "user-5": "ada@umich.edu" });
-  mockCommon(t, () => fakeUser("user-5"), client, { rateLimited: true });
+  mockCommon(t, () => fakeUser("user-5"), client, { rateLimitStatus: "limited" });
   const { POST } = await importRoute("429");
   const res = await POST(postRequest(DRAFT_BODY));
   assert.equal(res.status, 429);
-  assert.equal((await res.json()).error, "Too many requests, try again later");
+  assert.equal((await res.json()).code, "RATE_LIMITED");
+  assert.deepEqual(calls, []);
+});
+
+test("POST /api/apply/draft returns 503 when rate limiting is unavailable", async (t) => {
+  const { calls, client } = fakeDatabase(() => "user-8", { "user-8": "ada@umich.edu" });
+  mockCommon(t, () => fakeUser("user-8"), client, { rateLimitStatus: "unavailable" });
+  const { POST } = await importRoute("limiter-unavailable");
+  const res = await POST(postRequest(DRAFT_BODY));
+  assert.equal(res.status, 503);
+  assert.equal((await res.json()).code, "SERVICE_UNAVAILABLE");
   assert.deepEqual(calls, []);
 });
 

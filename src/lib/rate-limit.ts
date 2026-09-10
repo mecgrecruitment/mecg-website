@@ -46,18 +46,30 @@ export function emailBucket(prefix: string, email: string): string {
 // "allow" only where locking everyone out is worse than losing the limit for the
 // duration of an outage -- login is the one such path, since failing closed
 // there 429s the whole site including the board members trying to fix it.
-export async function checkRateLimit(bucket: string, onError: "deny" | "allow" = "deny"): Promise<boolean> {
+export type RateLimitStatus = "allowed" | "limited" | "unavailable";
+
+export async function checkRateLimitStatus(bucket: string): Promise<RateLimitStatus> {
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const { data, error } = await screeningRpc<boolean>(createAdminClient(), "check_rate_limit", {
     p_bucket: bucket,
   });
   if (error) {
     console.error("check_rate_limit failed", error);
-    if (onError === "allow") {
-      console.error(`rate limit failing open for ${bucket.split(":")[0]} -- abuse protection is OFF until the limiter recovers`);
-      return true;
-    }
-    return false;
+    return "unavailable";
   }
-  return data === true;
+  return data === true ? "allowed" : "limited";
+}
+
+// Compatibility wrapper for routes whose existing policy deliberately chooses
+// whether a limiter outage should fail open or closed. Applicant submission
+// routes use checkRateLimitStatus directly so an outage can be reported as a
+// retryable 503 rather than being mislabeled as a 429.
+export async function checkRateLimit(bucket: string, onError: "deny" | "allow" = "deny"): Promise<boolean> {
+  const status = await checkRateLimitStatus(bucket);
+  if (status !== "unavailable") return status === "allowed";
+  if (onError === "allow") {
+    console.error(`rate limit failing open for ${bucket.split(":")[0]} -- abuse protection is OFF until the limiter recovers`);
+    return true;
+  }
+  return false;
 }

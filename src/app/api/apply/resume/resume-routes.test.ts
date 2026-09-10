@@ -71,7 +71,7 @@ function clientWithSignedUpload(rpcHandler: (name: string, args?: Record<string,
 test("resume start creates a server-controlled upload target", async (t) => {
   const { client, calls } = clientWithSignedUpload(() => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }));
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importStartRoute("success");
   const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
@@ -86,7 +86,7 @@ test("resume start creates a server-controlled upload target", async (t) => {
 test("resume start ignores a client-supplied path and always uploads to the server-derived object", async (t) => {
   const { client } = clientWithSignedUpload(() => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }));
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importStartRoute("path-traversal");
   // A malicious client tries to steer the object path via the request body.
@@ -98,24 +98,47 @@ test("resume start ignores a client-supplied path and always uploads to the serv
 
 test("resume start rejects invalid files before creating an upload", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("should not connect"); } } });
   const { POST } = await importStartRoute("invalid");
   const response = await POST(request("/api/apply/resume/start", { filename: "resume.docx", size: 26 }));
   assert.equal(response.status, 400);
 });
 
+test("resume start reports a limiter outage as retryable service unavailability", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "unavailable", clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("should not connect"); } } });
+  const { POST } = await importStartRoute("limiter-unavailable");
+
+  const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
+
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("retry-after"), "30");
+  assert.equal((await response.json()).code, "SERVICE_UNAVAILABLE");
+});
+
 test("resume start fails closed when the signed upload URL cannot be created", async (t) => {
+  const calls: Array<{ name: string; args?: Record<string, unknown> }> = [];
   const client = {
-    rpc: async () => ({ data: { documentId: DOCUMENT_ID, path: PATH }, error: null }),
+    rpc: async (name: string, args?: Record<string, unknown>) => {
+      calls.push({ name, args });
+      if (name === "begin_resume_upload") return { data: { documentId: DOCUMENT_ID, path: PATH }, error: null };
+      if (name === "reject_resume_upload") return { data: PATH, error: null };
+      throw new Error(`unexpected RPC ${name}`);
+    },
     storage: { from: () => ({ createSignedUploadUrl: async () => ({ data: null, error: { message: "boom" } }) }) },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importStartRoute("signed-url-failure");
   const response = await POST(request("/api/apply/resume/start", { filename: "Ada Resume.pdf", size: 26 }));
   assert.equal(response.status, 500);
+  assert.deepEqual(calls, [
+    { name: "begin_resume_upload", args: { upload_filename: "Ada Resume.pdf", upload_size: 26 } },
+    { name: "reject_resume_upload", args: { target_document_id: DOCUMENT_ID, rejection: "signed upload url creation failed" } },
+  ]);
 });
 
 test("resume finalize verifies bytes and records the digest", async (t) => {
@@ -142,7 +165,7 @@ test("resume finalize verifies bytes and records the digest", async (t) => {
     },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => adminClient } });
   const { POST } = await importFinalizeRoute("success");
@@ -173,7 +196,7 @@ test("resume finalize rejects and removes non-PDF content", async (t) => {
     },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => client } });
   const { POST } = await importFinalizeRoute("invalid");
@@ -197,7 +220,7 @@ test("resume finalize never deletes content when rejection loses a race", async 
     }) },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importFinalizeRoute("rejection-race");
   const response = await POST(request("/api/apply/resume/finalize", { documentId: DOCUMENT_ID }));
@@ -221,7 +244,7 @@ test("resume finalize removes files superseded by a successful replacement", asy
     error: null,
   }) };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => userClient } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => adminClient } });
   const { POST } = await importFinalizeRoute("replacement-cleanup");
@@ -237,7 +260,7 @@ test("resume cancel does not remove a document the database refuses to reject", 
     storage: { from: () => ({ remove: async () => { removed = true; return { data: [], error: null }; } }) },
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+  t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimitStatus: async () => "allowed", clientIp: () => "203.0.113.7" } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   const { POST } = await importCancelRoute("ready-document");
   const response = await POST(request("/api/apply/resume/cancel", { documentId: DOCUMENT_ID }));

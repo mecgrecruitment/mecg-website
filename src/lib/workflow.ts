@@ -106,6 +106,21 @@ const MAX_ANSWERS = 50;
 const MAX_ANSWER_LENGTH = 8000;
 const MAX_ANSWERS_LENGTH = 40000;
 
+export const APPLICATION_FIELD_LIMITS = {
+  name: 120,
+  preferredName: 80,
+  phone: 32,
+  classYear: 20,
+  major: 120,
+  college: 80,
+  uniqname: 16,
+  gradTerm: 40,
+  accessibilityNotes: 2000,
+  linkedinUrl: 400,
+  resumeStoragePath: 240,
+  answer: MAX_ANSWER_LENGTH,
+} as const;
+
 export function countWords(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed.split(/\s+/).length : 0;
@@ -198,15 +213,15 @@ export function parseApplicationIntake(body: unknown, email: string) {
   const input = body as Record<string, unknown>;
   const person = normalizePersonInput(input.name, email);
   if (!person || input.consent !== true) return null;
-  const preferredName = optionalText(input.preferredName, 80);
-  const phone = optionalText(input.phone, 32);
-  const major = optionalText(input.major, 120);
-  const linkedinUrl = optionalText(input.linkedinUrl, 400);
-  const resumeStoragePath = optionalText(input.resumeStoragePath, 240);
-  const uniqname = optionalText(input.uniqname, 16);
-  const college = optionalText(input.college, 80);
-  const gradTerm = optionalText(input.gradTerm, 40);
-  const accessibilityNotes = optionalText(input.accessibilityNotes, 2000);
+  const preferredName = optionalText(input.preferredName, APPLICATION_FIELD_LIMITS.preferredName);
+  const phone = optionalText(input.phone, APPLICATION_FIELD_LIMITS.phone);
+  const major = optionalText(input.major, APPLICATION_FIELD_LIMITS.major);
+  const linkedinUrl = optionalText(input.linkedinUrl, APPLICATION_FIELD_LIMITS.linkedinUrl);
+  const resumeStoragePath = optionalText(input.resumeStoragePath, APPLICATION_FIELD_LIMITS.resumeStoragePath);
+  const uniqname = optionalText(input.uniqname, APPLICATION_FIELD_LIMITS.uniqname);
+  const college = optionalText(input.college, APPLICATION_FIELD_LIMITS.college);
+  const gradTerm = optionalText(input.gradTerm, APPLICATION_FIELD_LIMITS.gradTerm);
+  const accessibilityNotes = optionalText(input.accessibilityNotes, APPLICATION_FIELD_LIMITS.accessibilityNotes);
   if ([preferredName, phone, major, linkedinUrl, resumeStoragePath, uniqname, college, gradTerm, accessibilityNotes].includes(undefined)) return null;
   if (phone !== null && phone !== undefined && !isValidOptionalPhone(phone)) return null;
   if (!major || !uniqname || !isValidUniqname(uniqname) || !college || !COLLEGES.includes(college as (typeof COLLEGES)[number]) || !validUrl(linkedinUrl ?? null)) return null;
@@ -256,18 +271,18 @@ export function parseApplicationDraft(value: unknown): ApplicationDraft | null {
   };
 
   return {
-    name: text("name", 120),
-    preferredName: text("preferredName", 80),
-    phone: text("phone", 32),
+    name: text("name", APPLICATION_FIELD_LIMITS.name),
+    preferredName: text("preferredName", APPLICATION_FIELD_LIMITS.preferredName),
+    phone: text("phone", APPLICATION_FIELD_LIMITS.phone),
     classYear: CLASS_YEARS.includes(input.classYear as ClassYear) ? String(input.classYear) : "",
-    major: text("major", 120),
+    major: text("major", APPLICATION_FIELD_LIMITS.major),
     college: COLLEGES.includes(input.college as (typeof COLLEGES)[number]) ? String(input.college) : "",
-    uniqname: text("uniqname", 16),
-    gradTerm: text("gradTerm", 40),
-    accessibilityNotes: text("accessibilityNotes", 2000),
-    linkedinUrl: text("linkedinUrl", 400),
+    uniqname: text("uniqname", APPLICATION_FIELD_LIMITS.uniqname),
+    gradTerm: text("gradTerm", APPLICATION_FIELD_LIMITS.gradTerm),
+    accessibilityNotes: text("accessibilityNotes", APPLICATION_FIELD_LIMITS.accessibilityNotes),
+    linkedinUrl: text("linkedinUrl", APPLICATION_FIELD_LIMITS.linkedinUrl),
     answers: restoreAnswers(input.answers),
-    resumeStoragePath: text("resumeStoragePath", 240),
+    resumeStoragePath: text("resumeStoragePath", APPLICATION_FIELD_LIMITS.resumeStoragePath),
   };
 }
 

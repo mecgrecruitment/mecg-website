@@ -78,7 +78,10 @@ export async function currentUser(): Promise<CurrentUser | null> {
     .select("id, display_name, primary_email, active")
     .eq("id", identity.appUserId)
     .maybeSingle();
-  if (profileError || !profile?.active) return null;
+  // A failed profile lookup is a dependency failure, not evidence that the
+  // session is invalid. API routes can now distinguish it from a real 401.
+  if (profileError) throw profileError;
+  if (!profile?.active) return null;
 
   const { data: membershipRows, error: membershipError } = await supabase
     .from("memberships")

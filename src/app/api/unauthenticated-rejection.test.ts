@@ -53,6 +53,7 @@ const ROUTES: Array<{ path: string; methods: Method[]; expect: number; guard?: G
   { path: "./apply/resume/route.ts", methods: ["GET"], expect: 401 },
   { path: "./apply/resume/start/route.ts", methods: ["POST"], expect: 401 },
   { path: "./apply/route.ts", methods: ["POST"], expect: 401 },
+  { path: "./apply/status/route.ts", methods: ["GET"], expect: 401 },
   { path: "./checkin/[token]/route.ts", methods: ["POST"], expect: 401 },
   { path: "./maintenance/notifications/route.ts", methods: ["GET", "POST"], expect: 401, guard: "cron" },
   { path: "./maintenance/prune-resumes/route.ts", methods: ["GET", "POST"], expect: 401, guard: "cron" },
@@ -86,7 +87,13 @@ for (const row of ROUTES) {
   for (const method of row.methods) {
     test(`${row.path} ${method} -> ${row.expect}`, async (t) => {
       t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => null } });
-      t.mock.module("@/lib/rate-limit", { namedExports: { checkRateLimit: async () => true, clientIp: () => "203.0.113.7" } });
+      t.mock.module("@/lib/rate-limit", {
+        namedExports: {
+          checkRateLimit: async () => true,
+          checkRateLimitStatus: async () => "allowed",
+          clientIp: () => "203.0.113.7",
+        },
+      });
       t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("not called"); } } });
       t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
       const previousSecret = process.env.CRON_SECRET;

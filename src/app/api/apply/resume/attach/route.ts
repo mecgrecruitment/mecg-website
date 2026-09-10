@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { authServiceUnavailableResponse, mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,7 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 // No request body: the RPC resolves the caller's application in the open cycle
 // itself, so there is no id for a client to tamper with.
 export async function POST() {
-  const user = await currentUser();
+  let user;
+  try { user = await currentUser(); } catch { return authServiceUnavailableResponse(); }
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("attach_ready_resume");

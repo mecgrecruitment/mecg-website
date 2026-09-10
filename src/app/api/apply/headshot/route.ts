@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError } from "@/lib/api-route";
+import { NextRequest } from "next/server";
+import { mapRpcError, rateLimitRouteResponse, requestReference, routeJsonResponse } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
-import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+import { checkRateLimitStatus, clientIp } from "@/lib/rate-limit";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -30,35 +30,45 @@ function encodingFor(type: string): (typeof ENCODINGS)[keyof typeof ENCODINGS] |
 }
 
 export async function POST(req: NextRequest) {
-  const user = await currentUser();
-  if (!user) return NextResponse.json({ error: "Sign in before uploading" }, { status: 401 });
+  const startedAt = performance.now();
+  const requestId = requestReference(req);
+  const respond = (body: Record<string, unknown>, status: number, code?: string) =>
+    routeJsonResponse("application.headshot.upload", requestId, startedAt, body, status, { code });
+  let user;
+  try { user = await currentUser(); } catch { return respond({ error: "Sign-in services are temporarily unavailable. Try again shortly." }, 503, "AUTH_SERVICE_UNAVAILABLE"); }
+  if (!user) return respond({ error: "Sign in before uploading" }, 401, "AUTH_REQUIRED");
 
   const declaredLength = Number(req.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > MAX_REQUEST_BYTES) {
-    return NextResponse.json({ error: INVALID_FILE }, { status: 413 });
+    return respond({ error: INVALID_FILE }, 413, "PAYLOAD_TOO_LARGE");
   }
 
   // Before the body is buffered, not after: a request that trips the limit
   // should not first cost a megabyte of memory to parse.
-  if (!(await checkRateLimit(`headshot-upload:${user.id}:${clientIp(req)}`))) {
-    return NextResponse.json({ error: "Too many photo uploads. Wait a few minutes and try again." }, { status: 429 });
-  }
+  const limit = await checkRateLimitStatus(`headshot-upload:${user.id}:${clientIp(req)}`);
+  if (limit !== "allowed") return rateLimitRouteResponse(
+    "application.headshot.upload",
+    requestId,
+    startedAt,
+    limit,
+    "Too many photo uploads. Wait a few minutes and try again.",
+  );
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("headshot");
   const encoding = file instanceof File ? encodingFor(file.type) : null;
   if (!(file instanceof File) || !encoding || file.size < 1 || file.size > MAX_HEADSHOT_BYTES) {
-    return NextResponse.json({ error: INVALID_FILE }, { status: 400 });
+    return respond({ error: INVALID_FILE }, 400, "INVALID_FILE");
   }
   const bytes = new Uint8Array(await file.arrayBuffer());
-  if (!encoding.matches(bytes)) return NextResponse.json({ error: INVALID_FILE }, { status: 400 });
+  if (!encoding.matches(bytes)) return respond({ error: INVALID_FILE }, 400, "INVALID_FILE");
 
   const supabase = await createClient();
   const { data: target, error } = await screeningRpc<{ path: string }>(supabase, "begin_headshot_upload", { upload_extension: encoding.extension });
   if (error || typeof target?.path !== "string") {
     if (error) console.error("begin_headshot_upload failed", error);
     const mapped = error ? mapRpcError(error, "Could not start photo upload") : { body: { error: "Could not start photo upload" }, status: 500 };
-    return NextResponse.json(mapped.body, { status: mapped.status });
+    return respond(mapped.body, mapped.status, "UPLOAD_START_FAILED");
   }
 
   // candidate-photos carries no storage.objects policies, so the caller's own
@@ -69,7 +79,7 @@ export async function POST(req: NextRequest) {
   const { error: uploadError } = await storage.upload(target.path, bytes, { contentType: file.type });
   if (uploadError) {
     console.error("headshot upload failed", uploadError);
-    return NextResponse.json({ error: "Could not save the photo. Try again." }, { status: 502 });
+    return respond({ error: "Could not save the photo. Try again." }, 502, "STORAGE_UPLOAD_FAILED");
   }
 
   const { data: attached, error: attachError } = await screeningRpc<{ previousPath: string | null }>(supabase, "attach_headshot", {
@@ -87,7 +97,7 @@ export async function POST(req: NextRequest) {
       if (cleanupError) console.error("orphaned headshot cleanup failed", cleanupError);
     }
     const mapped = attachError ? mapRpcError(attachError, "Could not save the photo") : { body: { error: "Could not save the photo" }, status: 500 };
-    return NextResponse.json(mapped.body, { status: mapped.status });
+    return respond(mapped.body, mapped.status, "ATTACH_FAILED");
   }
 
   if (typeof attached.previousPath === "string" && attached.previousPath.length > 0) {
@@ -95,5 +105,5 @@ export async function POST(req: NextRequest) {
     if (removeError) console.error("superseded headshot cleanup failed", removeError);
   }
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  return respond({ ok: true }, 201);
 }

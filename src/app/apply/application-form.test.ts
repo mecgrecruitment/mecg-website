@@ -70,5 +70,19 @@ test("move advances the step even when the draft save fails", () => {
   const move = /async function move\(next: Step\) \{([\s\S]*?)\n  \}/.exec(source)?.[1];
   assert.ok(move, "move() not found in application-form.tsx");
   assert.doesNotMatch(move, /if\s*\([^)]*saveDraft/);
-  assert.match(move, /await saveDraft\(\{ \.\.\.draftPayload, currentStep: next \}\);\n\s*changeStep\(next\);/);
+  assert.match(move, /saveDraft\(\{ \.\.\.draftPayload, currentStep: next \}\);\n\s*changeStep\(next\);/);
+  assert.doesNotMatch(move, /await saveDraft/);
+});
+
+test("submission does not wait for autosave and reconciles an ambiguous response", () => {
+  const source = readFileSync(new URL("./application-form.tsx", import.meta.url), "utf8");
+  const submit = /async function submit\(\) \{([\s\S]*?)\n  \}\n\n  \/\//.exec(source)?.[1];
+  assert.ok(submit, "submit() not found in application-form.tsx");
+  assert.doesNotMatch(submit, /saveQueue|await saveDraft/);
+  assert.match(submit, /reconcileSubmittedApplication\(\)/);
+});
+
+test("resume selection allows browsers that omit the PDF MIME type", () => {
+  const source = readFileSync(new URL("./application-form.tsx", import.meta.url), "utf8");
+  assert.ok(source.includes('!file.type && file.name.toLowerCase().endsWith(".pdf")'));
 });

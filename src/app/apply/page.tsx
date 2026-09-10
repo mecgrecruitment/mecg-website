@@ -72,9 +72,18 @@ function parseIntakeSchema(value: unknown): IntakeSchema | null {
 
 export default async function ApplyPage() {
   const clerkConfigured = hasClerkRuntimeConfiguration();
-  const destination = await currentDestination();
+  let authUnavailable = false;
+  let destination: Awaited<ReturnType<typeof currentDestination>> = null;
+  try { destination = await currentDestination(); } catch {
+    authUnavailable = true;
+  }
   if (destination && destination !== "/apply") redirect(destination);
-  const user = destination === "/apply" ? await currentUser() : null;
+  let user: Awaited<ReturnType<typeof currentUser>> = null;
+  if (!authUnavailable && destination === "/apply") {
+    try { user = await currentUser(); } catch {
+      authUnavailable = true;
+    }
+  }
   const supabase = user ? await createClient() : null;
   // Signed-in applicants need the cycle window too: intake_schema reports
   // open:false for the whole period before opens_at, which is indistinguishable
@@ -165,7 +174,13 @@ export default async function ApplyPage() {
           </div>
         )}
 
-        {user && schemaUnavailable ? (
+        {authUnavailable ? (
+          <div className="mt-5">
+            <OperationNotice kind="error">
+              Sign-in services are temporarily unavailable. Reload in a moment; your browser recovery copy has not been removed.
+            </OperationNotice>
+          </div>
+        ) : user && schemaUnavailable ? (
           <div className="mt-5">
             <OperationNotice kind="error">
               The application could not be loaded right now. This is not the same as applications being closed. Reload in

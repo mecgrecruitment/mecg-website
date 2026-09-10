@@ -2821,6 +2821,10 @@ export type Database = {
           starts_at: string
         }[]
       }
+      my_application_submission_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       my_headshot: { Args: Record<PropertyKey, never>; Returns: boolean }
       my_member_record: { Args: { target_cycle_id: string }; Returns: Json }
       my_offer_deadlines: { Args: never; Returns: Json }

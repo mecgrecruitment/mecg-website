@@ -5,6 +5,7 @@
 // are shown to the applicant verbatim, which is why the decode failure names the
 // fix (an iPhone HEIC only decodes inside Safari).
 const HEADSHOT_SIZE = 512;
+const HEADSHOT_UPLOAD_TIMEOUT_MS = 30_000;
 
 export async function resizeHeadshot(file: File): Promise<File> {
   let bitmap: ImageBitmap;
@@ -41,12 +42,23 @@ export async function resizeHeadshot(file: File): Promise<File> {
 
 /** Takes the output of resizeHeadshot, so a caller that also wants the resized
  *  file for a preview does not decode the source twice. */
-export async function uploadHeadshot(resized: File): Promise<void> {
+export async function uploadHeadshot(
+  resized: File,
+  { fetcher = fetch, timeoutMs = HEADSHOT_UPLOAD_TIMEOUT_MS }: { fetcher?: typeof fetch; timeoutMs?: number } = {},
+): Promise<void> {
   const body = new FormData();
   body.append("headshot", resized);
-  const response = await fetch("/api/apply/headshot", { method: "POST", body });
-  if (!response.ok) {
-    const result = await response.json().catch(() => null) as Record<string, unknown> | null;
-    throw new Error(typeof result?.error === "string" ? result.error : "We could not upload your photo. Please try again.");
+  const signal = AbortSignal.timeout(timeoutMs);
+  try {
+    const response = await fetcher("/api/apply/headshot", { method: "POST", body, signal });
+    if (!response.ok) {
+      const result = await response.json().catch(() => null) as Record<string, unknown> | null;
+      throw new Error(typeof result?.error === "string" ? result.error : "We could not upload your photo. Please try again.");
+    }
+  } catch (error) {
+    if (signal.aborted) {
+      throw new Error("Uploading your photo took too long. Check your connection and try again.");
+    }
+    throw error;
   }
 }

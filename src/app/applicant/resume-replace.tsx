@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadResumeFile } from "@/lib/resume-upload";
+import { isAcceptableResumeFile, uploadResumeFile } from "@/lib/resume-upload";
 
 type State =
   | { kind: "idle" }
@@ -24,7 +24,7 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
 
   async function replace(file: File) {
     if (inFlight.current) return;
-    if (file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
+    if (!isAcceptableResumeFile(file)) {
       setState({ kind: "error", message: "Choose a PDF smaller than 10 MB." });
       return;
     }

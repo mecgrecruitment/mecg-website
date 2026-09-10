@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  APPLICATION_FIELD_LIMITS,
   canTransitionApplication,
   canTransitionCycle,
   canTransitionRound,
@@ -20,6 +21,11 @@ test("word counts match the application limit definition", () => {
   assert.equal(countWords(""), 0);
   assert.equal(countWords("  one\n two\tthree  "), 3);
   assert.equal(countWords("hyphenated-word"), 1);
+});
+
+test("application field limits are the parser contract", () => {
+  assert.equal(parseApplicationDraft({ name: "x".repeat(APPLICATION_FIELD_LIMITS.name + 1) })?.name.length, APPLICATION_FIELD_LIMITS.name);
+  assert.equal(parseApplicationIntake({ ...validIntake, name: "x".repeat(APPLICATION_FIELD_LIMITS.name + 1) }, "ada@umich.edu"), null);
 });
 
 const validIntake = {

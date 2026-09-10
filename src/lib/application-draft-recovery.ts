@@ -45,6 +45,11 @@ type RecoveryEnvelope = {
   draft: ApplicationDraftRecovery;
 };
 
+export type ApplicationDraftRecoverySnapshot = {
+  draft: ApplicationDraftRecovery;
+  savedAt: number;
+};
+
 const DRAFT_KEYS = new Set([
   "name",
   "preferredName",
@@ -198,6 +203,14 @@ export function loadApplicationDraftRecovery(
   expectedScope: ApplicationDraftRecoveryScope,
   now = Date.now(),
 ): ApplicationDraftRecovery | null {
+  return loadApplicationDraftRecoverySnapshot(storage, expectedScope, now)?.draft ?? null;
+}
+
+export function loadApplicationDraftRecoverySnapshot(
+  storage: StorageLike,
+  expectedScope: ApplicationDraftRecoveryScope,
+  now = Date.now(),
+): ApplicationDraftRecoverySnapshot | null {
   let serialized: string | null = null;
   try {
     serialized = storage.getItem(STORAGE_KEY);
@@ -222,7 +235,7 @@ export function loadApplicationDraftRecovery(
   const scope = parseScope(value.scope);
   const draft = parseDraft(value.draft);
   if (!scope || !draft || !sameScope(scope, expectedScope)) return reject();
-  return draft;
+  return { draft, savedAt: value.savedAt };
 }
 
 export function clearApplicationDraftRecovery(storage: StorageLike) {

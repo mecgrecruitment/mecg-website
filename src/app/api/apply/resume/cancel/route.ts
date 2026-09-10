@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readJsonBody } from "@/lib/api-route";
+import { authServiceUnavailableResponse, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
-  const user = await currentUser();
+  let user;
+  try { user = await currentUser(); } catch { return authServiceUnavailableResponse(); }
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const parsed = await readJsonBody(req, 2048);
   const body = !parsed.error && parsed.data && typeof parsed.data === "object" && !Array.isArray(parsed.data)
