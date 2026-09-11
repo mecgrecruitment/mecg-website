@@ -55,13 +55,13 @@ test("POST /api/member/screening returns the next private assignment after submi
   assert.deepEqual(calls.map((call) => call.name), ["submit_screening_review", "next_screening_assignment"]);
 });
 
-test("POST /api/member/screening requires evidence notes for ratings 1, 2, and 5", async (t) => {
+test("POST /api/member/screening requires evidence notes for ratings 1 and 5 only", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/supabase/server", {
     namedExports: { createClient: async () => { throw new Error("createClient should not be called"); } },
   });
   const { POST } = await importRoute("extreme-note");
-  for (const score of [1, 2, 5]) {
+  for (const score of [1, 5]) {
     const res = await POST(postRequest({
       assignmentId: "assignment-1",
       action: "SUBMIT",

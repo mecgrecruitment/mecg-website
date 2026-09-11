@@ -18,7 +18,7 @@ function parseScreeningRatings(value: unknown) {
     if (typeof score !== "number" || !Number.isInteger(score) || score < 1 || score > 5) return null;
     if (note != null && (typeof note !== "string" || note.length > MAX_NOTE_LENGTH)) return null;
     const normalizedNote = typeof note === "string" ? note : "";
-    if ((score === 1 || score === 2 || score === 5) && !normalizedNote.trim()) return null;
+    if ((score === 1 || score === 5) && !normalizedNote.trim()) return null;
     ratings.push({ criterionId, score, note: normalizedNote });
   }
   if (new Set(ratings.map((rating) => rating.criterionId)).size !== ratings.length) return null;

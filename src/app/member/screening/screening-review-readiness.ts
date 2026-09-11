@@ -23,7 +23,7 @@ export function screeningReviewBlocker(
     if (!Number.isInteger(score) || score < 1 || score > 5) {
       return { field: "score", criterionId: criterion.id, message: `Choose a rating for ${criterion.name}.` };
     }
-    if ((score === 1 || score === 2 || score === 5) && !(draft.notes[criterion.id] ?? "").trim()) {
+    if ((score === 1 || score === 5) && !(draft.notes[criterion.id] ?? "").trim()) {
       return {
         field: "note",
         criterionId: criterion.id,

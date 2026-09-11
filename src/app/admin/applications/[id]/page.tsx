@@ -118,7 +118,6 @@ function ResumePanel({
           {details.length > 0 && <p className="mt-1 text-xs text-mecg-navy/60">{details.join(" · ")}</p>}
           <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
             <iframe
-              sandbox=""
               loading="lazy"
               src={`/api/admin/applications/${applicationId}/resume`}
               title={`${applicantName} resume`}

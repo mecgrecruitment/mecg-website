@@ -48,7 +48,6 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
                 {detail.hasResume ? (
                   <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                     <iframe
-                      sandbox=""
                       loading="lazy"
                       src={`/api/member/screening/${assignmentId}/resume`}
                       title="Applicant resume"

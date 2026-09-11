@@ -272,7 +272,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
                 })}
               </div>
               {scores[criterion.id] && <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>}
-              <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note {(["1", "2", "5"].includes(scores[criterion.id])) ? "(required for this rating)" : "(optional)"}</label>
+              <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note {(["1", "5"].includes(scores[criterion.id])) ? "(required for this rating)" : "(optional)"}</label>
               <textarea
                 id={`screening-note-${criterion.id}`}
                 ref={(node) => { noteRefs.current[criterion.id] = node; }}

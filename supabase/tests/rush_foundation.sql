@@ -130,7 +130,7 @@ select extensions.ok(
     where conrelid = 'rush.screening_ratings'::regclass
       and conname = 'screening_ratings_extreme_score_note_check'
   ),
-  'screening ratings enforce evidence notes for scores 1, 2, and 5'
+  'screening ratings enforce evidence notes for scores 1 and 5'
 );
 select extensions.has_table('rush', 'speed_dating_pair_reports', 'wrong-pair reports have a durable operator-visible record');
 select extensions.has_function('rush', 'report_wrong_speed_dating_pair', array['text'], 'an evaluator can report a claimed wrong pair without deleting drafts');

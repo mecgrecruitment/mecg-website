@@ -4,10 +4,11 @@ import { screeningRecommendationWarning, screeningReviewBlocker } from "./screen
 
 const criteria = [{ id: "motivation", name: "Motivation" }, { id: "impact", name: "Impact" }];
 
-test("screeningReviewBlocker requires an evidence note for ratings 1, 2, and 5", () => {
+test("screeningReviewBlocker requires an evidence note for ratings 1 and 5 only", () => {
   const base = { scores: { motivation: "4", impact: "3" }, notes: {}, evidence: "Specific written evidence supports this decision.", recommendation: "HOLD" };
   assert.equal(screeningReviewBlocker(criteria, base), null);
-  for (const score of ["1", "2", "5"]) {
+  assert.equal(screeningReviewBlocker(criteria, { ...base, scores: { ...base.scores, motivation: "2" } }), null);
+  for (const score of ["1", "5"]) {
     assert.deepEqual(screeningReviewBlocker(criteria, { ...base, scores: { ...base.scores, motivation: score } }), {
       field: "note",
       criterionId: "motivation",
