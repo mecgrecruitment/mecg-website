@@ -39,6 +39,7 @@ export default async function ScreeningAdminPage() {
   const batch = overview && {
     id: overview.batchId,
     status: overview.status,
+    releasedAt: overview.releasedAt ?? null,
     approved: approved.length,
     pending: byStatus("PENDING").length,
     rejected: byStatus("REJECTED").length,
@@ -88,7 +89,7 @@ export default async function ScreeningAdminPage() {
         description="Choose readers, approve the identity-free copies, send them out, then close and rank. Readers never see who wrote what."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
-      <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} packetsHidden={packetsHidden} />
+      <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} packetsHidden={packetsHidden} canRelease={user.memberships.some((membership) => membership.cycleId === cycleId && membership.role === "OWNER")} />
       {packetsHidden && <p className="text-sm text-mecg-navy/55">Applications are hidden while you are a reader in this batch.</p>}
       {packets.length > 0 && (
         <section>
@@ -143,6 +144,7 @@ export default async function ScreeningAdminPage() {
       {overview?.status === "FROZEN" && (
         <section>
           <h2 className="text-xl font-semibold">Ranking</h2>
+          <p className="mt-1 text-sm text-mecg-navy/55">{ranked.length} applicants · tied averages share a rank</p>
           <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="Screening ranking">
             <div className="min-w-[56rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">
@@ -152,6 +154,7 @@ export default async function ScreeningAdminPage() {
                     <th className={TH}>Applicant</th>
                     <th className={TH}>Class</th>
                     <th className={TH}>Major</th>
+                    <th className={TH}>Events</th>
                     {Array.from({ length: reviewerSlots }, (_, index) => <th key={index} className={TH}>Reviewer {index + 1}</th>)}
                     <th className={TH}>Average</th>
                     <th className={TH}>Z</th>
@@ -170,6 +173,7 @@ export default async function ScreeningAdminPage() {
                         </td>
                         <td className={TD}>{applicant.classYear ? CLASS_YEAR_LABELS[applicant.classYear as ClassYear] ?? applicant.classYear : ""}</td>
                         <td className={TD}>{applicant.major ?? ""}</td>
+                        <td className={TD}>{applicant.events.map((event) => <span key={event} className="block whitespace-nowrap">{event}</span>)}</td>
                         {Array.from({ length: reviewerSlots }, (_, index) => {
                           const review = applicant.reviews[index];
                           return (
@@ -183,7 +187,7 @@ export default async function ScreeningAdminPage() {
                         <td className={`${TD} tabular-nums`}>{Object.entries(applicant.recommendationCounts).map(([recommendation, count]) => `${count}${recommendation[0]}`).join(" ")}</td>
                       </tr>
                       <tr className="border-b border-mecg-navy/10">
-                        <td colSpan={7 + reviewerSlots} className="px-4 py-2">
+                        <td colSpan={8 + reviewerSlots} className="px-4 py-2">
                           <details>
                             <summary className="cursor-pointer text-[13px] font-semibold text-mecg-navy/70">Notes</summary>
                             <div className="mt-3 space-y-4">

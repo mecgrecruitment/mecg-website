@@ -94,6 +94,8 @@ export async function POST(request: NextRequest) {
     result = await screeningRpc(supabase, "approve_screening_packets", { target_batch_id: String(body.batchId ?? "") });
   } else if (body.action === "FREEZE") {
     result = await screeningRpc(supabase, "freeze_screening_batch", { target_batch_id: String(body.batchId ?? "") });
+  } else if (body.action === "RELEASE") {
+    result = await screeningRpc(supabase, "release_screening_results", { target_batch_id: String(body.batchId ?? "") });
   } else if (body.action === "RESET") {
     result = await screeningRpc(supabase, "reset_screening_batch", { target_batch_id: String(body.batchId ?? "") });
   } else if (body.action === "REASSIGN_READER") {

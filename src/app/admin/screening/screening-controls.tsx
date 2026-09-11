@@ -10,6 +10,7 @@ const MAX_READS_PER_READER = 100;
 export type ScreeningBatchSummary = {
   id: string;
   status: "DRAFT" | "PUBLISHED" | "FROZEN";
+  releasedAt: string | null;
   approved: number;
   pending: number;
   rejected: number;
@@ -66,6 +67,7 @@ export default function ScreeningControls({
   batch,
   packetList,
   packetsHidden = false,
+  canRelease = false,
 }: {
   cycleId: string;
   members: Array<{ id: string; name: string }>;
@@ -73,6 +75,8 @@ export default function ScreeningControls({
   batch?: ScreeningBatchSummary;
   packetList?: ReactNode;
   packetsHidden?: boolean;
+  // Only Owners can release; the button stays hidden for everyone else.
+  canRelease?: boolean;
 }) {
   const [reviewerIds, setReviewerIds] = useState<string[]>([]);
   const [approveResult, setApproveResult] = useState<ApproveAllResult | null>(null);
@@ -233,7 +237,7 @@ export default function ScreeningControls({
         number={4}
         title="Track and close"
         state={step4State}
-        summary={batch?.status === "FROZEN" ? `Closed · ${batch.submitted} of ${batch.assigned} reviews submitted` : undefined}
+        summary={batch?.status === "FROZEN" ? `Closed · ${batch.submitted} of ${batch.assigned} reviews submitted${batch.releasedAt ? " · released to Board" : ""}` : undefined}
       >
         {batch && (
           <>
@@ -270,6 +274,11 @@ export default function ScreeningControls({
               Close review and rank
             </button>
             {reviewsLeft > 0 && <p className="mt-2 text-xs text-mecg-navy/55">Waiting on {reviewsLeft} review{reviewsLeft === 1 ? "" : "s"}.</p>}
+            {batch.status === "FROZEN" && !batch.releasedAt && (
+              canRelease
+                ? <button type="button" disabled={pending} onClick={() => void act({ action: "RELEASE", batchId: batch.id }, "Ranking released to Board and the Recruitment Committee.")} className="button-primary mt-4 disabled:opacity-50">Release ranking to Board</button>
+                : <p className="mt-2 text-xs text-mecg-navy/55">Only Owners see the ranking until one of them releases it.</p>
+            )}
             {step4State === "active" && notices}
           </>
         )}

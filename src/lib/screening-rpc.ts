@@ -175,6 +175,8 @@ export async function screeningRpc<T>(client: unknown, name: string, args?: Reco
 export type ScreeningOverview = {
   batchId: string;
   status: "DRAFT" | "PUBLISHED" | "FROZEN";
+  // Set once an Owner releases the closed ranking to Board and the Recruitment Committee.
+  releasedAt?: string | null;
   reviewsPerApplication: number;
   assigned: number;
   submitted: number;
@@ -194,6 +196,8 @@ export type ScreeningOverview = {
     applicantName?: string;
     classYear: string | null;
     major: string | null;
+    // Names of the cycle events the applicant checked in to, in date order. Context for the board, never scored.
+    events: string[];
     reviewerId?: string;
     reviewerName?: string;
     recommendation: "ADVANCE" | "HOLD" | "DECLINE";

@@ -8,13 +8,14 @@ export function rankScreeningResults(results: ScreeningResult[]) {
   const applicants = [...groups.entries()].map(([code, reviews]) => {
     const counts: Record<string, number> = {};
     for (const review of reviews) counts[review.recommendation] = (counts[review.recommendation] ?? 0) + 1;
-    const { applicationId, applicantName, classYear, major } = reviews[0];
+    const { applicationId, applicantName, classYear, major, events } = reviews[0];
     return {
       code,
       applicationId,
       applicantName,
       classYear,
       major,
+      events,
       reviews,
       averageScore: reviews.reduce((sum, review) => sum + review.score, 0) / reviews.length,
       recommendationCounts: counts,

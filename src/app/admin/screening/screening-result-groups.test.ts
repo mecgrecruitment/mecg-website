@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { rankScreeningResults, type ScreeningResult } from "./screening-result-groups";
 
 function review(code: string, score: number, recommendation: ScreeningResult["recommendation"] = "ADVANCE", applicantName?: string): ScreeningResult {
-  return { code, applicationId: `id-${code}`, applicantName, classYear: "JUNIOR", major: "Economics", recommendation, score, submittedAt: "2026-09-01T00:00:00Z", ratings: [] };
+  return { code, applicationId: `id-${code}`, applicantName, classYear: "JUNIOR", major: "Economics", events: ["Mass Meeting", "Career Panel"], recommendation, score, submittedAt: "2026-09-01T00:00:00Z", ratings: [] };
 }
 
 test("ranked screening results sort by average score, then name, then code, with dense ranks", () => {
