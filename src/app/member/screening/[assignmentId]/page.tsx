@@ -20,7 +20,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
         <div>
           <p className="font-mono text-xs text-mecg-orange-ink">{detail.candidateCode}</p>
           <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Application review</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Score only the application and resume below. Do not use outside knowledge or attempt to identify the applicant.</p>
+          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Score the written responses below. The resume is there for context and is not scored. Do not use outside knowledge or attempt to identify the applicant.</p>
         </div>
         <Link href="/member/screening" className="button-secondary text-sm">Reading queue</Link>
       </header>
@@ -44,7 +44,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
                 </article>
               ))}
               <article>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Resume</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Resume <span className="font-normal normal-case tracking-normal text-mecg-navy/50">· context only, not scored</span></p>
                 {detail.hasResume ? (
                   <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                     <iframe
