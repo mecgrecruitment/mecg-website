@@ -29,6 +29,28 @@ export function scheduleApplicationReceiptDelivery(input: {
         // been returned and must not depend on the mail provider.
         console.error("application receipt immediate delivery failed", error);
       }
+      // ponytail: Hobby caps the retry cron at once a day, so each submission
+      // also rescues a few stranded rows. Drop this once the cron runs every
+      // few minutes on a paid plan.
+      const { data: due, error: dueError } = await supabase
+        .from("notification_outbox")
+        .select("id")
+        .in("status", ["PENDING", "PROCESSING"])
+        .lte("next_attempt_at", new Date().toISOString())
+        .neq("id", data.id)
+        .order("next_attempt_at")
+        .limit(5);
+      if (dueError) {
+        console.error("application receipt sweep lookup failed", dueError);
+        return;
+      }
+      for (const item of due ?? []) {
+        try {
+          await deliverNotification(supabase, item.id);
+        } catch (error) {
+          console.error("application receipt sweep delivery failed", { notificationId: item.id, error });
+        }
+      }
       return;
     }
 
