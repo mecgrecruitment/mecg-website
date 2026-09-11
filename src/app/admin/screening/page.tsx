@@ -22,47 +22,121 @@ export default async function ScreeningAdminPage() {
   const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
-  const [{ data: overview, error }, { data: memberships }] = await Promise.all([
+  const [{ data: overview, error }, { data: memberships }, { count: submittedCount }] = await Promise.all([
     screeningRpc<ScreeningOverview>(supabase, "screening_admin_overview", { target_cycle_id: cycleId }),
     supabase.from("memberships").select("user_id,role,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
+    supabase.from("applications").select("id", { count: "exact", head: true }).eq("cycle_id", cycleId).not("status", "in", "(DRAFT,WITHDRAWN)"),
   ]);
   if (error) throw new Error(error.message);
   const panelists = new Set((memberships ?? []).filter((item) => item.role === "PANEL").map((item) => item.user_id));
   const members = [...new Map((memberships ?? [])
     .filter((item) => REVIEWER_ROLES.includes(item.role) && !panelists.has(item.user_id))
     .map((item) => [item.user_id, { id: item.user_id, name: item.profiles.display_name }])).values()];
+  const packets = overview?.packets ?? [];
+  const byStatus = (status: string) => packets.filter((packet) => packet.status === status);
+  const approved = byStatus("APPROVED");
+  const unapproved = packets.filter((packet) => packet.status !== "APPROVED");
+  const batch = overview && {
+    id: overview.batchId,
+    status: overview.status,
+    approved: approved.length,
+    pending: byStatus("PENDING").length,
+    rejected: byStatus("REJECTED").length,
+    assigned: overview.assigned,
+    submitted: overview.submitted,
+    reviewers: overview.reviewers.map(({ id, name, assigned, submitted }) => ({ id, name, assigned, submitted })),
+  };
   const ranked = rankScreeningResults(overview?.results ?? []);
   const reviewerSlots = Math.max(overview?.reviewsPerApplication ?? 3, ...ranked.map((applicant) => applicant.reviews.length));
+
+  // Step 2 body: only packets that still need a decision are expanded.
+  const packetList = overview?.status === "DRAFT" && (
+    <div className="mt-5 space-y-5">
+      {unapproved.length > 0 && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {unapproved.map((packet) => (
+            <article key={packet.id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-xs text-mecg-navy/60">{packet.code}</p>
+                  <h3 className="mt-1 font-semibold">{packet.applicantName}</h3>
+                </div>
+                <StatusPill tone="orange">{statusLabel(packet.status)}</StatusPill>
+              </div>
+              <div className="mt-4 space-y-4">{(packet.content.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h4 className="text-sm font-medium">{response.question}</h4><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
+              <PacketAction cycleId={cycleId} packetId={packet.id} status={packet.status} responses={packet.content.responses ?? []} />
+            </article>
+          ))}
+        </div>
+      )}
+      {approved.length > 0 && (
+        <details className="rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+          <summary className="cursor-pointer text-sm font-semibold text-mecg-navy/70">Approved · {approved.length}</summary>
+          <ul className="mt-3 columns-2 gap-6 text-sm text-mecg-navy/70 sm:columns-3">
+            {approved.map((packet) => <li key={packet.id}><span className="font-mono text-xs text-mecg-navy">{packet.code}</span> {packet.applicantName}</li>)}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
 
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow="Recruitment operations"
-        title="Review setup"
-        description="Review and approve identity-free copies of each application before assigning exactly three independent reviewers. Reviewers never see who wrote what."
+        title="Application review"
+        description="Choose readers, approve the identity-free copies, send them out, then close and rank. Readers never see who wrote what."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
-      <ScreeningControls cycleId={cycleId} members={members} batchId={overview?.batchId} status={overview?.status} />
-      {overview && (
-        <p className="rounded-2xl bg-mecg-navy/[0.03] p-4 text-sm text-mecg-navy/70">
-          {overview.packets.length} applications · {overview.assigned} active assignments · {overview.submitted} submitted reviews
-        </p>
-      )}
-      <section className="grid gap-5 lg:grid-cols-2">
-        {(overview?.packets ?? []).map((packet) => (
-          <article key={packet.id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-mono text-xs text-mecg-navy/60">{packet.code}</p>
-                <h2 className="mt-1 font-semibold">Identity steward: {packet.applicantName}</h2>
-              </div>
-              <StatusPill tone="orange">{statusLabel(packet.status)}</StatusPill>
+      <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} />
+      {packets.length > 0 && (
+        <section>
+          <h2 className="text-xl font-semibold">All applications</h2>
+          <p className="mt-1 text-sm text-mecg-navy/55">{packets.length} applications · {overview?.assigned ?? 0} reads assigned · {overview?.submitted ?? 0} submitted</p>
+          <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="All applications">
+            <div className="min-w-[40rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-mecg-navy/10">
+                    <th className={TH}>Code</th>
+                    <th className={TH}>Applicant</th>
+                    <th className={TH}>Redaction</th>
+                    <th className={TH}>Readers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {packets.map((packet) => (
+                    <Fragment key={packet.id}>
+                      <tr>
+                        <td className="px-4 pt-3 font-mono text-xs text-mecg-navy">{packet.code}</td>
+                        <td className="px-4 pt-3 text-[13px] font-semibold text-mecg-navy">{packet.applicantName}</td>
+                        <td className="px-4 pt-3"><StatusPill tone={packet.status === "APPROVED" ? "neutral" : "orange"}>{statusLabel(packet.status)}</StatusPill></td>
+                        <td className="px-4 pt-3">
+                          <div className="flex flex-wrap gap-1.5">
+                            {(packet.assignments ?? []).map((assignment) => (
+                              <StatusPill key={assignment.reviewerId} tone={["SUBMITTED", "LOCKED"].includes(assignment.status) ? "navy" : assignment.status === "RECUSED" ? "orange" : "neutral"}>
+                                {assignment.reviewerName} · {statusLabel(assignment.status)}
+                              </StatusPill>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                      <tr className="border-b border-mecg-navy/10">
+                        <td colSpan={4} className="px-4 pb-3 pt-1">
+                          <details>
+                            <summary className="cursor-pointer text-[13px] font-semibold text-mecg-navy/70">Responses</summary>
+                            <div className="mt-3 space-y-4">{(packet.content?.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
+                          </details>
+                        </td>
+                      </tr>
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="mt-4 space-y-4">{(packet.content.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
-            {overview?.status === "DRAFT" && <PacketAction cycleId={cycleId} packetId={packet.id} status={packet.status} responses={packet.content.responses ?? []} />}
-          </article>
-        ))}
-      </section>
+          </div>
+        </section>
+      )}
       {overview?.status === "FROZEN" && (
         <section>
           <h2 className="text-xl font-semibold">Ranking</h2>

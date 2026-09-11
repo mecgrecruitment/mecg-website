@@ -75,6 +75,8 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   if (!cycle) redirect("/member");
   const round = roundResult.data;
   if (!round) notFound();
+  // Application screening has its own stepper page; the coverage board is for interview rounds.
+  if (round.kind === "APPLICATION_SCREEN") redirect("/admin/screening");
   const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
   const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingSetupResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),

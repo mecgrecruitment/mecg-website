@@ -41,10 +41,7 @@ export function workspaceAdminTools({
 }): WorkspaceNavLink[] {
   return [
     ...(canRecruitmentOperations
-      ? ([
-        ["/admin/screening", "Review setup"],
-        ["/admin/audit", "Activity"],
-      ] as const)
+      ? [["/admin/audit", "Activity"] as const]
       : []),
     ...(isBoard ? [["/admin/projects", "Projects"] as const] : []),
     ...(canManageCycle ? [["/admin/settings", "Settings"] as const] : []),

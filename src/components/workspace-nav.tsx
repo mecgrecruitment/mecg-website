@@ -52,6 +52,7 @@ export default async function WorkspaceNav({
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
         ["/admin", "Recruitment"],
+        ["/admin/screening", "Application review"],
         ["/admin/rounds", "Interviews"],
       ] as const)
       : []),

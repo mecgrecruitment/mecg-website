@@ -108,6 +108,7 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   screening_admin_overview: isScreeningOverview,
   screening_assignment_detail: isScreeningDetail,
   screening_assignment_inputs: isScreeningAssignmentInputs,
+  approve_screening_packets: (value) => isRecord(value) && hasNumber(value, "approved") && Array.isArray(value.failed),
   begin_headshot_upload: objectWith(["path", "string"]),
   attach_headshot: (value) =>
     isRecord(value) && (value.previousPath === null || typeof value.previousPath === "string"),
@@ -174,13 +175,15 @@ export type ScreeningOverview = {
   reviewsPerApplication: number;
   assigned: number;
   submitted: number;
-  reviewers: Array<{ id: string; name: string; capacity: number }>;
+  reviewers: Array<{ id: string; name: string; capacity: number; assigned: number; submitted: number }>;
   packets: Array<{
     id: string;
     code: string;
     status: "PENDING" | "APPROVED" | "REJECTED";
     applicantName: string;
     content: { responses?: Array<{ question?: string; answer?: string }> };
+    // Absent for FROZEN batches when the viewer is not Board or Owner.
+    assignments?: Array<{ reviewerId: string; reviewerName: string; status: string }>;
   }>;
   results?: Array<{
     code: string;

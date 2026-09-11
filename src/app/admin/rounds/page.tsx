@@ -16,6 +16,7 @@ export const metadata: Metadata = { title: "Interviews" };
 function roundKindLabel(kind: string) {
   if (kind === "SPEED_DATING") return "Quick chats";
   if (kind === "GROUP_CASE") return "Group interview";
+  if (kind === "APPLICATION_SCREEN") return "Application review";
   return statusLabel(kind);
 }
 
@@ -74,7 +75,7 @@ export default async function RoundsPage() {
             return (
               <Link
                 key={round.id}
-                href={`/admin/rounds/${round.id}`}
+                href={round.kind === "APPLICATION_SCREEN" ? "/admin/screening" : `/admin/rounds/${round.id}`}
                 className="group grid gap-3 py-4 transition-colors hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
               >
                 <div className="min-w-0">

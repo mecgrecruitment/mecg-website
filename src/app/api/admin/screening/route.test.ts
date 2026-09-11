@@ -34,3 +34,21 @@ test("POST /api/admin/screening rejects payloads over the 64 KiB cap before pars
   assert.equal(res.status, 413);
   assert.equal((await res.json()).error, "Payload is too large");
 });
+
+test("POST /api/admin/screening APPROVE_ALL calls approve_screening_packets and returns its summary", async (t) => {
+  const calls: Array<[string, unknown]> = [];
+  const summary = { approved: 148, failed: [{ packetId: "p1", code: "A-07", reason: "answer still names the applicant" }] };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: {
+      createClient: async () => ({
+        rpc: async (name: string, args: unknown) => { calls.push([name, args]); return { data: summary, error: null }; },
+      }),
+    },
+  });
+  const { POST } = await importRoute("approve-all");
+  const res = await POST(postRequest({ cycleId: "cycle-1", action: "APPROVE_ALL", batchId: "batch-1" }));
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { data: summary });
+  assert.deepEqual(calls, [["approve_screening_packets", { target_batch_id: "batch-1" }]]);
+});

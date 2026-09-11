@@ -35,14 +35,13 @@ test("Speed Dating appears for an eligible member without screening access", () 
   ]);
 });
 
-test("recruitment operators can discover setup and activity without receiving Board tools", () => {
+test("recruitment operators can discover activity without receiving Board tools", () => {
   assert.deepEqual(workspaceAdminTools({
     canRecruitmentOperations: true,
     canManageCycle: false,
     isBoard: false,
     isOwner: false,
   }), [
-    ["/admin/screening", "Review setup"],
     ["/admin/audit", "Activity"],
   ]);
 });
@@ -54,7 +53,6 @@ test("owners receive every administrative destination", () => {
     isBoard: true,
     isOwner: true,
   }), [
-    ["/admin/screening", "Review setup"],
     ["/admin/audit", "Activity"],
     ["/admin/projects", "Projects"],
     ["/admin/settings", "Settings"],

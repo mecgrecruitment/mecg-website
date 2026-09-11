@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
         summary: { loads: distribution.loads },
       });
     }
+  } else if (body.action === "APPROVE_ALL") {
+    result = await screeningRpc(supabase, "approve_screening_packets", { target_batch_id: String(body.batchId ?? "") });
   } else if (body.action === "FREEZE") {
     result = await screeningRpc(supabase, "freeze_screening_batch", { target_batch_id: String(body.batchId ?? "") });
   } else {
