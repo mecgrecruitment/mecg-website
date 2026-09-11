@@ -35,3 +35,11 @@ Run this procedure before Gate A, then once per semester. Never restore a test b
 - The full workflow passes.
 - Privacy checks fail closed.
 - The reviewer records the restore duration and result.
+
+## Application-level backup
+
+`npm run backup:rush` snapshots the open rush cycle (or the newest one) into `backups/<cycle>-<timestamp>/`: one JSON file per rush table, `applicants.csv` with one row per application and one column per question, every attached resume under `resumes/`, and a `manifest.json` with row counts, resume failures and the git HEAD. `--dry-run` prints counts only.
+
+It needs `MECG_SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_MECG_SUPABASE_URL` in `.env.local`; `vercel env pull .env.local` restores them.
+
+The folder holds applicant PII. It is gitignored: keep it off the repo, store it only where the board's privacy notice allows, and delete it once the cycle closes. A failed resume download is listed in the manifest and does not abort the run; a failed table fetch does.

@@ -25,7 +25,8 @@
     "check:sql": "python3 scripts/check-sql.py",
     "clerk:migrate-users": "node scripts/migrate-auth-users.mjs",
     "clerk:load-signup": "node scripts/load-test-clerk-signup.mjs",
-    "rush:top": "node scripts/rush-top.mjs"
+    "rush:top": "node scripts/rush-top.mjs",
+    "backup:rush": "node scripts/backup-rush.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",

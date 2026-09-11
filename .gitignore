@@ -75,3 +75,6 @@ next-env.d.ts
 # Local backup of the team headshots that the LinkedIn-sourced set replaced.
 # 1.3M of .webp kept for comparison, not part of the site.
 /.assets-backup/
+
+# Application-level rush backups (scripts/backup-rush.mjs). Applicant PII, never commit.
+/backups/
