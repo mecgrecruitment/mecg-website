@@ -20,7 +20,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
         <div>
           <p className="font-mono text-xs text-mecg-orange-ink">{detail.candidateCode}</p>
           <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Application review</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Score only the application below. You cannot see who wrote it, so do not use outside knowledge or attempt to identify the applicant.</p>
+          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Score only the application and resume below. Do not use outside knowledge or attempt to identify the applicant.</p>
         </div>
         <Link href="/member/screening" className="button-secondary text-sm">Reading queue</Link>
       </header>
@@ -43,6 +43,33 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
                   <p className="mt-3 whitespace-pre-wrap text-pretty leading-7 text-mecg-navy/75">{response.answer}</p>
                 </article>
               ))}
+              <article>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Resume</p>
+                {detail.hasResume ? (
+                  <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+                    <iframe
+                      sandbox=""
+                      loading="lazy"
+                      src={`/api/member/screening/${assignmentId}/resume`}
+                      title="Applicant resume"
+                      className="h-[560px] w-full bg-white"
+                    />
+                    <div className="border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center">
+                      <a
+                        className="text-[13px] font-semibold text-mecg-orange-ink"
+                        href={`/api/member/screening/${assignmentId}/resume`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open in new tab ↗
+                      </a>
+                      <p className="mt-1 text-[11px] text-mecg-navy/50">If the preview does not load, open the PDF in a new tab.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-mecg-navy/60">No resume was attached.</p>
+                )}
+              </article>
             </div>
           </section>
         )}

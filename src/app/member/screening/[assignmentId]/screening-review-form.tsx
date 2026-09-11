@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { parseScreeningDraft } from "../screening-draft";
 import { screeningRecommendationWarning, screeningReviewBlocker } from "../screening-review-readiness";
 
-type Criterion = { id: string; name: string; description: string; weight: number; required: boolean };
+type Criterion = { id: string; key: string; name: string; description: string; weight: number; required: boolean };
 
 const SCORE_OPTIONS = [1, 2, 3, 4, 5] as const;
 const MAX_NOTE_LENGTH = 2000;
@@ -230,11 +230,14 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
         <p className="rounded-xl bg-mecg-blue/[0.08] px-4 py-3 text-sm text-mecg-navy" aria-live="polite">
           {scoredCount} of {criteria.length} criteria scored. Add overall evidence and a recommendation before submitting.
         </p>
-        {criteria.map((criterion) => {
+        {criteria.map((criterion, index) => {
           const note = notes[criterion.id] ?? "";
+          const isResume = criterion.key.startsWith("resume_");
+          const startsGroup = index === 0 || criteria[index - 1].key.startsWith("resume_") !== isResume;
           return (
+            <Fragment key={criterion.id}>
+            {startsGroup && <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">{isResume ? "Resume" : "Essays"}</p>}
             <fieldset
-              key={criterion.id}
               ref={(node) => { criterionRefs.current[criterion.id] = node; }}
               tabIndex={-1}
               className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"
@@ -281,6 +284,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
               />
               <p id={`screening-note-count-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / {MAX_NOTE_LENGTH}</p>
             </fieldset>
+            </Fragment>
           );
         })}
         <label className="block font-medium" htmlFor="screening-evidence">

@@ -72,10 +72,12 @@ function isScreeningDetail(value: unknown) {
     && hasString(value, "candidateCode")
     && hasString(value, "status")
     && isRecord(value.content)
+    && hasBoolean(value, "hasResume")
     && Array.isArray(value.criteria)
     && value.criteria.every((criterion) =>
       isRecord(criterion)
       && hasString(criterion, "id")
+      && hasString(criterion, "key")
       && hasString(criterion, "name")
       && hasString(criterion, "description")
       && hasNumber(criterion, "weight")
@@ -138,6 +140,7 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   ),
   reject_resume_upload: (value) => typeof value === "string",
   authorize_resume_access: (value) => typeof value === "string",
+  authorize_screening_resume: (value) => typeof value === "string",
   my_speed_dating_pairs: isSpeedDatingPairQueue,
   speed_dating_pair_setup: isSpeedDatingPairSetup,
   claim_speed_dating_pair: (value) =>
@@ -179,7 +182,20 @@ export type ScreeningOverview = {
     applicantName: string;
     content: { responses?: Array<{ question?: string; answer?: string }> };
   }>;
-  results?: Array<{ code: string; applicantName: string; recommendation: string; score: number; evidence: string }>;
+  results?: Array<{
+    code: string;
+    applicationId: string;
+    applicantName?: string;
+    classYear: string | null;
+    major: string | null;
+    reviewerId?: string;
+    reviewerName?: string;
+    recommendation: "ADVANCE" | "HOLD" | "DECLINE";
+    score: number;
+    evidence?: string;
+    submittedAt: string;
+    ratings: Array<{ key: string; name: string; weight: number; score: number; note?: string | null }>;
+  }>;
 };
 
 export type ScreeningQueueItem = {
@@ -206,5 +222,6 @@ export type ScreeningDetail = {
   candidateCode: string;
   status: string;
   content: { responses?: Array<{ question?: string; answer?: string }> };
-  criteria: Array<{ id: string; name: string; description: string; weight: number; required: boolean }>;
+  hasResume: boolean;
+  criteria: Array<{ id: string; key: string; name: string; description: string; weight: number; required: boolean }>;
 };

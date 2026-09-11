@@ -63,7 +63,8 @@ test("screeningRpc validates nested screening detail fields", async () => {
       candidateCode: "APPLICANT 123456",
       status: "ASSIGNED",
       content: { responses: [] },
-      criteria: [{ id: "criterion-1", name: "Judgment", description: "Uses evidence", weight: "25", required: true }],
+      hasResume: false,
+      criteria: [{ id: "criterion-1", key: "judgment", name: "Judgment", description: "Uses evidence", weight: "25", required: true }],
     }),
     "screening_assignment_detail",
   );

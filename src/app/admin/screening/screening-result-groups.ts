@@ -1,34 +1,31 @@
-export type ScreeningResult = {
-  code: string;
-  applicantName: string;
-  recommendation: string;
-  score: number;
-  evidence: string;
-};
+import type { ScreeningOverview } from "@/lib/screening-rpc";
 
-export function groupScreeningResults(results: ScreeningResult[]) {
-  const groups = new Map<string, { code: string; applicantName: string; reviews: ScreeningResult[] }>();
-  for (const result of results) {
-    const key = `${result.code}\u0000${result.applicantName}`;
-    const group = groups.get(key) ?? { code: result.code, applicantName: result.applicantName, reviews: [] };
-    group.reviews.push(result);
-    groups.set(key, group);
-  }
-  return [...groups.values()].map((group) => {
-    const seenKeys = new Map<string, number>();
-    const reviews = group.reviews.map((review) => {
-      const fingerprint = `${review.recommendation}\u0000${review.score}\u0000${review.evidence}`;
-      const occurrence = (seenKeys.get(fingerprint) ?? 0) + 1;
-      seenKeys.set(fingerprint, occurrence);
-      return { ...review, key: `${fingerprint}\u0000${occurrence}` };
-    });
+export type ScreeningResult = NonNullable<ScreeningOverview["results"]>[number];
+
+export function rankScreeningResults(results: ScreeningResult[]) {
+  const groups = new Map<string, ScreeningResult[]>();
+  for (const result of results) groups.set(result.code, [...(groups.get(result.code) ?? []), result]);
+  const applicants = [...groups.entries()].map(([code, reviews]) => {
+    const counts: Record<string, number> = {};
+    for (const review of reviews) counts[review.recommendation] = (counts[review.recommendation] ?? 0) + 1;
+    const { applicationId, applicantName, classYear, major } = reviews[0];
     return {
-    ...group,
-    reviews,
-    averageScore: group.reviews.reduce((sum, review) => sum + review.score, 0) / group.reviews.length,
-    recommendationCounts: Object.fromEntries([...new Set(group.reviews.map((review) => review.recommendation))].map((recommendation) => [
-      recommendation,
-      group.reviews.filter((review) => review.recommendation === recommendation).length,
-    ])),
-  }; });
+      code,
+      applicationId,
+      applicantName,
+      classYear,
+      major,
+      reviews,
+      averageScore: reviews.reduce((sum, review) => sum + review.score, 0) / reviews.length,
+      recommendationCounts: counts,
+    };
+  });
+  applicants.sort((a, b) => b.averageScore - a.averageScore || (a.applicantName ?? "").localeCompare(b.applicantName ?? "") || a.code.localeCompare(b.code));
+  const mean = applicants.reduce((sum, applicant) => sum + applicant.averageScore, 0) / applicants.length;
+  const stdDev = Math.sqrt(applicants.reduce((sum, applicant) => sum + (applicant.averageScore - mean) ** 2, 0) / applicants.length);
+  return applicants.map((applicant, index) => ({
+    ...applicant,
+    rank: index + 1,
+    zScore: applicants.length < 2 || stdDev === 0 ? null : (applicant.averageScore - mean) / stdDev,
+  }));
 }

@@ -17,7 +17,7 @@ function statusTone(status: ScreeningQueueItem["assignment_status"]) {
 
 export default async function ScreeningQueuePage() {
   const user = await requireMember();
-  const cycle = user.memberships.find((membership) => membership.active && membership.role === "RECRUITMENT_COMMITTEE");
+  const cycle = user.memberships.find((membership) => membership.active && ["RECRUITMENT_COMMITTEE", "BOARD", "OWNER"].includes(membership.role));
   if (!cycle) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">You are not enrolled as an application reviewer.</p></main>;
   const supabase = await createClient();
   const [{ data: queue, error }, { data: rawContext, error: contextError }] = await Promise.all([
