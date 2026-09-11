@@ -14,7 +14,7 @@ test("Kanban removes the single-column template before desktop column flow", () 
 
 test("Kanban destinations contain the current and legal active stages", () => {
   assert.deepEqual(kanbanDropStatuses("SUBMITTED"), ["SUBMITTED", "NEEDS_INFO", "ELIGIBLE"]);
-  assert.deepEqual(kanbanDropStatuses("INVITED"), ["INVITED", "IN_PROCESS"]);
+  assert.deepEqual(kanbanDropStatuses("INVITED"), ["INVITED", "GROUP_CASE"]);
   assert.deepEqual(kanbanDropStatuses("FINAL_REVIEW"), ["FINAL_REVIEW"]);
 });
 

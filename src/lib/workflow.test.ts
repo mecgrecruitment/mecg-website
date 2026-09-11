@@ -64,7 +64,7 @@ test("application transitions expose only legal manual next statuses", () => {
   assert.equal(canTransitionApplication("SUBMITTED", "IN_PROCESS"), false);
   assert.equal(canTransitionApplication("FINAL_REVIEW", "OFFERED"), false);
   assert.equal(canTransitionApplication("ELIGIBLE", "ELIGIBLE"), true);
-  assert.deepEqual(legalManualApplicationStatuses("INVITED"), ["INVITED", "IN_PROCESS"]);
+  assert.deepEqual(legalManualApplicationStatuses("INVITED"), ["INVITED", "GROUP_CASE"]);
   assert.deepEqual(legalManualApplicationStatuses("OFFERED"), ["OFFERED"]);
 });
 

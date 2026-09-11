@@ -3170,6 +3170,7 @@ export type Database = {
         | "NEEDS_INFO"
         | "ELIGIBLE"
         | "INVITED"
+        | "GROUP_CASE"
         | "IN_PROCESS"
         | "FINAL_REVIEW"
         | "OFFERED"
@@ -3350,6 +3351,7 @@ export const Constants = {
         "NEEDS_INFO",
         "ELIGIBLE",
         "INVITED",
+        "GROUP_CASE",
         "IN_PROCESS",
         "FINAL_REVIEW",
         "OFFERED",

@@ -229,7 +229,7 @@ function ApplicantRoster({
         <ul className="mt-3 flex flex-col gap-2" aria-label="All applicants">
           {applications.map((application) => (
             <li key={application.id} className={`grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:items-center ${canAdvance ? "md:grid-cols-[auto_minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]" : "md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]"}`}>
-              {canAdvance && (["ELIGIBLE", "INVITED", "IN_PROCESS"].includes(application.status) ? (
+              {canAdvance && (["ELIGIBLE", "INVITED", "GROUP_CASE", "IN_PROCESS"].includes(application.status) ? (
                   <label className="inline-flex min-h-11 items-center gap-2 text-xs font-medium text-mecg-navy/65">
                     <input
                       type="checkbox"

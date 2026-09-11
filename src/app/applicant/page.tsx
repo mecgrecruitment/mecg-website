@@ -20,7 +20,7 @@ import { mapSearchUrl, safeHumanLocation } from "./safe-location";
 export const metadata: Metadata = { title: "Applicant portal" };
 
 const STAGE_LABELS = ["Submitted", "In review", "Final review", "Decision"] as const;
-const IN_REVIEW_STATUSES = new Set(["ELIGIBLE", "INVITED", "IN_PROCESS"]);
+const IN_REVIEW_STATUSES = new Set(["ELIGIBLE", "INVITED", "GROUP_CASE", "IN_PROCESS"]);
 
 function pipelineStage(displayStatus: string, released: boolean) {
   if (released) return 3;
