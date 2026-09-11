@@ -23,9 +23,14 @@ export function rankScreeningResults(results: ScreeningResult[]) {
   applicants.sort((a, b) => b.averageScore - a.averageScore || (a.applicantName ?? "").localeCompare(b.applicantName ?? "") || a.code.localeCompare(b.code));
   const mean = applicants.reduce((sum, applicant) => sum + applicant.averageScore, 0) / applicants.length;
   const stdDev = Math.sqrt(applicants.reduce((sum, applicant) => sum + (applicant.averageScore - mean) ** 2, 0) / applicants.length);
-  return applicants.map((applicant, index) => ({
-    ...applicant,
-    rank: index + 1,
-    zScore: applicants.length < 2 || stdDev === 0 ? null : (applicant.averageScore - mean) / stdDev,
-  }));
+  // Dense ranking: equal averages share a rank and the next distinct average takes rank + 1.
+  let rank = 0;
+  return applicants.map((applicant, index) => {
+    if (index === 0 || applicant.averageScore !== applicants[index - 1].averageScore) rank += 1;
+    return {
+      ...applicant,
+      rank,
+      zScore: applicants.length < 2 || stdDev === 0 ? null : (applicant.averageScore - mean) / stdDev,
+    };
+  });
 }

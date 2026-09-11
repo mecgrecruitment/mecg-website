@@ -109,6 +109,9 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   screening_assignment_detail: isScreeningDetail,
   screening_assignment_inputs: isScreeningAssignmentInputs,
   approve_screening_packets: (value) => isRecord(value) && hasNumber(value, "approved") && Array.isArray(value.failed),
+  // Void RPC: PostgREST hands back an empty body, which supabase-js reports as null.
+  reset_screening_batch: (value) => value == null || value === "",
+  reassign_screening_reader: (value) => typeof value === "number" && Number.isInteger(value) && value >= 0,
   begin_headshot_upload: objectWith(["path", "string"]),
   attach_headshot: (value) =>
     isRecord(value) && (value.previousPath === null || typeof value.previousPath === "string"),

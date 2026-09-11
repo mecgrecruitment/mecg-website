@@ -6,7 +6,7 @@ function review(code: string, score: number, recommendation: ScreeningResult["re
   return { code, applicationId: `id-${code}`, applicantName, classYear: "JUNIOR", major: "Economics", recommendation, score, submittedAt: "2026-09-01T00:00:00Z", ratings: [] };
 }
 
-test("ranked screening results sort by average score, then name, then code", () => {
+test("ranked screening results sort by average score, then name, then code, with dense ranks", () => {
   const ranked = rankScreeningResults([
     review("APP-03", 3, "HOLD", "Zed"),
     review("APP-01", 4, "ADVANCE", "Amy"),
@@ -14,7 +14,7 @@ test("ranked screening results sort by average score, then name, then code", () 
     review("APP-04", 3, "HOLD", "Bob"),
   ]);
   assert.deepEqual(ranked.map((applicant) => applicant.code), ["APP-01", "APP-02", "APP-04", "APP-03"]);
-  assert.deepEqual(ranked.map((applicant) => applicant.rank), [1, 2, 3, 4]);
+  assert.deepEqual(ranked.map((applicant) => applicant.rank), [1, 2, 2, 2]);
   assert.deepEqual(ranked[1].recommendationCounts, { DECLINE: 1 });
 });
 
@@ -39,4 +39,9 @@ test("average is per applicant, not per review", () => {
   assert.equal(ranked[0].averageScore, 3);
   assert.equal(ranked[0].reviews.length, 3);
   assert.deepEqual(ranked[0].recommendationCounts, { ADVANCE: 3 });
+});
+
+test("dense ranking increments by one after a tie", () => {
+  const ranked = rankScreeningResults([review("A", 5), review("B", 4), review("C", 4), review("D", 3)]);
+  assert.deepEqual(ranked.map((applicant) => [applicant.code, applicant.rank]), [["A", 1], ["B", 2], ["C", 2], ["D", 3]]);
 });

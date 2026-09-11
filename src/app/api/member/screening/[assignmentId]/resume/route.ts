@@ -20,7 +20,21 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ ass
     console.error("screening resume signed url failed", signedError);
     return NextResponse.json({ error: "The resume is temporarily unavailable" }, { status: 502 });
   }
-  const response = NextResponse.redirect(signed.signedUrl);
-  response.headers.set("Cache-Control", "private, no-store");
-  return response;
+  // Proxy the bytes rather than redirecting so the storage URL never reaches the reader's browser history.
+  const upstream = await fetch(signed.signedUrl, { cache: "no-store" }).catch((cause: unknown) => {
+    console.error("screening resume fetch failed", cause);
+    return null;
+  });
+  if (!upstream?.ok) {
+    if (upstream) console.error("screening resume fetch failed", upstream.status);
+    return NextResponse.json({ error: "The resume is temporarily unavailable" }, { status: 502 });
+  }
+  return new NextResponse(upstream.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": 'inline; filename="resume.pdf"',
+      "Cache-Control": "private, no-store",
+    },
+  });
 }

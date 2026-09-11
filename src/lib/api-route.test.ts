@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { rateLimitRouteResponse, requestReference, routeJsonResponse } from "./api-route.ts";
+import { mapRpcError, mapRpcErrorVerbose, rateLimitRouteResponse, requestReference, routeJsonResponse } from "./api-route.ts";
 
 test("requestReference accepts a safe upstream request id and rejects log injection", () => {
   assert.equal(requestReference({ headers: new Headers({ "x-request-id": "edge:request-1" }) }), "edge:request-1");
@@ -43,4 +43,13 @@ test("rateLimitRouteResponse distinguishes an exhausted limit from limiter unava
   assert.equal(unavailable.status, 503);
   assert.equal(unavailable.headers.get("retry-after"), "30");
   assert.equal((await unavailable.json()).code, "SERVICE_UNAVAILABLE");
+});
+
+test("mapRpcErrorVerbose surfaces the Postgres message only for the operator-facing codes", () => {
+  assert.deepEqual(mapRpcErrorVerbose({ code: "55000", message: "Batch already has reviews" }), { body: { error: "Batch already has reviews" }, status: 409 });
+  assert.deepEqual(mapRpcErrorVerbose({ code: "22023", message: "Pick at least three readers" }), { body: { error: "Pick at least three readers" }, status: 400 });
+  assert.deepEqual(mapRpcErrorVerbose({ code: "42501", message: "Not a reader" }), { body: { error: "Not a reader" }, status: 403 });
+  assert.deepEqual(mapRpcErrorVerbose({ code: "P0002", message: "row missing" }), mapRpcError({ code: "P0002", message: "row missing" }));
+  assert.deepEqual(mapRpcErrorVerbose({ code: "XX000", message: "internal" }), { body: { error: "An unexpected error occurred" }, status: 500 });
+  assert.deepEqual(mapRpcErrorVerbose({ code: "55000", message: "  " }), { body: { error: "Request could not be completed" }, status: 409 });
 });

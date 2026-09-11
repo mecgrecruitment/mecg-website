@@ -44,8 +44,11 @@ export default async function ScreeningAdminPage() {
     rejected: byStatus("REJECTED").length,
     assigned: overview.assigned,
     submitted: overview.submitted,
+    packets: packets.length,
     reviewers: overview.reviewers.map(({ id, name, assigned, submitted }) => ({ id, name, assigned, submitted })),
   };
+  // The overview withholds packets from anyone enrolled as a reader in the batch.
+  const packetsHidden = Boolean(overview) && packets.length === 0 && (overview?.assigned ?? 0) > 0;
   const ranked = rankScreeningResults(overview?.results ?? []);
   const reviewerSlots = Math.max(overview?.reviewsPerApplication ?? 3, ...ranked.map((applicant) => applicant.reviews.length));
 
@@ -57,10 +60,7 @@ export default async function ScreeningAdminPage() {
           {unapproved.map((packet) => (
             <article key={packet.id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-mono text-xs text-mecg-navy/60">{packet.code}</p>
-                  <h3 className="mt-1 font-semibold">{packet.applicantName}</h3>
-                </div>
+                <h3 className="font-semibold">{packet.applicantName}</h3>
                 <StatusPill tone="orange">{statusLabel(packet.status)}</StatusPill>
               </div>
               <div className="mt-4 space-y-4">{(packet.content.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h4 className="text-sm font-medium">{response.question}</h4><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
@@ -88,7 +88,8 @@ export default async function ScreeningAdminPage() {
         description="Choose readers, approve the identity-free copies, send them out, then close and rank. Readers never see who wrote what."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
-      <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} />
+      <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} packetsHidden={packetsHidden} />
+      {packetsHidden && <p className="text-sm text-mecg-navy/55">Applications are hidden while you are a reader in this batch.</p>}
       {packets.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold">All applications</h2>
@@ -121,14 +122,16 @@ export default async function ScreeningAdminPage() {
                           </div>
                         </td>
                       </tr>
-                      <tr className="border-b border-mecg-navy/10">
-                        <td colSpan={4} className="px-4 pb-3 pt-1">
-                          <details>
-                            <summary className="cursor-pointer text-[13px] font-semibold text-mecg-navy/70">Responses</summary>
-                            <div className="mt-3 space-y-4">{(packet.content?.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
-                          </details>
-                        </td>
-                      </tr>
+                      {overview?.status !== "DRAFT" && (
+                        <tr className="border-b border-mecg-navy/10">
+                          <td colSpan={4} className="px-4 pb-3 pt-1">
+                            <details>
+                              <summary className="cursor-pointer text-[13px] font-semibold text-mecg-navy/70">Responses</summary>
+                              <div className="mt-3 space-y-4">{(packet.content?.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</p></div>)}</div>
+                            </details>
+                          </td>
+                        </tr>
+                      )}
                     </Fragment>
                   ))}
                 </tbody>

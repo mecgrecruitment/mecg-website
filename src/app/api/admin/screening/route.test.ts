@@ -52,3 +52,52 @@ test("POST /api/admin/screening APPROVE_ALL calls approve_screening_packets and 
   assert.deepEqual(await res.json(), { data: summary });
   assert.deepEqual(calls, [["approve_screening_packets", { target_batch_id: "batch-1" }]]);
 });
+
+test("POST /api/admin/screening RESET calls reset_screening_batch", async (t) => {
+  const calls: Array<[string, unknown]> = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: {
+      createClient: async () => ({
+        rpc: async (name: string, args: unknown) => { calls.push([name, args]); return { data: null, error: null }; },
+      }),
+    },
+  });
+  const { POST } = await importRoute("reset");
+  const res = await POST(postRequest({ cycleId: "cycle-1", action: "RESET", batchId: "batch-1" }));
+  assert.equal(res.status, 200);
+  assert.deepEqual(calls, [["reset_screening_batch", { target_batch_id: "batch-1" }]]);
+});
+
+test("POST /api/admin/screening REASSIGN_READER calls reassign_screening_reader and returns the count", async (t) => {
+  const calls: Array<[string, unknown]> = [];
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: {
+      createClient: async () => ({
+        rpc: async (name: string, args: unknown) => { calls.push([name, args]); return { data: 7, error: null }; },
+      }),
+    },
+  });
+  const { POST } = await importRoute("reassign");
+  const res = await POST(postRequest({ cycleId: "cycle-1", action: "REASSIGN_READER", batchId: "batch-1", reviewerId: "reader-1" }));
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { data: { reassigned: 7 } });
+  assert.deepEqual(calls, [["reassign_screening_reader", { target_batch_id: "batch-1", target_reviewer_id: "reader-1" }]]);
+});
+
+test("POST /api/admin/screening surfaces the RPC message for a 55000 refusal", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: {
+      createClient: async () => ({
+        rpc: async () => ({ data: null, error: { code: "55000", message: "Reviews have been submitted; the batch cannot be reset" } }),
+      }),
+    },
+  });
+  t.mock.method(console, "error", () => {});
+  const { POST } = await importRoute("reset-refused");
+  const res = await POST(postRequest({ cycleId: "cycle-1", action: "RESET", batchId: "batch-1" }));
+  assert.equal(res.status, 409);
+  assert.equal((await res.json()).error, "Reviews have been submitted; the batch cannot be reset");
+});

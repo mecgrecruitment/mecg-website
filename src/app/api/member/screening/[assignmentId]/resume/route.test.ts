@@ -48,14 +48,33 @@ test("GET screening resume returns 404 when the RPC reports P0002", async (t) =>
   assert.equal((await res.json()).error, "Not found");
 });
 
-test("GET screening resume redirects to the signed URL", async (t) => {
+test("GET screening resume proxies the signed URL's bytes as an inline PDF", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/supabase/server", {
     namedExports: { createClient: async () => client({ data: "cycle-1/app-1/resume.pdf", error: null }) },
   });
-  const { GET } = await importRoute("302");
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    assert.equal(String(input), SIGNED_URL);
+    return new Response("%PDF-1.4 bytes", { status: 200, headers: { "content-type": "application/octet-stream" } });
+  });
+  const { GET } = await importRoute("200");
   const res = await GET(getRequest(), { params });
-  assert.equal(res.status, 307);
-  assert.equal(res.headers.get("location"), SIGNED_URL);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("content-type"), "application/pdf");
+  assert.equal(res.headers.get("content-disposition"), 'inline; filename="resume.pdf"');
   assert.equal(res.headers.get("cache-control"), "private, no-store");
+  assert.equal(await res.text(), "%PDF-1.4 bytes");
+});
+
+test("GET screening resume returns 502 when storage refuses the signed URL", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: { createClient: async () => client({ data: "cycle-1/app-1/resume.pdf", error: null }) },
+  });
+  t.mock.method(globalThis, "fetch", async () => new Response("denied", { status: 403 }));
+  t.mock.method(console, "error", () => {});
+  const { GET } = await importRoute("502");
+  const res = await GET(getRequest(), { params });
+  assert.equal(res.status, 502);
+  assert.equal((await res.json()).error, "The resume is temporarily unavailable");
 });

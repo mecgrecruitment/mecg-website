@@ -68,6 +68,20 @@ export function mapRpcError(
   return { body: { error: "An unexpected error occurred" }, status: 500 };
 }
 
+// Codes whose message is written for the person acting (RAISE ... USING ERRCODE
+// in a rush RPC), so a route may surface it instead of the generic fallback.
+const VERBOSE_RPC_CODES = new Set(["22023", "55000", "42501"]);
+
+export function mapRpcErrorVerbose(
+  error: RpcError,
+  fallback?: string,
+): { body: { error: string }; status: number } {
+  const mapped = mapRpcError(error, fallback);
+  const message = error.message?.trim();
+  if (error.code && VERBOSE_RPC_CODES.has(error.code) && message) return { ...mapped, body: { error: message } };
+  return mapped;
+}
+
 export function requestReference(request: { headers: Headers }): string {
   const supplied = request.headers.get("x-request-id")?.trim();
   return supplied && /^[A-Za-z0-9._:-]{1,100}$/.test(supplied) ? supplied : randomUUID();

@@ -38,6 +38,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
   const lastSavedSignature = useRef<string | null>(null);
   const latestSignature = useRef("");
   const scoredCount = criteria.filter((criterion) => scores[criterion.id]).length;
+  const totalWeight = criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
   const draftPayload = useMemo(() => ({
     ratings: criteria.map((criterion) => ({
       criterionId: criterion.id,
@@ -242,7 +243,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
               tabIndex={-1}
               className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"
             >
-              <legend className="px-2 font-semibold">{criterion.name} · {criterion.weight}%</legend>
+              <legend className="px-2 font-semibold">{criterion.name} · {totalWeight ? Math.round((criterion.weight / totalWeight) * 100) : 0}%</legend>
               <p className="text-sm text-mecg-navy/55">{criterion.description}</p>
               <div className="mt-4 text-sm font-medium" id={`screening-rating-label-${criterion.id}`}>Rating</div>
               <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5" role="radiogroup" aria-labelledby={`screening-rating-label-${criterion.id}`}>

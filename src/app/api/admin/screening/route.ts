@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError, readJsonBody } from "@/lib/api-route";
+import { mapRpcErrorVerbose, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { distributeScreeningReviews, type ScreeningPacketInput, type ScreeningReviewerInput } from "@/lib/screening";
@@ -94,13 +94,21 @@ export async function POST(request: NextRequest) {
     result = await screeningRpc(supabase, "approve_screening_packets", { target_batch_id: String(body.batchId ?? "") });
   } else if (body.action === "FREEZE") {
     result = await screeningRpc(supabase, "freeze_screening_batch", { target_batch_id: String(body.batchId ?? "") });
+  } else if (body.action === "RESET") {
+    result = await screeningRpc(supabase, "reset_screening_batch", { target_batch_id: String(body.batchId ?? "") });
+  } else if (body.action === "REASSIGN_READER") {
+    const reassigned = await screeningRpc<number>(supabase, "reassign_screening_reader", {
+      target_batch_id: String(body.batchId ?? ""),
+      target_reviewer_id: String(body.reviewerId ?? ""),
+    });
+    result = reassigned.error ? reassigned : { data: { reassigned: reassigned.data ?? 0 }, error: null };
   } else {
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   }
 
   if (result.error) {
     console.error(`admin screening ${body.action} failed`, result.error);
-    const { body: errorBody, status } = mapRpcError(result.error);
+    const { body: errorBody, status } = mapRpcErrorVerbose(result.error);
     return NextResponse.json(errorBody, { status });
   }
   return NextResponse.json({ data: result.data });

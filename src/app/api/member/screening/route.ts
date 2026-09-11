@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError, readJsonBody } from "@/lib/api-route";
+import { mapRpcErrorVerbose, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     });
   if (result.error) {
     console.error(`member screening ${body.action} failed`, result.error);
-    const { body: errorBody, status } = mapRpcError(result.error);
+    const { body: errorBody, status } = mapRpcErrorVerbose(result.error);
     return NextResponse.json(errorBody, { status });
   }
   let nextAssignmentId: string | null = null;
