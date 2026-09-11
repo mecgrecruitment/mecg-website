@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
       .eq("cycle_id", cycleId)
       .not("submitted_at", "is", null)
       .neq("status", "DRAFT"),
-    supabase.from("events").select("id,name,starts_at").eq("cycle_id", cycleId).order("starts_at"),
+    supabase.from("events").select("id,name,starts_at,checkins(count)").eq("cycle_id", cycleId).order("starts_at"),
     supabase.from("evaluation_assignments").select("id,status,rounds!inner(cycle_id)").eq("rounds.cycle_id", cycleId),
     supabase.from("event_slots").select("id,capacity,event_id,slot_rsvps(id),events!inner(cycle_id)").eq("events.cycle_id", cycleId),
     supabase.from("referrals").select("id", { count: "exact", head: true }).eq("cycle_id", cycleId),
@@ -154,20 +154,19 @@ export default async function AdminDashboard() {
               </dl>
             </div>
             <div className="border-t border-mecg-navy/10 py-4 lg:border-l lg:border-t-0 lg:pl-6">
-              <p className="text-xs font-semibold text-mecg-navy/55">Coming up</p>
-              {nextEvent ? (
-                <div className="mt-2">
-                  <p className="font-semibold text-mecg-navy">{nextEvent.name}</p>
-                  <p className="mt-1 text-sm text-mecg-navy/55">{eventDate(nextEvent.starts_at)}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-                    {nextEventCapacity > 0 && (
-                      <p className="tabular text-xs text-mecg-navy/60">{nextEventRsvps}/{nextEventCapacity} RSVPs</p>
-                    )}
-                    <Link href={`/admin/events/${nextEvent.id}`} className="text-sm font-semibold text-mecg-blue hover:text-mecg-orange-ink">
-                      Open event →
-                    </Link>
-                  </div>
-                </div>
+              <p className="text-xs font-semibold text-mecg-navy/55">Events</p>
+              {events.length ? (
+                <ul className="mt-2 divide-y divide-mecg-navy/10">
+                  {events.map((event) => (
+                    <li key={event.id} className="py-2 first:pt-0 last:pb-0">
+                      <Link href={`/admin/events/${event.id}`} className="font-semibold text-mecg-navy hover:text-mecg-orange-ink">{event.name}</Link>
+                      <p className="mt-0.5 text-xs text-mecg-navy/55">
+                        {eventDate(event.starts_at)} · <span className="tabular">{event.checkins[0]?.count ?? 0} checked in</span>
+                        {event.id === nextEvent?.id && nextEventCapacity > 0 && <> · <span className="tabular">{nextEventRsvps}/{nextEventCapacity} RSVPs</span></>}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
               ) : (
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm text-mecg-navy/55">No upcoming events are scheduled.</p>
