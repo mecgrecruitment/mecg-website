@@ -33,6 +33,7 @@ type ApplicationDossierRow = {
   status: string;
   resume_storage_path: string | null;
   cycle_id: string;
+  pnm_id: string;
   offer_response: string | null;
   offer_responded_at: string | null;
   offer_expires_at: string | null;
@@ -150,7 +151,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
   const returnTo = validateRecruitmentReturnTo(query.returnTo);
   const user = await requireAdmin();
   const supabase = await createClient();
-  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
+  const applicationSelect: string = "id,status,resume_storage_path,cycle_id,pnm_id,pnms!inner(name,contact,preferred_name,phone,class_year,major,linkedin_url,accessibility_notes)";
   const { data, error } = await supabase
     .from("applications")
     .select(applicationSelect)
@@ -233,6 +234,10 @@ export default async function ApplicantDossier({ params, searchParams }: { param
     resumeDocument = document;
   }
 
+  const checkinsResult = await supabase.from("checkins").select("checked_in_at,events!inner(name,starts_at,cycle_id)").eq("pnm_id", application.pnm_id).eq("events.cycle_id", cycleId);
+  if (checkinsResult.error) throw checkinsResult.error;
+  const eventsAttended = checkinsResult.data.map((checkin) => checkin.events).sort((a, b) => a.starts_at.localeCompare(b.starts_at)).map((event) => event.name);
+
   if (committeeOnly) {
     return (
       <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6 sm:p-10">
@@ -253,6 +258,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
             {person.phone && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Phone</dt><dd>{person.phone}</dd></div>}
             {year && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Class year</dt><dd>{year}</dd></div>}
             {person.major && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Major</dt><dd>{person.major}</dd></div>}
+            <div><dt className="text-[13px] font-semibold text-mecg-navy/60">Events attended</dt><dd>{eventsAttended.length ? eventsAttended.join(", ") : "None"}</dd></div>
             {person.linkedin_url && <div><dt className="text-[13px] font-semibold text-mecg-navy/60">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
           </dl>
           <ResumePanel
@@ -417,6 +423,10 @@ export default async function ApplicantDossier({ params, searchParams }: { param
                 <dd>{person.major}</dd>
               </div>
             )}
+            <div>
+              <dt className="text-[13px] font-semibold text-mecg-navy/60">Events attended</dt>
+              <dd>{eventsAttended.length ? eventsAttended.join(", ") : "None"}</dd>
+            </div>
             {!panelOnly && person.linkedin_url && (
               <div>
                 <dt className="text-[13px] font-semibold text-mecg-navy/60">LinkedIn</dt>
