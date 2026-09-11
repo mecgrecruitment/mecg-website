@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
     supabase.from("rounds").select("id,name,status").eq("cycle_id", cycleId).order("name"),
     supabase
       .from("applications")
-      .select("id,status,submitted_at,resume_storage_path,pnms!inner(id,name,contact)")
+      .select("id,status,submitted_at,resume_storage_path,pnms!inner(id,name,contact,major)")
       .eq("cycle_id", cycleId)
       .not("submitted_at", "is", null)
       .neq("status", "DRAFT"),
@@ -213,6 +213,7 @@ export default async function AdminDashboard() {
           status: application.status,
           name: application.pnms.name,
           contact: application.pnms.contact,
+          major: application.pnms.major ?? "",
           submittedAt: application.submitted_at,
           submittedLabel: submittedDate(application.submitted_at),
           hasResume: Boolean(application.resume_storage_path),

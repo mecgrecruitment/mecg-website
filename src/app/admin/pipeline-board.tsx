@@ -22,6 +22,7 @@ import StatusPill from "@/components/status-pill";
 import SegmentedControl from "@/components/segmented-control";
 import { initials } from "@/lib/initials";
 import { applicationStatusLabel } from "@/lib/labels";
+import { canonicalMajor } from "@/lib/major";
 import {
   DECIDED_PIPELINE_STATUSES,
   PIPELINE_STATUSES,
@@ -34,6 +35,7 @@ type PipelineApplication = {
   status: PipelineStatus;
   name: string;
   contact: string;
+  major: string;
   submittedAt: string;
   submittedLabel: string;
   hasResume: boolean;
@@ -43,6 +45,7 @@ type PipelineApplication = {
 type ApplicantView = "ALL" | "PIPELINE";
 type ResumeFilter = "ALL" | "ON_FILE" | "MISSING";
 type StatusFilter = "ALL" | PipelineStatus;
+type RosterSort = "NAME" | "MAJOR" | "NEWEST" | "OLDEST";
 
 const ACTIVE_STATUSES = PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status));
 const DECIDED_STATUSES = PIPELINE_STATUSES.filter((status) => DECIDED_PIPELINE_STATUSES.has(status));
@@ -144,8 +147,10 @@ function ApplicantRoster({
   cycleId,
   statusFilter,
   resumeFilter,
+  sort,
   onStatusFilterChange,
   onResumeFilterChange,
+  onSortChange,
   selectedIds,
   onToggleSelected,
   returnTo,
@@ -157,8 +162,10 @@ function ApplicantRoster({
   cycleId: string;
   statusFilter: StatusFilter;
   resumeFilter: ResumeFilter;
+  sort: RosterSort;
   onStatusFilterChange: (filter: StatusFilter) => void;
   onResumeFilterChange: (filter: ResumeFilter) => void;
+  onSortChange: (sort: RosterSort) => void;
   selectedIds: Set<string>;
   onToggleSelected: (applicationId: string) => void;
   returnTo: string;
@@ -198,6 +205,22 @@ function ApplicantRoster({
               <option value="MISSING">Missing resume</option>
             </select>
           </label>
+          <label className="text-xs font-medium text-mecg-navy/65">
+            <span className="mb-1 block">Sort</span>
+            <select
+              value={sort}
+              onChange={(event) => {
+                const value = event.target.value;
+                onSortChange(value === "MAJOR" || value === "NEWEST" || value === "OLDEST" ? value : "NAME");
+              }}
+              className="select-control w-48 text-sm"
+            >
+              <option value="NAME">Name (A-Z)</option>
+              <option value="MAJOR">Major (A-Z)</option>
+              <option value="NEWEST">Date applied (newest)</option>
+              <option value="OLDEST">Date applied (oldest)</option>
+            </select>
+          </label>
         </div>
         <p className="text-sm text-mecg-navy/60" aria-live="polite">Showing {applications.length} of {total}</p>
       </div>
@@ -225,7 +248,7 @@ function ApplicantRoster({
                   <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="font-semibold text-mecg-navy hover:underline">
                     {application.name}
                   </Link>
-                  <p className="mt-0.5 truncate text-xs text-mecg-navy/60">{application.contact}</p>
+                  <p className="mt-0.5 truncate text-xs text-mecg-navy/60">{[application.contact, canonicalMajor(application.major)].filter(Boolean).join(" · ")}</p>
                 </div>
               </div>
               <div>
@@ -288,6 +311,10 @@ function PipelineBoardInner({
     const resumeParam = searchParams.get("resume");
     if (resumeParam === "ON_FILE" || resumeParam === "MISSING") return resumeParam;
     return filterParam === "MISSING_RESUME" ? "MISSING" : "ALL";
+  });
+  const [sort, setSort] = useState<RosterSort>(() => {
+    const sortParam = searchParams.get("sort");
+    return sortParam === "MAJOR" || sortParam === "NEWEST" || sortParam === "OLDEST" ? sortParam : "NAME";
   });
   const [showDecided, setShowDecided] = useState(searchParams.get("decided") === "1");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -424,12 +451,26 @@ function PipelineBoardInner({
     );
   }, [boardApplications, query]);
 
-  const rosterApplications = useMemo(() => searchResults.filter((application) => {
+  const filteredApplications = useMemo(() => searchResults.filter((application) => {
     if (statusFilter !== "ALL" && application.status !== statusFilter) return false;
     if (resumeFilter === "ON_FILE" && !application.hasResume) return false;
     if (resumeFilter === "MISSING" && application.hasResume) return false;
     return true;
   }), [resumeFilter, searchResults, statusFilter]);
+
+  const rosterApplications = useMemo(() => {
+    const rows = [...filteredApplications];
+    if (sort === "MAJOR") {
+      // Blank majors sort last so the roster does not open on a wall of empties.
+      return rows.sort((a, b) =>
+        (a.major ? 0 : 1) - (b.major ? 0 : 1) ||
+        canonicalMajor(a.major).localeCompare(canonicalMajor(b.major), undefined, { sensitivity: "base" }) ||
+        a.name.localeCompare(b.name));
+    }
+    if (sort === "NEWEST") return rows.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+    if (sort === "OLDEST") return rows.sort((a, b) => a.submittedAt.localeCompare(b.submittedAt));
+    return rows.sort((a, b) => a.name.localeCompare(b.name));
+  }, [filteredApplications, sort]);
 
   const decidedCount = boardApplications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
   const draggingApplication = draggingApplicationId
@@ -444,10 +485,11 @@ function PipelineBoardInner({
     if (view !== "ALL") params.set("view", view);
     if (statusFilter !== "ALL") params.set("filter", statusFilter);
     if (resumeFilter !== "ALL") params.set("resume", resumeFilter);
+    if (sort !== "NAME") params.set("sort", sort);
     if (showDecided) params.set("decided", "1");
     const serialized = params.toString();
     return serialized ? `/admin?${serialized}` : "/admin";
-  }, [query, resumeFilter, showDecided, statusFilter, view]);
+  }, [query, resumeFilter, showDecided, sort, statusFilter, view]);
 
   return (
     <section id="applicants">
@@ -523,8 +565,10 @@ function PipelineBoardInner({
             cycleId={cycleId}
             statusFilter={statusFilter}
             resumeFilter={resumeFilter}
+            sort={sort}
             onStatusFilterChange={setStatusFilter}
             onResumeFilterChange={setResumeFilter}
+            onSortChange={setSort}
             selectedIds={selectedIds}
             onToggleSelected={toggleSelected}
             returnTo={returnTo}
