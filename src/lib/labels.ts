@@ -90,6 +90,13 @@ const REFERRAL_STATUS: Record<string, string> = {
   PASSED: "Not this cycle",
 };
 
+const HASH_STAGE: Record<string, string> = {
+  APPLICATION: "Application",
+  SPEED_DATING: "Speed Dating",
+  GROUP_CASE: "Group Case",
+  FINAL: "Final",
+};
+
 const MEMBER_ROLE: Record<string, string> = {
   MEMBER: "Member",
   BOARD: "Board",
@@ -118,6 +125,7 @@ export const decisionStatusLabel = (value: string | null | undefined) => lookup(
 export const decisionOutcomeLabel = (value: string | null | undefined) => lookup(DECISION_OUTCOME, value);
 export const eventStatusLabel = (value: string | null | undefined) => lookup(EVENT_STATUS, value);
 export const memberRoleLabel = (value: string | null | undefined) => lookup(MEMBER_ROLE, value);
+export const hashStageLabel = (value: string | null | undefined) => lookup(HASH_STAGE, value);
 export const referralStatusLabel = (value: string | null | undefined) => lookup(REFERRAL_STATUS, value);
 
 // The order the board moves a referral through, for building a dropdown.

@@ -20,6 +20,7 @@ export type CurrentUser = {
       id: string;
       name: string;
       status: string;
+      hash_stage: string | null;
       createdAt: Date;
     };
   }>;
@@ -85,7 +86,7 @@ export async function currentUser(): Promise<CurrentUser | null> {
 
   const { data: membershipRows, error: membershipError } = await supabase
     .from("memberships")
-    .select("id, cycle_id, role, active, rush_cycles!inner(id, name, status, created_at)")
+    .select("id, cycle_id, role, active, rush_cycles!inner(id, name, status, hash_stage, created_at)")
     .eq("user_id", identity.appUserId)
     .eq("active", true);
   if (membershipError) throw membershipError;
@@ -104,6 +105,7 @@ export async function currentUser(): Promise<CurrentUser | null> {
         id: membership.rush_cycles.id,
         name: membership.rush_cycles.name,
         status: membership.rush_cycles.status,
+        hash_stage: membership.rush_cycles.hash_stage,
         createdAt: new Date(membership.rush_cycles.created_at),
       },
     })),

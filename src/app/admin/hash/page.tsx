@@ -8,60 +8,19 @@ import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evalu
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
 import { screeningRpc } from "@/lib/screening-rpc";
-import { hashOutcome } from "@/lib/hash-tally";
+import { currentHashStage, HASH_STAGE_RULES, HASH_STAGES, hashOutcome, type HashStage } from "@/lib/hash-tally";
 import { createAdminClient } from "@/lib/supabase/admin";
 import StatusPill from "@/components/status-pill";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, PreviewForm, ReleaseAllButton, ReleaseButton } from "../decision-form";
 import ApplyResultForm from "./apply-result-form";
+import { MemberNotes, MemberVote, type HashTallyRow } from "./member-vote";
+import StageHashPanel from "./stage-hash-panel";
 import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
 import { applicationStatusLabel, cycleStatusLabel, decisionOutcomeLabel, decisionStatusLabel, roundStatusLabel } from "@/lib/labels";
 
 export const metadata: Metadata = { title: "Decisions" };
-
-type HashTallyRow = {
-  application_id: string;
-  yes_count: number;
-  no_count: number;
-  unsure_count: number;
-  total_votes: number;
-  quorum: number;
-};
-
-// The counts and the rule that reads them belong together, and both layouts
-// show the same cell, so the rule is written once here.
-function MemberVote({ tally }: { tally: HashTallyRow | undefined }) {
-  if (!tally) return <span className="text-[12px] text-mecg-navy/55">—</span>;
-  const outcome = hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes);
-  return (
-    <div className="flex flex-col items-start gap-1.5">
-      <p className="text-[12px] text-mecg-navy/70">
-        <span className="tabular">{tally.yes_count}</span> yes · <span className="tabular">{tally.no_count}</span> no · <span className="tabular">{tally.unsure_count}</span> unsure
-      </p>
-      <StatusPill tone={outcome === "OFFER" ? "navy" : "neutral"}>{outcome === "OFFER" ? "Offer" : outcome === "REJECT" ? "No offer" : "Not enough votes"}</StatusPill>
-      {outcome === "PENDING" && <p className="text-[12px] text-mecg-navy/55"><span className="tabular">{tally.total_votes}/{tally.quorum}</span> votes so far</p>}
-    </div>
-  );
-}
-
-// Notes arrive without an author and in an order that cannot be lined up
-// against vote timestamps, so they are rendered exactly as they arrive.
-function MemberNotes({ notes }: { notes: string[] }) {
-  if (!notes.length) return null;
-  return (
-    <div>
-      <h3 className="text-[13px] font-semibold text-mecg-navy">What members wrote</h3>
-      <p className="mt-0.5 text-[12px] text-mecg-navy/55">Notes are shown without names.</p>
-      <ul className="mt-2 flex flex-col gap-1.5">
-        {notes.slice(0, 10).map((note, index) => (
-          <li key={`${index}-${note}`} className="text-[12px] leading-5 text-mecg-navy/70">{note}</li>
-        ))}
-      </ul>
-      {notes.length > 10 && <p className="mt-1.5 text-[12px] text-mecg-navy/55">and {notes.length - 10} more</p>}
-    </div>
-  );
-}
 
 // The vote binds, so applying it is the primary action and the hand-written
 // outcome sits behind a disclosure: a waitlist or a procedural review are the
@@ -115,13 +74,13 @@ export default async function HashBoard() {
   const canRelease = hasPermission(user.memberships, cycleId, "RELEASE");
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
-  if (!canPanel) redirect("/access-denied");
+  if (!canPanel && !canManageCycle) redirect("/access-denied");
   // Blind Hash review: a PANEL-only viewer (no MANAGE_CYCLE/RECRUITMENT_OPERATIONS) sees an
   // applicant code instead of a real name, matching blind screening's candidate_code.
   const panelOnly = canPanel && !canManageCycle && !canOperate;
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult, tallyResult, notesResult] = await Promise.all([
-    supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
+    supabase.from("rush_cycles").select("id,name,status,hash_stage,hash_quorum").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
     supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status,reason,communication_preview,decision_approvals(id)").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
@@ -144,6 +103,18 @@ export default async function HashBoard() {
   // function after the normal page authorization gate. The function returns
   // one boolean and cannot expose evaluation or applicant identity data.
   const admin = createAdminClient();
+  // A stage hash runs before decision lock and moves applicants between
+  // pipeline stages. The ballot and the eligible voters follow the stage rules.
+  const stage = currentHashStage(cycle);
+  const openStage: HashStage | null = stage && stage !== "FINAL" ? stage : null;
+  const ballotCounts = Object.fromEntries(HASH_STAGES.map((candidate) =>
+    [candidate, applications.filter((application) => HASH_STAGE_RULES[candidate].ballot.includes(application.status)).length])) as Record<HashStage, number>;
+  let eligibleVoters = 0;
+  if (openStage) {
+    const { data: voters, error: votersError } = await admin.from("memberships").select("role").eq("cycle_id", cycleId).eq("active", true);
+    if (votersError) throw votersError;
+    eligibleVoters = (voters ?? []).filter((voter) => HASH_STAGE_RULES[openStage].voterRoles.includes(voter.role)).length;
+  }
   const canonicalReadinessEntries = await Promise.all(applications.map(async (application) => {
     const result = await screeningRpc<boolean>(admin, "is_decision_ready", { target_application_id: application.id });
     return [application.id, result.error || typeof result.data !== "boolean" ? undefined : result.data] as const;
@@ -178,6 +149,11 @@ export default async function HashBoard() {
   if (!panelOnly) {
     for (const row of notesResult.data ?? []) notesByApplication.set(row.application_id, [...(notesByApplication.get(row.application_id) ?? []), row.note]);
   }
+  const stageRows = openStage
+    ? applications
+      .filter((application) => HASH_STAGE_RULES[openStage].ballot.includes(application.status))
+      .map((application) => ({ id: application.id, displayName: application.displayName, tally: tallyByApplication.get(application.id), notes: notesByApplication.get(application.id) ?? [] }))
+    : [];
   const cycleIssues = cycleReadinessIssues(cycle.status, rounds.map((round) => ({
     id: round.id,
     name: round.name,
@@ -260,10 +236,21 @@ export default async function HashBoard() {
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Decisions"
-        description="Resolve evidence exceptions, apply the members' vote, approve outcomes, and release them."
+        description="Run stage votes that move applicants through the pipeline, then resolve evidence exceptions, apply the final vote, approve outcomes, and release them."
         action={hashOpen ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Discussion mode</Link> : null}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
+      {stage !== "FINAL" && (
+        <StageHashPanel
+          cycleId={cycleId}
+          stage={openStage}
+          quorum={cycle.hash_quorum}
+          eligibleVoters={eligibleVoters}
+          ballotCounts={ballotCounts}
+          rows={stageRows}
+          canManageCycle={canManageCycle}
+        />
+      )}
       <section aria-labelledby="readiness-heading">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

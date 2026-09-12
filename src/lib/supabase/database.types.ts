@@ -1111,6 +1111,7 @@ export type Database = {
           cycle_id: string
           id: string
           note: string
+          stage: string
           updated_at: string
           vote: string
           voter_id: string
@@ -1121,6 +1122,7 @@ export type Database = {
           cycle_id: string
           id?: string
           note?: string
+          stage?: string
           updated_at?: string
           vote: string
           voter_id: string
@@ -1131,6 +1133,7 @@ export type Database = {
           cycle_id?: string
           id?: string
           note?: string
+          stage?: string
           updated_at?: string
           vote?: string
           voter_id?: string
@@ -1917,6 +1920,7 @@ export type Database = {
           closes_at: string | null
           created_at: string
           hash_quorum: number
+          hash_stage: string | null
           id: string
           name: string
           opens_at: string | null
@@ -1927,6 +1931,7 @@ export type Database = {
           closes_at?: string | null
           created_at?: string
           hash_quorum?: number
+          hash_stage?: string | null
           id?: string
           name: string
           opens_at?: string | null
@@ -1937,6 +1942,7 @@ export type Database = {
           closes_at?: string | null
           created_at?: string
           hash_quorum?: number
+          hash_stage?: string | null
           id?: string
           name?: string
           opens_at?: string | null
@@ -2487,6 +2493,14 @@ export type Database = {
         Args: { target_application_id: string }
         Returns: string
       }
+      apply_stage_hash_result: {
+        Args: { target_application_id: string }
+        Returns: string
+      }
+      apply_stage_hash_results: {
+        Args: { target_cycle_id: string }
+        Returns: number
+      }
       approve_decision: {
         Args: { target_decision_id: string }
         Returns: {
@@ -2954,6 +2968,14 @@ export type Database = {
           next_status: Database["rush"]["Enums"]["application_status"]
           target_application_id: string
         }
+        Returns: undefined
+      }
+      open_hash_stage: {
+        Args: { quorum: number; stage: string; target_cycle_id: string }
+        Returns: undefined
+      }
+      close_hash_stage: {
+        Args: { target_cycle_id: string }
         Returns: undefined
       }
       set_cycle_status: {

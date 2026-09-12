@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { hashOutcome } from "./hash-tally.ts";
+import { canVoteInStage, currentHashStage, hashOutcome } from "./hash-tally.ts";
 
 test("a tally below quorum is pending no matter how the votes lean", () => {
   assert.equal(hashOutcome(5, 4, 0, 4), "PENDING");
@@ -24,4 +24,17 @@ test("a yes majority offers, and unsure votes count toward quorum only", () => {
 
 test("an all-unsure tally at quorum rejects", () => {
   assert.equal(hashOutcome(5, 0, 0, 5), "REJECT");
+});
+
+test("an open stage wins, decision lock means the final vote, anything else is closed", () => {
+  assert.equal(currentHashStage({ hash_stage: "SPEED_DATING", status: "IN_PROCESS" }), "SPEED_DATING");
+  assert.equal(currentHashStage({ hash_stage: null, status: "DECISION_LOCK" }), "FINAL");
+  assert.equal(currentHashStage({ hash_stage: "GROUP_CASE", status: "DECISION_LOCK" }), "FINAL");
+  assert.equal(currentHashStage({ hash_stage: null, status: "IN_PROCESS" }), null);
+});
+
+test("the application hash is a board and committee vote; later stages open to every member", () => {
+  assert.equal(canVoteInStage("MEMBER", "APPLICATION"), false);
+  assert.equal(canVoteInStage("RECRUITMENT_COMMITTEE", "APPLICATION"), true);
+  assert.equal(canVoteInStage("MEMBER", "SPEED_DATING"), true);
 });

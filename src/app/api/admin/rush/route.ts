@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
+import { HASH_STAGES, type HashStage } from "@/lib/hash-tally";
 import { createClerkClient } from "@clerk/backend";
 import { CLERK_PASSWORD_MAX_LENGTH, CLERK_PASSWORD_MIN_LENGTH, hasValidClerkPasswordLength } from "@/lib/clerk-password";
 import { withClerkTimeout } from "@/lib/clerk-retry";
@@ -43,6 +44,8 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   DELETE_GROUP: "RECRUITMENT_OPERATIONS",
   SET_ROUND_STATUS: "MANAGE_CYCLE",
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
+  SET_HASH_STAGE: "MANAGE_CYCLE",
+  APPLY_STAGE_HASH: "MANAGE_CYCLE",
   SET_CYCLE_WINDOW: "MANAGE_CYCLE",
   SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
   SET_RUBRIC_CRITERIA: "MANAGE_CYCLE",
@@ -178,6 +181,24 @@ export async function POST(req: NextRequest) {
     ({ data, error } = await supabase.rpc("set_round_status", { target_round_id: String(body.roundId ?? ""), next_status: status as RoundStatus }));
   } else if (action === "SET_CYCLE_STATUS") {
     ({ data, error } = await supabase.rpc("set_cycle_status", { target_cycle_id: cycleId, next_status: status as CycleStatus }));
+  } else if (action === "SET_HASH_STAGE") {
+    // An empty stage closes the vote; the RPC owns the status gate and the
+    // refusal to open a second stage while one is running.
+    if (body.stage != null && typeof body.stage !== "string") return NextResponse.json({ error: "Invalid hash stage" }, { status: 400 });
+    const stage = body.stage || null;
+    if (stage === null) {
+      ({ data, error } = await supabase.rpc("close_hash_stage", { target_cycle_id: cycleId }));
+    } else {
+      const quorum = Number(body.quorum);
+      if (!HASH_STAGES.includes(stage as HashStage)) return NextResponse.json({ error: "Invalid hash stage" }, { status: 400 });
+      if (!Number.isInteger(quorum) || quorum < 1 || quorum > 500) return NextResponse.json({ error: "Quorum must be between 1 and 500" }, { status: 400 });
+      ({ data, error } = await supabase.rpc("open_hash_stage", { target_cycle_id: cycleId, stage, quorum }));
+    }
+  } else if (action === "APPLY_STAGE_HASH") {
+    const applicationId = typeof body.applicationId === "string" ? body.applicationId : "";
+    ({ data, error } = applicationId
+      ? await supabase.rpc("apply_stage_hash_result", { target_application_id: applicationId })
+      : await supabase.rpc("apply_stage_hash_results", { target_cycle_id: cycleId }));
   } else if (action === "SET_CYCLE_WINDOW") {
     const opensAt = parseOffsetDateTime(body.opensAt);
     const closesAt = parseOffsetDateTime(body.closesAt);

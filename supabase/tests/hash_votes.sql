@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(27);
+select extensions.plan(40);
 
 select extensions.has_table('rush', 'referrals', 'referrals are stored');
 select extensions.has_table('rush', 'hash_votes', 'hash votes are stored');
@@ -134,6 +134,67 @@ select extensions.ok(
 select extensions.ok(
   (select prosrc from pg_proc where oid = 'rush.cast_hash_vote(text,text,text)'::regprocedure) not like '%HASH_VOTE_CAST'', ''Application''%',
   'the vote audit row does not record the applicant'
+);
+
+-- Stage hashes. The rule table is the single source of who votes at which
+-- stage and where a YES sends the applicant, so the tests pin it directly.
+select extensions.has_column('rush', 'rush_cycles', 'hash_stage', 'a cycle names the stage hash that is open');
+select extensions.has_column('rush', 'hash_votes', 'stage', 'a vote carries the stage it was cast at');
+select extensions.ok(
+  exists(select 1 from pg_indexes where schemaname = 'rush' and tablename = 'hash_votes'
+    and indexdef like '%UNIQUE%' and indexdef like '%(application_id, voter_id, stage)%'),
+  'one vote per member per applicant per stage'
+);
+select extensions.ok(
+  not exists(select 1 from pg_constraint where conrelid = 'rush.hash_votes'::regclass and conname = 'hash_votes_application_id_voter_id_key'),
+  'the per-applicant unique key that would let a stage vote overwrite an earlier one is gone'
+);
+select extensions.ok(
+  exists(select 1 from pg_proc p where p.oid = 'rush.open_hash_stage(text,text,int)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']),
+  'open_hash_stage is a hardened security definer'
+);
+select extensions.ok(
+  exists(select 1 from pg_proc p where p.oid = 'rush.close_hash_stage(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']),
+  'close_hash_stage is a hardened security definer'
+);
+select extensions.ok(
+  exists(select 1 from pg_proc p where p.oid = 'rush.apply_stage_hash_result(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']),
+  'apply_stage_hash_result is a hardened security definer'
+);
+select extensions.ok(
+  exists(select 1 from pg_proc p where p.oid = 'rush.apply_stage_hash_results(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']),
+  'apply_stage_hash_results is a hardened security definer'
+);
+select extensions.ok(
+  has_function_privilege('authenticated', 'rush.apply_stage_hash_result(text)', 'EXECUTE')
+    and not has_function_privilege('anon', 'rush.apply_stage_hash_result(text)', 'EXECUTE')
+    and not has_function_privilege('anon', 'rush.open_hash_stage(text,text,int)', 'EXECUTE'),
+  'stage hash functions are reachable by members but not anon'
+);
+select extensions.ok(
+  not ('MEMBER' = any((select voter_roles from rush.hash_stage_rule('APPLICATION'))))
+    and 'BOARD' = any((select voter_roles from rush.hash_stage_rule('APPLICATION'))),
+  'the application hash is a board and committee screen, not a member vote'
+);
+select extensions.is(
+  (select pass_status from rush.hash_stage_rule('SPEED_DATING')),
+  'GROUP_CASE'::rush.application_status,
+  'passing the speed dating hash moves an applicant to GROUP_CASE'
+);
+
+update rush.rush_cycles set status = 'CLOSED' where status in ('DRAFT', 'OPEN', 'IN_PROCESS', 'DECISION_LOCK');
+insert into rush.rush_cycles(id, name, status) values
+  ('30000000-0000-4000-8000-000000000011', 'Stage hash cycle', 'IN_PROCESS');
+select extensions.is(
+  rush.current_hash_stage('30000000-0000-4000-8000-000000000011'),
+  null,
+  'no hash is open on an in-process cycle until the board opens one'
+);
+update rush.rush_cycles set status = 'DECISION_LOCK' where id = '30000000-0000-4000-8000-000000000011';
+select extensions.is(
+  rush.current_hash_stage('30000000-0000-4000-8000-000000000011'),
+  'FINAL',
+  'decision lock still implies the final hash'
 );
 
 select * from extensions.finish();

@@ -1,4 +1,5 @@
 import { hasPermission } from "@/lib/authorization";
+import { canVoteInStage, currentHashStage } from "@/lib/hash-tally";
 import type { CurrentUser } from "@/lib/auth";
 import { loadWorkspaceContext } from "@/lib/workspace-context";
 import { workspaceAdminTools, workspaceMemberTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
@@ -38,10 +39,13 @@ export default async function WorkspaceNav({
   const hasGroupCaseWork = currentContext?.hasGroupCaseWork ?? false;
 
   const can = (permission: Parameters<typeof hasPermission>[2]) => hasPermission(user.memberships, cycleId, permission);
-  // Every member votes once the cycle reaches decision lock, so the link is
-  // driven by cycle state rather than by role.
-  const votingOpen = user.memberships.some((membership) =>
-    membership.active && membership.cycleId === cycleId && membership.cycle.status === "DECISION_LOCK");
+  // The link follows the open ballot: a stage hash or the final vote at
+  // decision lock, and only for the roles that stage lets vote.
+  const votingOpen = user.memberships.some((membership) => {
+    if (!membership.active || membership.cycleId !== cycleId) return false;
+    const stage = currentHashStage(membership.cycle);
+    return stage !== null && canVoteInStage(membership.role, stage);
+  });
   const isBoard = user.memberships.some((membership) =>
     membership.active && ["BOARD", "OWNER"].includes(membership.role));
   const isOwner = user.memberships.some((membership) =>
