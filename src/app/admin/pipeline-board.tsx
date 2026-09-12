@@ -48,6 +48,12 @@ type StatusFilter = "ALL" | PipelineStatus;
 type RosterSort = "NAME" | "MAJOR" | "NEWEST" | "OLDEST";
 
 const ACTIVE_STATUSES = PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status));
+// Columns bigger than this get their own search box.
+const COLUMN_SEARCH_THRESHOLD = 8;
+
+function matchesApplicant(application: { name: string; contact: string }, term: string) {
+  return application.name.toLowerCase().includes(term) || application.contact.toLowerCase().includes(term);
+}
 const DECIDED_STATUSES = PIPELINE_STATUSES.filter((status) => DECIDED_PIPELINE_STATUSES.has(status));
 
 function ApplicantCard({
@@ -446,10 +452,11 @@ function PipelineBoardInner({
   const searchResults = useMemo(() => {
     const term = query.trim().toLowerCase();
     if (!term) return boardApplications;
-    return boardApplications.filter((application) =>
-      application.name.toLowerCase().includes(term) || application.contact.toLowerCase().includes(term),
-    );
+    return boardApplications.filter((application) => matchesApplicant(application, term));
   }, [boardApplications, query]);
+  // Per-column filter for the stage board. "Application in" holds most of the
+  // cycle at the start, and the page-level search sits a long scroll away.
+  const [columnQueries, setColumnQueries] = useState<Partial<Record<PipelineStatus, string>>>({});
 
   const filteredApplications = useMemo(() => searchResults.filter((application) => {
     if (statusFilter !== "ALL" && application.status !== statusFilter) return false;
@@ -588,7 +595,9 @@ function PipelineBoardInner({
           <DragDropContext onDragStart={startDragging} onDragEnd={finishDragging}>
             <div className={KANBAN_TRACK_CLASS_NAME} tabIndex={0} role="region" aria-label="Applicants by stage">
               {ACTIVE_STATUSES.map((status) => {
-                const column = searchResults.filter((application) => application.status === status);
+                const stageApplications = searchResults.filter((application) => application.status === status);
+                const columnTerm = (columnQueries[status] ?? "").trim().toLowerCase();
+                const column = columnTerm ? stageApplications.filter((application) => matchesApplicant(application, columnTerm)) : stageApplications;
                 const acceptsDraggedCard = legalDropStatuses?.has(status) ?? true;
                 return (
                   <article
@@ -598,9 +607,21 @@ function PipelineBoardInner({
                     <div className="mb-1.5 flex items-center justify-between gap-2 px-0.5">
                       <p className="text-[13px] font-semibold text-mecg-navy/55">{applicationStatusLabel(status)}</p>
                       <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
-                        {column.length}
+                        {columnTerm ? `${column.length}/${stageApplications.length}` : stageApplications.length}
                       </span>
                     </div>
+                    {(stageApplications.length > COLUMN_SEARCH_THRESHOLD || columnTerm) && (
+                      <label className="mb-1.5 block">
+                        <span className="sr-only">Search {applicationStatusLabel(status)}</span>
+                        <input
+                          type="search"
+                          value={columnQueries[status] ?? ""}
+                          onChange={(event) => setColumnQueries((current) => ({ ...current, [status]: event.target.value }))}
+                          placeholder="Search this stage…"
+                          className="field-control min-h-9 w-full rounded-lg bg-white text-[13px]"
+                        />
+                      </label>
+                    )}
                     <Droppable
                       droppableId={status}
                       isDropDisabled={Boolean(draggingApplication && !acceptsDraggedCard)}
@@ -614,7 +635,7 @@ function PipelineBoardInner({
                           {column.length === 0 && (
                             <div className={`flex min-h-28 flex-1 items-center justify-center rounded-xl border-[1.5px] border-dashed p-3 text-center ${snapshot.isDraggingOver ? "border-mecg-blue/45" : "border-mecg-navy/[0.14]"}`}>
                               <p className="text-[11.5px] text-mecg-navy/60">
-                                {snapshot.isDraggingOver ? "Drop here" : draggingApplication && !acceptsDraggedCard ? "Not a legal next stage" : query ? "No matches" : "No applicants yet"}
+                                {snapshot.isDraggingOver ? "Drop here" : draggingApplication && !acceptsDraggedCard ? "Not a legal next stage" : query || columnTerm ? "No matches" : "No applicants yet"}
                               </p>
                             </div>
                           )}
