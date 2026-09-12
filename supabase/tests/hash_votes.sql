@@ -172,8 +172,7 @@ select extensions.ok(
   'stage hash functions are reachable by members but not anon'
 );
 select extensions.ok(
-  not ('MEMBER' = any((select voter_roles from rush.hash_stage_rule('APPLICATION'))))
-    and 'BOARD' = any((select voter_roles from rush.hash_stage_rule('APPLICATION'))),
+  (select not ('MEMBER' = any(voter_roles)) and 'BOARD' = any(voter_roles) from rush.hash_stage_rule('APPLICATION')),
   'the application hash is a board and committee screen, not a member vote'
 );
 select extensions.is(
