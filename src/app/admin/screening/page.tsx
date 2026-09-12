@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -144,7 +145,7 @@ export default async function ScreeningAdminPage() {
       {overview?.status === "FROZEN" && (
         <section>
           <h2 className="text-xl font-semibold">Ranking</h2>
-          <p className="mt-1 text-sm text-mecg-navy/55">{ranked.length} applicants · tied averages share a rank</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">{ranked.length} applicants · tied averages share a rank · <Link href="/admin/screening/calibrated" className="font-semibold text-mecg-navy underline-offset-2 hover:underline">Reader-adjusted ranking</Link></p>
           <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="Screening ranking">
             <div className="min-w-[80rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">
