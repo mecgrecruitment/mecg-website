@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import OperationNotice from "@/components/operation-notice";
 import { initials } from "@/lib/initials";
@@ -50,6 +51,7 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
   const [rows, setRows] = useState<Record<string, RosterApplicant>>(() =>
     Object.fromEntries(initial.applicants.map((applicant) => [applicant.applicationId, applicant])));
   const [status, setStatus] = useState<Record<string, RowStatus>>({});
+  const { getToken } = useAuth();
   const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(() => new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   // Last server-confirmed values, so a failed save can put the score back without losing typed text.
@@ -98,11 +100,20 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
     sequence.current[applicationId] = ticket;
     setRowStatus(applicationId, { kind: "saving" });
     try {
-      const response = await fetch("/api/member/speed-dating/ratings", {
+      const post = () => fetch("/api/member/speed-dating/ratings", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ roundId: initial.roundId, applicationId, session: SESSION, score, note }),
       });
+      let response = await post();
+      // A phone that slept between taps sends a Clerk session cookie that
+      // expired while the tab was asleep; the middleware answers 401 before the
+      // route runs. Fetching a fresh token rewrites the cookie, so retry once.
+      if (response.status === 401) {
+        await getToken({ skipCache: true }).catch(() => null);
+        response = await post();
+      }
+      if (response.status === 401) throw new Error("Your sign-in expired. Reload the page and tap the star again.");
       const body: Partial<SpeedDatingRatingResult> & { error?: string } | null = await response.json().catch(() => null);
       if (!response.ok || typeof body?.savedAt !== "string") throw new Error(body?.error ?? "Could not save this rating");
       if (sequence.current[applicationId] !== ticket) return;
