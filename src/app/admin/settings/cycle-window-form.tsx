@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 import { cycleStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function CycleWindowForm({
   cycleId,
@@ -34,7 +35,7 @@ export default function CycleWindowForm({
       if (new Date(closes).getTime() <= new Date(opens).getTime()) {
         throw new Error("Applications must close after they open.");
       }
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "SET_CYCLE_WINDOW", cycleId, opensAt: opens, closesAt: closes }),

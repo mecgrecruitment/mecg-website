@@ -7,6 +7,7 @@ import FormField from "@/components/form-field";
 import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
 import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
 import { cycleStatusLabel, memberRoleLabel, roundStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type Option = { id: string; label: string };
 type MemberRole = "MEMBER" | "BOARD" | "PANEL" | "OWNER" | "RECRUITMENT_COMMITTEE";
@@ -64,7 +65,7 @@ function useRushAction(cycleId: string) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cycleId, ...payload }),

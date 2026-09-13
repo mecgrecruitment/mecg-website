@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export type IntakeQuestion = {
   key: string;
@@ -69,7 +70,7 @@ export default function QuestionEditor({
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cycleId, action: "SET_APPLICATION_QUESTIONS", questions }),

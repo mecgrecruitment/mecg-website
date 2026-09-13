@@ -6,6 +6,7 @@ import { isPipelineStatus, legalManualApplicationStatuses } from "@/lib/workflow
 import { moveApplicationRequest } from "./pipeline-kanban";
 import OperationNotice from "@/components/operation-notice";
 import { applicationStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function PipelineStatusForm({
   applicationId,
@@ -48,7 +49,7 @@ export default function PipelineStatusForm({
       }
       // A move into Speed Dating enrolls and staffs the applicant; a plain
       // status flip would leave them invisible to evaluators.
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(moveApplicationRequest(cycleId, applicationId, next)),

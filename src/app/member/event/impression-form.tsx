@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
 import { OBSERVATION_TAGS } from "./observation-tags";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function ImpressionForm({
   eventId,
@@ -30,7 +31,7 @@ export default function ImpressionForm({
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/member/impressions", {
+      const response = await authorizedFetch("/api/member/impressions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventId, applicationId, tags, note }),

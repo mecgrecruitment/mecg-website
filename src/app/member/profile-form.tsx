@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export type MemberProfile = {
   displayName: string;
@@ -27,7 +28,7 @@ export default function ProfileForm({ initial }: { initial: MemberProfile }) {
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/member/profile", {
+      const response = await authorizedFetch("/api/member/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function SetupForm() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function SetupForm() {
     setError("");
     setSuccess("");
     try {
-      const response = await fetch("/api/admin/setup", {
+      const response = await authorizedFetch("/api/admin/setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),

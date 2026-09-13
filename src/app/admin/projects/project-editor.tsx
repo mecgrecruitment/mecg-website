@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export type ProjectRow = {
   id: string;
@@ -56,7 +57,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/admin/projects", {
+      const response = await authorizedFetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

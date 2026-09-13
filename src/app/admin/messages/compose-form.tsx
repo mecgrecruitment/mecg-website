@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PIPELINE_STATUSES } from "@/lib/workflow";
 import { applicationStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 // Bulk send to a pipeline segment. Deliberately plain text rather than a rich
 // editor: the wrapper supplies the layout, and an editor here would be a second
@@ -65,7 +66,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
     setErrorField(null);
     setNotice("");
     try {
-      const response = await fetch("/api/admin/messages", {
+      const response = await authorizedFetch("/api/admin/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cycleId, statuses, subject, body: message }),

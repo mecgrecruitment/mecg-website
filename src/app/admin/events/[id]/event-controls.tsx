@@ -7,6 +7,7 @@ import OperationNotice from "@/components/operation-notice";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 import { EVENT_KINDS } from "@/lib/workflow";
 import { eventStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type EventData = {
   id: string; name: string; kind: string; location: string | null; visibility: string;
@@ -24,7 +25,7 @@ export default function EventControls({ event }: { event: EventData }) {
     const data = new FormData(form);
     setPending(true); setError("");
     try {
-      const response = await fetch(`/api/admin/events/${event.id}`, {
+      const response = await authorizedFetch(`/api/admin/events/${event.id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.get("name"), kind: data.get("kind"), location: data.get("location"), visibility: data.get("visibility"),
@@ -45,7 +46,7 @@ export default function EventControls({ event }: { event: EventData }) {
     if (!reason.trim() || !window.confirm("Cancel this event? Existing RSVPs will remain in the audit history.")) return;
     setPending(true); setError("");
     try {
-      const response = await fetch(`/api/admin/events/${event.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }) });
+      const response = await authorizedFetch(`/api/admin/events/${event.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }) });
       if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error ?? "Could not cancel event"); return; }
       router.refresh();
     } catch { setError("Could not cancel event"); } finally { setPending(false); }

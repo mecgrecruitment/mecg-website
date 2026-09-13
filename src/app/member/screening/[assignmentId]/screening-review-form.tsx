@@ -6,6 +6,7 @@ import OperationNotice from "@/components/operation-notice";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
 import { parseScreeningDraft } from "../screening-draft";
 import { screeningRecommendationWarning, screeningReviewBlocker } from "../screening-review-readiness";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type Criterion = { id: string; key: string; name: string; description: string; weight: number; required: boolean };
 
@@ -62,7 +63,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
       setDraftSaveState("loading");
       setDraftSaveError("");
       try {
-        const response = await fetch(`/api/member/screening/draft?assignmentId=${encodeURIComponent(assignmentId)}`, {
+        const response = await authorizedFetch(`/api/member/screening/draft?assignmentId=${encodeURIComponent(assignmentId)}`, {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -116,7 +117,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
       setDraftLoadFailed(false);
       setDraftSaveError("");
       try {
-        const response = await fetch(`/api/member/screening/draft?assignmentId=${encodeURIComponent(assignmentId)}`, {
+        const response = await authorizedFetch(`/api/member/screening/draft?assignmentId=${encodeURIComponent(assignmentId)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(draftPayload),
@@ -148,7 +149,7 @@ export default function ScreeningReviewForm({ assignmentId, criteria }: { assign
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/member/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assignmentId, ...payload }) });
+      const response = await authorizedFetch("/api/member/screening", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assignmentId, ...payload }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(body?.error ?? "Request failed");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { roundStatusLabel } from "@/lib/labels";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export type Criterion = {
   key: string;
@@ -59,7 +60,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cycleId: round.cycleId, action: "SET_RUBRIC_CRITERIA", roundId: round.roundId, criteria }),

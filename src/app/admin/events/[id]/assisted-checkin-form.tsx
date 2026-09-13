@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 const REASONS = [
   ["NO_CAMERA", "No camera available"],
@@ -25,7 +26,7 @@ export default function AssistedCheckinForm({ eventId, locked }: { eventId: stri
     setError("");
     setNotice("");
     try {
-      const response = await fetch(`/api/admin/events/${eventId}/assisted-checkin`, {
+      const response = await authorizedFetch(`/api/admin/events/${eventId}/assisted-checkin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: data.get("identifier"), reasonCode: data.get("reasonCode") }),

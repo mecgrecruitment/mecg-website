@@ -69,26 +69,26 @@ type ClerkWindow = Window & {
   Clerk?: { session?: { getToken(options?: { skipCache?: boolean }): Promise<string | null> } | null };
 };
 
-export class SessionExpiredError extends Error {
-  constructor() {
-    super("Your sign-in expired. Reload the page and try again.");
-    this.name = "SessionExpiredError";
-  }
-}
+export const SESSION_EXPIRED_MESSAGE = "Your sign-in expired. Reload the page and try again.";
 
-export async function refreshSessionToken(
+// A page waking from sleep fails thirty headshots at once; they share one
+// token request instead of each asking Clerk for their own.
+let inflightRefresh: Promise<boolean> | null = null;
+
+export function refreshSessionToken(
   timeoutMs = 5_000,
   clerkWindow: ClerkWindow = window as ClerkWindow,
 ) {
   const session = clerkWindow.Clerk?.session;
-  if (!session) return false;
+  if (!session) return Promise.resolve(false);
+  if (inflightRefresh) return inflightRefresh;
   // clerk-js retries a failed token fetch with a 3s-plus backoff of its own; on
   // venue wifi that can outlast the user's patience, so cap the wait here.
-  const token = await Promise.race([
+  inflightRefresh = Promise.race([
     session.getToken({ skipCache: true }).catch(() => null),
     new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
-  ]);
-  return token !== null;
+  ]).then((token) => token !== null).finally(() => { inflightRefresh = null; });
+  return inflightRefresh;
 }
 
 export async function authorizedFetch(
@@ -103,8 +103,11 @@ export async function authorizedFetch(
   if (response.status !== 401) return response;
   await refresh();
   const retried = await fetcher(input, init);
-  if (retried.status === 401) throw new SessionExpiredError();
-  return retried;
+  if (retried.status !== 401) return retried;
+  // Still refused with a fresh token: the session is gone, not just stale.
+  // Callers already render `body.error`, so hand them the instruction there
+  // instead of the middleware's bare "Unauthorized".
+  return Response.json({ error: SESSION_EXPIRED_MESSAGE }, { status: 401 });
 }
 
 // Runs `attempt` again after a thrown network error (fetch rejects; an HTTP
@@ -123,7 +126,7 @@ export async function retryOnNetworkError<T>(
     try {
       return await attempt();
     } catch (error) {
-      if (error instanceof SessionExpiredError || index >= delays.length || !stillWanted()) throw error;
+      if (index >= delays.length || !stillWanted()) throw error;
       await wait(delays[index]);
       if (!stillWanted()) throw error;
     }

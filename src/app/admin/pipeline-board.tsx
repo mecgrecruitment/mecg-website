@@ -30,6 +30,7 @@ import {
   isPipelineStatus,
   type PipelineStatus,
 } from "@/lib/workflow";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type PipelineApplication = {
   id: string;
@@ -373,7 +374,7 @@ function PipelineBoardInner({
     setBoardApplications((current) => moveApplicationInBoard(current, application.id, destinationStatus));
 
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(moveApplicationRequest(cycleId, application.id, destinationStatus)),
@@ -432,7 +433,7 @@ function PipelineBoardInner({
     setAdvancePending(true);
     setAdvanceNotice(null);
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "ADVANCE_SPEED_DATING", cycleId, applicationIds: ids }),

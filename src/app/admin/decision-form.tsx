@@ -6,6 +6,7 @@ import { useAction } from "@/lib/use-action";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
 import { decisionOutcomeLabel } from "@/lib/labels";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 const DECISION_OUTCOMES = ["OFFER", "WAITLIST", "REJECT", "PROCEDURAL_REVIEW"] as const;
 
@@ -117,7 +118,7 @@ export function ReleaseAllButton({ cycleId, readyCount }: { cycleId: string; rea
     setError("");
     setSuccess("");
     try {
-      const response = await fetch("/api/admin/decisions", {
+      const response = await authorizedFetch("/api/admin/decisions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "RELEASE_ALL", cycleId }),
@@ -168,7 +169,7 @@ export function OfferDeadlineForm({ applicationId, current }: { applicationId: s
     setSuccess("");
     try {
       const expiresAt = value ? detroitDateTimeToIso(value, current ?? undefined) : "";
-      const response = await fetch("/api/admin/decisions", {
+      const response = await authorizedFetch("/api/admin/decisions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt }),

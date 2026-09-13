@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatEasternDateTime } from "@/lib/date-time";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type Readiness = {
   ready: boolean;
@@ -25,7 +26,7 @@ const LABELS: Record<keyof Readiness["configuration"], string> = {
 };
 
 async function requestReadiness(): Promise<Readiness> {
-  const response = await fetch("/api/admin/operations", { cache: "no-store" });
+  const response = await authorizedFetch("/api/admin/operations", { cache: "no-store" });
   const body = await response.json();
   if (![200, 503].includes(response.status)) throw new Error(body?.error ?? "Could not check operations");
   return body as Readiness;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function RetryButton({ notificationId }: { notificationId: string }) {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function RetryButton({ notificationId }: { notificationId: string
     setPending(true);
     setMessage("");
     try {
-      const response = await fetch("/api/admin/notifications", {
+      const response = await authorizedFetch("/api/admin/notifications", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ notificationId }),

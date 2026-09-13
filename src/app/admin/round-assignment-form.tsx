@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type Option = { id: string; label: string };
 
@@ -27,7 +28,7 @@ export default function RoundAssignmentForm({
     const form = event.currentTarget;
     const data = new FormData(form);
     try {
-      const response = await fetch("/api/admin/rush", {
+      const response = await authorizedFetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

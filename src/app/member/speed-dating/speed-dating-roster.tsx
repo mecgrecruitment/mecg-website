@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import OperationNotice from "@/components/operation-notice";
-import { authorizedFetch, refreshSessionToken, retryOnNetworkError, SessionExpiredError } from "@/lib/client-fetch";
+import { authorizedFetch, refreshSessionToken, retryOnNetworkError } from "@/lib/client-fetch";
 import { initials } from "@/lib/initials";
 import { SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
 import { matchesApplicantName, type RosterApplicant, type SpeedDatingRoster } from "@/lib/speed-dating-roster";
@@ -125,8 +125,8 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
     } catch (saveError) {
       if (sequence.current[applicationId] !== ticket) return;
       patchRow(applicationId, { score: saved.current[applicationId].score });
-      const message = saveError instanceof SessionExpiredError ? "Your sign-in expired. Reload the page and tap the star again."
-        : saveError instanceof Error && !(saveError instanceof TypeError) ? saveError.message
+      const message = saveError instanceof Error && !(saveError instanceof TypeError)
+        ? saveError.message
         : "No connection. Check wifi and tap the star again.";
       setRowStatus(applicationId, { kind: "error", message });
     }

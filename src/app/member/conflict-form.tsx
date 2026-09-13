@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function ConflictForm({ applications }: { applications: { id: string; name: string }[] }) {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function ConflictForm({ applications }: { applications: { id: str
     setPending(true);
     const data = new FormData(event.currentTarget);
     try {
-      const response = await fetch("/api/member/conflicts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId: data.get("applicationId"), reason: data.get("reason") }) });
+      const response = await authorizedFetch("/api/member/conflicts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId: data.get("applicationId"), reason: data.get("reason") }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(body?.error ?? "Could not declare conflict");

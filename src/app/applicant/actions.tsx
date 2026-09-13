@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { setApplicantActionPending } from "./status-refresh";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 function replaceWithActionStatus(router: ReturnType<typeof useRouter>, action: "rsvp" | "buddy") {
   const params = new URLSearchParams(window.location.search);
@@ -35,7 +36,7 @@ export function SlotButton({ id }: { id: string }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/applicant/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
+      const response = await authorizedFetch("/api/applicant/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(responseError(body, "Could not RSVP"));
@@ -85,7 +86,7 @@ export function BuddyButton({ id }: { id: string }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/applicant/buddy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
+      const response = await authorizedFetch("/api/applicant/buddy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slotId: id }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(responseError(body, "Could not book"));
@@ -157,7 +158,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/applicant/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, accept: selected === "accept" }) });
+      const response = await authorizedFetch("/api/applicant/offer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, accept: selected === "accept" }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(responseError(body, "Could not record your response"));
@@ -243,7 +244,7 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, score: Number(score), note }) });
+      const response = await authorizedFetch("/api/applicant/survey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ applicationId, score: Number(score), note }) });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         setError(responseError(body, "Could not send feedback"));
@@ -325,7 +326,7 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/applicant/withdraw", {
+      const response = await authorizedFetch("/api/applicant/withdraw", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ applicationId }),

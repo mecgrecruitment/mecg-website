@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type BuddySlot = { id: string; startsAt: string; endsAt: string };
 
@@ -42,7 +43,7 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
     }
     const endsAt = new Date(startsAt.getTime() + 20 * 60 * 1000);
     try {
-      const response = await fetch("/api/member/buddy", {
+      const response = await authorizedFetch("/api/member/buddy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

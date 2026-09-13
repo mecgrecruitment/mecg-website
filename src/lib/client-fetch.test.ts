@@ -29,7 +29,7 @@ test("submission reconciliation keeps a non-committed result ambiguous", async (
   assert.equal(await reconcileSubmittedApplication({ fetcher, waits: [0, 0] }), false);
 });
 
-import { authorizedFetch, refreshSessionToken, retryOnNetworkError, SessionExpiredError } from "./client-fetch.ts";
+import { authorizedFetch, refreshSessionToken, retryOnNetworkError, SESSION_EXPIRED_MESSAGE } from "./client-fetch.ts";
 
 test("authorizedFetch retries once with a refreshed session after a 401", async () => {
   const statuses = [401, 200];
@@ -47,8 +47,10 @@ test("authorizedFetch leaves non-401 responses alone", async () => {
 });
 
 test("authorizedFetch reports an expired sign-in when the retry is refused too", async () => {
-  const fetcher: typeof fetch = async () => new Response(null, { status: 401 });
-  await assert.rejects(authorizedFetch("/api/x", {}, { fetcher, refresh: async () => false }), SessionExpiredError);
+  const fetcher: typeof fetch = async () => Response.json({ error: "Unauthorized" }, { status: 401 });
+  const response = await authorizedFetch("/api/x", {}, { fetcher, refresh: async () => false });
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { error: SESSION_EXPIRED_MESSAGE });
 });
 
 test("refreshSessionToken is a no-op without a Clerk session and bounded with one", async () => {
@@ -73,7 +75,7 @@ test("retryOnNetworkError retries thrown errors with the given delays and then g
   await assert.rejects(retryOnNetworkError(async () => { throw new TypeError("down"); }, { delays: [0], wait: async () => {} }), TypeError);
 });
 
-test("retryOnNetworkError stops when the action is superseded or the session expired", async () => {
+test("retryOnNetworkError stops when the action is superseded", async () => {
   let wanted = true;
   let calls = 0;
   await assert.rejects(retryOnNetworkError(async () => {
@@ -82,8 +84,18 @@ test("retryOnNetworkError stops when the action is superseded or the session exp
     throw new TypeError("down");
   }, { delays: [0, 0], wait: async () => {}, stillWanted: () => wanted }), TypeError);
   assert.equal(calls, 1);
+});
 
-  calls = 0;
-  await assert.rejects(retryOnNetworkError(async () => { calls += 1; throw new SessionExpiredError(); }, { delays: [0], wait: async () => {} }), SessionExpiredError);
+test("refreshSessionToken shares one in-flight token request", async () => {
+  let calls = 0;
+  let release!: (token: string) => void;
+  const session = { getToken: () => { calls += 1; return new Promise<string>((resolve) => { release = resolve; }); } };
+  const clerkWindow = { Clerk: { session } } as unknown as Window;
+  const first = refreshSessionToken(1_000, clerkWindow);
+  const second = refreshSessionToken(1_000, clerkWindow);
+  release("jwt");
+  assert.deepEqual(await Promise.all([first, second]), [true, true]);
   assert.equal(calls, 1);
+  await refreshSessionToken(1_000, clerkWindow).then(() => {}, () => {});
+  assert.equal(calls, 2);
 });

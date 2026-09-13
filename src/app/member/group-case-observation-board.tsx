@@ -5,6 +5,7 @@ import Link from "next/link";
 import { parseEvaluationDraftPayload, type EvaluationDraftPayload } from "@/app/api/member/evaluations/evaluation-draft-payload";
 import OperationNotice from "@/components/operation-notice";
 import { readEvaluationDraft, writeEvaluationDraft } from "@/lib/evaluation-draft-recovery";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 type Candidate = {
   assignmentId: string;
@@ -46,7 +47,7 @@ export default function GroupCaseObservationBoard({ candidates }: { candidates: 
       try {
         const loaded = await Promise.all(candidates.map(async (candidate) => {
           const local = readEvaluationDraft({ storage: window.sessionStorage, assignmentId: candidate.assignmentId, criteria: candidate.criteria });
-          const response = await fetch(`/api/member/evaluations/${encodeURIComponent(candidate.assignmentId)}/draft`, { cache: "no-store", signal: controller.signal });
+          const response = await authorizedFetch(`/api/member/evaluations/${encodeURIComponent(candidate.assignmentId)}/draft`, { cache: "no-store", signal: controller.signal });
           const body = await response.json().catch(() => null);
           if (!response.ok) throw new Error(body?.error ?? "Could not load Group Case notes");
           const parsed = body?.draft == null ? null : parseEvaluationDraftPayload(body.draft);
@@ -123,7 +124,7 @@ export default function GroupCaseObservationBoard({ candidates }: { candidates: 
     setState("saving");
     setError("");
     try {
-      const response = await fetch(`/api/member/evaluations/${encodeURIComponent(selected.assignmentId)}/draft`, {
+      const response = await authorizedFetch(`/api/member/evaluations/${encodeURIComponent(selected.assignmentId)}/draft`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(next),
