@@ -15,7 +15,19 @@ export default async function SpeedDatingPage() {
   const user = await requireMember();
   const membership = user.memberships.find((item) =>
     item.active && ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(item.role));
-  if (!membership) return null;
+  // Committee-only accounts reach this page from the nav but cannot grade; a
+  // blank page reads as a crash, so say what is going on.
+  if (!membership) {
+    return (
+      <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
+        <section className="rounded-2xl bg-white p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+          <h1 className="text-xl font-semibold text-mecg-navy">Speed Dating grading is for members</h1>
+          <p className="mt-2 text-sm leading-6 text-mecg-navy/65">Your account has the Recruitment Committee role only. Ask an owner to add the Member role if you are grading tonight.</p>
+          <Link href="/member" className="button-secondary mt-5 inline-flex">Return to My work</Link>
+        </section>
+      </main>
+    );
+  }
 
   const supabase = await createClient();
   const { data: round, error: roundError } = await supabase
