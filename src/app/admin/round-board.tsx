@@ -102,8 +102,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   const allApplications = (applicationsResult.data ?? [])
     .map((application) => ({ id: application.id, status: application.status, name: application.pnms.name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+  // Speed Dating coverage describes its enrolled cohort, not every open application in the cycle.
   const activeApplications = allApplications
-    .filter((application) => !["DRAFT", "WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status))
+    .filter((application) => round.kind === "SPEED_DATING"
+      ? ["INVITED", "GROUP_CASE", "IN_PROCESS", "FINAL_REVIEW"].includes(application.status)
+      : !["DRAFT", "WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status))
     .map((application) => ({ id: application.id, label: application.name }));
   const accounts = memberAccountsFor(membersResult.data ?? []);
   const memberNameById = new Map(accounts.map((account) => [account.id, account.name]));

@@ -17,6 +17,7 @@ import {
   canMoveApplication,
   kanbanDropStatuses,
   moveApplicationInBoard,
+  moveApplicationRequest,
 } from "./pipeline-kanban";
 import StatusPill from "@/components/status-pill";
 import SegmentedControl from "@/components/segmented-control";
@@ -59,6 +60,7 @@ const DECIDED_STATUSES = PIPELINE_STATUSES.filter((status) => DECIDED_PIPELINE_S
 function ApplicantCard({
   application,
   canOperate,
+  canAdvance,
   cycleId,
   controlId,
   returnTo,
@@ -69,6 +71,7 @@ function ApplicantCard({
 }: {
   application: PipelineApplication;
   canOperate: boolean;
+  canAdvance: boolean;
   cycleId: string;
   controlId: string;
   returnTo: string;
@@ -139,6 +142,7 @@ function ApplicantCard({
           controlId={controlId}
           compact
           disabled={isMoving}
+          canAdvance={canAdvance}
         />
       )}
     </div>
@@ -272,6 +276,7 @@ function ApplicantRoster({
                   cycleId={cycleId}
                   status={application.status}
                   controlId={`roster-${application.id}`}
+                  canAdvance={canAdvance}
                 />
               ) : (
                 <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-mecg-blue hover:underline">
@@ -325,6 +330,8 @@ function PipelineBoardInner({
   const [showDecided, setShowDecided] = useState(searchParams.get("decided") === "1");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmingAdvance, setConfirmingAdvance] = useState(false);
+  // Two-step confirm for "Advance all" in the Passed application round column.
+  const [confirmingStageAdvance, setConfirmingStageAdvance] = useState(false);
   const [advancePending, setAdvancePending] = useState(false);
   const [advanceNotice, setAdvanceNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const [draggingApplicationId, setDraggingApplicationId] = useState<string | null>(null);
@@ -357,7 +364,7 @@ function PipelineBoardInner({
     if (!destinationStatus || result.source.droppableId === destinationStatus) return;
 
     const application = boardApplications.find((candidate) => candidate.id === result.draggableId);
-    if (!application || movingIds.has(application.id) || !canMoveApplication(application.status, destinationStatus)) return;
+    if (!application || movingIds.has(application.id) || !canMoveApplication(application.status, destinationStatus, canAdvance)) return;
 
     const previousStatus = application.status;
     setMoveNotice(null);
@@ -369,19 +376,16 @@ function PipelineBoardInner({
       const response = await fetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "SET_APPLICATION_STATUS",
-          cycleId,
-          applicationId: application.id,
-          status: destinationStatus,
-        }),
+        body: JSON.stringify(moveApplicationRequest(cycleId, application.id, destinationStatus)),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error ?? "Could not update status");
 
       setMoveNotice({
         kind: "success",
-        message: `${application.name} moved to ${applicationStatusLabel(destinationStatus)}.`,
+        message: destinationStatus === "INVITED"
+          ? `${application.name} moved to Speed Dating and staffed with 2 evaluators.`
+          : `${application.name} moved to ${applicationStatusLabel(destinationStatus)}.`,
       });
       router.refresh();
     } catch (error) {
@@ -422,16 +426,16 @@ function PipelineBoardInner({
     setAdvanceNotice(null);
   }
 
-  async function advanceToSpeedDating() {
-    if (!canAdvance || selectedIds.size === 0) return;
-    const count = selectedIds.size;
+  async function advanceToSpeedDating(ids: string[]) {
+    if (!canAdvance || ids.length === 0) return;
+    const count = ids.length;
     setAdvancePending(true);
     setAdvanceNotice(null);
     try {
       const response = await fetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "ADVANCE_SPEED_DATING", cycleId, applicationIds: [...selectedIds] }),
+        body: JSON.stringify({ action: "ADVANCE_SPEED_DATING", cycleId, applicationIds: ids }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error ?? "Could not advance applicants");
@@ -441,6 +445,7 @@ function PipelineBoardInner({
       setAdvanceNotice({ kind: "success", message: `Advanced ${count} applicant${count === 1 ? "" : "s"}, created ${assignments} assignment${assignments === 1 ? "" : "s"}, and queued ${notifications} notification${notifications === 1 ? "" : "s"}.` });
       setSelectedIds(new Set());
       setConfirmingAdvance(false);
+      setConfirmingStageAdvance(false);
       router.refresh();
     } catch (error) {
       setAdvanceNotice({ kind: "error", message: error instanceof Error ? error.message : "Could not advance applicants" });
@@ -484,7 +489,7 @@ function PipelineBoardInner({
     ? boardApplications.find((application) => application.id === draggingApplicationId) ?? null
     : null;
   const legalDropStatuses = draggingApplication
-    ? new Set(kanbanDropStatuses(draggingApplication.status))
+    ? new Set(kanbanDropStatuses(draggingApplication.status, canAdvance))
     : null;
   const returnTo = useMemo(() => {
     const params = new URLSearchParams();
@@ -546,7 +551,7 @@ function PipelineBoardInner({
             {confirmingAdvance ? (
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="button-ghost-light text-sm" disabled={advancePending} onClick={() => setConfirmingAdvance(false)}>Cancel</button>
-                <button type="button" className="button-light text-sm" disabled={advancePending} onClick={advanceToSpeedDating}>
+                <button type="button" className="button-light text-sm" disabled={advancePending} onClick={() => advanceToSpeedDating([...selectedIds])}>
                   {advancePending ? "Advancing…" : `Confirm ${selectedIds.size} applicants`}
                 </button>
               </div>
@@ -610,6 +615,23 @@ function PipelineBoardInner({
                         {columnTerm ? `${column.length}/${stageApplications.length}` : stageApplications.length}
                       </span>
                     </div>
+                    {status === "ELIGIBLE" && canAdvance && column.length > 0 && (
+                      <div className="mb-1.5 flex flex-wrap items-center gap-1.5 px-0.5">
+                        {confirmingStageAdvance ? (
+                          <>
+                            <button type="button" className="button-secondary text-xs" disabled={advancePending} onClick={() => advanceToSpeedDating(column.map((application) => application.id))}>
+                              {advancePending ? "Advancing…" : `Confirm ${column.length}`}
+                            </button>
+                            <button type="button" className="button-secondary text-xs" disabled={advancePending} onClick={() => setConfirmingStageAdvance(false)}>Cancel</button>
+                            <p className="w-full text-[11px] text-mecg-navy/60">The whole cohort stops if any applicant cannot be staffed.</p>
+                          </>
+                        ) : (
+                          <button type="button" className="button-secondary text-xs" onClick={() => { setConfirmingStageAdvance(true); setAdvanceNotice(null); }}>
+                            {columnTerm ? `Advance ${column.length} shown` : `Advance all ${column.length} to Speed Dating`}
+                          </button>
+                        )}
+                      </div>
+                    )}
                     {(stageApplications.length > COLUMN_SEARCH_THRESHOLD || columnTerm) && (
                       <label className="mb-1.5 block">
                         <span className="sr-only">Search {applicationStatusLabel(status)}</span>
@@ -641,7 +663,7 @@ function PipelineBoardInner({
                           )}
                           {column.map((application, index) => {
                             const isMoving = movingIds.has(application.id);
-                            const hasDestination = kanbanDropStatuses(application.status).some(
+                            const hasDestination = kanbanDropStatuses(application.status, canAdvance).some(
                               (candidate) => candidate !== application.status,
                             );
                             return (
@@ -660,6 +682,7 @@ function PipelineBoardInner({
                                     <ApplicantCard
                                       application={application}
                                       canOperate={canOperate}
+                                      canAdvance={canAdvance}
                                       cycleId={cycleId}
                                       controlId={application.id}
                                       returnTo={returnTo}
@@ -721,6 +744,7 @@ function PipelineBoardInner({
                                 cycleId={cycleId}
                                 status={application.status}
                                 controlId={`decided-${application.id}`}
+                                canAdvance={canAdvance}
                               />
                             )}
                           </div>

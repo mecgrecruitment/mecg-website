@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { legalManualApplicationStatuses } from "@/lib/workflow";
+import { isPipelineStatus, legalManualApplicationStatuses } from "@/lib/workflow";
+import { moveApplicationRequest } from "./pipeline-kanban";
 import OperationNotice from "@/components/operation-notice";
 import { applicationStatusLabel } from "@/lib/labels";
 
@@ -13,6 +14,7 @@ export default function PipelineStatusForm({
   controlId,
   compact = false,
   disabled = false,
+  canAdvance = true,
 }: {
   applicationId: string;
   cycleId: string;
@@ -20,12 +22,16 @@ export default function PipelineStatusForm({
   controlId?: string;
   compact?: boolean;
   disabled?: boolean;
+  canAdvance?: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const destinations = legalManualApplicationStatuses(status).filter((item) => item !== status);
+  // INVITED goes through ADVANCE_SPEED_DATING, which needs MANAGE_CYCLE.
+  const destinations = legalManualApplicationStatuses(status).filter(
+    (item) => item !== status && (canAdvance || item !== "INVITED"),
+  );
   const busy = pending || disabled;
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -35,15 +41,17 @@ export default function PipelineStatusForm({
     setSuccess("");
     try {
       const data = new FormData(event.currentTarget);
+      const next = data.get("status");
+      if (typeof next !== "string" || !isPipelineStatus(next)) {
+        setError("Pick a stage first.");
+        return;
+      }
+      // A move into Speed Dating enrolls and staffs the applicant; a plain
+      // status flip would leave them invisible to evaluators.
       const response = await fetch("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "SET_APPLICATION_STATUS",
-          cycleId,
-          applicationId,
-          status: data.get("status"),
-        }),
+        body: JSON.stringify(moveApplicationRequest(cycleId, applicationId, next)),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {

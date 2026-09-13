@@ -5,6 +5,7 @@ import {
   canMoveApplication,
   kanbanDropStatuses,
   moveApplicationInBoard,
+  moveApplicationRequest,
 } from "./pipeline-kanban.ts";
 
 test("Kanban removes the single-column template before desktop column flow", () => {
@@ -16,6 +17,12 @@ test("Kanban destinations contain the current and legal active stages", () => {
   assert.deepEqual(kanbanDropStatuses("SUBMITTED"), ["SUBMITTED", "NEEDS_INFO", "ELIGIBLE"]);
   assert.deepEqual(kanbanDropStatuses("INVITED"), ["INVITED", "GROUP_CASE"]);
   assert.deepEqual(kanbanDropStatuses("FINAL_REVIEW"), ["FINAL_REVIEW"]);
+});
+
+test("Kanban hides Speed Dating from users who cannot advance", () => {
+  assert.deepEqual(kanbanDropStatuses("ELIGIBLE", false), ["ELIGIBLE"]);
+  assert.equal(canMoveApplication("ELIGIBLE", "INVITED", false), false);
+  assert.equal(canMoveApplication("ELIGIBLE", "INVITED", true), true);
 });
 
 test("Kanban moves reject the source, skipped stages, and decided stages", () => {
@@ -38,4 +45,18 @@ test("optimistic moves change only the selected application", () => {
     applications[1],
   ]);
   assert.equal(applications[0].status, "SUBMITTED");
+});
+
+test("moves to INVITED enroll through ADVANCE_SPEED_DATING, other moves flip status", () => {
+  assert.deepEqual(moveApplicationRequest("cycle", "app", "INVITED"), {
+    action: "ADVANCE_SPEED_DATING",
+    cycleId: "cycle",
+    applicationIds: ["app"],
+  });
+  assert.deepEqual(moveApplicationRequest("cycle", "app", "GROUP_CASE"), {
+    action: "SET_APPLICATION_STATUS",
+    cycleId: "cycle",
+    applicationId: "app",
+    status: "GROUP_CASE",
+  });
 });
