@@ -3,14 +3,34 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
-import { SPEED_DATING_SCORE_ANCHORS } from "@/lib/rubrics";
+import { initials } from "@/lib/initials";
+import { SPEED_DATING_SCORE_ANCHORS, SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
 import type { SpeedDatingPair } from "@/lib/speed-dating-pairs";
 
 type MemberDraft = { score: string; note: string };
 type Drafts = Record<string, MemberDraft>;
 
+const SCORES = [1, 2, 3, 4, 5];
+const NOTE_REQUIRED = ["1", "2", "5"];
+
 function blankDrafts(pair: SpeedDatingPair): Drafts {
   return Object.fromEntries(pair.members.map((member) => [member.applicationId, { score: "", note: "" }]));
+}
+
+function Star({ filled, className = "" }: { filled: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8Z" />
+    </svg>
+  );
+}
+
+function StarRow({ score, className = "h-5 w-5" }: { score: number; className?: string }) {
+  return (
+    <span className="inline-flex text-amber-400" aria-label={`${score} of 5`}>
+      {SCORES.map((value) => <Star key={value} filled={value <= score} className={value <= score ? className : `${className} text-mecg-navy/30`} />)}
+    </span>
+  );
 }
 
 export default function SpeedDatingPairGrading({
@@ -29,7 +49,12 @@ export default function SpeedDatingPairGrading({
   const [error, setError] = useState("");
   const [reviewing, setReviewing] = useState(false);
   const [pending, setPending] = useState(false);
-  const [confirmingWrongPair, setConfirmingWrongPair] = useState(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const count = pair.members.length;
+  const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(() => new Set());
+  function markHeadshotFailed(applicationId: string) {
+    setFailedHeadshots((current) => current.has(applicationId) ? current : new Set(current).add(applicationId));
+  }
   const lastSaved = useRef("");
   const noteRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const signature = useMemo(() => JSON.stringify(drafts), [drafts]);
@@ -39,7 +64,7 @@ export default function SpeedDatingPairGrading({
     async function load() {
       try {
         const loaded = await Promise.all(pair.members.map(async (member) => {
-          if (!member.assignmentId) throw new Error("This pair is not ready for grading.");
+          if (!member.assignmentId) throw new Error("This group is not ready for grading.");
           const response = await fetch(`/api/member/evaluations/${encodeURIComponent(member.assignmentId)}/draft`, {
             cache: "no-store",
             signal: controller.signal,
@@ -70,10 +95,10 @@ export default function SpeedDatingPairGrading({
     if (!ready || pending || signature === lastSaved.current) return;
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
-      setSaveMessage("Saving both applicant drafts…");
+      setSaveMessage("Saving applicant drafts…");
       try {
         await Promise.all(pair.members.map(async (member) => {
-          if (!member.assignmentId) throw new Error("Pair assignment missing");
+          if (!member.assignmentId) throw new Error("Group assignment missing");
           const draft = drafts[member.applicationId];
           const response = await fetch(`/api/member/evaluations/${encodeURIComponent(member.assignmentId)}/draft`, {
             method: "PUT",
@@ -88,7 +113,7 @@ export default function SpeedDatingPairGrading({
           if (!response.ok) throw new Error(body?.error ?? "Could not save ratings");
         }));
         lastSaved.current = signature;
-        setSaveMessage("Both drafts saved across devices.");
+        setSaveMessage("All drafts saved across devices.");
       } catch (saveError) {
         if (controller.signal.aborted) return;
         setSaveMessage("Draft sync failed. Keep this page open and retry your change.");
@@ -112,9 +137,9 @@ export default function SpeedDatingPairGrading({
     for (const member of pair.members) {
       const draft = drafts[member.applicationId];
       if (!draft.score) return `Rate ${member.name}.`;
-      if (["1", "2", "5"].includes(draft.score) && !draft.note.trim()) {
+      if (NOTE_REQUIRED.includes(draft.score) && !draft.note.trim()) {
         noteRefs.current[member.applicationId]?.focus();
-        return `Add a short evidence note for ${member.name}’s ${draft.score}.`;
+        return `Add 1–2 sentences for ${member.name}: a ${SPEED_DATING_SCORE_LABELS[Number(draft.score)]} needs a reason.`;
       }
     }
     return "";
@@ -141,26 +166,26 @@ export default function SpeedDatingPairGrading({
         }),
       });
       const body = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(body?.error ?? "Could not submit this pair");
+      if (!response.ok) throw new Error(body?.error ?? "Could not submit this group");
       router.push("/member/speed-dating?submitted=1");
       router.refresh();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Could not submit this pair");
+      setError(submitError instanceof Error ? submitError.message : "Could not submit this group");
       setPending(false);
     }
   }
 
-  async function reportWrongPair() {
+  async function discardGroup() {
     setPending(true);
     setError("");
     try {
-      const response = await fetch(`/api/member/speed-dating/pairs/${encodeURIComponent(pair.id)}/report`, { method: "POST" });
+      const response = await fetch(`/api/member/speed-dating/pairs/${encodeURIComponent(pair.id)}/discard`, { method: "POST" });
       const body = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(body?.error ?? "Could not report this pair");
-      router.push("/member/speed-dating?reported=1");
+      if (!response.ok) throw new Error(body?.error ?? "Could not discard this group");
+      router.push("/member/speed-dating?discarded=1");
       router.refresh();
-    } catch (reportError) {
-      setError(reportError instanceof Error ? reportError.message : "Could not report this pair");
+    } catch (discardError) {
+      setError(discardError instanceof Error ? discardError.message : "Could not discard this group");
       setPending(false);
     }
   }
@@ -170,22 +195,22 @@ export default function SpeedDatingPairGrading({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mecg-orange-ink">{pair.label}</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">Grade both applicants</h2>
-          <p className="mt-1 text-sm text-mecg-navy/65">{pair.members[0].name} + {pair.members[1].name}</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">Grade all {count} applicants</h2>
+          <p className="mt-1 text-sm text-mecg-navy/65">{pair.members.map((member) => member.name).join(" + ")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={onBack} className="button-secondary min-h-11">Back to search</button>
-          <button type="button" onClick={() => setConfirmingWrongPair(true)} className="button-secondary min-h-11">Wrong pair</button>
+          <button type="button" onClick={() => setConfirmingDiscard(true)} className="button-secondary min-h-11">Discard group</button>
         </div>
       </div>
 
-      {confirmingWrongPair && (
-        <section className="mt-4 rounded-xl bg-mecg-orange/[0.1] p-4" aria-labelledby="wrong-pair-heading">
-          <h3 id="wrong-pair-heading" className="font-semibold text-mecg-navy">These are not the two people you met?</h3>
-          <p className="mt-1 text-sm leading-6 text-mecg-navy/65">Report the mismatch and return to search. Your ratings stay saved as private drafts while the Board resolves the roster.</p>
+      {confirmingDiscard && (
+        <section className="mt-4 rounded-xl bg-mecg-orange/[0.1] p-4" aria-labelledby="discard-group-heading">
+          <h3 id="discard-group-heading" className="font-semibold text-mecg-navy">Discard this group?</h3>
+          <p className="mt-1 text-sm leading-6 text-mecg-navy/65">Made a mistake building this group? Discard it and start again from search. Nothing has been submitted.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" disabled={pending} onClick={() => void reportWrongPair()} className="button-primary">{pending ? "Reporting…" : "Report and return to search"}</button>
-            <button type="button" disabled={pending} onClick={() => setConfirmingWrongPair(false)} className="button-secondary">Cancel</button>
+            <button type="button" disabled={pending} onClick={() => void discardGroup()} className="button-primary min-h-11">{pending ? "Discarding…" : "Discard and return to search"}</button>
+            <button type="button" disabled={pending} onClick={() => setConfirmingDiscard(false)} className="button-secondary min-h-11">Cancel</button>
           </div>
         </section>
       )}
@@ -193,18 +218,43 @@ export default function SpeedDatingPairGrading({
       <div className="mt-4 rounded-xl bg-mecg-navy/[0.045] px-4 py-3 text-sm text-mecg-navy/70" role="status" aria-live="polite">{saveMessage}</div>
       {error && <div className="mt-4"><OperationNotice kind="error">{error}</OperationNotice></div>}
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
+      <details className="mt-4 rounded-xl bg-mecg-navy/[0.045] px-4 py-3 text-sm text-mecg-navy">
+        <summary className="cursor-pointer font-semibold">Scoring guide</summary>
+        <ul className="mt-3 space-y-2">
+          {SCORES.map((score) => (
+            <li key={score} className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-1 sm:grid-cols-[auto_6.5rem_1fr]">
+              <StarRow score={score} className="h-4 w-4" />
+              <span className="font-semibold">{SPEED_DATING_SCORE_LABELS[score]}</span>
+              <span className="col-span-2 text-xs leading-5 text-mecg-navy/65 sm:col-span-1">{SPEED_DATING_SCORE_ANCHORS[score]}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <div className={`mt-5 grid gap-4 md:grid-cols-2 ${count === 3 ? "lg:grid-cols-3" : ""}`}>
         {pair.members.map((member) => {
           const draft = drafts[member.applicationId];
-          const needsNote = ["1", "2", "5"].includes(draft.score);
+          const selected = Number(draft.score) || 0;
+          const needsNote = NOTE_REQUIRED.includes(draft.score);
           return (
             <fieldset key={member.applicationId} className="rounded-2xl border border-mecg-navy/10 p-4 sm:p-5" disabled={!ready || pending}>
-              <legend className="px-1 text-lg font-semibold text-mecg-navy">{member.name}</legend>
-              <p className="mt-1 text-sm font-medium text-mecg-navy">{criterion.name}</p>
-              <p className="mt-1 min-h-10 text-xs leading-5 text-mecg-navy/60">{criterion.description}</p>
-              <div className="mt-4 grid grid-cols-5 gap-2" aria-label={`${member.name} rating`}>
-                {[1, 2, 3, 4, 5].map((score) => (
-                  <label key={score} className="relative cursor-pointer">
+              <legend className="sr-only">{member.name}</legend>
+              {failedHeadshots.has(member.applicationId)
+                ? <div className="mx-auto flex size-36 items-center justify-center rounded-2xl bg-mecg-navy/[0.06] text-3xl font-semibold text-mecg-navy/60" aria-hidden="true">{initials(member.name)}</div>
+                // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
+                : <img
+                    src={`/api/admin/applications/${encodeURIComponent(member.applicationId)}/headshot`}
+                    alt=""
+                    className="mx-auto size-36 rounded-2xl object-cover"
+                    // The server-rendered img can fail before React attaches onError, so also check on mount.
+                    ref={(node) => { if (node?.complete && node.naturalWidth === 0) markHeadshotFailed(member.applicationId); }}
+                    onError={() => markHeadshotFailed(member.applicationId)}
+                  />}
+              <h3 className="mt-3 text-center text-lg font-semibold text-mecg-navy">{member.name}</h3>
+              <p className="mt-4 text-sm font-medium text-mecg-navy">Score this applicant</p>
+              <div className="mt-2 flex justify-between gap-1" role="radiogroup" aria-label={`${member.name} rating`}>
+                {SCORES.map((score) => (
+                  <label key={score} className="relative flex-1 cursor-pointer">
                     <input
                       type="radio"
                       name={`rating-${member.applicationId}`}
@@ -212,17 +262,22 @@ export default function SpeedDatingPairGrading({
                       checked={draft.score === String(score)}
                       onChange={() => update(member.applicationId, { score: String(score) })}
                       className="peer sr-only"
-                      aria-label={`Score ${score}: ${SPEED_DATING_SCORE_ANCHORS[score]}`}
+                      aria-label={`${score} of 5, ${SPEED_DATING_SCORE_LABELS[score]}`}
                     />
-                    <span className="flex min-h-12 items-center justify-center rounded-xl text-base font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] peer-checked:bg-mecg-navy peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-mecg-blue">
-                      {score}
+                    <span className="flex min-h-12 items-center justify-center rounded-xl transition-colors hover:bg-amber-50 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-mecg-blue">
+                      <Star filled={score <= selected} className={`h-11 w-11 ${score <= selected ? "text-amber-400" : "text-mecg-navy/30"}`} />
                     </span>
                   </label>
                 ))}
               </div>
-              {draft.score && <p className="mt-3 text-xs leading-5 text-mecg-navy/65">{SPEED_DATING_SCORE_ANCHORS[Number(draft.score)]}</p>}
+              {selected
+                ? <>
+                    <p className="mt-2 font-semibold text-mecg-navy">{SPEED_DATING_SCORE_LABELS[selected]}</p>
+                    <p className="mt-1 text-xs leading-5 text-mecg-navy/65">{SPEED_DATING_SCORE_ANCHORS[selected]}</p>
+                  </>
+                : <p className="mt-2 text-sm text-mecg-navy/55">Tap a star to score</p>}
               <label htmlFor={`speed-note-${member.applicationId}`} className="mt-4 block text-sm font-medium text-mecg-navy">
-                Evidence note{needsNote ? " · required" : " · optional"}
+                1–2 sentences about why you gave this score{needsNote ? " · required for this score" : " · optional"}
               </label>
               <textarea
                 id={`speed-note-${member.applicationId}`}
@@ -238,22 +293,26 @@ export default function SpeedDatingPairGrading({
       </div>
 
       {reviewing && (
-        <div className="mt-5 rounded-2xl bg-mecg-orange/[0.1] p-4" role="region" aria-label="Pair submission review">
+        <div className="mt-5 rounded-2xl bg-mecg-orange/[0.1] p-4" role="region" aria-label="Group submission review">
           <p className="font-semibold text-mecg-navy">Review before locking</p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {pair.members.map((member) => (
-              <p key={member.applicationId} className="text-sm text-mecg-navy/75">
-                <span className="font-semibold">{member.name}: {drafts[member.applicationId].score}/5</span>
-                {drafts[member.applicationId].note ? ` — ${drafts[member.applicationId].note}` : ""}
-              </p>
-            ))}
+          <div className={`mt-2 grid gap-2 sm:grid-cols-2 ${count === 3 ? "lg:grid-cols-3" : ""}`}>
+            {pair.members.map((member) => {
+              const score = Number(drafts[member.applicationId].score);
+              return (
+                <div key={member.applicationId} className="text-sm text-mecg-navy/75">
+                  <p className="font-semibold text-mecg-navy">{member.name}</p>
+                  <p className="mt-1 flex items-center gap-2"><StarRow score={score} /><span className="font-semibold">{SPEED_DATING_SCORE_LABELS[score]}</span></p>
+                  {drafts[member.applicationId].note && <p className="mt-1">{drafts[member.applicationId].note}</p>}
+                </div>
+              );
+            })}
           </div>
-          <p className="mt-3 text-xs text-mecg-navy/60">Submitting locks both independent evaluations together. Neither rating can be edited afterward.</p>
+          <p className="mt-3 text-xs text-mecg-navy/60">Submitting locks all {count} independent evaluations together. No rating can be edited afterward.</p>
         </div>
       )}
 
       <button type="submit" disabled={!ready || pending} className="button-primary mt-5 min-h-12 w-full disabled:opacity-50">
-        {pending ? "Submitting both ratings…" : reviewing ? "Submit both ratings" : "Review and submit pair"}
+        {pending ? `Submitting ${count} ratings…` : reviewing ? `Submit all ${count} ratings` : "Review and submit group"}
       </button>
     </form>
   );

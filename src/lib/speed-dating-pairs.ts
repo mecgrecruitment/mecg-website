@@ -1,18 +1,26 @@
 export type SpeedDatingPairMember = {
   applicationId: string;
   name: string;
-  position: 1 | 2;
+  position: 1 | 2 | 3;
   assignmentId: string | null;
   assignmentStatus: "ASSIGNED" | "IN_PROGRESS" | "SUBMITTED" | "LOCKED" | "RECUSED" | "MISSED" | null;
 };
 
+export const SPEED_DATING_SESSIONS = [1, 2] as const;
+export type SpeedDatingSession = typeof SPEED_DATING_SESSIONS[number];
+
+export const SPEED_DATING_GROUP_SIZES = { min: 2, max: 3 } as const;
+
 export type SpeedDatingPair = {
   id: string;
   label: string;
+  session: number;
   claimed: boolean;
   submittedAt: string | null;
-  members: [SpeedDatingPairMember, SpeedDatingPairMember];
+  members: SpeedDatingPairMember[];
 };
+
+export type SpeedDatingApplicant = { applicationId: string; name: string; scored: boolean };
 
 export type SpeedDatingPairQueue = {
   roundId: string;
@@ -21,6 +29,7 @@ export type SpeedDatingPairQueue = {
   calibrated: boolean;
   rubricReady: boolean;
   criterion: { id: string; name: string; description: string } | null;
+  applicants: SpeedDatingApplicant[];
   pairs: SpeedDatingPair[];
 };
 
@@ -34,18 +43,33 @@ export function searchSpeedDatingPairs(pairs: SpeedDatingPair[], query: string) 
   return pairs.filter((pair) => pair.members.some((member) => searchable(member.name).includes(needle)));
 }
 
+export function searchSpeedDatingApplicants(applicants: SpeedDatingApplicant[], query: string) {
+  const needle = searchable(query);
+  if (!needle) return [];
+  return applicants.filter((applicant) => searchable(applicant.name).includes(needle));
+}
+
+function isGroupSized(value: unknown[]) {
+  return value.length >= SPEED_DATING_GROUP_SIZES.min && value.length <= SPEED_DATING_GROUP_SIZES.max;
+}
+
 export function isSpeedDatingPairQueue(value: unknown): value is SpeedDatingPairQueue {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const queue = value as Record<string, unknown>;
   if (typeof queue.roundId !== "string" || typeof queue.roundName !== "string") return false;
   if (!["DRAFT", "PUBLISHED", "ACTIVE", "FROZEN", "FINALIZED", "ARCHIVED"].includes(String(queue.roundStatus))) return false;
-  if (!Array.isArray(queue.pairs)) return false;
+  if (!Array.isArray(queue.pairs) || !Array.isArray(queue.applicants)) return false;
+  if (!queue.applicants.every((applicant) => isRecord(applicant)
+    && typeof applicant.applicationId === "string"
+    && typeof applicant.name === "string"
+    && typeof applicant.scored === "boolean")) return false;
   return queue.pairs.every((candidate) => {
     if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return false;
     const pair = candidate as Record<string, unknown>;
     if (typeof pair.id !== "string" || typeof pair.label !== "string" || typeof pair.claimed !== "boolean") return false;
+    if (!isSession(pair.session)) return false;
     if (pair.submittedAt !== null && typeof pair.submittedAt !== "string") return false;
-    if (!Array.isArray(pair.members) || pair.members.length !== 2) return false;
+    if (!Array.isArray(pair.members) || !isGroupSized(pair.members)) return false;
     return pair.members.every((candidateMember, index) => {
       if (!candidateMember || typeof candidateMember !== "object" || Array.isArray(candidateMember)) return false;
       const member = candidateMember as Record<string, unknown>;
@@ -69,6 +93,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+function isSession(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1;
+}
+
 export type SpeedDatingPairRating = {
   applicationId: string;
   score: number;
@@ -82,8 +110,13 @@ export type SpeedDatingPairSetup = {
   pairs: Array<{
     id: string;
     label: string;
+    session: number;
     status: "DRAFT" | "PUBLISHED";
-    applicationIds: [string, string];
+    applicationIds: string[];
+    createdBy: string;
+    evaluatorName: string;
+    submittedAt: string | null;
+    claimEvaluatorIds: string[];
   }>;
 };
 
@@ -96,14 +129,20 @@ export function isSpeedDatingPairSetup(value: unknown): value is SpeedDatingPair
   return value.pairs.every((pair) => isRecord(pair)
     && typeof pair.id === "string"
     && typeof pair.label === "string"
+    && isSession(pair.session)
     && ["DRAFT", "PUBLISHED"].includes(String(pair.status))
     && Array.isArray(pair.applicationIds)
-    && pair.applicationIds.length === 2
-    && pair.applicationIds.every((applicationId) => typeof applicationId === "string"));
+    && isGroupSized(pair.applicationIds)
+    && pair.applicationIds.every((applicationId) => typeof applicationId === "string")
+    && typeof pair.createdBy === "string"
+    && typeof pair.evaluatorName === "string"
+    && (pair.submittedAt === null || typeof pair.submittedAt === "string")
+    && Array.isArray(pair.claimEvaluatorIds)
+    && pair.claimEvaluatorIds.every((evaluatorId) => typeof evaluatorId === "string"));
 }
 
-export function parseSpeedDatingPairRatings(value: unknown): [SpeedDatingPairRating, SpeedDatingPairRating] | null {
-  if (!Array.isArray(value) || value.length !== 2) return null;
+export function parseSpeedDatingPairRatings(value: unknown): SpeedDatingPairRating[] | null {
+  if (!Array.isArray(value) || !isGroupSized(value)) return null;
   const ratings: SpeedDatingPairRating[] = [];
   for (const candidate of value) {
     if (!isRecord(candidate)) return null;
@@ -116,6 +155,6 @@ export function parseSpeedDatingPairRatings(value: unknown): [SpeedDatingPairRat
     if ([1, 2, 5].includes(score) && !note.trim()) return null;
     ratings.push({ applicationId, score, note });
   }
-  if (ratings[0].applicationId === ratings[1].applicationId) return null;
-  return ratings as [SpeedDatingPairRating, SpeedDatingPairRating];
+  if (new Set(ratings.map((rating) => rating.applicationId)).size !== ratings.length) return null;
+  return ratings;
 }

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pai
     return NextResponse.json({ error: "Invalid pair ratings" }, { status: 400 });
   }
   const ratings = parseSpeedDatingPairRatings((parsedBody.data as Record<string, unknown>).members);
-  if (!ratings) return NextResponse.json({ error: "Rate both applicants from 1 to 5 and add evidence for scores of 1, 2, or 5" }, { status: 400 });
+  if (!ratings) return NextResponse.json({ error: "Rate everyone in the group from 1 to 5 and add evidence for scores of 1, 2, or 5" }, { status: 400 });
 
   const supabase = await createClient();
   const { data, error } = await (supabase.rpc.bind(supabase) as unknown as PairSubmitRpc)(

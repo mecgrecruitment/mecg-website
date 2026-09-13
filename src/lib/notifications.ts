@@ -152,8 +152,8 @@ function evaluationAssignedEmail(notification: Extract<ClaimedNotification, { te
   return {
     subject: "New MECG Speed Dating evaluation",
     html: wrapEmail(
-      `<p>Hi ${evaluatorName},</p><p>A ${roundName} evaluation for ${applicantName} was added to My Work.${timing}</p>`,
-      { label: "Open My Work", href: "https://mecgmichigan.com/member" },
+      `<p>Hi ${evaluatorName},</p><p>A ${roundName} evaluation for ${applicantName} is waiting in the Speed Dating workspace.${timing}</p>`,
+      { label: "Open Speed Dating", href: "https://mecgmichigan.com/member/speed-dating" },
     ),
   };
 }

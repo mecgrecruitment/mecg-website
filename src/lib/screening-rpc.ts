@@ -147,10 +147,9 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   authorize_screening_resume: (value) => typeof value === "string",
   my_speed_dating_pairs: isSpeedDatingPairQueue,
   speed_dating_pair_setup: isSpeedDatingPairSetup,
-  claim_speed_dating_pair: (value) =>
-    isRecord(value) && hasString(value, "pairId") && value.claimed === true,
-  report_wrong_speed_dating_pair: (value) =>
-    isRecord(value) && hasString(value, "pairId") && value.reported === true,
+  start_speed_dating_group: objectWith(["pairId", "string"], ["label", "string"]),
+  discard_speed_dating_group: (value) =>
+    isRecord(value) && hasString(value, "pairId") && value.discarded === true,
 };
 
 export async function screeningRpc<T>(client: unknown, name: string, args?: Record<string, unknown>) {

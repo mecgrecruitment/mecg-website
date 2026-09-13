@@ -32,10 +32,18 @@ export const SCORE_ANCHORS: Record<number, string> = {
   5: "Exceptional, adaptive, and constructive evidence",
 };
 
+export const SPEED_DATING_SCORE_LABELS: Record<number, string> = {
+  1: "Hard no",
+  2: "Leaning no",
+  3: "Average",
+  4: "Leaning yes",
+  5: "Yes",
+};
+
 export const SPEED_DATING_SCORE_ANCHORS: Record<number, string> = {
-  1: "Serious concern: behavior conflicted with MECG’s expectations.",
-  2: "Below the bar: a material concern or too little positive evidence.",
-  3: "Meets the bar: communicated clearly and engaged constructively.",
-  4: "Strong: listened, reasoned, and contributed with clear positive evidence.",
-  5: "Exceptional: adapted well and showed unusually strong judgment or collaboration.",
+  1: "This candidate said something extremely disrespectful or unwarranted. They should be removed from MECG’s recruitment process.",
+  2: "This candidate was not very memorable and might not be a good fit for MECG.",
+  3: "This candidate was likeable and had average answers, but nothing really stood out. They could potentially be a good fit.",
+  4: "This candidate was likeable and has qualities that many current members possess. They would be a good addition.",
+  5: "This candidate should be in MECG already. They were super personable and had super memorable answers. I would vouch for their character strongly.",
 };

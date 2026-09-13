@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(373);
+select extensions.plan(371);
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -132,8 +132,6 @@ select extensions.ok(
   ),
   'screening ratings enforce evidence notes for scores 1 and 5'
 );
-select extensions.has_table('rush', 'speed_dating_pair_reports', 'wrong-pair reports have a durable operator-visible record');
-select extensions.has_function('rush', 'report_wrong_speed_dating_pair', array['text'], 'an evaluator can report a claimed wrong pair without deleting drafts');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.recuse_screening_assignment(text,text)'::regprocedure)) > 0, 'reviewer recusal rechecks current role eligibility');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.screening_assignment_inputs(text)'::regprocedure)) > 0, 'assignment inputs exclude reviewers whose roles changed');
 select extensions.ok(position('is_eligible_screening_reviewer' in pg_get_functiondef('rush.commit_screening_assignments(text,jsonb,text,jsonb)'::regprocedure)) > 0, 'assignment commit rejects reviewers whose roles changed');
@@ -148,7 +146,7 @@ select extensions.ok(position('GROUP_CASE_BACKUP_EXPORTED' in pg_get_functiondef
 select extensions.has_function('rush','submit_speed_dating_pair',array['text','jsonb'],'Speed Dating pair submission exists');
 select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.submit_speed_dating_pair(text,jsonb)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'Speed Dating pair submission is a security definer with an empty search path');
 select extensions.ok(has_function_privilege('authenticated','rush.submit_speed_dating_pair(text,jsonb)','EXECUTE') and not has_function_privilege('anon','rush.submit_speed_dating_pair(text,jsonb)','EXECUTE'), 'Speed Dating pair submission ACL excludes anonymous callers');
-select extensions.ok(position('rush.submit_evaluation' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0 and position('jsonb_array_length(submitted_members) <> 2' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0, 'pair submission validates two applicants and uses the locked individual evaluation contract');
+select extensions.ok(position('rush.submit_evaluation' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0 and position('jsonb_array_length(submitted_members) not between 2 and 3' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0, 'pair submission validates a two or three applicant group and uses the locked individual evaluation contract');
 select extensions.ok(position('SPEED_DATING_PAIR_SUBMITTED' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0 and position('update rush.speed_dating_pair_claims' in pg_get_functiondef('rush.submit_speed_dating_pair(text,jsonb)'::regprocedure)) > 0, 'pair submission closes the claim and records an audit event in the same transaction');
 select extensions.has_function('rush','speed_dating_pair_setup',array['text'],'Board Speed Dating pair setup query exists');
 select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.speed_dating_pair_setup(text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'pair setup query is a security definer with an empty search path');

@@ -63,8 +63,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (screeningQueue.error) throw new Error(screeningQueue.error.message);
   const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
   const finishingGroupCase = activeRoundFilter === "GROUP_CASE" && mode === "finish";
-  // Speed Dating assignments are created in pairs and must only be submitted
-  // through the atomic pair workspace. Never expose either half to this legacy
+  // Speed Dating assignments are created in groups and must only be submitted
+  // through the atomic group workspace. Never expose a member to this legacy
   // one-applicant evaluation form.
   const assignmentRows = (assignments ?? []).filter((assignment) => assignment.rounds.kind !== "SPEED_DATING");
   const openAssignments = assignmentRows.filter(isReady);
@@ -140,8 +140,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     ...(workspaceContext.data?.hasSpeedDatingRound && !isScreeningReviewer
       ? [{
           href: "/member/speed-dating",
-          label: "Grade Speed Dating pairs",
-          detail: "Search either applicant’s name and submit both 1–5 ratings together",
+          label: "Grade Speed Dating groups",
+          detail: "Search the applicants in front of you and submit the group’s 1–5 ratings together",
           dueAt: 0,
         }]
       : []),
@@ -151,7 +151,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 6);
   const assignmentHeading = activeRoundFilter === "SPEED_DATING"
-    ? "Quick chats"
+    ? "Speed Dating"
     : activeRoundFilter === "GROUP_CASE"
       ? "Group interview"
       : "All evaluation work";
@@ -223,7 +223,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             current={currentWorkspace}
             links={[
               ["/member", "All work"],
-              ["/member?round=SPEED_DATING", "Quick chats"],
+              ["/member/speed-dating", "Speed Dating"],
               ["/member?round=GROUP_CASE", "Group interview"],
             ]}
           />

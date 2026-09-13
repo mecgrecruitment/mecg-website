@@ -2573,11 +2573,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      claim_speed_dating_pair: {
-        Args: { target_pair_id: string }
-        Returns: Json
-      }
-      report_wrong_speed_dating_pair: {
+      discard_speed_dating_group: {
         Args: { target_pair_id: string }
         Returns: Json
       }
@@ -2875,11 +2871,11 @@ export type Database = {
         Args: { replacement_evaluator_id: string; target_assignment_id: string }
         Returns: string
       }
-      replace_speed_dating_pairs: {
+      start_speed_dating_group: {
         Args: {
-          publish_pairs?: boolean
-          submitted_pairs: Json
+          target_application_ids: string[]
           target_round_id: string
+          target_session?: number
         }
         Returns: Json
       }

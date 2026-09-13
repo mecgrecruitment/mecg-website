@@ -29,10 +29,12 @@ Board and Owner users can select eligible applicants in Recruitment and run **Ad
 4. Selects two distinct, conflict-free evaluators using least-open-workload balancing and capacity limits.
 5. Creates formal evaluation assignments, which immediately appear in My Work.
 6. Moves eligible applicants to invited status.
-7. Enqueues applicant invitations and evaluator assignment notices with stable idempotency keys.
+7. Enqueues evaluator assignment notices with stable idempotency keys. Applicants are not emailed; the Board announces rounds on its own schedule.
 8. Writes applicant, assignment, participation, and batch audit events.
 
 If any selected applicant cannot be fully staffed, the whole command rolls back. Retrying the same completed command does not duplicate participation, assignments, or notifications.
+
+After advancement, the Board starts the round from the round page. Groups are formed off-app. On the night an evaluator searches the two or three applicants at their table, starts the group, scores everyone in it, and submits once. The Board sees the groups and evaluator coverage on the round page.
 
 ## Grading
 

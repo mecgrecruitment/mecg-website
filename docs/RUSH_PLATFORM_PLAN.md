@@ -134,17 +134,19 @@ Every criterion uses 1 through 5 plus `N/O` for not observed.
 
 Scores of 1, 2, 5, or a safety concern require a short behavior-based note. Evaluators cannot use "vibe," "culture fit," appearance, accent, school prestige, social status, confidence alone, or protected characteristics.
 
-### Speed Dating rubric
+### Speed Dating guide
 
-Use fixed prompts, equal time, randomized rotations, and three to four independent evaluations per applicant. Two valid evaluations are the minimum.
+Groups of two or three applicants are formed off-app. During the round an evaluator searches the applicants at their table, starts the group, scores everyone in it, and submits once. Each applicant gets a single 1–5 star rating:
 
-| Criterion | Weight | Rating 1 | Rating 3 | Rating 5 |
-| --- | ---: | --- | --- | --- |
-| Clear communication and concision | 25% | Hard to follow or does not answer | Clear answer with relevant context | Concise, structured, and adapts to the listener |
-| Listening and question quality | 20% | Interrupts or asks generic questions | Responds and asks a relevant follow-up | Paraphrases, probes, and builds on answers |
-| Structured reasoning | 20% | Jumps to conclusions | Breaks the prompt into reasonable steps | States assumptions and tradeoffs, then updates thoughtfully |
-| Collaboration and coachability | 20% | Defensive or dismissive | Receptive and respectful | Incorporates feedback and credits others |
-| Judgment and integrity | 15% | Exaggerates, evades, or ignores constraints | Candid about limits | Separates facts from assumptions and names real risks |
+| Rating | Label | Anchor |
+| ---: | --- | --- |
+| 1 | Hard no | This candidate said something extremely disrespectful or unwarranted. They should be removed from MECG’s recruitment process. |
+| 2 | Leaning no | This candidate was not very memorable and might not be a good fit for MECG. |
+| 3 | Average | This candidate was likeable and had average answers, but nothing really stood out. They could potentially be a good fit. |
+| 4 | Leaning yes | This candidate was likeable and has qualities that many current members possess. They would be a good addition. |
+| 5 | Yes | This candidate should be in MECG already. They were super personable and had super memorable answers. I would vouch for their character strongly. |
+
+Ratings of 1, 2, and 5 require one or two sentences of evidence.
 
 ### Group Case rubric
 
@@ -184,7 +186,7 @@ For an evaluation, convert observed criterion scores to 0 through 100:
 evaluationScore = 100 * sum(weight * (rating - 1) / 4) / sum(observed weights)
 ```
 
-An evaluation is valid only when at least 75% of its criterion weight was observed. `N/O` is omitted, not changed to zero. A Speed Dating form must observe Clear Communication plus at least two other criteria. A Group Case form must observe Collaboration and Inclusion plus at least three other criteria. Forms that miss an essential criterion remain evidence notes but do not enter the numeric aggregate.
+An evaluation is valid only when at least 75% of its criterion weight was observed. `N/O` is omitted, not changed to zero. A Speed Dating form has one overall score per applicant, and that score is required. A Group Case form must observe Collaboration and Inclusion plus at least three other criteria. Forms that miss an essential criterion remain evidence notes but do not enter the numeric aggregate.
 
 For each round:
 

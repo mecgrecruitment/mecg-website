@@ -1,35 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { speedDatingCoverageRank, speedDatingPairCoverage } from "./speed-dating-coverage";
+import { speedDatingApplicantCoverage } from "./speed-dating-coverage";
 
-const pair = ["app-1", "app-2"] as const;
-
-test("pair coverage completes only when the same evaluator submits both applicants", () => {
-  const coverage = speedDatingPairCoverage(pair, [
-    { applicationId: "app-1", evaluatorId: "judge-1", evaluatorName: "Judge One", status: "SUBMITTED" },
-    { applicationId: "app-2", evaluatorId: "judge-1", evaluatorName: "Judge One", status: "SUBMITTED" },
-    { applicationId: "app-1", evaluatorId: "judge-2", evaluatorName: "Judge Two", status: "SUBMITTED" },
-    { applicationId: "app-2", evaluatorId: "judge-2", evaluatorName: "Judge Two", status: "ASSIGNED" },
+test("applicant coverage counts groups and distinct submitting evaluators", () => {
+  const participants = [
+    { applicationId: "app-1", name: "Ada" },
+    { applicationId: "app-2", name: "Ben" },
+    { applicationId: "app-3", name: "Cy" },
+  ];
+  const rows = speedDatingApplicantCoverage(participants, [
+    { applicationIds: ["app-1", "app-2"], createdBy: "judge-1", submittedAt: "2026-09-13T01:00:00Z" },
+    { applicationIds: ["app-1", "app-3"], createdBy: "judge-2", submittedAt: "2026-09-13T01:10:00Z" },
+    { applicationIds: ["app-1", "app-2", "app-3"], createdBy: "judge-1", submittedAt: "2026-09-13T01:20:00Z" },
+    { applicationIds: ["app-2", "app-3"], createdBy: "judge-3", submittedAt: null },
   ]);
-  assert.equal(coverage.completeEvaluators, 1);
-  assert.deepEqual(coverage.evaluators.map((evaluator) => evaluator.state), ["STARTED", "COMPLETE"]);
-  assert.equal(speedDatingCoverageRank(coverage), 1);
-});
-
-test("a one-sided assignment is flagged before ordinary incomplete coverage", () => {
-  const coverage = speedDatingPairCoverage(pair, [
-    { applicationId: "app-1", evaluatorId: "judge-1", evaluatorName: "Judge One", status: "ASSIGNED" },
+  assert.deepEqual(rows, [
+    { applicationId: "app-1", name: "Ada", groups: 3, evaluatorsSubmitted: 2 },
+    { applicationId: "app-2", name: "Ben", groups: 3, evaluatorsSubmitted: 1 },
+    { applicationId: "app-3", name: "Cy", groups: 3, evaluatorsSubmitted: 2 },
   ]);
-  assert.equal(coverage.hasBrokenAssignment, true);
-  assert.equal(coverage.evaluators[0]?.state, "BROKEN");
-  assert.equal(speedDatingCoverageRank(coverage), 0);
-});
-
-test("recused and missed halves do not masquerade as pair progress", () => {
-  const coverage = speedDatingPairCoverage(pair, [
-    { applicationId: "app-1", evaluatorId: "judge-1", evaluatorName: "Judge One", status: "RECUSED" },
-    { applicationId: "app-2", evaluatorId: "judge-1", evaluatorName: "Judge One", status: "MISSED" },
-  ]);
-  assert.equal(coverage.evaluators.length, 0);
-  assert.equal(coverage.completeEvaluators, 0);
 });

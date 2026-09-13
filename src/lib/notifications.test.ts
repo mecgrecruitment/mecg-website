@@ -176,7 +176,7 @@ test("deliverNotification sends a Speed Dating invitation with escaped round det
   assert.match(String(sent[0]?.html), /View next steps/);
 });
 
-test("deliverNotification sends an evaluator assignment to My Work", async (t) => {
+test("deliverNotification sends an evaluator assignment to the Speed Dating workspace", async (t) => {
   const sent: Array<Record<string, unknown>> = [];
   t.mock.module("@/lib/email", {
     namedExports: {
@@ -209,7 +209,7 @@ test("deliverNotification sends an evaluator assignment to My Work", async (t) =
   assert.equal(sent[0]?.subject, "New MECG Speed Dating evaluation");
   assert.match(String(sent[0]?.html), /&lt;Evaluator&gt;/);
   assert.match(String(sent[0]?.html), /&lt;Applicant&gt;/);
-  assert.match(String(sent[0]?.html), /Open My Work/);
+  assert.match(String(sent[0]?.html), /Open Speed Dating/);
 });
 
 test("deliverNotification rejects a malformed new-template timestamp before sending", async (t) => {

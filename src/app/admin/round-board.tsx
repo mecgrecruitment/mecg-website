@@ -15,11 +15,11 @@ import { memberAccountsFor } from "./member-accounts";
 import RubricEditor, { type Criterion, type RoundRubric } from "./rounds/rubric-editor";
 import GroupForms from "./groups/group-forms";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
+import { formatEasternDateTime } from "@/lib/date-time";
 import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState } from "./group-case-coverage";
 import { screeningRpc } from "@/lib/screening-rpc";
-import type { SpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
-import SpeedDatingPairBuilder from "./rounds/speed-dating-pair-builder";
-import { speedDatingCoverageRank, speedDatingPairCoverage } from "./speed-dating-coverage";
+import { SPEED_DATING_SESSIONS, type SpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
+import { speedDatingApplicantCoverage } from "./speed-dating-coverage";
 
 function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; name: string; status: string }): RoundRubric | null {
   if (!Array.isArray(value)) return null;
@@ -165,25 +165,19 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       || a.label.localeCompare(b.label))
     : [];
   const applicationNameById = new Map(allApplications.map((application) => [application.id, application.name]));
-  const speedDatingCoverageRows = round.kind === "SPEED_DATING" && speedDatingSetupResult.data
-    ? speedDatingSetupResult.data.pairs.map((pair) => {
-      const pairAssignments = assignments.flatMap((assignment) => {
-        const application = Array.isArray(assignment.applications) ? assignment.applications[0] : assignment.applications;
-        if (!application || !pair.applicationIds.includes(application.id)) return [];
-        const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0] : assignment.evaluator;
-        return [{
-          applicationId: application.id,
-          evaluatorId: assignment.evaluator_id,
-          evaluatorName: evaluator?.display_name ?? "Unknown evaluator",
-          status: assignment.status,
-        }];
-      });
-      return {
-        ...pair,
-        names: pair.applicationIds.map((applicationId) => applicationNameById.get(applicationId) ?? "Applicant") as [string, string],
-        coverage: speedDatingPairCoverage(pair.applicationIds, pairAssignments),
-      };
-    }).sort((a, b) => speedDatingCoverageRank(a.coverage) - speedDatingCoverageRank(b.coverage) || a.label.localeCompare(b.label))
+  const speedDatingSetup = round.kind === "SPEED_DATING" ? speedDatingSetupResult.data : null;
+  const speedDatingSessions = SPEED_DATING_SESSIONS
+    .map((session) => ({
+      session,
+      rows: (speedDatingSetup?.pairs ?? [])
+        .filter((pair) => pair.session === session)
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map((pair) => ({ ...pair, names: pair.applicationIds.map((applicationId) => applicationNameById.get(applicationId) ?? "Applicant") })),
+    }))
+    .filter((group) => group.rows.length > 0);
+  const speedDatingApplicants = speedDatingSetup
+    ? speedDatingApplicantCoverage(speedDatingSetup.participants, speedDatingSetup.pairs)
+      .sort((a, b) => a.evaluatorsSubmitted - b.evaluatorsSubmitted || a.name.localeCompare(b.name))
     : [];
 
   return (
@@ -340,40 +334,55 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         </section>
       )}
 
-      {round.kind === "SPEED_DATING" && canManage && speedDatingSetupResult.data && (
+      {round.kind === "SPEED_DATING" && canManage && speedDatingSetup && (
         <>
-          {speedDatingCoverageRows.length > 0 && (
-            <section>
-              <SectionLabel>Speed Dating coverage</SectionLabel>
-              <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Complete both halves of every pair</h2>
-                  <p className="mt-1 text-sm text-mecg-navy/55">Incomplete and one-sided evaluator work appears first. Live scores stay private.</p>
+          <section>
+            <SectionLabel>Groups</SectionLabel>
+            <p className="mt-1 text-sm text-mecg-navy/55">Evaluators build groups from search on the night. Every submitted group locks one rating per applicant.</p>
+            {speedDatingSessions.map((group) => (
+              <div key={group.session}>
+                <h3 className="mt-5 text-base font-semibold text-mecg-navy">Session {group.session}</h3>
+                <div className="mt-2 divide-y divide-mecg-navy/10 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                  {group.rows.map((row) => (
+                    <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[7rem_minmax(12rem,1.4fr)_minmax(10rem,1fr)_12rem] md:items-center md:py-3">
+                      <p className="text-xs font-semibold text-mecg-orange-ink">{row.label}</p>
+                      <p className="text-sm font-semibold text-mecg-navy">{row.names.join(" + ")}</p>
+                      <p className="text-sm text-mecg-navy/70">{row.evaluatorName}</p>
+                      <StatusPill tone={row.submittedAt ? "navy" : "neutral"}>
+                        {row.submittedAt ? `Submitted ${formatEasternDateTime(row.submittedAt)}` : "In progress"}
+                      </StatusPill>
+                    </article>
+                  ))}
                 </div>
-                <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
-                  {speedDatingCoverageRows.filter((row) => row.coverage.completeEvaluators < 2).length} pairs need coverage
-                </span>
               </div>
-              <div className="mt-4 divide-y divide-mecg-navy/10 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-                {speedDatingCoverageRows.map((row) => (
-                  <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[7rem_minmax(12rem,1fr)_minmax(16rem,1.4fr)_8rem] md:items-center md:py-3">
-                    <p className="text-xs font-semibold text-mecg-orange-ink">{row.label}</p>
-                    <p className="text-sm font-semibold text-mecg-navy">{row.names[0]} <span className="font-normal text-mecg-navy/35">+</span> {row.names[1]}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {row.coverage.evaluators.map((evaluator) => (
-                        <span key={evaluator.evaluatorId} className={`rounded-full px-2.5 py-1 text-xs ${evaluator.state === "BROKEN" ? "bg-red-50 font-semibold text-red-700" : "bg-mecg-navy/[0.055] text-mecg-navy/70"}`}>
-                          {evaluator.evaluatorName} · {evaluator.submitted}/2 submitted{evaluator.state === "BROKEN" ? " · one-sided" : ""}
-                        </span>
-                      ))}
-                      {!row.coverage.evaluators.length && <span className="text-xs font-semibold text-red-700">No evaluator has started</span>}
-                    </div>
-                    <StatusPill tone={row.coverage.completeEvaluators >= 2 ? "navy" : "orange"}>{row.coverage.completeEvaluators}/2 complete</StatusPill>
+            ))}
+            {!speedDatingSessions.length && (
+              <p className="mt-4 rounded-2xl bg-white p-6 text-center text-sm text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">No groups yet.</p>
+            )}
+          </section>
+          <section>
+            <SectionLabel>Applicant coverage</SectionLabel>
+            <p className="mt-1 text-sm text-mecg-navy/55">Aim for at least two evaluators per applicant.</p>
+            <div className="mt-4 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <div className="hidden bg-mecg-navy/[0.04] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/55 md:grid md:grid-cols-[minmax(12rem,1fr)_8rem_12rem]">
+                <span>Applicant</span>
+                <span>Groups</span>
+                <span>Evaluators submitted</span>
+              </div>
+              <div className="divide-y divide-mecg-navy/10">
+                {speedDatingApplicants.map((row) => (
+                  <article key={row.applicationId} className={`grid gap-3 px-4 py-4 md:grid-cols-[minmax(12rem,1fr)_8rem_12rem] md:items-center md:py-3 ${row.evaluatorsSubmitted < 2 ? "bg-amber-50/60" : "bg-white"}`}>
+                    <Link href={`/admin/applications/${row.applicationId}`} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.name}</Link>
+                    <p className="text-sm text-mecg-navy/70"><span className="mr-1 font-semibold md:hidden">Groups:</span>{row.groups}</p>
+                    <p className="text-sm text-mecg-navy/70"><span className="mr-1 font-semibold md:hidden">Evaluators submitted:</span>{row.evaluatorsSubmitted}</p>
                   </article>
                 ))}
+                {!speedDatingApplicants.length && (
+                  <p className="bg-white p-6 text-center text-sm text-mecg-navy/55">No active Speed Dating applicants yet.</p>
+                )}
               </div>
-            </section>
-          )}
-          <SpeedDatingPairBuilder cycleId={cycleId} setup={speedDatingSetupResult.data} />
+            </div>
+          </section>
         </>
       )}
 

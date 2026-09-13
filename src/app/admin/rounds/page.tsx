@@ -14,7 +14,7 @@ import { cycleStatusLabel, roundStatusLabel, statusLabel } from "@/lib/labels";
 export const metadata: Metadata = { title: "Interviews" };
 
 function roundKindLabel(kind: string) {
-  if (kind === "SPEED_DATING") return "Quick chats";
+  if (kind === "SPEED_DATING") return "Speed Dating";
   if (kind === "GROUP_CASE") return "Group interview";
   if (kind === "APPLICATION_SCREEN") return "Application review";
   return statusLabel(kind);
