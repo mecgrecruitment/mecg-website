@@ -5,14 +5,14 @@ import WorkspaceNav from "@/components/workspace-nav";
 import { requireMember } from "@/lib/auth";
 import { cycleStatusLabel } from "@/lib/labels";
 import { screeningRpc } from "@/lib/screening-rpc";
-import type { SpeedDatingPairQueue } from "@/lib/speed-dating-pairs";
+import type { SpeedDatingRoster as Roster } from "@/lib/speed-dating-roster";
 import { createClient } from "@/lib/supabase/server";
-import SpeedDatingPairSearch from "./speed-dating-pair-search";
+import SpeedDatingRoster from "./speed-dating-roster";
 
 export const metadata: Metadata = { title: "Speed Dating" };
 
-export default async function SpeedDatingPage({ searchParams }: { searchParams: Promise<{ pair?: string; submitted?: string; discarded?: string }> }) {
-  const [{ pair: requestedPairId, submitted, discarded }, user] = await Promise.all([searchParams, requireMember()]);
+export default async function SpeedDatingPage() {
+  const user = await requireMember();
   const membership = user.memberships.find((item) =>
     item.active && ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(item.role));
   if (!membership) return null;
@@ -29,13 +29,11 @@ export default async function SpeedDatingPage({ searchParams }: { searchParams: 
     .maybeSingle();
   if (roundError) throw roundError;
 
-  let queue: SpeedDatingPairQueue | null = null;
+  let roster: Roster | null = null;
   if (round) {
-    const result = await screeningRpc<SpeedDatingPairQueue>(supabase, "my_speed_dating_pairs", {
-      target_round_id: round.id,
-    });
+    const result = await screeningRpc<Roster>(supabase, "my_speed_dating_roster", { target_round_id: round.id });
     if (result.error) throw new Error(result.error.message);
-    queue = result.data;
+    roster = result.data;
   }
 
   return (
@@ -43,11 +41,11 @@ export default async function SpeedDatingPage({ searchParams }: { searchParams: 
       <WorkspaceHeader
         eyebrow={`${membership.cycle.name} · ${cycleStatusLabel(membership.cycle.status)}`}
         title="Speed Dating"
-        description="Search the applicants in front of you, score each one, and submit the group together."
+        description="Find each applicant as they reach your table and tap a star. Every rating saves on its own."
       />
       <WorkspaceNav user={user} cycleId={membership.cycleId} current="/member/speed-dating" />
-      {queue ? (
-        <SpeedDatingPairSearch initialQueue={queue} requestedPairId={requestedPairId} submitted={submitted === "1"} discarded={discarded === "1"} />
+      {roster ? (
+        <SpeedDatingRoster initial={roster} />
       ) : (
         <section className="rounded-2xl bg-white p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
           <h2 className="text-xl font-semibold text-mecg-navy">No Speed Dating round is ready</h2>

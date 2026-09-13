@@ -2851,6 +2851,10 @@ export type Database = {
         Args: { target_round_id: string }
         Returns: Json
       }
+      my_speed_dating_roster: {
+        Args: { target_round_id: string }
+        Returns: Json
+      }
       owns_application: {
         Args: { target_application_id: string }
         Returns: boolean
@@ -2870,6 +2874,16 @@ export type Database = {
       reassign_evaluator: {
         Args: { replacement_evaluator_id: string; target_assignment_id: string }
         Returns: string
+      }
+      rate_speed_dating_applicant: {
+        Args: {
+          note: string
+          score: number
+          target_application_id: string
+          target_round_id: string
+          target_session: number
+        }
+        Returns: Json
       }
       start_speed_dating_group: {
         Args: {

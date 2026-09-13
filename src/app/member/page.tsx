@@ -140,8 +140,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     ...(workspaceContext.data?.hasSpeedDatingRound && !isScreeningReviewer
       ? [{
           href: "/member/speed-dating",
-          label: "Grade Speed Dating groups",
-          detail: "Search the applicants in front of you and submit the group’s 1–5 ratings together",
+          label: "Grade Speed Dating",
+          detail: "Search the applicants in front of you, tap a star, add a note. Every tap saves.",
           dueAt: 0,
         }]
       : []),

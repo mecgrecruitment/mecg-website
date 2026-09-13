@@ -1,4 +1,4 @@
-import { isSpeedDatingPairQueue, isSpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
+import { isSpeedDatingRoster } from "@/lib/speed-dating-roster";
 
 type RpcError = { code?: string; message: string };
 type RpcResult<T> = Promise<{ data: T | null; error: RpcError | null }>;
@@ -145,11 +145,10 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
   reject_resume_upload: (value) => typeof value === "string",
   authorize_resume_access: (value) => typeof value === "string",
   authorize_screening_resume: (value) => typeof value === "string",
-  my_speed_dating_pairs: isSpeedDatingPairQueue,
-  speed_dating_pair_setup: isSpeedDatingPairSetup,
-  start_speed_dating_group: objectWith(["pairId", "string"], ["label", "string"]),
-  discard_speed_dating_group: (value) =>
-    isRecord(value) && hasString(value, "pairId") && value.discarded === true,
+  my_speed_dating_roster: isSpeedDatingRoster,
+  rate_speed_dating_applicant: (value) =>
+    isRecord(value) && hasString(value, "applicationId") && hasNumber(value, "score") && hasString(value, "note")
+    && hasNumber(value, "session") && hasString(value, "savedAt"),
 };
 
 export async function screeningRpc<T>(client: unknown, name: string, args?: Record<string, unknown>) {
