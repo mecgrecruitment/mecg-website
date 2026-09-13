@@ -1,61 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import OperationNotice from "@/components/operation-notice";
-import SegmentedControl from "@/components/segmented-control";
 import { initials } from "@/lib/initials";
 import { SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
-import {
-  SPEED_DATING_SESSIONS,
-  matchesApplicantName,
-  type RosterApplicant,
-  type SpeedDatingRoster,
-  type SpeedDatingSession,
-} from "@/lib/speed-dating-roster";
+import { matchesApplicantName, type RosterApplicant, type SpeedDatingRoster } from "@/lib/speed-dating-roster";
 import type { SpeedDatingRatingResult } from "@/app/api/member/speed-dating/ratings/route";
 
 const SCORES = [1, 2, 3, 4, 5];
 const NOTE_DEBOUNCE_MS = 800;
-const CHOICE_EVENT = "speed-dating-choice-change";
+// One sitting per night: every rating is session 1. The column stays in the
+// schema so an older multi-session round still reads back.
+const SESSION = 1;
 
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
-
-function isSession(value: number): value is SpeedDatingSession {
-  return (SPEED_DATING_SESSIONS as readonly number[]).includes(value);
-}
-
-// The session lives in localStorage per round so it survives a refresh
-// mid-evening; a module-level copy keeps it working when storage is blocked.
-const chosen = new Map<string, string>();
-
-function readChoice(key: string) {
-  const held = chosen.get(key);
-  if (held !== undefined) return held;
-  try {
-    return window.localStorage.getItem(key) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-function subscribeChoice(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(CHOICE_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(CHOICE_EVENT, callback);
-  };
-}
-
-function choose(key: string, value: string) {
-  chosen.set(key, value);
-  try { window.localStorage.setItem(key, value); } catch {}
-  window.dispatchEvent(new Event(CHOICE_EVENT));
-}
-
-function useChoice(key: string) {
-  return useSyncExternalStore(subscribeChoice, () => readChoice(key), () => "");
-}
 
 function Headshot({ applicant, failed, onFail }: { applicant: RosterApplicant; failed: boolean; onFail: () => void }) {
   if (failed) return <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-mecg-navy/[0.06] text-xs font-semibold text-mecg-navy/60" aria-hidden="true">{initials(applicant.name)}</span>;
@@ -88,9 +46,6 @@ function grow(node: HTMLTextAreaElement | null) {
 }
 
 export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRoster }) {
-  const sessionKey = `speed-dating-session:${initial.roundId}`;
-  const storedSession = Number(useChoice(sessionKey));
-  const session: SpeedDatingSession = isSession(storedSession) ? storedSession : 1;
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Record<string, RosterApplicant>>(() =>
     Object.fromEntries(initial.applicants.map((applicant) => [applicant.applicationId, applicant])));
@@ -141,20 +96,17 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
   async function save(applicationId: string, score: number, note: string) {
     const ticket = (sequence.current[applicationId] ?? 0) + 1;
     sequence.current[applicationId] = ticket;
-    // Read the toggle at send time so a debounced note save tags the session showing now.
-    const stored = Number(readChoice(sessionKey));
-    const session = isSession(stored) ? stored : 1;
     setRowStatus(applicationId, { kind: "saving" });
     try {
       const response = await fetch("/api/member/speed-dating/ratings", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ roundId: initial.roundId, applicationId, session, score, note }),
+        body: JSON.stringify({ roundId: initial.roundId, applicationId, session: SESSION, score, note }),
       });
       const body: Partial<SpeedDatingRatingResult> & { error?: string } | null = await response.json().catch(() => null);
       if (!response.ok || typeof body?.savedAt !== "string") throw new Error(body?.error ?? "Could not save this rating");
       if (sequence.current[applicationId] !== ticket) return;
-      const confirmed = { ...saved.current[applicationId], score, note, session: body.session ?? session, savedAt: body.savedAt };
+      const confirmed = { ...saved.current[applicationId], score, note, session: body.session ?? SESSION, savedAt: body.savedAt };
       saved.current[applicationId] = confirmed;
       patchRow(applicationId, { session: confirmed.session, savedAt: confirmed.savedAt });
       setRowStatus(applicationId, { kind: "saved" });
@@ -197,17 +149,7 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
   return (
     <section className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">{initial.roundName}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="w-48">
-          <SegmentedControl
-            name="Session"
-            options={SPEED_DATING_SESSIONS.map((s) => ({ value: String(s), label: `Session ${s}` }))}
-            value={String(session)}
-            onChange={(value) => { if (isSession(Number(value))) choose(sessionKey, value); }}
-          />
-        </div>
-        <p className="text-sm font-semibold text-mecg-navy/65" aria-live="polite">Graded {scored} of {initial.progress.total}</p>
-      </div>
+      <p className="mt-3 text-sm font-semibold text-mecg-navy/65" aria-live="polite">Graded {scored} of {initial.progress.total}</p>
       <div className="relative mt-4">
         <svg className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-mecg-navy/45" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
@@ -254,7 +196,7 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
                   {rowStatus?.kind === "saved" && "Saved"}
                   {rowStatus?.kind === "hint" && rowStatus.message}
                   {rowStatus?.kind === "error" && <span className="font-semibold text-red-700">{rowStatus.message}</span>}
-                  {!rowStatus && row.savedAt && (row.session ? `Session ${row.session}` : "Saved")}
+                  {!rowStatus && row.savedAt && "Saved"}
                 </p>
               </div>
               <div className="flex" role="group" aria-label={`${row.name} score`}>

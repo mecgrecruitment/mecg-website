@@ -1,6 +1,3 @@
-export const SPEED_DATING_SESSIONS = [1, 2] as const;
-export type SpeedDatingSession = typeof SPEED_DATING_SESSIONS[number];
-
 export type RosterApplicant = {
   applicationId: string;
   name: string;
@@ -55,4 +52,23 @@ function fold(value: string) {
 export function matchesApplicantName(name: string, query: string) {
   const needle = fold(query);
   return !needle || fold(name).includes(needle);
+}
+
+// Plain lowercase includes for free-text notes; an empty query matches nothing.
+export function matchesNote(note: string, query: string) {
+  const needle = query.trim().toLowerCase();
+  return Boolean(needle) && note.toLowerCase().includes(needle);
+}
+
+export type ResultsSortKey = "adjusted" | "mean" | "count" | "stddev";
+type ResultsRow = { name: string; count: number; adjusted: number | null; mean: number | null; stddev: number | null };
+
+// Board results ordering: ungraded applicants always sink to the bottom and
+// nulls sort after values in either direction.
+export function compareResults(a: ResultsRow, b: ResultsRow, key: ResultsSortKey, direction: "desc" | "asc") {
+  if ((a.count === 0) !== (b.count === 0)) return a.count === 0 ? 1 : -1;
+  const left = a[key];
+  const right = b[key];
+  if (left == null || right == null) return left == null ? (right == null ? 0 : 1) : -1;
+  return (direction === "desc" ? right - left : left - right) || a.name.localeCompare(b.name);
 }

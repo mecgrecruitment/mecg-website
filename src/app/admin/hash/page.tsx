@@ -20,10 +20,17 @@ import StageHashPanel from "./stage-hash-panel";
 import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
 import { applicationStatusLabel, cycleStatusLabel, decisionOutcomeLabel, decisionStatusLabel, roundStatusLabel } from "@/lib/labels";
 import { starsFromScore } from "@/lib/rubrics";
+import type { SpeedDatingResults } from "../speed-dating-results";
 
-// Speed Dating reads as stars; every other round keeps the 0..100 score.
-function roundScoreLabel(kind: string, score: number) {
-  return kind === "SPEED_DATING" ? `${starsFromScore(score).toFixed(1)} ★` : score.toFixed(1);
+type SpeedDatingSummary = { adjusted: number | null; count: number };
+
+// Speed Dating reads as stars with the grader-adjusted score beside them;
+// every other round keeps the 0..100 score.
+function roundScoreLabel(kind: string, score: number, speedDating?: SpeedDatingSummary) {
+  if (kind !== "SPEED_DATING") return score.toFixed(1);
+  const stars = `${starsFromScore(score).toFixed(1)} ★`;
+  if (!speedDating) return stars;
+  return `${stars} · adj ${speedDating.adjusted == null ? "—" : speedDating.adjusted.toFixed(1)} · ${speedDating.count} grader${speedDating.count === 1 ? "" : "s"}`;
 }
 
 export const metadata: Metadata = { title: "Decisions" };
@@ -101,6 +108,14 @@ export default async function HashBoard() {
   const rounds = (roundsResult.data ?? [])
     .filter((round) => round.weight > 0)
     .map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
+  // Grader-adjusted Speed Dating scores sit beside the raw stars in the queue.
+  const speedDatingRound = (roundsResult.data ?? []).find((round) => round.kind === "SPEED_DATING");
+  const speedDatingByApplication = new Map<string, SpeedDatingSummary>();
+  if (speedDatingRound) {
+    const { data: speedDatingResults, error: speedDatingError } = await screeningRpc<SpeedDatingResults>(supabase, "speed_dating_results", { target_round_id: speedDatingRound.id });
+    if (speedDatingError) console.error("speed_dating_results failed", speedDatingError);
+    for (const applicant of speedDatingResults?.applicants ?? []) speedDatingByApplication.set(applicant.applicationId, { adjusted: applicant.adjusted, count: applicant.count });
+  }
   const applications = (appsResult.data ?? [])
     .filter((application) => !["DRAFT", "WITHDRAWN"].includes(application.status))
     .map((application) => ({ ...application, displayName: panelOnly ? applicantCode(application.id) : application.pnms.name }))
@@ -336,7 +351,7 @@ export default async function HashBoard() {
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1">
                         {results.map(({ round, aggregate }) => (
-                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : roundScoreLabel(round.kind, aggregate.score)}</p>
+                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id))}</p>
                         ))}
                       </div>
                       <p className="tabular text-lg font-bold text-mecg-navy">{finalScore == null ? <span className="text-sm font-normal text-mecg-navy/55">Pending</span> : finalScore.toFixed(1)}</p>
@@ -357,7 +372,7 @@ export default async function HashBoard() {
                             {results.map(({ round, aggregate, lockedEvaluations }) => (
                               <div key={round.id}>
                                 <dt className="text-xs font-semibold text-mecg-navy">{round.name}</dt>
-                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : round.kind === "SPEED_DATING" ? roundScoreLabel(round.kind, aggregate.score) : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
+                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : round.kind === "SPEED_DATING" ? roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id)) : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
                               </div>
                             ))}
                             <div>

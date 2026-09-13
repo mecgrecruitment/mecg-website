@@ -38,9 +38,10 @@ test("rating validates the body before opening a database client", async (t) => 
     { roundId: "round-1", applicationId: "app-1", session: 1, score: 6 },
     { roundId: "round-1", applicationId: "app-1", session: 1, score: 3.5 },
     { roundId: "round-1", applicationId: "app-1", session: 1, score: "4" },
-    { roundId: "round-1", applicationId: "app-1", session: 3, score: 4 },
+    { roundId: "round-1", applicationId: "app-1", session: 0, score: 4 },
+    { roundId: "round-1", applicationId: "app-1", session: 5, score: 4 },
+    { roundId: "round-1", applicationId: "app-1", session: 1.5, score: 4 },
     { roundId: "round-1", applicationId: "app-1", session: "1", score: 4 },
-    { roundId: "round-1", applicationId: "app-1", score: 4 },
     { roundId: "round-1", applicationId: "", session: 1, score: 4 },
     { applicationId: "app-1", session: 1, score: 4 },
     { roundId: "round-1", applicationId: "app-1", session: 1, score: 4, note: "x".repeat(2001) },
@@ -73,7 +74,7 @@ test("rating passes the round, applicant, session, score, and note to the guarde
   }]);
 });
 
-test("rating defaults the note to an empty string", async (t) => {
+test("rating defaults the session to 1 and the note to an empty string", async (t) => {
   const calls: Array<Record<string, unknown> | undefined> = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({}) } });
@@ -86,9 +87,10 @@ test("rating defaults the note to an empty string", async (t) => {
     },
   });
   const { POST } = await importRoute("default-note");
-  const response = await POST(request({ roundId: "round-1", applicationId: "app-1", session: 1, score: 5 }));
+  const response = await POST(request({ roundId: "round-1", applicationId: "app-1", score: 5 }));
   assert.equal(response.status, 200);
   assert.equal(calls[0]?.note, "");
+  assert.equal(calls[0]?.target_session, 1);
 });
 
 test("rating surfaces the database's own message when the round is frozen", async (t) => {

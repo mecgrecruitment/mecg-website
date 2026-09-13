@@ -166,8 +166,8 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   // applicant they meet, so workload counts graded applicants and graders.
   const speedDating = round.kind === "SPEED_DATING";
   const speedDatingResults = speedDating ? speedDatingResultsResult.data : null;
-  const speedDatingGraded = (speedDatingResults?.applicants ?? []).filter((applicant) => applicant.count > 0).length;
-  const speedDatingGraders = new Set((speedDatingResults?.applicants ?? []).flatMap((applicant) => applicant.scores.map((score) => score.evaluatorId))).size;
+  const speedDatingGraded = speedDatingResults?.summary.graded ?? 0;
+  const speedDatingGraders = speedDatingResults?.summary.graders ?? 0;
 
   return (
     <main className="workspace-stack mx-auto flex w-full max-w-7xl flex-col">
@@ -328,9 +328,9 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       {speedDating && canManage && speedDatingResults && (
         <section>
           <SectionLabel>Results</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Stars are the mean across graders.</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Adjusted corrects for lenient and harsh graders; stars are the raw mean.</p>
           <div className="mt-4">
-            <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} />
+            <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} canExport={canExport} />
           </div>
         </section>
       )}
