@@ -34,6 +34,12 @@ test("score spread is review evidence but does not block a database-ready decisi
   assert.deepEqual(result.issues, [{ key: "spread-round-1", kind: "review", label: "Quick chats has a wide score spread (22)." }]);
 });
 
+test("speed dating spread is not review evidence", () => {
+  const result = applicantReadinessIssues([{ ...readyRound, kind: "SPEED_DATING", aggregateStatus: "REVIEW", spread: 50 }], true);
+
+  assert.deepEqual(result.issues, []);
+});
+
 test("canonical readiness can block when visible evidence appears complete", () => {
   const result = applicantReadinessIssues([readyRound], false);
 

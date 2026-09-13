@@ -8,6 +8,7 @@ import SegmentedControl from "@/components/segmented-control";
 import {
   SPEED_DATING_GROUP_SIZES,
   SPEED_DATING_SESSIONS,
+  groupSizeAllowed,
   searchSpeedDatingApplicants,
   type SpeedDatingApplicant,
   type SpeedDatingPair,
@@ -40,40 +41,44 @@ function highlight(name: string, query: string) {
   );
 }
 
-const SESSION_STORAGE_KEY = "speed-dating-session";
-const SESSION_EVENT = "speed-dating-session-change";
+const CHOICE_EVENT = "speed-dating-choice-change";
+const TABLE_MAX = 99;
 
 function isSession(value: number): value is SpeedDatingSession {
   return (SPEED_DATING_SESSIONS as readonly number[]).includes(value);
 }
 
-// Session choice lives in localStorage so it survives a refresh mid-evening; a
-// module-level copy keeps the switch working when storage is blocked.
-let chosenSession: SpeedDatingSession | null = null;
+// Session and table live in localStorage per round so they survive a refresh
+// mid-evening; a module-level copy keeps them working when storage is blocked.
+const chosen = new Map<string, string>();
 
-function readSession(): SpeedDatingSession {
-  if (chosenSession) return chosenSession;
+function readChoice(key: string) {
+  const held = chosen.get(key);
+  if (held !== undefined) return held;
   try {
-    const stored = Number(window.localStorage.getItem(SESSION_STORAGE_KEY));
-    return isSession(stored) ? stored : 1;
+    return window.localStorage.getItem(key) ?? "";
   } catch {
-    return 1;
+    return "";
   }
 }
 
-function subscribeSession(callback: () => void) {
+function subscribeChoice(callback: () => void) {
   window.addEventListener("storage", callback);
-  window.addEventListener(SESSION_EVENT, callback);
+  window.addEventListener(CHOICE_EVENT, callback);
   return () => {
     window.removeEventListener("storage", callback);
-    window.removeEventListener(SESSION_EVENT, callback);
+    window.removeEventListener(CHOICE_EVENT, callback);
   };
 }
 
-function chooseSession(next: SpeedDatingSession) {
-  chosenSession = next;
-  try { window.localStorage.setItem(SESSION_STORAGE_KEY, String(next)); } catch {}
-  window.dispatchEvent(new Event(SESSION_EVENT));
+function choose(key: string, value: string) {
+  chosen.set(key, value);
+  try { window.localStorage.setItem(key, value); } catch {}
+  window.dispatchEvent(new Event(CHOICE_EVENT));
+}
+
+function useChoice(key: string) {
+  return useSyncExternalStore(subscribeChoice, () => readChoice(key), () => "");
 }
 
 function memberNames(pair: SpeedDatingPair) {
@@ -98,22 +103,27 @@ export default function SpeedDatingPairSearch({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const session = useSyncExternalStore(subscribeSession, readSession, () => 1 as SpeedDatingSession);
+  const sessionKey = `speed-dating-session:${initialQueue.roundId}`;
+  const tableKey = `speed-dating-table:${initialQueue.roundId}`;
+  const storedSession = Number(useChoice(sessionKey));
+  const session: SpeedDatingSession = isSession(storedSession) ? storedSession : 1;
+  const tableText = useChoice(tableKey);
+  const table = Number(tableText);
+  const hasTable = Number.isInteger(table) && table >= 1 && table <= TABLE_MAX;
   const [tray, setTray] = useState<SpeedDatingApplicant[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { pairs, applicants } = initialQueue;
+  const { pairs, applicants, progress } = initialQueue;
   const results = useMemo(() => searchSpeedDatingApplicants(applicants, query).slice(0, RESULT_LIMIT), [applicants, query]);
   const unfinished = pairs.filter((pair) => !pair.submittedAt);
   const inSession = pairs.filter((pair) => pair.session === session);
   const unfinishedInSession = inSession.filter((pair) => !pair.submittedAt);
   const submittedInSession = inSession.filter((pair) => pair.submittedAt);
   const submittedBySession = SPEED_DATING_SESSIONS.map((s) => `Session ${s}: ${pairs.filter((pair) => pair.session === s && pair.submittedAt).length} submitted`).join(" · ");
-  const scoredCount = applicants.filter((applicant) => applicant.scored).length;
   const isActive = initialQueue.roundStatus === "ACTIVE";
   const canStart = isActive && initialQueue.rubricReady && initialQueue.calibrated;
-  const traySized = tray.length >= SPEED_DATING_GROUP_SIZES.min && tray.length <= SPEED_DATING_GROUP_SIZES.max;
+  const traySized = groupSizeAllowed(tray.length);
   const activePair = requestedPairId
     ? pairs.find((pair) => pair.id === requestedPairId && !pair.submittedAt)
     : undefined;
@@ -149,7 +159,7 @@ export default function SpeedDatingPairSearch({
       const response = await fetch("/api/member/speed-dating/groups", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ roundId: initialQueue.roundId, applicationIds: tray.map((item) => item.applicationId), session }),
+        body: JSON.stringify({ roundId: initialQueue.roundId, applicationIds: tray.map((item) => item.applicationId), session, table }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok || typeof body?.pairId !== "string") throw new Error(body?.error ?? "Could not start this group");
@@ -200,8 +210,11 @@ export default function SpeedDatingPairSearch({
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <section className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">{initialQueue.roundName}</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">Who is in front of you?</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">Search each applicant’s name and add them. Groups are two or three people.</p>
+        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 className="text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">Who is in front of you?</h2>
+          <p className="text-sm font-semibold text-mecg-navy/65">Graded {progress.scored} of {progress.total}</p>
+        </div>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">Search each applicant’s name and add them. Grade one at a time or up to three together.</p>
 
         {submitted && <div className="mt-4"><OperationNotice kind="success">All ratings were submitted. Search to build the next group.</OperationNotice></div>}
         {discarded && <div className="mt-4"><OperationNotice kind="success">Group discarded. Search to build the next one.</OperationNotice></div>}
@@ -216,15 +229,34 @@ export default function SpeedDatingPairSearch({
           </div>
         )}
 
-        <p className="mt-6 text-sm font-semibold text-mecg-navy">Session</p>
-        <div className="mt-2 max-w-xs">
-          <SegmentedControl
-            name="Session"
-            options={SPEED_DATING_SESSIONS.map((s) => ({ value: String(s), label: `Session ${s}` }))}
-            value={String(session)}
-            onChange={(value) => { const next = Number(value); if (isSession(next)) chooseSession(next); }}
-          />
+        <div className="mt-6 flex flex-wrap items-end gap-3">
+          <div className="w-full max-w-xs">
+            <p className="text-sm font-semibold text-mecg-navy">Session</p>
+            <div className="mt-2">
+              <SegmentedControl
+                name="Session"
+                options={SPEED_DATING_SESSIONS.map((s) => ({ value: String(s), label: `Session ${s}` }))}
+                value={String(session)}
+                onChange={(value) => { if (isSession(Number(value))) choose(sessionKey, value); }}
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="table-number" className="block text-sm font-semibold text-mecg-navy">Table</label>
+            <input
+              id="table-number"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={tableText}
+              onChange={(event) => choose(tableKey, event.target.value.replace(/\D/g, "").slice(0, 2))}
+              placeholder="Table"
+              autoComplete="off"
+              className="mt-2 min-h-11 w-24 rounded-xl border border-mecg-navy/15 bg-white px-4 text-base text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
+            />
+          </div>
         </div>
+        <p className="mt-2 text-xs leading-5 text-mecg-navy/60">Your table for this session. Change it if you move.</p>
 
         <label htmlFor="applicant-search" className="mt-5 block text-sm font-semibold text-mecg-navy">Applicant name</label>
         <div className="relative mt-2">
@@ -266,7 +298,7 @@ export default function SpeedDatingPairSearch({
                     <div key={applicant.applicationId} className="flex items-center justify-between gap-3 rounded-xl border border-mecg-navy/10 px-4 py-2">
                       <span className="font-semibold text-mecg-navy">{highlight(applicant.name, query)}</span>
                       <span className="flex items-center gap-2">
-                        {applicant.scored && <span className="rounded-full bg-mecg-navy/[0.06] px-3 py-1 text-xs font-semibold text-mecg-navy/60">Scored</span>}
+                        {applicant.scored && <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">✓ Graded</span>}
                         {!applicant.scored && openGroup && <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">In {openGroup.label}</span>}
                         <button
                           type="button"
@@ -302,12 +334,13 @@ export default function SpeedDatingPairSearch({
               )}
             <button
               type="button"
-              disabled={!traySized || !canStart || pending}
+              disabled={!traySized || !hasTable || !canStart || pending}
               onClick={() => void startGroup()}
               className="button-primary mt-4 min-h-11 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {pending ? "Starting…" : tray.length < SPEED_DATING_GROUP_SIZES.min ? `Add ${SPEED_DATING_GROUP_SIZES.min - tray.length} more to start` : `Start grading these ${tray.length} applicants`}
+              {pending ? "Starting…" : tray.length === 0 ? "Add an applicant to start" : tray.length === 1 ? "Start grading this applicant" : `Start grading these ${tray.length} applicants`}
             </button>
+            {traySized && !hasTable && <p className="mt-2 text-xs font-semibold text-mecg-orange-ink">Enter your table number</p>}
           </div>
         </div>
 
@@ -330,9 +363,9 @@ export default function SpeedDatingPairSearch({
         <p className="mt-4 text-sm font-semibold text-white">{pairs.length - unfinished.length} submitted</p>
         <p className="mt-1 text-sm font-semibold text-white">{unfinished.length} remaining</p>
         <p className="mt-2 text-xs text-white/65">{submittedBySession}</p>
-        <p className="mt-4 text-sm font-semibold text-white">Applicants scored: {scoredCount} of {applicants.length}</p>
+        <p className="mt-4 text-sm font-semibold text-white">Graded {progress.scored} of {progress.total}</p>
         <div className="mt-5 border-t border-white/10 pt-5 text-sm leading-6 text-white/70">
-          <p>You score each applicant once per round. Other evaluators grade the same people independently.</p>
+          <p>Score every applicant who comes to your table. Everyone at the table scores independently; the board sees the average.</p>
         </div>
       </aside>
     </div>

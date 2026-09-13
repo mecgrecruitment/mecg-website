@@ -4,6 +4,7 @@ export type DecisionRoundEvidence = {
   status: string;
   weight: number;
   lockedEvaluations: number;
+  kind?: string;
   aggregateStatus?: string;
   spread?: number | null;
 };
@@ -56,7 +57,9 @@ export function applicantReadinessIssues(
         label: `${round.name} needs ${2 - round.lockedEvaluations} more locked evaluation${round.lockedEvaluations === 1 ? "" : "s"}.`,
       });
     }
-    if (round.aggregateStatus === "REVIEW") {
+    // Speed Dating has dozens of graders on a five-point scale; a one-star
+    // disagreement is the norm there, not a review signal.
+    if (round.aggregateStatus === "REVIEW" && round.kind !== "SPEED_DATING") {
       issues.push({
         key: `spread-${round.id}`,
         kind: "review",

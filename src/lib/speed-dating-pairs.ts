@@ -9,12 +9,17 @@ export type SpeedDatingPairMember = {
 export const SPEED_DATING_SESSIONS = [1, 2] as const;
 export type SpeedDatingSession = typeof SPEED_DATING_SESSIONS[number];
 
-export const SPEED_DATING_GROUP_SIZES = { min: 2, max: 3 } as const;
+export const SPEED_DATING_GROUP_SIZES = { min: 1, max: 3 } as const;
+
+export function groupSizeAllowed(count: number) {
+  return Number.isInteger(count) && count >= SPEED_DATING_GROUP_SIZES.min && count <= SPEED_DATING_GROUP_SIZES.max;
+}
 
 export type SpeedDatingPair = {
   id: string;
   label: string;
   session: number;
+  tableNumber: number | null;
   claimed: boolean;
   submittedAt: string | null;
   members: SpeedDatingPairMember[];
@@ -30,6 +35,7 @@ export type SpeedDatingPairQueue = {
   rubricReady: boolean;
   criterion: { id: string; name: string; description: string } | null;
   applicants: SpeedDatingApplicant[];
+  progress: { scored: number; total: number };
   pairs: SpeedDatingPair[];
 };
 
@@ -50,7 +56,7 @@ export function searchSpeedDatingApplicants(applicants: SpeedDatingApplicant[], 
 }
 
 function isGroupSized(value: unknown[]) {
-  return value.length >= SPEED_DATING_GROUP_SIZES.min && value.length <= SPEED_DATING_GROUP_SIZES.max;
+  return groupSizeAllowed(value.length);
 }
 
 export function isSpeedDatingPairQueue(value: unknown): value is SpeedDatingPairQueue {
@@ -63,11 +69,13 @@ export function isSpeedDatingPairQueue(value: unknown): value is SpeedDatingPair
     && typeof applicant.applicationId === "string"
     && typeof applicant.name === "string"
     && typeof applicant.scored === "boolean")) return false;
+  if (!isRecord(queue.progress) || typeof queue.progress.scored !== "number" || typeof queue.progress.total !== "number") return false;
   return queue.pairs.every((candidate) => {
     if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return false;
     const pair = candidate as Record<string, unknown>;
     if (typeof pair.id !== "string" || typeof pair.label !== "string" || typeof pair.claimed !== "boolean") return false;
     if (!isSession(pair.session)) return false;
+    if (pair.tableNumber !== null && !(Number.isInteger(pair.tableNumber) && (pair.tableNumber as number) >= 1)) return false;
     if (pair.submittedAt !== null && typeof pair.submittedAt !== "string") return false;
     if (!Array.isArray(pair.members) || !isGroupSized(pair.members)) return false;
     return pair.members.every((candidateMember, index) => {

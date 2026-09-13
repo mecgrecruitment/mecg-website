@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  groupSizeAllowed,
   isSpeedDatingPairQueue,
   isSpeedDatingPairSetup,
   parseSpeedDatingPairRatings,
@@ -15,6 +16,7 @@ const pairs: SpeedDatingPair[] = [
     id: "pair-1",
     label: "Session 1 · Pair 01",
     session: 1,
+    tableNumber: 4,
     claimed: false,
     submittedAt: null,
     members: [
@@ -26,6 +28,7 @@ const pairs: SpeedDatingPair[] = [
     id: "pair-2",
     label: "Session 1 · Pair 02",
     session: 1,
+    tableNumber: null,
     claimed: true,
     submittedAt: null,
     members: [
@@ -40,6 +43,8 @@ const applicants: SpeedDatingApplicant[] = [
   { applicationId: "app-1", name: "Amélie Jones", scored: false },
   { applicationId: "app-2", name: "Marcus Lee", scored: true },
 ];
+
+const progress = { scored: 1, total: 2 };
 
 const setupPair = {
   id: "pair-1",
@@ -67,7 +72,8 @@ test("pair setup validation keeps the Board payload group-shaped", () => {
   };
   assert.equal(isSpeedDatingPairSetup(setup), true);
   assert.equal(isSpeedDatingPairSetup({ ...setup, pairs: [{ ...setupPair, applicationIds: ["app-1", "app-2", "app-3"], submittedAt: "2026-09-13T15:00:00Z" }] }), true);
-  assert.equal(isSpeedDatingPairSetup({ ...setup, pairs: [{ ...setupPair, applicationIds: ["app-1"] }] }), false);
+  assert.equal(isSpeedDatingPairSetup({ ...setup, pairs: [{ ...setupPair, applicationIds: ["app-1"] }] }), true);
+  assert.equal(isSpeedDatingPairSetup({ ...setup, pairs: [{ ...setupPair, applicationIds: [] }] }), false);
   assert.equal(isSpeedDatingPairSetup({ ...setup, pairs: [{ ...setupPair, applicationIds: ["app-1", "app-2", "app-3", "app-4"] }] }), false);
   const { evaluatorName: _evaluatorName, ...withoutEvaluator } = setupPair;
   void _evaluatorName;
@@ -88,16 +94,23 @@ test("blank search does not expose a wall of applicant names", () => {
   assert.deepEqual(searchSpeedDatingPairs(pairs, " "), []);
 });
 
-test("queue validation requires two or three ordered members", () => {
-  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: { id: "criterion-1", name: "Overall", description: "Overall assessment" }, applicants, pairs };
+test("group sizes run from one to three", () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 1.5].map(groupSizeAllowed), [false, true, true, true, false, false]);
+});
+
+test("queue validation requires one to three ordered members", () => {
+  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: { id: "criterion-1", name: "Overall", description: "Overall assessment" }, applicants, progress, pairs };
   assert.equal(isSpeedDatingPairQueue(queue), true);
-  assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairs[0], members: [pairs[0].members[0]] }] }), false);
+  assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairs[0], members: [pairs[0].members[0]] }] }), true);
+  assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairs[0], members: [] }] }), false);
+  assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairs[0], tableNumber: 0 }] }), false);
+  assert.equal(isSpeedDatingPairQueue({ ...queue, progress: undefined }), false);
   const fourth = { applicationId: "app-6", name: "Jo Park", position: 4, assignmentId: null, assignmentStatus: null };
   assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairs[1], members: [...pairs[1].members, fourth] }] }), false);
 });
 
 test("queue validation requires the applicant list", () => {
-  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: null, pairs: [] };
+  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: null, progress, pairs: [] };
   assert.equal(isSpeedDatingPairQueue(queue), false);
   assert.equal(isSpeedDatingPairQueue({ ...queue, applicants: [] }), true);
   assert.equal(isSpeedDatingPairQueue({ ...queue, applicants: [{ applicationId: "app-1", name: "Amélie Jones" }] }), false);
@@ -106,7 +119,7 @@ test("queue validation requires the applicant list", () => {
 test("queue and setup validation require a session on every pair", () => {
   const { session: _session, ...pairWithoutSession } = pairs[0];
   void _session;
-  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: null, applicants: [], pairs: [pairWithoutSession] };
+  const queue = { roundId: "round-1", roundName: "Speed Dating", roundStatus: "ACTIVE", calibrated: true, rubricReady: true, criterion: null, applicants: [], progress, pairs: [pairWithoutSession] };
   assert.equal(isSpeedDatingPairQueue(queue), false);
   assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairWithoutSession, session: 0 }] }), false);
   assert.equal(isSpeedDatingPairQueue({ ...queue, pairs: [{ ...pairWithoutSession, session: 2 }] }), true);
@@ -118,7 +131,7 @@ test("queue and setup validation require a session on every pair", () => {
   }), false);
 });
 
-test("pair ratings require two or three distinct applicants and evidence for 1, 2, and 5", () => {
+test("pair ratings require one to three distinct applicants and evidence for 1, 2, and 5", () => {
   assert.deepEqual(parseSpeedDatingPairRatings([
     { applicationId: "app-1", score: 3, note: "" },
     { applicationId: "app-2", score: 5, note: "Strong listening" },
@@ -139,7 +152,8 @@ test("pair ratings require two or three distinct applicants and evidence for 1, 
     { applicationId: "app-2", score: 4, note: "" },
     { applicationId: "app-3", score: 3, note: "" },
   ])?.length, 3);
-  assert.equal(parseSpeedDatingPairRatings([{ applicationId: "app-1", score: 3, note: "" }]), null);
+  assert.equal(parseSpeedDatingPairRatings([{ applicationId: "app-1", score: 3, note: "" }])?.length, 1);
+  assert.equal(parseSpeedDatingPairRatings([]), null);
   assert.equal(parseSpeedDatingPairRatings([
     { applicationId: "app-1", score: 3, note: "" },
     { applicationId: "app-2", score: 4, note: "" },

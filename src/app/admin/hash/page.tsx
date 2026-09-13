@@ -19,6 +19,12 @@ import { MemberNotes, MemberVote, type HashTallyRow } from "./member-vote";
 import StageHashPanel from "./stage-hash-panel";
 import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
 import { applicationStatusLabel, cycleStatusLabel, decisionOutcomeLabel, decisionStatusLabel, roundStatusLabel } from "@/lib/labels";
+import { starsFromScore } from "@/lib/rubrics";
+
+// Speed Dating reads as stars; every other round keeps the 0..100 score.
+function roundScoreLabel(kind: string, score: number) {
+  return kind === "SPEED_DATING" ? `${starsFromScore(score).toFixed(1)} ★` : score.toFixed(1);
+}
 
 export const metadata: Metadata = { title: "Decisions" };
 
@@ -198,6 +204,7 @@ export default async function HashBoard() {
       name: round.name,
       status: round.status,
       weight: round.weight,
+      kind: round.kind,
       lockedEvaluations,
       aggregateStatus: aggregate.status,
       spread: aggregate.spread,
@@ -329,7 +336,7 @@ export default async function HashBoard() {
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1">
                         {results.map(({ round, aggregate }) => (
-                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : aggregate.score.toFixed(1)}</p>
+                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : roundScoreLabel(round.kind, aggregate.score)}</p>
                         ))}
                       </div>
                       <p className="tabular text-lg font-bold text-mecg-navy">{finalScore == null ? <span className="text-sm font-normal text-mecg-navy/55">Pending</span> : finalScore.toFixed(1)}</p>
@@ -350,7 +357,7 @@ export default async function HashBoard() {
                             {results.map(({ round, aggregate, lockedEvaluations }) => (
                               <div key={round.id}>
                                 <dt className="text-xs font-semibold text-mecg-navy">{round.name}</dt>
-                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
+                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : round.kind === "SPEED_DATING" ? roundScoreLabel(round.kind, aggregate.score) : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
                               </div>
                             ))}
                             <div>

@@ -195,7 +195,8 @@ export default function SpeedDatingPairGrading({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-mecg-orange-ink">{pair.label}</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">Grade all {count} applicants</h2>
+          <p className="mt-1 text-sm font-semibold text-mecg-navy/65">Session {pair.session}{pair.tableNumber ? ` · Table ${pair.tableNumber}` : ""}</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy">{count === 1 ? "Grade this applicant" : `Grade all ${count} applicants`}</h2>
           <p className="mt-1 text-sm text-mecg-navy/65">{pair.members.map((member) => member.name).join(" + ")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -307,12 +308,12 @@ export default function SpeedDatingPairGrading({
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-mecg-navy/60">Submitting locks all {count} independent evaluations together. No rating can be edited afterward.</p>
+          <p className="mt-3 text-xs text-mecg-navy/60">{count === 1 ? "Submitting locks this evaluation." : `Submitting locks all ${count} independent evaluations together.`} No rating can be edited afterward.</p>
         </div>
       )}
 
       <button type="submit" disabled={!ready || pending} className="button-primary mt-5 min-h-12 w-full disabled:opacity-50">
-        {pending ? `Submitting ${count} ratings…` : reviewing ? `Submit all ${count} ratings` : "Review and submit group"}
+        {pending ? "Submitting…" : reviewing ? (count === 1 ? "Submit rating" : `Submit all ${count} ratings`) : "Review and submit"}
       </button>
     </form>
   );

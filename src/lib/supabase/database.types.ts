@@ -2876,6 +2876,7 @@ export type Database = {
           target_application_ids: string[]
           target_round_id: string
           target_session?: number
+          target_table?: number
         }
         Returns: Json
       }
@@ -2884,6 +2885,10 @@ export type Database = {
         Returns: Json
       }
       speed_dating_pair_setup: {
+        Args: { target_round_id: string }
+        Returns: Json
+      }
+      speed_dating_results: {
         Args: { target_round_id: string }
         Returns: Json
       }

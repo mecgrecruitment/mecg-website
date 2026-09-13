@@ -285,18 +285,22 @@ export function RoundControls({
   memberAccounts,
   applications,
   assignments,
+  assignable = true,
 }: ControlProps & {
   rounds: (Option & { status: string })[];
   memberAccounts: MemberAccount[];
   applications: Option[];
   assignments: Array<Option & { evaluatorId: string; evaluatorName: string; applicationName: string }>;
+  // Speed Dating has no pre-assignment: graders pick their own tables, so
+  // the assign and reassign panels are hidden and only round status remains.
+  assignable?: boolean;
 }) {
   const { act, pending, error } = useRushAction(cycleId);
   const activeMemberAccounts = memberAccounts.filter((member) => member.active !== false);
   return (
     <section className="flex flex-col gap-5">
       <div className="grid gap-5 lg:grid-cols-2">
-        <JsonActionForm
+        {assignable && <JsonActionForm
           className={CARD}
           onSubmitData={(data) => void act({ action: "ASSIGN", roundId: data.get("roundId"), applicationId: data.get("applicationId"), evaluatorId: data.get("evaluatorId") })}
         >
@@ -316,7 +320,7 @@ export function RoundControls({
             </Select>
             <button type="submit" disabled={pending} className="button-primary mt-1 w-full">Create assignment</button>
           </div>
-        </JsonActionForm>
+        </JsonActionForm>}
 
         <div className="rounded-2xl bg-paper p-5">
           <p className="text-[13px] font-semibold text-mecg-navy/50">Round status</p>
@@ -346,7 +350,7 @@ export function RoundControls({
           </div>
         </div>
       </div>
-      <div className="rounded-2xl bg-paper p-5">
+      {assignable && <div className="rounded-2xl bg-paper p-5">
         <p className="text-[13px] font-semibold text-mecg-navy/50">Open assignments</p>
         <p className="mt-1 text-sm text-mecg-navy/55">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
         <div className="mt-3 grid gap-2">
@@ -362,7 +366,7 @@ export function RoundControls({
           ))}
           {!assignments.length && <p className="text-sm text-mecg-navy/55">No untouched assignments are available to change.</p>}
         </div>
-      </div>
+      </div>}
       <ErrorNotice error={error} />
     </section>
   );

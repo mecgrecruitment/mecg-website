@@ -33,18 +33,22 @@ test("group start validates the applicant list before opening a database client"
   });
   const { POST } = await importRoute("invalid");
   for (const body of [
-    { roundId: "round-1", applicationIds: ["app-1"] },
-    { roundId: "round-1", applicationIds: ["app-1", "app-2", "app-3", "app-4"] },
-    { roundId: "round-1", applicationIds: ["app-1", "app-1"] },
-    { roundId: "round-1", applicationIds: ["app-1", "app-2"], session: 5 },
-    { applicationIds: ["app-1", "app-2"] },
+    { roundId: "round-1", applicationIds: [], table: 4 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2", "app-3", "app-4"], table: 4 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-1"], table: 4 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2"], session: 5, table: 4 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2"] },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2"], table: 0 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2"], table: 100 },
+    { roundId: "round-1", applicationIds: ["app-1", "app-2"], table: "4" },
+    { applicationIds: ["app-1", "app-2"], table: 4 },
   ]) {
     const response = await POST(request(body));
     assert.equal(response.status, 400, JSON.stringify(body));
   }
 });
 
-test("group start passes the round, applicants, and session to the guarded RPC", async (t) => {
+test("group start passes the round, applicants, session, and table to the guarded RPC", async (t) => {
   const calls: Array<{ name: string; args: Record<string, unknown> | undefined }> = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({}) } });
@@ -57,12 +61,12 @@ test("group start passes the round, applicants, and session to the guarded RPC",
     },
   });
   const { POST } = await importRoute("success");
-  const response = await POST(request({ roundId: "round-1", applicationIds: ["app-1", "app-2", "app-3"], session: 2 }));
+  const response = await POST(request({ roundId: "round-1", applicationIds: ["app-1"], session: 2, table: 7 }));
   assert.equal(response.status, 201);
   assert.deepEqual(await response.json(), { pairId: "pair-1", label: "Group 01" });
   assert.deepEqual(calls, [{
     name: "start_speed_dating_group",
-    args: { target_round_id: "round-1", target_application_ids: ["app-1", "app-2", "app-3"], target_session: 2 },
+    args: { target_round_id: "round-1", target_application_ids: ["app-1"], target_session: 2, target_table: 7 },
   }]);
 });
 
@@ -73,7 +77,7 @@ test("group start surfaces the database's own message for an already scored appl
     namedExports: { screeningRpc: async () => ({ data: null, error: { code: "55000", message: "you already scored Sam Lee" } }) },
   });
   const { POST } = await importRoute("scored");
-  const response = await POST(request({ roundId: "round-1", applicationIds: ["app-1", "app-2"] }));
+  const response = await POST(request({ roundId: "round-1", applicationIds: ["app-1", "app-2"], table: 4 }));
   assert.equal(response.status, 409);
   assert.deepEqual(await response.json(), { error: "you already scored Sam Lee" });
 });

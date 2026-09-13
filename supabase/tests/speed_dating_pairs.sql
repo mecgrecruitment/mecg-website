@@ -7,13 +7,13 @@ select extensions.has_table('rush', 'speed_dating_pairs', 'Speed Dating pairs ex
 select extensions.has_table('rush', 'speed_dating_pair_members', 'pair membership exists');
 select extensions.has_table('rush', 'speed_dating_pair_claims', 'evaluator claims exist');
 select extensions.col_is_pk('rush', 'speed_dating_pair_claims', array['pair_id', 'evaluator_id'], 'a member claims a pair at most once');
-select extensions.has_function('rush', 'start_speed_dating_group', array['text', 'text[]', 'integer'], 'evaluator group start function exists');
+select extensions.has_function('rush', 'start_speed_dating_group', array['text', 'text[]', 'integer', 'integer'], 'evaluator group start function exists');
 select extensions.has_function('rush', 'my_speed_dating_pairs', array['text'], 'member pair queue function exists');
 select extensions.has_function('rush', 'discard_speed_dating_group', array['text'], 'group discard function exists');
 select extensions.hasnt_function('rush', 'replace_speed_dating_pairs', array['text', 'jsonb', 'boolean'], 'the Board no longer builds pairs');
 select extensions.hasnt_function('rush', 'claim_speed_dating_pair', array['text'], 'claims happen when a group starts');
 select extensions.ok(
-  (select p.prosecdef and p.proconfig @> array['search_path=""'] from pg_proc p where p.oid = 'rush.start_speed_dating_group(text,text[],integer)'::regprocedure),
+  (select p.prosecdef and p.proconfig @> array['search_path=""'] from pg_proc p where p.oid = 'rush.start_speed_dating_group(text,text[],integer,integer)'::regprocedure),
   'group start is a hardened security definer'
 );
 select extensions.ok(
@@ -25,8 +25,8 @@ select extensions.ok(
   'group discard is a hardened security definer'
 );
 select extensions.ok(
-  has_function_privilege('authenticated', 'rush.start_speed_dating_group(text,text[],integer)', 'EXECUTE')
-  and not has_function_privilege('anon', 'rush.start_speed_dating_group(text,text[],integer)', 'EXECUTE')
+  has_function_privilege('authenticated', 'rush.start_speed_dating_group(text,text[],integer,integer)', 'EXECUTE')
+  and not has_function_privilege('anon', 'rush.start_speed_dating_group(text,text[],integer,integer)', 'EXECUTE')
   and has_function_privilege('authenticated', 'rush.discard_speed_dating_group(text)', 'EXECUTE')
   and not has_function_privilege('anon', 'rush.discard_speed_dating_group(text)', 'EXECUTE'),
   'only authenticated actors can start or discard a group'
@@ -55,11 +55,11 @@ select extensions.ok(
 );
 select extensions.ok(
   position('is_active_screening_reviewer' in pg_get_functiondef('rush.my_speed_dating_pairs(text)'::regprocedure)) > 0
-  and position('is_active_screening_reviewer' in pg_get_functiondef('rush.start_speed_dating_group(text,text[],integer)'::regprocedure)) > 0,
+  and position('is_active_screening_reviewer' in pg_get_functiondef('rush.start_speed_dating_group(text,text[],integer,integer)'::regprocedure)) > 0,
   'screening reviewers cannot search applicants or start identified groups'
 );
 select extensions.ok(
-  position('You already scored' in pg_get_functiondef('rush.start_speed_dating_group(text,text[],integer)'::regprocedure)) > 0
+  position('You already scored' in pg_get_functiondef('rush.start_speed_dating_group(text,text[],integer,integer)'::regprocedure)) > 0
   and position('submitted groups cannot be discarded' in pg_get_functiondef('rush.discard_speed_dating_group(text)'::regprocedure)) > 0,
   'a group cannot re-score an applicant and a submitted group cannot be discarded'
 );

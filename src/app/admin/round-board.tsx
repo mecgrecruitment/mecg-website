@@ -15,11 +15,9 @@ import { memberAccountsFor } from "./member-accounts";
 import RubricEditor, { type Criterion, type RoundRubric } from "./rounds/rubric-editor";
 import GroupForms from "./groups/group-forms";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
-import { formatEasternDateTime } from "@/lib/date-time";
 import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState } from "./group-case-coverage";
 import { screeningRpc } from "@/lib/screening-rpc";
-import { SPEED_DATING_SESSIONS, type SpeedDatingPairSetup } from "@/lib/speed-dating-pairs";
-import { speedDatingApplicantCoverage } from "./speed-dating-coverage";
+import SpeedDatingResultsTable, { type SpeedDatingResults } from "./speed-dating-results";
 
 function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; name: string; status: string }): RoundRubric | null {
   if (!Array.isArray(value)) return null;
@@ -78,7 +76,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   // Application screening has its own stepper page; the coverage board is for interview rounds.
   if (round.kind === "APPLICATION_SCREEN") redirect("/admin/screening");
   const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
-  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingSetupResult] = await Promise.all([
+  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingResultsResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),
     supabase.from("memberships").select("user_id,role,active,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     round.kind === "GROUP_CASE"
@@ -91,12 +89,12 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       ? supabase.rpc("cycle_rubrics", { target_cycle_id: cycleId })
       : Promise.resolve({ data: [], error: null }),
     round.kind === "SPEED_DATING" && canManage
-      ? screeningRpc<SpeedDatingPairSetup>(supabase, "speed_dating_pair_setup", { target_round_id: round.id })
+      ? screeningRpc<SpeedDatingResults>(supabase, "speed_dating_results", { target_round_id: round.id })
       : Promise.resolve({ data: null, error: null }),
   ]);
   for (const result of [applicationsResult, membersResult, groupMembersResult, groupsResult]) if (result.error) throw result.error;
   if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
-  if (speedDatingSetupResult.error) throw new Error(speedDatingSetupResult.error.message);
+  if (speedDatingResultsResult.error) throw new Error(speedDatingResultsResult.error.message);
   const rubric = parseRoundRubric(rubricsResult.data, cycleId, round);
   const assignments = canOperate ? round?.evaluation_assignments ?? [] : [];
   const allApplications = (applicationsResult.data ?? [])
@@ -164,21 +162,12 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       || a.groupName.localeCompare(b.groupName)
       || a.label.localeCompare(b.label))
     : [];
-  const applicationNameById = new Map(allApplications.map((application) => [application.id, application.name]));
-  const speedDatingSetup = round.kind === "SPEED_DATING" ? speedDatingSetupResult.data : null;
-  const speedDatingSessions = SPEED_DATING_SESSIONS
-    .map((session) => ({
-      session,
-      rows: (speedDatingSetup?.pairs ?? [])
-        .filter((pair) => pair.session === session)
-        .sort((a, b) => a.label.localeCompare(b.label))
-        .map((pair) => ({ ...pair, names: pair.applicationIds.map((applicationId) => applicationNameById.get(applicationId) ?? "Applicant") })),
-    }))
-    .filter((group) => group.rows.length > 0);
-  const speedDatingApplicants = speedDatingSetup
-    ? speedDatingApplicantCoverage(speedDatingSetup.participants, speedDatingSetup.pairs)
-      .sort((a, b) => a.evaluatorsSubmitted - b.evaluatorsSubmitted || a.name.localeCompare(b.name))
-    : [];
+  // Speed Dating has no pre-assignment: every member present grades every
+  // applicant they meet, so workload counts graded applicants and graders.
+  const speedDating = round.kind === "SPEED_DATING";
+  const speedDatingResults = speedDating ? speedDatingResultsResult.data : null;
+  const speedDatingGraded = (speedDatingResults?.applicants ?? []).filter((applicant) => applicant.count > 0).length;
+  const speedDatingGraders = new Set((speedDatingResults?.applicants ?? []).flatMap((applicant) => applicant.scores.map((score) => score.evaluatorId))).size;
 
   return (
     <main className="workspace-stack mx-auto flex w-full max-w-7xl flex-col">
@@ -208,8 +197,10 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
                 {[
                   [String(activeApplications.length), "applicants"],
-                  [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
-                  [String(openAssignments), "open forms"],
+                  speedDating
+                    ? [`${speedDatingGraded}/${activeApplications.length}`, "graded"]
+                    : [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
+                  speedDating ? [String(speedDatingGraders), "graders"] : [String(openAssignments), "open forms"],
                   [String(submittedAssignments), "submitted"],
                 ].map(([value, label]) => (
                   <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 sm:py-3">
@@ -217,7 +208,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                   </div>
                 ))}
             </div>
-            {(undercoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && (
+            {(undercoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && !speedDating && (
               <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {undercoveredApplicants.length > 0 && (
                     <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
@@ -334,56 +325,14 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         </section>
       )}
 
-      {round.kind === "SPEED_DATING" && canManage && speedDatingSetup && (
-        <>
-          <section>
-            <SectionLabel>Groups</SectionLabel>
-            <p className="mt-1 text-sm text-mecg-navy/55">Evaluators build groups from search on the night. Every submitted group locks one rating per applicant.</p>
-            {speedDatingSessions.map((group) => (
-              <div key={group.session}>
-                <h3 className="mt-5 text-base font-semibold text-mecg-navy">Session {group.session}</h3>
-                <div className="mt-2 divide-y divide-mecg-navy/10 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-                  {group.rows.map((row) => (
-                    <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[7rem_minmax(12rem,1.4fr)_minmax(10rem,1fr)_12rem] md:items-center md:py-3">
-                      <p className="text-xs font-semibold text-mecg-orange-ink">{row.label}</p>
-                      <p className="text-sm font-semibold text-mecg-navy">{row.names.join(" + ")}</p>
-                      <p className="text-sm text-mecg-navy/70">{row.evaluatorName}</p>
-                      <StatusPill tone={row.submittedAt ? "navy" : "neutral"}>
-                        {row.submittedAt ? `Submitted ${formatEasternDateTime(row.submittedAt)}` : "In progress"}
-                      </StatusPill>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {!speedDatingSessions.length && (
-              <p className="mt-4 rounded-2xl bg-white p-6 text-center text-sm text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">No groups yet.</p>
-            )}
-          </section>
-          <section>
-            <SectionLabel>Applicant coverage</SectionLabel>
-            <p className="mt-1 text-sm text-mecg-navy/55">Aim for at least two evaluators per applicant.</p>
-            <div className="mt-4 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-              <div className="hidden bg-mecg-navy/[0.04] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/55 md:grid md:grid-cols-[minmax(12rem,1fr)_8rem_12rem]">
-                <span>Applicant</span>
-                <span>Groups</span>
-                <span>Evaluators submitted</span>
-              </div>
-              <div className="divide-y divide-mecg-navy/10">
-                {speedDatingApplicants.map((row) => (
-                  <article key={row.applicationId} className={`grid gap-3 px-4 py-4 md:grid-cols-[minmax(12rem,1fr)_8rem_12rem] md:items-center md:py-3 ${row.evaluatorsSubmitted < 2 ? "bg-amber-50/60" : "bg-white"}`}>
-                    <Link href={`/admin/applications/${row.applicationId}`} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.name}</Link>
-                    <p className="text-sm text-mecg-navy/70"><span className="mr-1 font-semibold md:hidden">Groups:</span>{row.groups}</p>
-                    <p className="text-sm text-mecg-navy/70"><span className="mr-1 font-semibold md:hidden">Evaluators submitted:</span>{row.evaluatorsSubmitted}</p>
-                  </article>
-                ))}
-                {!speedDatingApplicants.length && (
-                  <p className="bg-white p-6 text-center text-sm text-mecg-navy/55">No active Speed Dating applicants yet.</p>
-                )}
-              </div>
-            </div>
-          </section>
-        </>
+      {speedDating && canManage && speedDatingResults && (
+        <section>
+          <SectionLabel>Results</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Stars are the mean across graders.</p>
+          <div className="mt-4">
+            <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} />
+          </div>
+        </section>
       )}
 
       {canOperate && (
@@ -393,6 +342,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
           memberAccounts={accounts}
           applications={activeApplications}
           assignments={untouchedAssignments}
+          assignable={!speedDating}
         />
       )}
 

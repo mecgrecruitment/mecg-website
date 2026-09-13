@@ -24,6 +24,11 @@ export const ROUND_DEFINITIONS = [
   },
 ] as const;
 
+// Round scores live on 0..100 (scoreEvaluation); Speed Dating reads back as 1..5 stars.
+export function starsFromScore(score: number) {
+  return score / 25 + 1;
+}
+
 export const SCORE_ANCHORS: Record<number, string> = {
   1: "Serious concern or behavior undermined the criterion",
   2: "Below the expected bar or inconsistent evidence",
