@@ -52,6 +52,12 @@ export async function handleProxy(
   const { userId } = await session();
   if (userId) return NextResponse.next();
   if (isProtectedApi(pathname)) {
+    // __client_uat is Clerk's own marker that a session exists in this browser.
+    // Set but rejected means the short-lived session cookie expired (a phone
+    // that slept); absent means nobody is signed in. Telling them apart in the
+    // log is the difference between a one-line grep and an evening of guessing.
+    const clientUat = request.cookies.get("__client_uat")?.value;
+    console.warn(`api 401 ${pathname} ${clientUat && clientUat !== "0" ? "stale-session" : "no-session"}`);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   return NextResponse.redirect(new URL("/login", request.url));

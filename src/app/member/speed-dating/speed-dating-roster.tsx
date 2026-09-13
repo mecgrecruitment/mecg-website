@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch, refreshSessionToken, retryOnNetworkError, SessionExpiredError } from "@/lib/client-fetch";
 import { initials } from "@/lib/initials";
 import { SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
 import { matchesApplicantName, type RosterApplicant, type SpeedDatingRoster } from "@/lib/speed-dating-roster";
@@ -17,17 +17,25 @@ const SESSION = 1;
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
 
 function Headshot({ applicant, failed, onFail }: { applicant: RosterApplicant; failed: boolean; onFail: () => void }) {
+  // An <img> cannot retry a 401 on its own. The first failure is usually a
+  // session cookie that expired while the phone slept; refresh it and ask once
+  // more with a cache-busting query before settling for initials.
+  const [retried, setRetried] = useState(false);
+  const handleFailure = () => {
+    if (retried) { onFail(); return; }
+    void refreshSessionToken().finally(() => setRetried(true));
+  };
   if (failed) return <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-mecg-navy/[0.06] text-xs font-semibold text-mecg-navy/60" aria-hidden="true">{initials(applicant.name)}</span>;
   return (
     // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
     <img
-      src={`/api/admin/applications/${encodeURIComponent(applicant.applicationId)}/headshot`}
+      src={`/api/admin/applications/${encodeURIComponent(applicant.applicationId)}/headshot${retried ? "?retry=1" : ""}`}
       alt=""
       loading="lazy"
       className="size-11 shrink-0 rounded-full object-cover"
       // The server-rendered img can fail before React attaches onError, so also check on mount.
-      ref={(node) => { if (node?.complete && node.naturalWidth === 0) onFail(); }}
-      onError={onFail}
+      ref={(node) => { if (node?.complete && node.naturalWidth === 0) handleFailure(); }}
+      onError={handleFailure}
     />
   );
 }
@@ -51,7 +59,6 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
   const [rows, setRows] = useState<Record<string, RosterApplicant>>(() =>
     Object.fromEntries(initial.applicants.map((applicant) => [applicant.applicationId, applicant])));
   const [status, setStatus] = useState<Record<string, RowStatus>>({});
-  const { getToken } = useAuth();
   const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(() => new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   // Last server-confirmed values, so a failed save can put the score back without losing typed text.
@@ -100,20 +107,14 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
     sequence.current[applicationId] = ticket;
     setRowStatus(applicationId, { kind: "saving" });
     try {
-      const post = () => fetch("/api/member/speed-dating/ratings", {
+      // Ratings upsert per grader and applicant, so resending after a dropped
+      // connection is safe. stillWanted drops a retry once a newer tap for the
+      // same applicant has taken over, so an old score cannot land last.
+      const response = await retryOnNetworkError(() => authorizedFetch("/api/member/speed-dating/ratings", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ roundId: initial.roundId, applicationId, session: SESSION, score, note }),
-      });
-      let response = await post();
-      // A phone that slept between taps sends a Clerk session cookie that
-      // expired while the tab was asleep; the middleware answers 401 before the
-      // route runs. Fetching a fresh token rewrites the cookie, so retry once.
-      if (response.status === 401) {
-        await getToken({ skipCache: true }).catch(() => null);
-        response = await post();
-      }
-      if (response.status === 401) throw new Error("Your sign-in expired. Reload the page and tap the star again.");
+      }), { stillWanted: () => sequence.current[applicationId] === ticket });
       const body: Partial<SpeedDatingRatingResult> & { error?: string } | null = await response.json().catch(() => null);
       if (!response.ok || typeof body?.savedAt !== "string") throw new Error(body?.error ?? "Could not save this rating");
       if (sequence.current[applicationId] !== ticket) return;
@@ -124,7 +125,10 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
     } catch (saveError) {
       if (sequence.current[applicationId] !== ticket) return;
       patchRow(applicationId, { score: saved.current[applicationId].score });
-      setRowStatus(applicationId, { kind: "error", message: saveError instanceof Error ? saveError.message : "Could not save this rating" });
+      const message = saveError instanceof SessionExpiredError ? "Your sign-in expired. Reload the page and tap the star again."
+        : saveError instanceof Error && !(saveError instanceof TypeError) ? saveError.message
+        : "No connection. Check wifi and tap the star again.";
+      setRowStatus(applicationId, { kind: "error", message });
     }
   }
 

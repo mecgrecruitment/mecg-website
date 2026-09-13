@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
+import SessionKeepalive from "@/components/session-keepalive";
 import { serializeJsonLd } from "@/lib/json-ld";
 import { hasClerkFrontendConfiguration } from "@/lib/env";
 import "./globals.css";
@@ -58,7 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className="h-full scroll-smooth antialiased"
     >
       <body className="min-h-full flex flex-col">
-        {clerkConfigured ? <ClerkProvider>{content}</ClerkProvider> : content}
+        {clerkConfigured ? <ClerkProvider><SessionKeepalive />{content}</ClerkProvider> : content}
       </body>
     </html>
   );
