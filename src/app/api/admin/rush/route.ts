@@ -46,6 +46,7 @@ const ACTION_PERMISSIONS: Record<string, Permission> = {
   SET_CYCLE_STATUS: "MANAGE_CYCLE",
   SET_HASH_STAGE: "MANAGE_CYCLE",
   APPLY_STAGE_HASH: "MANAGE_CYCLE",
+  SET_HASH_PRESENTING: "MANAGE_CYCLE",
   SET_CYCLE_WINDOW: "MANAGE_CYCLE",
   SET_APPLICATION_QUESTIONS: "MANAGE_CYCLE",
   SET_RUBRIC_CRITERIA: "MANAGE_CYCLE",
@@ -199,6 +200,9 @@ export async function POST(req: NextRequest) {
     ({ data, error } = applicationId
       ? await supabase.rpc("apply_stage_hash_result", { target_application_id: applicationId })
       : await supabase.rpc("apply_stage_hash_results", { target_cycle_id: cycleId }));
+  } else if (action === "SET_HASH_PRESENTING") {
+    // null clears the cursor; the RPC checks the applicant belongs to the cycle.
+    ({ data, error } = await supabase.rpc("set_hash_presenting", { target_cycle_id: cycleId, target_application_id: body.applicationId === null ? null : String(body.applicationId ?? "") }));
   } else if (action === "SET_CYCLE_WINDOW") {
     const opensAt = parseOffsetDateTime(body.opensAt);
     const closesAt = parseOffsetDateTime(body.closesAt);

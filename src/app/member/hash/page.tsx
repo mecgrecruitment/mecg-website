@@ -19,7 +19,7 @@ export default async function MemberHashPage() {
   // board-only on purpose: a member who could see an applicant sitting at
   // 3 yes / 9 no would know how to vote, which is the whole thing a secret
   // ballot is meant to prevent. The cycle row carries the threshold and no counts.
-  const { data: cycleRow, error: cycleError } = await supabase.from("rush_cycles").select("hash_stage,hash_quorum,status").eq("id", cycleId).single();
+  const { data: cycleRow, error: cycleError } = await supabase.from("rush_cycles").select("hash_stage,hash_quorum,status,hash_presenting_application_id").eq("id", cycleId).single();
   if (cycleError) throw cycleError;
   const stage = currentHashStage(cycleRow);
   const stageName = stage ? `${hashStageLabel(stage)} hash` : "Hash";
@@ -73,7 +73,7 @@ export default async function MemberHashPage() {
           {" "}Every tap saves on its own, you can change it until the board applies the result, and nobody can see how anyone else voted or where the count stands.
         </p>
       </section>
-      <HashBallot applicants={applicantList} votes={votes ?? []} />
+      <HashBallot applicants={applicantList} votes={votes ?? []} presentingId={cycleRow.hash_presenting_application_id} />
     </main>
   );
 }

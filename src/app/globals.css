@@ -348,6 +348,26 @@ details[open] > summary .disclosure-chevron {
   background-size: 32px 32px;
 }
 
+/* Hash deliberation deck. Static looks live here; every keyframe sits in the
+   no-preference block below so the global reduce-motion kill covers them. */
+.deck-wordart {
+  background: linear-gradient(90deg, #ffd166, #ff6b6b, #c77dff, #4cc9f0);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(2px 2px 0 rgb(0 0 0 / 55%)) drop-shadow(4px 4px 0 rgb(0 0 0 / 35%)) drop-shadow(0 0 18px rgb(255 209 102 / 35%));
+}
+
+.deck-stamp {
+  transform: rotate(-12deg);
+}
+
+.deck-confetti {
+  left: var(--x);
+  background: hsl(var(--hue) 90% 60%);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @keyframes step-forward {
     from {
@@ -377,6 +397,177 @@ details[open] > summary .disclosure-chevron {
 
   .step-seat[data-direction="back"] {
     animation: step-back var(--t-panel) var(--ease-out) both;
+  }
+
+
+  @keyframes deck-enter-fly {
+    0% {
+      opacity: 0;
+      transform: translate(-60vw, 60vh) scale(0.6);
+    }
+    70% {
+      opacity: 1;
+      transform: translate(3vw, -3vh) scale(1.04);
+    }
+    85% {
+      transform: translate(-1vw, 1vh) scale(0.98);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes deck-enter-spin {
+    from {
+      opacity: 0;
+      transform: scale(0.2) rotate(-360deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0);
+    }
+  }
+
+  @keyframes deck-enter-swoosh {
+    0% {
+      opacity: 0;
+      transform: translateX(-120vw) skewX(-30deg);
+    }
+    80% {
+      opacity: 1;
+      transform: translateX(2vw) skewX(8deg);
+    }
+    100% {
+      transform: translateX(0) skewX(0);
+    }
+  }
+
+  @keyframes deck-wordart-shimmer {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 200% 50%;
+    }
+  }
+
+  @keyframes deck-headshot-pop {
+    0% {
+      transform: scale(0);
+    }
+    70% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes deck-drumroll {
+    0%, 100% {
+      transform: translate(0, 0) rotate(0);
+    }
+    20% {
+      transform: translate(-6px, 2px) rotate(-0.6deg);
+    }
+    40% {
+      transform: translate(6px, -2px) rotate(0.6deg);
+    }
+    60% {
+      transform: translate(-4px, -2px) rotate(-0.4deg);
+    }
+    80% {
+      transform: translate(4px, 2px) rotate(0.4deg);
+    }
+  }
+
+  @keyframes deck-stamp {
+    from {
+      opacity: 0;
+      transform: rotate(-12deg) scale(3);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(-12deg) scale(1);
+    }
+  }
+
+  @keyframes deck-screen-shake {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-8px, 6px);
+    }
+  }
+
+  @keyframes deck-confetti {
+    from {
+      opacity: 1;
+      transform: translateY(-5vh) rotate(0);
+    }
+    to {
+      opacity: 0.4;
+      transform: translateY(105vh) rotate(720deg);
+    }
+  }
+
+  @keyframes deck-fly-off {
+    to {
+      opacity: 0;
+      transform: translate(40vw, 40vh) scale(0.2);
+    }
+  }
+
+  @keyframes deck-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  .deck-card[data-enter="fly"] {
+    animation: deck-enter-fly 700ms var(--ease-out) both;
+  }
+
+  .deck-card[data-enter="spin"] {
+    animation: deck-enter-spin 700ms var(--ease-out) both;
+  }
+
+  .deck-card[data-enter="swoosh"] {
+    animation: deck-enter-swoosh 700ms var(--ease-out) both;
+  }
+
+  /* Phase classes come after the entrance rules and match their specificity, so they win. */
+  .deck-card.deck-drumroll {
+    animation: deck-drumroll 150ms linear infinite;
+  }
+
+  .deck-card.deck-fly-off {
+    animation: deck-fly-off 700ms ease-in both;
+  }
+
+  .deck-card.deck-fade-out {
+    animation: deck-fade-out 700ms ease-in both;
+  }
+
+  .deck-wordart {
+    animation: deck-wordart-shimmer 4s linear infinite;
+  }
+
+  .deck-headshot-pop {
+    animation: deck-headshot-pop 500ms 150ms var(--ease-out) both;
+  }
+
+  .deck-stamp {
+    animation: deck-stamp 250ms ease-out both;
+  }
+
+  .deck-screen-shake {
+    animation: deck-screen-shake 60ms linear;
+  }
+
+  .deck-confetti {
+    animation: deck-confetti 2.2s ease-in var(--delay) both;
   }
 
 }

@@ -1919,6 +1919,7 @@ export type Database = {
         Row: {
           closes_at: string | null
           created_at: string
+          hash_presenting_application_id: string | null
           hash_quorum: number
           hash_stage: string | null
           id: string
@@ -1930,6 +1931,7 @@ export type Database = {
         Insert: {
           closes_at?: string | null
           created_at?: string
+          hash_presenting_application_id?: string | null
           hash_quorum?: number
           hash_stage?: string | null
           id?: string
@@ -1941,6 +1943,7 @@ export type Database = {
         Update: {
           closes_at?: string | null
           created_at?: string
+          hash_presenting_application_id?: string | null
           hash_quorum?: number
           hash_stage?: string | null
           id?: string
@@ -1949,7 +1952,15 @@ export type Database = {
           status?: Database["rush"]["Enums"]["cycle_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rush_cycles_hash_presenting_application_id_fkey"
+            columns: ["hash_presenting_application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       screening_assignments: {
         Row: {
@@ -2800,6 +2811,13 @@ export type Database = {
           note: string
         }[]
       }
+      hash_applicant_notes: {
+        Args: { target_application_id: string }
+        Returns: {
+          note: string
+          source: string
+        }[]
+      }
       is_active_screening_reviewer: {
         Args: { target_cycle_id: string }
         Returns: boolean
@@ -2882,7 +2900,7 @@ export type Database = {
       rate_speed_dating_applicant: {
         Args: {
           note: string
-          score: number
+          score: number | null
           target_application_id: string
           target_round_id: string
           target_session: number
@@ -2995,6 +3013,10 @@ export type Database = {
       }
       close_hash_stage: {
         Args: { target_cycle_id: string }
+        Returns: undefined
+      }
+      set_hash_presenting: {
+        Args: { target_application_id: string | null; target_cycle_id: string }
         Returns: undefined
       }
       set_cycle_status: {

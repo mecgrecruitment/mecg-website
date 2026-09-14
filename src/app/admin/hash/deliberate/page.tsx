@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
+import { canonicalMajor } from "@/lib/major";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { currentHashStage, HASH_STAGE_RULES } from "@/lib/hash-tally";
 import { GROUP_CASE_SCORE_BANDS } from "@/lib/rubrics";
@@ -29,9 +30,9 @@ export default async function DeliberationPage() {
   const panelOnly = canPanel && !canManageCycle && !canOperate;
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult] = await Promise.all([
-    supabase.from("rush_cycles").select("id,name,status,hash_stage").eq("id", cycleId).single(),
+    supabase.from("rush_cycles").select("id,name,status,hash_stage,hash_quorum,hash_presenting_application_id").eq("id", cycleId).single(),
     supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
-    supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
+    supabase.from("applications").select("id,status,pnms!inner(id,name,major,class_year),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
     supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),
   ]);
@@ -103,6 +104,9 @@ export default async function DeliberationPage() {
     return {
       id: application.id,
       name: panelOnly ? applicantCode(application.id) : application.pnms.name,
+      // Major plus year identifies someone in a small cohort, so a blind viewer gets neither.
+      major: panelOnly ? null : canonicalMajor(application.pnms.major ?? "") || null,
+      classYear: panelOnly ? null : application.pnms.class_year,
       status: application.status,
       groupName: groupCase?.groupName ?? null,
       groupCase: groupCase
@@ -130,5 +134,5 @@ export default async function DeliberationPage() {
     };
   }).sort((a, b) => (b.finalScore ?? b.groupCase?.mean ?? -1) - (a.finalScore ?? a.groupCase?.mean ?? -1) || a.name.localeCompare(b.name));
 
-  return <DeliberationDeck entries={entries} cycleId={cycleId} />;
+  return <DeliberationDeck entries={entries} cycleId={cycleId} stage={stage} quorum={cycle.hash_quorum} canOperate={canManageCycle} initialPresentingId={cycle.hash_presenting_application_id} />;
 }
