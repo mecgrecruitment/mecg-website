@@ -149,8 +149,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     ...(activeGroupCaseRound && !isScreeningReviewer
       ? [{
           href: "/member/group-case",
-          label: "Pick your Group Case applicants",
-          detail: "Add the people at your table, then observe and score them.",
+          label: "Grade Group Case",
+          detail: "Tap stars for the applicants at your table. Every tap saves.",
           dueAt: 0,
         }]
       : []),
@@ -234,12 +234,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               ["/member", "All work"],
               ["/member/speed-dating", "Speed Dating"],
               ["/member?round=GROUP_CASE", "Group interview"],
-              ["/member/group-case", "Group Case roster"],
+              ["/member/group-case", "Group Case"],
             ]}
           />
         </div>
         {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && (
-          <Link href="/member/group-case" className="button-secondary mt-3.5 inline-flex text-sm">Add applicants from your table</Link>
+          <Link href="/member/group-case" className="button-secondary mt-3.5 inline-flex text-sm">Grade Group Case</Link>
         )}
         {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && groupCaseObservationCandidates.length > 0 && (
           <GroupCaseObservationBoard candidates={groupCaseObservationCandidates} />
@@ -377,7 +377,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               <p className="font-semibold text-mecg-navy">No assignments in this view</p>
               <p className="mt-1 text-sm text-mecg-navy/55">New work will appear here when the Board assigns and opens a round.</p>
               {activeRoundFilter === "GROUP_CASE" && (
-                <Link href="/member/group-case" className="button-secondary mt-4 inline-flex text-sm">Add applicants from your table</Link>
+                <Link href="/member/group-case" className="button-secondary mt-4 inline-flex text-sm">Grade Group Case</Link>
               )}
             </div>
           )}

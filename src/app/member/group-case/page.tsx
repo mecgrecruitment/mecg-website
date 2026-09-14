@@ -53,7 +53,7 @@ export default async function GroupCasePage() {
       <WorkspaceHeader
         eyebrow={`${membership.cycle.name} · ${cycleStatusLabel(membership.cycle.status)}`}
         title="Group Case"
-        description="Add the applicants at your table, then capture observations and score them from My work."
+        description="Tap a star for each criterion you observed. Every tap saves on its own."
       />
       <WorkspaceNav user={user} cycleId={membership.cycleId} current="/member/group-case" />
       {roster ? (

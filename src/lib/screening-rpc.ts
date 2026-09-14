@@ -1,4 +1,4 @@
-import { isGroupCaseRoster } from "@/lib/group-case-roster";
+import { isGroupCaseRoster, isGroupCaseScores } from "@/lib/group-case-roster";
 import { isSpeedDatingRoster } from "@/lib/speed-dating-roster";
 
 type RpcError = { code?: string; message: string };
@@ -151,8 +151,9 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
     isRecord(value) && hasString(value, "applicationId") && hasNumber(value, "score") && hasString(value, "note")
     && hasNumber(value, "session") && hasString(value, "savedAt"),
   group_case_roster: isGroupCaseRoster,
-  open_group_case_assignments: (value) =>
-    isRecord(value) && Array.isArray(value.assignmentIds) && hasNumber(value, "created") && hasNumber(value, "skippedConflicts"),
+  rate_group_case_applicant: (value) =>
+    isRecord(value) && hasString(value, "applicationId") && isGroupCaseScores(value.scores) && hasString(value, "note")
+    && hasString(value, "savedAt"),
 };
 
 export async function screeningRpc<T>(client: unknown, name: string, args?: Record<string, unknown>) {
