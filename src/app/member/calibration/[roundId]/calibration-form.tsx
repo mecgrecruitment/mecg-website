@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
+import { authorizedFetch } from "@/lib/client-fetch";
 
 export default function CalibrationForm({ roundId, rubricId, returnTo }: {
   roundId: string;
@@ -23,7 +24,7 @@ export default function CalibrationForm({ roundId, rubricId, returnTo }: {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/member/calibration/acknowledge", {
+      const response = await authorizedFetch("/member/calibration/acknowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roundId, rubricId }),

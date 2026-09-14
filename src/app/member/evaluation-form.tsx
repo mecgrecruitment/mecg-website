@@ -6,7 +6,7 @@ import OperationNotice from "@/components/operation-notice";
 import { parseEvaluationDraftPayload } from "@/app/api/member/evaluations/evaluation-draft-payload";
 import { clearEvaluationDraft, readEvaluationDraft, writeEvaluationDraft } from "@/lib/evaluation-draft-recovery";
 import { SCORE_ANCHORS } from "@/lib/rubrics";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
 
 type Criterion = {
   id: string;
@@ -176,12 +176,12 @@ export default function EvaluationForm({
       setDraftSaveState({ kind: "saving", message: "Saving draft…" });
       setDraftLoadFailed(false);
       try {
-        const response = await authorizedFetch(`/api/member/evaluations/${assignmentId}/draft`, {
+        const response = await retryOnNetworkError(() => authorizedFetch(`/api/member/evaluations/${assignmentId}/draft`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(draftPayload),
           signal: controller.signal,
-        });
+        }), { stillWanted: () => !controller.signal.aborted });
         const body = await response.json().catch(() => null);
         if (!response.ok) throw new Error(body?.error ?? "Could not save evaluation draft");
         lastSavedSignature.current = draftSignature;
@@ -250,7 +250,7 @@ export default function EvaluationForm({
     setPending(true);
     setError("");
     try {
-      const response = await authorizedFetch(`/api/member/evaluations/${assignmentId}`, {
+      const response = await retryOnNetworkError(() => authorizedFetch(`/api/member/evaluations/${assignmentId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -261,9 +261,10 @@ export default function EvaluationForm({
             note: notes[criterion.id] ?? "",
           })),
         }),
-      });
+      }));
       const body = await response.json().catch(() => null);
-      if (!response.ok) {
+      // 409 means the first submit landed before the connection dropped; treat it as done.
+      if (!response.ok && response.status !== 409) {
         setError(body?.error ?? "Could not submit evaluation");
         setPending(false);
         return;

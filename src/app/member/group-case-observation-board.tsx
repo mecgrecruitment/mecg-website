@@ -5,7 +5,7 @@ import Link from "next/link";
 import { parseEvaluationDraftPayload, type EvaluationDraftPayload } from "@/app/api/member/evaluations/evaluation-draft-payload";
 import OperationNotice from "@/components/operation-notice";
 import { readEvaluationDraft, writeEvaluationDraft } from "@/lib/evaluation-draft-recovery";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
 
 type Candidate = {
   assignmentId: string;
@@ -124,11 +124,11 @@ export default function GroupCaseObservationBoard({ candidates }: { candidates: 
     setState("saving");
     setError("");
     try {
-      const response = await authorizedFetch(`/api/member/evaluations/${encodeURIComponent(selected.assignmentId)}/draft`, {
+      const response = await retryOnNetworkError(() => authorizedFetch(`/api/member/evaluations/${encodeURIComponent(selected.assignmentId)}/draft`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(next),
-      });
+      }));
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(body?.error ?? "Could not save this observation");
       setDrafts((currentDrafts) => ({ ...currentDrafts, [selected.assignmentId]: next }));

@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import OperationNotice from "@/components/operation-notice";
-import { authorizedFetch, refreshSessionToken, retryOnNetworkError } from "@/lib/client-fetch";
-import { initials } from "@/lib/initials";
+import Headshot from "@/components/applicant-headshot";
+import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
 import { SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
 import { matchesApplicantName, type RosterApplicant, type SpeedDatingRoster } from "@/lib/speed-dating-roster";
 import type { SpeedDatingRatingResult } from "@/app/api/member/speed-dating/ratings/route";
@@ -15,30 +15,6 @@ const NOTE_DEBOUNCE_MS = 800;
 const SESSION = 1;
 
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
-
-function Headshot({ applicant, failed, onFail }: { applicant: RosterApplicant; failed: boolean; onFail: () => void }) {
-  // An <img> cannot retry a 401 on its own. The first failure is usually a
-  // session cookie that expired while the phone slept; refresh it and ask once
-  // more with a cache-busting query before settling for initials.
-  const [retried, setRetried] = useState(false);
-  const handleFailure = () => {
-    if (retried) { onFail(); return; }
-    void refreshSessionToken().finally(() => setRetried(true));
-  };
-  if (failed) return <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-mecg-navy/[0.06] text-xs font-semibold text-mecg-navy/60" aria-hidden="true">{initials(applicant.name)}</span>;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
-    <img
-      src={`/api/admin/applications/${encodeURIComponent(applicant.applicationId)}/headshot${retried ? "?retry=1" : ""}`}
-      alt=""
-      loading="lazy"
-      className="size-11 shrink-0 rounded-full object-cover"
-      // The server-rendered img can fail before React attaches onError, so also check on mount.
-      ref={(node) => { if (node?.complete && node.naturalWidth === 0) handleFailure(); }}
-      onError={handleFailure}
-    />
-  );
-}
 
 function Star({ filled }: { filled: boolean }) {
   return (

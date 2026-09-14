@@ -41,13 +41,14 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, workspaceContext, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }] = await Promise.all([
+  const [{ data: assignments, error }, workspaceContext, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }, { data: activeGroupCaseRound }] = await Promise.all([
     supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics!rubrics_round_id_fkey(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     loadWorkspaceContext(cycleMembership.cycleId),
     supabase.rpc("my_grading_events"),
     loadCalibrationStates(supabase, cycleMembership.cycleId),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
+    supabase.from("rounds").select("id").eq("cycle_id", cycleMembership.cycleId).eq("kind", "GROUP_CASE").eq("status", "ACTIVE").limit(1).maybeSingle(),
   ]);
   if (error) throw error;
   if (buddySlotsError) throw buddySlotsError;
@@ -145,6 +146,14 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
           dueAt: 0,
         }]
       : []),
+    ...(activeGroupCaseRound && !isScreeningReviewer
+      ? [{
+          href: "/member/group-case",
+          label: "Pick your Group Case applicants",
+          detail: "Add the people at your table, then observe and score them.",
+          dueAt: 0,
+        }]
+      : []),
   ].sort((a, b) => a.dueAt - b.dueAt);
   const recentCompletions = assignmentRows
     .filter(isSubmitted)
@@ -225,9 +234,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               ["/member", "All work"],
               ["/member/speed-dating", "Speed Dating"],
               ["/member?round=GROUP_CASE", "Group interview"],
+              ["/member/group-case", "Group Case roster"],
             ]}
           />
         </div>
+        {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && (
+          <Link href="/member/group-case" className="button-secondary mt-3.5 inline-flex text-sm">Add applicants from your table</Link>
+        )}
         {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && groupCaseObservationCandidates.length > 0 && (
           <GroupCaseObservationBoard candidates={groupCaseObservationCandidates} />
         )}
@@ -363,6 +376,9 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
               <p className="font-semibold text-mecg-navy">No assignments in this view</p>
               <p className="mt-1 text-sm text-mecg-navy/55">New work will appear here when the Board assigns and opens a round.</p>
+              {activeRoundFilter === "GROUP_CASE" && (
+                <Link href="/member/group-case" className="button-secondary mt-4 inline-flex text-sm">Add applicants from your table</Link>
+              )}
             </div>
           )}
         </div>}
