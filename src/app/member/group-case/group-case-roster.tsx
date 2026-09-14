@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import OperationNotice from "@/components/operation-notice";
 import Headshot from "@/components/applicant-headshot";
 import { formatStars } from "@/app/admin/speed-dating-results";
 import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
 import type { GroupCaseApplicant, GroupCaseRoster, GroupCaseScores } from "@/lib/group-case-roster";
-import { SCORE_ANCHORS } from "@/lib/rubrics";
+import { groupCaseAnchors } from "@/lib/rubrics";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
 import type { GroupCaseRatingResult } from "@/app/api/member/group-case/ratings/route";
 
 const SCORES = [1, 2, 3, 4, 5];
-const LEGEND = [[1, "Serious concern"], [3, "Meets the bar"], [5, "Exceptional"]] as const;
 const NOTE_DEBOUNCE_MS = 800;
 
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
@@ -182,9 +182,8 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
         />
       </div>
       <p className="mt-3 text-xs leading-5 text-mecg-navy/60">
-        {LEGEND.map(([score, label], index) => (
-          <span key={score}>{index > 0 && " · "}<span className="font-semibold text-mecg-navy/80">{score}</span> {label}</span>
-        ))}
+        Score 1 to 5 on each dimension. Collaboration and Composure count twice.{" "}
+        <Link href={`/member/calibration/${initial.roundId}?return=/member/group-case`} className="font-semibold text-mecg-blue underline">Read the rubric</Link>
       </p>
 
       {initial.roundStatus === "PUBLISHED" && <div className="mt-4"><OperationNotice kind="info">Grading opens when the board starts the round.</OperationNotice></div>}
@@ -256,7 +255,7 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                                   type="button"
                                   disabled={readOnly}
                                   aria-pressed={current === score}
-                                  aria-label={`${score}, ${SCORE_ANCHORS[score]}`}
+                                  aria-label={`${score}, ${groupCaseAnchors(criterion.name)[score]}`}
                                   onClick={() => rate(applicationId, criterion.id, score)}
                                   className="flex size-11 items-center justify-center rounded-lg hover:bg-amber-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                                 >
@@ -264,6 +263,7 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                                 </button>
                               ))}
                             </div>
+                            {current !== null && <p className="mt-0.5 text-xs leading-5 text-mecg-navy/60">{groupCaseAnchors(criterion.name)[current]}</p>}
                           </div>
                         );
                       })}

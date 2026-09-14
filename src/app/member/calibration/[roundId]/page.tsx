@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { screeningRpc } from "@/lib/screening-rpc";
 import WorkspaceHeader from "@/components/workspace-header";
 import SectionLabel from "@/components/section-label";
-import { SCORE_ANCHORS, SPEED_DATING_SCORE_ANCHORS, SPEED_DATING_SCORE_LABELS } from "@/lib/rubrics";
+import { SCORE_ANCHORS, SPEED_DATING_SCORE_ANCHORS, SPEED_DATING_SCORE_LABELS, groupCaseAnchors, GROUP_CASE_SCORE_BANDS, GROUP_CASE_RED_FLAGS, GROUP_CASE_GREEN_FLAGS } from "@/lib/rubrics";
 import CalibrationForm from "./calibration-form";
 import type { CalibrationDetail } from "../types";
 
@@ -26,6 +26,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
   if (error || !detail) notFound();
   if (roundError) throw roundError;
   const speedDating = round?.kind === "SPEED_DATING";
+  const groupCase = round?.kind === "GROUP_CASE";
 
   return (
     <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
@@ -35,7 +36,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
         description="Review the shared anchors before opening applicant evaluations."
       />
 
-      <section>
+      {!groupCase && <section>
         <SectionLabel number="01">Score anchors</SectionLabel>
         <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
           {Object.entries(speedDating ? SPEED_DATING_SCORE_ANCHORS : SCORE_ANCHORS).map(([score, meaning]) => (
@@ -46,7 +47,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
             </div>
           ))}
         </div>
-      </section>
+      </section>}
 
       <section>
         <SectionLabel number="02">Active rubric guidance</SectionLabel>
@@ -58,20 +59,66 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
                 <span className="text-xs font-semibold text-mecg-navy/45">{criterion.weight}%{criterion.required ? " · required" : ""}</span>
               </div>
               <p className="mt-2 text-sm leading-6 text-mecg-navy/65">{criterion.description}</p>
+              {groupCase && (
+                <ol className="mt-3 space-y-1.5">
+                  {Object.entries(groupCaseAnchors(criterion.name)).map(([score, text]) => (
+                    <li key={score} className="flex gap-3 text-sm leading-6 text-mecg-navy/70">
+                      <span className="tabular w-4 shrink-0 font-semibold text-mecg-navy">{score}</span>
+                      <span>{text}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
               <p className="mt-2 text-xs leading-5 text-mecg-navy/50">Record what the applicant said or did. Do not infer traits from attendance, identity, or another evaluator’s opinion.</p>
             </article>
           ))}
         </div>
       </section>
 
+      {groupCase && (
+        <section>
+          <SectionLabel number="03">Scoring and the final call</SectionLabel>
+          <p className="mt-3.5 text-sm leading-6 text-mecg-navy/65">Weighted score = Collaboration ×2 + Problem-Solving + Leadership + Creativity + Composure ×2 + Presentation, out of 40. The number is a guide, not the decision.</p>
+          <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
+            {GROUP_CASE_SCORE_BANDS.map(({ min, max, label }) => (
+              <div key={min} className="rounded-2xl bg-paper p-4">
+                <p className="tabular text-xl font-semibold text-mecg-navy">{min}–{max}</p>
+                <p className="mt-1 text-xs leading-5 text-mecg-navy/60">{label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <h3 className="font-semibold text-mecg-navy">Red flags, note regardless of score</h3>
+              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-red-800">
+                {GROUP_CASE_RED_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
+              </ul>
+            </div>
+            <div className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <h3 className="font-semibold text-mecg-navy">Green flags, note regardless of score</h3>
+              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-emerald-800">
+                {GROUP_CASE_GREEN_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section>
-        <SectionLabel number="03">Evidence standard</SectionLabel>
+        <SectionLabel number={groupCase ? "04" : "03"}>Evidence standard</SectionLabel>
         <ul className="mt-3.5 space-y-2 rounded-2xl bg-mecg-navy p-5 text-sm leading-6 text-white/75 sm:p-6">
           {speedDating ? (
             <>
               <li>Score the whole conversation with one star rating.</li>
               <li>Write 1–2 sentences for every 1, 2 or 5.</li>
               <li>Do not compare notes or scores with peers before submitting.</li>
+            </>
+          ) : groupCase ? (
+            <>
+              <li>Score each dimension independently before comparing notes with your co-judge.</li>
+              <li>Use a score only when you observed enough evidence; leave a dimension blank if you did not see it.</li>
+              <li>Put red and green flags in the note, tied to what the applicant said or did.</li>
+              <li>Do not let the final presentation overwrite what you saw in the working session.</li>
             </>
           ) : (
             <>
