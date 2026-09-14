@@ -19,8 +19,9 @@ import { MemberNotes, MemberVote, type HashTallyRow } from "./member-vote";
 import StageHashPanel from "./stage-hash-panel";
 import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
 import { applicationStatusLabel, cycleStatusLabel, decisionOutcomeLabel, decisionStatusLabel, roundStatusLabel } from "@/lib/labels";
-import { starsFromScore } from "@/lib/rubrics";
-import type { SpeedDatingResults } from "../speed-dating-results";
+import { GROUP_CASE_SCORE_BANDS, starsFromScore } from "@/lib/rubrics";
+import { formatStars, type SpeedDatingResults } from "../speed-dating-results";
+import type { GroupCaseResults } from "../group-case-results";
 
 type SpeedDatingSummary = { adjusted: number | null; count: number };
 
@@ -110,11 +111,25 @@ export default async function HashBoard() {
     .map((round) => ({ ...round, rubric: [...round.rubrics].sort((a, b) => b.version - a.version)[0] }));
   // Grader-adjusted Speed Dating scores sit beside the raw stars in the queue.
   const speedDatingRound = (roundsResult.data ?? []).find((round) => round.kind === "SPEED_DATING");
+  const groupCaseRound = (roundsResult.data ?? []).find((round) => round.kind === "GROUP_CASE");
+  const [speedDatingResult, groupCaseResult] = await Promise.all([
+    speedDatingRound ? screeningRpc<SpeedDatingResults>(supabase, "speed_dating_results", { target_round_id: speedDatingRound.id }) : null,
+    groupCaseRound ? screeningRpc<GroupCaseResults>(supabase, "group_case_results", { target_round_id: groupCaseRound.id }) : null,
+  ]);
+  if (speedDatingResult?.error) console.error("speed_dating_results failed", speedDatingResult.error);
+  if (groupCaseResult?.error) console.error("group_case_results failed", groupCaseResult.error);
   const speedDatingByApplication = new Map<string, SpeedDatingSummary>();
-  if (speedDatingRound) {
-    const { data: speedDatingResults, error: speedDatingError } = await screeningRpc<SpeedDatingResults>(supabase, "speed_dating_results", { target_round_id: speedDatingRound.id });
-    if (speedDatingError) console.error("speed_dating_results failed", speedDatingError);
-    for (const applicant of speedDatingResults?.applicants ?? []) speedDatingByApplication.set(applicant.applicationId, { adjusted: applicant.adjusted, count: applicant.count });
+  for (const applicant of speedDatingResult?.data?.applicants ?? []) speedDatingByApplication.set(applicant.applicationId, { adjusted: applicant.adjusted, count: applicant.count });
+  const groupCaseByApplication = new Map((groupCaseResult?.data?.applicants ?? []).map((applicant) => [applicant.applicationId, applicant]));
+  function stageScores(applicationId: string) {
+    const groupCase = groupCaseByApplication.get(applicationId);
+    const speedDating = speedDatingByApplication.get(applicationId);
+    const rounded = groupCase?.mean == null ? null : Math.round(groupCase.mean);
+    const band = rounded === null ? null : GROUP_CASE_SCORE_BANDS.find((candidate) => rounded >= candidate.min && rounded <= candidate.max)?.label;
+    return {
+      groupCase: groupCase?.mean == null ? "—" : `${groupCase.mean.toFixed(1)} / 40${band ? ` · ${band}` : ""}`,
+      speedDating: speedDating?.count ? `${formatStars(speedDating.adjusted)} · ${speedDating.count} grader${speedDating.count === 1 ? "" : "s"}` : "—",
+    };
   }
   const applications = (appsResult.data ?? [])
     .filter((application) => !["DRAFT", "WITHDRAWN"].includes(application.status))
@@ -173,7 +188,7 @@ export default async function HashBoard() {
   const stageRows = openStage
     ? applications
       .filter((application) => HASH_STAGE_RULES[openStage].ballot.includes(application.status))
-      .map((application) => ({ id: application.id, displayName: application.displayName, tally: tallyByApplication.get(application.id), notes: notesByApplication.get(application.id) ?? [] }))
+      .map((application) => ({ id: application.id, displayName: application.displayName, tally: tallyByApplication.get(application.id), notes: notesByApplication.get(application.id) ?? [], scores: stageScores(application.id) }))
     : [];
   const cycleIssues = cycleReadinessIssues(cycle.status, rounds.map((round) => ({
     id: round.id,
@@ -259,7 +274,7 @@ export default async function HashBoard() {
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Decisions"
         description="Run stage votes that move applicants through the pipeline, then resolve evidence exceptions, apply the final vote, approve outcomes, and release them."
-        action={hashOpen ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Discussion mode</Link> : null}
+        action={hashOpen || stage !== null ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Discussion mode</Link> : null}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
       {stage !== "FINAL" && (

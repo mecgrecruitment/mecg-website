@@ -7,7 +7,7 @@ import { applicationStatusLabel, hashStageLabel } from "@/lib/labels";
 import OperationNotice from "@/components/operation-notice";
 import { MemberNotes, MemberVote, type HashTallyRow } from "./member-vote";
 
-export type StageHashRow = { id: string; displayName: string; tally: HashTallyRow | undefined; notes: string[] };
+export type StageHashRow = { id: string; displayName: string; tally: HashTallyRow | undefined; notes: string[]; scores?: { groupCase: string; speedDating: string } };
 
 const STAGE_LABELS = { pass: "Advance", fail: "Reject" };
 
@@ -94,7 +94,15 @@ export default function StageHashPanel({
           const outcome = row.tally ? hashOutcome(row.tally.quorum, row.tally.yes_count, row.tally.no_count, row.tally.total_votes) : "PENDING";
           return (
             <article key={row.id} className="grid gap-2 py-3 sm:grid-cols-[minmax(10rem,1fr)_minmax(12rem,1fr)_auto] sm:items-start sm:gap-4">
-              <Link href={`/admin/applications/${row.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{row.displayName}</Link>
+              <div>
+                <Link href={`/admin/applications/${row.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{row.displayName}</Link>
+                {row.scores && (
+                  <p className="mt-0.5 text-xs text-mecg-navy/60">
+                    <span className="font-medium">Group Case</span> {row.scores.groupCase}
+                    <span className="ml-3 font-medium">Speed Dating</span> {row.scores.speedDating}
+                  </p>
+                )}
+              </div>
               <MemberVote tally={row.tally} labels={STAGE_LABELS} />
               {canManageCycle && <button type="button" disabled={pending || outcome === "PENDING"} onClick={() => void apply(row.id)} className="button-secondary text-sm">Apply</button>}
               {row.notes.length > 0 && <div className="sm:col-span-3"><MemberNotes notes={row.notes} /></div>}
