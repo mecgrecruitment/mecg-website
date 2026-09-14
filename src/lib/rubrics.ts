@@ -128,3 +128,12 @@ export const GROUP_CASE_GREEN_FLAGS = [
   "Changed their own position when a teammate made a better point.",
   "Volunteered for the least glamorous task (timekeeping, notes, formatting) without being asked.",
 ] as const;
+
+// Weighted 1..5 stars rescaled to the guide's 6..40 range: 8 x weighted mean. Null until every criterion has a score.
+export function groupCaseTotal(scores: Record<string, number | null>, criteria: Array<{ id: string; weight: number }>): { total: number; band: string } | null {
+  if (criteria.length === 0 || criteria.some((criterion) => scores[criterion.id] == null)) return null;
+  const weightSum = criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+  const total = Math.round(8 * criteria.reduce((sum, criterion) => sum + criterion.weight * (scores[criterion.id] as number), 0) / weightSum);
+  const band = GROUP_CASE_SCORE_BANDS.find((entry) => total >= entry.min && total <= entry.max) ?? GROUP_CASE_SCORE_BANDS[0];
+  return { total, band: band.label };
+}
