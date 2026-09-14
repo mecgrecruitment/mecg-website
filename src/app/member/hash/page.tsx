@@ -5,8 +5,7 @@ import { applicationStatusLabel, cycleStatusLabel, hashStageLabel } from "@/lib/
 import { canVoteInStage, currentHashStage, HASH_STAGE_RULES } from "@/lib/hash-tally";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
-import SectionLabel from "@/components/section-label";
-import VoteForm from "./vote-form";
+import HashBallot from "./hash-ballot";
 
 export const metadata: Metadata = { title: "Hash" };
 
@@ -61,54 +60,20 @@ export default async function MemberHashPage() {
   const outcomeCopy = stage === "FINAL"
     ? "more Yes than No means an offer; anything else does not"
     : `YES sends them to ${applicationStatusLabel(HASH_STAGE_RULES[stage].pass)}; anything else ends their application`;
-  const myVotes = new Map((votes ?? []).map((vote) => [vote.application_id, vote]));
-  const applicantList = (applicants ?? []).slice().sort((a, b) => a.name.localeCompare(b.name));
+  const applicantList = (applicants ?? []).map(({ id, name }) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       {header}
       <section>
-        <SectionLabel number="01">How it works</SectionLabel>
-        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-mecg-navy/70">
+        <p className="max-w-2xl text-[14px] leading-6 text-mecg-navy/70">
           {quorum
-            ? `An applicant's vote only counts once at least ${quorum} members have voted on them. Past that, ${outcomeCopy}. Unsure counts toward reaching ${quorum} but not toward either side. You can change your vote until the board applies the result.`
-            : `An applicant's vote only counts once enough members have voted on them. Past that, ${outcomeCopy}. Unsure counts toward reaching that number but not toward either side. You can change your vote until the board applies the result.`}
-        </p>
-        <p className="mt-2 max-w-2xl text-[13px] leading-5 text-mecg-navy/55">
-          You cannot see how anyone else voted or where the count stands.
+            ? `An applicant's vote counts once at least ${quorum} members have voted on them: ${outcomeCopy}, and Unsure counts toward ${quorum} but not toward either side.`
+            : `An applicant's vote counts once enough members have voted on them: ${outcomeCopy}, and Unsure counts toward that number but not toward either side.`}
+          {" "}Every tap saves on its own, you can change it until the board applies the result, and nobody can see how anyone else voted or where the count stands.
         </p>
       </section>
-
-      <section>
-        <SectionLabel number="02">Your votes</SectionLabel>
-        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">
-          {applicantList.length ? `${applicantList.length} applicant${applicantList.length === 1 ? "" : "s"} to vote on` : "Nobody to vote on"}
-        </h2>
-        <div className="mt-3.5 flex flex-col gap-4">
-          {applicantList.map((applicant) => {
-            const existing = myVotes.get(applicant.id);
-            return (
-              <article key={applicant.id} className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
-                <h3 className="text-lg font-semibold text-mecg-navy">{applicant.name}</h3>
-                <p className="mt-1 text-[12px] text-mecg-navy/55">{existing ? "You have voted. Saving again replaces it." : "You have not voted on this applicant yet."}</p>
-                <div className="mt-4">
-                  <VoteForm
-                    applicationId={applicant.id}
-                    applicantName={applicant.name}
-                    initialVote={existing?.vote ?? ""}
-                    initialNote={existing?.note ?? ""}
-                  />
-                </div>
-              </article>
-            );
-          })}
-          {!applicantList.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55">
-              No applicants are up for a vote right now. Anyone you have declared a conflict on stays off this list.
-            </p>
-          )}
-        </div>
-      </section>
+      <HashBallot applicants={applicantList} votes={votes ?? []} />
     </main>
   );
 }
