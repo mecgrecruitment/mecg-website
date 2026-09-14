@@ -53,6 +53,20 @@ function AuthControl({ className, onNavigate }: { className: string; onNavigate?
   return <ClerkAuthControl className={className} onNavigate={onNavigate} />;
 }
 
+// Signed-in visitors already have a workspace; /login resolves which one
+// (admin, member, applicant) server-side and redirects, so send them there.
+function PrimaryAction({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
+  const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
+  return clerkConfigured ? <ClerkPrimaryAction className={className} onNavigate={onNavigate} /> : <Link href="/join" onClick={onNavigate} className={className}>Join MECG</Link>;
+}
+
+function ClerkPrimaryAction({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
+  const { isSignedIn } = useAuth();
+  return isSignedIn
+    ? <Link href="/login" onClick={onNavigate} className={className}>My workspace</Link>
+    : <Link href="/join" onClick={onNavigate} className={className}>Join MECG</Link>;
+}
+
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -75,7 +89,7 @@ export default function SiteHeader() {
             </Link>
           ))}
           <AuthControl className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96" />
-          <Link href="/join" className="button-primary">Join MECG</Link>
+          <PrimaryAction className="button-primary" />
         </nav>
         <button
           type="button"
@@ -102,7 +116,7 @@ export default function SiteHeader() {
               </Link>
             ))}
             <AuthControl className="border-b border-white/10 py-4 text-left text-lg text-white" onNavigate={() => setOpen(false)} />
-            <Link href="/join" onClick={() => setOpen(false)} className="button-primary mt-5 text-center">Join MECG</Link>
+            <PrimaryAction className="button-primary mt-5 text-center" onNavigate={() => setOpen(false)} />
           </div>
         </nav>
       )}
