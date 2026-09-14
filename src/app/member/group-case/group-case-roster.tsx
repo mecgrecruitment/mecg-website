@@ -59,6 +59,11 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
   const saved = useRef<Record<string, GroupCaseApplicant>>({ ...rows });
   const timers = useRef<Record<string, number>>({});
   const sequence = useRef<Record<string, number>>({});
+  // Every save carries all six scores, so two taps in flight at once could
+  // land at Postgres in the wrong order and the earlier one would erase the
+  // later star. One request per applicant at a time; a save that is already
+  // superseded when its turn comes is skipped, the newer one carries everything.
+  const inflight = useRef<Record<string, Promise<void>>>({});
 
   const readOnly = initial.roundStatus !== "ACTIVE" || initial.criteria.length === 0;
   const everyone = useMemo(() => initial.groups.flatMap((group) => group.applicants), [initial.groups]);
@@ -137,9 +142,14 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
   }
 
   async function save(applicationId: string, scores: GroupCaseScores, note: string) {
+    let finish = () => {};
     const ticket = (sequence.current[applicationId] ?? 0) + 1;
     sequence.current[applicationId] = ticket;
     setRowStatus(applicationId, { kind: "saving" });
+    await inflight.current[applicationId];
+    if (sequence.current[applicationId] !== ticket) return;
+    const done = new Promise<void>((resolve) => { finish = resolve; });
+    inflight.current[applicationId] = done;
     try {
       // Ratings upsert per grader and applicant, so resending after a dropped
       // connection is safe. stillWanted drops a retry once a newer tap for the
@@ -163,6 +173,8 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
         ? saveError.message
         : "No connection. Check wifi and tap the star again.";
       setRowStatus(applicationId, { kind: "error", message });
+    } finally {
+      finish();
     }
   }
 
