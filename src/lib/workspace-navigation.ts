@@ -17,7 +17,7 @@ export function workspaceMemberTools({
 }): WorkspaceNavLink[] {
   return [
     ...(hasSpeedDatingRound ? [["/member/speed-dating", "Speed Dating"] as const] : []),
-    ...(hasGroupCaseWork ? [["/member?round=GROUP_CASE", "Group Case"] as const] : []),
+    ...(hasGroupCaseWork ? [["/member/group-case", "Group Case"] as const] : []),
     ...(votingOpen ? [["/member/hash", "Hash vote"] as const] : []),
     ...(isScreeningReviewer
       ? [["/member/screening", `Read applications${openScreeningCount ? ` · ${openScreeningCount}` : ""}`] as const]

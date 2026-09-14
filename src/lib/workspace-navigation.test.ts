@@ -11,7 +11,7 @@ test("live member tools expose screening, voting, and event tasks with the open 
     openScreeningCount: 3,
     hasGradingEvent: true,
   }), [
-    ["/member?round=GROUP_CASE", "Group Case"],
+    ["/member/group-case", "Group Case"],
     ["/member/hash", "Hash vote"],
     ["/member/screening", "Read applications · 3"],
     ["/member/event", "Live event"],

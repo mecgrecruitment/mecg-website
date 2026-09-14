@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import EvaluationForm from "./evaluation-form";
@@ -16,7 +17,6 @@ import { loadWorkspaceContext } from "@/lib/workspace-context";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { loadCalibrationStates } from "./calibration/load";
 import { evaluationTaskHref, selectedEvaluationAssignment } from "./assignment-navigation";
-import GroupCaseObservationBoard from "./group-case-observation-board";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -35,8 +35,10 @@ function isReady(assignment: { status: string; evaluations: Array<{ status: stri
     && assignment.rounds.status === "ACTIVE";
 }
 
-export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string; assignment?: string; mode?: string }> }) {
-  const [user, { round: roundFilter, assignment: requestedAssignmentId, mode }] = await Promise.all([requireMember(), searchParams]);
+export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string; assignment?: string }> }) {
+  const [user, { round: roundFilter, assignment: requestedAssignmentId }] = await Promise.all([requireMember(), searchParams]);
+  // Group Case grading moved to its own page; old links and bookmarks still land there.
+  if (roundFilter === "GROUP_CASE") redirect("/member/group-case");
   const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
   if (!cycleMembership) return null;
 
@@ -62,8 +64,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     : { data: [], error: null };
   if (applicantsError) throw applicantsError;
   if (screeningQueue.error) throw new Error(screeningQueue.error.message);
-  const activeRoundFilter = roundFilter === "SPEED_DATING" || roundFilter === "GROUP_CASE" ? roundFilter : null;
-  const finishingGroupCase = activeRoundFilter === "GROUP_CASE" && mode === "finish";
+  const activeRoundFilter = roundFilter === "SPEED_DATING" ? roundFilter : null;
   // Speed Dating assignments are created in groups and must only be submitted
   // through the atomic group workspace. Never expose a member to this legacy
   // one-applicant evaluation form.
@@ -114,14 +115,6 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() : Number.POSITIVE_INFINITY,
       }];
     }),
-    ...(openAssignments.some((assignment) => assignment.rounds.kind === "GROUP_CASE")
-      ? [{
-          href: "/member?round=GROUP_CASE",
-          label: "Capture Group Case observations",
-          detail: `${openAssignments.filter((assignment) => assignment.rounds.kind === "GROUP_CASE").length} applicants in your finish queue`,
-          dueAt: 0,
-        }]
-      : []),
     ...(screeningQueue.data ?? [])
       .filter((item) => item.assignment_status === "ASSIGNED")
       .map((item) => ({
@@ -159,28 +152,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     .filter(isSubmitted)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 6);
-  const assignmentHeading = activeRoundFilter === "SPEED_DATING"
-    ? "Speed Dating"
-    : activeRoundFilter === "GROUP_CASE"
-      ? "Group interview"
-      : "All evaluation work";
-  const groupCaseObservationCandidates = activeRoundFilter === "GROUP_CASE"
-    ? visible.flatMap((assignment) => {
-      const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
-      if (!isReady(assignment) || !rubric || !acknowledgedRubrics.has(rubric.id)) return [];
-      return [{
-        assignmentId: assignment.id,
-        name: assignment.applications.pnms.name,
-        criteria: [...rubric.rubric_criteria].sort((a, b) => a.position - b.position).map((criterion) => ({
-          id: criterion.id,
-          name: criterion.name,
-          description: criterion.description,
-          weight: criterion.weight,
-          required: criterion.required,
-        })),
-      }];
-    })
-    : [];
+  const assignmentHeading = activeRoundFilter === "SPEED_DATING" ? "Speed Dating" : "All evaluation work";
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
@@ -233,68 +205,11 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             links={[
               ["/member", "All work"],
               ["/member/speed-dating", "Speed Dating"],
-              ["/member?round=GROUP_CASE", "Group interview"],
               ["/member/group-case", "Group Case"],
             ]}
           />
         </div>
-        {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && (
-          <Link href="/member/group-case" className="button-secondary mt-3.5 inline-flex text-sm">Grade Group Case</Link>
-        )}
-        {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && groupCaseObservationCandidates.length > 0 && (
-          <GroupCaseObservationBoard candidates={groupCaseObservationCandidates} />
-        )}
-        {activeRoundFilter === "GROUP_CASE" && !finishingGroupCase && visible.length > 0 && groupCaseObservationCandidates.length === 0 && (
-          <div className="mt-3.5 rounded-2xl bg-mecg-orange/[0.1] p-5 text-sm text-mecg-navy/70">Review the active Group Case calibration before recording observations, or wait for the Board to open your assignments.</div>
-        )}
-        {activeRoundFilter === "GROUP_CASE" && finishingGroupCase && visible.length > 0 && (
-          <div className="mt-3.5 rounded-2xl bg-paper p-4 sm:p-5" role="region" aria-label="Group Case finish queue">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold text-mecg-navy">Group Case finish queue</p>
-                <p className="mt-1 text-xs text-mecg-navy/55">Score one applicant at a time. Submitting opens the next ready person.</p>
-              </div>
-              <span className="tabular text-xs font-semibold text-mecg-navy/60">
-                {visible.filter(isSubmitted).length}/{visible.length} submitted
-              </span>
-            </div>
-            <div className="scroll-cue -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-5 sm:px-5">
-              {visible.map((assignment, index) => {
-                const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
-                const submitted = isSubmitted(assignment);
-                const ready = isReady(assignment);
-                const calibrated = Boolean(rubric && acknowledgedRubrics.has(rubric.id));
-                const selected = assignment.id === selectedAssignmentId;
-                const state = submitted ? "Submitted" : selected ? "Grading now" : ready && calibrated ? "Ready" : ready ? "Needs calibration" : "Waiting";
-                const content = (
-                  <>
-                    <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-mecg-navy/45">Applicant {index + 1}</span>
-                    <span className="mt-1 block whitespace-nowrap text-sm font-semibold text-mecg-navy">{assignment.applications.pnms.name}</span>
-                    <span className={`mt-1 block text-xs font-semibold ${submitted ? "text-emerald-800" : selected ? "text-mecg-orange-ink" : "text-mecg-navy/55"}`}>{state}</span>
-                  </>
-                );
-                return ready && calibrated && !selected ? (
-                  <Link
-                    key={assignment.id}
-                    href={evaluationTaskHref(assignment.id, "GROUP_CASE")}
-                    className="min-w-40 rounded-xl bg-white px-3.5 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] hover:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div
-                    key={assignment.id}
-                    aria-current={selected ? "step" : undefined}
-                    className={`min-w-40 rounded-xl px-3.5 py-3 ${selected ? "bg-mecg-orange/[0.12] shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" : "bg-white shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]"}`}
-                  >
-                    {content}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {(activeRoundFilter !== "GROUP_CASE" || finishingGroupCase) && <div className="mt-3.5 flex flex-col gap-4">
+        <div className="mt-3.5 flex flex-col gap-4">
           {visible.map((assignment) => {
             const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
             const submitted = isSubmitted(assignment);
@@ -376,12 +291,9 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
               <p className="font-semibold text-mecg-navy">No assignments in this view</p>
               <p className="mt-1 text-sm text-mecg-navy/55">New work will appear here when the Board assigns and opens a round.</p>
-              {activeRoundFilter === "GROUP_CASE" && (
-                <Link href="/member/group-case" className="button-secondary mt-4 inline-flex text-sm">Grade Group Case</Link>
-              )}
             </div>
           )}
-        </div>}
+        </div>
       </section>
 
       <section>
