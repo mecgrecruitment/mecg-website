@@ -10,6 +10,10 @@ const BOARD = {
   ...OWNER, id: "board-1",
   memberships: [{ ...OWNER.memberships[0], id: "m2", role: "BOARD" }],
 };
+const PANEL = {
+  ...OWNER, id: "panel-1",
+  memberships: [{ ...OWNER.memberships[0], id: "m4", role: "PANEL" }],
+};
 const COMMITTEE = {
   ...OWNER, id: "committee-1",
   memberships: [{ ...OWNER.memberships[0], id: "m3", role: "RECRUITMENT_COMMITTEE" }],
@@ -121,6 +125,28 @@ test("board can atomically advance a distinct applicant cohort to Speed Dating",
     name: "advance_to_speed_dating",
     args: { target_cycle_id: "cycle-1", target_application_ids: ["application-1", "application-2"] },
   }]);
+});
+
+test("board can form Group Case teams of a chosen size", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("form-groups");
+  const response = await POST(request({ action: "FORM_GROUPS", cycleId: "cycle-1", groupSize: 4 }));
+  assert.equal(response.status, 201);
+  assert.deepEqual(fake.calls, [{ name: "form_case_groups", args: { target_cycle_id: "cycle-1", group_size: 4 } }]);
+});
+
+test("panel cannot form Group Case teams", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => PANEL } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("not called"); } } });
+  const { POST } = await route("form-groups-forbidden");
+  const forbidden = await POST(request({ action: "FORM_GROUPS", cycleId: "cycle-1" }));
+  assert.equal(forbidden.status, 403);
+  assert.equal(fake.calls.length, 0);
 });
 
 test("committee cannot advance applicants", async (t) => {

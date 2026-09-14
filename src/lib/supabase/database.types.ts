@@ -2746,6 +2746,10 @@ export type Database = {
         }
         Returns: Json
       }
+      form_case_groups: {
+        Args: { group_size?: number; target_cycle_id: string }
+        Returns: number
+      }
       freeze_screening_batch: {
         Args: { target_batch_id: string }
         Returns: undefined
