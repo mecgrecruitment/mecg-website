@@ -18,6 +18,7 @@ import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib
 import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState } from "./group-case-coverage";
 import { screeningRpc } from "@/lib/screening-rpc";
 import SpeedDatingResultsTable, { type SpeedDatingResults } from "./speed-dating-results";
+import GroupCaseResultsTable, { type GroupCaseResults } from "./group-case-results";
 
 function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; name: string; status: string }): RoundRubric | null {
   if (!Array.isArray(value)) return null;
@@ -76,7 +77,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   // Application screening has its own stepper page; the coverage board is for interview rounds.
   if (round.kind === "APPLICATION_SCREEN") redirect("/admin/screening");
   const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
-  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingResultsResult] = await Promise.all([
+  const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingResultsResult, groupCaseResultsResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),
     supabase.from("memberships").select("user_id,role,active,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
     round.kind === "GROUP_CASE"
@@ -91,10 +92,14 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
     round.kind === "SPEED_DATING" && canManage
       ? screeningRpc<SpeedDatingResults>(supabase, "speed_dating_results", { target_round_id: round.id })
       : Promise.resolve({ data: null, error: null }),
+    round.kind === "GROUP_CASE" && canManage
+      ? screeningRpc<GroupCaseResults>(supabase, "group_case_results", { target_round_id: round.id })
+      : Promise.resolve({ data: null, error: null }),
   ]);
   for (const result of [applicationsResult, membersResult, groupMembersResult, groupsResult]) if (result.error) throw result.error;
   if (rubricsResult.error) console.error("cycle_rubrics failed", rubricsResult.error);
   if (speedDatingResultsResult.error) throw new Error(speedDatingResultsResult.error.message);
+  if (groupCaseResultsResult.error) throw new Error(groupCaseResultsResult.error.message);
   const rubric = parseRoundRubric(rubricsResult.data, cycleId, round);
   const assignments = canOperate ? round?.evaluation_assignments ?? [] : [];
   const allApplications = (applicationsResult.data ?? [])
@@ -168,6 +173,20 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   // applicant they meet, so workload counts graded applicants and graders.
   const speedDating = round.kind === "SPEED_DATING";
   const speedDatingResults = speedDating ? speedDatingResultsResult.data : null;
+  const groupCaseResults = round.kind === "GROUP_CASE" ? groupCaseResultsResult.data : null;
+  // Results carry group names; GroupForms keys teams by id.
+  const groupIdByName = new Map((groupsResult.data ?? []).map((group) => [group.name, group.id]));
+  const graderSetsByGroup = new Map<string, Set<string>>();
+  for (const applicant of groupCaseResults?.applicants ?? []) {
+    const groupId = applicant.groupName ? groupIdByName.get(applicant.groupName) : undefined;
+    if (!groupId) continue;
+    const set = graderSetsByGroup.get(groupId) ?? new Set<string>();
+    for (const evaluation of applicant.evaluations) set.add(evaluation.evaluatorId);
+    graderSetsByGroup.set(groupId, set);
+  }
+  const gradersByGroup = groupCaseResults
+    ? Object.fromEntries([...graderSetsByGroup].map(([groupId, set]) => [groupId, set.size]))
+    : undefined;
   const speedDatingGraded = speedDatingResults?.summary.graded ?? 0;
   const speedDatingGraders = speedDatingResults?.summary.graders ?? 0;
 
@@ -253,7 +272,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
             <div>
               <SectionLabel>Group Case coverage</SectionLabel>
               <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Who still needs attention</h2>
-              <p className="mt-1 text-sm text-mecg-navy/55">Applicants needing judges appear first. Scores stay hidden while grading is underway.</p>
+              <p className="mt-1 text-sm text-mecg-navy/55">Any member at the table can grade. Applicants nobody has scored yet appear first.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
@@ -291,10 +310,10 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                 const stateLabel = row.coverage.state === "UNASSIGNED"
                   ? "No judges"
                   : row.coverage.state === "PARTIAL"
-                    ? "Needs 1 judge"
+                    ? "1 grader"
                     : row.coverage.state === "SUBMITTED"
                       ? "Complete"
-                      : `${row.coverage.submitted}/2 submitted`;
+                      : `${row.coverage.submitted} submitted`;
                 return (
                   <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(16rem,1.4fr)_8rem] md:items-center md:py-3">
                     <div className="flex items-center gap-2.5">
@@ -313,7 +332,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                           </span>
                         );
                       })}
-                      {!row.assignments.length && <span className="text-xs font-semibold text-red-700">Assign two judges</span>}
+                      {!row.assignments.length && <span className="text-xs font-semibold text-red-700">No grader yet</span>}
                     </div>
                     <StatusPill tone={row.coverage.state === "SUBMITTED" ? "navy" : row.coverage.state === "IN_PROGRESS" ? "neutral" : "orange"}>{stateLabel}</StatusPill>
                   </article>
@@ -323,6 +342,21 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                 <p className="bg-white p-6 text-center text-sm text-mecg-navy/55">No active Group Case applicants yet.</p>
               )}
             </div>
+          </div>
+        </section>
+      )}
+
+      {round.kind === "GROUP_CASE" && canManage && groupCaseResults && (
+        <section>
+          <SectionLabel>Results</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Weighted score out of 40: Collaboration and Composure count twice. Each grader&apos;s partial ratings count over the criteria they observed.</p>
+          <div className="mt-4">
+            <GroupCaseResultsTable
+              results={groupCaseResults}
+              canViewNotes={canOperate || canManage}
+              canExport={canExport}
+              exportHref={`/api/admin/export?kind=group-case&format=xlsx&cycleId=${encodeURIComponent(cycleId)}&roundId=${encodeURIComponent(round.id)}`}
+            />
           </div>
         </section>
       )}
@@ -356,8 +390,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
             <GroupForms
               cycleId={cycleId}
               groups={groupsResult.data ?? []}
-              applications={allApplications.map((application) => ({ id: application.id, name: application.name }))}
+              applications={allApplications
+                .filter((application) => ["GROUP_CASE", "IN_PROCESS", "FINAL_REVIEW"].includes(application.status))
+                .map((application) => ({ id: application.id, name: application.name }))}
               members={(groupMembersResult.data ?? []).map((member) => ({ group_id: member.group_id, application_id: member.application_id }))}
+              gradersByGroup={gradersByGroup}
             />
           </div>
         </section>

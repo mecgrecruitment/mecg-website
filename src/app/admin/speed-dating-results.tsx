@@ -53,12 +53,12 @@ export function formatStars(mean: number | null) {
   return mean == null ? "—" : `${mean.toFixed(1)} ★`;
 }
 
-function fixed(value: number | null) {
+export function fixed(value: number | null) {
   return value == null ? "—" : value.toFixed(1);
 }
 
 // Seconds since the last server refresh; refreshes only while the tab is showing.
-function useLiveRefresh() {
+export function useLiveRefresh() {
   const router = useRouter();
   const [secondsAgo, setSecondsAgo] = useState(0);
   useEffect(() => {

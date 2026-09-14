@@ -1,3 +1,4 @@
+import { isGroupCaseResults } from "@/lib/group-case-results";
 import { isGroupCaseRoster, isGroupCaseScores } from "@/lib/group-case-roster";
 import { isSpeedDatingRoster } from "@/lib/speed-dating-roster";
 
@@ -151,6 +152,7 @@ const RPC_VALIDATORS: Record<string, RpcValidator> = {
     isRecord(value) && hasString(value, "applicationId") && hasNumber(value, "score") && hasString(value, "note")
     && hasNumber(value, "session") && hasString(value, "savedAt"),
   group_case_roster: isGroupCaseRoster,
+  group_case_results: isGroupCaseResults,
   rate_group_case_applicant: (value) =>
     isRecord(value) && hasString(value, "applicationId") && isGroupCaseScores(value.scores) && hasString(value, "note")
     && hasString(value, "savedAt"),
