@@ -345,7 +345,7 @@ export default async function HashBoard() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 id="queue-heading" className="text-xl font-semibold text-mecg-navy">Ranked decision queue</h2>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">The vote binds: {quorum ? `${quorum} votes` : "quorum"} and more Yes than No produces an offer. Expand one applicant to inspect the evidence and act.</p>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">The vote binds: {quorum ? `${quorum} votes` : "quorum"} and 60% Yes produces an offer. Expand one applicant to inspect the evidence and act.</p>
               </div>
               <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{decisions.length}</span> decisions · <span className="tabular font-semibold text-mecg-navy">{lockedDecisionCount}</span> ready to release</p>
             </div>

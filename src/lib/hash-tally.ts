@@ -1,11 +1,11 @@
 export type HashOutcome = "PENDING" | "OFFER" | "REJECT";
 
-// The same rule rush.hash_tally applies, so the UI can label a row without a
+// The same rule rush.hash_passes applies, so the UI can label a row without a
 // second round trip. The SQL stays the source of truth for a binding tally.
-// A tie is a REJECT: a membership needs a majority, not the absence of one.
+// A pass is 60% Yes of everyone who voted; Unsure counts against, like a tie.
 export function hashOutcome(quorum: number, yes: number, no: number, totalVotes: number): HashOutcome {
   if (totalVotes < quorum) return "PENDING";
-  return yes > no ? "OFFER" : "REJECT";
+  return totalVotes > 0 && yes * 5 >= totalVotes * 3 ? "OFFER" : "REJECT";
 }
 
 export const HASH_STAGES = ["APPLICATION", "SPEED_DATING", "GROUP_CASE"] as const;

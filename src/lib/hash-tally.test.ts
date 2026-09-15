@@ -13,13 +13,17 @@ test("a tally exactly at quorum counts", () => {
   assert.equal(hashOutcome(5, 2, 3, 5), "REJECT");
 });
 
-test("a tie rejects, because membership needs a majority", () => {
+test("a pass is 60% yes of everyone who voted; a tie is nowhere near", () => {
   assert.equal(hashOutcome(4, 2, 2, 4), "REJECT");
+  assert.equal(hashOutcome(5, 3, 2, 5), "OFFER");
+  assert.equal(hashOutcome(5, 6, 4, 10), "OFFER");
+  assert.equal(hashOutcome(5, 5, 5, 10), "REJECT");
 });
 
-test("a yes majority offers, and unsure votes count toward quorum only", () => {
+test("unsure counts toward quorum and against the yes share", () => {
   assert.equal(hashOutcome(5, 14, 3, 18), "OFFER");
-  assert.equal(hashOutcome(5, 3, 2, 10), "OFFER");
+  assert.equal(hashOutcome(5, 3, 2, 10), "REJECT");
+  assert.equal(hashOutcome(5, 6, 0, 10), "OFFER");
 });
 
 test("an all-unsure tally at quorum rejects", () => {

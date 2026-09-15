@@ -42,7 +42,7 @@ export default function StageHashPanel({
     return (
       <section aria-labelledby="stage-hash-heading">
         <h2 id="stage-hash-heading" className="text-xl font-semibold text-mecg-navy">Stage vote</h2>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">Open a hash on one pipeline stage. YES moves the applicant forward, NO or a tie rejects them.</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">Open a hash on one pipeline stage. 60% YES moves the applicant forward; anything less rejects them.</p>
         <form onSubmit={open} className="mt-3 flex flex-wrap items-end gap-3">
           <label className="text-sm font-medium">Stage
             <select name="stage" required disabled={pending} className="select-control mt-2 text-sm">

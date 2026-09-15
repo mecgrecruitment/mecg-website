@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
 import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { applicantCode } from "@/lib/applicant-code";
@@ -68,8 +69,22 @@ export default async function DeliberationPage() {
   const groupCaseCriteria = [...(groupCaseResult?.data?.criteria ?? [])].sort((a, b) => a.position - b.position);
   const cleanNotes = (notes: string[]) => panelOnly ? [] : notes.map((note) => note.trim()).filter(Boolean);
 
+  // An applied stage result moves the status off the ballot, but the board goes
+  // through the deck more than once, so anyone this stage voted on stays in it.
+  // hash_votes is voter-only under RLS; the admin client reads application ids
+  // alone, nothing that could attribute a ballot.
+  const voted = new Set<string>();
+  if (stage !== "FINAL") {
+    const { data, error } = await createAdminClient().from("hash_votes").select("application_id").eq("cycle_id", cycleId).eq("stage", stage);
+    if (error) throw error;
+    for (const vote of data ?? []) voted.add(vote.application_id);
+  }
+  const resultOf = (status: string) =>
+    stage !== "FINAL" && [HASH_STAGE_RULES[stage].pass, "REJECTED"].includes(status) ? status : null;
   const applications = (appsResult.data ?? []).filter((application) =>
-    stage === "FINAL" ? !["DRAFT", "WITHDRAWN"].includes(application.status) : HASH_STAGE_RULES[stage].ballot.includes(application.status));
+    stage === "FINAL"
+      ? !["DRAFT", "WITHDRAWN"].includes(application.status)
+      : HASH_STAGE_RULES[stage].ballot.includes(application.status) || (resultOf(application.status) !== null && voted.has(application.id)));
   const decisionByApplication = new Map<string, NonNullable<typeof decisionsResult.data>[number]>();
   for (const decision of decisionsResult.data ?? []) {
     if (!decisionByApplication.has(decision.application_id)) decisionByApplication.set(decision.application_id, decision);
@@ -109,6 +124,7 @@ export default async function DeliberationPage() {
       major: panelOnly ? null : canonicalMajor(application.pnms.major ?? "") || null,
       classYear: panelOnly ? null : CLASS_YEAR_LABELS[application.pnms.class_year as ClassYear] ?? application.pnms.class_year,
       status: application.status,
+      result: resultOf(application.status),
       groupName: groupCase?.groupName ?? null,
       groupCase: groupCase
         ? {

@@ -60,7 +60,7 @@ export default async function MemberHashPage() {
   if (votesError) throw votesError;
   const quorum = cycleRow.hash_quorum ?? 0;
   const outcomeCopy = stage === "FINAL"
-    ? "more Yes than No means an offer; anything else does not"
+    ? "60% Yes means an offer; anything else does not"
     : `YES sends them to ${applicationStatusLabel(HASH_STAGE_RULES[stage].pass)}; anything else ends their application`;
   const applicantList = (applicants ?? []).map(({ id, name, major, class_year }) => ({
     id,
@@ -74,8 +74,8 @@ export default async function MemberHashPage() {
       <section>
         <p className="max-w-2xl text-[14px] leading-6 text-mecg-navy/70">
           {quorum
-            ? `An applicant's vote counts once at least ${quorum} members have voted on them: ${outcomeCopy}, and Unsure counts toward ${quorum} but not toward either side.`
-            : `An applicant's vote counts once enough members have voted on them: ${outcomeCopy}, and Unsure counts toward that number but not toward either side.`}
+            ? `An applicant's vote counts once at least ${quorum} members have voted on them: ${outcomeCopy}, and Unsure counts toward ${quorum} but not as a Yes.`
+            : `An applicant's vote counts once enough members have voted on them: ${outcomeCopy}, and Unsure counts toward that number but not as a Yes.`}
           {" "}Every tap saves on its own, you can change it until the board applies the result, and nobody can see how anyone else voted or where the count stands.
         </p>
       </section>

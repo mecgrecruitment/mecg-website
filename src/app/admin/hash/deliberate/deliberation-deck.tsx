@@ -16,6 +16,8 @@ export type DeckEntry = {
   major: string | null;
   classYear: string | null;
   status: string;
+  // Set when this stage's result was already applied; the deck treats it as stamped.
+  result: string | null;
   groupName: string | null;
   groupCase: { mean: number | null; band: string | null; count: number; criteria: { name: string; mean: number | null }[]; notes: string[] } | null;
   speedDating: { adjusted: number | null; mean: number | null; count: number; notes: string[] } | null;
@@ -108,13 +110,19 @@ export default function DeliberationDeck({
   const [query, setQuery] = useState("");
   const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(new Set());
   const [tally, setTally] = useState<Map<string, TallyRow>>(new Map());
-  const [applied, setApplied] = useState<Record<string, string>>({});
+  const [applied, setApplied] = useState<Record<string, string>>(() => Object.fromEntries(entries.flatMap((candidate) => candidate.result ? [[candidate.id, candidate.result]] : [])));
+  const [revisit, setRevisit] = useState<Set<string>>(new Set());
+  const [onlyRevisits, setOnlyRevisits] = useState(false);
   const [phase, setPhase] = useState<Phase | null>(null);
   const [confetti, setConfetti] = useState<Confetti | null>(null);
   const [error, setError] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   // Server order is by score; A to Z re-sorts here so the projector never reloads mid-discussion.
-  const ordered = useMemo(() => sort === "score" ? entries : [...entries].sort((a, b) => a.name.localeCompare(b.name)), [entries, sort]);
+  const sorted = useMemo(() => sort === "score" ? entries : [...entries].sort((a, b) => a.name.localeCompare(b.name)), [entries, sort]);
+  // The revisit filter drops itself once the last flag clears, so the deck never goes empty.
+  const revisitCount = entries.filter((candidate) => revisit.has(candidate.id)).length;
+  const ordered = onlyRevisits && revisitCount > 0 ? sorted.filter((candidate) => revisit.has(candidate.id)) : sorted;
+  // A cursor outside the narrowed list lands on its first card.
   const index = Math.max(ordered.findIndex((candidate) => candidate.id === selectedId), 0);
   const entry = ordered[index];
 
@@ -127,6 +135,15 @@ export default function DeliberationDeck({
     const timer = window.setTimeout(() => setSelectedId(preferred), 0);
     return () => window.clearTimeout(timer);
   }, [entries, storageKey, initialPresentingId]);
+
+  useEffect(() => {
+    let stored: string[] = [];
+    try { stored = JSON.parse(window.localStorage.getItem(`${storageKey}:revisit`) ?? "[]"); } catch {}
+    const known = stored.filter((id) => entries.some((candidate) => candidate.id === id));
+    if (!known.length) return;
+    const timer = window.setTimeout(() => setRevisit(new Set(known)), 0);
+    return () => window.clearTimeout(timer);
+  }, [entries, storageKey]);
 
   // Presenting pointer for the phones. The cleanup is the debounce: arrow-key spam sends one POST.
   const entryId = entry?.id;
@@ -167,6 +184,13 @@ export default function DeliberationDeck({
     setPhase(null);
     return nextApplied;
   }
+  function toggleRevisit() {
+    if (phase?.kind === "drumroll" || !entry) return;
+    const next = new Set(revisit);
+    if (!next.delete(entry.id)) next.add(entry.id);
+    setRevisit(next);
+    try { window.localStorage.setItem(`${storageKey}:revisit`, JSON.stringify([...next])); } catch {}
+  }
   function step(delta: number) {
     if (phase?.kind === "drumroll") return;
     leave();
@@ -205,6 +229,7 @@ export default function DeliberationDeck({
       if (event.key === "ArrowRight") step(1);
       if (event.key === "ArrowLeft") step(-1);
       if (event.key === "Enter") { if (phase?.kind === "stamped") advance(); else void reveal(); }
+      if (event.key.toLowerCase() === "u" && !event.metaKey && !event.ctrlKey && !event.altKey) toggleRevisit();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -232,6 +257,7 @@ export default function DeliberationDeck({
   const groupCase = entry.groupCase;
   const speedDating = entry.speedDating;
   const outcome = applied[entry.id];
+  const flagged = revisit.has(entry.id);
   const stampStatus = phase && phase.kind !== "drumroll" ? phase.status : null;
   const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : "";
 
@@ -242,6 +268,7 @@ export default function DeliberationDeck({
         <div className="flex items-center gap-2">
           <button type="button" aria-pressed={sort === "score"} onClick={() => setSort("score")} className={SORT_BUTTON}>By score</button>
           <button type="button" aria-pressed={sort === "name"} onClick={() => setSort("name")} className={SORT_BUTTON}>A to Z</button>
+          <button type="button" aria-pressed={onlyRevisits && revisitCount > 0} disabled={revisitCount === 0} onClick={() => setOnlyRevisits((current) => !current)} className={`${SORT_BUTTON} disabled:opacity-30`}>Revisits ({revisitCount})</button>
           <Link href="/admin/hash" className="ml-2 text-sm text-white/50 underline decoration-white/30 underline-offset-2 hover:text-white hover:decoration-white">Exit</Link>
         </div>
       </header>
@@ -276,13 +303,13 @@ export default function DeliberationDeck({
           className={`deck-card relative flex w-full max-w-4xl flex-col items-center gap-8 rounded-3xl bg-white/[0.04] p-8 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:p-12 ${cardMotion}`}
         >
           {failedHeadshots.has(entry.id) ? (
-            <span className="deck-headshot-pop flex size-28 items-center justify-center rounded-full bg-white/[0.08] text-3xl font-semibold text-white/70" aria-hidden="true">{initials(entry.name)}</span>
+            <span className="deck-headshot-pop flex size-56 items-center justify-center rounded-full bg-white/[0.08] text-6xl font-semibold text-white/70" aria-hidden="true">{initials(entry.name)}</span>
           ) : (
             // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
             <img
               src={`/api/admin/applications/${encodeURIComponent(entry.id)}/headshot`}
               alt=""
-              className="deck-headshot-pop size-28 rounded-full object-cover"
+              className="deck-headshot-pop size-56 rounded-full object-cover"
               onError={() => setFailedHeadshots((current) => new Set(current).add(entry.id))}
             />
           )}
@@ -290,16 +317,24 @@ export default function DeliberationDeck({
             <div className="flex flex-wrap items-center justify-center gap-3">
               <h1 className="deck-wordart break-words text-5xl font-semibold tracking-[-0.03em] sm:text-6xl">{entry.name}</h1>
               {outcome && <span className="rounded-full bg-white/[0.12] px-3 py-1 text-sm font-semibold">{applicationStatusLabel(outcome)}</span>}
+              {flagged && <span className="rounded-full bg-amber-300/20 px-3 py-1 text-sm font-semibold text-amber-200">Revisit</span>}
             </div>
-            <p className="mt-3 text-[13px] font-semibold text-white/50">{[entry.major, entry.classYear, entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
+            <p className="mt-3 text-2xl font-semibold text-white/85">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
+            <p className="mt-1 text-[13px] font-semibold text-white/50">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
           </div>
           {/* Participation only. Which way the room is leaning stays off the wall until the stamp lands. */}
           <div className={`${PANEL} relative w-full`}>
             <p className="text-[13px] font-semibold text-white/50">Room vote</p>
-            <p className="tabular mt-1 text-4xl font-bold">{row?.total ?? 0}<span className="ml-2 text-base font-normal text-white/50">of {quorum} voted</span></p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]">
-              <div className="h-full rounded-full bg-white/70" style={{ width: `${Math.min((row?.total ?? 0) / Math.max(quorum, 1), 1) * 100}%`, transition: "width 600ms" }} />
-            </div>
+            {outcome ? (
+              <p className={`mt-1 text-4xl font-bold ${outcome === "REJECTED" ? "text-rose-300" : "text-emerald-300"}`}>{applicationStatusLabel(outcome)}</p>
+            ) : (
+              <>
+                <p className="tabular mt-1 text-4xl font-bold">{row?.total ?? 0}<span className="ml-2 text-base font-normal text-white/50">of {quorum} voted</span></p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div className="h-full rounded-full bg-white/70" style={{ width: `${Math.min((row?.total ?? 0) / Math.max(quorum, 1), 1) * 100}%`, transition: "width 600ms" }} />
+                </div>
+              </>
+            )}
             {canReveal && <p className="deck-pulse mt-3 text-sm font-semibold text-mecg-orange">Quorum reached · press Enter to reveal</p>}
             {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#111a36] text-6xl font-bold" aria-hidden="true">…</div>}
           </div>
@@ -401,6 +436,7 @@ export default function DeliberationDeck({
           <p className="tabular text-sm font-semibold text-white/70">{index + 1} of {ordered.length}</p>
           {error && <p className="mt-1 text-sm text-rose-300">{error}</p>}
         </div>
+        <button type="button" aria-pressed={flagged} onClick={toggleRevisit} disabled={phase?.kind === "drumroll"} className={`${SORT_BUTTON} px-4 py-2 text-sm font-normal disabled:opacity-30`}>Revisit (U)</button>
         <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
       </footer>
     </main>
