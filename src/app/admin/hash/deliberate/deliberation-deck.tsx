@@ -8,7 +8,7 @@ import { matchesApplicantName } from "@/lib/speed-dating-roster";
 import { authorizedFetch } from "@/lib/client-fetch";
 import { runAction } from "@/lib/run-action";
 import type { HashStage } from "@/lib/hash-tally";
-import { formatStars } from "../../speed-dating-results";
+import { formatStars } from "@/lib/speed-dating-roster";
 
 export type DeckEntry = {
   id: string;
@@ -179,15 +179,18 @@ export default function DeliberationDeck({
   // Moving off a stamped card commits it; the drumroll is a request in flight, so it holds.
   function leave(): Record<string, string> {
     if (phase?.kind !== "stamped" || !entry) return applied;
+    // An UNSURE stamp applied nothing; the applicant stays live and flagged to revisit.
+    if (phase.status === "UNSURE") { setPhase(null); return applied; }
     const nextApplied = { ...applied, [entry.id]: phase.status };
     setApplied(nextApplied);
     setPhase(null);
     return nextApplied;
   }
-  function toggleRevisit() {
+  function toggleRevisit(force = false) {
     if (phase?.kind === "drumroll" || !entry) return;
     const next = new Set(revisit);
-    if (!next.delete(entry.id)) next.add(entry.id);
+    if (force) next.add(entry.id);
+    else if (!next.delete(entry.id)) next.add(entry.id);
     setRevisit(next);
     try { window.localStorage.setItem(`${storageKey}:revisit`, JSON.stringify([...next])); } catch {}
   }
@@ -214,6 +217,13 @@ export default function DeliberationDeck({
     setError("");
     setPhase({ kind: "drumroll" });
     await wait(1200);
+    // Unsure is the room's answer when it out-votes both Yes and No: nothing is applied,
+    // the card gets a yellow stamp and a revisit flag, and the vote stays open.
+    if (row && row.unsure >= row.yes && row.unsure >= row.no) {
+      setPhase({ kind: "stamped", status: "UNSURE" });
+      toggleRevisit(true);
+      return;
+    }
     const result = await runAction(RUSH_URL, { action: "APPLY_STAGE_HASH", cycleId, applicationId: target.id }, "Could not apply the result");
     if (!result.ok) { setError(result.error); setPhase(null); return; }
     const status = String((result.body as { id?: string } | null)?.id ?? "");
@@ -416,8 +426,8 @@ export default function DeliberationDeck({
           )}
           {stampStatus && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-              <span className={`deck-stamp rounded-2xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : "text-emerald-300 border-emerald-300"}`}>
-                {applicationStatusLabel(stampStatus).toUpperCase()}
+              <span className={`deck-stamp rounded-2xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-amber-300" : "text-emerald-300 border-emerald-300"}`}>
+                {stampStatus === "UNSURE" ? "UNSURE" : applicationStatusLabel(stampStatus).toUpperCase()}
               </span>
             </div>
           )}
@@ -436,7 +446,7 @@ export default function DeliberationDeck({
           <p className="tabular text-sm font-semibold text-white/70">{index + 1} of {ordered.length}</p>
           {error && <p className="mt-1 text-sm text-rose-300">{error}</p>}
         </div>
-        <button type="button" aria-pressed={flagged} onClick={toggleRevisit} disabled={phase?.kind === "drumroll"} className={`${SORT_BUTTON} px-4 py-2 text-sm font-normal disabled:opacity-30`}>Revisit (U)</button>
+        <button type="button" aria-pressed={flagged} onClick={() => toggleRevisit()} disabled={phase?.kind === "drumroll"} className={`${SORT_BUTTON} px-4 py-2 text-sm font-normal disabled:opacity-30`}>Revisit (U)</button>
         <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
       </footer>
     </main>
