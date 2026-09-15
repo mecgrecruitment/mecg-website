@@ -35,7 +35,6 @@ type Confetti = { x: string; delay: string; hue: number }[];
 const PANEL = "rounded-2xl bg-white/[0.06] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]";
 const SORT_BUTTON = "rounded-full px-3 py-1 text-xs font-semibold text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white aria-pressed:bg-white/[0.12] aria-pressed:text-white";
 const ENTRANCES = ["fly", "spin", "swoosh"] as const;
-const BARS = [["yes", "Yes", "bg-emerald-400"], ["unsure", "Unsure", "bg-amber-300"], ["no", "No", "bg-rose-400"]] as const;
 const RUSH_URL = "/api/admin/rush";
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
@@ -234,11 +233,10 @@ export default function DeliberationDeck({
   const speedDating = entry.speedDating;
   const outcome = applied[entry.id];
   const stampStatus = phase && phase.kind !== "drumroll" ? phase.status : null;
-  const scale = Math.max(row?.total ?? 0, quorum, 1);
   const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : "";
 
   return (
-    <main className={`flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
+    <main className={`deck-root flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
       <header className="flex items-center justify-between gap-4">
         <p className="text-[13px] font-semibold text-white/50">Discussion mode</p>
         <div className="flex items-center gap-2">
@@ -295,29 +293,14 @@ export default function DeliberationDeck({
             </div>
             <p className="mt-3 text-[13px] font-semibold text-white/50">{[entry.major, entry.classYear, entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
           </div>
-          <div className={`${PANEL} relative grid w-full gap-4 text-left sm:grid-cols-[1fr_auto] sm:items-center`}>
-            <div>
-              <p className="text-[13px] font-semibold text-white/50">Room vote</p>
-              {row ? (
-                <div className="mt-2 space-y-2">
-                  {BARS.map(([key, label, color]) => (
-                    <div key={key} className="flex items-center gap-3 text-sm">
-                      <span className="w-14 text-white/60">{label}</span>
-                      <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
-                        <div className={`h-full rounded-full ${color}`} style={{ width: `${(row[key] / scale) * 100}%`, transition: "width 600ms" }} />
-                      </div>
-                      <span className="tabular w-8 text-right font-semibold">{row[key]}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : <p className="mt-2 text-sm text-white/50">No votes yet</p>}
+          {/* Participation only. Which way the room is leaning stays off the wall until the stamp lands. */}
+          <div className={`${PANEL} relative w-full`}>
+            <p className="text-[13px] font-semibold text-white/50">Room vote</p>
+            <p className="tabular mt-1 text-4xl font-bold">{row?.total ?? 0}<span className="ml-2 text-base font-normal text-white/50">of {quorum} voted</span></p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+              <div className="h-full rounded-full bg-white/70" style={{ width: `${Math.min((row?.total ?? 0) / Math.max(quorum, 1), 1) * 100}%`, transition: "width 600ms" }} />
             </div>
-            <div className="sm:w-48 sm:text-right">
-              <p className="tabular text-sm font-semibold text-white/80">{canReveal ? "Quorum reached · press Enter to reveal" : `${row?.total ?? 0} of ${quorum} voted`}</p>
-              <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.08]">
-                <div className="h-full rounded-full bg-white/70" style={{ width: `${Math.min((row?.total ?? 0) / Math.max(quorum, 1), 1) * 100}%`, transition: "width 600ms" }} />
-              </div>
-            </div>
+            {canReveal && <p className="deck-pulse mt-3 text-sm font-semibold text-mecg-orange">Quorum reached · press Enter to reveal</p>}
             {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#111a36] text-6xl font-bold" aria-hidden="true">…</div>}
           </div>
           {!stageHash && (
