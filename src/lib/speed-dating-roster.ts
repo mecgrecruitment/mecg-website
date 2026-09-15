@@ -72,3 +72,9 @@ export function compareResults(a: ResultsRow, b: ResultsRow, key: ResultsSortKey
   if (left == null || right == null) return left == null ? (right == null ? 0 : 1) : -1;
   return (direction === "desc" ? right - left : left - right) || a.name.localeCompare(b.name);
 }
+
+// Plain module on purpose: /admin/hash renders on the server and cannot call
+// a function that lives in a "use client" file.
+export function formatStars(mean: number | null) {
+  return mean == null ? "—" : `${mean.toFixed(1)} ★`;
+}
