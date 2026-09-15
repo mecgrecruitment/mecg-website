@@ -21,7 +21,8 @@ const NOTE_SOURCES: { source: string; label: string }[] = [
 type Row = { vote: Vote; note: string };
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
 type Note = { source: string; note: string };
-type Live = { presentingId: string | null; notes: Note[] };
+type Presenting = { id: string; name: string; meta: string; decided: string | null };
+type Live = { presentingId: string | null; presenting: Presenting | null; notes: Note[] };
 export type BallotApplicant = { id: string; name: string; meta: string };
 export type BallotVote = { application_id: string; vote: string; note: string | null };
 
@@ -38,7 +39,7 @@ async function fetchLive(applicationId?: string): Promise<Live | null> {
     if (!response.ok) return null;
     const body: Partial<Live> | null = await response.json().catch(() => null);
     if (!body) return null;
-    return { presentingId: body.presentingId ?? null, notes: Array.isArray(body.notes) ? body.notes : [] };
+    return { presentingId: body.presentingId ?? null, presenting: body.presenting ?? null, notes: Array.isArray(body.notes) ? body.notes : [] };
   } catch {
     // Stale is fine on a phone; the next tick tries again.
     return null;
@@ -140,7 +141,7 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
     }));
   });
   const [status, setStatus] = useState<Record<string, RowStatus>>({});
-  const [live, setLive] = useState<Live>({ presentingId, notes: [] });
+  const [live, setLive] = useState<Live>({ presentingId, presenting: null, notes: [] });
   const [notesById, setNotesById] = useState<Record<string, Note[]>>({});
   const [openNotes, setOpenNotes] = useState<Record<string, boolean>>({});
   const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(() => new Set());
@@ -153,7 +154,10 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
 
   const visible = useMemo(() => applicants.filter((applicant) => matchesApplicantName(applicant.name, query)), [applicants, query]);
   const voted = Object.values(rows).filter((row) => row.vote).length;
-  const presenting = applicants.find((applicant) => applicant.id === live.presentingId);
+  // On the ballot: the member's own row pins to the top. Already stamped by the
+  // board: the phone still shows who is on the wall, with no buttons to tap.
+  const onBallot = applicants.find((applicant) => applicant.id === live.presentingId);
+  const presenting = onBallot ?? (live.presenting && live.presenting.id === live.presentingId ? live.presenting : undefined);
 
   useEffect(() => {
     if (!window.matchMedia("(pointer: coarse)").matches) inputRef.current?.focus();
@@ -296,7 +300,15 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
             <p className="text-[13px] font-semibold text-white/50">Now presenting</p>
           </div>
           <div className="mt-4">
-            <BallotRow id={presenting.id} name={presenting.name} meta={presenting.meta} row={rows[presenting.id]} rowStatus={status[presenting.id]} dark onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
+            {onBallot ? (
+              <BallotRow id={presenting.id} name={presenting.name} meta={presenting.meta} row={rows[presenting.id]} rowStatus={status[presenting.id]} dark onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
+            ) : (
+              <div>
+                <p className="font-semibold text-white">{presenting.name}</p>
+                {presenting.meta && <p className="text-xs text-white/60">{presenting.meta}</p>}
+                <p className="mt-2 inline-block rounded-full bg-mecg-orange px-3 py-1 text-[13px] font-semibold text-mecg-navy">{"decided" in presenting && presenting.decided ? `Board decided: ${presenting.decided}` : "Not on your ballot"}</p>
+              </div>
+            )}
           </div>
           <div className="mt-5">
             <ApplicantNotes notes={live.notes} dark />
