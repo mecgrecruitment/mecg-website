@@ -27,8 +27,9 @@ export type DeckEntry = {
 
 type Sort = "score" | "name";
 type TallyRow = { applicationId: string; yes: number; no: number; unsure: number; total: number; quorum: number; outcome: string };
-// drumroll → stamped → leaving, then the deck advances and the phase clears.
-type Phase = { kind: "drumroll" } | { kind: "stamped" | "leaving"; status: string };
+// drumroll → stamped. The stamp holds until the presenter moves; leaving a
+// stamped card is what records it as applied, so nothing is on a timer.
+type Phase = { kind: "drumroll" } | { kind: "stamped"; status: string };
 type Confetti = { x: string; delay: string; hue: number }[];
 
 const PANEL = "rounded-2xl bg-white/[0.06] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]";
@@ -159,8 +160,25 @@ export default function DeliberationDeck({
     setSelectedId(id);
     try { window.localStorage.setItem(storageKey, id); } catch {}
   }
+  // Moving off a stamped card commits it; the drumroll is a request in flight, so it holds.
+  function leave(): Record<string, string> {
+    if (phase?.kind !== "stamped" || !entry) return applied;
+    const nextApplied = { ...applied, [entry.id]: phase.status };
+    setApplied(nextApplied);
+    setPhase(null);
+    return nextApplied;
+  }
   function step(delta: number) {
+    if (phase?.kind === "drumroll") return;
+    leave();
     const next = ordered[Math.min(Math.max(index + delta, 0), ordered.length - 1)];
+    if (next) select(next.id);
+  }
+  function advance() {
+    if (phase?.kind !== "stamped" || !entry) return;
+    const nextApplied = leave();
+    const at = ordered.findIndex((candidate) => candidate.id === entry.id);
+    const next = [...ordered.slice(at + 1), ...ordered.slice(0, at)].find((candidate) => !nextApplied[candidate.id]);
     if (next) select(next.id);
   }
 
@@ -178,25 +196,16 @@ export default function DeliberationDeck({
     const status = String((result.body as { id?: string } | null)?.id ?? "");
     setPhase({ kind: "stamped", status });
     if (status !== "REJECTED") { setConfetti(makeConfetti()); window.setTimeout(() => setConfetti(null), 2500); }
-    await wait(2500);
-    setPhase({ kind: "leaving", status });
-    await wait(700);
-    const nextApplied = { ...applied, [target.id]: status };
-    setApplied(nextApplied);
-    const at = ordered.findIndex((candidate) => candidate.id === target.id);
-    const next = [...ordered.slice(at + 1), ...ordered.slice(0, at)].find((candidate) => !nextApplied[candidate.id]);
-    if (next) select(next.id);
-    setPhase(null);
   }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const typing = event.target instanceof HTMLElement && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName);
       if (event.key === "/" && !typing) { event.preventDefault(); searchRef.current?.focus(); return; }
-      if (typing || phase) return;
+      if (typing) return;
       if (event.key === "ArrowRight") step(1);
       if (event.key === "ArrowLeft") step(-1);
-      if (event.key === "Enter") void reveal();
+      if (event.key === "Enter") { if (phase?.kind === "stamped") advance(); else void reveal(); }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -204,6 +213,8 @@ export default function DeliberationDeck({
 
   const matches = query.trim() ? ordered.filter((candidate) => matchesApplicantName(candidate.name, query)).slice(0, 8) : [];
   function jump(id: string) {
+    if (phase?.kind === "drumroll") return;
+    leave();
     select(id);
     setQuery("");
     searchRef.current?.blur();
@@ -224,7 +235,7 @@ export default function DeliberationDeck({
   const outcome = applied[entry.id];
   const stampStatus = phase && phase.kind !== "drumroll" ? phase.status : null;
   const scale = Math.max(row?.total ?? 0, quorum, 1);
-  const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : phase?.kind === "leaving" ? (phase.status === "REJECTED" ? "deck-fade-out" : "deck-fly-off") : "";
+  const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : "";
 
   return (
     <main className={`flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
@@ -402,12 +413,12 @@ export default function DeliberationDeck({
         </div>
       )}
       <footer className="flex items-center justify-between">
-        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || !!phase} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Previous</button>
+        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Previous</button>
         <div className="text-center">
           <p className="tabular text-sm font-semibold text-white/70">{index + 1} of {ordered.length}</p>
           {error && <p className="mt-1 text-sm text-rose-300">{error}</p>}
         </div>
-        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || !!phase} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
+        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
       </footer>
     </main>
   );

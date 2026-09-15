@@ -512,19 +512,6 @@ details[open] > summary .disclosure-chevron {
     }
   }
 
-  @keyframes deck-fly-off {
-    to {
-      opacity: 0;
-      transform: translate(40vw, 40vh) scale(0.2);
-    }
-  }
-
-  @keyframes deck-fade-out {
-    to {
-      opacity: 0;
-    }
-  }
-
   .deck-card[data-enter="fly"] {
     animation: deck-enter-fly 700ms var(--ease-out) both;
   }
@@ -540,14 +527,6 @@ details[open] > summary .disclosure-chevron {
   /* Phase classes come after the entrance rules and match their specificity, so they win. */
   .deck-card.deck-drumroll {
     animation: deck-drumroll 150ms linear infinite;
-  }
-
-  .deck-card.deck-fly-off {
-    animation: deck-fly-off 700ms ease-in both;
-  }
-
-  .deck-card.deck-fade-out {
-    animation: deck-fade-out 700ms ease-in both;
   }
 
   .deck-wordart {
