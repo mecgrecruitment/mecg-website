@@ -11,6 +11,7 @@ import { canonicalMajor } from "@/lib/major";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { currentHashStage, HASH_STAGE_RULES } from "@/lib/hash-tally";
 import { GROUP_CASE_SCORE_BANDS } from "@/lib/rubrics";
+import { CLASS_YEAR_LABELS, type ClassYear } from "@/lib/workflow";
 import type { GroupCaseResults } from "../../group-case-results";
 import type { SpeedDatingResults } from "../../speed-dating-results";
 import DeliberationDeck, { type DeckEntry } from "./deliberation-deck";
@@ -106,7 +107,7 @@ export default async function DeliberationPage() {
       name: panelOnly ? applicantCode(application.id) : application.pnms.name,
       // Major plus year identifies someone in a small cohort, so a blind viewer gets neither.
       major: panelOnly ? null : canonicalMajor(application.pnms.major ?? "") || null,
-      classYear: panelOnly ? null : application.pnms.class_year,
+      classYear: panelOnly ? null : CLASS_YEAR_LABELS[application.pnms.class_year as ClassYear] ?? application.pnms.class_year,
       status: application.status,
       groupName: groupCase?.groupName ?? null,
       groupCase: groupCase

@@ -5,6 +5,8 @@ import { applicationStatusLabel, cycleStatusLabel, hashStageLabel } from "@/lib/
 import { canVoteInStage, currentHashStage, HASH_STAGE_RULES } from "@/lib/hash-tally";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
+import { canonicalMajor } from "@/lib/major";
+import { CLASS_YEAR_LABELS, type ClassYear } from "@/lib/workflow";
 import HashBallot from "./hash-ballot";
 
 export const metadata: Metadata = { title: "Hash" };
@@ -60,7 +62,11 @@ export default async function MemberHashPage() {
   const outcomeCopy = stage === "FINAL"
     ? "more Yes than No means an offer; anything else does not"
     : `YES sends them to ${applicationStatusLabel(HASH_STAGE_RULES[stage].pass)}; anything else ends their application`;
-  const applicantList = (applicants ?? []).map(({ id, name }) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  const applicantList = (applicants ?? []).map(({ id, name, major, class_year }) => ({
+    id,
+    name,
+    meta: [major ? canonicalMajor(major) : "", class_year ? CLASS_YEAR_LABELS[class_year as ClassYear] ?? class_year : ""].filter(Boolean).join(" · "),
+  })).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">

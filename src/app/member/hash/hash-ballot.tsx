@@ -22,7 +22,7 @@ type Row = { vote: Vote; note: string };
 type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
 type Note = { source: string; note: string };
 type Live = { presentingId: string | null; notes: Note[] };
-export type BallotApplicant = { id: string; name: string };
+export type BallotApplicant = { id: string; name: string; meta: string };
 export type BallotVote = { application_id: string; vote: string; note: string | null };
 
 function grow(node: HTMLTextAreaElement | null) {
@@ -69,9 +69,10 @@ function ApplicantNotes({ notes, dark }: { notes: Note[] | undefined; dark?: boo
   );
 }
 
-function BallotRow({ id, name, row, rowStatus, dark, onCast, onEditNote, onFlushNote }: {
+function BallotRow({ id, name, meta, row, rowStatus, dark, onCast, onEditNote, onFlushNote }: {
   id: string;
   name: string;
+  meta: string;
   row: Row;
   rowStatus: RowStatus | undefined;
   dark?: boolean;
@@ -83,6 +84,7 @@ function BallotRow({ id, name, row, rowStatus, dark, onCast, onEditNote, onFlush
     <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
       <div className="min-w-0 flex-1 basis-40">
         <p className={`font-semibold ${dark ? "text-white" : "text-mecg-navy"}`}>{name}</p>
+        {meta && <p className={`text-xs ${dark ? "text-white/60" : "text-mecg-navy/55"}`}>{meta}</p>}
         <p className={`mt-0.5 min-h-4 text-xs ${dark ? "text-white/60" : "text-mecg-navy/55"}`} aria-live="polite">
           {rowStatus?.kind === "saving" && "Saving…"}
           {rowStatus?.kind === "saved" && "Saved"}
@@ -294,7 +296,7 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
             <p className="text-[13px] font-semibold text-white/50">Now presenting</p>
           </div>
           <div className="mt-4">
-            <BallotRow id={presenting.id} name={presenting.name} row={rows[presenting.id]} rowStatus={status[presenting.id]} dark onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
+            <BallotRow id={presenting.id} name={presenting.name} meta={presenting.meta} row={rows[presenting.id]} rowStatus={status[presenting.id]} dark onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
           </div>
           <div className="mt-5">
             <ApplicantNotes notes={live.notes} dark />
@@ -325,9 +327,9 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
             <p className="mt-1 text-sm text-mecg-navy/55">Check the spelling or try their other name.</p>
           </li>
         )}
-        {visible.map(({ id, name }) => (
+        {visible.map(({ id, name, meta }) => (
           <li key={id} className={`py-3 ${rows[id].vote ? "bg-mecg-navy/[0.03]" : ""} -mx-2 rounded-xl px-2`}>
-            <BallotRow id={id} name={name} row={rows[id]} rowStatus={status[id]} onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
+            <BallotRow id={id} name={name} meta={meta} row={rows[id]} rowStatus={status[id]} onCast={cast} onEditNote={editNote} onFlushNote={flushNote} />
             <button
               type="button"
               aria-expanded={!!openNotes[id]}

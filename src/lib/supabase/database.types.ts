@@ -2800,7 +2800,9 @@ export type Database = {
       hash_ballot: {
         Args: { target_cycle_id: string }
         Returns: {
+          class_year: string | null
           id: string
+          major: string | null
           name: string
         }[]
       }
