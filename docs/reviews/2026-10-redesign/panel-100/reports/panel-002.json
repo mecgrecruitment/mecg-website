@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-002",
+  "lens": "Apple-inspired clarity: proposition hierarchy, next actions, state feedback and restraint at a narrow mobile viewport; simulated expertise, not an Apple employee or human participant.",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The supplied mobile captures show a coherent Precision Instrument identity: readable prose, disciplined orange emphasis, quiet hairlines, distinct client/student actions and an explanatory bench with clear selected-state treatment. Source provides native station buttons, announced readouts, reduced-motion handling, inquiry progress/error messages and an alternative email route. However, the homepage delays basic engagement facts behind a large instrument and organization proof, and the inquiry form can silently discard edits during submission. These undermine the exceptional clarity and dependable feedback required for an unqualified world-class judgment. Hold pending correction of the inquiry edit-loss path and appropriate integration acceptance. This is an independent AI assessment of supplied captures, source and local evidence, not observed human task success or a whole-product certification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/mobile-hero.png",
+    "captures/mobile.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/form-field.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/email.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/app/apply/application-form.tsx:MaterialsStep and ReviewStep privacy disclosures",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx",
+      "evidence": "submit captures FormData at lines 19\u201322, then awaits the response and unconditionally calls form.reset() at line 30. Inputs at lines 42\u201346 and textarea at line 49 remain editable; only the submit button is disabled at line 52. FormField forwards ordinary input props without an implicit submission lock. Thus edits made after Send are neither included in the request nor preserved on success. public-journeys.spec.ts:46\u201352 uses an immediate intercepted success and does not cover this race.",
+      "userImpact": "On a slow mobile connection, a client can correct or extend the visible inquiry while Sending is displayed, then lose those unsent changes when the earlier request succeeds. The success message does not distinguish the submitted version.",
+      "suggestedFix": "Disable the editable fieldset while sending, or track the submitted version and preserve subsequent edits with explicit feedback. Verify with a delayed response and an attempted in-flight edit."
+    },
+    {
+      "severity": "low",
+      "file": "src/app/(marketing)/home/page.tsx",
+      "evidence": "Hero copy at lines 41\u201345 states student-led consulting but omits cost and duration. The engagement instrument appears at line 48, followed by figures and six past organizations; the cost/duration facts first render at lines 100\u2013107 from site-content.ts:158\u2013162. captures/mobile-hero.png shows the instrument consuming roughly another screen below the actions, and captures/mobile.png confirms the ordering before the engagement facts.",
+      "userImpact": "A first-time mobile client is invited to inquire before learning the unusually useful fit facts: no consulting fee and a semester-long engagement. The repeated process explanation receives earlier prominence than those decision essentials.",
+      "suggestedFix": "Include pro-bono and semester-long in the hero support copy or a compact fact line beside the primary action. Preserve the bench and established typography/palette."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployed acceptance, hosted Clerk/Supabase/storage/RLS or real email delivery evidence exists. The reviewed client journey intercepts /api/contact; its passing log proves that synthetic confirmation path only.",
+    "No human study, physical-device, Safari/Firefox, assistive-technology or formal accessibility evidence; supplied homepage captures use Linux fallback fonts. Contact mobile appearance was source-reviewed without a supplied contact capture.",
+    "No client-approved outcome artifacts are available. The homepage accurately labels case studies pending approval; the publication proof uses a fixture and does not establish approval.",
+    "Original-resume access is explicitly disclosed in MaterialsStep and ReviewStep; this is not anonymous PDF review. Hosted enforcement and Board policy resolution were not independently verified.",
+    "Private grading/operator workflows and the full application journey were outside this seat\u2019s detailed inspection. No tests or browser sessions were run during this review."
+  ]
+}

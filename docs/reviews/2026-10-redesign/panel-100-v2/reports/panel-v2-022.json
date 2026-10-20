@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-v2-022",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "This simulated AI review finds a coherent Precision Instrument presentation at 320px: the offer states no consulting fee and one semester early, the optional bench reduces initial scanning, and its expanded native buttons keep the handoff readable. The inspected client journey connects engagement terms to a labeled inquiry form. Current contact validation shares trimmed rules with the API, associates specific errors, focuses the invalid field after unlocking, preserves uncertain inquiries and bounds waiting. Scoped keyboard and rejection tests support those particular behaviors. Deck shortcuts now exclude interactive targets; explicit application controls and OS-capped presentation motion address the earlier material objections. Rubric errors also have field associations. However, compact deck targets still miss the documented interaction floor. More fundamentally, complete authenticated keyboard recovery/status/operator journeys, actual assistive-technology use and hosted provider acceptance remain unestablished. Those gaps prevent an unqualified world-class judgment or integrated release recommendation. Honest pending partnership evidence is appropriate but does not demonstrate an actual consulting deliverable; unpublished membership workload also limits independent fit assessment.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/contact-validation.ts",
+    "src/components/form-field.tsx",
+    "src/components/site-header.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (interaction/render sections)",
+    "src/app/admin/rounds/rubric-editor.tsx (validation/render sections)",
+    "src/app/globals.css (focus/buttons/motion sections)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/apply/application-form.tsx (materials/review disclosure)",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact/sign-out results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-320.png",
+    "captures/public-home-expanded-mobile-320.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-292,470-476",
+      "evidence": "SORT_BUTTON uses text-xs and py-1 without a minimum height; By score/A to Z/Revisits inherit that compact target. Previous/Next use text-sm and py-2 without min-h-11, and Exit has no minimum target box. By contrast, Presentation motion explicitly adds min-h-11 at line 296. These source-defined targets fall below DESIGN.md section 2\u2019s 44px project floor; no physical-device miss or WCAG failure is claimed.",
+      "userImpact": "A narrow-screen touch operator gets small, closely grouped controls while changing the discussion order or navigating applicants, reducing comfortable activation compared with the public controls.",
+      "suggestedFix": "Give deck sort, Exit, search results and footer actions at least 44px target height and sufficient width; allow the footer to wrap at narrow widths. Verify actual target rectangles and no horizontal overflow at 320px and 390px."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated sequential-keyboard application, upload, conflict recovery, status or consequential operator journey; local intercepted APIs prove their recorded scope only.",
+    "No screen-reader session, physical iPhone, macOS Safari, human task success or accessibility conformance audit. Linux WebKit and local lab scores do not substitute.",
+    "No hosted Clerk session expiry/sign-out, Supabase RPC/RLS/storage, Resend delivery or provisioning acceptance; no staging exists.",
+    "Approved consulting artifacts, current Board-confirmed workload and Board decisions on original-resume access, retention and closed-round remediation remain outstanding. Current source accurately discloses identifying resume access.",
+    "Private visual evidence viewed was a synthetic recovery capture; expanded bench capture neutralized sticky-header positioning solely for capture. No full suite or shared browser was run."
+  ]
+}

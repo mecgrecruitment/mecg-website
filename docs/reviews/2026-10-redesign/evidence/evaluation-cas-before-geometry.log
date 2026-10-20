@@ -1,0 +1,177 @@
+
+Running 100 tests using 2 workers
+
+  ✓    1 [chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (761ms)
+  ✓    2 [chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓    3 [chromium] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.3s)
+  ✓    5 [chromium] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (493ms)
+  ✓    4 [chromium] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓    6 [chromium] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.3s)
+  ✓    7 [chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.5s)
+  ✓    8 [chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.5s)
+  ✓    9 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (369ms)
+  ✓   10 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (438ms)
+  ✓   12 [chromium] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (472ms)
+  ✓   11 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (1.4s)
+  ✓   13 [chromium] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.4s)
+  ✓   14 [chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.0s)
+  ✓   16 [chromium] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (450ms)
+  ✓   15 [chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.1s)
+  ✓   17 [chromium] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (506ms)
+  ✓   18 [chromium] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (472ms)
+  ✓   19 [chromium] › tests/e2e/evaluation-cas.spec.ts:119:5 › a stalled successful JSON body times out and retries the exact committed request before newer edits (896ms)
+  ✓   20 [chromium] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (1.4s)
+  ✓   21 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.4s)
+  ✓   22 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (1.4s)
+  ✓   23 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.1s)
+  ✓   25 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (550ms)
+  ✓   24 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓   26 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.3s)
+  ✓   28 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.6s)
+  ✓   27 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.5s)
+  ✓   29 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (370ms)
+  ✓   30 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (328ms)
+  ✓   32 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (587ms)
+  ✓   31 [mobile-chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (1.5s)
+  ✓   33 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.3s)
+  ✓   34 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.3s)
+  ✓   35 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.2s)
+  ✓   36 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (439ms)
+  ✓   38 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (441ms)
+  ✓   37 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (634ms)
+  ✓   39 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:119:5 › a stalled successful JSON body times out and retries the exact committed request before newer edits (969ms)
+  ✓   40 [mobile-chromium] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (1.4s)
+  ✓   41 [firefox] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓   42 [firefox] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓   43 [firefox] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.5s)
+  ✓   44 [firefox] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.5s)
+  ✓   45 [firefox] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (814ms)
+  ✓   46 [firefox] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (712ms)
+  ✓   48 [firefox] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (2.1s)
+  ✓   47 [firefox] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (3.0s)
+  ✓   49 [firefox] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (698ms)
+  ✓   50 [firefox] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (650ms)
+  ✓   51 [firefox] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (817ms)
+  ✓   52 [firefox] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (777ms)
+  ✓   53 [firefox] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.6s)
+  ✓   54 [firefox] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.4s)
+  ✓   56 [firefox] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (876ms)
+  ✓   55 [firefox] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.3s)
+  ✓   57 [firefox] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (854ms)
+  ✓   58 [firefox] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (806ms)
+  ✓   59 [firefox] › tests/e2e/evaluation-cas.spec.ts:119:5 › a stalled successful JSON body times out and retries the exact committed request before newer edits (1.3s)
+  ✓   60 [firefox] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (2.0s)
+  ✓   61 [webkit] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓   62 [webkit] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (684ms)
+  ✓   63 [webkit] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.3s)
+  ✓   64 [webkit] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.4s)
+  ✓   65 [webkit] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (733ms)
+  ✓   66 [webkit] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (725ms)
+  ✓   68 [webkit] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.7s)
+  ✓   69 [webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (498ms)
+  ✓   67 [webkit] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.6s)
+  ✓   70 [webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (592ms)
+  ✓   71 [webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (1.1s)
+  ✓   72 [webkit] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (768ms)
+  ✓   73 [webkit] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.4s)
+  ✓   74 [webkit] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.3s)
+  ✓   76 [webkit] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (731ms)
+  ✓   75 [webkit] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.2s)
+  ✓   77 [webkit] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (711ms)
+  ✓   78 [webkit] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (761ms)
+  ✓   79 [webkit] › tests/e2e/evaluation-cas.spec.ts:119:5 › a stalled successful JSON body times out and retries the exact committed request before newer edits (731ms)
+  ✓   81 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (550ms)
+  ✓   82 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (575ms)
+  ✓   83 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.2s)
+  ✓   84 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓   85 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (625ms)
+  ✓   86 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (558ms)
+  ✘   80 [webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (6.5s)
+  ✓   87 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.4s)
+  ✓   89 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (489ms)
+  ✓   88 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.9s)
+  ✓   90 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (631ms)
+  ✓   92 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (694ms)
+  ✓   91 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (945ms)
+  ✓   93 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.4s)
+  ✓   94 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.3s)
+  ✓   96 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (682ms)
+  ✓   95 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.2s)
+  ✓   97 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (702ms)
+  ✓   98 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (683ms)
+  ✓   99 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:119:5 › a stalled successful JSON body times out and retries the exact committed request before newer edits (763ms)
+  ✘  100 [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (6.5s)
+
+
+  1) [webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice 
+
+    Error: expect(locator).toBeChecked() failed
+
+    Locator:  getByRole('radio', { name: /^Score 3:/ }).first()
+    Expected: checked
+    Received: unchecked
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeChecked" getByRole('radio', { name: /^Score 3:/ }).first() with timeout 5000ms
+      - waiting for getByRole('radio', { name: /^Score 3:/ }).first()
+        14 × locator resolved to <input value="3" type="radio" class="peer sr-only" name="rating-synthetic-evaluation-analysis" aria-label="Score 3: Meets the expected bar with ordinary evidence"/>
+           - unexpected value "unchecked"
+
+
+      162 |   await expect(page.getByText(/Retry confirms the exact earlier request/)).toBeVisible();
+      163 |   await page.mouse.up();
+    > 164 |   await expect(radio).toBeChecked();
+          |                       ^
+      165 | });
+      166 |
+        at /work/tests/e2e/evaluation-cas.spec.ts:164:23
+
+    Error Context: .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice 
+
+    Error: expect(locator).toBeChecked() failed
+
+    Locator:  getByRole('radio', { name: /^Score 3:/ }).first()
+    Expected: checked
+    Received: unchecked
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeChecked" getByRole('radio', { name: /^Score 3:/ }).first() with timeout 5000ms
+      - waiting for getByRole('radio', { name: /^Score 3:/ }).first()
+        14 × locator resolved to <input value="3" type="radio" class="peer sr-only" name="rating-synthetic-evaluation-analysis" aria-label="Score 3: Meets the expected bar with ordinary evidence"/>
+           - unexpected value "unchecked"
+
+
+      162 |   await expect(page.getByText(/Retry confirms the exact earlier request/)).toBeVisible();
+      163 |   await page.mouse.up();
+    > 164 |   await expect(radio).toBeChecked();
+          |                       ^
+      165 | });
+      166 |
+        at /work/tests/e2e/evaluation-cas.spec.ts:164:23
+
+    Error Context: .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-mobile-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-mobile-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/evaluation-cas-final/evaluation-cas-a-save-erro-32ccc-teal-a-native-rating-choice-mobile-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice 
+    [mobile-webkit] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice 
+  98 passed (1.2m)

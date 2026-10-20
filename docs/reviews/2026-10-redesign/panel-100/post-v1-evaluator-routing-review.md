@@ -1,0 +1,9 @@
+# Separate current-tree evaluator/routing source QA
+
+Coordinator source review only, not a V1 panel vote. Inspected evaluation-form.tsx loading, divergent-copy selection, local write receipt, autosave, retry, download and review focus; evaluation-draft-recovery.ts writer; auth.ts destinationForUser and auth-destination.ts editable-intake capability.
+
+No actionable defect found in these targeted changes by bounded source inspection. Storage getter failures are contained. Current-backup claims require the exact current payload signature to match a successful storage write. Failed backups get an explicit memory-only warning and private JSON export; server saved state is acknowledged by a validated timestamp. Divergent browser/server drafts pause editing/sync and expose both copies plus separate downloads before either selection. Choosing browser content schedules promotion while choosing server content replaces the browser only after that explicit decision. Review/error focus paths are explicit.
+
+Returning applicants with existing history now receive an applicant-only authoritative intake read before routing them away from /apply. Internal role priority is preserved. A current open editable draft capability selects /apply; an intake service error propagates rather than silently claiming an application is no longer editable.
+
+Limit: draft GET/PUT requests still use existing authorizedFetch/network retry without a bounded full-body deadline. An indefinitely stalled initial draft GET can leave `draftReady` false and grading controls waiting; this is pre-existing behavior outside the requested storage/routing fixes, and merits a separate bounded-load follow-up. No hosted or browser checks reproduced here; no broad accessibility or world-class approval inferred. Panel votes remain attached to frozen V1.

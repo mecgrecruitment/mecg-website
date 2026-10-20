@@ -1,0 +1,47 @@
+{
+  "seatId": "panel-007",
+  "lens": "Apple-inspired clarity; recovery and retry. Simulated expertise/user lens, not a human or employee assessment.",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected public composition has a clear proposition, distinct client/student actions, restrained color, precise typography and an engineering-specific figure that preserves MECG identity. The desktop hero and mobile capture support this visual judgment. Source-traced journeys covered home to client inquiry and Join to application preparation, draft recovery and submission. Application recovery explains competing copies, pauses writes, offers comparison, restores focus and separates local preservation from confirmed account saving. Supplied browser tests and logs support those behaviors only against synthetic APIs; they are not observed applicant success. Original-resume visibility is disclosed without promising anonymity, and absent case studies are explicitly pending approval. One client-inquiry recovery gap remains. Missing hosted integration, authenticated visual evidence and user-task evidence prevent an unqualified world-class or release endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/public-recruitment.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx",
+    "src/lib/application-draft-recovery.ts (storage contract and scope parsing)",
+    "src/lib/client-fetch.ts",
+    "tests/e2e/application-reliability.spec.ts (recovery and submission cases)",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (relevant case results)",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "P2",
+      "file": "src/app/(marketing)/contact/contact-form.tsx",
+      "evidence": "submit(), lines 16\u201324, awaits bare fetch and response.json without a timeout or cancellation. Lines 51\u201353 disable the only submit button while sending; failure guidance appears only after resolution/rejection. The home primary CTA targets this form (home/page.tsx:44). contact/page.tsx:28\u201329 supplies a separate email fallback, but the pending form never explains when to use it.",
+      "userImpact": "A stalled connection can leave a prospective client at Sending\u2026 with no bounded feedback or in-form recovery. The user cannot tell whether to wait or switch to email, and reloading risks losing the written inquiry. This is a source-derived failure mode, not a reproduced outage.",
+      "suggestedFix": "Bound the request and body-read wait, preserve entered values, and show an actionable unknown-delivery message with an email fallback. Offer retry with clear duplicate-delivery handling. Add a focused intercepted-request test that never resolves and verifies recovery controls become available."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployed acceptance run or hosted Clerk/Supabase/storage/email integration exists; session-expiry recovery and actual contact delivery remain unknown.",
+    "No human study or observed task success; synthetic browser cases and source reasoning cannot establish comprehension, confidence or conversion.",
+    "No supplied application recovery-state captures or live authenticated inspection; private-screen visual hierarchy, long comparisons and assistive-technology announcements remain unverified.",
+    "No physical-device, Safari, Firefox or assistive-technology validation; Linux fallback-font captures are the visual evidence.",
+    "Client-approved outcomes/artifacts remain absent; Board resolution of original-resume policy and deployment/migration rollout remain external decisions. Other private grading/operator workflows were outside this focused inspection."
+  ]
+}

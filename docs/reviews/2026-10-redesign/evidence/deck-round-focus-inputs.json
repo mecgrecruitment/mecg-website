@@ -1,0 +1,7 @@
+{
+  "src/app/admin/hash/deliberate/deliberation-deck.tsx": "aa457b09da29b6d63f3cb27276e5ca1a524621da5c78fbb69228e7c856fe0d76",
+  "tests/e2e/deck-accessibility.spec.ts": "882e3302a97446574ea877e9ed7686515b6077a1caba0f19005e20fa8fa6508d",
+  "tests/e2e/deck-touch-targets.spec.ts": "d6da04c0aafb10b95cb55474aeaa5a098e0096c007b3501773daff413f8870b1",
+  "src/app/admin/round-status-control.tsx": "28d2256c74cdc66b7cf95490424e32af0e3337da860d4e03856f16451a4abdbc",
+  "tests/e2e/operator-close.spec.ts": "b15d4efce0bd3f038bf2cec5eb1590765490eddb91da2896e73b311471187522"
+}

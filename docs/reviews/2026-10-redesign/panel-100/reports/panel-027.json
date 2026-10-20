@@ -1,0 +1,46 @@
+{
+  "seatId": "panel-027",
+  "lens": "Accessible interaction \u2014 recovery and retry",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy and generous primary controls. Source inspection of the client inquiry journey and application recovery journey shows native inputs/buttons, associated validation messages, explicit copy selection, focused recovery headings, and honest save/submit uncertainty. Original-resume access is disclosed rather than called anonymous; unavailable case studies are not replaced with invented outcomes. However, the operator discussion screen explicitly bypasses reduced-motion protection. This prevents an unqualified world-class accessibility judgment. Hold for that correction and focused verification. This is a simulated AI accessibility review of frozen source, supplied captures and local test evidence, not observed user success or accessibility certification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/site-header.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/apply/headshot-field.tsx",
+    "src/app/globals.css",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (sampled motion and controls)",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (final results)",
+    "captures/mobile-hero.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/globals.css:522-577; src/app/admin/hash/deliberate/deliberation-deck.tsx:275-348",
+      "evidence": "The reduce media query at lines 569-577 deliberately excludes .deck-root and its descendants. Lines 522-566 define fly/spin/swoosh entrances, infinite drumroll/shimmer, headshot pop, screen shake, confetti and infinite pulse. DeliberationDeck applies deck-root, entrance attributes, deck-headshot-pop, deck-wordart and deck-pulse. Only the numeric count-up separately checks the preference (line 63); the CSS effects remain active.",
+      "userImpact": "An operator or meeting attendee requesting reduced motion still encounters large card motion and repeating effects while reading consequential applicant evidence. A projected display also exposes attendees who do not control the presenting computer.",
+      "suggestedFix": "Include the deck in reduced-motion overrides and render static final states. Provide a persistent presentation motion-off control for shared displays. Verify card navigation, reveal, and revisit flows with reduced motion enabled, including computed animation styles."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated journey, hosted Clerk/Supabase/storage/email integration, staging environment, or human usability study exists in the supplied evidence.",
+    "No screen-reader announcement testing, switch/voice access, physical-device touch testing, Safari/Firefox validation, zoom/reflow audit, or formal accessibility conformance assessment was performed.",
+    "The application tests use synthetic fixtures and mostly programmatic clicks/fills. They establish sampled recovery state transitions, not a complete keyboard-only retry journey or reliable announcement order after upload/submission controls are disabled and re-enabled.",
+    "Public-journey tests cover menu Escape/focus return, mocked inquiry confirmation and instrument reduced-motion styles; the supplied 76-pass log does not establish accessibility across every private workflow. Private recovery screens have no supplied visual captures inspected here."
+  ]
+}

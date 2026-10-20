@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import type { NextFetchEvent } from "next/server";
+import { WORKSPACE_CYCLE_HEADER } from "@/lib/workspace-cycle-url";
 import { hasClerkConfiguration } from "@/lib/env";
 
 
@@ -50,7 +51,15 @@ export async function handleProxy(
     return NextResponse.next();
   }
   const { userId } = await session();
-  if (userId) return NextResponse.next();
+  if (userId) {
+    const requestHeaders = new Headers(request.headers);
+    // Never trust a caller-supplied selector header. Alias conflicts are kept
+    // for the server boundary to reject, rather than choosing an arbitrary one.
+    requestHeaders.set(WORKSPACE_CYCLE_HEADER, JSON.stringify([
+      ...request.nextUrl.searchParams.getAll("cycleId"), ...request.nextUrl.searchParams.getAll("cycle"),
+    ]));
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
   if (isProtectedApi(pathname)) {
     // __client_uat is Clerk's own marker that a session exists in this browser.
     // Set but rejected means the short-lived session cookie expired (a phone

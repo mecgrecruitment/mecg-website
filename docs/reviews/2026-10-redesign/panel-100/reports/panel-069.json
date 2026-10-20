@@ -1,0 +1,51 @@
+{
+  "seatId": "panel-069",
+  "lens": "Prospective applicant \u2014 cross-step continuity",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The reviewed journey is thoughtfully explained but contains a material return-to-draft routing gap for repeat applicants. Home clearly identifies student consulting and offers a student action; Join explains eligibility, preparation, evaluated rounds and attendance boundaries. The supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy and readable primary actions. Application source explicitly separates saving from submitting, compares recovery copies before replacement, preserves uncertain writes and discloses original-resume access. Synthetic browser tests and the two-session PostgreSQL race support those specific mechanisms. However, an applicant with an earlier submitted application can lose access to a newly saved draft when returning. That breaks the promised ability to save and return. This is an independent simulated applicant assessment from frozen source, supplied captures and logs, not observed student success or a complete assessment of every private workflow.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "src/lib/auth.ts",
+    "src/lib/auth-destination.ts",
+    "supabase/migrations/20260825020000_fix_applicant_workflow.sql:19-31",
+    "supabase/migrations/20260830100000_harden_applicant_workflow.sql:389-404",
+    "supabase/migrations/20260901000000_allow_reapplication.sql",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/mobile-hero.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "file": "src/lib/auth-destination.ts:22-23",
+      "evidence": "can_start_application() in supabase/migrations/20260901000000_allow_reapplication.sql:32-41 returns false whenever the selected cycle already has any application, including DRAFT or NEEDS_INFO. is_applicant() in 20260825020000_fix_applicant_workflow.sql:26-29 remains true for a prior submitted/rejected application. destinationForUser passes both values to resolveAuthDestination, which chooses /applicant; src/app/apply/page.tsx:86 redirects that destination before rendering the draft. Thus a repeat applicant can begin a new cycle, save, leave, and be redirected away on return. The same combination affects a later-cycle NEEDS_INFO application.",
+      "userImpact": "Returning applicants cannot resume their saved work or supply requested changes through /apply, despite the save-and-return promise. The status page can instead describe the current draft as moving through review.",
+      "suggestedFix": "Make routing recognize an editable DRAFT/NEEDS_INFO application in the current intake cycle, while retaining prior application history. Add a regression covering prior-cycle submission, new-cycle initial save, return to /apply, and NEEDS_INFO resubmission."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/email integration, staging deployment or real student study exists; this review cannot establish end-to-end account creation, upload persistence or delivered receipts.",
+    "The reported browser journey intercepts application APIs and substitutes the applicant destination; it does not prove the actual authenticated save-return-status handoff. The routing finding is source-derived, not a live reproduction.",
+    "Private application/recovery/status visual craft was inspected through source and synthetic test assertions, without supplied authenticated captures. Physical devices, Safari, Firefox and assistive-technology task success remain unknown.",
+    "Client-approved outcomes and project artifacts remain absent. Original-resume access is disclosed policy, not anonymization; Board policy resolution and production retention practices were not verified."
+  ]
+}

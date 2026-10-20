@@ -1,0 +1,17 @@
+import { cookies } from 'next/headers';
+export type CurrentUser = {
+  id: string; email: string; name: string; active: boolean;
+  memberships: Array<{ id: string; cycleId: string; role: 'MEMBER' | 'BOARD' | 'PANEL' | 'OWNER' | 'RECRUITMENT_COMMITTEE'; active: boolean; cycle: { id: string; name: string; status: string; hash_stage: string | null; createdAt: Date } }>;
+};
+export async function currentUser(): Promise<CurrentUser> {
+  const selected = (await cookies()).get('preview-role')?.value;
+  const role = selected === 'reviewer' ? 'RECRUITMENT_COMMITTEE' : selected === 'member' ? 'MEMBER' : selected === 'panel' ? 'PANEL' : selected === 'owner' ? 'OWNER' : 'BOARD';
+  return { id: 'preview-user', email: 'preview@example.invalid', name: `${role === 'MEMBER' ? 'Morgan Member' : role === 'PANEL' ? 'Parker Panelist' : role === 'OWNER' ? 'Olivia Owner' : 'Bailey Board'} · Sample account`, active: true,
+    memberships: selected === 'applicant' ? [] : [{ id: 'preview-membership', cycleId: 'preview-cycle', role, active: true, cycle: { id: 'preview-cycle', name: 'Fall recruitment · Sample cycle', status: 'IN_PROCESS', hash_stage: 'GROUP_CASE', createdAt: new Date('2026-09-01T12:00:00Z') } }] };
+}
+export const requireUser = currentUser;
+export const requireMember = currentUser;
+export const requireAdmin = currentUser;
+export const requireBoard = currentUser;
+export async function currentDestination() { return (await cookies()).get('preview-role')?.value === 'applicant' ? '/applicant' : '/member'; }
+export const destinationForUser = currentDestination;

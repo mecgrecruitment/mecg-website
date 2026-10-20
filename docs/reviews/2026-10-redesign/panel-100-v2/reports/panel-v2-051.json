@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-v2-051",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "As a simulated first-encounter client reviewer, I can understand the offer and construct a useful inquiry. The hero immediately states student leadership, no consulting fee and one academic semester. Work explains the 6\u20138-person team, client responsibilities, meeting cadence, confidentiality discussion and handoff. The desktop and mobile homepage captures show a coherent Precision Instrument identity: restrained hierarchy, consistent structural rules and clearly separated partnership and culture material. The narrow-screen bench disclosure improves access to the substantive content. I traced Home \u2192 Work \u2192 practical FAQ \u2192 Contact and inspected the corresponding local browser scenario. Contact now locks submitted fields, validates acknowledgements, preserves uncertain inquiries, bounds the wait and reuses a request identity for unchanged retries. These address the relevant historical reliability objections. However, the core client task still stops at judging actual consulting quality: organization profiles describe the organizations while expressly withholding MECG methods, deliverables and outcomes. Honest copy corrects the earlier overpromise but does not supply evidence. That material content gap prevents my agreement with the broad world-class claim. Release readiness remains unproven independently because actual provider integration and consequential authenticated workflows have no hosted acceptance evidence; this is not a claim of a demonstrated integration failure.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/site-content.ts (services, engagement facts, steps and FAQs)",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/email.ts:50\u2013106",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results and final count)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:99\u2013108; src/content/projects.public.ts:3\u20135; src/app/(marketing)/work/page.tsx:56\u201363",
+      "evidence": "The selected profile displays the organization description, then states that MECG project scope, methods, deliverables and outcomes await public-release approval. The approved fallback contains zero records, and Work omits Selected work when the public list is empty. The supplied homepage captures corroborate the pending-case-study state. The mobile selector now places the result adjacent, so the old remote-result objection is not retained.",
+      "userImpact": "A prospective client can assess the proposed service and partnership breadth but cannot inspect a comparable engagement or deliverable to judge analytical quality before sharing time and context.",
+      "suggestedFix": "Obtain client and Board approval for at least one bounded real engagement showing the decision, MECG contribution, methods, limitations and redacted handoff artifact. Publish through the existing approval boundary; preserve truthful pending copy until permission exists."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance/delivery, hosted Clerk sessions and expiry, Supabase RPC/RLS/storage and authenticated application/evaluation/operator recovery; local intercepted responses establish narrower behavior.",
+    "Observed human comprehension or task success, screen-reader use, physical iPhone/macOS Safari, and full sequential keyboard traversal from homepage proof through inquiry; the inspected keyboard test covers the contact form.",
+    "Board approval for retention, original-resume review policy and closed-round remediation; current disclosures do not constitute approval.",
+    "Visual craft of private workflows or Work/Contact screens beyond the supplied homepage captures; no private live account was used."
+  ]
+}

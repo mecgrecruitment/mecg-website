@@ -72,7 +72,6 @@ export const PREPARATION_NOTES = [
   "Read the prompt closely and answer the question that was asked.",
   "Practice explaining your reasoning without hiding behind a memorized framework.",
   "Come ready to listen, change your mind, and make room for teammates.",
-  "Ask current members about this semester's time commitment before you apply.",
 ] as const;
 
 export const JOIN_FAQS = [
@@ -83,6 +82,5 @@ export const JOIN_FAQS = [
   ["What is Meet Members versus Speed Dating?", "Meet Members is an open mixer. Speed Dating is the evaluated round, with short structured conversations, assigned members, and a rubric."],
   ["What is Group Case?", "It is a team problem. We score individual behavior, including how you frame, listen, and share work. We do not score whether your group found a clever answer."],
   ["How do I prepare?", "Read how we evaluate. We do not gate on memorized case frameworks."],
-  ["What is the weekly commitment?", "Membership includes project work, team meetings, and organization events. Ask during recruitment for this semester's expected load."],
   ["When does recruitment happen?", "Recruitment runs by semester. When a cycle is active, the dates on this page are the live dates."],
 ] as const;

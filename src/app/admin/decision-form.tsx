@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { releaseEvidenceHref } from "@/lib/release-evidence";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAction } from "@/lib/use-action";
 import { detroitDateTimeToIso, formatDetroitDateTime } from "@/lib/detroit-date-time";
+import { formatEasternDateTime } from "@/lib/date-time";
 import { decisionOutcomeLabel } from "@/lib/labels";
 import OperationNotice from "@/components/operation-notice";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { parseReleasePreflight, parseReleaseReport, releaseSnapshot, labelReleaseItems, filterReleaseItems, type ReleaseViewFilters, RELEASE_REASONS, type LabeledReleaseItem, type ReleaseReport } from "@/lib/decision-release";
+import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 
 const DECISION_OUTCOMES = ["OFFER", "WAITLIST", "REJECT", "PROCEDURAL_REVIEW"] as const;
 
@@ -83,108 +88,252 @@ export function PreviewForm({ decisionId, cycleId, current }: { decisionId: stri
 }
 
 export function ReleaseButton({ decisionId }: { decisionId: string }) {
-  const { pending, error, success, run, router } = useAction("/api/admin/decisions", "Could not release outcome. Check your connection and try again.");
+  const router = useRouter();
+  const busy = useRef(false);
+  const [pending, setPending] = useState(false);
+  const [uncertain, setUncertain] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const resultRef = useRef<HTMLDivElement>(null);
   async function release() {
-    if (pending || !window.confirm("Release this outcome to the applicant now? This cannot be undone.")) return;
-    // A 502 with released:true means the outcome IS released and only the applicant email
-    // failed. Refresh anyway, or the board sees a stale LOCKED row and clicks Release again.
-    const result = await run(
-      { action: "RELEASE", decisionId },
-      { successMessage: "Outcome released to the applicant.", fallbackError: "Could not release", skipRefresh: true },
-    );
-    if (result.ok || (result.body as { released?: boolean } | null)?.released === true) router.refresh();
+    if (busy.current || uncertain || success || !window.confirm("Release this outcome to the applicant now? This cannot be undone.")) return;
+    busy.current = true; setPending(true); setError("");
+    try {
+      const { response, body } = await fetchJsonWithTimeout("/api/admin/decisions", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "RELEASE", decisionId }),
+      }, 15_000, authorizedFetch);
+      if (!response.ok && response.status < 500 && response.status !== 408) {
+        setError(body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "Could not release this outcome. Review its current state before trying again.");
+        return;
+      }
+      if (!response.ok || !body || typeof body !== "object" || !("released" in body) || body.released !== true
+        || !("decisionId" in body) || body.decisionId !== decisionId
+        || !("notified" in body) || typeof body.notified !== "boolean" || !("queued" in body) || typeof body.queued !== "boolean") {
+        setUncertain(true); return;
+      }
+      setSuccess(body.notified ? "Outcome released to the applicant; notification delivered." : body.queued ? "Outcome released to the applicant. Notification is queued." : "Outcome released to the applicant. Notification delivery needs review.");
+      router.refresh();
+    } catch { setUncertain(true); }
+    finally { busy.current = false; setPending(false); requestAnimationFrame(() => resultRef.current?.focus()); }
   }
-  return (
-    <div className="flex flex-col items-start gap-2">
-      <button type="button" disabled={pending} onClick={release} className="button-primary text-xs">{pending ? "Releasing…" : "Release outcome"}</button>
+  return <div className="flex flex-col items-start gap-2">
+    <button type="button" disabled={pending || uncertain || !!success} onClick={release} className="button-primary text-xs">{pending ? "Releasing…" : "Release outcome"}</button>
+    <div ref={resultRef} tabIndex={-1} aria-label="Outcome release result">
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>
+      {uncertain && <>
+        <OperationNotice kind="info">Release could not be confirmed. This outcome may already be released. Reload the current page and check its decision status before another release review. This button stays locked to prevent an accidental duplicate.</OperationNotice>
+        <button type="button" className="button-secondary mt-2" onClick={() => window.location.reload()}>Reload current decision status</button>
+      </>}
     </div>
-  );
+  </div>;
 }
 
-// Decision night was sixty separate Release clicks, each of which could half
-// fail with no record of how far the board got. This releases everything the
-// single-decision path would accept and reports what it skipped.
-export function ReleaseAllButton({ cycleId, readyCount }: { cycleId: string; readyCount: number }) {
+// Preflight is advisory until the server checks the exact reviewed snapshot.
+export function ReleaseAllButton({ cycleId, lockedCount }: { cycleId: string; lockedCount: number }) {
+  const filterId = useId();
   const router = useRouter();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const [success, setSuccess] = useState("");
+  const busy = useRef(false);
+  const [review, setReview] = useState<LabeledReleaseItem[] | null>(null);
+  const [filters, setFilters] = useState<ReleaseViewFilters>({ query: "", eligibility: "ALL", outcome: "ALL" });
+  const [report, setReport] = useState<(Omit<ReleaseReport, "items"> & { items: LabeledReleaseItem[] }) | null>(null);
 
-  async function releaseAll() {
-    if (pending || !window.confirm(`Release ${readyCount} locked outcome${readyCount === 1 ? "" : "s"} to applicants now? This cannot be undone.`)) return;
+  const reviewTriggerRef = useRef<HTMLButtonElement>(null);
+  const reviewRef = useRef<HTMLElement>(null);
+  const resultRef = useRef<HTMLElement>(null);
+  const focusAfterRelease = useRef(false);
+
+  async function requestReview() {
+    if (busy.current) return;
+    busy.current = true;
     setPending(true);
+    setFilters({ query: "", eligibility: "ALL", outcome: "ALL" });
     setError("");
-    setSuccess("");
+    setReview(null);
     try {
-      const response = await authorizedFetch("/api/admin/decisions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "RELEASE_ALL", cycleId }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => null);
-        setError(body?.error ?? "Could not release the outcomes");
-        return;
-      }
-      const body = await response.json().catch(() => null);
-      const released = Number(body?.released ?? 0);
-      const skipped = Number(body?.skipped ?? 0);
-      setSuccess(skipped
-        ? `Released ${released} and queued their emails. Skipped ${skipped} that were not ready or that you are conflicted on.`
-        : `Released ${released} outcome${released === 1 ? "" : "s"}; applicant emails are queued for delivery.`);
-      router.refresh();
+      const { response, body } = await fetchJsonWithTimeout("/api/admin/decisions", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "RELEASE_PREFLIGHT", cycleId }),
+      }, 15_000, authorizedFetch);
+      if (!response.ok) { setError("Could not check release readiness. Refresh your session and try again."); return; }
+      const items = parseReleasePreflight(body);
+      if (!items) { setError("Release readiness could not be verified. Reload the board before trying again."); return; }
+      const labeled = labelReleaseItems(items, body);
+      if (!labeled) { setError("Applicant codes could not be verified. Reload the board before trying again."); return; }
+      setReview(labeled);
     } catch {
-      setError("Could not release the outcomes. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+      setError("Could not check release readiness. Check your connection and try again.");
+    } finally { busy.current = false; setPending(false); }
   }
 
-  if (!readyCount) return null;
-  return (
-    <div className="flex flex-col items-start gap-2">
-      <button type="button" disabled={pending} onClick={releaseAll} className="button-primary text-sm">
-        {pending ? "Releasing…" : `Release all ${readyCount} locked outcomes`}
-      </button>
-      <OperationNotice kind="error">{error}</OperationNotice>
-      <OperationNotice kind="success">{success}</OperationNotice>
-    </div>
-  );
+  async function releaseReviewed() {
+    if (busy.current || !review) return;
+    busy.current = true;
+    setPending(true);
+    setError("");
+    setReport(null);
+    focusAfterRelease.current = true;
+    try {
+      const { response, body } = await fetchJsonWithTimeout("/api/admin/decisions", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "RELEASE_ALL", cycleId, snapshot: releaseSnapshot(review) }),
+      }, 15_000, authorizedFetch);
+      if (!response.ok) {
+        setReview(null);
+        setError(response.status === 409
+          ? "The cohort, outcomes or readiness changed. Review the current cohort and confirm again."
+          : "Release could not be confirmed. Refresh the board and review current outcomes before retrying.");
+        router.refresh();
+        return;
+      }
+      const result = parseReleaseReport(body);
+      if (!result) {
+        setReview(null);
+        setError("The release response could not be verified. Refresh the board before retrying; some outcomes may already be released.");
+        router.refresh();
+        return;
+      }
+      const labeled = labelReleaseItems(result.items, body);
+      if (!labeled) {
+        setReview(null);
+        setError("The release result could not be verified. Refresh the board before retrying.");
+        router.refresh();
+        return;
+      }
+      setReport({ ...result, items: labeled });
+      setReview(null);
+      router.refresh();
+    } catch {
+      setReview(null);
+      setError("The release result is unknown. Refresh the board before retrying; some outcomes may already be released.");
+      router.refresh();
+    } finally { busy.current = false; setPending(false); }
+  }
+
+  function itemList(items: LabeledReleaseItem[]) {
+    return <ul className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+      {items.map((item) => <li key={item.decisionId} className="py-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <Link href={withWorkspaceCycle(`/admin/applications/${encodeURIComponent(item.applicationId)}`, cycleId)} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-2">
+            {item.applicantLabel} · Open dossier
+          </Link>
+          <span>{decisionOutcomeLabel(item.outcome)}</span>
+          <span className="font-semibold">{item.reasonCode ? "Blocked" : "Eligible"}</span>
+        </div>
+        {item.reasonCode && <p className="max-w-2xl leading-6 text-mecg-navy/70">{RELEASE_REASONS[item.reasonCode]}</p>}
+        {item.reasonCode === "EVIDENCE_NOT_READY" && <Link href={releaseEvidenceHref(item.applicationId, cycleId)} className="mt-2 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Inspect missing evidence for {item.applicantLabel}</Link>}
+      </li>)}
+    </ul>;
+  }
+
+  useEffect(() => {
+    if (pending) return;
+    if (review) reviewRef.current?.focus();
+    else if (focusAfterRelease.current) {
+      focusAfterRelease.current = false;
+      if (report) resultRef.current?.focus();
+      else reviewTriggerRef.current?.focus();
+    }
+  }, [pending, review, report]);
+
+  const eligible = review?.filter((item) => item.reasonCode === null) ?? [];
+  const blocked = review?.filter((item) => item.reasonCode !== null) ?? [];
+  const visibleItems = filterReleaseItems(review ?? [], filters);
+  if (!lockedCount && !review && !report && !error) return null;
+  return <div className="flex w-full flex-col items-start gap-3 text-sm">
+    <button ref={reviewTriggerRef} type="button" disabled={pending} onClick={() => void requestReview()} className="button-secondary text-sm">
+      {pending ? "Checking release…" : report ? "Review remaining outcomes" : `Review ${lockedCount} locked outcome${lockedCount === 1 ? "" : "s"}`}
+    </button>
+    <OperationNotice kind="error">{error}</OperationNotice>
+    {review && <section ref={reviewRef} tabIndex={-1} aria-label="Confirm release cohort" className="w-full border border-mecg-navy/15 p-4 sm:p-5">
+      <h3 className="text-base font-semibold">Review outcomes before release</h3>
+      <p className="mt-2 leading-6">{review.length} locked outcomes: {eligible.length} eligible, {blocked.length} blocked. Only the eligible outcomes below will be released. Applicant-visible release cannot be undone.</p>
+      <p className="my-3 leading-6 text-mecg-navy/70">Each row identifies the applicant code and outcome. The server checks this cohort again before releasing; queued emails are tracked separately in the delivery log.</p>
+      <dl className="my-4 flex flex-wrap gap-x-6 gap-y-2" aria-label="Full cohort outcomes">
+        {DECISION_OUTCOMES.map((outcome) => <div key={outcome}><dt className="text-mecg-navy/65">{decisionOutcomeLabel(outcome)}</dt><dd className="font-semibold tabular-nums">{review.filter((item) => item.outcome === outcome).length}</dd></div>)}
+      </dl>
+      <div className="my-4 grid gap-3 sm:grid-cols-3">
+        <label className="text-sm font-medium">Applicant code<input type="search" value={filters.query} maxLength={100} disabled={pending} onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy" /></label>
+        <div><label htmlFor={`${filterId}-eligibility`} className="text-sm font-medium">Release eligibility</label><select id={`${filterId}-eligibility`} value={filters.eligibility} disabled={pending} onChange={(event) => { const eligibility = event.target.value; if (eligibility === "ALL" || eligibility === "ELIGIBLE" || eligibility === "BLOCKED") setFilters((current) => ({ ...current, eligibility })); }} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All eligibility</option><option value="ELIGIBLE">Eligible</option><option value="BLOCKED">Blocked</option></select></div>
+        <div><label htmlFor={`${filterId}-outcome`} className="text-sm font-medium">Outcome</label><select id={`${filterId}-outcome`} value={filters.outcome} disabled={pending} onChange={(event) => { const outcome = event.target.value; if (outcome === "ALL" || outcome === "OFFER" || outcome === "WAITLIST" || outcome === "REJECT" || outcome === "PROCEDURAL_REVIEW") setFilters((current) => ({ ...current, outcome })); }} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All outcomes</option>{DECISION_OUTCOMES.map((outcome) => <option key={outcome} value={outcome}>{decisionOutcomeLabel(outcome)}</option>)}</select></div>
+      </div>
+      <p role="status" className="leading-6">Showing {visibleItems.length} of {review.length} reviewed outcomes. Filters change this view only; release includes all {eligible.length} eligible outcomes in the full reviewed cohort.</p>
+      <div className="my-4 flex flex-wrap gap-3">
+        <button type="button" disabled={pending || !eligible.length} onClick={() => void releaseReviewed()} className="button-primary text-sm">{pending ? "Releasing…" : `Release ${eligible.length} eligible outcome${eligible.length === 1 ? "" : "s"}`}</button>
+        <button type="button" disabled={pending} onClick={() => { setReview(null); window.requestAnimationFrame(() => reviewTriggerRef.current?.focus()); }} className="button-secondary text-sm">Cancel</button>
+      </div>
+      <div tabIndex={0} role="region" aria-label="Filtered reviewed outcomes" className="max-h-[28rem] overflow-y-auto overscroll-contain focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy">{visibleItems.length ? itemList(visibleItems) : <p className="py-4">No outcomes match these filters. The full reviewed cohort is unchanged.</p>}</div>
+    </section>}
+    {report && <section ref={resultRef} tabIndex={-1} aria-label="Batch release result" className="w-full border border-mecg-navy/15 p-4 sm:p-5">
+      <p role="status" className="font-semibold">{report.released} released · {report.skipped} skipped</p>
+      <p className="mt-2 leading-6 text-mecg-navy/70">Released outcomes are visible to applicants. Their emails are queued; delivery is not yet confirmed. <Link href={withWorkspaceCycle("/admin/messages", cycleId)} className="inline-flex min-h-11 items-center underline underline-offset-2">Open delivery log</Link></p>
+      {report.skipped > 0 && <><h3 className="mt-3 font-semibold">Resolve skipped outcomes, then review remaining outcomes to retry</h3>{itemList(report.items.filter((item) => item.reasonCode !== null))}</>}
+    </section>}
+  </div>;
 }
 
 // An offer with no deadline leaves the cohort open indefinitely. The RPC
 // enforces expiry in respond_to_offer, so this only has to collect the date.
 export function OfferDeadlineForm({ applicationId, current }: { applicationId: string; current: string | null }) {
+  return <OfferDeadlineEditor key={applicationId} applicationId={applicationId} current={current} />;
+}
+
+function OfferDeadlineEditor({ applicationId, current }: { applicationId: string; current: string | null }) {
   const router = useRouter();
+  const fieldId = useId();
+  const busy = useRef(false);
+  const resultRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState("");
+  const [edited, setEdited] = useState(false);
+  const [uncertain, setUncertain] = useState(false);
+  const [proposed, setProposed] = useState<string | null>(null);
+  const [value, setValue] = useState(() => current ? formatDetroitDateTime(current) : "");
 
-  async function save(form: HTMLFormElement) {
-    const value = String(new FormData(form).get("expiresAt") ?? "");
+  async function save(value: string) {
+    if (busy.current || uncertain) return;
+    let expiresAt: string | null;
+    try { expiresAt = value ? detroitDateTimeToIso(value, current ?? undefined) : null; }
+    catch (conversionError) {
+      setError(conversionError instanceof Error ? conversionError.message : "Enter a valid Detroit date and time.");
+      setSuccess("");
+      requestAnimationFrame(() => resultRef.current?.focus());
+      return;
+    }
+    busy.current = true;
+    setValue(value);
+    setProposed(expiresAt);
     setPending(true);
     setError("");
     setSuccess("");
     try {
-      const expiresAt = value ? detroitDateTimeToIso(value, current ?? undefined) : "";
-      const response = await authorizedFetch("/api/admin/decisions", {
+      const { response, body } = await fetchJsonWithTimeout("/api/admin/decisions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => null);
-        setError(body?.error ?? "Could not set the deadline");
+        body: JSON.stringify({ action: "SET_DEADLINE", applicationId, expiresAt: expiresAt ?? "" }),
+      }, 15_000, authorizedFetch);
+      if (!response.ok && response.status < 500 && response.status !== 408) {
+        setError(body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "Could not set the deadline. Your proposed date is unchanged.");
         return;
       }
-      setSuccess(value ? "Deadline saved." : "Deadline cleared.");
+      if (!response.ok || !body || typeof body !== "object" || Array.isArray(body)
+        || !("kind" in body) || body.kind !== "deadline-set"
+        || !("applicationId" in body) || body.applicationId !== applicationId
+        || !("expiresAt" in body) || body.expiresAt !== expiresAt) {
+        setUncertain(true);
+        return;
+      }
+      setSuccess(expiresAt ? `Deadline saved: ${formatEasternDateTime(expiresAt)}.` : "Deadline cleared. This offer has no deadline.");
+      setEdited(false);
       router.refresh();
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Could not set the deadline");
-    } finally {
+    } catch { setUncertain(true); }
+    finally {
+      busy.current = false;
       setPending(false);
+      requestAnimationFrame(() => resultRef.current?.focus());
     }
   }
 
@@ -193,7 +342,7 @@ export function OfferDeadlineForm({ applicationId, current }: { applicationId: s
       className="flex flex-col items-start gap-2"
       onSubmit={(event) => {
         event.preventDefault();
-        void save(event.currentTarget);
+        void save(String(new FormData(event.currentTarget).get("expiresAt") ?? ""));
       }}
     >
       <label className="text-xs font-semibold text-mecg-navy/60">
@@ -201,15 +350,28 @@ export function OfferDeadlineForm({ applicationId, current }: { applicationId: s
         <input
           type="datetime-local"
           name="expiresAt"
-          defaultValue={current ? formatDetroitDateTime(current) : ""}
-          className="mt-1.5 block min-h-10 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+          disabled={pending || uncertain}
+          value={value}
+          aria-describedby={`${fieldId}-result`}
+          onChange={(event) => { setValue(event.target.value); setSuccess(""); setError(""); setEdited(true); }}
+          className="mt-1.5 block min-h-11 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
         />
       </label>
-      <button type="submit" disabled={pending} className="button-secondary text-xs">
-        {pending ? "Saving…" : "Save deadline"}
-      </button>
-      <OperationNotice kind="error">{error}</OperationNotice>
-      <OperationNotice kind="success">{success}</OperationNotice>
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={pending || uncertain} className="button-secondary text-xs">
+          {pending ? "Saving…" : "Save deadline"}
+        </button>
+        <button type="button" disabled={pending || uncertain} onClick={() => void save("")} className="button-secondary text-xs">Clear deadline</button>
+      </div>
+      <div id={`${fieldId}-result`} ref={resultRef} tabIndex={-1} aria-label="Offer deadline save result">
+        <OperationNotice kind="error">{error}</OperationNotice>
+        <OperationNotice kind="success">{success}</OperationNotice>
+        {edited && !pending && !uncertain && !success && <p role="status" className="text-sm text-mecg-navy/65">Changes not saved.</p>}
+        {uncertain && <>
+          <OperationNotice kind="info">The deadline save could not be confirmed. It may already be applied. Proposed value: {proposed ? formatEasternDateTime(proposed) : "no deadline"}. Keep a copy of this value, then reload the current offer to check its saved deadline before another change.</OperationNotice>
+          <button type="button" className="button-secondary mt-2" onClick={() => window.location.reload()}>Reload current offer deadline</button>
+        </>}
+      </div>
     </form>
   );
 }

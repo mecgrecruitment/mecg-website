@@ -1,0 +1,64 @@
+{
+  "seatId": "panel-v2-021",
+  "lens": "Accessible interaction; first encounter (simulated expertise, not a human or Apple employee)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition now states student-led, no-fee, semester-long consulting before the inquiry action. The supplied mobile capture coherently presents that offer and truthfully marks case studies pending approval. I traced the actual Home \u2192 Contact inquiry journey through native fields, shared trimmed validation, linked errors, post-unlock invalid-field focus, pending edit protection and bounded uncertain-delivery recovery. Focused synthetic keyboard tests support those improvements. The earlier deck shortcut collision is addressed by interactive-ancestor/event guards and explicit native result controls; the 35-check motion log supports tab-local motion-off, OS precedence and immediate reduced-motion application. Sign-out preserves navigation and restores retry focus; rubric validation now identifies name/key/weight errors. These are meaningful repairs, but the remaining consequential failure-feedback and save-recovery gaps prevent world-class agreement. Hosted and assistive-technology acceptance also remain absent. Hold is a recommendation to resolve and verify these interaction paths, not a claim of an observed production incident.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (especially original seats 021\u2013030)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "captures/public-home-mobile-390.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/contact-validation.ts",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/lib/client-fetch.ts",
+    "src/app/globals.css",
+    "src/app/apply/application-form.tsx (materials/privacy disclosure)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "tests/e2e/rubric-validation.spec.ts",
+    "tests/e2e/sign-out-recovery.spec.ts",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact/sign-out entries)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (rubric entries)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,473",
+      "evidence": "Failed result application sets error and clears phase. The only error rendering is an ordinary footer paragraph at line 473; it has no alert/live semantics, focus transfer or association with the result button. The separate polite phase status at lines 331\u2013333 reports applying/success but becomes empty on failure. deck-accessibility.spec.ts intercepts successful application and never asserts failed-result announcement.",
+      "userImpact": "A screen-reader operator can hear the pending result but receive no announced reason it failed; discovering the footer message requires manual exploration. This is a source-derived gap, not an observed AT failure.",
+      "suggestedFix": "Expose result/pointer failures through a persistent live error region or deliberate focused error summary, associate recovery guidance with the action, and verify a rejected application using keyboard and assistive technology."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rounds/rubric-editor.tsx:60-84,107,210",
+      "evidence": "save() sets pending then awaits authorizedFetch without a signal or deadline; non-OK response.json is also unbounded. authorizedFetch in src/lib/client-fetch.ts delegates to fetch and only handles session refresh. Pending disables the whole fieldset and save action until finally. The supplied rubric test releases its deferred request with 409; it does not cover a nonsettling request/body.",
+      "userImpact": "A stalled save can leave an operator indefinitely unable to edit or retry, with unsaved scoring-guide changes held only on the page and no uncertainty/recovery guidance.",
+      "suggestedFix": "Bound the full request/body operation, preserve criteria, announce unknown save outcome and restore controls; reconcile the authoritative rubric before retrying an uncertain write. Add focused stalled-request/body recovery coverage."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend integration, real authenticated prepare/apply/recover/status/operator journey, or provider session termination was observed.",
+    "No screen-reader session, human task-success observation, physical iPhone/macOS Safari evidence or formal accessibility conformance proof; supplied browser checks use synthetic local fixtures.",
+    "No supplied deck/rubric final capture; their visual states and exact touch dimensions remain source-derived. Several deck secondary controls lack the documented 44px minimum, but I did not measure rendered geometry.",
+    "Approved engagement artifacts, current Board-confirmed workload, and Board policy/retention/remediation decisions remain missing. Original resume access is accurately disclosed in materials/review copy; that is not anonymization or policy approval."
+  ]
+}

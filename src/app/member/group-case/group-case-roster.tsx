@@ -5,11 +5,13 @@ import Link from "next/link";
 import OperationNotice from "@/components/operation-notice";
 import Headshot from "@/components/applicant-headshot";
 import { formatStars } from "@/app/admin/speed-dating-results";
-import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
+import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 import type { GroupCaseApplicant, GroupCaseRoster, GroupCaseScores } from "@/lib/group-case-roster";
-import { GROUP_CASE_GREEN_FLAGS, GROUP_CASE_RED_FLAGS, GROUP_CASE_SCORE_BANDS, groupCaseAnchors, groupCaseTotal } from "@/lib/rubrics";
+import { GROUP_CASE_GREEN_FLAGS, GROUP_CASE_RED_FLAGS, groupCaseAnchors } from "@/lib/rubrics";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
-import type { GroupCaseRatingResult } from "@/app/api/member/group-case/ratings/route";
+import { groupCaseQualityMessage } from "@/lib/group-case-roster";
+
+import { parseGroupCaseWriteResult, type GroupCaseWriteRequest, type GroupCaseWriteSnapshot } from "@/lib/group-case-write";
 
 const SCORES = [1, 2, 3, 4, 5];
 const NOTE_DEBOUNCE_MS = 800;
@@ -19,7 +21,7 @@ const FLAGS = [
   ...GROUP_CASE_GREEN_FLAGS.map((text) => ({ text, prefix: "Green flag", className: "bg-emerald-50 text-emerald-800" })),
 ];
 
-type RowStatus = { kind: "saving" | "saved" | "error" | "hint"; message?: string };
+type RowStatus = { kind: "saving" | "saved" } | { kind: "error" | "hint" | "unknown" | "conflict"; message: string };
 
 function Star({ filled }: { filled: boolean }) {
   return (
@@ -44,28 +46,33 @@ function chipLabel(text: string) {
   return trimmed.length > 40 ? `${trimmed.slice(0, 40)}…` : trimmed;
 }
 
-export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster }) {
+export default function GroupCaseRoster({ initial, readOnlyReason }: { initial: GroupCaseRoster; readOnlyReason?: string }) {
   const tableKey = `mecg:group-case-table:${initial.roundId}`;
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Record<string, GroupCaseApplicant>>(() =>
     Object.fromEntries(initial.groups.flatMap((group) => group.applicants).map((applicant) => [applicant.applicationId, applicant])));
   const [status, setStatus] = useState<Record<string, RowStatus>>({});
+  const rowsRef = useRef(rows);
+  const pendingWrites = useRef<Record<string, GroupCaseWriteRequest>>({});
+  const conflictsRef = useRef<Record<string, GroupCaseWriteSnapshot>>({});
+  const [conflicts, setConflicts] = useState<Record<string, GroupCaseWriteSnapshot>>({});
+  const [copyStatus, setCopyStatus] = useState<Record<string, string>>({});
   const [openId, setOpenId] = useState<string | null>(null);
   const [table, setTable] = useState<string | null>(null);
   const [failedHeadshots, setFailedHeadshots] = useState<Set<string>>(() => new Set());
+  const conflictFocus = useRef<string | null>(null);
+  const choiceFocus = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  // Last server-confirmed values, so a failed save can put the scores back without losing typed text.
+  // Last server-confirmed evidence; unconfirmed edits stay available for retry.
   const saved = useRef<Record<string, GroupCaseApplicant>>({ ...rows });
   const timers = useRef<Record<string, number>>({});
-  const sequence = useRef<Record<string, number>>({});
-  // Every save carries all six scores, so two taps in flight at once could
-  // land at Postgres in the wrong order and the earlier one would erase the
-  // later star. One request per applicant at a time; a save that is already
-  // superseded when its turn comes is skipped, the newer one carries everything.
+  // Drain the latest whole-row intent behind one active request per applicant.
+  // A queued edit never retries an uncertain write; only explicit retry may do so.
+  // Database revisions also guard against competing tabs and devices.
   const inflight = useRef<Record<string, Promise<void>>>({});
 
-  const readOnly = initial.roundStatus !== "ACTIVE" || initial.criteria.length === 0;
+  const readOnly = Boolean(readOnlyReason) || initial.roundStatus !== "ACTIVE" || initial.criteria.length === 0;
   const everyone = useMemo(() => initial.groups.flatMap((group) => group.applicants), [initial.groups]);
   const showGroupHeadings = !(initial.groups.length === 1 && initial.groups[0].groupId === null);
   const tables = useMemo(() => initial.groups.filter((group) => group.groupId !== null), [initial.groups]);
@@ -111,6 +118,29 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
     return () => window.clearTimeout(timer);
   }, [tables, showTables, tableKey]);
 
+  useEffect(() => {
+    const applicationId = conflictFocus.current;
+    const heading = applicationId ? document.getElementById(`group-case-conflict-${applicationId}`) : null;
+    if (heading) { heading.focus(); conflictFocus.current = null; }
+    const selected = choiceFocus.current;
+    if (selected) {
+      document.getElementById(`group-case-toggle-${selected}`)?.focus();
+      choiceFocus.current = null;
+    }
+  }, [conflicts]);
+
+  useEffect(() => {
+    function protectObservations(event: BeforeUnloadEvent) {
+      const dirty = Object.entries(rowsRef.current).some(([id, row]) => signature(row) !== signature(saved.current[id]));
+      if (dirty || Object.keys(pendingWrites.current).length || Object.keys(conflictsRef.current).length) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    }
+    window.addEventListener("beforeunload", protectObservations);
+    return () => window.removeEventListener("beforeunload", protectObservations);
+  });
+
   function pickTable(groupId: string | null) {
     setTable(groupId);
     try { window.localStorage.setItem(tableKey, groupId ?? ALL_TABLES); } catch {}
@@ -125,7 +155,8 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
   }
 
   function patchRow(applicationId: string, patch: Partial<GroupCaseApplicant>) {
-    setRows((current) => ({ ...current, [applicationId]: { ...current[applicationId], ...patch } }));
+    rowsRef.current = { ...rowsRef.current, [applicationId]: { ...rowsRef.current[applicationId], ...patch } };
+    setRows(rowsRef.current);
   }
 
   function setRowStatus(applicationId: string, next: RowStatus | null) {
@@ -141,41 +172,100 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
     return Object.fromEntries(initial.criteria.map((criterion) => [criterion.id, scores[criterion.id] ?? null]));
   }
 
-  async function save(applicationId: string, scores: GroupCaseScores, note: string) {
+  function signature(row: { scores: GroupCaseScores; note: string }) {
+    return JSON.stringify({ scores: fullScores(row.scores), note: row.note });
+  }
+  const observationsUnconfirmed = Object.values(status).some((rowStatus) =>
+    rowStatus.kind === "saving" || rowStatus.kind === "unknown" || rowStatus.kind === "conflict" || rowStatus.kind === "error"
+    || (rowStatus.kind === "hint" && rowStatus.message === "Unsaved changes"));
+  function checkRubricNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (observationsUnconfirmed && !window.confirm("Some observations are not yet confirmed. Leaving may lose changes held only on this page. Choose Cancel to wait for confirmation or download your observations first.")) event.preventDefault();
+  }
+  const unknownMessage = "Save could not be confirmed. It may already be saved. Newer observations remain on this page. Retry confirms the earlier request before sending newer changes.";
+  async function save(applicationId: string, retry = false) {
+    const active = inflight.current[applicationId];
+    if (active) {
+      await active;
+      return save(applicationId);
+    }
+    if (readOnly) return;
+    if (conflictsRef.current[applicationId]) return;
+    const previous = pendingWrites.current[applicationId];
+    if (previous && !retry) { setRowStatus(applicationId, { kind: "unknown", message: unknownMessage }); return; }
+    const latest = rowsRef.current[applicationId];
+    if (!previous && signature(latest) === signature(saved.current[applicationId])) {
+      setRowStatus(applicationId, latest.savedAt ? { kind: "saved" } : { kind: "hint", message: "No evidence saved yet" });
+      return;
+    }
+    const request = previous ?? { roundId: initial.roundId, applicationId, scores: fullScores(latest.scores), note: latest.note, expectedRevision: saved.current[applicationId].revision, mutationId: crypto.randomUUID() };
+    pendingWrites.current[applicationId] = request;
     let finish = () => {};
-    const ticket = (sequence.current[applicationId] ?? 0) + 1;
-    sequence.current[applicationId] = ticket;
+    inflight.current[applicationId] = new Promise<void>((resolve) => { finish = resolve; });
     setRowStatus(applicationId, { kind: "saving" });
-    await inflight.current[applicationId];
-    if (sequence.current[applicationId] !== ticket) return;
-    const done = new Promise<void>((resolve) => { finish = resolve; });
-    inflight.current[applicationId] = done;
     try {
-      // Ratings upsert per grader and applicant, so resending after a dropped
-      // connection is safe. stillWanted drops a retry once a newer tap for the
-      // same applicant has taken over, so an old score cannot land last.
-      const response = await retryOnNetworkError(() => authorizedFetch("/api/member/group-case/ratings", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ roundId: initial.roundId, applicationId, scores: fullScores(scores), note }),
-      }), { stillWanted: () => sequence.current[applicationId] === ticket });
-      const body: Partial<GroupCaseRatingResult> & { error?: string } | null = await response.json().catch(() => null);
-      if (!response.ok || typeof body?.savedAt !== "string") throw new Error(body?.error ?? "Could not save this rating");
-      if (sequence.current[applicationId] !== ticket) return;
-      const confirmed = { ...saved.current[applicationId], scores: body.scores ?? scores, note, savedAt: body.savedAt };
-      saved.current[applicationId] = confirmed;
-      patchRow(applicationId, { scores: confirmed.scores, savedAt: confirmed.savedAt });
-      setRowStatus(applicationId, { kind: "saved" });
-    } catch (saveError) {
-      if (sequence.current[applicationId] !== ticket) return;
-      patchRow(applicationId, { scores: saved.current[applicationId].scores });
-      const message = saveError instanceof Error && !(saveError instanceof TypeError)
-        ? saveError.message
-        : "No connection. Check wifi and tap the star again.";
-      setRowStatus(applicationId, { kind: "error", message });
+      const { response, body } = await fetchJsonWithTimeout("/api/member/group-case/ratings", {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(request),
+      }, 15_000, authorizedFetch);
+      const result = parseGroupCaseWriteResult(body);
+      if (response.status === 409 && result?.kind === "conflict" && result.snapshot.applicationId === applicationId) {
+        delete pendingWrites.current[applicationId];
+        conflictsRef.current[applicationId] = result.snapshot;
+        conflictFocus.current = applicationId;
+        setQuery("");
+        setTable(null);
+        setOpenId(applicationId);
+        setConflicts({ ...conflictsRef.current });
+        setRowStatus(applicationId, { kind: "conflict", message: "Saved observations changed elsewhere. Compare both copies before continuing." });
+        return;
+      }
+      if (!response.ok && response.status < 500 && response.status !== 408) {
+        delete pendingWrites.current[applicationId];
+        const message = body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "These observations were refused. Check the round and your access before retrying.";
+        setRowStatus(applicationId, { kind: "error", message });
+        return;
+      }
+      if (!response.ok || result?.kind !== "saved" || result.applicationId !== applicationId || result.mutationId !== request.mutationId) throw new Error("Unconfirmed save");
+      saved.current[applicationId] = { ...saved.current[applicationId], ...result };
+      delete pendingWrites.current[applicationId];
+      if (signature(rowsRef.current[applicationId]) !== signature(request)) {
+        cancelTimer(applicationId);
+        void save(applicationId);
+      } else {
+        cancelTimer(applicationId);
+        patchRow(applicationId, { scores: result.scores, note: result.note, savedAt: result.savedAt, quality: result.quality, revision: result.revision });
+        setRowStatus(applicationId, { kind: "saved" });
+      }
+    } catch {
+      setRowStatus(applicationId, { kind: "unknown", message: unknownMessage });
     } finally {
+      delete inflight.current[applicationId];
       finish();
     }
+  }
+
+  function chooseCopy(applicationId: string, source: "local" | "server") {
+    const snapshot = conflictsRef.current[applicationId];
+    if (!snapshot || (source === "local" && readOnly)) return;
+    choiceFocus.current = applicationId;
+    cancelTimer(applicationId);
+    saved.current[applicationId] = { ...saved.current[applicationId], ...snapshot };
+    delete pendingWrites.current[applicationId]; delete conflictsRef.current[applicationId];
+    setConflicts({ ...conflictsRef.current });
+    if (source === "server") {
+      patchRow(applicationId, snapshot);
+      setRowStatus(applicationId, snapshot.savedAt ? { kind: "saved" } : { kind: "hint", message: "Server copy selected; no evidence saved yet." });
+    } else { void save(applicationId); }
+  }
+
+  function downloadCopy(applicationId: string) {
+    try {
+      const data = { roundId: initial.roundId, applicationId, exportedAt: new Date().toISOString(), local: rowsRef.current[applicationId], lastConfirmed: saved.current[applicationId], conflictingServer: conflictsRef.current[applicationId] ?? null, unconfirmedRequest: pendingWrites.current[applicationId] ?? null };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      const link = document.createElement("a"); link.href = url; link.download = "mecg-private-group-case-observations.json"; document.body.append(link); link.click(); link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setCopyStatus((current) => ({ ...current, [applicationId]: "Private copy prepared. Check your download before leaving this page." }));
+    } catch { setCopyStatus((current) => ({ ...current, [applicationId]: "Download could not start. Keep this page open and copy the observations you need." })); }
   }
 
   function cancelTimer(applicationId: string) {
@@ -185,42 +275,42 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
 
   function rate(applicationId: string, criterionId: string, score: number) {
     cancelTimer(applicationId);
-    const row = rows[applicationId];
+    const row = rowsRef.current[applicationId];
     // Tapping the selected star again clears it: the criterion was not observed.
     const scores = { ...row.scores, [criterionId]: row.scores[criterionId] === score ? null : score };
     patchRow(applicationId, { scores });
-    void save(applicationId, scores, row.note);
+    void save(applicationId);
   }
 
   function editNote(applicationId: string, note: string) {
     patchRow(applicationId, { note });
     cancelTimer(applicationId);
-    const scores = rows[applicationId].scores;
-    if (countScored(scores) === 0) { setRowStatus(applicationId, { kind: "hint", message: "Pick a star to save" }); return; }
+    const scores = rowsRef.current[applicationId].scores;
+    setRowStatus(applicationId, pendingWrites.current[applicationId] && status[applicationId]?.kind === "unknown" ? { kind: "unknown", message: unknownMessage } : { kind: "hint", message: "Unsaved changes" });
+    if (countScored(scores) === 0 && !note.trim() && !saved.current[applicationId].savedAt) return;
     timers.current[applicationId] = window.setTimeout(() => {
       delete timers.current[applicationId];
-      void save(applicationId, scores, note);
+      void save(applicationId);
     }, NOTE_DEBOUNCE_MS);
   }
 
   function flushNote(applicationId: string) {
     if (!timers.current[applicationId]) return;
     cancelTimer(applicationId);
-    const row = rows[applicationId];
-    if (countScored(row.scores) > 0) void save(applicationId, row.scores, row.note);
+    const row = rowsRef.current[applicationId];
+    if (countScored(row.scores) > 0 || row.note.trim() || saved.current[applicationId].savedAt) void save(applicationId);
   }
 
   function addFlag(applicationId: string, prefix: string, text: string) {
-    const note = rows[applicationId].note;
+    const note = rowsRef.current[applicationId].note;
     const separator = note.length > 0 && !note.endsWith("\n") ? "\n" : "";
     editNote(applicationId, `${note}${separator}${prefix}: ${text}`);
     requestAnimationFrame(() => grow(document.getElementById(`group-case-note-${applicationId}`) as HTMLTextAreaElement | null));
   }
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">{initial.roundName}</p>
-      <p className="mt-3 text-sm font-semibold text-mecg-navy/65" aria-live="polite">Graded {scored} of {total}</p>
+    <section className="grading-workspace group-case-workspace min-w-0 rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
+      <div className="grading-workspace-heading"><h2>Observe your case team</h2><p aria-live="polite">Started grading {scored} of {total}</p></div>
       {showTables && (
         <div className="scroll-cue -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 sm:-mx-7 sm:px-7" role="group" aria-label="Table">
           {[{ groupId: null, groupName: "All tables", count: everyone.length }, ...tables.map((group) => ({ groupId: group.groupId, groupName: group.groupName, count: group.applicants.length }))].map((chip) => {
@@ -252,13 +342,13 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
           placeholder="Search a name"
           aria-label="Search applicants"
           autoComplete="off"
-          className="min-h-12 w-full rounded-xl border border-mecg-navy/15 bg-white py-3 pl-12 pr-4 text-base text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
+          className="workspace-search min-h-12 w-full rounded-xl border border-mecg-navy/15 bg-white py-3 pl-12 pr-4 text-base text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
         />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-xs leading-5 text-mecg-navy/60">
-          Score 1 to 5 on each dimension. Collaboration and Composure count twice.{" "}
-          <Link href={`/member/calibration/${initial.roundId}?return=/member/group-case`} className="font-semibold text-mecg-blue underline">Read the rubric</Link>
+          Score only behavior you observed, from 1 to 5. Leave unobserved dimensions blank. Notes can be saved without scores.{" "}
+          <Link onClick={checkRubricNavigation} href={`/member/calibration/${initial.roundId}?return=/member/group-case`} className="font-semibold text-mecg-blue underline">Read the rubric</Link>
         </p>
         <button type="button" onClick={() => dialogRef.current?.showModal()} className="button-secondary shrink-0 text-sm">Rubric</button>
       </div>
@@ -270,16 +360,21 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
       >
         <div className="max-h-[85vh] overflow-y-auto p-5">
           <h3 id="group-case-rubric-title" className="text-lg font-semibold">Group Case rubric</h3>
-          <table className="mt-3 w-full text-sm">
-            <tbody>
-              {GROUP_CASE_SCORE_BANDS.map((band) => (
-                <tr key={band.min} className="border-t border-mecg-navy/10">
-                  <td className="py-1.5 pr-3 font-semibold tabular-nums">{band.min} to {band.max}</td>
-                  <td className="py-1.5">{band.label}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <p className="mt-2 text-sm leading-6 text-mecg-navy/65">Rate the behavior you observed. Use the anchors below for each dimension; a rating does not determine the admission decision.</p>
+          <div className="mt-3 divide-y divide-mecg-navy/10">
+            {initial.criteria.map((criterion) => (
+              <details key={criterion.id} className="py-2">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">{criterion.name}</summary>
+                <ol className="space-y-2 pb-2">
+                  {Object.entries(groupCaseAnchors(criterion.name)).map(([score, anchor]) => (
+                    <li key={score} className="flex gap-3 text-sm leading-6 text-mecg-navy/65">
+                      <span className="tabular shrink-0 font-semibold text-mecg-navy">{score}</span><span>{anchor}</span>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            ))}
+          </div>
           <h4 className="mt-4 text-sm font-semibold text-red-800">Red flags</h4>
           <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-mecg-navy/75">
             {GROUP_CASE_RED_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
@@ -293,7 +388,7 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
       </dialog>
 
       {initial.roundStatus === "PUBLISHED" && <div className="mt-4"><OperationNotice kind="info">Grading opens when the board starts the round.</OperationNotice></div>}
-      {initial.roundStatus === "FROZEN" && <div className="mt-4"><OperationNotice kind="info">This round is frozen. Ratings can no longer be changed.</OperationNotice></div>}
+      {readOnlyReason ? <div className="mt-4"><OperationNotice kind="info">{readOnlyReason}</OperationNotice></div> : initial.roundStatus === "FROZEN" && <div className="mt-4"><OperationNotice kind="info">This round is frozen. Ratings can no longer be changed.</OperationNotice></div>}
       {initial.criteria.length === 0 && <div className="mt-4"><OperationNotice kind="error">The Board must configure the Group Case rubric before grading can begin.</OperationNotice></div>}
 
       {visibleGroups.length === 0 && (
@@ -310,13 +405,15 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
               const row = rows[applicationId];
               const rowStatus = status[applicationId];
               const scoredCount = countScored(row.scores);
-              const result = groupCaseTotal(row.scores, initial.criteria);
+              const savedLabel = row.quality ? `Evidence saved · review ${row.quality.valid ? "qualifies" : "incomplete"}` : "Evidence saved · quality unavailable";
               const expanded = openId === applicationId;
+              const rowReadOnly = readOnly || Boolean(conflicts[applicationId]);
               const bodyId = `group-case-${applicationId}`;
               return (
                 <li key={applicationId} className={`-mx-2 rounded-xl px-2 py-3 ${scoredCount > 0 ? "bg-mecg-navy/[0.03]" : ""}`}>
                   <button
                     type="button"
+                    id={`group-case-toggle-${applicationId}`}
                     aria-expanded={expanded}
                     aria-controls={bodyId}
                     onClick={() => toggleOpen(applicationId)}
@@ -325,12 +422,12 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                     <Headshot applicant={row} failed={failedHeadshots.has(applicationId)} onFail={() => markHeadshotFailed(applicationId)} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-mecg-navy">{row.name}</span>
-                      <span className="mt-0.5 block min-h-4 text-xs text-mecg-navy/55" aria-live="polite">
+                      <span className="group-case-save-status mt-0.5 block min-h-4 text-xs text-mecg-navy/55" aria-live="polite">
                         {rowStatus?.kind === "saving" && "Saving…"}
-                        {rowStatus?.kind === "saved" && "Saved"}
+                        {rowStatus?.kind === "saved" && savedLabel}
                         {rowStatus?.kind === "hint" && rowStatus.message}
-                        {rowStatus?.kind === "error" && <span className="font-semibold text-red-700">{rowStatus.message}</span>}
-                        {!rowStatus && row.savedAt && "Saved"}
+                        {(rowStatus?.kind === "error" || rowStatus?.kind === "unknown" || rowStatus?.kind === "conflict") && <span className="font-semibold text-red-700">{rowStatus.message}</span>}
+                        {!rowStatus && row.savedAt && savedLabel}
                       </span>
                     </span>
                     {row.speedDating && (
@@ -341,21 +438,15 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                         {formatStars(row.speedDating.adjusted)}
                       </span>
                     )}
-                    {result ? (
-                      <span className="min-w-0 max-w-[8.5rem] shrink-0 text-right">
-                        <span className="block text-sm font-bold tabular-nums text-mecg-navy">{result.total} / 40</span>
-                        <span className="block truncate text-xs text-mecg-navy/55" title={result.band}>{result.band}</span>
-                      </span>
-                    ) : (
-                      <span className="shrink-0 text-xs font-semibold text-mecg-navy/55">{scoredCount} of {initial.criteria.length}</span>
-                    )}
+                    <span className="shrink-0 text-xs text-mecg-navy/65">{scoredCount} of {initial.criteria.length} rated</span>
+                    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={`shrink-0 text-mecg-navy/65 ${expanded ? "rotate-180" : ""}`}><path d="m5 8 5 5 5-5" /></svg>
                   </button>
                   {expanded && (
                     <div id={bodyId} className="mt-3 pl-[3.75rem]">
                       {/* top = WorkspaceNav's top-3 (12px) + its 56px shell. */}
-                      <div className="sticky top-[4.25rem] z-10 -mx-2 flex items-center justify-between gap-3 bg-white/95 px-2 py-2 backdrop-blur">
+                      <div className="sticky top-0 z-10 -mx-2 flex items-center justify-between gap-3 bg-white/95 px-2 py-2 backdrop-blur">
                         <span className="text-sm font-semibold text-mecg-navy">{row.name}</span>
-                        <span className="text-xs text-mecg-navy/60">{result ? `${result.total} / 40 · ${result.band}` : `${scoredCount} of ${initial.criteria.length} scored`}</span>
+                        <span className="text-xs text-mecg-navy/60">{`${scoredCount} of ${initial.criteria.length} dimensions rated`}</span>
                       </div>
                       <div className="divide-y divide-mecg-navy/[0.06]">
                         {initial.criteria.map((criterion) => {
@@ -376,7 +467,7 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                                   <button
                                     key={score}
                                     type="button"
-                                    disabled={readOnly}
+                                    disabled={rowReadOnly}
                                     aria-pressed={current === score}
                                     aria-label={`${score}, ${groupCaseAnchors(criterion.name)[score]}`}
                                     onClick={() => rate(applicationId, criterion.id, score)}
@@ -389,20 +480,19 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                               {current !== null && (
                                 <p className="mt-0.5 text-xs leading-5 text-mecg-navy/60">
                                   {groupCaseAnchors(criterion.name)[current]}
-                                  <button type="button" disabled={readOnly} onClick={() => rate(applicationId, criterion.id, current)} className="ml-2 text-xs font-semibold text-mecg-blue underline disabled:opacity-60">Clear</button>
+                                  <button type="button" disabled={rowReadOnly} onClick={() => rate(applicationId, criterion.id, current)} className="ml-2 text-xs font-semibold text-mecg-blue underline disabled:opacity-60">Clear</button>
                                 </p>
                               )}
                             </div>
                           );
                         })}
                       </div>
-                      {result && <p className="mt-3 text-sm text-mecg-navy">Your score: <strong>{result.total} / 40</strong> · {result.band}</p>}
                       <textarea
                         id={`group-case-note-${applicationId}`}
                         rows={1}
                         value={row.note}
                         maxLength={4000}
-                        disabled={readOnly}
+                        disabled={rowReadOnly}
                         placeholder="Note (optional)"
                         aria-label={`Note for ${row.name}`}
                         ref={grow}
@@ -411,6 +501,30 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                         onBlur={() => flushNote(applicationId)}
                         className="mt-3 min-h-11 w-full resize-none rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 text-sm text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
                       />
+                      <p className="my-2 text-sm leading-6 text-mecg-navy/65" aria-live="polite">
+                        {rowStatus?.kind === "saving" || rowStatus?.kind === "hint" || rowStatus?.kind === "error" || rowStatus?.kind === "unknown" || rowStatus?.kind === "conflict"
+                          ? "Changes are unconfirmed. Review quality will update after a confirmed save."
+                          : row.savedAt ? groupCaseQualityMessage(row.quality) : "No evidence saved yet. Save only behavior you observed; unobserved dimensions can stay blank."}
+                      </p>
+                      {(rowStatus?.kind === "error" || rowStatus?.kind === "hint" || rowStatus?.kind === "unknown" || rowStatus?.kind === "conflict") && (
+                        <div className="mt-2 text-sm text-mecg-navy/65">
+                          <p className="font-semibold">{rowStatus.message}</p>
+                          <p>These changes are only in this open page until a save is confirmed. Copy your note before leaving.</p>
+                          <p className="mt-2">A private copy contains scores and notes. Download it before reloading or choosing a different copy.</p>
+                          <button type="button" onClick={() => downloadCopy(applicationId)} className="button-secondary mt-2 mr-2 min-h-11 text-sm">Download observations</button>
+                          <p role="status" className="mt-2">{copyStatus[applicationId]}</p>
+                          {conflicts[applicationId] && <section role="alert" className="mt-3 border-y border-mecg-navy/15 py-3">
+                            <h4 id={`group-case-conflict-${applicationId}`} tabIndex={-1} className="font-semibold">Choose which observations to keep</h4>
+                            <div className="mt-3 grid min-w-0 gap-4 sm:grid-cols-2">{(["local", "server"] as const).map((source) => {
+                              const copy = source === "local" ? row : conflicts[applicationId];
+                              return <div key={source} className="min-w-0"><h5 className="font-semibold">{source === "local" ? "This page" : "Current server copy"}</h5><ul className="mt-2 space-y-1">{initial.criteria.map((criterion) => <li key={criterion.id}>{criterion.name}: {copy.scores[criterion.id] ?? "Not observed"}</li>)}</ul><p className="mt-2 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{copy.note || "No note"}</p></div>;
+                            })}</div>
+                            <div className="mt-3 flex flex-wrap gap-3"><button type="button" disabled={readOnly} onClick={() => chooseCopy(applicationId, "local")} className="button-primary">Keep this page’s observations</button><button type="button" onClick={() => chooseCopy(applicationId, "server")} className="button-secondary">Use current server copy</button></div>
+                          </section>}
+
+                          <button type="button" disabled={rowReadOnly || (rowStatus.kind !== "unknown" && scoredCount === 0 && !row.note.trim() && !row.savedAt)} onClick={() => { cancelTimer(applicationId); void save(applicationId, true); }} className="button-secondary mt-2 min-h-11 text-sm">Retry save</button>
+                        </div>
+                      )}
                       <details className="mt-2">
                         <summary className="cursor-pointer text-xs font-semibold text-mecg-navy/60">Add a flag</summary>
                         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -418,7 +532,7 @@ export default function GroupCaseRoster({ initial }: { initial: GroupCaseRoster 
                             <button
                               key={flag.text}
                               type="button"
-                              disabled={readOnly}
+                              disabled={rowReadOnly}
                               title={flag.text}
                               onClick={() => addFlag(applicationId, flag.prefix, flag.text)}
                               className={`min-h-10 rounded-full px-2.5 py-1 text-xs font-semibold disabled:opacity-60 ${flag.className}`}

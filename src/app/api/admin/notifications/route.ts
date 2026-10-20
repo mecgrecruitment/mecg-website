@@ -40,12 +40,28 @@ export async function POST(request: NextRequest) {
   }
   try {
     const result = await deliverNotification(createAdminClient(), notificationId);
-    return NextResponse.json(result);
+    return NextResponse.json({ notificationId, ...result });
   } catch (error) {
     console.error("manual notification retry failed", {
       notificationId,
       category: error instanceof Error ? error.message : "unknown",
     });
-    return NextResponse.json({ attempted: false, delivered: false, status: "PENDING" }, { status: 202 });
+    return NextResponse.json({ notificationId, status: "UNCONFIRMED" }, { status: 202 });
   }
+}
+
+// Read only: checking an uncertain retry must never enqueue or send another email.
+export async function GET(request: NextRequest) {
+  const user = await currentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const notificationId = request.nextUrl.searchParams.get("notificationId");
+  if (!notificationId) return NextResponse.json({ error: "Notification is required" }, { status: 400 });
+  const supabase = await createClient();
+  const { data: notification, error } = await supabase.from("notification_outbox")
+    .select("id,cycle_id,status").eq("id", notificationId).maybeSingle();
+  if (error) return NextResponse.json({ error: "Notification status is unavailable" }, { status: 503 });
+  if (!notification?.cycle_id || !hasPermission(user.memberships, notification.cycle_id, "MANAGE_CYCLE")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return NextResponse.json({ notificationId: notification.id, status: notification.status }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { screeningRpc } from "@/lib/screening-rpc";
+import { isEvaluationDraftRevision, parseEvaluationDraftWriteResult } from "@/lib/evaluation-draft-write";
 
 const MAX_RATINGS = 50;
 const MAX_NOTE_LENGTH = 2000;
@@ -33,16 +35,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ ass
   const body = parsedBody.data as Record<string, unknown>;
   const ratings = parseRatings(body.ratings);
   if (!ratings) return NextResponse.json({ error: "Every criterion needs a score from 1 to 5, or an explicit skip" }, { status: 400 });
+  if (!(body.expectedDraftRevision === null || isEvaluationDraftRevision(body.expectedDraftRevision))) return NextResponse.json({ error: "Confirm your saved draft before submitting." }, { status: 400 });
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("submit_evaluation", {
+  const { data, error } = await screeningRpc<unknown>(supabase, "submit_evaluation_v2", {
     target_assignment_id: assignmentId,
     submitted_ratings: ratings,
-    submitted_evidence: typeof body.evidence === "string" ? body.evidence : undefined,
+    submitted_evidence: typeof body.evidence === "string" ? body.evidence : "",
+    expected_draft_revision: body.expectedDraftRevision,
   });
   if (error) {
-    console.error("submit_evaluation failed", error);
+    console.error("submit_evaluation_v2 failed", { code: error.code ?? "unknown" });
     const { body, status } = mapRpcError(error);
     return NextResponse.json(body, { status });
   }
-  return NextResponse.json({ id: data?.[0]?.evaluation_id, score: data?.[0]?.score }, { status: 201 });
+  const conflict = parseEvaluationDraftWriteResult(data);
+  if (conflict?.kind === "conflict" && conflict.snapshot.assignmentId === assignmentId) return NextResponse.json(conflict, { status: 409 });
+  if (!data || typeof data !== "object" || !("kind" in data) || data.kind !== "submitted" || !("assignmentId" in data) || data.assignmentId !== assignmentId || !("evaluationId" in data) || typeof data.evaluationId !== "string" || !data.evaluationId.trim() || !("score" in data) || typeof data.score !== "number" || !Number.isFinite(data.score)) return NextResponse.json({ error: "Submission could not be confirmed. Check My work before retrying." }, { status: 503 });
+  return NextResponse.json({ assignmentId, id: data.evaluationId, score: data.score }, { status: 201 });
 }

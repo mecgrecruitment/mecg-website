@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-v2-072",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The revision makes meaningful improvements for an evaluator: observation-only notes persist without invented ratings; saved partial evidence is explicitly distinguished from a qualifying review using canonical minimum, required-criterion and weighted-coverage blockers. My work now routes editable Group Case observations back to their workspace instead of calling them locked submissions. The general evaluation form preserves divergent drafts, reports actual backup status and focuses the review summary before final locking. However, Group Case still has an unbounded save path that can strand an evaluator without confirmation or usable retry. That is a material weakness in the focal task. The supplied 320px public capture shows a coherent Precision Instrument hierarchy, clear no-fee/semester proposition, restrained disclosure and honest pending proof. It cannot substitute for inspectable consulting artifacts, current membership workload facts or reliable authenticated task completion. Considering the unchanged broad question, these functional and evidential limitations prevent world-class agreement. This is an independent simulated AI assessment from frozen source, supplied captures and recorded local evidence, not an observed human session.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/content/projects.public.ts",
+    "captures/public-home-mobile-320.png",
+    "captures/PROVENANCE.json",
+    "src/app/member/page.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/applicant/page.tsx (confirmation/privacy disclosure)",
+    "src/app/apply/test-harness/group-case/page.tsx",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql (authorization, note-only guard and quality fields)",
+    "supabase/tests/group_case_reviewer_quality.sql (fixture and canonical blocker assertions)",
+    "docs/reviews/2026-10-redesign/group-case-evaluator-followup.md",
+    "docs/reviews/2026-10-redesign/member-work-continuity.md",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final result)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save awaits retryOnNetworkError(authorizedFetch(...)) at lines 157-161 and response.json() at 162 without a signal or full-operation deadline. Later saves await the same per-applicant inflight promise at 149. src/lib/client-fetch.ts:authorizedFetch supplies no timeout; retryOnNetworkError retries only thrown errors. The Retry save/copy guidance is rendered only for error or hint states, whereas a stalled save remains saving. Existing group-case-evidence.spec.ts tests rejected/malformed receipts, not nonsettling requests or response bodies.",
+      "userImpact": "A stalled mobile connection can leave observations indefinitely at Saving and block later saves for that applicant. The reviewer cannot verify persistence or reach the explicit retry state, and reloading risks losing unconfirmed observations.",
+      "suggestedFix": "Bound the complete Group Case request and body read, release its serialized queue on timeout, retain the latest payload and expose an honest unconfirmed outcome with retry/copy guidance. Add focused nonsettling-request and stalled-body checks, including a newer edit while the earlier save is pending."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated reviewer journey or final evaluator mobile capture was supplied; narrow private layout, real task success and assistive-technology use remain unobserved.",
+    "Recorded 55/55 synthetic Group Case/continuity browser checks and 753 isolated SQL assertions establish their stated local scopes, not Clerk session expiry, hosted Supabase/RLS integration or deployed migration behavior.",
+    "Actual approved engagement artifacts, current Board-confirmed membership workload, hosted upload/email/provisioning/release recovery and Board policy decisions remain unavailable. Original identifying resume access is accurately disclosed; it is not anonymous resume review.",
+    "Physical iPhone/macOS Safari, screen-reader sessions and complete authenticated keyboard application/operator journeys remain unverified. No tests or external mutations were performed by this seat."
+  ]
+}

@@ -1,0 +1,121 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [
+      "No action in the first 390×844 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        40,
+        18,
+        17,
+        16,
+        15,
+        14,
+        12
+      ],
+      "body": 15.4,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 8,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        46.08,
+        18,
+        17,
+        16,
+        15,
+        14,
+        12
+      ],
+      "body": 15.4,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 7,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [
+      "No action in the first 1280×900 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        76,
+        18,
+        17,
+        16,
+        15,
+        14,
+        12
+      ],
+      "body": 15.4,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 7,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [
+      "No action in the first 1440×900 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        76,
+        18,
+        17,
+        16,
+        15,
+        14,
+        12
+      ],
+      "body": 15.4,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 7,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 24
+    }
+  }
+]

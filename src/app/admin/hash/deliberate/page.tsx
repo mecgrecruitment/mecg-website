@@ -1,3 +1,5 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { roundEvidence } from "@/lib/round-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -5,8 +7,8 @@ import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { combineRoundScores } from "@/lib/evaluation.js";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { applicantCode } from "@/lib/applicant-code";
 import { canonicalMajor } from "@/lib/major";
 import { screeningRpc } from "@/lib/screening-rpc";
@@ -21,7 +23,7 @@ export const metadata: Metadata = { title: "Discussion" };
 
 export default async function DeliberationPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const cycleId = await selectWorkspaceCycle(user.memberships, ["HASH_PANEL_ACCESS", "MANAGE_CYCLE"]);
   if (!cycleId) redirect("/member");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const canManageCycle = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
@@ -33,8 +35,8 @@ export default async function DeliberationPage() {
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status,hash_stage,hash_quorum,hash_presenting_application_id").eq("id", cycleId).single(),
-    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
-    supabase.from("applications").select("id,status,pnms!inner(id,name,major,class_year),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
+    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,minimum_observed_criteria,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
+    supabase.from("applications").select("id,status,pnms!inner(id,name,major,class_year),evaluation_assignments(id,round_id,evaluator_id,evaluations(id,status,rubric_id,version,voided_at,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
     supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),
   ]);
@@ -47,7 +49,7 @@ export default async function DeliberationPage() {
       <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6 sm:p-10">
         <h1 className="text-3xl font-semibold tracking-[-0.03em]">Discussion</h1>
         <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">Discussion mode opens when the board opens a stage vote or moves the cycle into voting and decisions.</p>
-        <Link href="/admin/hash" className="button-secondary self-start text-sm">Back to Hash</Link>
+        <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="button-secondary self-start text-sm">Back to Hash</Link>
       </main>
     );
   }
@@ -101,16 +103,8 @@ export default async function DeliberationPage() {
     // The weighted final score only means something for the final vote; a stage
     // hash shows the raw round results instead.
     const byRound = stage === "FINAL" ? rounds.map((round) => {
-      const criteria = round.rubric?.rubric_criteria ?? [];
-      const scored: ReturnType<typeof scoreEvaluation>[] = [];
-      for (const assignment of application.evaluation_assignments) {
-        if (assignment.round_id !== round.id) continue;
-        for (const evaluation of assignment.evaluations) {
-          if (!["SUBMITTED", "LOCKED"].includes(evaluation.status)) continue;
-          scored.push(scoreEvaluation(criteria, evaluation.criterion_ratings.map((rating) => ({ criterionId: rating.criterion_id, score: rating.score }))));
-        }
-      }
-      return { round, aggregate: aggregateRound(scored) };
+      const { aggregate } = roundEvidence({ roundId: round.id, rubric: round.rubric, assignments: application.evaluation_assignments });
+      return { round, aggregate };
     }) : [];
     const group = impressionGroups.get(application.id);
     const decision = decisionByApplication.get(application.id);

@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-083",
+  "lens": "Recruitment operator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The frozen revision has a coherent Precision Instrument presentation, a clear no-fee, one-semester proposition and honest pending-project boundaries. I traced the actual Home-to-Contact source journey: inquiry guidance, field validation, pending edit protection, receipt validation and uncertainty preserve a useful path. Operator changes address the relevant original objections: canonical validity is distinct from submitted forms, cohort selection uses a native control, release filters retain the full reviewed snapshot, advancement/release cancellation restores focus, and blocked evidence now identifies rounds and distinguishes closed-round owner remediation. The supplied desktop public and synthetic mobile diagnostics captures show restrained hierarchy and readable recovery information. Focused tests and their logs support these local behaviors, but do not demonstrate complete authenticated keyboard task success. One completion-focus gap remains in grading closure. With missing integrated provider acceptance, approved work examples, membership workload facts and Board remediation authority, I cannot give unqualified world-class agreement. Hold consequential release acceptance until the focus gap and relevant operational verification are addressed; this is a simulated AI source/evidence review, not observed human usability.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/app/admin/pipeline-board.tsx (review/focus sections)",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/round-board.tsx (coverage and attention sections)",
+    "src/app/admin/group-case-coverage.ts",
+    "src/components/workspace-cycle-switcher.tsx",
+    "src/lib/decision-release.ts",
+    "src/app/admin/applications/[id]/release-evidence/page.tsx",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts",
+    "tests/e2e/operator-review.spec.ts",
+    "docs/reviews/2026-10-redesign/operator-review-and-scale.md",
+    "docs/reviews/2026-10-redesign/release-evidence-diagnostics.md",
+    "docs/reviews/2026-10-redesign/evidence/operator-review-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-browser.log (final results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/round-status-control.tsx:55-65,151-154,187-188",
+      "evidence": "The dialog cleanup always invokes trigger.focus() (63). Once reconcileClose establishes closed state, both the status select and trigger are disabled (151,154). Dismiss removes the dialog, leaving no enabled return target. operator-close.spec.ts:98-108 verifies the lost-acknowledgement closed state and disabled trigger after Dismiss, but never asserts completion focus. This is source-derived, not a reproduced live account failure.",
+      "userImpact": "A keyboard operator loses a stable focus destination after completing or reconciling an irreversible grading close, impairing continuation to results and blocked-release recovery.",
+      "suggestedFix": "On closed completion, focus a persistent programmatically focusable status/result heading or an enabled round-results link after dialog removal; retain trigger restoration for cancellation. Add a keyboard confirmation/reconciliation-to-Dismiss test asserting that destination and subsequent Tab continuation."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/session, Supabase JWT/RLS/RPC, upload/storage, email or consequential operator recovery acceptance; source and synthetic interception do not establish integration.",
+    "No complete authenticated keyboard prepare/apply/recover/status/operator journey, human task observation, screen-reader session, physical iPhone or macOS Safari evidence.",
+    "Approved engagement artifacts/results and current Board-confirmed weekly/mandatory/peak commitments remain absent.",
+    "Board approval for identifying original-resume review, retention operations and closed-round remediation remains outstanding. Diagnostics do not authorize reopening or guarantee recovery.",
+    "Private operator visual craft beyond the supplied synthetic diagnostics capture was inspected through source/tests, not live authenticated screens."
+  ]
+}

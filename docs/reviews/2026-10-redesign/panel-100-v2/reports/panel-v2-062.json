@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-v2-062",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "As a simulated AI applicant reviewer focused on narrow mobile screens, I see a coherent Precision Instrument identity and substantial recovery improvements. The 320px public capture presents the no-fee, semester-long proposition clearly and keeps the process instrument optional. Join explains eligibility, evaluated versus unscored events, preparation and unavailable recruitment truthfully. The synthetic mobile recovery capture and actual component show readable stacked copies, changed-field choices, private backup and an explicit combination action. Submission now validates a receipt or reconciles owned-cycle status, preserves uncertain answers, and distinguishes draft saving from submission. The authoritative received banner also correctly discloses identifying original-resume access. These address the relevant prior objections. However, the independently reachable dashboard still describes editable drafts as submitted/in review and can say no action is needed. That directly compromises the assigned task of distinguishing saved from submitted work, so I cannot agree with the broad world-class claim and recommend holding consequential release until this is corrected. Missing workload facts, approved engagement evidence and hosted integrated acceptance further limit confidence; local browser and SQL evidence does not establish actual applicant or operator success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/lib/auth-destination.ts",
+    "src/app/apply/application-form.tsx:440-830",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx:1-420",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts:1-45",
+    "supabase/migrations/20260830100000_harden_applicant_workflow.sql:388-403",
+    "supabase/migrations/20260901000000_allow_reapplication.sql:25-45",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final result)",
+    "captures/public-home-mobile-320.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:23-30,43-49,263-284,366-371",
+      "evidence": "applicant_dashboard returns caller-owned DRAFT/NEEDS_INFO rows without filtering (20260830100000_harden_applicant_workflow.sql:389-401). Dashboard explicitly allows destination /apply at lines 158-160, and /apply links returning applicants to /applicant. pipelineStage falls back to index 0, labeled Submitted; applicationHeadline and the application card call any unreleased nonwithdrawn row moving through review. can_start_application returns false once that cycle has any application (20260901000000_allow_reapplication.sql:32-41). With no schedule items, the next-action fallback therefore says You’re caught up rather than linking to the editable draft.",
+      "userImpact": "A returning applicant viewing history can mistake an unsubmitted saved draft for an application already in review and stop before submitting; NEEDS_INFO likewise lacks a clear resubmission action on this surface. This is source-derived, not an observed hosted incident.",
+      "suggestedFix": "Render explicit Draft—not submitted and Changes requested states before review states, suppress the Submitted step for drafts, and offer Continue application/Review and resubmit linked to /apply when editable. Add real-dashboard SSR fixtures for DRAFT and NEEDS_INFO with prior-cycle history and an empty schedule."
+    }
+  ],
+  "notVerified": [
+    "No real authenticated end-to-end application, upload, recovery, receipt/status or consequential operator journey was observed. Supplied application capture and browser checks use synthetic intercepted APIs.",
+    "No hosted Clerk session/expiry, Supabase RPC/RLS/storage, Resend delivery or coordinated migration rollout acceptance; no staging exists.",
+    "No physical iPhone/macOS Safari, screen-reader session, full authenticated keyboard journey or observed human comprehension/task success.",
+    "No Board-confirmed weekly hours, mandatory times or peak commitments; no approved actual engagement artifacts. Resume/blind-review, retention and closed-round remediation authority remain unresolved.",
+    "Grading/operator workflows were considered through product contracts and evidence limits, not directly exercised; private visual assessment was limited to the supplied application recovery capture."
+  ]
+}

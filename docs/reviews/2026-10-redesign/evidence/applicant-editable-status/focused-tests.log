@@ -1,0 +1,59 @@
+(node:1811860) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/application-status-page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ actual applicant dashboard distinguishes saved drafts and requested changes throughout hero and history
+  ✔ DRAFT hero and current history retain the required application task with empty or booked schedules (13.803647ms)
+  ✔ DRAFT closed, failed and mismatched-cycle access never promises editing or invents a deadline (3.979674ms)
+  ✔ DRAFT earlier history stays truthful beside a genuinely submitted current application (1.477941ms)
+  ✔ NEEDS_INFO hero and current history retain the required application task with empty or booked schedules (5.944695ms)
+  ✔ NEEDS_INFO closed, failed and mismatched-cycle access never promises editing or invents a deadline (3.564316ms)
+  ✔ NEEDS_INFO earlier history stays truthful beside a genuinely submitted current application (1.060199ms)
+  ✔ an earlier closed draft does not block an authoritative opportunity to start a new cycle (0.70891ms)
+  ✔ received confirmation remains tied to a real submission and retains identifying-resume disclosure (2.016366ms)
+✔ actual applicant dashboard distinguishes saved drafts and requested changes throughout hero and history (170.703045ms)
+(node:1811861) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ editing access binds owned application identity to the active intake cycle and editable status (0.759243ms)
+✔ closed intake and unknown lookup are distinct and never invent a deadline (0.120653ms)
+✔ draft and requested changes produce plain pre-review states, while released outcomes retain authority (0.753422ms)
+(node:1811861) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/application-status.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1811862) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1811862) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1811862) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:1811862) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+▶ dashboard next action and schedule recover from an isolated schedule RPC failure
+  ✔ failure preserves the application and shows real retry/contact controls without empty claims (6.090124ms)
+  ✔ an offer keeps priority while schedule failure remains recoverable (0.993136ms)
+  ✔ an unavailable offer deadline never implies an open window even with stale future or expired data (1.432337ms)
+  ✔ malformed deadline entries are unknown while contractual missing keys mean no deadline (4.61635ms)
+  ✔ submission banner requires the owned application and authoritative submitted state (2.589776ms)
+  ✔ a subsequent successful lookup restores genuine empty-state copy (0.754965ms)
+✔ dashboard next action and schedule recover from an isolated schedule RPC failure (157.925995ms)
+(node:1811862) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/next-action-page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1811868) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ failed schedule lookup requires recovery rather than reassuring the applicant (0.559464ms)
+✔ only a successfully loaded empty schedule gives caught-up reassurance (0.144196ms)
+✔ the earliest future booking wins over open times, ignoring past bookings (0.586263ms)
+✔ legacy single-chat bookings still produce the next confirmed action (0.08623ms)
+✔ available event and chat times are counted while full events are excluded (0.690957ms)
+(node:1811868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/next-action.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 433.727378

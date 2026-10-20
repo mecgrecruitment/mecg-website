@@ -1,0 +1,36 @@
+{
+  "seatId": "panel-v2-015",
+  "lens": "Editorial and brand craft",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public design is disciplined and distinctive within Precision Instrument: balanced display/prose typography, quiet hairlines, restrained orange actions, numbered sections, a useful drafting-bench interaction and honestly captioned real photography. Desktop and mobile captures preserve a coherent hierarchy. The revised hero answers cost and duration immediately; the narrow-screen disclosure and adjacent organization selector address the relevant earlier navigation/composition objections. I traced Home \u2192 Work terms/partnership exploration \u2192 Contact inquiry in actual source and inspected its synthetic journey and reliability checks. Pending edits are protected, receipts validated and unknown delivery explained. However, the central consulting promise still lacks one inspectable piece of completed consulting work. Partnership breadth and a PwC visit establish different facts from analytical quality. That substantive editorial gap prevents world-class agreement even though the fallback now makes honest claims. Release remains separately unproven because consequential integrated provider workflows have no hosted acceptance. This is an independent simulated AI review, not observed human success or an Apple endorsement.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json identity reference",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; src/app/(marketing)/work/page.tsx; src/app/(marketing)/contact/page.tsx; src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx; src/components/engagement-instrument.tsx; src/components/site-header.tsx; src/components/site-footer.tsx",
+    "src/content/projects.public.ts; src/lib/projects/public-projects.ts; src/lib/site-content.ts:130-182; src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx and src/app/applicant/page.tsx (resume/privacy disclosure excerpts)",
+    "captures/PROVENANCE.json; captures/public-home-desktop-1280.png; captures/public-home-mobile-390.png; captures/public-home-expanded-mobile-320.png",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md; evidence/mobile-hierarchy-browser.log; evidence/integrated-followup-browser.log (contact results excerpts)",
+    "tests/e2e/public-journeys.spec.ts; tests/e2e/contact-reliability.spec.ts"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved fallback is empty. Home correctly renders Past partnerships / Across industries and the pending-client-approval status; organization profiles explicitly withhold scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show that fallback. Home:135-136 correctly captions its real photograph as a PwC member visit. The old misleading specific-questions heading is fixed; the underlying proof gap remains.",
+      "userImpact": "A prospective client can assess terms and affiliations but cannot assess the reasoning, specificity or usefulness of an actual MECG handoff before investing in an inquiry. Visual precision currently exceeds demonstrated consulting substance.",
+      "suggestedFix": "Have the content owners obtain client and Board approval for one bounded engagement: actual decision question, constraints, methods, redacted deliverable excerpt and factual handoff/result with limits. Publish through the existing approval boundary before people/culture content. Preserve the honest pending status until approved; fabricate nothing."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance, deployment, real authenticated application/grading/operator recovery or provider email delivery was observed. Local intercepted requests and supplied logs establish narrower scopes.",
+    "No human comprehension/task-success study, screen-reader session, physical iPhone or macOS Safari evidence. Full sequential keyboard journeys across preparation, authenticated application, recovery and status remain unproven.",
+    "Visual inspection covered supplied homepage captures and expanded bench; other public/private responsive surfaces were not visually observed. The 320px expanded capture neutralizes sticky-header positioning solely for capture.",
+    "Approved engagement artifacts, current Board-confirmed membership workload and Board decisions on original-resume policy, retention and closed-round remediation remain unavailable. Accurate original-resume disclosures do not resolve policy authority."
+  ]
+}

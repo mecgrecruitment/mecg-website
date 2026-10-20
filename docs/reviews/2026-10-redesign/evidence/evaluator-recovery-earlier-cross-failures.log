@@ -1,0 +1,103 @@
+
+Running 24 tests using 2 workers
+
+  ✓   1 [firefox] › tests/e2e/evaluation-backup.spec.ts:5:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (2.1s)
+  ✓   2 [firefox] › tests/e2e/evaluation-backup.spec.ts:5:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (2.1s)
+  ✓   3 [firefox] › tests/e2e/evaluation-backup.spec.ts:29:5 › a confirmed server save is distinguished from unavailable browser storage (1.4s)
+  ✓   4 [firefox] › tests/e2e/evaluation-backup.spec.ts:39:5 › a malformed successful draft receipt never confirms a server backup (1.5s)
+  ✓   5 [firefox] › tests/e2e/evaluation-backup.spec.ts:49:5 › review keyboard focus visits the summary and returns to editing before final locking (789ms)
+  ✓   6 [firefox] › tests/e2e/evaluation-backup.spec.ts:78:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.5s)
+  ✘   7 [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (7.0s)
+  ✘   8 [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing server (6.9s)
+  ✓   9 [webkit] › tests/e2e/evaluation-backup.spec.ts:5:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓  10 [webkit] › tests/e2e/evaluation-backup.spec.ts:5:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓  11 [webkit] › tests/e2e/evaluation-backup.spec.ts:29:5 › a confirmed server save is distinguished from unavailable browser storage (1.3s)
+  ✓  12 [webkit] › tests/e2e/evaluation-backup.spec.ts:39:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓  13 [webkit] › tests/e2e/evaluation-backup.spec.ts:49:5 › review keyboard focus visits the summary and returns to editing before final locking (798ms)
+  ✓  14 [webkit] › tests/e2e/evaluation-backup.spec.ts:78:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.4s)
+  ✓  15 [webkit] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.7s)
+  ✓  16 [webkit] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.9s)
+  ✓  17 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:5:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.4s)
+  ✓  18 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:5:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (1.3s)
+  ✓  19 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:29:5 › a confirmed server save is distinguished from unavailable browser storage (1.3s)
+  ✓  20 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:39:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓  21 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:49:5 › review keyboard focus visits the summary and returns to editing before final locking (783ms)
+  ✓  22 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:78:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.4s)
+  ✓  23 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.4s)
+  ✓  24 [mobile-webkit] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.8s)
+
+
+  1) [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing browser 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByLabel('Overall observable evidence (optional)')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByLabel('Overall observable evidence (optional)') with timeout 5000ms
+      - waiting for getByLabel('Overall observable evidence (optional)')
+        14 × locator resolved to <textarea maxlength="4000" id="evidence-synthetic-evaluation" aria-describedby="evidence-count-synthetic-evaluation" class="min-h-24 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"></textarea>
+           - unexpected value "enabled"
+
+
+      118 |     await expect(page.getByText("Newer browser evidence B, not yet synced.", { exact: true })).toBeVisible();
+      119 |     await expect(page.getByText("Older server evidence A.", { exact: true })).toBeVisible();
+    > 120 |     await expect(evidence).toBeDisabled();
+          |                            ^
+      121 |     expect(await page.evaluate(() => sessionStorage.getItem("mecg:evaluation-draft:v1:synthetic-evaluation"))).toContain("Newer browser evidence B");
+      122 |     const writesBeforeChoice = writes.length;
+      123 |     allowSave = true;
+        at /work/tests/e2e/evaluation-backup.spec.ts:120:28
+
+    Error Context: .audit/evaluation-recovery-cross/evaluation-backup-a-newer--3f2f9-copy-until-choosing-browser-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/evaluation-recovery-cross/evaluation-backup-a-newer--3f2f9-copy-until-choosing-browser-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/evaluation-recovery-cross/evaluation-backup-a-newer--3f2f9-copy-until-choosing-browser-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing server 
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator:  getByRole('heading', { name: 'Choose which evaluation draft to keep' })
+    Expected: focused
+    Received: inactive
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeFocused" getByRole('heading', { name: 'Choose which evaluation draft to keep' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Choose which evaluation draft to keep' })
+        13 × locator resolved to <h2 tabindex="-1" class="text-lg font-semibold" id="conflict-synthetic-evaluation">Choose which evaluation draft to keep</h2>
+           - unexpected value "inactive"
+
+
+      115 |     await page.reload();
+      116 |     const conflict = page.getByRole("heading", { name: "Choose which evaluation draft to keep" });
+    > 117 |     await expect(conflict).toBeFocused();
+          |                            ^
+      118 |     await expect(page.getByText("Newer browser evidence B, not yet synced.", { exact: true })).toBeVisible();
+      119 |     await expect(page.getByText("Older server evidence A.", { exact: true })).toBeVisible();
+      120 |     await expect(evidence).toBeDisabled();
+        at /work/tests/e2e/evaluation-backup.spec.ts:117:28
+
+    Error Context: .audit/evaluation-recovery-cross/evaluation-backup-a-newer--05fa8--copy-until-choosing-server-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/evaluation-recovery-cross/evaluation-backup-a-newer--05fa8--copy-until-choosing-server-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/evaluation-recovery-cross/evaluation-backup-a-newer--05fa8--copy-until-choosing-server-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing browser 
+    [firefox] › tests/e2e/evaluation-backup.spec.ts:98:7 › a newer browser evaluation is preserved against an older server copy until choosing server 
+  22 passed (25.3s)

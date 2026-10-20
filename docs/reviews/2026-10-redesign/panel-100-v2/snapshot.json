@@ -1,0 +1,26 @@
+{
+  "roundId": "mecg-panel-v2",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "snapshotPath": "/tmp/mecg-panel-20261016-v2",
+  "frozenAt": "2026-10-16T21:52:25.968127+00:00",
+  "fileCount": 981,
+  "captureCount": 7,
+  "rootAuthorizedFreezeAndVoterLaunch": true,
+  "excluded": [
+    ".git",
+    "node_modules",
+    ".next",
+    ".audit except selected copied captures/lab",
+    "test-results",
+    "tsconfig.tsbuildinfo",
+    "local secret env files (example retained)",
+    "supabase temporary runtime state",
+    "V1 votes/manifest/aggregate/summary",
+    "V2 in-progress reports"
+  ],
+  "metadataNotInContentHash": [
+    "content-manifest.json",
+    "SNAPSHOT.json"
+  ],
+  "reviewContent": "Full source/assets/tests/migrations/docs and actual selected final captures/logs; original objections/responses included; V1 votes excluded as guidance"
+}

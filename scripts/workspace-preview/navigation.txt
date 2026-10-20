@@ -1,0 +1,18 @@
+'use client';
+import { usePathname } from 'next/navigation';
+const roles = [['board', 'Board'], ['member', 'Member'], ['panel', 'Hash panel'], ['applicant', 'Applicant'], ['owner', 'Owner'], ['reviewer', 'Application reviewer']] as const;
+const pages = [
+  ['/admin', 'Recruitment'], ['/admin/screening', 'Application review'], ['/admin/rounds', 'Interviews'], ['/admin/messages', 'Communications'], ['/admin/hash', 'Decisions'], ['/admin/people', 'People'], ['/admin/settings', 'Settings'], ['/admin/applications/preview-app-4', 'Applicant file'], ['/admin/events/preview-event', 'Event attendance'], ['/admin/hash/deliberate', 'Deliberation deck'],
+  ['/member', 'My work'], ['/member/screening', 'Reading queue'], ['/member/screening/preview-reading-0', 'Read an application'], ['/member/speed-dating', 'Speed Dating'], ['/member/group-case', 'Group Case'], ['/member/hash', 'Hash ballot'], ['/member/refer', 'Referrals'],
+  ['/apply/test-harness', 'Application form'], ['/applicant', 'Applicant status'],
+] as const;
+export default function PreviewNavigation() {
+  const pathname = usePathname();
+  return <aside aria-label="Preview controls" className="workspace-preview-toolbar">
+    <div className="workspace-preview-toolbar-inner">
+      <span>Local preview <span className="preview-sample-label">· Sample data · Read only</span></span>
+      <label><span className="sr-only">Preview role</span><select aria-label="Preview role" defaultValue="" onChange={(event) => { if (event.target.value) window.location.assign(`/preview-role?role=${event.target.value}`); }}><option value="" disabled>Switch role…</option>{roles.map(([role, label]) => <option key={role} value={role}>{label}</option>)}</select></label>
+      <details><summary>All screens</summary><nav aria-label="All sample pages">{pages.map(([href, label]) => <a key={href} href={`/preview-role?role=${href.startsWith('/applicant') || href === '/apply/test-harness' ? 'applicant' : href.includes('/screening') && href.startsWith('/member') ? 'reviewer' : href.startsWith('/member') ? 'member' : href.includes('/hash') || href.includes('/people') ? 'owner' : 'board'}&to=${encodeURIComponent(href)}`} aria-current={pathname === href ? 'page' : undefined}>{label}</a>)}</nav></details>
+    </div>
+  </aside>;
+}

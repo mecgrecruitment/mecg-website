@@ -1,0 +1,123 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        40,
+        30,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.8,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 16,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        46.08,
+        36,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.8,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        76,
+        36,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.8,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        76,
+        36,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.8,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 28
+    }
+  }
+]

@@ -100,3 +100,39 @@ export function clearApplicationStepRecovery(storage: StorageLike) {
     // Browser recovery must never block a successful submission.
   }
 }
+
+// UUIDs are opaque revision tokens, never clocks or sequence estimates.
+const UUID_TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function isDraftRevision(value: unknown): value is string {
+  return typeof value === "string" && UUID_TOKEN.test(value);
+}
+export type ApplicationDraftSnapshot = { draft: ApplicationServerDraft; revision: string };
+export function parseApplicationDraftSnapshot(value: unknown): ApplicationDraftSnapshot | null {
+  if (!isRecord(value) || !isDraftRevision(value.revision)) return null;
+  const { revision, ...payload } = value;
+  const draft = parseApplicationServerDraft(payload);
+  return draft ? { draft, revision } : null;
+}
+export type ApplicationDraftSaveRequest = {
+  draft: ApplicationServerDraft;
+  expectedRevision: string | null;
+  mutationId: string;
+  cycleId: string;
+};
+export function parseApplicationDraftSaveRequest(value: unknown): ApplicationDraftSaveRequest | null {
+  if (!isRecord(value) || Object.keys(value).length !== 4) return null;
+  if (!isDraftRevision(value.mutationId) || !(value.expectedRevision === null || isDraftRevision(value.expectedRevision))
+    || typeof value.cycleId !== "string" || !value.cycleId || value.cycleId.length > 240) return null;
+  const draft = parseApplicationServerDraft(value.draft);
+  return draft ? { draft, expectedRevision: value.expectedRevision, mutationId: value.mutationId, cycleId: value.cycleId } : null;
+}
+export type ApplicationDraftSaveResult = { kind: "saved"; revision: string }
+  | { kind: "conflict"; snapshot: ApplicationDraftSnapshot | null };
+export function parseApplicationDraftSaveResult(value: unknown): ApplicationDraftSaveResult | null {
+  if (!isRecord(value)) return null;
+  if (value.kind === "saved" && isDraftRevision(value.revision)) return { kind: "saved", revision: value.revision };
+  if (value.kind !== "conflict") return null;
+  if (value.draft === null) return { kind: "conflict", snapshot: null };
+  const snapshot = parseApplicationDraftSnapshot(value.draft);
+  return snapshot ? { kind: "conflict", snapshot } : null;
+}

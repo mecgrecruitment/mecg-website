@@ -23,7 +23,7 @@ if (![401,403].includes(fixtureAttempt.status)) throw new Error(`Public workflow
 const openApi = await fetchWithTimeout(`${url}/rest/v1/`, { headers: serviceHeaders });
 if (!openApi.ok) throw new Error(`Rush OpenAPI metadata failed: HTTP ${openApi.status}`);
 const paths = Object.keys((await openApi.json()).paths ?? {});
-for (const required of ["/rpc/submit_application","/rpc/submit_evaluation","/rpc/declare_conflict","/rpc/create_decision","/rpc/approve_decision","/rpc/release_decision"]) {
+for (const required of ["/rpc/submit_application_v2","/rpc/save_application_draft_v2","/rpc/submit_evaluation","/rpc/declare_conflict","/rpc/create_decision","/rpc/approve_decision","/rpc/release_decision"]) {
   if (!paths.includes(required)) throw new Error(`Missing RPC from API: ${required}`);
 }
 const migrations = JSON.parse(execFileSync("supabase", ["migration","list","--linked","--output-format","json"], { cwd: root, encoding: "utf8", timeout: 15_000 }));

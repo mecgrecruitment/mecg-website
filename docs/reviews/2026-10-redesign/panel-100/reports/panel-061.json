@@ -1,0 +1,46 @@
+{
+  "seatId": "panel-061",
+  "lens": "Prospective applicant — first encounter (simulated AI user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The sampled applicant flow is thoughtfully structured: eligibility, preparation, evaluation traits and recruitment stages are available before account creation. The public desktop/mobile hero captures show coherent Precision Instrument typography, clear actions and a legible process figure. Source and supplied browser logs support explicit save acknowledgements, a separate final submission action, preserved competing answers, paused writes during conflict selection and recovery from uncertain submission responses. The status source prioritizes bookings/offers and distinguishes schedule failure from having nothing to do. However, the post-submit privacy promise remains misleading, and the successful synthetic journeys do not establish successful account creation, real uploads, submission and status retrieval through hosted services. I cannot give an unqualified world-class agreement from this evidence. Hold for the copy correction and integrated applicant acceptance evidence; this is an AI source/evidence assessment, not observed student success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:285",
+      "evidence": "The Application received banner says written responses will enter “anonymous first-pass review.” MaterialsStep and ReviewStep in src/app/apply/application-form.tsx:731 and :746 explicitly disclose that assigned reviewers can also view the original identifying resume. The release-open-items Blind review entry says anonymous resume review must not be claimed pending policy resolution.",
+      "userImpact": "At the moment of successful submission, a first-time applicant receives an anonymity assurance that obscures the reviewer’s ability to connect responses with their identity. It undermines the more accurate disclosure shown before consent.",
+      "suggestedFix": "Replace “anonymous first-pass review” with the precise packet boundary: profile fields are omitted from the written-response packet, while assigned reviewers can also access the original resume. Add a focused assertion for the actual confirmation copy."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration exists in this package. Real Clerk signup/session expiry, Supabase RPC/RLS, storage uploads and receipt email delivery were not exercised together.",
+    "The application reliability browser tests use /apply/test-harness with intercepted APIs and replace /applicant with synthetic HTML; their redirects do not verify the actual authenticated dashboard after a real submission.",
+    "No supplied applicant-form/recovery/dashboard visual captures were available. Private-screen visual craft and real keyboard/assistive-technology task completion remain unverified; public captures cannot establish them.",
+    "No human applicant study, physical-device test, Safari/Firefox validation or measured task-success evidence exists. The isolated two-session draft race proves that tested race only."
+  ]
+}

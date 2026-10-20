@@ -1,0 +1,70 @@
+{
+  "seatId": "panel-v2-039",
+  "lens": "Information and discoverability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public journey is coherent and visually disciplined: the supplied desktop/mobile captures place no-fee and semester facts beside the main actions, distinguish partnerships from approved work, and keep the mobile process optional. I traced Home to Join preparation/evaluation guidance and Work to the anchored inquiry form in actual source, then checked the corresponding local test assertions. Recruitment outages, absent cycles and empty published events now receive different explanations and usable next steps; the final Node log records these focused checks passing. Metadata supplies complete canonical/social objects, private routes default to noindex, and request-time case pages support publication withdrawal. However, two central information tasks remain incomplete: clients cannot inspect an actual approved engagement, and students cannot assess the current membership workload independently. Honest disclosures substantially improve trust but do not supply those answers. These concrete gaps prevent my unqualified world-class agreement. Hosted release readiness remains unproven; local source and mocked journeys do not demonstrate integrated application, grading or operator success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/join/page.test.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/public-recruitment.ts",
+    "src/lib/public-recruitment.test.ts",
+    "src/lib/join-content.ts",
+    "src/lib/seo.ts",
+    "src/lib/seo.test.ts",
+    "src/app/robots.ts",
+    "src/app/sitemap.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/applicant/page.tsx:290-315",
+    "src/app/apply/application-form.tsx (original-resume disclosures)",
+    "tests/e2e/public-journeys.spec.ts",
+    "scripts/verify-publication.mjs",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (relevant results/totals)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (result)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved fallback is empty; selected organization profiles explicitly withhold engagement scope, methods, deliverables and outcomes. Home renders the matching pending-approval state in the supplied captures. The mobile selector now correctly places these details adjacent.",
+      "userImpact": "Clients can establish organizational familiarity and proposed terms, but cannot evaluate the quality or relevance of MECG contribution before an inquiry.",
+      "suggestedFix": "Obtain client/Board approval for one bounded engagement question, method, redacted handoff artifact and factual limits; publish through the existing approval boundary. Preserve the pending disclosure until then."
+    },
+    {
+      "severity": "medium",
+      "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+      "evidence": "The FAQ now explicitly labels weekly hours, mandatory meeting times and peak commitments unpublished and provides a direct subject-specific Board email. This fixes the misleading omission treatment, while the underlying facts remain unavailable.",
+      "userImpact": "Students still need a separate conversation to establish schedule fit before investing in application preparation.",
+      "suggestedFix": "Have recruitment leadership approve and date a current-cycle workload range, recurring obligations and peak-week caveat, then publish beside preparation and in this FAQ. Do not invent hours."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/email acceptance or actual authenticated prepare/apply/recover/status/operator journey; grading and operator implementations were not independently exercised in this seat.",
+    "No observed human comprehension/task success, assistive-technology session, physical iPhone or macOS Safari validation. Captures are local public fixtures, not field evidence.",
+    "The publication script checks synthetic publish/image/withdraw behavior; I did not rerun it or establish hosted publication permissions/cache behavior.",
+    "Board decisions on identifying original resumes, retention and closed-round remediation remain external. The sampled application and receipt disclosures correctly acknowledge original-resume identity access."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-019",
+  "lens": "Editorial and brand craft",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public composition is coherent and distinctive within Precision Instrument: restrained blue/orange, strong sans headings, mono metadata, hairline divisions and appropriately captioned real photography. Desktop and mobile captures preserve a clear hierarchy. The hero now explains cost and duration immediately. The optional mobile bench brings organization figures forward, and complementary working expectations avoid repeating its four steps. The previous mobile organization-response distance is repaired by an adjacent native selector. I traced the actual Home \u2192 Work \u2192 Contact proposition and inquiry path in source and inspected its focused browser assertions; this is not observed human task success. The inquiry now protects submitted inputs, validates acknowledgement and retains uncertain messages. However, the central promise remains stronger than its inspectable consulting evidence: partnerships establish breadth, while no actual engagement demonstrates analytical craft or a useful handoff. That material information gap prevents my agreement with the unchanged broad world-class claim. Hosted application, grading and operator acceptance is also absent, so I cannot give an unconditional release recommendation.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/policies/recruitment-policy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx (privacy disclosure excerpts)",
+    "src/app/applicant/page.tsx (receipt disclosure excerpt)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (summary)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-expanded-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3\u20135; src/app/(marketing)/home/page.tsx:67\u201397; src/components/client-project-grid.tsx:103\u2013108",
+      "evidence": "The approved release list remains empty. Home correctly labels the fallback Past partnerships and discloses pending case studies; selected organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show organization rows and a PwC visit photograph, with no consulting artifact. The misleading earlier specific-questions heading is fixed; substantive proof remains absent.",
+      "userImpact": "A prospective client can assess service terms and organizational associations but cannot assess the specificity, reasoning or usefulness of comparable MECG work before an inquiry.",
+      "suggestedFix": "Have content owners secure client and Board approval for one bounded engagement containing its actual decision, contribution, method and redacted deliverable or factual handoff with limits. Publish through the existing release boundary and feature it before culture photography. Preserve the truthful pending state until approval."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/Supabase/storage/Resend integration, consequential operator recovery and complete authenticated keyboard journeys; local fixtures do not establish these.",
+    "Observed human comprehension/task completion, assistive-technology use and physical-device Safari behavior.",
+    "Work/Join/Contact/private-screen visual composition beyond available homepage captures and source; the expanded 320px capture includes its disclosed screenshot-only header adjustment.",
+    "Board-approved current workload facts, retention/privacy policy and closed-round remediation; the reviewed application disclosures accurately acknowledge identifying original-resume access."
+  ]
+}

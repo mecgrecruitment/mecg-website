@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-v2-042",
+  "lens": "Product systems and reliability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The narrow-screen presentation is coherent with Precision Instrument: the 320px public capture presents cost, semester length and audience actions clearly, while the process bench is optional. The synthetic mobile recovery capture shows readable stacked alternatives, changed-answer choices and a private backup before discarding work. I traced preparation on Join through application recovery, submission and the stored-state dashboard receipt in source and focused tests; this is inspected implementation, not observed applicant success. The relevant original receipt and close-grading objections are addressed: submission parses an application ID, reconciles the owned cycle on ambiguous responses and retains recovery when unconfirmed; the dashboard independently checks stored submission state and repeats the identifying-resume disclosure. Close grading bounds the complete response, reads authoritative status, blocks repeated uncertain writes and carries an uncertainty marker across same-tab reload. The diagnostics SQL counts distinct valid locked evaluators using current rubrics and excludes declared conflicts; its mobile view distinguishes evidence readiness from release permission. These are substantial, credible local safeguards. They do not establish world-class performance across the broad product: approved engagement proof and workload facts remain missing, and real authenticated completion, provider integration and consequential recovery have no hosted acceptance evidence. I found no additional source-supported recovery defect in this sample. Release readiness remains unproven independently of visual quality. This is a simulated AI assessment, not human or Apple endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory structure)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx (recovery/submission and mobile feedback)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt/privacy excerpts)",
+    "src/lib/application-submission.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/api/apply/status/route.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/round-close-request.ts",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (submission receipt cases)",
+    "tests/e2e/operator-close.spec.ts",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-320.png",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final entries)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-browser.log (final entries)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (scoped search and result summary)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-81",
+      "evidence": "The approved public project list is empty; the homepage correctly substitutes Past partnerships and a pending-client-approval status. The supplied 320px homepage capture shows organization rows rather than an inspectable engagement.",
+      "userImpact": "Clients can assess the offer and affiliations but cannot evaluate an actual question, method or deliverable before investing in an inquiry. Honest fallback copy mitigates confusion without supplying proof.",
+      "suggestedFix": "Have content owners obtain client and MECG approval for one bounded engagement with its question, methods, redacted handoff and limits, then publish through the existing approval boundary. Preserve the pending state until approval."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk session expiry, Supabase RPC/RLS, upload/storage transitions, Resend delivery, provisioning and committed-write recovery in a hosted integrated environment; none is supplied.",
+    "Complete authenticated keyboard applicant and operator journeys, human comprehension/task success, screen-reader use, physical iPhone or macOS Safari behavior.",
+    "Final visual states for the real authenticated close dialog and remaining private screens; supplied private captures are synthetic harnesses.",
+    "Board-approved workload details, original-resume/blind-review resolution, retention operations and closed-round remediation authority.",
+    "No full suites were run, no shared browser was used, and local scenario counts were not treated as one uninterrupted all-pass run."
+  ]
+}

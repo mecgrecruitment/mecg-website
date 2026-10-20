@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-014",
+  "lens": "Editorial and brand craft \u2014 service failure (simulated AI review lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The supplied homepage captures show a coherent Precision Instrument identity: strong sans headlines, restrained mono metadata, legible body copy, hairline structure and purposeful orange actions. Desktop columns become a readable mobile sequence. The real PwC-visit photograph is accurately captioned as member culture, not client delivery. Organization proof precedes people. However, the central client proposition still lacks an inspectable example of MECG work, and the mobile partnership selector puts its response after a long logo list. I traced Work \u2192 Contact, including source-level error handling and the recorded synthetic success test. These support local interface behavior, not delivered inquiries or observed client success. This is an independent AI assessment, not human endorsement; release readiness remains unproven without hosted integration evidence.",
+  "inspected": [
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/globals.css",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx:731-746 (original-resume disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public cases and final count)",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97",
+      "evidence": "The captured Selected work section supplies sector-level prose and a pending-approval status instead of a specific engagement. src/content/projects.public.ts exports an empty list; client-project-grid.tsx:93-102 renders organization descriptions and says scope, methods, deliverables and outcomes await approval. The only homepage photograph is explicitly a PwC member visit (home/page.tsx:135-136).",
+      "userImpact": "A prospective client can assess organization breadth and the proposed process but cannot inspect the quality of the promised research or recommendations. The strongest editorial promise has no corresponding work artifact.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement example: actual question, method, redacted deliverable and honest handoff/limits. Place it before the organization directory; preserve the current disclosure until approval exists."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34-69",
+      "evidence": "Below the sm breakpoint the grid has one column; all 15 PAST_PROJECTS entries render as min-h-36 buttons before selected-client-profile. Selection at line 45 only updates state; the resulting article appears after the entire grid, with no focus or scroll handoff. Fifteen 144px minimum rows imply at least 2160px of selectors before the response. This is a source-derived layout concern, not an observed mobile task failure.",
+      "userImpact": "A mobile visitor selecting an early organization may see only its selected styling, miss the explanatory response far below, and assume the control supplied no useful information.",
+      "suggestedFix": "Render the selected profile adjacent to its trigger on narrow screens, or provide an explicit accessible jump to the updated profile. Verify selecting the first organization at 390px reveals its details without traversing the remaining directory."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, real client inquiry delivery, Clerk/Supabase/storage/email integration or human usability study exists. The client journey test intercepts /api/contact with a synthetic 200 response; the log records its pass in desktop and mobile Chromium.",
+    "Only homepage desktop/mobile captures were supplied for public visual inspection; Work/Contact failure layouts and private workflows were not visually observed. Contact source preserves fields on failed responses and offers email on transport/delivery failure, but those failures were not exercised by me.",
+    "Client publication approvals, project artifacts, current statistics provenance and Board approval of privacy/retention policy were not independently established. Original-resume identifying content is explicitly disclosed, not anonymized.",
+    "Physical devices, Safari/Firefox, alternative system-font rendering, assistive technology and formal accessibility conformance remain unverified."
+  ]
+}

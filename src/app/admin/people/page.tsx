@@ -1,8 +1,10 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -71,7 +73,7 @@ export default async function PeoplePage() {
   // controls below it, so this is one page with two audiences rather than a
   // second near-identical page for the read-only case.
   const user = await requireMember();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "WORKSPACE_ACCESS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "WORKSPACE_ACCESS");
   if (!cycleId) redirect("/member");
   const canManage = hasPermission(user.memberships, cycleId, "MANAGE_MEMBERSHIPS");
   const canOnboard = user.memberships.some((membership) => membership.active && membership.cycleId === cycleId && ["BOARD", "OWNER"].includes(membership.role));
@@ -104,6 +106,8 @@ export default async function PeoplePage() {
         description="Who is on the team this cycle."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/people" />
+
+      {canManage && <Link href={withWorkspaceCycle(`/admin/provisioning?cycleId=${encodeURIComponent(cycleId)}`, cycleId)} className="text-sm font-semibold text-mecg-navy underline underline-offset-4">Review account setup incidents</Link>}
 
       <PeopleWorkspace
         directory={<PeopleDirectory directory={directory} currentUserId={user.id} canManage={canManage} duplicateAccountIds={duplicateAccountIds} />}

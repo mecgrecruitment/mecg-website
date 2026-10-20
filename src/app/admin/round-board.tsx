@@ -1,12 +1,13 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { isInRoundCohort } from "@/lib/round-cohort";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import { initials } from "@/lib/initials";
 import SectionLabel from "@/components/section-label";
-import StatTile from "@/components/stat-tile";
 import StatusPill from "@/components/status-pill";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -15,7 +16,7 @@ import { memberAccountsFor } from "./member-accounts";
 import RubricEditor, { type Criterion, type RoundRubric } from "./rounds/rubric-editor";
 import GroupForms from "./groups/group-forms";
 import { assignmentStatusLabel, cycleStatusLabel, roundStatusLabel } from "@/lib/labels";
-import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState } from "./group-case-coverage";
+import { countsTowardCoverage, groupCaseCoverageRank, groupCaseCoverageState, groupCaseEvidenceState, groupCaseStaffingLabel } from "./group-case-coverage";
 import { screeningRpc } from "@/lib/screening-rpc";
 import SpeedDatingResultsTable, { type SpeedDatingResults } from "./speed-dating-results";
 import GroupCaseResultsTable, { type GroupCaseResults } from "./group-case-results";
@@ -51,14 +52,19 @@ function parseRoundRubric(value: unknown, cycleId: string, round: { id: string; 
 
 export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS")
-    ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS")
-    ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
-  if (!cycleId) redirect("/member");
+  const requestedCycle = await requestedWorkspaceCycleId();
+  if (requestedCycle && !hasPermission(user.memberships, requestedCycle, "WORKSPACE_ACCESS")) notFound();
+  const supabase = await createClient();
+  // Explicit entity links use the row's actual authorized cycle, even when a
+  // different cohort has the default priority or an authorized query is stale.
+  const context = await supabase.from("rounds").select("cycle_id").eq("id", roundId).maybeSingle();
+  if (context.error) throw context.error;
+  const cycleId = context.data?.cycle_id;
+  if (!cycleId || !(["RECRUITMENT_OPERATIONS", "HASH_PANEL_ACCESS", "MANAGE_CYCLE"] as const).some((permission) =>
+    hasPermission(user.memberships, cycleId, permission))) notFound();
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const canManage = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const canExport = hasPermission(user.memberships, cycleId, "EXPORT");
-  const supabase = await createClient();
   const [cycleResult, roundResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status").eq("id", cycleId).single(),
     supabase
@@ -75,7 +81,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
   const round = roundResult.data;
   if (!round) notFound();
   // Application screening has its own stepper page; the coverage board is for interview rounds.
-  if (round.kind === "APPLICATION_SCREEN") redirect("/admin/screening");
+  if (round.kind === "APPLICATION_SCREEN") redirect(withWorkspaceCycle("/admin/screening", cycleId));
   const canManageGroups = round.kind === "GROUP_CASE" && (canOperate || canManage);
   const [applicationsResult, membersResult, groupMembersResult, groupsResult, rubricsResult, speedDatingResultsResult, groupCaseResultsResult] = await Promise.all([
     supabase.from("applications").select("id,status,pnms!inner(name)").eq("cycle_id", cycleId),
@@ -107,11 +113,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
     .sort((a, b) => a.name.localeCompare(b.name));
   // Speed Dating and Group Case coverage describe their enrolled cohorts, not every open application in the cycle.
   const activeApplications = allApplications
-    .filter((application) => round.kind === "SPEED_DATING"
-      ? ["INVITED", "GROUP_CASE", "IN_PROCESS", "FINAL_REVIEW"].includes(application.status)
-      : round.kind === "GROUP_CASE"
-        ? ["GROUP_CASE", "IN_PROCESS", "FINAL_REVIEW"].includes(application.status)
-        : !["DRAFT", "WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status))
+    .filter((application) => isInRoundCohort(round.kind, application.status))
     .map((application) => ({ id: application.id, label: application.name }));
   const accounts = memberAccountsFor(membersResult.data ?? []);
   const memberNameById = new Map(accounts.map((account) => [account.id, account.name]));
@@ -158,14 +160,17 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
     evaluatorLoad.set(assignment.evaluator_id, entry);
   }
   const evaluatorLoadList = Array.from(evaluatorLoad.entries()).sort(([, a], [, b]) => b.open - a.open);
+  const canonicalGroupCaseEvidence = new Map((groupCaseResultsResult.data?.applicants ?? []).map((applicant) => [applicant.applicationId, applicant]));
   const groupCaseCoverageRows = round.kind === "GROUP_CASE"
     ? activeApplications.map((application) => ({
       ...application,
       groupName: groupByApplication.get(application.id) ?? "Unassigned group",
       assignments: (assignmentsByApplication.get(application.id) ?? []).filter((assignment) => countsTowardCoverage(assignment.status)),
       coverage: coverageByApplication.get(application.id) ?? groupCaseCoverageState([]),
+      evidence: groupCaseEvidenceState(canonicalGroupCaseEvidence.get(application.id)),
     })).sort((a, b) =>
-      groupCaseCoverageRank(a.coverage.state) - groupCaseCoverageRank(b.coverage.state)
+      a.evidence.rank - b.evidence.rank
+      || groupCaseCoverageRank(a.coverage.state) - groupCaseCoverageRank(b.coverage.state)
       || a.groupName.localeCompare(b.groupName)
       || a.label.localeCompare(b.label))
     : [];
@@ -197,11 +202,20 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         title={round.name}
         description="Manage this round's readiness, assignments, scoring guide, and results in one place."
         action={canOperate
-          ? <Link href="/admin/rounds" className="button-secondary text-sm">All interviews</Link>
-          : <Link href="/admin" className="button-secondary text-sm">Overview</Link>}
+          ? <Link href={withWorkspaceCycle("/admin/rounds", cycleId)} className="button-secondary text-sm">All interviews</Link>
+          : <Link href={withWorkspaceCycle("/admin", cycleId)} className="button-secondary text-sm">Overview</Link>}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/rounds" />
-      <section className="flex flex-col gap-5">
+      <nav aria-label="Round sections" className="flex flex-wrap gap-2">
+        <a href="#round-overview" className="button-secondary">Overview</a>
+        {canOperate && round.kind === "GROUP_CASE" && <a href="#round-evidence" className="button-secondary">Evidence and staffing</a>}
+        {canOperate && <a href="#round-controls" className="button-secondary">{speedDating ? "Round lifecycle" : "Staffing and lifecycle"}</a>}
+        {canManageGroups && <a href="#round-groups" className="button-secondary">Group placement</a>}
+        {canManage && (groupCaseResults || speedDatingResults) && <a href="#round-results" className="button-secondary">Results</a>}
+        {canOperate && <a href="#round-assignments" className="button-secondary">Assignment records</a>}
+        {canOperate && rubric && <a href="#round-settings" className="button-secondary">Scoring guide</a>}
+      </nav>
+      <section id="round-overview" className="flex flex-col gap-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
           <p className="text-pretty text-sm leading-6 text-mecg-navy/55">
             Round status: {roundStatusLabel(round.status)}.
@@ -215,20 +229,19 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         {canOperate && (
           <>
             <SectionLabel>Round workload</SectionLabel>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+            <dl className="workspace-metrics" aria-label="Round workload">
                 {[
                   [String(activeApplications.length), "applicants"],
                   speedDating
                     ? [`${speedDatingGraded}/${activeApplications.length}`, "graded"]
-                    : [`${coveredApplicants}/${activeApplications.length}`, "covered twice"],
+                    : [`${coveredApplicants}/${activeApplications.length}`, "with 2+ assigned"],
                   speedDating ? [String(speedDatingGraders), "graders"] : [String(openAssignments), "open forms"],
-                  [String(submittedAssignments), "submitted"],
+                  [String(submittedAssignments), "forms submitted"],
                 ].map(([value, label]) => (
-                  <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3.5 sm:py-3">
-                    <StatTile value={value} label={label} tone="dark" />
-                  </div>
+                  <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
                 ))}
-            </div>
+            </dl>
+            <p className="text-sm text-mecg-navy/65">Assigned coverage measures staffing. Submitted forms can contain partial observations; qualifying evidence is checked separately in results.</p>
             {(undercoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && !speedDating && (
               <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {undercoveredApplicants.length > 0 && (
@@ -238,7 +251,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                         {undercoveredApplicants.map((application) => (
                           <Link
                             key={application.id}
-                            href={`/admin/applications/${application.id}`}
+                            href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)}
                             className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
                           >
                             {application.label} · {coverageByApplication.get(application.id)?.assigned ?? 0}/2
@@ -267,16 +280,16 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       </section>
 
       {canOperate && round.kind === "GROUP_CASE" && (
-        <section>
+        <section id="round-evidence">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <SectionLabel>Group Case coverage</SectionLabel>
               <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Who still needs attention</h2>
-              <p className="mt-1 text-sm text-mecg-navy/55">Any member at the table can grade. Applicants nobody has scored yet appear first.</p>
+              <p className="mt-1 text-sm text-mecg-navy/55">Staffing counts assigned forms. Evidence status uses valid independent evaluations where results access is permitted; incomplete and unknown evidence appears first.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
-                {groupCaseCoverageRows.filter((row) => ["UNASSIGNED", "PARTIAL"].includes(row.coverage.state)).length} need coverage
+                {groupCaseCoverageRows.filter((row) => row.evidence.needsAttention).length} need evidence review
               </span>
               {canExport && ["PUBLISHED", "ACTIVE"].includes(round.status) && (
                 <>
@@ -299,26 +312,20 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
             </div>
           </div>
           <div className="mt-4 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-            <div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(16rem,1.4fr)_8rem] gap-3 border-b border-mecg-navy/10 bg-paper px-4 py-3 text-[13px] font-semibold text-mecg-navy/55 md:grid">
+            <div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(12rem,1fr)_minmax(12rem,1fr)] gap-3 border-b border-mecg-navy/10 bg-paper px-4 py-3 text-[13px] font-semibold text-mecg-navy/55 md:grid">
               <span>Applicant</span>
               <span>Group</span>
               <span>Judges</span>
-              <span>Status</span>
+              <span>Evidence and staffing</span>
             </div>
             <div className="divide-y divide-mecg-navy/10">
               {groupCaseCoverageRows.map((row) => {
-                const stateLabel = row.coverage.state === "UNASSIGNED"
-                  ? "No judges"
-                  : row.coverage.state === "PARTIAL"
-                    ? "1 grader"
-                    : row.coverage.state === "SUBMITTED"
-                      ? "Complete"
-                      : `${row.coverage.submitted} submitted`;
+                const stateLabel = row.evidence.label;
                 return (
-                  <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(16rem,1.4fr)_8rem] md:items-center md:py-3">
+                  <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(12rem,1fr)_minmax(12rem,1fr)] md:items-center md:py-3">
                     <div className="flex items-center gap-2.5">
                       <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">{initials(row.label)}</span>
-                      <Link href={`/admin/applications/${row.id}`} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.label}</Link>
+                      <Link href={withWorkspaceCycle(`/admin/applications/${row.id}`, cycleId)} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.label}</Link>
                     </div>
                     <p className="text-xs text-mecg-navy/60"><span className="mr-1 font-semibold md:hidden">Group:</span>{row.groupName}</p>
                     <div className="flex flex-wrap gap-1.5">
@@ -334,7 +341,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                       })}
                       {!row.assignments.length && <span className="text-xs font-semibold text-red-700">No grader yet</span>}
                     </div>
-                    <StatusPill tone={row.coverage.state === "SUBMITTED" ? "navy" : row.coverage.state === "IN_PROGRESS" ? "neutral" : "orange"}>{stateLabel}</StatusPill>
+                    <div className="min-w-0 text-xs leading-5">
+                      <StatusPill tone={row.evidence.state === "complete" ? "navy" : "orange"}>{stateLabel}</StatusPill>
+                      <p className="mt-2 text-mecg-navy/70">{row.evidence.detail}</p>
+                      <p className="mt-2 text-mecg-navy/60">Staffing: {groupCaseStaffingLabel(row.coverage)}</p>
+                    </div>
                   </article>
                 );
               })}
@@ -346,33 +357,10 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         </section>
       )}
 
-      {round.kind === "GROUP_CASE" && canManage && groupCaseResults && (
-        <section>
-          <SectionLabel>Results</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Weighted score out of 40: Collaboration and Composure count twice. Each grader&apos;s partial ratings count over the criteria they observed.</p>
-          <div className="mt-4">
-            <GroupCaseResultsTable
-              results={groupCaseResults}
-              canViewNotes={canOperate || canManage}
-              canExport={canExport}
-              exportHref={`/api/admin/export?kind=group-case&format=xlsx&cycleId=${encodeURIComponent(cycleId)}&roundId=${encodeURIComponent(round.id)}`}
-            />
-          </div>
-        </section>
-      )}
-
-      {speedDating && canManage && speedDatingResults && (
-        <section>
-          <SectionLabel>Results</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Adjusted corrects for lenient and harsh graders; stars are the raw mean.</p>
-          <div className="mt-4">
-            <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} canExport={canExport} />
-          </div>
-        </section>
-      )}
-
       {canOperate && (
+        <section id="round-controls" aria-label="Staffing and round lifecycle">
         <RoundControls
+          canManageStatus={canManage}
           cycleId={cycleId}
           rounds={[{ id: round.id, label: round.name, status: round.status }]}
           memberAccounts={accounts}
@@ -380,10 +368,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
           assignments={untouchedAssignments}
           assignable={!speedDating}
         />
+        </section>
       )}
 
       {canManageGroups && (
-        <section>
+        <section id="round-groups">
           <SectionLabel>Group setup</SectionLabel>
           <p className="mt-1 text-sm text-mecg-navy/55">Create the case teams, set their prompt, and place applicants before the interview begins.</p>
           <div className="mt-4">
@@ -400,11 +389,35 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         </section>
       )}
 
-      {canOperate && rubric && <RubricEditor round={rubric} />}
+      {round.kind === "GROUP_CASE" && canManage && groupCaseResults && (
+        <section id="round-results">
+          <SectionLabel>Results</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Valid mean out of 40: two independent evaluations must each meet required criteria, the rubric minimum and 75% weighted coverage. Partial observations remain evidence.</p>
+          <div className="mt-4">
+            <GroupCaseResultsTable
+              results={groupCaseResults}
+              canViewNotes={canOperate || canManage}
+              canExport={canExport}
+              exportHref={`/api/admin/export?kind=group-case&format=xlsx&cycleId=${encodeURIComponent(cycleId)}&roundId=${encodeURIComponent(round.id)}`}
+            />
+          </div>
+        </section>
+      )}
+
+      {speedDating && canManage && speedDatingResults && (
+        <section id="round-results">
+          <SectionLabel>Results</SectionLabel>
+          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Adjusted corrects for lenient and harsh graders; stars are the raw mean.</p>
+          <div className="mt-4">
+            <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} canExport={canExport} />
+          </div>
+        </section>
+      )}
+
 
       {canOperate && (
-        <section>
-          <SectionLabel>Results and assignments</SectionLabel>
+        <section id="round-assignments">
+          <SectionLabel>Assignment records</SectionLabel>
           <p className="mt-1 text-sm text-mecg-navy/55">Track who is assigned and whether each evaluation is still open or submitted.</p>
           {assignments.length === 0 ? (
             <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
@@ -503,6 +516,8 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
           )}
         </section>
       )}
+
+      {canOperate && rubric && <details id="round-settings" className="workspace-panel"><summary className="min-h-11 cursor-pointer text-base font-semibold">Scoring guide and rubric settings</summary><p className="my-3 text-sm text-mecg-navy/65">Review the current criteria here. Editing remains limited by the round’s existing lifecycle rules.</p><RubricEditor round={rubric} /></details>}
     </main>
   );
 }

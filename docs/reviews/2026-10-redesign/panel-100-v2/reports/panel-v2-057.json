@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-v2-057",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client journey is substantially more useful and trustworthy: the hero states no consulting fee and semester timing; Work explains team size, responsibilities, confidentiality and handoff; Contact prompts a useful inquiry and identifies its recipient. The supplied desktop/mobile homepage captures show coherent Precision Instrument hierarchy, restrained color and a compact mobile process disclosure. I traced Home \u2192 Work terms/FAQ \u2192 Contact and its retry states through actual source and supplied tests, rather than observing a human task. The three original seat-057 objections are addressed locally: the submitted fieldset locks, unchanged in-page retries retain one UUID passed as provider idempotency, and limiter unavailability returns 503 separately from quota 429. Receipt validation and the full-operation deadline preserve uncertain inquiries. Focused browser logs corroborate these mocked states. Nevertheless, a central client task remains incomplete: there is no inspectable actual engagement or deliverable with which to judge recommendation quality. Honest partnership copy fixes overstatement but cannot supply that evidence. This material information deficiency prevents my broad world-class agreement. Hosted delivery and consequential private workflows also remain insufficiently verified for a release recommendation.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/site-content.ts (services, facts, steps, FAQs)",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "src/lib/rate-limit.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+      "evidence": "The approved static release list is empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes, and Work conditionally omits Selected work when no public records exist. The supplied homepage captures display pending approval rather than an engagement. UNRESOLVED.md confirms actual approved project artifacts remain absent.",
+      "userImpact": "A prospective client can establish fit and organizational associations but cannot judge the rigor, relevance or usefulness of actual MECG work before sharing context and investing in scoping.",
+      "suggestedFix": "Have content owners obtain client and Board approval for at least one actual decision question, methods, constraints and redacted handoff excerpt with bounded results or limitations. Publish through the existing approval boundary; retain the truthful pending state until then."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance, inbox delivery, Board reply timing or provider retry behavior; source and local intercepted tests do not prove hosted delivery.",
+    "In-page idempotency is not durable across reloads/tabs or beyond provider retention; the documented 24-hour contract was not independently exercised.",
+    "No supplied observed human comprehension/task success, screen-reader session, physical iPhone or macOS Safari acceptance.",
+    "Authenticated application, grading, operator and provisioning journeys were not independently exercised here; hosted Clerk/Supabase/storage integration and Board privacy/retention/remediation approvals remain open."
+  ]
+}

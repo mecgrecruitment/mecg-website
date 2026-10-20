@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B · A room full of people</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.top { position: relative; min-height: 640px; color: white; overflow: hidden; }
+.top > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+.top::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(20 44 87 / 55%) 0%, rgb(20 44 87 / 10%) 35%, rgb(20 44 87 / 88%) 100%); }
+.top > * { position: relative; z-index: 1; }
+header.site img { filter: brightness(0) invert(1); }
+.hero { display: flex; flex-direction: column; justify-content: end; min-height: 560px; padding-bottom: 96px; }
+h1 { font-size: clamp(44px, 6vw, 80px); line-height: 1; letter-spacing: -0.045em; font-weight: 600; max-width: 13ch; }
+.lede { margin-top: 20px; font-size: 18px; max-width: 46ch; color: #e1eaff; }
+.card { position: relative; z-index: 2; margin-top: -64px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; background: white; border-radius: 16px; padding: 28px 32px; box-shadow: 0 30px 60px -30px rgb(18 33 62 / 50%); }
+.card p { color: var(--muted); max-width: 52ch; }
+.card .row { display: flex; gap: 20px; align-items: center; }
+.facts { padding-block: 40px; }
+@media (max-width: 767px) {
+  .top { min-height: 600px; }
+  .hero { min-height: 520px; padding-bottom: 88px; }
+  h1 { font-size: 44px; }
+  .card { grid-template-columns: 1fr; padding: 24px; margin-inline: 0; }
+  .card .row { flex-wrap: wrap; }
+}
+</style></head>
+<body>
+<section class="top">
+  <img src="http://localhost:3100/mecg/members-professional.jpeg" alt="MECG members visiting PwC in Chicago">
+  <div class="wrap"><header class="site"><img src="http://localhost:3100/logos/mecg-color.svg" alt="MECG" height="36"><nav><a>Client Services</a><a>Our Team</a><a>Contact Us</a><a class="btn">Join MECG</a></nav></header>
+  <div class="hero"><h1>Pro bono consulting, led by Michigan students.</h1><p class="lede">Seventy members from every major, working a semester at a time on questions organizations actually face.</p></div></div>
+</section>
+<div class="wrap">
+  <div class="card"><p>Tell us the decision you're facing. We'll talk through fit, timing and what a useful answer would look like.</p><div class="row"><a class="btn">Discuss a project →</a><a class="link">Join MECG →</a></div></div>
+  <dl class="facts"><div><b>70+</b><span>Members active in 2026</span></div><div><b>30+</b><span>Organizations since founding</span></div><div><b>1</b><span>Semester per engagement</span></div><div><b>$0</b><span>Consulting fee</span></div></dl>
+</div>
+</body></html>

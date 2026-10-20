@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-053",
+  "lens": "Prospective client \u2014 keyboard-oriented use (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected public proposition explains student-led, semester-long consulting, useful outputs, no consulting fee, team size, confidentiality scoping and client responsibilities. The work-to-contact journey gives a client concrete prompts for a useful inquiry and identifies the board as recipient. Supplied homepage captures show coherent Precision Instrument hierarchy, clear actions and readable mobile composition. Native links, buttons, details/summary, labeled inputs, a skip link and explicit focus styles provide a credible keyboard foundation; the menu Escape check passed locally. However, the evidence does not demonstrate an end-to-end keyboard client journey or actual email delivery, and there is no approved engagement artifact with which to assess work quality. I cannot give unqualified world-class agreement or establish release readiness from this source/capture review. This is an AI assessment, not observed client success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/form-field.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/globals.css (focus rules)",
+    "src/app/layout.tsx (scroll behavior excerpts)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts; src/components/client-project-grid.tsx",
+      "evidence": "PUBLIC_PROJECTS is empty. ClientProjectGrid displays organization descriptions and explicitly says project scope, methods, deliverables and outcomes are pending approval. WorkPage lines 56\u201363 omits Selected work when no public projects exist; the desktop capture confirms the homepage pending-approval state.",
+      "userImpact": "A client can establish organizational familiarity but cannot judge the quality or relevance of actual MECG analysis and handoff materials. This leaves the evidence-assessment part of the client task incomplete.",
+      "suggestedFix": "Obtain client and board approval for at least one bounded engagement account with its question, methods, limits and a redacted deliverable. Preserve the approval boundary and pending status until that evidence exists."
+    },
+    {
+      "severity": "medium",
+      "file": "tests/e2e/public-journeys.spec.ts:39\u201352",
+      "evidence": "The client journey clicks the FAQ and CTA, fills controls directly, clicks submit and intercepts /api/contact with a synthetic 200. The separate menu test manually focuses a link before Escape; it does not establish sequential keyboard traversal. The supplied log records both tests passing.",
+      "userImpact": "Passing checks do not establish that a keyboard-oriented client can traverse the proof controls and FAQ, reach the anchored form, correct invalid input and complete the inquiry with visible focus.",
+      "suggestedFix": "Add a focused keyboard-only local journey using Tab/Shift+Tab and Enter/Space, checking focus visibility and destination, FAQ activation, organization disclosure, validation recovery and status feedback. Keep actual email delivery as a separately verified integration gate."
+    }
+  ],
+  "notVerified": [
+    "No browser interaction was performed by this seat; keyboard behavior is inferred from source and existing limited test evidence, not observed task completion.",
+    "No staging or hosted integration exists in the supplied evidence. Actual contact-provider acceptance, inbox receipt, board response time and configured recipient were not verified.",
+    "No approved project outcomes/artifacts or independently authenticated client claims were available; no human client study occurred.",
+    "Work/contact screenshots, screen-reader behavior, physical devices, Safari/Firefox and formal accessibility conformance were not verified.",
+    "Private application, grading and operator workflows were outside this seat\u2019s inspected scope; this review does not establish their readiness."
+  ]
+}

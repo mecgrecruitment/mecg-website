@@ -45,7 +45,7 @@ export default function WorkspaceMoreMenu({
   const linkList = (links: readonly WorkspaceNavLink[]) => (
     <div className="grid gap-0.5">
       {links.map(([href, label]) => {
-        const selected = currentPath === href;
+        const selected = currentPath === href.split(/[?#]/, 1)[0];
         return (
           <Link
             key={href}

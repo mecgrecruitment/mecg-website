@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-v2-004",
+  "lens": "Apple-inspired clarity; service failure (simulated independent AI lens, not an Apple employee)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected public composition is disciplined and legible within Precision Instrument. Cost, duration and the client action now sit together; the mobile bench disclosure restores proportion without sacrificing identity. I traced the client terms-to-inquiry journey through actual source and focused browser assertions, plus recruitment outage handling. Earlier contact objections are materially addressed: captured fields lock, successful acknowledgement is validated, the full fetch/body wait is bounded, failed inquiries retain their text, and unchanged retries reuse a delivery intent. Recruitment now distinguishes service failure from unpublished information and preserves application access. These are substantive improvements in clarity and trust. However, the broad world-class proposition remains unproven: the client cannot inspect an approved example of delivered work, and consequential authenticated/provider journeys have no hosted acceptance evidence. Passing local fixtures and polished screenshots cannot establish those outcomes. I found no new source-established failure in the focal contact path; release readiness remains unproven independently of visual quality.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/join/page.test.ts",
+    "src/lib/public-recruitment.ts",
+    "src/lib/public-recruitment.test.ts",
+    "src/lib/supabase/public.ts",
+    "src/lib/supabase/timeout.ts",
+    "src/lib/email.ts:35-100",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "src/components/client-project-grid.tsx:20-126",
+    "src/content/projects.public.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (contact cases)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (final totals)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved release list remains empty. The homepage correctly says Past partnerships and Case studies pending client approval; organization details explicitly withhold scope, methods, deliverables and outcomes. The supplied current homepage captures confirm this available proof state. The earlier misleading heading is fixed, but the underlying evidence objection remains.",
+      "userImpact": "A prospective client can understand the semester offer and recognize organizations, but cannot assess the reasoning, specificity or usefulness of an actual MECG handoff before investing in an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement containing its real decision question, method, contribution, redacted handoff and limitations; publish through the existing release boundary. Retain the honest pending state until approved."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance, real inquiry inbox receipt, or consequential operator recovery was supplied; no staging exists.",
+    "Private application/grading/operator workflows were not comprehensively exercised by this seat. Local contact mocks establish feedback behavior, not provider delivery or human task success.",
+    "No screen-reader session, physical iPhone/macOS Safari session, or observed human comprehension; the contact keyboard fixture covers a narrower local path.",
+    "Board-confirmed membership workload, retention/remediation policy decisions and approved project artifacts remain external dependencies. Original identifying resume access is disclosed, not anonymization."
+  ]
+}

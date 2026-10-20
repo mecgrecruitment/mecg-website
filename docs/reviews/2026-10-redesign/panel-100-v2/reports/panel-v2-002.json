@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-002",
+  "lens": "Apple-inspired clarity; narrow mobile viewport (simulated AI design lens, not an Apple employee or human participant)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The narrow homepage has a coherent, restrained identity and a clear offer. The supplied 320px and 390px captures show readable hierarchy, visible client/student actions, cost and semester duration before the process disclosure, and honest separation between partnerships and culture photography. Current source independently confirms the relevant earlier responses: the bench is optional on narrow screens; later engagement copy is complementary; the organization selector places its result adjacent. I traced the client journey from Home through Work terms to the anchored inquiry form. Contact source and focused browser assertions now protect pending input, validate receipts, preserve uncertain inquiries, bound waiting and identify invalid fields. These are substantial improvements in clarity and feedback. Nevertheless, the actual consulting evidence remains absent: a prospective client cannot inspect a representative question, method or handoff. For a consulting site whose purpose includes judging capability, that prevents my unqualified world-class agreement. This is an independently assessed content limitation, not a request to replace Precision Instrument or fabricate results. Release remains unproven because supplied local source, screenshots and intercepted browser tests cannot establish hosted provider behavior or complete private workflows.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings/responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "captures/public-home-mobile-320.png",
+    "captures/public-home-mobile-390.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (engagement facts/steps/FAQs)",
+    "src/app/api/contact/route.ts",
+    "src/app/applicant/page.tsx (submission confirmation copy)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-lint.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved fallback remains empty. Home now correctly titles the empty state Past partnerships and discloses pending case studies. Organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. Both inspected mobile captures show partnership listings rather than an actual engagement. The corrected heading resolves the overpromise, but not the evidence task.",
+      "userImpact": "An organization can understand the offer and recognize past partners, but cannot judge the rigor or relevance of a comparable MECG recommendation before investing time in contact.",
+      "suggestedFix": "Have the client and Board approve one bounded engagement with its real question, constraints, methods and a redacted handoff artifact or factual result. Publish through the existing approval boundary and feature it in the available proof slot. Retain truthful pending copy until approval exists."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance exists in this package; inquiry delivery, real session expiry and consequential recovery remain unproven.",
+    "Complete authenticated applicant, evaluator and operator journeys were not exercised by this seat; no private visual completeness or policy approval is inferred.",
+    "No human task-success observations, screen-reader session, physical iPhone or macOS Safari evidence. Linux WebKit and local lab scores do not substitute for them.",
+    "Board-approved workload facts, original-resume/blind-review policy reconciliation, retention and closed-round remediation remain external dependencies. The inspected applicant confirmation accurately discloses identifying original-resume access."
+  ]
+}

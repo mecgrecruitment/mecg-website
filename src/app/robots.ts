@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/home", "/team", "/work", "/join", "/contact"],
-      disallow: ["/admin", "/member", "/applicant", "/apply", "/api", "/login", "/forgot-password", "/reset-password", "/checkin", "/auth"],
+      allow: "/",
+      disallow: ["/admin", "/member", "/applicant", "/apply", "/api", "/login", "/sign-up", "/forgot-password", "/reset-password", "/checkin", "/auth", "/access-denied"],
     },
-    sitemap: "https://mecgmichigan.com/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

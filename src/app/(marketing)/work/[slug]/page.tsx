@@ -1,48 +1,34 @@
 import type { Metadata } from "next";
+import { marketingMetadata, marketingBreadcrumbs } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MarketingSection from "@/components/marketing-section";
 import PageIntro from "@/components/page-intro";
 import SectionHeading from "@/components/section-heading";
 import SectionLabel from "@/components/section-label";
-import { getPublicProject, getPublicProjectSlugs } from "@/lib/projects/public-projects";
+import { getPublicProject } from "@/lib/projects/public-projects";
 import { serializeJsonLd } from "@/lib/json-ld";
 
 type ProjectPageProps = {
   readonly params: Promise<{ slug: string }>;
 };
 
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-  return (await getPublicProjectSlugs()).map((slug) => ({ slug }));
-}
+// Approved projects can be published or withdrawn after deployment.
+// Resolve each request through the public release boundary instead of a build-time slug list.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
   const project = await getPublicProject(slug);
 
-  // dynamicParams = false + generateStaticParams above means an unknown slug
-  // 404s before this ever runs, but this branch stays defensive rather than
-  // reading fields off an undefined project.
-  if (!project) return {};
+  if (!project) notFound();
 
-  return {
+  return marketingMetadata({
     title: project.title,
     description: project.decision,
-    alternates: { canonical: `/work/${slug}` },
-    openGraph: {
-      title: project.title,
-      description: project.decision,
-      url: `/work/${slug}`,
-      images: [`/work/${slug}/opengraph-image`],
-    },
-    twitter: {
-      title: project.title,
-      description: project.decision,
-      images: [`/work/${slug}/opengraph-image`],
-    },
-  };
+    path: `/work/${slug}`,
+    image: null,
+  });
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
@@ -51,15 +37,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   if (!project) notFound();
 
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://mecgmichigan.com/home" },
-      { "@type": "ListItem", position: 2, name: "Client Services", item: "https://mecgmichigan.com/work" },
-      { "@type": "ListItem", position: 3, name: project.title, item: `https://mecgmichigan.com/work/${slug}` },
-    ],
-  };
+  const breadcrumbJsonLd = marketingBreadcrumbs([
+    { name: "Home", path: "/home" },
+    { name: "Client Services", path: "/work" },
+    { name: project.title, path: `/work/${slug}` },
+  ]);
 
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
@@ -67,12 +49,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <PageIntro
         label={`${project.industry} · ${project.semester}`}
         title={project.title}
-        copy={project.decision}
+        copy={`For ${project.clientLabel}`}
+        aside={
+          <div className="public-lit rounded-2xl p-6 shadow-[0_28px_56px_-28px_rgb(18_33_62/0.6)] sm:p-7">
+            <p className="text-[13px] text-white/80">The question we started from</p>
+            <p className="display-face mt-2 text-balance text-[26px] leading-[1.05] sm:text-[36px]">{project.decision}</p>
+          </div>
+        }
       >
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-white/70">{project.clientLabel}</p>
+        <Link href="/contact#message" className="button-primary">Discuss a similar project <span aria-hidden="true">→</span></Link>
       </PageIntro>
 
-      <MarketingSection aria-labelledby="context-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+      <MarketingSection aria-labelledby="context-title" className="pt-32! lg:pt-44!" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <SectionLabel>Context</SectionLabel>
             <SectionHeading id="context-title" className="mt-4">The decision came first.</SectionHeading>
@@ -93,7 +81,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {project.methods.map((method, index) => (
               <li key={method} className="rounded-2xl bg-white p-6 shadow-[0_12px_30px_rgba(7,13,31,0.06)]">
-                <span className="font-mono text-xs text-mecg-orange-ink">0{index + 1}</span>
+                <span className="text-[15px] font-semibold tabular-nums text-mecg-blue">0{index + 1}</span>
                 <p className="mt-5 leading-7 text-mecg-navy/70">{method}</p>
               </li>
             ))}
@@ -107,7 +95,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
           <div>
             <ul className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
-              {project.deliverables.map((deliverable) => <li key={deliverable} className="flex gap-3 py-5 leading-7 text-mecg-navy/65"><span className="text-mecg-orange-ink" aria-hidden="true">→</span><span>{deliverable}</span></li>)}
+              {project.deliverables.map((deliverable) => <li key={deliverable} className="flex gap-3 py-5 leading-7 text-mecg-navy/65"><span className="text-mecg-blue" aria-hidden="true">→</span><span>{deliverable}</span></li>)}
             </ul>
             {project.handoff ? <p className="mt-7 text-lg leading-8 text-mecg-navy/72">{project.handoff}</p> : null}
           </div>
@@ -115,7 +103,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <MarketingSection tone="navy" aria-labelledby="member-work-title" innerClassName="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
-            <SectionLabel className="text-mecg-orange">Member ownership</SectionLabel>
+            <SectionLabel dark>Member ownership</SectionLabel>
             <SectionHeading id="member-work-title" className="mt-4">The work students owned.</SectionHeading>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2">
@@ -125,7 +113,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <MarketingSection spacing="compact" innerClassName="flex flex-wrap items-center justify-between gap-5">
           <Link href="/work" className="font-semibold text-mecg-blue">← Back to client work</Link>
-          <Link href="/join" className="button-primary">Explore recruitment <span aria-hidden="true">→</span></Link>
+          <Link href="/contact#message" className="button-primary">Discuss a similar project <span aria-hidden="true">→</span></Link>
       </MarketingSection>
     </main>
   );

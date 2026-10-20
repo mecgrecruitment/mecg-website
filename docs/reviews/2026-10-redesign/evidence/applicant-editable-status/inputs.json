@@ -1,0 +1,18 @@
+{
+  "sha256": {
+    "src/app/applicant/page.tsx": "144fda8f37b170ef85d3a0148ecba8bf2d8a2fbd8aea7524f4495670f6aca8cd",
+    "src/app/applicant/application-status.ts": "f3a681cc9ac23ab83589130bf048528fd64377ecaefb4626d2758208bfdcaee7",
+    "src/app/applicant/application-status.test.ts": "f943a09eaaeef97b3b554358c06c30876bee9fe54446aeb66f92aafdc11087e1",
+    "src/app/applicant/application-status-page.test.ts": "6ce06247e4788ac4446cc7a9a6da97120ce43cc2eec4319d2a2434dabd3f9290",
+    "src/app/applicant/next-action.ts": "7a049108ed7d6b705838e3a5e241b5fc2944260c9a4fd5c1bc06bd936caf8776",
+    "src/app/applicant/next-action-page.test.ts": "c5d96bd4cac2a02a6079c9b2a4aea8bfe1bb99c6eb21de447cb35551feb80db8",
+    "src/app/apply/page.tsx": "1fd922021b8203ba2ce1e7b4c1ab4145959586751564b77a5b76ff6836f5761d",
+    "src/lib/auth-destination.ts": "6a7e578b68003b3db68ea1d240e697b360a1e2ee7db0edfbcd58383cdfd94022",
+    "src/components/portal-shell.tsx": "06c4ef6131c1d524ed76c0a63f3ea815c0a6cc4bdbba93b94ce928bdae769aa9",
+    "src/app/globals.css": "f32b703c6a8c94206a84165c7fb58ac2fc423cb1a597944fc605db723bb9f9ed",
+    ".audit/applicant-editable-status/capture.mjs": "3e4c53f8f56c5fd9b27cf80e8f638677d4025f2178cae09f97beacf1c839bf82",
+    "docs/PRODUCT.md": "1a151e326416546cbc9000de7964ade51c770670122db07ffa91af5596d2ddd0",
+    "docs/DESIGN.md": "1918540e4026b84e1b8e4233c920a7a5bef7c96b6798ed4a962e129c058704a8",
+    "docs/reviews/2026-10-redesign/panel-100-v2/reports/panel-v2-062.json": "1655d15b5586ae26423c0669a50fb60313450c20a2b583e36d3c84e6cdf85c21"
+  }
+}

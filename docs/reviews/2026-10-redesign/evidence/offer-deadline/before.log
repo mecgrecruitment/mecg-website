@@ -1,0 +1,43 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (5.8s)
+
+
+  1) [chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByLabel('Offer deadline (Detroit time)')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByLabel('Offer deadline (Detroit time)') with timeout 5000ms
+      - waiting for getByLabel('Offer deadline (Detroit time)')
+        14 × locator resolved to <input name="expiresAt" type="datetime-local" value="2030-09-10T16:00" class="mt-1.5 block min-h-10 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"/>
+           - unexpected value "enabled"
+
+
+      17 |   await page.getByRole("button", { name: "Save deadline", exact: true }).click();
+      18 |   await expect.poll(() => sent).toEqual({ action: "SET_DEADLINE", applicationId: "synthetic-offer", expiresAt: deadline });
+    > 19 |   await expect(input).toBeDisabled();
+         |                       ^
+      20 |   await page.keyboard.press("ArrowUp");
+      21 |   await expect(input).toHaveValue("2030-09-11T16:00");
+      22 |   finish();
+        at /work/tests/e2e/offer-deadline.spec.ts:19:23
+
+    Error Context: .audit/offer-deadline-before/offer-deadline-pending-dea-20085-s-names-the-confirmed-value-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/offer-deadline-before/offer-deadline-pending-dea-20085-s-names-the-confirmed-value-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/offer-deadline-before/offer-deadline-pending-dea-20085-s-names-the-confirmed-value-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value 

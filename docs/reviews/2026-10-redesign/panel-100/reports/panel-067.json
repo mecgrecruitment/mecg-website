@@ -1,0 +1,38 @@
+{
+  "seatId": "panel-067",
+  "lens": "Prospective applicant \u2014 recovery and retry (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected local journey is carefully supported: Home gives students a clear Join action; Join explains eligibility, preparation and evaluated rounds; Apply distinguishes saving from submission. Recovery pauses editing and writes until the applicant compares copies and chooses, with explicit replacement consequences. Exact uncertain save mutations are retried before newer edits, and interrupted submission checks status before asking the applicant to retry. The supplied desktop/mobile hero captures show coherent Precision Instrument typography, hierarchy and visible actions. Original-resume identification is disclosed in Materials and Review, and unpublished case-study outcomes are not invented. I found no actionable defect in the sampled recovery implementation. However, the browser tests intercept APIs and even replace the destination applicant page. Their passing results support local component behavior, not an integrated applicant completing recruitment. Without authenticated hosted recovery/upload evidence or observed applicant comprehension, an unqualified world-class or release verdict is unproven. This is an independent AI source/evidence assessment, not human acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (recovery/save/submit and materials/review sections)",
+    "src/lib/application-draft-recovery.ts (scope and parser sections)",
+    "src/lib/client-fetch.ts",
+    "src/app/applicant/page.tsx (next action, receipt and schedule failure sections)",
+    "src/app/applicant/next-action.ts",
+    "tests/e2e/application-reliability.spec.ts (sampled recovery, rejection, conflict and reconciliation cases)",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [],
+  "notVerified": [
+    "No staging or hosted integration exists. Clerk expiry/re-authentication while preserving unsynced answers, real Supabase RPC/RLS, resume/photo uploads and email delivery remain unverified together.",
+    "No actual applicant was observed comparing copies, understanding the tab-limited 24-hour recovery boundary, distinguishing draft from submission, or following the next action. Source review cannot establish those outcomes.",
+    "Private application/conflict/status visual craft was assessed through source and synthetic test assertions; no supplied live authenticated captures establish its appearance or keyboard/assistive-technology usability.",
+    "The two-session PostgreSQL log proves its reported initial-save race only. Cross-device upload transitions, deadline changes and deployed migration/client coordination remain important unknowns.",
+    "Physical devices, Safari, Firefox and assistive technology were not verified; the inspected captures use Linux fonts and Chromium evidence."
+  ]
+}

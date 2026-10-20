@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { postMemberAction } from "@/lib/member-action";
 
 type BuddySlot = { id: string; startsAt: string; endsAt: string };
 
@@ -24,6 +24,8 @@ function localTimeSnapshot() {
 export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string; slots?: BuddySlot[] }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [unknown, setUnknown] = useState(false);
+  const inFlight = useRef(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const localTime = useSyncExternalStore(subscribeToClock, localTimeSnapshot, () => "");
@@ -31,10 +33,12 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (inFlight.current || unknown) return;
+    const form = event.currentTarget;
     setError("");
     setMessage("");
     setPending(true);
-    const data = new FormData(event.currentTarget);
+    const data = new FormData(form);
     const startsAt = new Date(String(data.get("startsAt")));
     if (Number.isNaN(startsAt.getTime()) || startsAt.getTime() <= Date.now()) {
       setError("Choose a valid start time");
@@ -42,29 +46,16 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
       return;
     }
     const endsAt = new Date(startsAt.getTime() + 20 * 60 * 1000);
-    try {
-      const response = await authorizedFetch("/api/member/buddy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cycleId,
-          startsAt: startsAt.toISOString(),
-          endsAt: endsAt.toISOString(),
-        }),
-      });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        setError(body?.error ?? "Could not publish slot");
-      } else {
-        event.currentTarget.reset();
-        setMessage("Your 20-minute slot is published.");
-        router.refresh();
-      }
-    } catch {
-      setError("Could not publish slot. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
+    inFlight.current = true;
+    const result = await postMemberAction({ path: "/api/member/buddy", payload: {
+      cycleId, startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(),
+    } });
+    inFlight.current = false;
+    setPending(false);
+    if (result.kind === "saved") {
+      form.reset(); setMessage("Your 20-minute slot is published."); router.refresh();
+    } else if (result.kind === "rejected") setError(result.message);
+    else { setUnknown(true); setError("Publishing could not be confirmed. The slot may already exist. Reload to check your published slots before trying again."); }
   }
 
   return (
@@ -75,15 +66,16 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
       <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" onSubmit={submit}>
         <label className="text-sm font-medium text-mecg-navy">
           Start time{timeZone ? ` (${timeZone})` : ""}
-          <input name="startsAt" type="datetime-local" required min={minimum || undefined} className="field-control mt-2" aria-describedby="buddy-slot-help" />
+          <input name="startsAt" type="datetime-local" required disabled={pending || unknown} min={minimum || undefined} className="field-control mt-2" aria-describedby="buddy-slot-help" />
         </label>
-        <button type="submit" disabled={pending} className="button-primary disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Publishing…" : "Publish slot"}</button>
+        <button type="submit" disabled={pending || unknown} className="button-primary disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Publishing…" : "Publish slot"}</button>
       </form>
       <p id="buddy-slot-help" className="mt-2 text-xs leading-5 text-mecg-navy/60">Times are shown in your current time zone and saved with the correct offset.</p>
       <div className="mt-3 space-y-2">
         <OperationNotice kind="error">{error}</OperationNotice>
         <OperationNotice kind="success">{message}</OperationNotice>
       </div>
+      {unknown && <button type="button" className="button-secondary mt-3" onClick={() => window.location.reload()}>Reload to check published slots</button>}
       {slots.length > 0 && (
         <div className="mt-5 border-t border-mecg-navy/10 pt-4">
           <p className="text-[13px] font-semibold text-mecg-navy/60">Published slots</p>

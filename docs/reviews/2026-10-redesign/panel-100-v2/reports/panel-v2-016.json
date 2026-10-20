@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-v2-016",
+  "lens": "Editorial and brand craft",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The supplied desktop and narrow-screen homepage is carefully composed within Precision Instrument: restrained type hierarchy, clear section rhythm, useful fact tables and an honestly captioned real PwC visit photograph. Cost and semester length now qualify the hero. The collapsed mobile bench brings the figures forward; its expanded 320px capture preserves long station labels. Current source and focused assertions resolve the earlier remote mobile organization-profile response: a native selector now directly precedes its result. The client journey from Work terms to the anchored contact form has useful guidance, protected pending input and explicit uncertain-delivery language. Nevertheless, the central consulting proposition still lacks inspectable consulting work. Recognizable partnerships, organization descriptions and a process illustration cannot demonstrate the reasoning or usefulness of an actual MECG handoff. This is a material editorial gap for the site\u2019s purpose, even though the revised headings correctly stop promising unavailable specifics. I therefore disagree with the broad world-class claim. Release is separately unproven because hosted consequential workflows remain outside the supplied evidence. This is an independent simulated AI assessment of supplied source, tests and captures, not observed human acceptance.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts (engagement facts, steps and FAQs)",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/apply/application-form.tsx (materials/review privacy disclosure)",
+    "src/app/applicant/page.tsx (submission confirmation disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (client-profile and client journey results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-expanded-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved fallback remains empty. The captured homepage renders partnership breadth and pending case studies; organization profiles explicitly withhold scope, methods, deliverables and outcomes. WorkPage:56-63 omits Selected work when no approved records exist. The real homepage photograph at home/page.tsx:135-136 is correctly a member visit, not a project artifact.",
+      "userImpact": "A client can assess terms and affiliations but cannot independently judge the specificity, analytical quality or practical usefulness of completed MECG work before investing in an inquiry.",
+      "suggestedFix": "Have client and Board content owners approve one bounded engagement: actual decision, student contribution, methods, redacted deliverable excerpt and honest handoff/limits. Feature it through the existing approved-publication path before general process exposition. Retain truthful pending copy until approval; invent no outcomes."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/email or consequential operator acceptance; local intercepted receipts and isolated SQL do not prove these integrations.",
+    "No observed human comprehension/task success, screen-reader session, physical iPhone or macOS Safari evidence; no accessibility certification inferred.",
+    "No current Board-approved membership workload facts, publication approvals, retention policy or closed-round remediation policy supplied. Resume disclosure is accurate in sampled copy; it does not establish policy resolution.",
+    "No final Work/Join/Contact or authenticated operator visual captures inspected; their complete responsive visual craft and end-to-end keyboard journeys remain unverified."
+  ]
+}

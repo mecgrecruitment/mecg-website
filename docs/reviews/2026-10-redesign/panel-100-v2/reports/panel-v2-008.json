@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-v2-008",
+  "lens": "Apple-inspired clarity; factual comprehension (simulated AI lens, not an Apple employee or human participant)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The revised public proposition is substantially clearer: cost, duration and student leadership appear before the two audience actions. Desktop and 390px captures show disciplined typography, hairlines, restrained color and a useful engineering metaphor consistent with Precision Instrument. Mobile makes that metaphor optional, allowing organization figures to arrive sooner; the later working-together section supplies complementary expectations. I rechecked the earlier hero, remote mobile-profile and contact-receipt objections against current source. Those implementation responses are credible: the mobile selector precedes its adjacent profile, pending contact fields lock, successful responses require ok:true, and uncertain delivery retains the inquiry with specific retry guidance. The supplied keyboard, delayed-acknowledgement and malformed-response tests/logs support these local behaviors. The applicant confirmation now accurately discloses identifying original-resume access, consistent with the inspected authorization migration. However, the main client task still lacks an inspectable example of MECG analysis or a deliverable. Partnership names and process explanation cannot establish the quality of the recommendation being offered. This substantive information gap prevents my unqualified world-class agreement even though the visual hierarchy is coherent. Release remains unproven because the inspected local evidence does not establish actual provider delivery or integrated authenticated application/operator behavior.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/join-content.ts:65-88",
+    "src/app/applicant/page.tsx:290-310",
+    "supabase/migrations/20260911145642_screening_resume.sql (authorization and detail excerpt)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact cases and final total)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log (route summary)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "The approved fallback remains empty; Work renders Selected work only when publicProjects.length > 0. The supplied current home captures show the pending-client-approval state. ClientProjectGrid explicitly withholds scope, methods, deliverables and outcomes in its MECG engagement paragraph. The corrected Past partnerships heading resolves the earlier overpromise, but no approved actual engagement is supplied.",
+      "userImpact": "A prospective client can understand the offer and initiate contact but cannot assess the specificity, reasoning or practical quality of a comparable MECG handoff.",
+      "suggestedFix": "Content owners should obtain client and Board approval for one bounded engagement: actual question, constraints, method and redacted deliverable with honest handoff limits. Publish through the existing approval boundary; retain the pending disclosure until approval exists."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk session/expiry, Supabase RPC/RLS, storage/upload, Resend delivery and consequential operator recovery; no staging exists.",
+    "Observed human comprehension, complete authenticated keyboard journeys, screen-reader use, physical iPhone or macOS Safari. Supplied captures and intercepted API checks establish narrower local scope.",
+    "Board-confirmed weekly hours, mandatory meeting times and peak commitments remain unavailable; join-content.ts:86 honestly discloses the omission.",
+    "Board resolution of original-resume/blind-review policy, retention operations and closed-round remediation; truthful current disclosure does not establish policy approval.",
+    "Private application, evaluator and operator visual craft beyond the inspected source excerpts; no claim of comprehensive private acceptance."
+  ]
+}

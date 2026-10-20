@@ -1,0 +1,7 @@
+            proname            |  owner   | prosecdef |      proconfig       | anon_execute | authenticated_execute 
+-------------------------------+----------+-----------+----------------------+--------------+-----------------------
+ decision_evidence_diagnostics | postgres | t         | {"search_path=\"\""} | f            | t
+ decision_evidence_rounds      | postgres | t         | {"search_path=\"\""} | f            | f
+ is_decision_ready             | postgres | t         | {"search_path=\"\""} | f            | f
+(3 rows)
+

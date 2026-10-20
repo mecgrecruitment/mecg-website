@@ -1,0 +1,9 @@
+# Deck targets and keyboard continuation
+
+Frozen V2 seats 022 and 023 identified compact controls and focus loss when an applied card is replaced. The working tree now gives sort, Exit, search results and footer actions at least 44 CSS pixels in both dimensions, allows narrow footer wrapping, and uses the established typography and restrained corner treatment.
+
+An explicitly applied result focuses Next unapplied applicant. Advancing focuses the new applicant heading, including the final-card case; subsequent Tab reaches its action. Explicit search jumps preserve context. Native controls keep their own keyboard behavior. Previously added bounded, action-specific result receipts and announced unknown/failure recovery remain in place. The completed view describes only results applied in this view; it does not claim the whole cohort is ready.
+
+The final single local browser matrix passed **75/75 checks** across Chromium, mobile Chromium, Firefox, WebKit and mobile WebKit. It includes actual target rectangles and document overflow at 320 and 390 pixels, native Enter/Tab continuation after applying and advancing, final-card completion, search jumps, motion controls and result recovery. Focused lint and TypeScript passed. An earlier 320-pixel run reproduced the undersized targets. The final mobile WebKit capture was inspected.
+
+Evidence: [final browser log](./evidence/deck-touch-context-browser.log), [before-fix reproduction](./evidence/deck-touch-before.log), [lint](./evidence/deck-touch-context-lint.log), [320-pixel capture](./evidence/deck-controls-320-mobile-webkit.png). Tests use the actual gated component with fictional records and intercepted local APIs. They establish neither hosted authorization nor human/assistive-technology acceptance. Frozen V2 votes remain unchanged.

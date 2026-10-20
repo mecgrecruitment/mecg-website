@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireBoard } from "@/lib/auth";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -17,7 +17,7 @@ export default async function ProjectsPage() {
   // Projects are org-wide, not cycle-scoped, so this gates on being board
   // rather than on a capability within a cycle.
   const user = await requireBoard();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "WORKSPACE_ACCESS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "WORKSPACE_ACCESS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
   const [projectsResult, staffingResult, membersResult] = await Promise.all([

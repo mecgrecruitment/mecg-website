@@ -1,0 +1,123 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [
+      "Running text under 15px: 14px \"For a project, describe the de\"; 14px \"No consulting fee. A semester \"; 14px \"Pro-bono consulting at the Uni\"",
+      "No action in the first 390×844 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        36,
+        30,
+        18,
+        16,
+        14,
+        12
+      ],
+      "body": 14.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 9,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [
+      "Running text under 15px: 14px \"For a project, describe the de\"; 14px \"No consulting fee. A semester \"; 14px \"Pro-bono consulting at the Uni\"",
+      "No action in the first 768×1024 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        60,
+        36,
+        18,
+        16,
+        14,
+        12
+      ],
+      "body": 14.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 8,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [
+      "Running text under 15px: 14px \"For a project, describe the de\"; 14px \"No consulting fee. A semester \"; 14px \"Pro-bono consulting at the Uni\"",
+      "No action in the first 1280×900 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        60,
+        36,
+        18,
+        16,
+        14,
+        12
+      ],
+      "body": 14.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 8,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [
+      "Running text under 15px: 14px \"For a project, describe the de\"; 14px \"No consulting fee. A semester \"; 14px \"Pro-bono consulting at the Uni\"",
+      "No action in the first 1440×900 screen (outside the nav). The one action should be visible without scrolling."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "95%",
+        "ui-monospace": "5%"
+      },
+      "sizes": [
+        60,
+        36,
+        18,
+        16,
+        14,
+        12
+      ],
+      "body": 14.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 8,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 24
+    }
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "seatId": "panel-v2-036",
+  "lens": "Information and discoverability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public information architecture is coherent and carefully restrained. The desktop and mobile homepage captures communicate the no-fee, semester-long proposition early, separate partnership history from approved work, and preserve the Precision Instrument identity. I traced Home \u2192 Client Services \u2192 engagement FAQ \u2192 Contact and Join \u2192 preparation/evaluation criteria \u2192 commitment FAQ in actual source, with corresponding local browser assertions/log entries. Recruitment now correctly distinguishes lookup failure, no cycle and unpublished events; the earlier outage objection is resolved in the inspected source and focused SSR tests. Canonical/social metadata, private noindex defaults and request-time project pages support discoverability without knowingly exposing private routes. Nevertheless, two central decisions remain unsupported by sufficient public content: clients cannot inspect an actual approved engagement, and students cannot assess membership workload independently. Those are material shortcomings for this website\u2019s purpose, so my broad world-class answer is disagree. Release remains unproven because local fixtures and source checks do not establish the consequential hosted workflows.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; work/page.tsx; join/page.tsx; contact/page.tsx; contact/contact-form.tsx",
+    "src/components/site-header.tsx; site-footer.tsx; client-project-grid.tsx",
+    "src/lib/join-content.ts; public-recruitment.ts; public-recruitment.test.ts; seo.ts; projects/public-projects.ts",
+    "src/app/(marketing)/join/page.test.ts; work/[slug]/page.tsx; work/[slug]/opengraph-image.tsx",
+    "src/content/projects.public.ts; src/app/robots.ts; sitemap.ts; seo-routes.test.ts; applicant/page.tsx:290-314",
+    "tests/e2e/public-journeys.spec.ts; scripts/verify-publication.mjs",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (final summary); integrated-final-browser.log (public-journey entries)",
+    "captures/PROVENANCE.json; captures/public-home-mobile-390.png; captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved fallback list is empty. Selected organization profiles explicitly withhold scope, methods, deliverables and outcomes pending approval. The supplied current homepage captures show partnership rows and the pending-client-approval status, not an engagement example.",
+      "userImpact": "A prospective client can understand fit and process but cannot evaluate the reasoning or usefulness of a comparable MECG handoff before investing in an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement with its real question, methods, constraints and redacted handoff artifact. Publish through the existing approval boundary; retain truthful pending copy until then."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:75,86; src/app/(marketing)/join/page.tsx (commitment FAQ)",
+      "evidence": "The preparation guidance directs students to the commitment FAQ, which explicitly says expected hours, mandatory meeting times and peak commitments are unpublished. The targeted Board email improves recovery but supplies none of those facts.",
+      "userImpact": "Students with difficult schedules still need a separate conversation to establish basic membership fit after reading the preparation journey.",
+      "suggestedFix": "Have recruitment leadership approve and date a current-semester workload range, recurring obligations and peak-week caveat, then publish beside preparation. Do not invent estimates."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/Supabase/RLS/storage/Resend integration, session expiry, and consequential operator recovery; no staging exists.",
+    "Actual content approvals, current workload facts, Board privacy/retention/remediation decisions, and observed human comprehension or task success.",
+    "Complete authenticated keyboard journeys, screen-reader use, physical iPhone/macOS Safari, field performance, indexing or social crawler behavior. Public captures are local unavailable-service renders; private grading/operator workflows were not independently exercised in this seat."
+  ]
+}

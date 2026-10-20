@@ -74,3 +74,42 @@ test("recruitment committee cannot retry a decision notification", async (t) => 
   assert.equal(response.status, 403);
   assert.deepEqual(fake.calls, []);
 });
+
+test("uncertain delivery acknowledgement stays unconfirmed and identifies its notification", async (t) => {
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user("BOARD") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({}) } });
+  t.mock.module("@/lib/notifications", { namedExports: { deliverNotification: async () => { throw new Error("response interrupted"); } } });
+  const { POST } = await importRoute("uncertain-retry");
+  const response = await POST(request());
+  assert.equal(response.status, 202);
+  assert.deepEqual(await response.json(), { notificationId: "notification-1", status: "UNCONFIRMED" });
+});
+
+test("checking a notification is read only and returns no recipient or message content", async (t) => {
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("readback must not send"); } } });
+  t.mock.module("@/lib/notifications", { namedExports: { deliverNotification: async () => { throw new Error("readback must not send"); } } });
+  const fake = client();
+  const value = { ...fake.value, from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: "notification-1", cycle_id: "cycle-1", status: "SENT" }, error: null }) }) }) }) };
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user("BOARD") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => value } });
+  const { GET } = await importRoute("read-status");
+  const response = await GET(new NextRequest("http://localhost/api/admin/notifications?notificationId=notification-1"));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await response.json(), { notificationId: "notification-1", status: "SENT" });
+  assert.deepEqual(fake.calls, []);
+});
+
+test("readback cannot expose another cycle's notification to a committee member", async (t) => {
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("readback must not send"); } } });
+  t.mock.module("@/lib/notifications", { namedExports: { deliverNotification: async () => { throw new Error("readback must not send"); } } });
+  const fake = client();
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user("RECRUITMENT_COMMITTEE") } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+  const { GET } = await importRoute("forbidden-read-status");
+  const response = await GET(new NextRequest("http://localhost/api/admin/notifications?notificationId=notification-1"));
+  assert.equal(response.status, 403);
+  assert.deepEqual(fake.calls, []);
+});

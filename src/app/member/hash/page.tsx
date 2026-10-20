@@ -1,3 +1,4 @@
+import { selectWorkspaceMembership } from "@/lib/workspace-cycle";
 import type { Metadata } from "next";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Hash" };
 
 export default async function MemberHashPage() {
   const user = await requireMember();
-  const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
+  const cycleMembership = await selectWorkspaceMembership(user, ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"]);
   if (!cycleMembership) return null;
   const { cycleId, cycle } = cycleMembership;
   const supabase = await createClient();
@@ -79,7 +80,7 @@ export default async function MemberHashPage() {
           {" "}Every tap saves on its own, you can change it until the board applies the result, and nobody can see how anyone else voted or where the count stands.
         </p>
       </section>
-      <HashBallot applicants={applicantList} votes={votes ?? []} presentingId={cycleRow.hash_presenting_application_id} />
+      <HashBallot cycleId={cycleId} applicants={applicantList} votes={votes ?? []} presentingId={cycleRow.hash_presenting_application_id} />
     </main>
   );
 }

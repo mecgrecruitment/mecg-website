@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-017",
+  "lens": "Editorial and brand craft",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public presentation is coherent and carefully edited within Precision Instrument: clear sans-serif hierarchy, restrained mono labels, hairline composition, purposeful contrast, and a real photograph accurately captioned as a PwC member visit. Desktop and mobile captures maintain that identity. V2 corrects the unsupported specific-question heading, states no-fee/semester terms in the hero, makes the mobile bench optional, and replaces repeated process prose with practical expectations. The mobile organization selector now places details directly below its trigger. I traced the organization-to-inquiry journey through actual Work/Contact source and inspected its intercepted browser tests: pending fields lock, malformed/lost acknowledgements preserve answers, and unchanged retries reuse an intent key. These are meaningful improvements, not observed human success or actual email delivery. I nevertheless disagree with the broad world-class proposition because the central consulting offer still has no inspectable completed engagement or work artifact. Polished explanation and recognizable partnerships cannot establish the quality of the promised analysis. I recommend holding complete release acceptance while this substantive proof gap and consequential hosted integration evidence remain unresolved; this is not a finding that the public layout itself is broken.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (services/terms/process/FAQs)",
+    "src/app/globals.css:1-110",
+    "src/app/applicant/page.tsx:280-312",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-expanded-mobile-320.png",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact entries)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:67-97; src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5",
+      "evidence": "The corrected homepage honestly says Past partnerships and Case studies pending client approval. Organization profiles explicitly withhold scope, methods, deliverables and outcomes; the approved fallback remains empty. The supplied desktop/mobile captures show partnership names and process explanation, followed by the accurately identified culture photograph at home/page.tsx:135-136, with no consulting artifact.",
+      "userImpact": "A prospective client can assess fit and terms but cannot judge MECG analytical craft, contribution or handoff quality before investing in an inquiry. This relevant original objection remains substantive despite the successful heading and mobile fixes.",
+      "suggestedFix": "Obtain client and Board approval for one representative engagement with its actual decision, constraints, methods, MECG contribution and redacted deliverable or bounded handoff. Publish through the existing approval boundary and feature it before general process/people content. Retain honest pending copy until approval; fabricate no outcome."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/session, Supabase RPC/RLS, upload/storage, actual Resend delivery, provisioning and consequential operator recovery; local fixtures do not establish these integrations.",
+    "Full real authenticated application/recovery/status/grading/operator journeys, screen-reader use, human comprehension and physical iPhone/macOS Safari behavior. Private visual craft beyond supplied public captures was not assessed.",
+    "Client-approved project evidence, current Board-confirmed workload commitments, and Board authority for resume/privacy retention and closed-round remediation. The inspected applicant confirmation accurately discloses identifying original-resume access; disclosure does not resolve policy."
+  ]
+}

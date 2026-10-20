@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-042",
+  "lens": "Product systems and reliability; narrow mobile viewport (simulated AI expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The mobile proposition and two audience actions are clear and visually coherent with Precision Instrument. Recovery offers explicit comparison and pauses writes; round coverage distinguishes partial submissions from valid independent evidence, and the mobile confirmation explains irreversible closure. However, completion and uncertain-write handling remain inconsistent at consequential boundaries. These are source-supported reliability/interface defects, not observed user failures. Local synthetic browser and PostgreSQL evidence is substantial but does not establish hosted integration or real task success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx",
+    "src/lib/application-draft-recovery.ts",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/rush-controls.tsx",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/admin/decision-form.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/use-action.ts",
+    "src/lib/round-close-summary.ts",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "supabase/tests/round_close_summary.sql",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log",
+    "captures/mobile-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:493-539",
+      "evidence": "submit() calls finishSubmission() after response.ok without parsing the success body; this deletes browser answers and navigates to submitted=1. The API contract returns applicationId (src/app/api/apply/route.ts, POST). tests/e2e/application-reliability.spec.ts:64-80 actually accepts a 200 {} as submission success; its malformed-success check at 342 only covers draft saving. ApplicantDashboard renders Application received from submitted=1 at src/app/applicant/page.tsx:281-286.",
+      "userImpact": "A malformed successful acknowledgement can discard the recovery copy and enter a success path without a verified submission receipt. The dashboard banner is URL-driven rather than independently tied to that submission.",
+      "suggestedFix": "Validate a nonempty applicationId receipt before clearing recovery; reconcile invalid success responses against authoritative status. Tie the dashboard acknowledgement to a confirmed submitted application. Add a targeted malformed-submit-success regression."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rush-controls.tsx:64-85",
+      "evidence": "useRushAction.act() labels thrown transport errors Request failed and leaves the page unrefreshed. RoundStatusControl.saveStatus() retains the ready confirmation when act returns false (round-status-control.tsx:59-66). Its warning states there is no transition back to open grading. operator-close.spec.ts:85 tests a failed coverage GET, not a lost POST acknowledgement.",
+      "userImpact": "If freeze commits before the response is lost, a mobile operator still sees an enabled close confirmation and Keep grading open despite grading already being closed. The interface asserts failure where the result is unknown.",
+      "suggestedFix": "Show an unknown-outcome state after ambiguous freeze writes, disable repeat confirmation, and reload authoritative round status before offering another action. Test a committed freeze followed by a dropped acknowledgement."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted Clerk/Supabase/storage/email integration, migration rollout or production acceptance evidence exists.",
+    "No observed human task success, physical-device, Safari/Firefox or assistive-technology validation. Mobile screenshots and Chromium logs are limited evidence.",
+    "Application recovery and operator behavior were inspected through source and supplied synthetic tests, not a live authenticated journey. No new tests or shared browser were run.",
+    "Client-approved outcomes/project artifacts remain absent; original resume access is disclosed policy, not anonymization. Board policy approval and retention decisions remain unresolved."
+  ]
+}

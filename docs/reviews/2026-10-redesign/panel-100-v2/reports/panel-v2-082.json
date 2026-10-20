@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-v2-082",
+  "lens": "Recruitment operator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The narrow mobile evidence shows a coherent Precision Instrument identity, readable hierarchy, explicit project-publication limits and a clear no-fee, one-semester proposition. The source-traced Home\u2013Join\u2013preparation journey distinguishes unavailable recruitment information from unpublished dates and retains application access. Operator improvements are substantive: cohort-scoped navigation, canonical evidence attention instead of submission-based completion, deliberate close confirmation with authoritative reconciliation, searchable batch review preserving the complete snapshot, and specific round diagnostics with safe closed-round escalation. The earlier two-partial-submissions objection is resolved in the inspected helper and board. However, individual release retains a materially weaker acknowledgement/recovery contract than batch release. This consequential inconsistency prevents world-class agreement and warrants a targeted fix before release. My assessment is simulated AI source/artifact review, not observed operator success. Local test receipts and synthetic mobile captures cannot establish hosted acceptance, and missing approved project evidence, membership workload facts and policy decisions further limit the broad claim.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/applicant/page.tsx (receipt/privacy excerpts)",
+    "src/app/admin/round-board.tsx",
+    "src/app/admin/group-case-coverage.ts",
+    "src/app/admin/group-case-coverage.test.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/rounds/page.tsx",
+    "src/components/workspace-nav.tsx",
+    "src/components/workspace-cycle-switcher.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/use-action.ts",
+    "src/lib/run-action.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/admin/applications/[id]/page.tsx (decision controls)",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx",
+    "src/app/api/admin/decisions/route.ts (release contract)",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts (first 130 lines)",
+    "tests/e2e/operator-review.spec.ts",
+    "tests/e2e/release-reliability.spec.ts",
+    "tests/e2e/release-evidence.spec.ts",
+    "tests/e2e/cohort-workspace-selection.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (summary)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-320.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-19; src/lib/use-action.ts:28-39",
+      "evidence": "ReleaseButton calls useAction/runAction, which awaits authorizedFetch and response.json without a deadline or release-specific receipt validation. A thrown request becomes generic Could not release; ReleaseButton refreshes only on result.ok or body.released === true. Thus a committed release with a lost acknowledgement leaves the old control enabled after generic failure, while a stall leaves Releasing\u2026 indefinitely. The control is actually mounted on the applicant dossier (page.tsx:552). The supplied release-reliability.spec.ts tests ReleaseAllButton, not this individual path.",
+      "userImpact": "An operator recovering a particular applicant outcome on unreliable mobile connectivity cannot reliably distinguish failed release from committed release, or regain controls after a stalled response. This is a source-derived failure path, not a hosted reproduction.",
+      "suggestedFix": "Give individual release the batch flow\u2019s bounded complete-response contract, validate its action-specific acknowledgement, report unknown outcomes explicitly and refresh/reconcile authoritative status before offering another release. Add focused individual-release checks for stalls, malformed success and committed-write acknowledgement loss."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk/Supabase/storage/email integration, session expiry and authenticated mobile operator recovery; no staging or hosted acceptance is supplied.",
+    "Complete authenticated keyboard journeys, screen-reader use, physical iPhone/macOS Safari and observed human task success. Synthetic diagnostics capture does not establish the full private workspace visual experience.",
+    "Client-approved real engagement artifacts/results and current Board-confirmed workload facts remain absent.",
+    "Board-approved closed-round remediation and original-resume/retention policy resolution; accurate disclosure and diagnostics do not supply that authority."
+  ]
+}

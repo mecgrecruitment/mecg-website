@@ -1,0 +1,9 @@
+{
+  "/home": {
+    "status": 200
+  },
+  "/join": {
+    "status": 200,
+    "excludedTimeExpectationFaqAbsent": true
+  }
+}

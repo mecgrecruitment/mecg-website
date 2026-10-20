@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-003",
+  "lens": "Apple-inspired clarity; keyboard-oriented use (simulated AI review lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The public composition is clear and restrained: the homepage explains student-led consulting, separates client and student next actions, and uses the drafting bench, hairlines and limited orange emphasis coherently with Precision Instrument. Supplied desktop/mobile captures support that visual judgment. Native station buttons expose pressed state and a live readout; navigation includes a skip link, visible-focus rules and Escape focus return. I traced the actual client path from engagement terms to the inquiry form and inspected its success/error implementation, test and passing log. That test uses clicks and intercepted HTTP, so it establishes neither keyboard-only task success nor delivery. Original-resume access is explicitly disclosed in the application source; the empty approved-project fallback and pending-approval copy avoid fabricated case outcomes. One pending-state defect remains. The broader world-class and release claims remain unproven without integrated workflow and keyboard evidence; this is an independent AI source/capture assessment, not human endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/desktop-hero.png",
+    "captures/mobile.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/form-field.tsx",
+    "src/app/globals.css:1-110",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/apply/application-form.tsx:729-750",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log:36-45,78-93",
+    "evidence/publication-proof-result.json"
+  ],
+  "findings": [
+    {
+      "severity": "P2",
+      "file": "src/app/(marketing)/contact/contact-form.tsx",
+      "evidence": "submit() captures FormData at lines 19-23, then unconditionally calls form.reset() after success at line 30. Fields at lines 42-49 remain editable while sending; only the submit button is disabled at line 52. Thus a delayed successful response clears edits made after the request snapshot. This follows from source; it was not reproduced in a live browser.",
+      "userImpact": "A keyboard user can Shift+Tab back into the message and correct it while Sending is displayed. The correction is neither transmitted nor retained, while the confirmation says the message was sent, obscuring which version reached the board.",
+      "suggestedFix": "Make the pending-state contract explicit: lock the submitted fields while sending, or preserve edits and reset only when current values still match the submitted snapshot. Verify with a delayed-response case that edits cannot silently disappear."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, hosted integration or human study exists. Clerk sessions, Supabase/RLS, storage and actual email receipt were not exercised here.",
+    "No complete Tab/Shift+Tab/Enter/Space inquiry journey, focus continuity after submission, or screen-reader live-region announcement was observed. The menu test explicitly covers Escape; station and inquiry tests primarily use clicks.",
+    "Safari, Firefox, physical devices, zoom/reflow and assistive technology remain untested; supplied visuals use Linux fallback fonts and Chromium evidence.",
+    "Authenticated grading/operator and applicant workflows were not comprehensively inspected in this seat. The application excerpt establishes disclosure wording, not enforcement of all privacy permissions.",
+    "Client-approved outcome artifacts remain absent. Publication fixture results do not establish client consent, actual organization metrics, or hosted publication authorization."
+  ]
+}

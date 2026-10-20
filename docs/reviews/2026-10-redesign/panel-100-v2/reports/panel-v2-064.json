@@ -1,0 +1,36 @@
+{
+  "seatId": "panel-v2-064",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The revision provides a coherent, restrained public proposition and substantially better applicant failure recovery. I verified that recruitment outages retain application access, uncertain submissions preserve answers, offer-deadline outages withhold unsupported response-window claims, and confirmation consistently discloses identifying original-resume access. The supplied mobile recovery capture shows readable exact-version choices and a clearly explained private backup. However, the actual status page can still describe a saved draft as submitted and moving through review, with no resume-draft next action. That contradicts the central saved-versus-submitted distinction. Together with unpublished workload facts and missing integrated acceptance, this prevents my agreement with the unchanged broad world-class claim. My hold concerns the status-state defect and consequential integration uncertainty; it is not a demand to fabricate content or change Board policy. This is an independent AI source/artifact review, not observed student success.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json identity header",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; src/app/(marketing)/join/page.tsx; src/app/(marketing)/join/page.test.ts; src/lib/join-content.ts; src/lib/public-recruitment.ts; src/lib/public-recruitment.test.ts",
+    "src/app/apply/page.tsx (1–160); src/lib/auth-destination.ts; src/app/apply/application-form.tsx (submission, recovery, materials and review); src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx; src/app/applicant/next-action.ts; src/app/applicant/next-action-page.test.ts",
+    "supabase/migrations/20260830100000_harden_applicant_workflow.sql (applicant_dashboard); 20260901000000_allow_reapplication.sql; 20260901070000_offer_deadline.sql (my_offer_deadlines); 20260911145642_screening_resume.sql (authorization/detail)",
+    "tests/e2e/application-reliability.spec.ts (1–180); tests/e2e/application-combine.spec.ts",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md; application-mixed-copy-recovery.md; evidence/application-combine-browser.log (terminal results); evidence/release-evidence-final-node.log (terminal results)",
+    "captures/public-home-mobile-390.png; captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:26–30,43–49,153–159,263–284,366–370",
+      "evidence": "ApplicantDashboard deliberately permits destination /apply. applicant_dashboard SQL (20260830100000_harden_applicant_workflow.sql:389–403) returns DRAFT/NEEDS_INFO rows newest first. A returning applicant can reach this page through Past applications (apply/page.tsx:148–153) after saving a new draft. The dashboard maps that draft to the Submitted step and the unconditional moving-through-review headline. can_start_application is false once any current-cycle row exists (20260901000000_allow_reapplication.sql:32–41), so the next-action branch falls through to scheduleNextAction, which can say You’re caught up. The improved receipt-banner guard does not correct these other assertions. This is source-demonstrated, not a hosted reproduction.",
+      "userImpact": "A student checking history or returning after an uncertain save can mistake an unsubmitted application for one already under review and miss the need to resume and submit; NEEDS_INFO similarly lacks an explicit correction action.",
+      "suggestedFix": "Render draft and requested-change states explicitly throughout headline, stepper, application card and next action. Link editable current intake back to /apply; when intake is unavailable, explain uncertainty rather than claiming completion. Add real-page SSR coverage for prior-cycle history plus a current DRAFT/NEEDS_INFO and empty schedule."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/session, Supabase RPC/RLS, upload/storage and email integration; no staging exists and no hosted acceptance was supplied.",
+    "Complete authenticated keyboard prepare/apply/recover/status journey, assistive-technology use, human comprehension and physical iPhone/macOS Safari behavior. Intercepted harness destinations and SSR checks prove narrower scopes.",
+    "Approved project artifacts, current Board-confirmed workload range/mandatory times, retention policy and original-resume/closed-round remediation decisions remain absent or unresolved.",
+    "Live grading/operator task success and their complete visual states were not independently exercised in this applicant-focused review."
+  ]
+}

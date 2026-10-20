@@ -1,0 +1,42 @@
+{
+  "seatId": "panel-v2-046",
+  "lens": "Product systems and reliability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision shows careful reliability design: application recovery pauses writes, compares changed fields, permits exact combinations and exports both originals; submission requires an application receipt or same-cycle reconciliation before clearing recovery. The applicant confirmation independently checks stored state and accurately discloses identifying resume access. Close grading now distinguishes unknown outcomes, blocks repeat confirmation and preserves that lock across same-tab reload. Release diagnostics distinguish valid locked evidence from submitted forms and route closed-round insufficiency to authorized remediation. The public mobile capture has coherent Precision Instrument hierarchy and explicit no-fee/semester terms; the synthetic recovery and diagnostics captures keep lengthy text legible. I traced Join preparation through application recovery, review, submission and status in actual source and focused intercepted tests. Those checks support the revised contracts, but do not demonstrate a real authenticated journey. A remaining offer-deadline pending-state mismatch can misrepresent which consequential date was saved. Together with missing approved project proof and hosted integration acceptance, that prevents my unqualified world-class agreement. Hold the consequential operator release until that editor is corrected and verified.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md; prior-findings-and-responses.json (all 141 findings)",
+    "src/app/(marketing)/home/page.tsx; src/app/(marketing)/join/page.tsx; src/content/projects.public.ts",
+    "src/app/apply/page.tsx:1-125; application-form.tsx:466-750; application-recovery-review.tsx",
+    "src/lib/application-submission.ts; src/lib/client-fetch.ts",
+    "src/app/applicant/page.tsx (receipt and privacy copy)",
+    "src/app/member/evaluation-form.tsx:120-260; src/app/member/group-case/group-case-roster.tsx (save/quality/retry passages)",
+    "src/app/admin/round-status-control.tsx; round-close-request.ts; group-case-coverage.ts; decision-form.tsx:100-312",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx; src/app/admin/applications/[id]/page.tsx:538-561",
+    "src/app/api/admin/decisions/route.ts; route.test.ts (SET_DEADLINE assertions)",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql; 20260902210000_offer_deadline_state_guard.sql; 20260902300000_member_onboarding.sql:1-49",
+    "docs/reviews/2026-10-redesign/release-evidence-diagnostics.md",
+    "tests/e2e/application-combine.spec.ts; application-reliability.spec.ts:1-145; operator-close.spec.ts:97-200",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final results); integrated-final-browser.log (close recovery cases); release-evidence-final-node.log (summary); release-evidence-sql/tests.log (summary)",
+    "captures/PROVENANCE.json; public-home-mobile-390.png; synthetic-application-mixed-copies-mobile.png; synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/decision-form.tsx:263-307 (OfferDeadlineForm)",
+      "evidence": "save captures expiresAt at line 264; only the submit button is disabled during the request. The uncontrolled datetime input at 299-304 remains editable. Any successful response sets the generic Deadline saved message at 280 and refreshes the route, without comparing the current input to the captured value or naming the persisted date. The actual dossier renders this editor for unanswered locked/released offers at applications/[id]/page.tsx:554-555. This is a source-demonstrated race, not a hosted reproduction.",
+      "userImpact": "An operator can submit date A, change the visible field to date B while waiting, then see Deadline saved although A was sent. The database deadline controls whether an applicant may respond, so this ambiguity can affect a real response window.",
+      "suggestedFix": "Lock the date input while its captured write is pending, or explicitly preserve and mark subsequent edits unsaved. Show the confirmed saved date, validate the acknowledgement, and add a delayed-response regression covering an attempted in-flight date change."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk expiry, Supabase RPC/RLS wiring, uploads/storage, Resend delivery, provisioning and committed-write recovery in a hosted integrated environment; none was supplied.",
+    "Complete authenticated keyboard journeys, screen-reader use, physical iPhone/macOS Safari, or observed human task success. The private images are synthetic harness captures.",
+    "Client-approved engagement artifacts/results, Board-confirmed membership workload, and policy decisions for original resumes, retention and closed-round remediation remain absent.",
+    "No live deadline race was executed; no implementation, account, database or external state was changed during this review."
+  ]
+}

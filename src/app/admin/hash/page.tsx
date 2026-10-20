@@ -1,11 +1,13 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { roundEvidence } from "@/lib/round-evidence";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
-import { aggregateRound, combineRoundScores, scoreEvaluation } from "@/lib/evaluation.js";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { combineRoundScores } from "@/lib/evaluation.js";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { applicantCode } from "@/lib/applicant-code";
 import { screeningRpc } from "@/lib/screening-rpc";
 import { currentHashStage, HASH_STAGE_RULES, HASH_STAGES, hashOutcome, type HashStage } from "@/lib/hash-tally";
@@ -81,7 +83,7 @@ function PendingDecisionPanel({
 
 export default async function HashBoard() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const cycleId = await selectWorkspaceCycle(user.memberships, ["HASH_PANEL_ACCESS", "MANAGE_CYCLE"]);
   if (!cycleId) redirect("/member");
   const canPanel = hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS");
   const canDecide = hasPermission(user.memberships, cycleId, "DECIDE");
@@ -95,8 +97,8 @@ export default async function HashBoard() {
   const supabase = await createClient();
   const [cycleResult, roundsResult, appsResult, decisionsResult, impressionsResult, tallyResult, notesResult] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status,hash_stage,hash_quorum").eq("id", cycleId).single(),
-    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
-    supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluations(id,status,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
+    supabase.from("rounds").select("id,name,kind,status,weight,rubrics!rubrics_round_id_fkey(id,version,minimum_observed_criteria,rubric_criteria(id,name,description,weight,required,position))").eq("cycle_id", cycleId).order("name"),
+    supabase.from("applications").select("id,status,pnms!inner(id,name),evaluation_assignments(id,round_id,evaluator_id,evaluations(id,status,rubric_id,version,voided_at,criterion_ratings(criterion_id,score,note)))").eq("cycle_id", cycleId),
     supabase.from("decisions").select("id,application_id,outcome,status,reason,communication_preview,decision_approvals(id)").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
     supabase.from("event_impressions").select("application_id,tags,note,events!inner(cycle_id)").eq("events.cycle_id", cycleId),
     screeningRpc<HashTallyRow[]>(supabase, "hash_tally", { target_cycle_id: cycleId }),
@@ -216,18 +218,8 @@ export default async function HashBoard() {
   }
   const rankings = applications.map((application) => {
     const byRound = rounds.map((round) => {
-      const criteria = round.rubric?.rubric_criteria ?? [];
-      const scored: ReturnType<typeof scoreEvaluation>[] = [];
-      let lockedEvaluations = 0;
-      for (const assignment of application.evaluation_assignments) {
-        if (assignment.round_id !== round.id) continue;
-        if (assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")) lockedEvaluations += 1;
-        for (const evaluation of assignment.evaluations) {
-          if (!["SUBMITTED", "LOCKED"].includes(evaluation.status)) continue;
-          scored.push(scoreEvaluation(criteria, evaluation.criterion_ratings.map((rating) => ({ criterionId: rating.criterion_id, score: rating.score }))));
-        }
-      }
-      return { round, aggregate: aggregateRound(scored), lockedEvaluations };
+      const { aggregate, lockedEvaluations } = roundEvidence({ roundId: round.id, rubric: round.rubric, assignments: application.evaluation_assignments });
+      return { round, aggregate, lockedEvaluations };
     });
     const readiness = applicantReadinessIssues(byRound.map(({ round, aggregate, lockedEvaluations }) => ({
       id: round.id,
@@ -248,8 +240,8 @@ export default async function HashBoard() {
   }).sort((a, b) => (b.finalScore ?? -1) - (a.finalScore ?? -1));
   const roundReadiness = rounds.map((round) => {
     const assignments = applications.flatMap((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id));
-    const locked = assignments.filter((assignment) => assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")).length;
-    const covered = applications.filter((application) => application.evaluation_assignments.filter((assignment) => assignment.round_id === round.id && assignment.evaluations.some((evaluation) => evaluation.status === "LOCKED")).length >= 2).length;
+    const locked = applications.reduce((sum, application) => sum + roundEvidence({ roundId: round.id, rubric: round.rubric, assignments: application.evaluation_assignments }).lockedEvaluations, 0);
+    const covered = applications.filter((application) => roundEvidence({ roundId: round.id, rubric: round.rubric, assignments: application.evaluation_assignments }).lockedEvaluations >= 2).length;
     return { ...round, assignmentCount: assignments.length, locked, covered };
   });
   const decisions = [...decisionByApplication.values()];
@@ -264,7 +256,7 @@ export default async function HashBoard() {
     if (readiness.ready && voteOutcome === "PENDING" && !decision) labels.push("Member vote has not reached quorum.");
     if (readiness.ready && voteOutcome !== "PENDING" && !decision) labels.push("Vote decided; apply the result.");
     if (decision && !["LOCKED", "RELEASED"].includes(decision.status)) labels.push(`${decision.decision_approvals.length}/2 approvals recorded.`);
-    if (decision?.status === "LOCKED") labels.push("Outcome is approved and ready to release.");
+    if (decision?.status === "LOCKED") labels.push("Outcome is locked; review release to check evidence, approvals and your conflicts.");
     return labels.length ? [{ application, labels, blocked: !readiness.ready }] : [];
   });
 
@@ -274,7 +266,7 @@ export default async function HashBoard() {
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Decisions"
         description="Run stage votes that move applicants through the pipeline, then resolve evidence exceptions, apply the final vote, approve outcomes, and release them."
-        action={hashOpen || stage !== null ? <Link href="/admin/hash/deliberate" className="button-secondary text-sm">Discussion mode</Link> : null}
+        action={hashOpen || stage !== null ? <Link href={withWorkspaceCycle("/admin/hash/deliberate", cycleId)} className="button-secondary text-sm">Discussion mode</Link> : null}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/hash" />
       {stage !== "FINAL" && (
@@ -296,9 +288,9 @@ export default async function HashBoard() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={hashOpen ? "navy" : "neutral"}>{hashOpen ? "Queue open" : `${cycleIssues.length} blocker${cycleIssues.length === 1 ? "" : "s"}`}</StatusPill>
-            {canRelease && <ReleaseAllButton cycleId={cycleId} readyCount={lockedDecisionCount} />}
           </div>
         </div>
+        {canRelease && <div className="mt-4"><ReleaseAllButton cycleId={cycleId} lockedCount={lockedDecisionCount} /></div>}
         {cycleIssues.length > 0 && (
           <ul className="mt-4 border-l-2 border-mecg-orange pl-4 text-sm text-mecg-navy/70">
             {cycleIssues.map((issue) => <li key={issue.key}>{issue.label}</li>)}
@@ -332,7 +324,7 @@ export default async function HashBoard() {
               <ul className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
                 {exceptionRows.map(({ application, labels, blocked }) => (
                   <li key={application.id} className="grid gap-1 py-3 sm:grid-cols-[minmax(10rem,0.35fr)_1fr_auto] sm:items-start sm:gap-4">
-                    <Link href={`/admin/applications/${application.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
+                    <Link href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
                     <p className="text-sm leading-6 text-mecg-navy/60">{labels.join(" ")}</p>
                     <StatusPill tone={blocked ? "neutral" : "navy"}>{blocked ? "Blocked" : "Action"}</StatusPill>
                   </li>
@@ -361,7 +353,7 @@ export default async function HashBoard() {
                     <div className="grid gap-3 md:grid-cols-[2rem_minmax(10rem,1.2fr)_minmax(10rem,1fr)_7rem_minmax(10rem,0.8fr)] md:items-start">
                       <span className="tabular text-sm font-semibold text-mecg-navy/45">{index + 1}</span>
                       <div>
-                        <Link href={`/admin/applications/${application.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
+                        <Link href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
                         <p className="mt-0.5 text-xs text-mecg-navy/55">{applicationStatusLabel(application.status)}</p>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CLASS_YEAR_LABELS, CLASS_YEARS } from "@/lib/workflow";
 
 const FIELD_CLASS =
@@ -13,9 +13,12 @@ export default function InterestForm() {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setMessage("");
     setIsError(false);
     setPending(true);
@@ -23,9 +26,12 @@ export default function InterestForm() {
     const form = event.currentTarget;
     const data = new FormData(form);
 
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 15_000);
     try {
       const response = await fetch("/api/interest", {
         method: "POST",
+        signal: controller.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.get("name"),
@@ -36,27 +42,30 @@ export default function InterestForm() {
         }),
       });
 
-      if (response.ok) {
+      const body: unknown = await response.json().catch(() => null);
+      if (response.ok && body && typeof body === "object" && "ok" in body && body.ok === true) {
         form.reset();
         setMessage("You're on the list. We'll email you when cycle details change.");
       } else {
-        const body = await response.json().catch(() => null);
         setIsError(true);
-        setMessage(body?.error ?? "We couldn't save your information. Please try again.");
+        setMessage(!response.ok && body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "Your signup could not be confirmed. Your information is still here. Retry, or email mecg-board@umich.edu for help.");
       }
     } catch {
       setIsError(true);
-      setMessage("We couldn't reach the server. Check your connection and try again.");
+      setMessage("Your signup could not be confirmed. Your information is still here. Retry, or email mecg-board@umich.edu for help.");
     } finally {
+      window.clearTimeout(timer);
+      submitting.current = false;
       setPending(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="mt-7 grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} aria-busy={pending} className="mt-7 grid gap-4 sm:grid-cols-2">
       <label className="block text-sm font-medium text-white/80">
         Full name
         <input
+          maxLength={120}
           name="name"
           autoComplete="name"
           required
@@ -68,6 +77,7 @@ export default function InterestForm() {
       <label className="block text-sm font-medium text-white/80">
         Email
         <input
+          maxLength={254}
           name="email"
           type="email"
           autoComplete="email"
@@ -80,6 +90,7 @@ export default function InterestForm() {
       <label className="block text-sm font-medium text-white/80">
         Uniqname <span className="font-normal text-white/70">optional</span>
         <input
+          maxLength={200}
           name="uniqname"
           autoComplete="username"
           placeholder="uniqname"
@@ -99,6 +110,7 @@ export default function InterestForm() {
       <label className="block text-sm font-medium text-white/80 sm:col-span-2">
         How did you hear about MECG? <span className="font-normal text-white/70">optional</span>
         <input
+          maxLength={200}
           name="howHeard"
           placeholder="A friend, an event, Instagram…"
           disabled={pending}

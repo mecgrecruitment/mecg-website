@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-070",
+  "lens": "Prospective applicant \u2014 overall coherence; simulated intended-user lens, not human participation",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected local journey is coherent: the homepage explains student-led consulting and exposes Join MECG; Join explains eligibility, materials, recruitment stages and evaluation traits; the form distinguishes account saves from submission, compares conflicting copies before replacing either, clears consent after changes, and redirects confirmed submissions to applicant status. Desktop/mobile hero captures show a restrained, legible Precision Instrument hierarchy with clear student access. The implementation handles meaningful failure states rather than promising that every save succeeded. However, application browser checks use synthetic identity/materials and intercepted APIs/status destinations. They do not demonstrate a student completing the authenticated production journey or understanding its next step. One confirmation privacy phrase also needs qualification. I cannot establish world-class acceptance or hosted release readiness from this evidence alone; this is an independent AI source/capture review, not observed user success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/apply/test-harness/page.tsx",
+    "src/lib/auth.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:285",
+      "evidence": "The Application received confirmation says written responses enter \u201canonymous first-pass review.\u201d ApplicationForm MaterialsStep (application-form.tsx:731) and ReviewStep (:746) explain that assigned first-pass reviewers can also view the identifying original resume. The confirmation omits that qualification at the point applicants are told what happens next.",
+      "userImpact": "An applicant can leave the journey believing the first-pass reviewer cannot identify them, despite the accurately disclosed original-resume access earlier in the form. The final confirmation weakens the consistency of the privacy explanation.",
+      "suggestedFix": "Describe the written-response packet as omitting profile identifiers and repeat that assigned reviewers can also access the original resume. Reuse the reviewed disclosure across materials, review and confirmation so the final state preserves the same expectation."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/RLS/storage/email integration exists in the supplied evidence; session expiry, real upload transitions and end-to-end save/submit races remain unverified there.",
+    "The logged 76 browser passes include intercepted application responses; application-reliability.spec.ts:23-25 replaces /applicant with synthetic HTML. Redirect success therefore does not establish the real status-page handoff.",
+    "No supplied authenticated applicant/recovery captures establish visual craft across long responses, conflict comparison or status states; those surfaces were assessed from source/tests only.",
+    "No human comprehension study, physical-device use, Safari/Firefox or assistive-technology validation was observed. Board resolution of original-resume policy and client-approved project artifacts remain external dependencies."
+  ]
+}

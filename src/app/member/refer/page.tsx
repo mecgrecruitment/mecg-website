@@ -1,3 +1,4 @@
+import { selectWorkspaceMembership } from "@/lib/workspace-cycle";
 import type { Metadata } from "next";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +28,7 @@ function nextAction(status: string) {
 
 export default async function ReferPage() {
   const user = await requireMember();
-  const cycleMembership = user.memberships.find((membership) => membership.active && ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
+  const cycleMembership = await selectWorkspaceMembership(user, ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"]);
   if (!cycleMembership) return null;
 
   const supabase = await createClient();

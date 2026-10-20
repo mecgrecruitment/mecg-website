@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-046",
+  "lens": "Product systems and reliability — long or difficult content",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The Precision Instrument public proposition is coherent, and recovery and irreversible-action interfaces show considerable care. Recovery comparisons preserve paragraphs and wrap long text; saving pauses until a copy is chosen, with explicit overwrite consequences. The synthetic mobile close-grading capture gives irreversible consequences and incomplete evidence prominent, readable treatment. The SQL aggregate distinguishes submitted work from valid independent evaluators rather than treating every observation as completion. Original-resume identification is disclosed accurately. However, final application submission accepts an HTTP success without validating its receipt, weakening the recovery guarantee at the most consequential moment. Local fixtures and passing logs support specific mechanisms, not observed applicant/operator success or hosted reliability. World-class agreement remains unproven.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx (save, recovery, submission, comparison and materials/review sections)",
+    "src/app/api/apply/route.ts",
+    "src/lib/application-draft-recovery.ts",
+    "src/lib/client-fetch.ts",
+    "src/lib/decision-release.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/rush-controls.tsx:55-89",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "tests/e2e/application-reliability.spec.ts (selected recovery/submission cases)",
+    "tests/e2e/operator-close.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-round-close-final-e2e.log (results)",
+    "evidence/mecg-privacy-final-node.log (summary)",
+    "evidence/mecg-privacy-db-final.log (summary)",
+    "captures/mobile-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:493-538",
+      "evidence": "finishSubmission clears both recovery stores and navigates to /applicant?submitted=1 (493-501). After non-success handling, submit calls it at 538 without parsing the successful response. The actual route returns {applicationId} (src/app/api/apply/route.ts:102-112). tests/e2e/application-reliability.spec.ts:64-80 explicitly supplies HTTP 200 with {} and expects submission navigation; the malformed-receipt rejection at 342-349 covers draft saves only.",
+      "userImpact": "If a successful HTTP response lacks the application receipt, the interface still treats submission as confirmed and removes the browser recovery copy. For lengthy responses with failed autosave, that can remove the applicant's only recovery copy before submission has been meaningfully confirmed. This is a conditional failure path, not evidence of an observed lost application.",
+      "suggestedFix": "Validate the successful submission receipt before clearing recovery. Treat missing/malformed receipts as uncertain, reconcile submitted status, and otherwise retain answers with explicit recovery guidance. Add a focused regression for empty/malformed 2xx submission responses and use a valid receipt in the storage-disabled success fixture."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in the supplied evidence; session expiry, upload transitions and production rollout races remain unverified.",
+    "No real applicant or operator task observation or human study establishes successful recovery, comprehension of irreversible consequences, or completion with long/difficult content.",
+    "Maximum-length multi-question recovery comparisons were source-reviewed, not visually exercised. Private captures are synthetic; the supplied mobile modal capture does not by itself prove reachability of every lower control.",
+    "Safari, Firefox, physical devices and assistive technology were not exercised.",
+    "Client-approved case-study outcomes/artifacts remain absent. Original-resume policy reconciliation and privacy retention remain owner decisions."
+  ]
+}

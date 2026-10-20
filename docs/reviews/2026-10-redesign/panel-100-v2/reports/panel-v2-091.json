@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-v2-091",
+  "lens": "Simulated owner and access-sensitive user, first encounter",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision gives a clear public proposition and materially safer account recovery. The mobile homepage visibly states no fee and one semester; its pending case-study boundary avoids invented proof. I traced the actual People account forms through ADD_EXISTING_USER, incident storage, the owner queue and resolution. Unknown identity/grant acknowledgements preserve access, return opaque references, retain form details and offer cycle-scoped reconciliation. Mounted associated tabs support Arrow/Home/End navigation. The original-resume disclosure consistently explains that reviewers can identify applicants. These are substantial source and local-test strengths, but do not establish a successful authenticated owner recovery with real providers or user comprehension of privacy boundaries. For the unchanged broad world-class question, those consequential unknowns plus absent approved work evidence prevent unqualified agreement. Hold consequential rollout for integrated acceptance; this is an AI simulation, not human task observation.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/account-provisioning-followup.md",
+    "src/app/(marketing)/home/page.tsx",
+    "captures/public-home-mobile-390.png",
+    "src/app/admin/rush-controls.tsx",
+    "src/app/admin/account-provisioning.tsx",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/people/people-workspace.tsx",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/operational-log.ts",
+    "src/lib/workspace-cycle.ts",
+    "src/proxy.ts",
+    "src/app/apply/application-form.tsx:720-735",
+    "src/app/applicant/page.tsx:307",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/account-provisioning.spec.ts",
+    "tests/e2e/cohort-workspace-selection.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/account-provisioning-node.log",
+    "docs/reviews/2026-10-redesign/evidence/account-provisioning-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "tests/e2e/account-provisioning.spec.ts:5-45; docs/reviews/2026-10-redesign/account-provisioning-followup.md",
+      "evidence": "The browser fixture increments writes and aborts/fulfills intercepted requests; it represents a commit without performing one. The receipt explicitly leaves hosted Clerk/Supabase and an authenticated owner recovery unverified. The 40 passing browser checks and 31 route tests therefore verify useful local contracts, not provider reconciliation. SQL tests separately establish owner/cycle restrictions.",
+      "userImpact": "An owner still lacks evidence that a real partial account can be located, repaired in the intended cycle and safely reconciled under actual sessions and provider delays.",
+      "suggestedFix": "Before consequential release, record an authorized integrated recovery using synthetic identities: uncertain create/link/grant acknowledgement, current-role and cross-cycle denial, preserved prior access, Clerk/People inspection and resolution. Verify provider and database state independently of the displayed receipt."
+    }
+  ],
+  "notVerified": [
+    "No hosted environment exists; actual Clerk sessions/expiry, Supabase RPC/RLS, storage and email integration remain unverified.",
+    "No authenticated owner end-to-end recovery, assistive-technology session or observed human understanding/task success was supplied; private owner visuals were source-reviewed, not captured live.",
+    "Client-approved engagement artifacts/outcomes and Board-confirmed membership workload remain absent.",
+    "Board decisions for original-resume policy conflict, retention/privacy operations and closed-round remediation remain outstanding. Accurate disclosure does not constitute policy approval."
+  ]
+}

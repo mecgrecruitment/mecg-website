@@ -1,0 +1,1220 @@
+{
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "status": "V2 independent review in progress; dispositions do not change votes",
+  "items": [
+    {
+      "sourceSeat": "panel-v2-001",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-84",
+        "evidence": "The approved fallback remains empty; the current capture renders Past partnerships and Case studies pending client approval. ClientProjectGrid explicitly withholds scope, methods, deliverables and outcomes. The revised heading fixes the overpromise, but the evidence itself is still absent.",
+        "userImpact": "An organization can assess terms and affiliations but cannot judge the quality or relevance of a completed MECG recommendation.",
+        "suggestedFix": "Obtain client and Board approval for one real decision question, method, redacted deliverable and bounded handoff/result, then publish through the existing approval boundary. Keep the honest pending state until approved."
+      },
+      "disposition": "Confirmed missing external authority/facts. Honest pending copy remains; no case study, approval, workload number or meeting time will be invented. Current-cycle Board workload facts have now been requested asynchronously; approved project artifact request remains unanswered from earlier work. No current code change can supply those facts. V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-001",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says expected hours, mandatory meeting times and peak commitments are not published; Join supplies a direct Board email fallback.",
+        "userImpact": "A student cannot independently determine schedule fit before committing time to recruitment or applying.",
+        "suggestedFix": "Have the Board confirm and date the current-cycle weekly range, required meetings and peak expectations, then publish them near preparation. Preserve the truthful contact fallback until those facts exist."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-002",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback remains empty. Home now correctly titles the empty state Past partnerships and discloses pending case studies. Organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. Both inspected mobile captures show partnership listings rather than an actual engagement. The corrected heading resolves the overpromise, but not the evidence task.",
+        "userImpact": "An organization can understand the offer and recognize past partners, but cannot judge the rigor or relevance of a comparable MECG recommendation before investing time in contact.",
+        "suggestedFix": "Have the client and Board approve one bounded engagement with its real question, constraints, methods and a redacted handoff artifact or factual result. Publish through the existing approval boundary and feature it in the available proof slot. Retain truthful pending copy until approval exists."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-003",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:67-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:107-108",
+        "evidence": "The homepage fallback now accurately says Past partnerships and Case studies pending client approval; the supplied desktop and mobile captures show this state. PUBLIC_PROJECTS is empty, and organization profiles explicitly withhold scope, methods, deliverables and outcomes. This verifies that the earlier misleading heading is fixed while the underlying proof objection remains.",
+        "userImpact": "A prospective client can understand cost, duration, process and associations but cannot inspect an actual MECG question, analysis or handoff to assess relevance and quality before inquiring.",
+        "suggestedFix": "Have content owners secure client and Board approval for one bounded engagement showing the decision, student contribution, methods, a redacted deliverable and factual limits. Feature it through the existing approved-publication slot. Preserve the honest pending state until approval exists."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-004",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved release list remains empty. The homepage correctly says Past partnerships and Case studies pending client approval; organization details explicitly withhold scope, methods, deliverables and outcomes. The supplied current homepage captures confirm this available proof state. The earlier misleading heading is fixed, but the underlying evidence objection remains.",
+        "userImpact": "A prospective client can understand the semester offer and recognize organizations, but cannot assess the reasoning, specificity or usefulness of an actual MECG handoff before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement containing its real decision question, method, contribution, redacted handoff and limitations; publish through the existing release boundary. Retain the honest pending state until approved."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-005",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:108; src/app/(marketing)/home/page.tsx:80",
+        "evidence": "The approved fallback remains empty. Current organization profiles explicitly withhold project scope, methods, deliverables and outcomes; the supplied final homepage captures show the pending-client-approval state. Renaming the fallback to Past partnerships correctly fixes the former overpromise but does not provide an engagement example.",
+        "userImpact": "An organization can assess the proposed process and affiliations but cannot judge the specificity or quality of MECG analysis before investing in an inquiry.",
+        "suggestedFix": "Content owners should obtain client and Board approval for one bounded real engagement: question, contribution, methods, redacted deliverable and handoff limits. Publish through the existing boundary; retain the truthful pending state until approval."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-006",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback remains empty. The current selected profile explicitly says project scope, methods, deliverables and outcomes await approval; the inspected homepage captures likewise show the pending-client-approval state. Honest partnership headings resolve the earlier overpromise but supply no engagement evidence.",
+        "userImpact": "A prospective client can understand terms and affiliations but cannot assess the substance or relevance of MECG\u2019s actual work before investing in an inquiry.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded engagement with its actual decision, methods, limits and redacted handoff artifact. Publish through the existing approval boundary; retain the truthful pending status until approved."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-007",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-81",
+        "evidence": "The approved fallback list is empty. The current homepage correctly switches to Past partnerships / Across industries and explicitly states case studies are pending client approval; the supplied public-home-mobile-390.png shows that fallback, not a concrete engagement question, method or handoff.",
+        "userImpact": "A prospective client understands the offer and next action but cannot inspect the substance or relevance of completed MECG work before investing time in an inquiry. Honest affiliation and process descriptions leave this decision incomplete.",
+        "suggestedFix": "Obtain client and Board approval for one bounded actual engagement: question, contribution, method, limitations and a redacted deliverable or factual handoff. Publish through the existing approval boundary; retain the truthful pending state until then."
+      },
+      "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-008",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "The approved fallback remains empty; Work renders Selected work only when publicProjects.length > 0. The supplied current home captures show the pending-client-approval state. ClientProjectGrid explicitly withholds scope, methods, deliverables and outcomes in its MECG engagement paragraph. The corrected Past partnerships heading resolves the earlier overpromise, but no approved actual engagement is supplied.",
+        "userImpact": "A prospective client can understand the offer and initiate contact but cannot assess the specificity, reasoning or practical quality of a comparable MECG handoff.",
+        "suggestedFix": "Content owners should obtain client and Board approval for one bounded engagement: actual question, constraints, method and redacted deliverable with honest handoff limits. Publish through the existing approval boundary; retain the pending disclosure until approval exists."
+      },
+      "disposition": "Confirmed external content/approval dependency: approved engagement facts/artifact remain unavailable. Honest pending copy and approval boundary remain. No invented outcomes or new authority. Frozen V2 verdict unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-009",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "The approved fallback collection is empty; every organization profile explicitly withholds project scope, methods, deliverables and outcomes pending approval. Work conditionally omits Selected work when no published records exist. Both viewed home captures show the pending case-study state rather than an actual question, method or handoff.",
+        "userImpact": "A prospective organization can understand the proposed engagement but cannot independently assess the relevance or rigor of completed MECG work before investing in an inquiry.",
+        "suggestedFix": "Have authorized content owners obtain client and Board approval for one bounded engagement with its real decision, methods, limitations and redacted handoff artifact, then publish through the established approval boundary. Retain the honest pending state until approval exists."
+      },
+      "disposition": "Confirmed external engagement content/approval dependency. Existing approved-publication path works locally, while no real approved artifact/question/method/handoff has been supplied. Honest pending copy remains; no invented approval or outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-010",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx: selected-client-profile",
+        "evidence": "The current homepage correctly renders Past partnerships and Case studies pending client approval. PUBLIC_PROJECTS is empty; selected organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. Both inspected public captures show affiliation evidence and a culture photograph, without an actual consulting artifact.",
+        "userImpact": "A prospective organization can understand the offer and terms but cannot judge the substance or usefulness of comparable MECG work before committing to a conversation.",
+        "suggestedFix": "Have content owners secure client and Board approval for one bounded real engagement: decision question, MECG method, redacted handoff excerpt and limitations. Feature it through the existing approval boundary. Preserve the accurate pending state until approval exists."
+      },
+      "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+    },
+    {
+      "sourceSeat": "panel-v2-011",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:107-108",
+        "evidence": "The current fallback contains broad industry prose and a pending-client-approval status; the approved fallback list is empty. Organization profiles explicitly withhold scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show partnership names and culture photography without an engagement artifact. This independently sustains the historical proof objection while recognizing the corrected partnership heading.",
+        "userImpact": "A prospective organization can assess service fit and affiliations but cannot judge the specificity, reasoning or usefulness of actual MECG work before committing time to an inquiry.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded engagement: real decision, constraints, methods, MECG contribution, redacted deliverable and factual handoff or result with limits. Feature it through the existing publication boundary before general process material. Retain pending status until approved; fabricate nothing."
+      },
+      "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+    },
+    {
+      "sourceSeat": "panel-v2-012",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved release list remains empty. Home renders the honest partnership/pending-approval fallback rather than a decision, method or deliverable. Selected organization details explicitly withhold scope, methods, deliverables and outcomes. The supplied mobile captures show that fallback; home/page.tsx:135-136 correctly identifies the photograph as a PwC member visit.",
+        "userImpact": "A prospective client can understand fit and recognize partners, but cannot inspect the substance or practical quality of comparable MECG work before inquiring. Improved ordering cannot supply the missing proof.",
+        "suggestedFix": "Content owners should obtain client and Board approval for one bounded engagement with its actual question, method, constraints and redacted deliverable or factual handoff. Feature it through the existing publication boundary before process exposition. Preserve pending disclosures until approval; fabricate no outcome."
+      },
+      "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+    },
+    {
+      "sourceSeat": "panel-v2-013",
+      "finding": {
+        "severity": "medium",
+        "file": "src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-82",
+        "evidence": "The approved local project list remains empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes. The current homepage capture shows partnership names and pending-approval status, with the only photograph identified as a PwC member visit. Revised headings truthfully describe partnerships, so the prior misleading-heading defect is resolved; the underlying proof gap remains.",
+        "userImpact": "A prospective client can understand terms and inquire, but cannot assess the quality or relevance of an actual MECG engagement before doing so.",
+        "suggestedFix": "Obtain client and Board approval for at least one bounded engagement question, method, redacted deliverable and result or handoff, then publish through the existing release boundary. Keep the current honest pending state until approval exists."
+      },
+      "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+    },
+    {
+      "sourceSeat": "panel-v2-014",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:99-108",
+        "evidence": "The approved fallback remains empty. Home now accurately says Past partnerships / Across industries and displays pending approval; organization details provide business descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show that fallback. The photograph at home/page.tsx:135-136 documents a PwC visit, not a consulting deliverable.",
+        "userImpact": "A prospective client can understand the service and recognize organizations, but cannot assess whether MECG research and recommendations are sufficiently rigorous or relevant before committing time and information.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement: actual decision, constraints, methods and a redacted deliverable with an honest handoff/result and limits. Feature it through the approved publication boundary before general capabilities or people. Retain truthful pending copy until approval; invent no outcome."
+      },
+      "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+    },
+    {
+      "sourceSeat": "panel-v2-021",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,473",
+        "evidence": "Failed result application sets error and clears phase. The only error rendering is an ordinary footer paragraph at line 473; it has no alert/live semantics, focus transfer or association with the result button. The separate polite phase status at lines 331\u2013333 reports applying/success but becomes empty on failure. deck-accessibility.spec.ts intercepts successful application and never asserts failed-result announcement.",
+        "userImpact": "A screen-reader operator can hear the pending result but receive no announced reason it failed; discovering the footer message requires manual exploration. This is a source-derived gap, not an observed AT failure.",
+        "suggestedFix": "Expose result/pointer failures through a persistent live error region or deliberate focused error summary, associate recovery guidance with the action, and verify a rejected application using keyboard and assistive technology."
+      },
+      "disposition": "Addressed and locally verified on the later working tree; see deck-result-recovery.md (55/55 focused browser checks). Frozen V2 snapshot and verdict remain unchanged. Hosted providers, human/AT validation and publication authority remain separate."
+    },
+    {
+      "sourceSeat": "panel-v2-021",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/rounds/rubric-editor.tsx:60-84,107,210",
+        "evidence": "save() sets pending then awaits authorizedFetch without a signal or deadline; non-OK response.json is also unbounded. authorizedFetch in src/lib/client-fetch.ts delegates to fetch and only handles session refresh. Pending disables the whole fieldset and save action until finally. The supplied rubric test releases its deferred request with 409; it does not cover a nonsettling request/body.",
+        "userImpact": "A stalled save can leave an operator indefinitely unable to edit or retry, with unsaved scoring-guide changes held only on the page and no uncertainty/recovery guidance.",
+        "suggestedFix": "Bound the full request/body operation, preserve criteria, announce unknown save outcome and restore controls; reconcile the authoritative rubric before retrying an uncertain write. Add focused stalled-request/body recovery coverage."
+      },
+      "disposition": "Addressed and locally verified on the later working tree; see operator-write-receipts.md (55 API tests and all 80 browser scenarios have passing coverage across recorded runs). Frozen V2 snapshot and verdict remain unchanged. Hosted providers, human/AT validation and publication authority remain separate."
+    },
+    {
+      "sourceSeat": "panel-v2-071",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save waits on inflight at line 149, then awaits retryOnNetworkError(authorizedFetch(...)) at 157-161 and response.json at 162 without a deadline or AbortSignal. finish releases the per-applicant queue only in finally at 178-179. client-fetch.ts authorizedFetch has no overall deadline; retryOnNetworkError only retries rejected requests. Retry/copy guidance in the roster renders only for error/hint, not saving. The supplied group-case-evidence.spec.ts covers rejected and malformed responses, but no permanently stalled request/body.",
+        "userImpact": "A connection/body stall leaves Saving\u2026 indefinitely. Subsequent scores and notes for that applicant wait behind the unresolved request, so observations remain only in the page without reaching normal retry guidance. This is a source-derived failure mode, not an observed hosted incident.",
+        "suggestedFix": "Bound the complete Group Case request/body lifecycle, release the queue on timeout, preserve the latest payload and announce an unconfirmed outcome with copy/retry guidance. Add stalled-request and stalled-body checks followed by a newer observation, ensuring stale receipts cannot mark it saved."
+      },
+      "disposition": "Addressed on later working tree: revision-safe SQL, exact mutation replay, full JSON deadline, serial intent drain and explicit conflict choices/private copy. SQL verified including real two-session first-save conflict. Final Group Case browser matrix90/90 and focusedAPI/helper/SSR30/30 pass; see group-case-client-revisions.md and group-case-v2-integration-tests.md. Frozen V2 snapshot and vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-081",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+        "evidence": "ReleaseButton calls useAction/runAction, whose authorizedFetch and response.json have no deadline. runAction accepts every HTTP success, including a missing/malformed body, as ok:true; a lost response returns the generic \u201cCould not release\u201d. ReleaseButton refreshes only for ok or released:true, so an ambiguous committed write leaves the old view with an enabled retry. This button is actually rendered in applications/[id]/page.tsx:552 and hash/page.tsx:414. The new bounded ReleaseAllButton does not cover this path.",
+        "userImpact": "An operator releasing one applicant can remain indefinitely at Releasing, receive false certainty from a malformed success, or retry a stale locked outcome after an unacknowledged commit. This is a source-established conditional failure, not a hosted reproduction.",
+        "suggestedFix": "Give individual release the bounded full-body request, validated operation receipt and explicit unknown-result reconciliation used for batch release. Refresh authoritative outcome state before allowing retry; cover stalled bodies, malformed success and commit-then-response-loss in a focused individual-release test."
+      },
+      "disposition": "Addressed on later working tree with bounded full-body release confirmation, exact decision receipt, persistent uncertainty and authoritative full-reload recovery. See operator-write-receipts.md for 55 API tests and recorded passing coverage of all 80 browser checks. Frozen V2 verdict unchanged; no hosted delivery proof claimed."
+    },
+    {
+      "sourceSeat": "panel-v2-091",
+      "finding": {
+        "severity": "medium",
+        "file": "tests/e2e/account-provisioning.spec.ts:5-45; docs/reviews/2026-10-redesign/account-provisioning-followup.md",
+        "evidence": "The browser fixture increments writes and aborts/fulfills intercepted requests; it represents a commit without performing one. The receipt explicitly leaves hosted Clerk/Supabase and an authenticated owner recovery unverified. The 40 passing browser checks and 31 route tests therefore verify useful local contracts, not provider reconciliation. SQL tests separately establish owner/cycle restrictions.",
+        "userImpact": "An owner still lacks evidence that a real partial account can be located, repaired in the intended cycle and safely reconciled under actual sessions and provider delays.",
+        "suggestedFix": "Before consequential release, record an authorized integrated recovery using synthetic identities: uncertain create/link/grant acknowledgement, current-role and cross-cycle denial, preserved prior access, Clerk/People inspection and resolution. Verify provider and database state independently of the displayed receipt."
+      },
+      "disposition": "Confirmed external hosted integration evidence gap. Local intercepted browser/API/SQL verification cannot prove real Clerk/Supabase/email reconciliation. User states no staging environment exists. No production writes or provider proof fabricated; V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-031",
+      "finding": {
+        "severity": "medium",
+        "file": "src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5",
+        "evidence": "The organization profile withholds scope, methods, deliverables and outcomes pending approval; the approved static release list is empty. The current homepage capture and home/page.tsx:77-80 show the corresponding pending case-study state. Recognizable partnerships and a process figure are available, but no actual engagement artifact is supplied.",
+        "userImpact": "A prospective client cannot evaluate the relevance or analytical quality of MECG delivery before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement question, method, redacted deliverable and factual handoff with limits; publish through the existing release boundary. Preserve the truthful pending state until authorized."
+      },
+      "disposition": "Confirmed missing approved real engagement evidence. Existing approval/publication path is locally verified, while actual authorized question/method/artifact/outcome has not been supplied. Honest pending state remains. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-031",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment FAQ explicitly says expected weekly hours, mandatory meeting times and peak commitments are unpublished. Join provides a direct Board email link, which mitigates the former vague advice but does not supply those facts.",
+        "userImpact": "A student cannot independently decide whether membership fits their semester after reading the preparation and FAQ journey.",
+        "suggestedFix": "Have recruitment leadership approve and date a current-cycle workload range, required meetings and peak-period expectations; publish beside preparation and in this FAQ. Do not invent estimates."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-051",
+      "finding": {
+        "severity": "medium",
+        "file": "src/components/client-project-grid.tsx:99\u2013108; src/content/projects.public.ts:3\u20135; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The selected profile displays the organization description, then states that MECG project scope, methods, deliverables and outcomes await public-release approval. The approved fallback contains zero records, and Work omits Selected work when the public list is empty. The supplied homepage captures corroborate the pending-case-study state. The mobile selector now places the result adjacent, so the old remote-result objection is not retained.",
+        "userImpact": "A prospective client can assess the proposed service and partnership breadth but cannot inspect a comparable engagement or deliverable to judge analytical quality before sharing time and context.",
+        "suggestedFix": "Obtain client and Board approval for at least one bounded real engagement showing the decision, MECG contribution, methods, limitations and redacted handoff artifact. Publish through the existing approval boundary; preserve truthful pending copy until permission exists."
+      },
+      "disposition": "Confirmed missing actual approved engagement evidence. Existing publication boundary remains; no authorized real artifact or outcomes supplied and no content invented. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-061",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published. Join renders a direct Board email fallback, but no current workload facts. This confirms the remaining substance of the original schedule-fit objection, with improved truthful disclosure.",
+        "userImpact": "A first-time student cannot determine whether membership fits classes, employment or other obligations before investing in applying; a separate Board conversation remains necessary.",
+        "suggestedFix": "Have the Board approve and publish a dated current-semester typical weekly range, mandatory times and peak-period expectations alongside preparation. Retain the honest unavailable statement until facts are approved; do not invent hours."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-015",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback is empty. Home correctly renders Past partnerships / Across industries and the pending-client-approval status; organization profiles explicitly withhold scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show that fallback. Home:135-136 correctly captions its real photograph as a PwC member visit. The old misleading specific-questions heading is fixed; the underlying proof gap remains.",
+        "userImpact": "A prospective client can assess terms and affiliations but cannot assess the reasoning, specificity or usefulness of an actual MECG handoff before investing in an inquiry. Visual precision currently exceeds demonstrated consulting substance.",
+        "suggestedFix": "Have the content owners obtain client and Board approval for one bounded engagement: actual decision question, constraints, methods, redacted deliverable excerpt and factual handoff/result with limits. Publish through the existing approval boundary before people/culture content. Preserve the honest pending status until approved; fabricate nothing."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-016",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback remains empty. The captured homepage renders partnership breadth and pending case studies; organization profiles explicitly withhold scope, methods, deliverables and outcomes. WorkPage:56-63 omits Selected work when no approved records exist. The real homepage photograph at home/page.tsx:135-136 is correctly a member visit, not a project artifact.",
+        "userImpact": "A client can assess terms and affiliations but cannot independently judge the specificity, analytical quality or practical usefulness of completed MECG work before investing in an inquiry.",
+        "suggestedFix": "Have client and Board content owners approve one bounded engagement: actual decision, student contribution, methods, redacted deliverable excerpt and honest handoff/limits. Feature it through the existing approved-publication path before general process exposition. Retain truthful pending copy until approval; invent no outcomes."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-022",
+      "finding": {
+        "severity": "low",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-292,470-476",
+        "evidence": "SORT_BUTTON uses text-xs and py-1 without a minimum height; By score/A to Z/Revisits inherit that compact target. Previous/Next use text-sm and py-2 without min-h-11, and Exit has no minimum target box. By contrast, Presentation motion explicitly adds min-h-11 at line 296. These source-defined targets fall below DESIGN.md section 2\u2019s 44px project floor; no physical-device miss or WCAG failure is claimed.",
+        "userImpact": "A narrow-screen touch operator gets small, closely grouped controls while changing the discussion order or navigating applicants, reducing comfortable activation compared with the public controls.",
+        "suggestedFix": "Give deck sort, Exit, search results and footer actions at least 44px target height and sufficient width; allow the footer to wrap at narrow widths. Verify actual target rectangles and no horizontal overflow at 320px and 390px."
+      },
+      "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-023",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:211-216,332,374",
+        "evidence": "Next unapplied applicant calls advance(), which clears phase through leave() and selects another entry. Its button is conditional on stamped phase and inside the card keyed by entry.id. No effect/ref assigns focus after that focused subtree is removed. The supplied deck tests stop at visibility of Next unapplied applicant and do not activate it and assert continuation focus. This is source-derived, not a live reproduction.",
+        "userImpact": "A keyboard presenter advancing an applied result loses the focused control and a stable location for inspecting or acting on the next applicant.",
+        "suggestedFix": "After explicit advance, focus a programmatically focusable new-applicant heading or another deliberate stable destination. Handle the final-card case too; test Enter activation, focus destination and subsequent Tab order."
+      },
+      "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-023",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,324-328,473",
+        "evidence": "A failed APPLY_STAGE_HASH sets error and clears phase. Both existing polite status regions announce applicant/phase only; clearing phase empties the result message. The error is rendered as an ordinary footer paragraph without a live role, association or focus transfer.",
+        "userImpact": "A screen-reader keyboard operator may hear Applying room result without being informed that application failed or where to recover. Visual footer feedback does not provide equivalent automatic feedback.",
+        "suggestedFix": "Expose the failure through a persistent alert/status region and associate it with the explicit retry control. Add a rejected apply test asserting the error announcement semantics and reachable retry focus."
+      },
+      "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-032",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:102-109",
+        "evidence": "The approved fallback list is empty. The selected organization profile explicitly withholds MECG scope, methods, deliverables and outcomes pending approval; the supplied homepage capture shows the corresponding pending case-study state.",
+        "userImpact": "Prospective clients can inspect affiliations and process but cannot assess the quality or relevance of an actual consulting handoff.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement question, method and redacted deliverable or handoff; publish through the existing approval boundary. Preserve truthful pending copy until approval."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-032",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment FAQ explicitly says this semester's hours, mandatory meeting times and peak commitments are unpublished. Join supplies a direct Board email link, so the fallback is now truthful and actionable.",
+        "userImpact": "Students still need a separate conversation to decide whether membership fits their semester, including after finding the relevant FAQ on a phone.",
+        "suggestedFix": "Have the Board approve and date the current-cycle typical weekly range, fixed obligations and peak-period caveat; publish beside preparation and in the FAQ without inventing hours."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-033",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:108",
+        "evidence": "The approved fallback remains empty. The selected organization profile explicitly withholds scope, methods, deliverables and outcomes pending approval; supplied homepage captures show partnerships and pending case studies instead of an inspectable engagement.",
+        "userImpact": "Prospective clients cannot evaluate the substance or relevance of a prior MECG handoff before contacting the Board.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement question, actual method and redacted deliverable/handoff with limits, then publish through the existing boundary. Keep pending disclosure until approval; invent no outcomes."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-033",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly commitment answer explicitly says expected weekly hours, mandatory meeting times and peak commitments are not published. The direct Board email in Join is a truthful mitigation.",
+        "userImpact": "A student who finds the relevant FAQ still cannot independently determine whether membership fits their semester.",
+        "suggestedFix": "Publish a dated Board-confirmed current-cycle weekly range, mandatory meeting expectations and peak-period caveat when available, retaining the direct question route."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-042",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-81",
+        "evidence": "The approved public project list is empty; the homepage correctly substitutes Past partnerships and a pending-client-approval status. The supplied 320px homepage capture shows organization rows rather than an inspectable engagement.",
+        "userImpact": "Clients can assess the offer and affiliations but cannot evaluate an actual question, method or deliverable before investing in an inquiry. Honest fallback copy mitigates confusion without supplying proof.",
+        "suggestedFix": "Have content owners obtain client and MECG approval for one bounded engagement with its question, methods, redacted handoff and limits, then publish through the existing approval boundary. Preserve the pending state until approval."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-043",
+      "finding": {
+        "severity": "low",
+        "file": "src/app/admin/round-status-control.tsx:55-65,154,187",
+        "evidence": "Dialog cleanup always calls trigger.focus(), but confirmed closure sets closeState to closed and disables that trigger. Dismiss then removes the focused dialog control and attempts to focus an unfocusable disabled button. The committed-freeze browser case verifies dismissal and disabled state, but does not assert a usable focus destination. This is a source-derived gap, not an observed hosted failure.",
+        "userImpact": "A keyboard operator finishing a successful irreversible close has no explicit stable focus handoff to continue reviewing the round.",
+        "suggestedFix": "After confirmed closure, focus an enabled round-review link or a programmatically focusable closed-status heading outside the dialog. Retain trigger restoration for cancellation and unresolved outcomes; assert the success-dismissal destination in the focused keyboard test."
+      },
+      "disposition": "Resolved in later working tree: completed or authoritatively reconciled close dismisses to persistent status heading, then Tab reaches enabled results link; cancel still restores trigger. 90/90 full matrix plus 10/10 affected follow-up and clean lint. See ../round-close-completion-focus.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-052",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "The committed approved-project list is empty. Selected organization profiles provide business descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work renders Selected work only when publicProjects is nonempty. The supplied 390px homepage capture shows the pending-approval state; release-open-items.md confirms actual approved artifacts remain absent. The partnership heading now accurately describes this limitation, but does not supply project proof.",
+        "userImpact": "A mobile client can understand fit and responsibilities but cannot judge the analytical quality, relevance or usefulness of a comparable MECG engagement before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded real engagement with its question, methods, constraints and redacted deliverable or handoff. Publish through the existing approval boundary and feature it clearly. Retain the honest pending state until authorized; invent no outcomes."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-062",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/applicant/page.tsx:23-30,43-49,263-284,366-371",
+        "evidence": "applicant_dashboard returns caller-owned DRAFT/NEEDS_INFO rows without filtering (20260830100000_harden_applicant_workflow.sql:389-401). Dashboard explicitly allows destination /apply at lines 158-160, and /apply links returning applicants to /applicant. pipelineStage falls back to index 0, labeled Submitted; applicationHeadline and the application card call any unreleased nonwithdrawn row moving through review. can_start_application returns false once that cycle has any application (20260901000000_allow_reapplication.sql:32-41). With no schedule items, the next-action fallback therefore says You\u2019re caught up rather than linking to the editable draft.",
+        "userImpact": "A returning applicant viewing history can mistake an unsubmitted saved draft for an application already in review and stop before submitting; NEEDS_INFO likewise lacks a clear resubmission action on this surface. This is source-derived, not an observed hosted incident.",
+        "suggestedFix": "Render explicit Draft\u2014not submitted and Changes requested states before review states, suppress the Submitted step for drafts, and offer Continue application/Review and resubmit linked to /apply when editable. Add real-dashboard SSR fixtures for DRAFT and NEEDS_INFO with prior-cycle history and an empty schedule."
+      },
+      "disposition": "Resolved in later working tree: explicit not-submitted draft and requested-change states in hero/history, no Submitted step for editable states, guarded current-cycle Continue/Resubmit and truthful unavailable/unknown access. 24 focused, 45 broader tests and eight styled synthetic actual-shell SSR captures pass. See ../applicant-editable-status.md. No hosted proof implied. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-072",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save awaits retryOnNetworkError(authorizedFetch(...)) at lines 157-161 and response.json() at 162 without a signal or full-operation deadline. Later saves await the same per-applicant inflight promise at 149. src/lib/client-fetch.ts:authorizedFetch supplies no timeout; retryOnNetworkError retries only thrown errors. The Retry save/copy guidance is rendered only for error or hint states, whereas a stalled save remains saving. Existing group-case-evidence.spec.ts tests rejected/malformed receipts, not nonsettling requests or response bodies.",
+        "userImpact": "A stalled mobile connection can leave observations indefinitely at Saving and block later saves for that applicant. The reviewer cannot verify persistence or reach the explicit retry state, and reloading risks losing unconfirmed observations.",
+        "suggestedFix": "Bound the complete Group Case request and body read, release its serialized queue on timeout, retain the latest payload and expose an honest unconfirmed outcome with retry/copy guidance. Add focused nonsettling-request and stalled-body checks, including a newer edit while the earlier save is pending."
+      },
+      "disposition": "Resolved in later working tree with revision-safe serialized writes, bounded request/body, exact current-mutation replay and private copy/conflict recovery. Prior Group Case proof covers 95 scoped configuration checks across overlapping runs; see ../group-case-write-revisions.md and consolidated grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-073",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save awaits the prior inflight promise at line 149, then unbounded authorizedFetch/retryOnNetworkError at 157-161 and response.json at 162. client-fetch.ts supplies no deadline in those helpers. A never-settling request/body never reaches finally or the error state. The copy-before-leaving guidance and Retry save are rendered only for error/hint at roster lines 420-423, excluding saving. The supplied Group Case tests cover rejected and malformed receipts, not a stalled request/body.",
+        "userImpact": "A reviewer can remain at Saving indefinitely. Later edits queue behind the unresolved save, so neither further grading nor retry confirms persistence; leaving can lose observations held only in memory. This is source-derived, not a live incident reproduction.",
+        "suggestedFix": "Bound the complete request and body read, release the queue on timeout, retain the exact current payload and announce an unknown save outcome with reachable retry/copy guidance. Preserve ordering so a late earlier write cannot overwrite newer observations. Add focused stalled-request and stalled-body cases followed by a newer edit and recovery."
+      },
+      "disposition": "Resolved in later working tree with revision-safe serialized writes, bounded request/body, exact current-mutation replay and private copy/conflict recovery. Prior Group Case proof covers 95 scoped configuration checks across overlapping runs; see ../group-case-write-revisions.md and consolidated grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-082",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-19; src/lib/use-action.ts:28-39",
+        "evidence": "ReleaseButton calls useAction/runAction, which awaits authorizedFetch and response.json without a deadline or release-specific receipt validation. A thrown request becomes generic Could not release; ReleaseButton refreshes only on result.ok or body.released === true. Thus a committed release with a lost acknowledgement leaves the old control enabled after generic failure, while a stall leaves Releasing\u2026 indefinitely. The control is actually mounted on the applicant dossier (page.tsx:552). The supplied release-reliability.spec.ts tests ReleaseAllButton, not this individual path.",
+        "userImpact": "An operator recovering a particular applicant outcome on unreliable mobile connectivity cannot reliably distinguish failed release from committed release, or regain controls after a stalled response. This is a source-derived failure path, not a hosted reproduction.",
+        "suggestedFix": "Give individual release the batch flow\u2019s bounded complete-response contract, validate its action-specific acknowledgement, report unknown outcomes explicitly and refresh/reconcile authoritative status before offering another release. Add focused individual-release checks for stalls, malformed success and committed-write acknowledgement loss."
+      },
+      "disposition": "Resolved in later working tree with action-specific bounded individual-release receipt, unknown-outcome lock and authoritative reconciliation. Prior operator-write proof covers 55 API and 80 scoped browser checks across runs. See ../grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-083",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/round-status-control.tsx:55-65,151-154,187-188",
+        "evidence": "The dialog cleanup always invokes trigger.focus() (63). Once reconcileClose establishes closed state, both the status select and trigger are disabled (151,154). Dismiss removes the dialog, leaving no enabled return target. operator-close.spec.ts:98-108 verifies the lost-acknowledgement closed state and disabled trigger after Dismiss, but never asserts completion focus. This is source-derived, not a reproduced live account failure.",
+        "userImpact": "A keyboard operator loses a stable focus destination after completing or reconciling an irreversible grading close, impairing continuation to results and blocked-release recovery.",
+        "suggestedFix": "On closed completion, focus a persistent programmatically focusable status/result heading or an enabled round-results link after dialog removal; retain trigger restoration for cancellation. Add a keyboard confirmation/reconciliation-to-Dismiss test asserting that destination and subsequent Tab continuation."
+      },
+      "disposition": "Resolved in later working tree: completed or authoritatively reconciled close dismisses to persistent status heading, then Tab reaches enabled results link; cancel still restores trigger. 90/90 full matrix plus 10/10 affected follow-up and clean lint. See ../round-close-completion-focus.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-053",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The approved fallback is empty. Selected profiles explicitly withhold MECG scope, methods, deliverables and outcomes pending approval, while Work renders Selected work only when published projects exist. The supplied homepage captures show the pending-approval state; the final unresolved record confirms actual approved engagement evidence is still absent.",
+        "userImpact": "A prospective client can understand fit and recognize past organizations but cannot inspect comparable reasoning, contribution or handoff quality before committing time and information.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its real decision, methods, constraints, MECG contribution and redacted deliverable or handoff. Publish through the existing approval boundary; retain the honest pending status until authorized."
+      },
+      "disposition": "Confirmed missing approved actual engagement evidence. Preserve truthful pending state and existing approval boundary; no approved artifact or outcomes supplied. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-063",
+      "finding": {
+        "severity": "medium",
+        "file": "tests/e2e/application-reliability.spec.ts:8-42; tests/e2e/application-combine.spec.ts:34-44,61-66",
+        "evidence": "The submission journey advances with click/check and replaces /applicant with synthetic HTML. New combination checks select radios with check and actions with click. Heading-focus assertions and the recorded 105 passing combinations are useful, but still do not demonstrate sequential keyboard completion through preparation, materials, recovery, consent and the actual status surface. This historical evidence objection remains applicable; no keyboard malfunction is established.",
+        "userImpact": "A keyboard-dependent student lacks demonstrated continuity through the complete consequential application task.",
+        "suggestedFix": "Add a focused Tab/Shift+Tab, Enter/Space and native-radio/select journey through validation, recovery choices, submission and real status rendering, asserting visible focus and useful destinations. Record authenticated integration separately when an environment is available."
+      },
+      "disposition": "Local keyboard evidence strengthened: new sequential Tab/Shift+Tab, Enter/Space, native radio/select journey passes5/5 browser configurations through validation, recovery, material fields, consent and confirmed navigation. Actual hosted authentication/upload/status journey remains unproven; navigation boundary and separate actual-dashboard SSR proof are explicitly distinguished. See ../application-keyboard-continuity.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-063",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx:160",
+        "evidence": "The weekly-commitment FAQ explicitly says expected hours, mandatory meeting times and peak commitments are not published and offers Board email. The fallback is truthful but supplies no planning range.",
+        "userImpact": "Applicants cannot independently judge schedule fit before investing in recruitment.",
+        "suggestedFix": "Obtain Board-confirmed current-semester hours, mandatory times and peak obligations; publish dated guidance without inventing estimates."
+      },
+      "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+    },
+    {
+      "sourceSeat": "panel-v2-024",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/rounds/rubric-editor.tsx",
+        "evidence": "save() lines 60\u201384 awaits authorizedFetch without a deadline; its non-success response.json() also has no deadline. pending clears only in finally, while line 107 disables the whole editing fieldset. authorizedFetch in src/lib/client-fetch.ts:113\u2013129 forwards ordinary fetch and adds session retry, not an operation deadline. tests/e2e/rubric-validation.spec.ts resolves its delayed save with a 409; it does not exercise a permanently stalled request/body.",
+        "userImpact": "During a network/service stall, a keyboard operator remains at Saving with all rubric controls unavailable and no announced uncertainty or recovery action. Reloading risks discarding the unsaved rubric changes. This is source-established, not a reproduced hosted incident.",
+        "suggestedFix": "Bound the complete save/body wait, preserve the proposed rubric, announce an unknown acknowledgement and provide a reachable reconciliation/retry action. Read the persisted rubric before replaying an uncertain write. Add stalled-header/body and lost-acknowledgement checks that verify restored controls, focus and retained changes."
+      },
+      "disposition": "Resolved in later working tree together with021: full request/body bounded to15 seconds; exact round/rubric receipt; editable retained criteria on uncertainty, save locked pending authorized reload, private export before reload, focused outcome. Existing operator-write proof records55 API tests and80 browser checks with passing split-run coverage, including stalls/unknown writes. See ../operator-write-receipts.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-074",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save waits for inflight.current[applicationId] at line 149, then awaits retryOnNetworkError(authorizedFetch(...)) at 157-161 and response.json() at 162 without a deadline. client-fetch.ts:authorizedFetch/retryOnNetworkError supplies no deadline; retries only follow rejection. A never-settling request or body therefore never reaches catch/finally. Later saves for that applicant wait behind the same promise. Retry/copy guidance at roster lines 434-439 renders only for error/hint, while save sets saving. Existing group-case-evidence.spec.ts covers settled failures and delayed-then-released responses, not a permanent stall. This is a source-derived failure path, not a reproduced hosted incident.",
+        "userImpact": "An evaluator can remain at Saving indefinitely with no confirmed receipt or reachable save recovery; later notes and ratings cannot persist for that applicant even when other interactions work. Reloading risks the in-memory evidence.",
+        "suggestedFix": "Bound the complete request and response-body lifecycle and expose explicit unconfirmed-state copy/recovery. Preserve the latest payload and serialization safeguards; account for a timed-out request potentially committing before replay. Add focused never-settling request/body checks showing recovery becomes available and later evidence is not silently blocked."
+      },
+      "disposition": "Resolved in later working tree: bounded request/body, revision-safe serialization, exact uncertain mutation replay before newer edits, private copy and explicit conflict recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for scoped proof;95 covered configuration checks across overlapping runs are not one95-check suite. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-084",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:24-36",
+        "evidence": "ReleaseButton delegates RELEASE to useAction/runAction. runAction awaits authorizedFetch and response.json without a deadline and returns ok:true for every response.ok, including a null/malformed body. The control disables itself while pending and announces Outcome released on that unchecked success. A thrown response loss produces only Could not release and does not refresh unless a released:true body was received. This control is mounted for locked outcomes in applications/[id]/page.tsx:552 and hash/page.tsx:414. The inspected release-reliability.spec.ts exercises RELEASE_ALL through the batch harness, not this individual control.",
+        "userImpact": "An operator releasing one outcome can remain indefinitely at Releasing during a stalled request/body. A lost acknowledgement after commit leaves a stale locked row with generic failure, while malformed 2xx can falsely announce release. The stronger batch recovery does not protect this path.",
+        "suggestedFix": "Use a full request/body deadline and validate an action-specific release receipt. Preserve an explicit unknown outcome on timeout, response loss or malformed success, refresh authoritative decision state and require reconciliation before another release. Add focused individual-control stalled-body, malformed-success and committed-response-loss checks."
+      },
+      "disposition": "Resolved in later working tree with081/082: current ReleaseButton bounds full request/body to15seconds, validates the exact decision-specific released/notified/queued receipt, preserves an unknown-outcome lock, focuses persistent recovery and requires authorized full-page status reload before another release review. Root rechecked current source2026-10-17. Existing55 API tests and80 scoped browser checks have passing evidence; see ../operator-write-receipts.md. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-017",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:67-97; src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5",
+        "evidence": "The corrected homepage honestly says Past partnerships and Case studies pending client approval. Organization profiles explicitly withhold scope, methods, deliverables and outcomes; the approved fallback remains empty. The supplied desktop/mobile captures show partnership names and process explanation, followed by the accurately identified culture photograph at home/page.tsx:135-136, with no consulting artifact.",
+        "userImpact": "A prospective client can assess fit and terms but cannot judge MECG analytical craft, contribution or handoff quality before investing in an inquiry. This relevant original objection remains substantive despite the successful heading and mobile fixes.",
+        "suggestedFix": "Obtain client and Board approval for one representative engagement with its actual decision, constraints, methods, MECG contribution and redacted deliverable or bounded handoff. Publish through the existing approval boundary and feature it before general process/people content. Retain honest pending copy until approval; fabricate no outcome."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-018",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The corrected partnership section still supplies industry-level prose and pending approval rather than a real engagement. The approved fallback is empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show this pending state. The PwC image is correctly captioned as a member visit, so it cannot fill the project-proof gap.",
+        "userImpact": "A prospective client can understand fit and process but cannot judge the specificity, reasoning or usefulness of prior MECG work before sharing their own problem.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded engagement: actual decision, method, constraints and redacted deliverable or factual handoff. Feature it through the existing approval boundary. Retain the truthful pending state until approved; invent no outcomes."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-025",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+        "evidence": "reveal() at lines 236\u2013237 sets error and clears phase when APPLY_STAGE_HASH fails. The result live region at lines 327\u2013329 only describes drumroll/stamped phases, so it becomes empty on failure. The actual error is rendered as an ordinary footer paragraph at line 473, with no alert/live semantics, association or focus transfer. deck-accessibility.spec.ts intercepts successful result writes and does not cover this failure receipt.",
+        "userImpact": "A screen-reader operator can hear that a room result is being applied without receiving the failure explanation or a directed recovery destination. The error may be visually distant from the action. This is source-derived, not an observed assistive-technology incident.",
+        "suggestedFix": "Announce the application error through a persistent alert or the result status region, associate it with the retry control, and preserve a useful focus destination after unlocking. Add a rejected-result keyboard regression asserting the accessible failure message and retry path."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-026",
+      "finding": {
+        "severity": "high",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:222-240",
+        "evidence": "reveal() enters drumroll and awaits runAction at line 236. run-action.ts:9-14 and client-fetch.ts:121-124 impose no request/body deadline. step/jump/revisit are blocked during drumroll; Previous/Next are disabled at 470/476. A rejected request merely resets phase with an error rendered as a plain paragraph at 473, without an alert or authoritative result reconciliation.",
+        "userImpact": "A stalled result request can strand the presenter indefinitely. A lost acknowledgement can describe a consequential applied result as failure and leave a screen-reader operator without announced uncertainty. These are source-derived paths, not reproduced hosted incidents.",
+        "suggestedFix": "Bound request and body consumption; announce an unknown-outcome state, retain the applicant context, and reconcile authoritative stage results before enabling another application. Add stalled and committed-but-lost response checks with keyboard recovery."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-026",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/rounds/rubric-editor.tsx:60-84",
+        "evidence": "save() sets pending and awaits bare authorizedFetch; only finally clears pending. The entire editable fieldset is disabled at line 107. authorizedFetch supplies session retry but no deadline.",
+        "userImpact": "An operator editing a long scoring guide can remain at Saving indefinitely, unable to edit or retry in place; refreshing risks losing the unconfirmed text. Field-linked validation fixes do not cover this pending path.",
+        "suggestedFix": "Bound the save acknowledgement, preserve the captured guide, announce uncertain saving, restore controls/focus and provide authoritative reload/comparison before retry. Verify a nonsettling request and retained content."
+      },
+      "disposition": "Resolved in later working tree: full-body15sec deadline, exact round and actual rubric receipt, retained editable criteria with private download, save locked on unknown until authorized reload, focused result. Existing55API/80scopedbrowser passing evidence includes stalled headers/body and retained content; ../operator-write-receipts.md. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-034",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:109-112",
+        "evidence": "The approved fallback remains empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes. Home accurately shows pending approval instead of an engagement example.",
+        "userImpact": "A prospective client can understand the offer but cannot assess an actual MECG analysis or handoff before committing time to an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement question, method and redacted deliverable/handoff with limits, then publish through the existing release boundary. Retain truthful pending copy until approved."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-034",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says current hours, mandatory meeting times and peak commitments are unpublished; Join provides a direct Board email question link.",
+        "userImpact": "Students still need a separate conversation to determine schedule fit before applying, even after finding the right FAQ.",
+        "suggestedFix": "Publish a dated, Board-confirmed current-semester range, required meeting expectations and peak-week caveat when available. Do not invent hours."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-035",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/app/(marketing)/home/page.tsx:66-80; src/components/client-project-grid.tsx:108-114",
+        "evidence": "The committed approved project list is empty. The actual captured homepage presents past partnerships and pending approval; selected profiles explicitly withhold scope, methods, deliverables and outcomes. No approved engagement artifact is supplied. The revised headings accurately describe this limitation.",
+        "userImpact": "Clients can assess terms and affiliations but cannot inspect comparable MECG reasoning or a handoff before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement with its actual decision, methods, contribution, redacted deliverable and limitations; publish through the existing boundary. Preserve pending disclosure until approved."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-035",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+        "evidence": "The FAQ explicitly says expected weekly hours, mandatory meeting times and peak commitments are unpublished, and supplies a direct Board email link. This truthfully mitigates the original omission but leaves the substantive answer absent.",
+        "userImpact": "Students still need a separate conversation to determine whether membership fits their semester.",
+        "suggestedFix": "Have recruitment leadership approve and date a current-cycle weekly range, required meetings and peak-period expectations, then publish them in this FAQ. Do not invent hours."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-044",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+        "evidence": "ReleaseButton is rendered for locked decisions in admin/applications/[id]/page.tsx:552 and Hash (source references inspected). It calls useAction/runAction, which awaits authorizedFetch and response.json without a deadline, accepts every successful HTTP response including a null/malformed body, and maps transport loss to 'Could not release'. Only result.ok or released:true triggers refresh. The batch release tests in release-reliability.spec.ts exercise ReleaseAllButton, so their lost/stalled coverage does not cover this live alternative.",
+        "userImpact": "A stalled single release can remain at Releasing indefinitely. A committed release followed by response loss leaves a stale locked row and generic failure with retry available; a malformed successful response can announce release without a verified receipt. Operators receive different certainty for the same irreversible outcome depending on entry point.",
+        "suggestedFix": "Give single release the same bounded full-body wait, validated action-specific receipt, explicit unknown-outcome feedback and authoritative readback as batch release. Add focused single-release stalled-body, malformed-success and commit-then-lost-response checks."
+      },
+      "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-045",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save() awaits authorizedFetch through retryOnNetworkError at lines 157\u2013162 without a deadline, including response.json(). The helper in src/lib/client-fetch.ts retries rejected requests but does not bound unresolved requests. Every later save for that applicant waits on inflight.current at line 149; its resolver runs only in finally. Consequently, stalled headers or body consumption can keep the row at Saving indefinitely and prevent newer changes from reaching the server. The retry/copy guidance at roster lines 419\u2013424 is rendered only for error/hint states. group-case-evidence.spec.ts covers rejected saves and a delayed receipt that eventually resolves, rather than a never-settling response. This is a source-derived path, not a hosted reproduction.",
+        "userImpact": "A reviewer can continue entering observations while the save queue remains blocked, with no bounded route to recover or explicit copy-before-leaving guidance during the stalled saving state. Reloading can discard those in-memory changes.",
+        "suggestedFix": "Bound the complete acknowledgement lifecycle, expose an unknown-save state with private copy/export recovery, and reconcile safely before permitting replacement writes so delayed commits cannot overwrite newer evidence. Add stalled-header/body cases that verify queued edits remain recoverable and no false saved receipt appears."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-054",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:99\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The approved static project list is empty. Selected profiles show organization descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work omits Selected work when no public projects exist; the supplied homepage captures display the pending-approval state. DESIGN.md \u00a77 and release-open-items.md confirm the missing real artifacts.",
+        "userImpact": "A prospective client can understand the offer and responsibilities but cannot inspect comparable work to judge analytical rigor, usefulness or fit before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its actual decision, MECG contribution, methods, limitations and a redacted deliverable or factual handoff. Publish through the approved-project boundary. Preserve the truthful pending state until approval; invent no outcomes."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-055",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "The approved fallback remains empty. Organization profiles describe the organizations and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work renders Selected work only for nonempty publication data. The supplied homepage captures show the pending-approval state, and UNRESOLVED.md confirms actual approved engagement evidence is absent. The mobile selector adjacency fix does not resolve this separate evidence gap.",
+        "userImpact": "A prospective client can assess proposed fit and responsibilities but cannot judge the rigor, relevance or practical usefulness of an actual MECG handoff before committing time and access.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded engagement showing the actual decision, MECG contribution, methods, constraints and a redacted deliverable or handoff excerpt. Publish through the existing approval boundary; preserve truthful pending disclosures until then."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-064",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/applicant/page.tsx:26\u201330,43\u201349,153\u2013159,263\u2013284,366\u2013370",
+        "evidence": "ApplicantDashboard deliberately permits destination /apply. applicant_dashboard SQL (20260830100000_harden_applicant_workflow.sql:389\u2013403) returns DRAFT/NEEDS_INFO rows newest first. A returning applicant can reach this page through Past applications (apply/page.tsx:148\u2013153) after saving a new draft. The dashboard maps that draft to the Submitted step and the unconditional moving-through-review headline. can_start_application is false once any current-cycle row exists (20260901000000_allow_reapplication.sql:32\u201341), so the next-action branch falls through to scheduleNextAction, which can say You\u2019re caught up. The improved receipt-banner guard does not correct these other assertions. This is source-demonstrated, not a hosted reproduction.",
+        "userImpact": "A student checking history or returning after an uncertain save can mistake an unsubmitted application for one already under review and miss the need to resume and submit; NEEDS_INFO similarly lacks an explicit correction action.",
+        "suggestedFix": "Render draft and requested-change states explicitly throughout headline, stepper, application card and next action. Link editable current intake back to /apply; when intake is unavailable, explain uncertainty rather than claiming completion. Add real-page SSR coverage for prior-cycle history plus a current DRAFT/NEEDS_INFO and empty schedule."
+      },
+      "disposition": "Resolved in later working tree: explicit draft/requested-change hero/history, no Submitted pipeline for editable states, guarded current-cycle application action and truthful unknown/unavailable access. Actualdashboard24focused/45regressiontests and8styledsyntheticSSRcaptures pass. See ../applicant-editable-status.md; no hostedjourney claim. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-065",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says current weekly hours, mandatory times and peak commitments are not published. Join provides a direct Board email link, but no schedule-fit facts. This remains the factual limitation raised in the prior applicant objections, despite the truthful mitigation.",
+        "userImpact": "A student cannot independently decide whether membership fits a constrained semester before investing in recruitment and an application.",
+        "suggestedFix": "Obtain Board-confirmed current-semester workload range, required times and peak-week expectations, then publish them with an update date. Retain the honest contact fallback until those facts are authorized."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-075",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save awaits the preceding inflight promise (149), then retryOnNetworkError(authorizedFetch(...)) (157-161) and response.json() (162), without a deadline. client-fetch.ts:113-153 supplies session retry/network-rejection retry, not a timeout. finish only runs after settlement (178-179). Recovery controls at roster lines 431-437 appear only for error/hint. The supplied group-case-evidence.spec.ts covers resolved failures and delayed receipts, not a permanently stalled request/body.",
+        "userImpact": "A stalled observation save can remain Saving indefinitely. Later scores/notes for that applicant queue behind the unresolved promise, so further editing or Retry cannot obtain a receipt. Unsaved observations exist only in the open page.",
+        "suggestedFix": "Bound the complete authorization/request/body wait, release the per-applicant queue on timeout and show an explicit unconfirmed state with copy/retry guidance. Preserve sequence protection and avoid treating abort as proof of noncommit. Add stalled-header and stalled-body checks that verify later evidence can be saved."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-085",
+      "finding": {
+        "severity": "high",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:25-35",
+        "evidence": "ReleaseButton uses the generic runAction path, which awaits authorizedFetch and the complete JSON body without a deadline, accepts every HTTP-success response including null/malformed JSON, and turns transport loss into only \u201cCould not release\u201d. ReleaseButton refreshes only on result.ok or released:true. Consequently a committed release with a lost response leaves the stale row and enables retry; a stalled response remains Releasing indefinitely. This actual control is rendered on the dossier and Decisions page (applications/[id]/page.tsx:552; hash/page.tsx:414). The supplied lost/stalled release browser test exercises ReleaseAllButton, not this control.",
+        "userImpact": "An operator releasing one applicant cannot reliably distinguish completed release from failure, recover from a stalled acknowledgement, or trust the success message after malformed acknowledgement. This is a source-established conditional failure, not an observed hosted incident.",
+        "suggestedFix": "Give single release a bounded complete-response operation, validate an action-specific receipt, and show explicit unknown outcome with authoritative outcome reconciliation before another release attempt. Cover committed response loss, stalled bodies and malformed success on the actual single-release control."
+      },
+      "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-076",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save waits on the previous applicant request at line 149, then awaits retryOnNetworkError(authorizedFetch(...)) and response.json() at lines 157-162 without a deadline. client-fetch.ts:113-126 and 136-151 add session/network retries but no bound on a pending attempt or response body. The queue is released only in finally at 178-179. Recovery/copy guidance and Retry save render only for error/hint, not saving (roster lines 420-423). This is a source-derived failure path; I did not run a stalled browser reproduction. Existing group-case-evidence.spec.ts covers resolved errors and eventually released delayed responses, not a permanently stalled save.",
+        "userImpact": "If a connection or response body stalls, the row can remain Saving indefinitely. Later edits for that applicant queue behind it, so a reviewer cannot confirm their long observation or complete a qualifying review through the available retry controls. Reloading risks memory-only evidence.",
+        "suggestedFix": "Bound the complete save/body lifecycle and show explicit unconfirmed outcome with retained payload and copy/recovery guidance. Preserve serialization and protect against a late older write replacing newer evidence; test stalled headers/body plus subsequent edits and eventual reconciliation."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-019",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/app/(marketing)/home/page.tsx:67\u201397; src/components/client-project-grid.tsx:103\u2013108",
+        "evidence": "The approved release list remains empty. Home correctly labels the fallback Past partnerships and discloses pending case studies; selected organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show organization rows and a PwC visit photograph, with no consulting artifact. The misleading earlier specific-questions heading is fixed; substantive proof remains absent.",
+        "userImpact": "A prospective client can assess service terms and organizational associations but cannot assess the specificity, reasoning or usefulness of comparable MECG work before an inquiry.",
+        "suggestedFix": "Have content owners secure client and Board approval for one bounded engagement containing its actual decision, contribution, method and redacted deliverable or factual handoff with limits. Publish through the existing release boundary and feature it before culture photography. Preserve the truthful pending state until approval."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-036",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback list is empty. Selected organization profiles explicitly withhold scope, methods, deliverables and outcomes pending approval. The supplied current homepage captures show partnership rows and the pending-client-approval status, not an engagement example.",
+        "userImpact": "A prospective client can understand fit and process but cannot evaluate the reasoning or usefulness of a comparable MECG handoff before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement with its real question, methods, constraints and redacted handoff artifact. Publish through the existing approval boundary; retain truthful pending copy until then."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-036",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:75,86; src/app/(marketing)/join/page.tsx (commitment FAQ)",
+        "evidence": "The preparation guidance directs students to the commitment FAQ, which explicitly says expected hours, mandatory meeting times and peak commitments are unpublished. The targeted Board email improves recovery but supplies none of those facts.",
+        "userImpact": "Students with difficult schedules still need a separate conversation to establish basic membership fit after reading the preparation journey.",
+        "suggestedFix": "Have recruitment leadership approve and date a current-semester workload range, recurring obligations and peak-week caveat, then publish beside preparation. Do not invent estimates."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-046",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:263-307 (OfferDeadlineForm)",
+        "evidence": "save captures expiresAt at line 264; only the submit button is disabled during the request. The uncontrolled datetime input at 299-304 remains editable. Any successful response sets the generic Deadline saved message at 280 and refreshes the route, without comparing the current input to the captured value or naming the persisted date. The actual dossier renders this editor for unanswered locked/released offers at applications/[id]/page.tsx:554-555. This is a source-demonstrated race, not a hosted reproduction.",
+        "userImpact": "An operator can submit date A, change the visible field to date B while waiting, then see Deadline saved although A was sent. The database deadline controls whether an applicant may respond, so this ambiguity can affect a real response window.",
+        "suggestedFix": "Lock the date input while its captured write is pending, or explicitly preserve and mark subsequent edits unsaved. Show the confirmed saved date, validate the acknowledgement, and add a delayed-response regression covering an attempted in-flight date change."
+      },
+      "disposition": "Confirmed in current tree, reproduced and repaired2026-10-17: captured date/action locks, exact application/date RPC-backed receipt, dated confirmation, unsaved edit state, explicit clear, bounded unknown-outcome recovery. All861Node,50browserchecks plus10repeatedcapturefollowups, lint/build/types pass. See ../offer-deadline-write-recovery.md. NoSQL/eligibility changes, no hostedacceptance claim. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-020",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/(marketing)/home/page.tsx:66\u201397; src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108",
+        "evidence": "The frozen homepage appropriately says Past partnerships and discloses pending case studies. PUBLIC_PROJECTS remains empty; selected profiles explicitly withhold scope, methods, deliverables and outcomes. The desktop/mobile captures show organization rows rather than a completed engagement. The photograph at home/page.tsx:135\u2013136 is a PwC visit, accurately captioned, and supplies no consulting artifact.",
+        "userImpact": "A prospective client can assess service fit and associations but cannot judge the reasoning, specificity or usefulness of a real MECG deliverable before investing in an inquiry.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded real engagement with its decision, constraints, methods and factual handoff, plus a redacted deliverable excerpt where permitted. Publish through the existing release boundary before people/process exposition. Preserve truthful pending copy until approval; invent no outcomes."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-027",
+      "finding": {
+        "severity": "low",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-296",
+        "evidence": "SORT_BUTTON provides text-xs and py-1 without a minimum height; By score, A to Z and Revisits use it directly. Exit likewise has no minimum target. Presentation motion explicitly adds min-h-11. globals.css applies its 44px button minimum only to named button utility classes, which these controls do not use. This conflicts with DESIGN.md\u2019s 44px interaction floor; it is source-derived, not a measured touch failure.",
+        "userImpact": "Touch operators receive smaller, less forgiving sort/filter/exit targets than the adjacent presentation control.",
+        "suggestedFix": "Give these header controls an inline-flex 44px minimum target and verify their rendered bounds and wrapping at narrow widths."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-037",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108",
+        "evidence": "The approved static collection is empty; selected organizations explicitly withhold MECG scope, methods, deliverables and outcomes. The homepage capture likewise shows pending approval rather than a real engagement. UNRESOLVED.md confirms approved evidence is absent.",
+        "userImpact": "A client can assess the offer and associations but cannot judge the quality or relevance of actual MECG work before inquiry.",
+        "suggestedFix": "Obtain client/Board approval for one bounded engagement with the real question, methods and redacted handoff artifact; publish through the existing boundary. Preserve truthful pending copy until approved."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-037",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+        "evidence": "The FAQ explicitly says weekly hours, mandatory times and peak commitments remain unpublished and provides a direct Board question link. This is an honest mitigation, not the missing schedule information.",
+        "userImpact": "A student cannot independently compare membership with their semester commitments.",
+        "suggestedFix": "Have the Board supply and date a current-cycle weekly range, recurring obligations and peak-week caveat beside preparation/FAQ; invent no estimate."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-056",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "The fallback release list is empty. Selected profiles describe the organizations, then explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work omits Selected work when that list is empty. The supplied home captures and home/page.tsx:78-80 likewise show the pending-approval state. The public-project loader can read approved database records, but no actual approved engagement is supplied in this package.",
+        "userImpact": "A prospective client can evaluate proposed scope and responsibilities but cannot inspect comparable reasoning, deliverable quality or limits before committing time and access. The evidence-assessment portion of the focal task remains incomplete.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one bounded real engagement showing its question, methods, student contribution, redacted handoff and limitations. Publish through the existing approval boundary. Preserve the truthful pending state until approval; fabricate no outcomes."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-066",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:75,86",
+        "evidence": "Preparation asks students to assess schedule fit, but the weekly-commitment answer explicitly says expected hours, mandatory meetings and peak commitments are unpublished. Join supplies a direct Board email, which truthfully mitigates but does not answer the question.",
+        "userImpact": "A student with a difficult semester cannot independently decide whether membership fits before investing in recruitment.",
+        "suggestedFix": "Obtain Board-confirmed current-semester weekly ranges, required times and peak expectations; publish them with a date. Retain the candid contact fallback until approved facts exist."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-077",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save awaits the previous per-applicant promise at line 149, then bare authorizedFetch through retryOnNetworkError at lines 157-161 and unbounded response.json at line 162. Neither helper supplies a deadline (src/lib/client-fetch.ts:authorizedFetch/retryOnNetworkError). A nonsettling request/body never reaches finally to release the queue. Retry/copy guidance renders only for error/hint at roster lines 420-423. Existing Group Case tests cover resolved failures and delayed eventual receipts, not a permanently stalled save. This is source-derived, not a reproduced hosted incident.",
+        "userImpact": "The row can remain Saving indefinitely. Later notes/stars and manual retries queue behind the unresolved operation; the reviewer cannot confirm persistence or reach a reliable recovery state before leaving.",
+        "suggestedFix": "Bound the full request/body lifecycle, release the queue on timeout, preserve the current payload and expose explicit unconfirmed-save/copy guidance. Add a focused stalled-request and stalled-body regression proving subsequent retry can proceed without claiming non-delivery."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-087",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:25-35",
+        "evidence": "ReleaseButton calls useAction/runAction, which awaits authorizedFetch and response.json without a deadline. Pending clears only after settlement. A thrown response becomes generic \"Could not release\"; ReleaseButton refreshes only on success or a parsed released:true. The live dossier exposes this button for LOCKED decisions at src/app/admin/applications/[id]/page.tsx:552. The supplied lost/stalled release test mounts the batch-only harness, so its passing recovery assertion does not cover this individual path.",
+        "userImpact": "An operator releasing one recovered outcome can remain indefinitely at Releasing, or receive an apparent failure with stale LOCKED controls after the release committed but acknowledgement was lost. They lack the batch flow\u2019s explicit unknown-result and current-state review guidance.",
+        "suggestedFix": "Give individual release a full-body deadline, validated receipt and explicit unknown-outcome state; refresh/reconcile current decision state before permitting a fresh release attempt. Cover stalled bodies and commit-then-lost acknowledgements using the actual individual control."
+      },
+      "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-047",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save() awaits the previous per-applicant promise at line 149, then calls authorizedFetch through retryOnNetworkError at 157-161 and consumes response.json at 162 without any deadline. finish() releases the queue only in finally at 178-179. Neither helper bounds a nonsettling request/body. Saving feedback at 338 therefore can persist indefinitely; the recovery controls at 420-423 depend on error/hint state, and another save still waits behind the stalled promise. The inspected failed-save browser case supplies an immediate 409 rather than stalled transport/body. This is source-derived, not an observed hosted failure.",
+        "userImpact": "A reviewer can keep adding observations while every subsequent save for that applicant remains blocked. Reloading to escape risks losing those in-memory notes and ratings.",
+        "suggestedFix": "Bound authorization, request and full-body consumption; preserve the exact observations and expose an explicit unconfirmed state with private export/reconciliation guidance. Protect ordering against a delayed original write before sending newer payloads. Add focused stalled-headers and stalled-body cases verifying bounded feedback, retained evidence and safe queue recovery."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-057",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The approved static release list is empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes, and Work conditionally omits Selected work when no public records exist. The supplied homepage captures display pending approval rather than an engagement. UNRESOLVED.md confirms actual approved project artifacts remain absent.",
+        "userImpact": "A prospective client can establish fit and organizational associations but cannot judge the rigor, relevance or usefulness of actual MECG work before sharing context and investing in scoping.",
+        "suggestedFix": "Have content owners obtain client and Board approval for at least one actual decision question, methods, constraints and redacted handoff excerpt with bounded results or limitations. Publish through the existing approval boundary; retain the truthful pending state until then."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-028",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236",
+        "evidence": "reveal awaits runAction after entering drumroll. run-action.ts:9\u201314 awaits authorizedFetch and response.json without a deadline; client-fetch.ts:authorizedFetch supplies no default deadline. The reveal button (373) and previous/revisit/next controls (470\u2013476) remain disabled while drumroll persists. A rejected acknowledgement simply clears phase and says Could not apply the result (237), without authoritative reconciliation.",
+        "userImpact": "A stalled write/body can strand the operator in Applying result. A lost acknowledgement can invite another application despite an unknown committed result.",
+        "suggestedFix": "Bound the full operation; announce an unknown outcome, reconcile the applicant\u2019s authoritative stage result, and require reconciliation before enabling repeat application. Cover stalled body and committed-write/lost-response cases."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-028",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:473",
+        "evidence": "The result failure is rendered as an ordinary footer paragraph. The separate live region reports drumroll/stamped states but does not include error; failure resets phase and empties that region. No failure focus transfer is present.",
+        "userImpact": "A screen-reader operator activating Reveal can receive Applying room result without an announced explanation when application fails.",
+        "suggestedFix": "Expose failure/uncertainty in a persistent alert or live region and keep a reachable recovery action; verify failure announcement and keyboard continuation."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-067",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published; Join renders this with a Board email fallback. This is an honestly disclosed remaining information gap, not a false statement or new regression.",
+        "userImpact": "A student can prepare materials and begin applying but cannot independently determine whether membership fits their semester.",
+        "suggestedFix": "Obtain Board-confirmed current-semester weekly range, recurring mandatory times and peak-period expectations, then date and publish them near preparation. Retain the truthful fallback until confirmed."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-078",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save awaits the previous per-applicant promise at line 149, then authorizedFetch inside retryOnNetworkError at lines 157-161 and response.json at line 162 without a deadline. src/lib/client-fetch.ts:authorizedFetch forwards fetch without one; retryOnNetworkError only retries rejected promises. A never-settling request/body therefore never reaches catch/finally. Recovery/copy guidance and Retry save render only for error/hint at roster lines 420-423, while this path remains saving. The seven group-case-evidence scenarios cover rejection and delayed eventual completion, not a permanent stall. This is source-derived, not a hosted reproduction.",
+        "userImpact": "An evaluator can remain at Saving indefinitely, with subsequent saves for that applicant queued behind the stalled request and no surfaced retry or copy guidance. Unconfirmed observations remain only in the open page.",
+        "suggestedFix": "Bound the complete request and body-read lifecycle, release the per-applicant queue after timeout, retain the current payload and show explicit unconfirmed-save/copy/retry guidance. Preserve serialization and stale-response protection. Add a focused stalled-request and stalled-body check, including a newer queued edit."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-038",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/home/page.tsx:66\u201381",
+        "evidence": "The approved fallback remains empty; organization profiles explicitly withhold scope, methods, deliverables and outcomes. The actual supplied homepage captures show partnerships and pending approval rather than an engagement example. The corrected heading is truthful, so the former unsupported-heading issue is not repeated.",
+        "userImpact": "A prospective organization cannot inspect the contribution, reasoning or usefulness of comparable MECG work before investing in an inquiry.",
+        "suggestedFix": "Have content owners obtain client and Board approval for one real question, methods, redacted handoff artifact and bounded result or limitations; publish through the existing approval boundary. Retain pending copy until approved."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-038",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx:157\u2013160",
+        "evidence": "The weekly-commitment FAQ explicitly says expected hours, mandatory meeting times and peak commitments are unpublished. The direct Board email is a useful verified mitigation, but supplies no planning facts.",
+        "userImpact": "Students must initiate a separate conversation to determine whether membership fits their semester, even after finding the relevant FAQ.",
+        "suggestedFix": "Obtain and publish a dated, current-cycle Board-approved typical weekly range, fixed obligations and peak-week caveat beside preparation. Do not invent estimates."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-058",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The approved fallback is empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes pending approval; Work omits Selected work when no published records exist. Home lines 67\u201380 now accurately label partnerships and pending case studies, matching the supplied captures and documented external content limitation.",
+        "userImpact": "A client can judge proposed scope and obligations but cannot inspect the specificity, reasoning or usefulness of a comparable MECG handoff before initiating a project discussion.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement account with the actual decision, methods, constraints, student contribution and a redacted deliverable or handoff excerpt. Publish through the existing approval boundary. Preserve honest pending copy until approval; invent no outcome."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-068",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/applicant/page.tsx:26-49,154-159,263-284,369-373",
+        "evidence": "The page deliberately permits destination /apply for history access. applicant_dashboard returns all owned applications ordered newest first, including DRAFT (20260830100000_harden_applicant_workflow.sql:389-403). applicationHeadline defaults DRAFT to 'moving through review'; pipelineStage defaults it to stage 0, whose label is Submitted. The current-application body repeats the review claim. can_start_application returns false for any existing current-cycle application (20260901000000_allow_reapplication.sql:32-41), so a saved draft does not receive the Start application action; the page instead falls through to schedule guidance, potentially 'You're caught up'. The /apply Past applications link makes this reachable during normal repeat-applicant work.",
+        "userImpact": "A student opening history/status with a saved, unsubmitted current draft can believe it entered review and has no outstanding submission task. NEEDS_INFO likewise lacks a clear return-to-edit action here. This is source-derived, not a hosted reproduction.",
+        "suggestedFix": "Render explicit draft and requested-changes states before review/schedule branches, with a truthful not-submitted message and an authorized Continue application link to /apply. Exclude drafts from the submitted stepper. Add real dashboard SSR coverage for prior-cycle history plus a current DRAFT and NEEDS_INFO."
+      },
+      "disposition": "Resolved in later working tree: explicit draft/requested-change hero/history, no Submitted pipeline for editable states, guarded current-cycle application action and truthful unknown/unavailable access. Actualdashboard24focused/45regressiontests and8styledsyntheticSSRcaptures pass. See ../applicant-editable-status.md; no hostedjourney claim. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-029",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:237,319-325,473",
+        "evidence": "reveal() handles an unsuccessful APPLY_STAGE_HASH by setting error and clearing phase (237). The polite result region only announces drumroll/stamped states and becomes empty on failure (319-325); the actual error renders as an ordinary footer paragraph at 473, without role, live region or focus transfer. The supplied deck tests exercise successful reveal and shortcut isolation, not rejected result feedback.",
+        "userImpact": "A screen-reader operator can hear that application is in progress but receive no automatic explanation when it fails, while the visible failure appears remotely in the footer. Consequential result recovery requires searching for the explanation.",
+        "suggestedFix": "Expose the error through a persistent alert/status region near the action, associate recovery guidance with the result control, and add a rejected-result keyboard regression verifying announcement semantics and a reachable retry. Keep uncertain commit outcomes distinct from confirmed rejection."
+      },
+      "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-079",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "evidence": "save sets Saving and awaits the previous per-applicant promise at lines 148-152, then awaits retryOnNetworkError(authorizedFetch(...)) and response.json at lines 157-162 without a deadline. client-fetch.ts:114-125 forwards unbounded fetches; retryOnNetworkError:136-151 retries rejection only. A request or body that never settles never reaches catch/finally, so its queue promise remains unresolved. group-case-evidence.spec.ts covers returned failures and delayed receipts, not a nonsettling operation. This is source-derived, not a reproduced hosted incident.",
+        "userImpact": "A reviewer can remain at Saving indefinitely. Later edits and even an offered retry after another edit queue behind the stalled save; their evidence remains unconfirmed in memory without reaching the explicit failure/copy guidance.",
+        "suggestedFix": "Bound the complete request and response-body lifecycle, release the per-applicant queue on timeout, retain the latest full observation payload, and show an explicit unknown-save receipt with copy/retry guidance. Preserve stale-write protection when retrying. Add focused stalled-request and stalled-body tests followed by a newer edit and successful recovery."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-089",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+        "evidence": "ReleaseButton uses useAction/runAction, which awaits authorizedFetch and response.json without a deadline, accepts every response.ok as success, and reports a lost response as Could not release. Only success or released:true triggers refresh. This button remains rendered in the dossier (applications/[id]/page.tsx:552) and Decisions (hash/page.tsx:414). In contrast, ReleaseAllButton uses full-body deadlines and explicit unknown-result recovery. release-reliability.spec.ts exercises only the batch component.",
+        "userImpact": "A stalled individual release can remain Releasing indefinitely. A committed release with a lost acknowledgement leaves stale state and generic failure; a malformed successful response can claim confirmed release without a verified receipt.",
+        "suggestedFix": "Give individual release a bounded complete-response operation, validate its action-specific receipt, and reconcile ambiguous outcomes against authoritative decision state before allowing retry. Add single-release stalled-body, malformed-success and committed-response-loss cases."
+      },
+      "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-039",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback is empty; selected organization profiles explicitly withhold engagement scope, methods, deliverables and outcomes. Home renders the matching pending-approval state in the supplied captures. The mobile selector now correctly places these details adjacent.",
+        "userImpact": "Clients can establish organizational familiarity and proposed terms, but cannot evaluate the quality or relevance of MECG contribution before an inquiry.",
+        "suggestedFix": "Obtain client/Board approval for one bounded engagement question, method, redacted handoff artifact and factual limits; publish through the existing approval boundary. Preserve the pending disclosure until then."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-039",
+      "finding": {
+        "severity": "medium",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+        "evidence": "The FAQ now explicitly labels weekly hours, mandatory meeting times and peak commitments unpublished and provides a direct subject-specific Board email. This fixes the misleading omission treatment, while the underlying facts remain unavailable.",
+        "userImpact": "Students still need a separate conversation to establish schedule fit before investing in application preparation.",
+        "suggestedFix": "Have recruitment leadership approve and date a current-cycle workload range, recurring obligations and peak-week caveat, then publish beside preparation and in this FAQ. Do not invent hours."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-030",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/rounds/rubric-editor.tsx:60-84",
+        "evidence": "save() awaits authorizedFetch without a deadline (67-71), then can await an unbounded error body (73). pending only clears in finally (81-84), while the editing fieldset is disabled by pending (112). authorizedFetch in src/lib/client-fetch.ts:113-130 delegates directly to fetch. The rubric regression releases a delayed rejection; it does not cover a never-settling request.",
+        "userImpact": "An operator can remain at Saving with every rubric control disabled indefinitely; reloading risks losing the in-memory scoring guide and does not establish whether the write committed. This is a source-derived failure path, not a hosted reproduction.",
+        "suggestedFix": "Bound the full request/body operation, retain the captured criteria, announce an unconfirmed outcome and restore a safe recovery path that checks the current saved rubric before retry. Add a stalled-request regression."
+      },
+      "disposition": "Resolved in later working tree: full-body15sec deadline, exact round and actual rubric receipt, retained editable criteria with private download, save locked on unknown until authorized reload, focused result. Existing55API/80scopedbrowser passing evidence includes stalled headers/body and retained content; ../operator-write-receipts.md. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-059",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "evidence": "The approved fallback remains empty. Organization profiles expressly withhold project scope, methods, deliverables and outcomes pending approval; Selected work renders only when publicProjects has records. The supplied homepage captures show the corresponding pending-client-approval status, and UNRESOLVED.md confirms actual approved engagement evidence is absent. Changing the empty-state heading to Past partnerships fixes the promise mismatch but does not supply delivery evidence.",
+        "userImpact": "A client can establish fit and organizational associations but cannot assess the rigor or relevance of a real MECG recommendation before investing time and access in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement with its question, MECG contribution, methods, constraints and redacted handoff excerpt. Publish through the existing approval boundary; preserve the honest pending state until permission exists."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-069",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly commitment FAQ explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published. JoinPage supplies a direct Board email, which truthfully mitigates the absence but does not provide the facts.",
+        "userImpact": "A student cannot independently assess semester schedule fit before preparing and applying, particularly if they cannot attend an event or obtain a timely reply.",
+        "suggestedFix": "Obtain Board-confirmed current-semester hours, recurring required times and peak-period expectations; publish them with a review date near preparation. Retain the present uncertainty and contact route until confirmed."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-080",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-180",
+        "evidence": "save sets Saving at line 148, serializes subsequent writes behind inflight at line 149, then awaits authorizedFetch through retryOnNetworkError at lines 157-161 and response.json at line 162 without a deadline. src/lib/client-fetch.ts authorizedFetch has no timeout; retryOnNetworkError only retries rejected promises. A nonsettling request/body therefore never reaches catch/finally. Retry/copy guidance is rendered only for error/hint at roster lines 420-424; further queued saves remain behind the unresolved promise. Existing group-case-evidence.spec.ts covers settled errors and delayed-but-released receipts, not a permanently stalled request/body.",
+        "userImpact": "During unreliable connectivity, a reviewer can remain at Saving indefinitely, unable to confirm evidence or complete a queued retry for that applicant. Unsaved observations remain only in the open page without the normal recovery guidance. This is source-derived, not an observed hosted incident.",
+        "suggestedFix": "Bound the full request and JSON-body wait; surface an explicit unconfirmed outcome with retained notes/scores and copy guidance. Ensure the serialized queue recovers without permitting an older uncertain full-score write to overwrite newer evidence. Add stalled-request and stalled-body checks."
+      },
+      "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-090",
+      "finding": {
+        "severity": "medium",
+        "file": "src/app/admin/decision-form.tsx:263-285,306-307",
+        "evidence": "OfferDeadlineForm.save awaits authorizedFetch without a signal/deadline (270-274), and an error body read is also unbounded (276). Pending clears only in finally (284-285), while the save button is disabled and reads Saving\u2026 (306-307). authorizedFetch in src/lib/client-fetch.ts adds session refresh but no deadline. The actual dossier renders this control for locked/released offers without a response (applications/[id]/page.tsx:554-555). This is source-derived, not an observed hosted failure.",
+        "userImpact": "A stalled request can strand an operator while changing an applicant response deadline, with no in-place recovery or confirmation of whether the deadline changed.",
+        "suggestedFix": "Bound the full request/body wait, restore controls with explicit unknown-outcome guidance, and reconcile the stored deadline before another change. Add focused stalled-response and committed-write/lost-acknowledgement checks for this actual control."
+      },
+      "disposition": "Resolved in later working tree with046: full request/body deadline, exact application/date canonical-RPC receipt, captured date/action locks, dated confirmation and explicit unsaved edit state. Lost/malformed/stalled results retain proposed value and lock writes pending authorized offer reload; explicit Clear deadline path.861Node,50browser checks plus10repeatedcapturefollowups, lint/build/types pass. See ../offer-deadline-write-recovery.md. NoSQL/eligibility change or hostedacceptance claim. Frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-040",
+      "finding": {
+        "severity": "medium",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108",
+        "evidence": "The approved fallback remains empty, and selected profiles explicitly withhold MECG scope, methods, deliverables and outcomes. The homepage capture shows the pending-client-approval status rather than an engagement example. This is a retained content dependency, not the superseded misleading heading defect.",
+        "userImpact": "Prospective clients can assess terms and affiliations but cannot inspect the specificity or quality of comparable MECG work before investing in an inquiry.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement with its actual question, contribution, method, redacted handoff and limitations; publish through the existing boundary. Keep the truthful pending state until approval."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-040",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says expected hours, mandatory meeting times and peak commitments are unpublished. The new direct Board question link is a useful mitigation, but supplies no schedule facts.",
+        "userImpact": "Students cannot independently determine semester fit after finding the relevant information.",
+        "suggestedFix": "Have recruitment leadership approve and date a current-cycle workload range, recurring obligations and peak-week caveat, then publish near preparation. Do not invent hours."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-060",
+      "finding": {
+        "severity": "medium",
+        "file": "src/components/client-project-grid.tsx:99-119; src/content/projects.public.ts:3-5; src/app/(marketing)/work/page.tsx:56-63",
+        "evidence": "Profiles display organization descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. The approved fallback is empty; Work omits Selected work when no projects are returned. Both inspected homepage captures show the pending-approval state. The mandatory unresolved record confirms actual approved engagement evidence remains absent.",
+        "userImpact": "A client can assess proposed fit and responsibilities but cannot inspect comparable reasoning or handoff quality before committing time, information and access. Recognizable partnerships do not complete that evaluation.",
+        "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its real decision, student contribution, methods, constraints and redacted deliverable or handoff. Publish through the existing approval boundary; preserve the honest pending disclosure until permission exists."
+      },
+      "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    },
+    {
+      "sourceSeat": "panel-v2-070",
+      "finding": {
+        "severity": "low",
+        "file": "src/lib/join-content.ts:86",
+        "evidence": "The weekly-commitment answer explicitly says expected hours, mandatory meeting times and peak commitments are not published. Join renders a direct Board email link, an honest fallback rather than the missing facts.",
+        "userImpact": "A prospective applicant cannot independently determine schedule fit before investing in preparation and applying.",
+        "suggestedFix": "Obtain Board-confirmed current-semester weekly range, mandatory times and peak-period expectations, then publish dated guidance beside preparation. Retain the truthful contact fallback until approval."
+      },
+      "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+    }
+  ],
+  "reviewedReports": 100,
+  "reviewedSeats": [
+    "panel-v2-001",
+    "panel-v2-002",
+    "panel-v2-003",
+    "panel-v2-004",
+    "panel-v2-005",
+    "panel-v2-006",
+    "panel-v2-007",
+    "panel-v2-008",
+    "panel-v2-009",
+    "panel-v2-010",
+    "panel-v2-011",
+    "panel-v2-012",
+    "panel-v2-013",
+    "panel-v2-014",
+    "panel-v2-015",
+    "panel-v2-016",
+    "panel-v2-017",
+    "panel-v2-018",
+    "panel-v2-019",
+    "panel-v2-020",
+    "panel-v2-021",
+    "panel-v2-022",
+    "panel-v2-023",
+    "panel-v2-024",
+    "panel-v2-025",
+    "panel-v2-026",
+    "panel-v2-027",
+    "panel-v2-028",
+    "panel-v2-029",
+    "panel-v2-030",
+    "panel-v2-031",
+    "panel-v2-032",
+    "panel-v2-033",
+    "panel-v2-034",
+    "panel-v2-035",
+    "panel-v2-036",
+    "panel-v2-037",
+    "panel-v2-038",
+    "panel-v2-039",
+    "panel-v2-040",
+    "panel-v2-041",
+    "panel-v2-042",
+    "panel-v2-043",
+    "panel-v2-044",
+    "panel-v2-045",
+    "panel-v2-046",
+    "panel-v2-047",
+    "panel-v2-048",
+    "panel-v2-049",
+    "panel-v2-050",
+    "panel-v2-051",
+    "panel-v2-052",
+    "panel-v2-053",
+    "panel-v2-054",
+    "panel-v2-055",
+    "panel-v2-056",
+    "panel-v2-057",
+    "panel-v2-058",
+    "panel-v2-059",
+    "panel-v2-060",
+    "panel-v2-061",
+    "panel-v2-062",
+    "panel-v2-063",
+    "panel-v2-064",
+    "panel-v2-065",
+    "panel-v2-066",
+    "panel-v2-067",
+    "panel-v2-068",
+    "panel-v2-069",
+    "panel-v2-070",
+    "panel-v2-071",
+    "panel-v2-072",
+    "panel-v2-073",
+    "panel-v2-074",
+    "panel-v2-075",
+    "panel-v2-076",
+    "panel-v2-077",
+    "panel-v2-078",
+    "panel-v2-079",
+    "panel-v2-080",
+    "panel-v2-081",
+    "panel-v2-082",
+    "panel-v2-083",
+    "panel-v2-084",
+    "panel-v2-085",
+    "panel-v2-086",
+    "panel-v2-087",
+    "panel-v2-088",
+    "panel-v2-089",
+    "panel-v2-090",
+    "panel-v2-091",
+    "panel-v2-092",
+    "panel-v2-093",
+    "panel-v2-094",
+    "panel-v2-095",
+    "panel-v2-096",
+    "panel-v2-097",
+    "panel-v2-098",
+    "panel-v2-099",
+    "panel-v2-100"
+  ]
+}

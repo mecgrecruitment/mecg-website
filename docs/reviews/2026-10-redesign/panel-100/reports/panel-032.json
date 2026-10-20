@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-032",
+  "lens": "Information and discoverability \u2014 narrow mobile viewport; simulated expertise/user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected public information architecture is coherent and restrained. The 390px homepage capture makes the student-led proposition and both audience actions legible, while its framed instrument, typography and hairlines express Precision Instrument consistently. Source tracing supports a client journey from services and pro-bono terms to an inquiry form with useful guidance, failure recovery and an email alternative. Student content explains eligibility, materials and individual evaluation without promising anonymous resume review. Canonical/social metadata and private noindex defaults are explicit. Dynamic case pages and generated social images consult the public release boundary; the supplied production fixture demonstrates publication and page withdrawal without rebuilding. However, information completeness has a small substantive gap, and local captures plus synthetic journeys cannot establish world-class task success or hosted release readiness. This is an independent AI source/capture assessment, not observed student/client behavior.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/mobile-hero.png",
+    "captures/mobile.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/lib/seo.ts",
+    "src/app/layout.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/app/robots.ts",
+    "src/app/sitemap.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/work/[slug]/opengraph-image.tsx",
+    "src/app/(marketing)/work/[slug]/twitter-image.tsx",
+    "src/app/apply/application-form.tsx: MaterialsStep and ReviewStep, lines 729\u2013750",
+    "src/app/api/contact/route.ts",
+    "supabase/migrations/20260901080000_projects_and_staffing.sql: public_projects and upsert_project excerpts",
+    "scripts/verify-publication.mjs",
+    "evidence/publication-proof-result.json",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log: public test results"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:75,86",
+      "evidence": "Preparation tells applicants to ask current members about time commitment; the weekly-commitment FAQ lists activities but again says to ask during recruitment. The Join page renders these entries without a published expected load.",
+      "userImpact": "A student comparing commitments on a phone cannot assess schedule fit independently before applying; finding the named FAQ still leaves the actual planning question unanswered.",
+      "suggestedFix": "Obtain and publish a Board-approved current-cycle weekly range and required meeting expectations, dated by semester. If unsettled, state that explicitly and link directly to a contact route for this question; do not invent hours."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment or hosted Clerk/Supabase/storage/email integration evidence exists. The inspected client journey test intercepts /api/contact with a synthetic 200 response; it does not prove board receipt or response timing.",
+    "No human task-success study, physical-device testing, assistive-technology session, Safari or Firefox evidence. Only the supplied homepage mobile captures were visually inspected; Join/contact mobile craft is supported by source and recorded overflow checks, not screenshots.",
+    "Real search indexing, social-platform cache invalidation and production canonical-domain behavior remain unverified. The publication script verifies emitted image PNGs while published and the page 404 after withdrawal; it does not fetch withdrawn image URLs or test sitemap/index convergence.",
+    "Client-approved case studies/artifacts remain absent. SQL exposes explicitly selected public fields behind is_public, but actual client approval and Board publication governance were not observed. Resume access disclosure was inspected, not hosted authorization or retention enforcement."
+  ]
+}

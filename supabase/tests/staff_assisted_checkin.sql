@@ -1,7 +1,7 @@
 begin;
 set local role postgres;
 set local search_path = extensions, public;
-select extensions.plan(20);
+select extensions.plan(25);
 
 select extensions.has_function(
   'rush', 'staff_assisted_check_in', array['text', 'text', 'text'],
@@ -35,11 +35,14 @@ insert into rush.memberships(user_id, cycle_id, role) values
 insert into rush.pnms(id, name, contact, normalized_contact, uniqname) values
   ('20000000-0000-4000-8000-000000000021', 'Primary Applicant', 'primary@umich.edu', 'primary@umich.edu', 'primary'),
   ('20000000-0000-4000-8000-000000000022', 'Ambiguous Applicant', 'primary', 'primary', 'second'),
-  ('20000000-0000-4000-8000-000000000023', 'Other Cycle Applicant', 'other@umich.edu', 'other@umich.edu', 'othercycle');
+  ('20000000-0000-4000-8000-000000000023', 'Other Cycle Applicant', 'other@umich.edu', 'other@umich.edu', 'othercycle'),
+  ('20000000-0000-4000-8000-000000000024', 'Walk-up without application', 'walkup@umich.edu', 'walkup@umich.edu', 'walkup'),
+  ('20000000-0000-4000-8000-000000000025', 'Withdrawn applicant', 'withdrawn@umich.edu', 'withdrawn@umich.edu', 'withdrawn');
 insert into rush.applications(id, pnm_id, cycle_id, status, submitted_at) values
   ('20000000-0000-4000-8000-000000000031', '20000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000011', 'SUBMITTED', now()),
   ('20000000-0000-4000-8000-000000000032', '20000000-0000-4000-8000-000000000022', '20000000-0000-4000-8000-000000000011', 'SUBMITTED', now()),
-  ('20000000-0000-4000-8000-000000000033', '20000000-0000-4000-8000-000000000023', '20000000-0000-4000-8000-000000000012', 'SUBMITTED', now());
+  ('20000000-0000-4000-8000-000000000033', '20000000-0000-4000-8000-000000000023', '20000000-0000-4000-8000-000000000012', 'SUBMITTED', now()),
+  ('20000000-0000-4000-8000-000000000034', '20000000-0000-4000-8000-000000000025', '20000000-0000-4000-8000-000000000011', 'WITHDRAWN', now());
 
 insert into rush.events(id, cycle_id, name, status, starts_at, ends_at, checkin_opens_at, checkin_closes_at, checkin_token_digest) values
   ('20000000-0000-4000-8000-000000000041', '20000000-0000-4000-8000-000000000011', 'Assisted event', 'PUBLISHED', now(), now() + interval '1 hour', now() - interval '10 minutes', now() + interval '70 minutes', repeat('4', 64)),
@@ -64,9 +67,11 @@ select extensions.throws_ok(
 
 set local "request.jwt.claim.sub" = '20000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"20000000-0000-4000-8000-000000000001","role":"authenticated"}';
-select extensions.throws_ok(
-  $$select rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'other@umich.edu', 'QR_FAILURE')$$,
-  'P0002', 'applicant missing', 'an exact identifier from another cycle is rejected'
+-- Festifall's later walk-up contract intentionally resolves people globally;
+-- historical applications in another cycle do not prevent event attendance.
+select extensions.is(
+  rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'other@umich.edu', 'QR_FAILURE')->>'applicationId',
+  null::text, 'a person from another cycle can attend as a walk-up without an application here'
 );
 select extensions.throws_ok(
   $$select rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'primary', 'QR_FAILURE')$$,
@@ -87,9 +92,9 @@ select extensions.is(
   'an authorized operator can check in an exact email case-insensitively'
 );
 set local role postgres;
-select extensions.is((select checkin_method from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041'), 'STAFF_ASSISTED', 'attendance records the staff-assisted method');
-select extensions.is((select checked_in_by from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041'), '20000000-0000-4000-8000-000000000001'::uuid, 'attendance records the operator');
-select extensions.is((select reason_code from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041'), 'CONNECTIVITY_FAILURE', 'attendance records the bounded reason');
+select extensions.is((select checkin_method from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041' and pnm_id = '20000000-0000-4000-8000-000000000021'), 'STAFF_ASSISTED', 'attendance records the staff-assisted method');
+select extensions.is((select checked_in_by from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041' and pnm_id = '20000000-0000-4000-8000-000000000021'), '20000000-0000-4000-8000-000000000001'::uuid, 'attendance records the operator');
+select extensions.is((select reason_code from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041' and pnm_id = '20000000-0000-4000-8000-000000000021'), 'CONNECTIVITY_FAILURE', 'attendance records the bounded reason');
 select extensions.ok(exists(
   select 1 from rush.audit_events
   where cycle_id = '20000000-0000-4000-8000-000000000011'
@@ -105,9 +110,26 @@ select extensions.is(
   'the exact applicant code resolves and a duplicate request is safe'
 );
 set local role postgres;
-select extensions.is((select count(*) from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041'), 1::bigint, 'a duplicate request creates no second attendance row');
-select extensions.is((select count(*) from rush.audit_events where action = 'APPLICANT_STAFF_ASSISTED_CHECKIN' and resource_id = (select id from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041')), 1::bigint, 'a duplicate request creates no second audit event');
+select extensions.is((select count(*) from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041' and pnm_id = '20000000-0000-4000-8000-000000000021'), 1::bigint, 'a duplicate request creates no second attendance row');
+select extensions.is((select count(*) from rush.audit_events where action = 'APPLICANT_STAFF_ASSISTED_CHECKIN' and resource_id = (select id from rush.checkins where event_id = '20000000-0000-4000-8000-000000000041' and pnm_id = '20000000-0000-4000-8000-000000000021')), 1::bigint, 'a duplicate request creates no second audit event');
 select extensions.is((select count(*) from rush.event_impressions where event_id = '20000000-0000-4000-8000-000000000041'), 0::bigint, 'assisted attendance does not create or change scoring evidence');
+
+set local role authenticated;
+select extensions.is(
+  rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'walkup@umich.edu', 'SIGN_IN_UNAVAILABLE')->>'applicationId',
+  null::text, 'a known person with no application can check in through the staffed fallback'
+);
+select extensions.throws_ok(
+  $$select rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'withdrawn@umich.edu', 'QR_FAILURE')$$,
+  'P0002', 'applicant missing', 'a withdrawn application in this cycle still blocks assisted attendance'
+);
+select extensions.throws_ok(
+  $$select rush.staff_assisted_check_in('20000000-0000-4000-8000-000000000041', 'unknown@umich.edu', 'QR_FAILURE')$$,
+  'P0002', 'applicant missing', 'an unmatched identity does not create a person or attendance'
+);
+set local role postgres;
+select extensions.is((select count(*) from rush.checkins where event_id='20000000-0000-4000-8000-000000000041'),3::bigint,'primary and both valid walk-ups each have one attendance row');
+select extensions.is((select count(*) from rush.applications where pnm_id='20000000-0000-4000-8000-000000000024'),0::bigint,'assisted walk-up does not fabricate an application');
 
 select * from extensions.finish();
 rollback;

@@ -1,9 +1,10 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -28,7 +29,7 @@ export default async function AuditPage({
   searchParams: Promise<{ resource?: string; page?: string }>;
 }) {
   const [user, { resource, page }] = await Promise.all([requireAdmin(), searchParams]);
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
   const pageIndex = Math.max(0, Number.parseInt(page ?? "0", 10) || 0);
   const supabase = await createClient();
@@ -74,7 +75,7 @@ export default async function AuditPage({
 
       <nav aria-label="Filter by resource" className="flex flex-wrap gap-2">
         <Link
-          href="/admin/audit"
+          href={withWorkspaceCycle("/admin/audit", cycleId)}
           aria-current={resource ? undefined : "page"}
           className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource ? "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]" : "bg-mecg-navy text-white"}`}
         >
@@ -83,7 +84,7 @@ export default async function AuditPage({
         {resources.map((name) => (
           <Link
             key={name}
-            href={`/admin/audit?resource=${encodeURIComponent(name)}`}
+            href={withWorkspaceCycle(`/admin/audit?resource=${encodeURIComponent(name)}`, cycleId)}
             aria-current={resource === name ? "page" : undefined}
             className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource === name ? "bg-mecg-navy text-white" : "text-mecg-navy/55 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}
           >
@@ -120,9 +121,9 @@ export default async function AuditPage({
       {(pageIndex > 0 || hasNextPage) && (
         <nav aria-label="Activity pages" className="flex items-center justify-between">
           {pageIndex > 0
-            ? <Link href={pageHref(pageIndex - 1)} className="button-secondary text-sm">Newer</Link>
+            ? <Link href={withWorkspaceCycle(pageHref(pageIndex - 1), cycleId)} className="button-secondary text-sm">Newer</Link>
             : <span />}
-          {hasNextPage && <Link href={pageHref(pageIndex + 1)} className="button-secondary text-sm">Older</Link>}
+          {hasNextPage && <Link href={withWorkspaceCycle(pageHref(pageIndex + 1), cycleId)} className="button-secondary text-sm">Older</Link>}
         </nav>
       )}
     </main>

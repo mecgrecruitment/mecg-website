@@ -1,0 +1,31 @@
+{
+  "seatId": "panel-v2-094",
+  "lens": "Owner and access-sensitive user",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The owner recovery design is substantially stronger in this frozen revision. I traced People \u2192 account setup \u2192 uncertain response \u2192 cycle-specific recovery/People \u2192 incident resolution in source and focused synthetic tests. Both provisioning branches require membership acknowledgements; uncertain identity/grant writes preserve existing access and record restricted incidents. The client retains entered details, bounds response waits, rejects malformed success, and explains that a completed request may have no incident. Resolution explicitly records an owner's reconciliation rather than repairing accounts. People tabs now retain forms and implement associated panels and arrow-key navigation. Local SQL evidence exercises owner-only access, revoked owners, column-limited incident insertion and idempotent audited resolution. The desktop/mobile homepage captures show coherent Precision Instrument hierarchy and clear no-fee/semester terms; the missing approved work is honestly labeled. Applicant materials, review and confirmation consistently disclose identifying original-resume access. I found no new actionable defect in this sampled path. However, world-class confidence across consequential access and privacy workflows needs evidence that actual Clerk identities, sessions and Supabase permissions behave together under interruption. The supplied fixtures and isolated SQL do not establish that, nor actual owner task success. I would hold a consequential integrated rollout pending that validation; this is not a claim that a hosted failure was observed.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json package reference",
+    "docs/PRODUCT.md; docs/DESIGN.md; docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md; account-provisioning-followup.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md; prior-findings-and-responses.json (all 141)",
+    "src/app/(marketing)/home/page.tsx; src/content/projects.public.ts",
+    "src/app/admin/account-provisioning.tsx; rush-controls.tsx (PeopleControls); people/page.tsx; people/people-workspace.tsx; provisioning/page.tsx; provisioning/resolve-button.tsx",
+    "src/app/api/admin/rush/route.ts (provisioning branches); route.test.ts:356-475; src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/lib/provisioning-incident.ts; operational-log.ts; workspace-cycle.ts; workspace-cycle-url.ts; src/proxy.ts",
+    "src/app/apply/application-form.tsx (materials/review disclosures); src/app/applicant/page.tsx:290-315",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql; supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/account-provisioning.spec.ts; provisioning-recovery.spec.ts; cohort-workspace-selection.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/account-provisioning-browser.log; account-provisioning-node.log; release-evidence-sql/tests.log; release-evidence-final-node.log (summary); release-evidence-final-build.log (tail); release-evidence-final-lint.log",
+    "captures/public-home-desktop-1280.png; captures/public-home-mobile-390.png"
+  ],
+  "findings": [],
+  "notVerified": [
+    "No hosted integrated owner creation/linking/reconciliation journey, actual provider acknowledgement loss, session expiry, or production RLS configuration. Synthetic browser fixtures represent commits; they do not perform them.",
+    "No observed human owner/applicant task success, full authenticated keyboard journey, assistive-technology session, physical iPhone or macOS Safari validation. No final owner queue capture was supplied.",
+    "Approved engagement artifacts and current Board-confirmed membership workload facts remain unavailable.",
+    "Board approval of retention/privacy operations, the original-resume policy conflict and closed-round remediation remains outstanding. Accurate disclosure does not resolve those decisions.",
+    "Application, grading and release behavior outside the sampled evidence was not independently exercised in this review."
+  ]
+}

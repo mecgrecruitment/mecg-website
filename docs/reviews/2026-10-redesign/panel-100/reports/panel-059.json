@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-059",
+  "lens": "Prospective client — cross-step continuity (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The public offer is understandable: student-led research and recommendations, no consulting fee, a semester, 6–8 members, and a responsive client contact. Home → Client Services → Contact preserves that proposition and gives useful inquiry prompts and a named board destination. Supplied homepage captures show coherent Precision Instrument hierarchy, restrained color, and readable grouping across desktop/mobile. However, partnership names cannot establish work quality, and approved project evidence is absent. A source-inferred mobile disclosure gap interrupts evidence exploration. The logged client journey passes with intercepted contact delivery; it establishes local interface behavior, not a successful real inquiry. These limits prevent an unqualified world-class or release endorsement.",
+  "inspected": [
+    "snapshot-manifest.json",
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34–69",
+      "evidence": "Below the sm breakpoint the grid is one column; site-content.ts supplies 15 organizations. Each button has min-h-36 (line 46), selection only updates state (line 45), and the selected article follows the entire grid (lines 67–69). No focus or scroll transition connects selection to the details.",
+      "userImpact": "Selecting an early organization on a narrow screen places its explanation several screens below the trigger. A client can miss the result and lose continuity while trying to assess relevant experience. This is inferred from source, not observed user behavior.",
+      "suggestedFix": "Place mobile details immediately after the selected organization, or provide an explicit accessible transition to the result with a return path. Verify selection of the first organization at a narrow viewport."
+    },
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3–5",
+      "evidence": "The approved fallback is empty. ClientProjectGrid lines 97–103 withholds scope, methods, deliverables and outcomes pending approval; the supplied homepage capture likewise states case studies pending client approval. The publication proof starts with zero projects and exercises a synthetic publication fixture.",
+      "userImpact": "A prospective client can understand the proposed process but cannot judge the quality or relevance of an actual MECG handoff before inquiring. Organization descriptions and logos do not fill that evidence gap.",
+      "suggestedFix": "Obtain client/board approval for at least one bounded engagement example showing the question, MECG contribution, methods, deliverable excerpt and limitations. Preserve the existing approval boundary; do not fabricate outcomes."
+    }
+  ],
+  "notVerified": [
+    "No observed human task success, inquiry conversion, or client comprehension study exists; this is an independent AI source/capture review.",
+    "No staging or hosted integration evidence exists. public-journeys.spec.ts:46 intercepts /api/contact; log entries 32 and 70 therefore do not prove Resend acceptance, board receipt, reply routing, or the promised one-week response.",
+    "No supplied Work/Contact captures establish their visual execution or the inferred mobile organization-selection behavior; no shared browser was used.",
+    "Actual production approved-project inventory, NDA handling, inquiry retention practices and operational response ownership were not established by the inspected local evidence.",
+    "Physical devices, Safari/Firefox and assistive-technology behavior remain unverified; private application/operator workflows are outside this seat’s inspected scope."
+  ]
+}

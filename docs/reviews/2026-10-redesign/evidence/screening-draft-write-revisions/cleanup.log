@@ -1,0 +1,4 @@
+{"project_id_filter":"mecg-goal-20261016","backup":false,"message":"Stopped supabase local development setup."}
+docker ps -a --filter name=supabase_db_mecg-goal-20261016 --format {{.Names}} ''
+docker volume ls --filter name=mecg-goal-20261016 --format {{.Name}} ''
+PASS: task database container and volumes absent

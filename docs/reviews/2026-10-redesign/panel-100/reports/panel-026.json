@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-026",
+  "lens": "Accessible interaction \u2014 long or difficult content",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "This simulated expertise review finds strong public foundations: a readable, coherent Precision Instrument presentation, two clear audience actions, native inquiry fields and FAQ disclosures, a skip link, menu Escape/focus return, and large primary controls. The inspected client journey runs from services and engagement terms to the inquiry form; its supplied confirmation test intercepts delivery. Application source supports long written responses with associated guidance/errors, first-invalid-field focus, step-heading focus, wrapping review text and explicit original-resume disclosure. Public copy preserves pending client approval rather than inventing outcomes. However, discussion mode bypasses reduced motion and exposes a global Enter shortcut that conflicts with native control activation. Those concrete accessibility issues prevent agreement. This is source/capture and supplied local-test review, not observed user success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/app/layout.tsx",
+    "src/app/globals.css",
+    "src/lib/site-content.ts (engagement and FAQ excerpts)",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/form-field.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/apply/application-form.tsx (selected validation, focus and step/render sections)",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (selected assertions)",
+    "evidence/mecg-round-close-full-e2e.log (completion/public test excerpts)",
+    "evidence/mecg-round-close-final-e2e.log (completion excerpt)",
+    "captures/mobile-hero.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/globals.css:522-581",
+      "evidence": "Deck entrance, spin, drumroll, shimmer, stamp, shake and pulse animations are declared at lines 522-566. The reduced-motion selector explicitly excludes .deck-root and descendants at 574-577. DeliberationDeck renders that root, animated cards and pulse (deliberation-deck.tsx:275,310-313,348); only the numeric count-up checks the preference.",
+      "userImpact": "Motion-sensitive participants reviewing a long cohort still encounter large card movement and repeated decorative motion despite requesting reduced motion. Projection does not remove this access need.",
+      "suggestedFix": "Include the deck in reduced-motion overrides; render static cards, headshots, status and result feedback, suppress confetti/shake, and verify navigation/reveal with reduced motion enabled."
+    },
+    {
+      "severity": "high",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:234-245",
+      "evidence": "The window keydown listener excludes only INPUT/TEXTAREA/SELECT. Enter otherwise calls advance() or reveal(), including events from focused native buttons/links. Sorting buttons exist at 279-282 and Previous/Revisit/Next at 444-450. reveal() can call APPLY_STAGE_HASH at 227. This conflict is inferred directly from source, not reproduced in an authenticated browser.",
+      "userImpact": "A keyboard operator activating a focused sort, navigation or revisit control can also initiate a result reveal/application for the current applicant, making focus unreliable during consequential cohort review.",
+      "suggestedFix": "Ignore shortcut events originating within interactive elements and respect defaultPrevented; provide an explicit native reveal/apply button. Add a focused-control Enter regression proving that only the named control acts and no stage mutation occurs."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated discussion-mode, application or operator session; no shared browser or new tests run for this seat.",
+    "No assistive-technology, physical-device, Safari/Firefox, zoom/reflow or long-content task study. Captures show default public hero states, not keyboard focus, error announcements or private content.",
+    "Supplied Chromium passes cover menu focus and instrument reduced motion, not the discussion-mode conflicts identified here; synthetic contact/application responses do not prove Clerk, Supabase, storage or email integration.",
+    "No staging, deployment, human usability success, formal accessibility conformance, Board policy approval or client-approved project artifacts established."
+  ]
+}

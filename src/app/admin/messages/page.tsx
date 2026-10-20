@@ -1,9 +1,10 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -30,11 +31,11 @@ export default async function MessagesPage({
   searchParams: Promise<{ view?: string | string[] }>;
 }) {
   const [user, { view: requestedView }] = await Promise.all([requireAdmin(), searchParams]);
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
   const canManageDelivery = hasPermission(user.memberships, cycleId, "MANAGE_CYCLE");
   const view = selectedView(requestedView);
-  if (view === "delivery" && !canManageDelivery) redirect("/admin/messages");
+  if (view === "delivery" && !canManageDelivery) redirect(withWorkspaceCycle("/admin/messages", cycleId));
 
   const supabase = await createClient();
   const [cycleResult, appsResult, logResult] = await Promise.all([
@@ -93,7 +94,7 @@ export default async function MessagesPage({
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Communications"
-        description="Write to applicants, review sent messages, and resolve delivery failures."
+        description="Write to applicants, review sent messages, and review provider-send failures."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/messages" />
       <nav aria-label="Communication sections" className="scroll-cue overflow-x-auto border-b border-mecg-navy/10">
@@ -101,7 +102,7 @@ export default async function MessagesPage({
           {tabs.map(([href, label, tab]) => (
             <Link
               key={tab}
-              href={href}
+              href={withWorkspaceCycle(href, cycleId)}
               aria-current={view === tab ? "page" : undefined}
               className={`inline-flex min-h-11 items-center border-b-2 px-3.5 text-sm font-semibold transition-colors duration-150 ${
                 view === tab
@@ -121,7 +122,7 @@ export default async function MessagesPage({
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <p className="text-[13px] font-semibold text-mecg-navy/50">Recent sends</p>
-            <p className="mt-1 text-sm text-mecg-navy/55">The last {LOG_PAGE_SIZE} messages for this cycle.</p>
+            <p className="mt-1 text-sm text-mecg-navy/55">Up to {LOG_PAGE_SIZE} recent messages for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
           </div>
           {failedCount > 0 && (
             <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-[13px] font-semibold text-red-800">
@@ -130,6 +131,7 @@ export default async function MessagesPage({
           )}
         </div>
         <div className="mt-3 flex flex-col gap-2">
+          {logResult.error && <p role="alert" className="text-sm text-red-800">Message history is unavailable. Reload to check recent sends before sending again.</p>}
           {log.map((message) => (
             <article key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <div className="min-w-0">
@@ -138,7 +140,7 @@ export default async function MessagesPage({
               </div>
               <div className="flex items-center gap-3">
                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
-                  {message.delivered ? "Delivered" : "Failed"}
+                  {message.delivered ? "Sent to provider" : "Send failed"}
                 </span>
                 <time dateTime={message.created_at} className="tabular text-[11px] text-mecg-navy/45">
                   {formatEasternDateTime(message.created_at)}
@@ -146,7 +148,7 @@ export default async function MessagesPage({
               </div>
             </article>
           ))}
-          {!log.length && (
+          {!logResult.error && !log.length && (
             <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center text-sm text-mecg-navy/55">
               Nothing has been sent from this system yet.
             </p>
@@ -187,7 +189,7 @@ export default async function MessagesPage({
           <section aria-labelledby="delivery-history">
             <div>
               <h2 id="delivery-history" className="text-lg font-semibold text-mecg-navy">Delivery history</h2>
-              <p className="mt-1 text-sm text-mecg-navy/65">The latest {OUTBOX_PAGE_SIZE} automated emails and texts for this cycle.</p>
+              <p className="mt-1 text-sm text-mecg-navy/65">Up to {OUTBOX_PAGE_SIZE} recent automated emails and texts for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
             </div>
             <div className="mt-3 flex flex-col gap-2">
               {deliveryLog.map((item) => (
@@ -200,7 +202,7 @@ export default async function MessagesPage({
                   </div>
                   <div className="text-right">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.status === "SENT" ? "bg-emerald-50 text-emerald-800" : item.status === "FAILED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"}`}>
-                      {statusLabel(item.status)}
+                      {item.status === "SENT" ? "Sent to provider" : statusLabel(item.status)}
                     </span>
                     <time className="ml-3 tabular text-xs text-mecg-navy/65" dateTime={item.sent_at ?? item.next_attempt_at}>
                       {formatEasternDateTime(item.sent_at ?? item.next_attempt_at)}

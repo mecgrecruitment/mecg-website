@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-020",
+  "lens": "Editorial and brand craft \u2014 overall coherence (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public presentation is coherent and unusually disciplined: strong sans headings, restrained mono metadata, aligned hairline rows, and a useful engineering-process figure sustain Precision Instrument across the desktop and mobile homepage captures. The proposition identifies student consulting and practical recommendations; client and student actions are distinct. Proof precedes member imagery, and the PwC visit photo is honestly captioned as a visit. However, the central promise of specific work remains unsupported by an inspectable engagement or actual project artifact. Named organizations and a process illustration establish context, not the quality of a delivered recommendation. That content gap prevents my unqualified world-class agreement for a consulting website. I traced the actual client route from home/work to the contact form in source and inspected the corresponding passing desktop/mobile test log. That test intercepts the contact API, so it establishes local navigation and confirmation behavior, not delivered inquiries or observed client success. Release readiness remains unproven beyond this editorial review.",
+  "inspected": [
+    "snapshot-manifest.json (identity header)",
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/globals.css (tokens and focus rules)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97; src/content/projects.public.ts:3-5",
+      "evidence": "The heading promises \u201cReal organizations. Specific questions.\u201d, but the captured empty-publication state supplies only cross-industry process prose, a pending-approval status, and organization/sector rows. PUBLIC_PROJECTS is empty. The only homepage photograph (home/page.tsx:134-136) documents a PwC member visit, not consulting work. Both full-page captures show this same proof gap.",
+      "userImpact": "A prospective client can understand the offer and inquiry process but cannot assess the specificity, reasoning, or usefulness of an actual MECG handoff before making contact. The polished process metaphor carries more evidential weight than the available work warrants.",
+      "suggestedFix": "Have content owners obtain approval for one concise engagement: the real decision, relevant constraints, methods, and an approved result or handoff, with a redacted deliverable image where permitted. Place that evidence in the existing selected-work slot before the process section. Preserve the honest pending state until approval; do not invent outcomes or substitute stock imagery."
+    }
+  ],
+  "notVerified": [
+    "No hosted or staging environment, real contact email delivery, Clerk/Supabase/storage integration, or authenticated end-to-end workflow was exercised. The inspected inquiry browser test uses a synthetic HTTP success response.",
+    "No human study or observed user task success exists; no conversion improvement, client endorsement, or factual verification of the organization counts is established by this review.",
+    "Visual evidence is the supplied Linux-font desktop/mobile homepage captures. Other public pages were source-reviewed only where listed; tablet visual composition, physical devices, Safari, Firefox, zoom and assistive technology remain unverified.",
+    "Private application, grading and operator behavior was outside this focal inspection. The documented original-resume policy remains unresolved; this review makes no anonymous-review or privacy-conformance claim.",
+    "Client publication permission and project artifacts remain content-owner dependencies. No historical seat votes or review verdicts were used as guidance."
+  ]
+}

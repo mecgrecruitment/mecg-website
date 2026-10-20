@@ -1,28 +1,30 @@
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
 import { screeningRpc, type ScreeningDetail } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
-import SectionLabel from "@/components/section-label";
 import ScreeningReviewForm from "./screening-review-form";
 import { parseScreeningProgress, screeningDeadlineLabel } from "../screening-draft";
 import ScreeningReadingDesk from "./screening-reading-desk";
 
 export default async function ScreeningAssignmentPage({ params }: { params: Promise<{ assignmentId: string }> }) {
-  await requireMember();
+  const user = await requireMember();
+  const cycleId = await selectWorkspaceCycle(user.memberships, "WORKSPACE_ACCESS");
   const { assignmentId } = await params;
+  const cycleName = user.memberships.find((membership) => membership.active && membership.cycleId === cycleId)?.cycle.name;
   const supabase = await createClient();
   const { data: detail, error } = await screeningRpc<ScreeningDetail>(supabase, "screening_assignment_detail", { target_assignment_id: assignmentId });
-  if (error || !detail) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">This assignment is unavailable.</p><Link href="/member/screening" className="button-secondary mt-4 text-sm">Back to queue</Link></main>;
+  if (error || !detail) return <main className="workspace-private mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">This assignment is unavailable.</p><Link href={withWorkspaceCycle("/member/screening", cycleId)} className="button-secondary mt-4 text-sm">Back to queue</Link></main>;
   const progress = parseScreeningProgress((detail as ScreeningDetail & { progress?: unknown }).progress);
   return (
-    <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
-      <header className="flex flex-wrap items-start justify-between gap-6">
+    <main className="workspace-private workspace-stack mx-auto flex max-w-7xl flex-col">
+      <nav aria-label="Review context" className="workspace-focus-context"><Link href={withWorkspaceCycle("/member/screening", cycleId)}>Reading queue</Link>{cycleName && <span>{cycleName}</span>}<span aria-hidden="true">/</span><span className="tabular">{detail.candidateCode}</span></nav>
+      <header className="workspace-page-header flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-xs text-mecg-orange-ink">{detail.candidateCode}</p>
-          <h1 className="mt-2.5 text-3xl font-semibold tracking-[-0.03em] sm:text-[34px]">Application review</h1>
-          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Score the written responses below. The resume is there for context and is not scored. Do not use outside knowledge or attempt to identify the applicant.</p>
+          <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em]">Candidate <span className="tabular">{detail.candidateCode}</span></h1>
+          <p className="mt-1.5 text-[15px] text-mecg-navy/55">Read every response before scoring. Use only the submitted material; do not attempt to identify the applicant. The resume is context only and is not scored.</p>
         </div>
-        <Link href="/member/screening" className="button-secondary text-sm">Reading queue</Link>
       </header>
       {progress && (
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mecg-blue/[0.08] px-5 py-4 text-sm">
@@ -32,26 +34,29 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
       )}
       <ScreeningReadingDesk
         reader={(
-          <section>
-            <SectionLabel number="01">Read the application</SectionLabel>
-            <p className="mt-2 text-sm text-mecg-navy/60">Read every response before scoring. Use only what is written here.</p>
-            <div className="mt-3.5 space-y-6 rounded-2xl bg-mecg-navy/[0.035] p-5 sm:p-6">
+          <section className="application-document" aria-label="Application responses">
+            <nav className="reading-contents" aria-label="Jump to application section">
+              {(detail.content.responses ?? []).map((response, index) => <a key={index} href={`#response-${index + 1}`} title={response.question}>Response {index + 1}</a>)}
+              <a href="#application-resume">Resume</a>
+            </nav>
+            <div>
+              {!detail.content.responses?.length && <p className="py-8">No written responses are available.</p>}
               {(detail.content.responses ?? []).map((response, index) => (
-                <article key={`${response.question}\u0000${response.answer}`} className="border-b border-mecg-navy/10 pb-6 last:border-0 last:pb-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Response {index + 1}</p>
+                <article key={`${response.question}\u0000${response.answer}`} id={`response-${index + 1}`} className="reading-response">
+                  <p className="review-response-label">Response {index + 1}</p>
                   <h2 className="mt-2 text-balance font-semibold">{response.question}</h2>
                   <p className="mt-3 whitespace-pre-wrap text-pretty leading-7 text-mecg-navy/75">{response.answer}</p>
                 </article>
               ))}
-              <article>
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Resume <span className="font-normal normal-case tracking-normal text-mecg-navy/50">· context only, not scored</span></p>
+              <details id="application-resume" className="reading-resume">
+                <summary>Resume <span>· context only, not scored</span></summary>
                 {detail.hasResume ? (
                   <div className="mt-3 overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
                     <iframe
                       loading="lazy"
                       src={`/api/member/screening/${assignmentId}/resume`}
                       title="Applicant resume"
-                      className="h-[560px] w-full bg-white"
+                      className="h-[75vh] min-h-[480px] w-full bg-white"
                     />
                     <div className="border-t border-mecg-navy/10 bg-mecg-navy/[0.02] p-2 text-center">
                       <a
@@ -68,15 +73,15 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
                 ) : (
                   <p className="mt-3 text-sm text-mecg-navy/60">No resume was attached.</p>
                 )}
-              </article>
+              </details>
             </div>
           </section>
         )}
         scorer={(
           <section>
-            <SectionLabel number="02">Score independently</SectionLabel>
-            <p className="mt-2 text-sm text-mecg-navy/60">Apply the same anchors to every application. Your draft and final review are private.</p>
-            <div className="mt-3.5"><ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} /></div>
+            <h2 className="text-lg font-semibold">Your review</h2>
+            <p className="mt-1 text-sm text-mecg-navy/65">Private to you. Apply the same rubric to every application.</p>
+            <div className="mt-3.5"><ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} cycleId={cycleId ?? undefined} /></div>
           </section>
         )}
       />

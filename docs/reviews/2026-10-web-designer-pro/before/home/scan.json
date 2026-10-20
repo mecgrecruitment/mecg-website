@@ -1,0 +1,172 @@
+[
+  {
+    "w": 390,
+    "fails": [
+      "Control label wraps onto two lines: \"Operations & Management\"; \"Product Development\"; \"Scope the project\"; \"Build the evidence\". Give it room or shorten it."
+    ],
+    "warns": [
+      "16 text elements at 11px: 11px \"Active in 2026\"; 11px \"Partnered since founding\"; 11px \"First cohort, Winter 2024\"",
+      "Running text under 15px: 14px \"A few questions we could explo\"; 12px \"A possible starting point. We’\"; 12px \"Selected past organizations. C\""
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        36,
+        30,
+        28,
+        24,
+        20,
+        16,
+        14,
+        13,
+        12,
+        11
+      ],
+      "body": 15.3,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 14,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [
+      "Control label wraps onto two lines: \"Operations & Management\"; \"Scope the project\"; \"Build the evidence\"; \"Recommend and hand off\". Give it room or shorten it."
+    ],
+    "warns": [
+      "10 text elements at 11px: 11px \"Active in 2026\"; 11px \"Partnered since founding\"; 11px \"First cohort, Winter 2024\"",
+      "Running text under 15px: 12px \"A possible starting point. We’\"; 12px \"Selected past organizations. C\"; 14px \"Pro-bono consulting at the Uni\""
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        40,
+        30,
+        28,
+        24,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12,
+        11
+      ],
+      "body": 15.4,
+      "heroLayering": {
+        "overlap": true,
+        "sideBySide": false,
+        "crossers": 2
+      },
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 12,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [
+      "Control label wraps onto two lines: \"Recommend and hand off\". Give it room or shorten it."
+    ],
+    "warns": [
+      "13 distinct text sizes. A scale has 6 to 9 steps: 49.92, 42, 36, 28, 24, 18, 17, 16, 15, 14, 13, 12, 11",
+      "10 text elements at 11px: 11px \"Active in 2026\"; 11px \"Partnered since founding\"; 11px \"First cohort, Winter 2024\"",
+      "Running text under 15px: 12px \"A possible starting point. We’\"; 12px \"Selected past organizations. C\"; 14px \"Pro-bono consulting at the Uni\""
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        49.92,
+        42,
+        36,
+        28,
+        24,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12,
+        11
+      ],
+      "body": 15.4,
+      "heroLayering": {
+        "overlap": true,
+        "sideBySide": false,
+        "crossers": 7
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 12,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [
+      "Control label wraps onto two lines: \"Recommend and hand off\". Give it room or shorten it."
+    ],
+    "warns": [
+      "13 distinct text sizes. A scale has 6 to 9 steps: 50, 42, 36, 28, 24, 18, 17, 16, 15, 14, 13, 12, 11",
+      "10 text elements at 11px: 11px \"Active in 2026\"; 11px \"Partnered since founding\"; 11px \"First cohort, Winter 2024\"",
+      "Running text under 15px: 12px \"A possible starting point. We’\"; 12px \"Selected past organizations. C\"; 14px \"Pro-bono consulting at the Uni\""
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        50,
+        42,
+        36,
+        28,
+        24,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12,
+        11
+      ],
+      "body": 15.4,
+      "heroLayering": {
+        "overlap": true,
+        "sideBySide": false,
+        "crossers": 7
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 12,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 39
+    }
+  }
+]

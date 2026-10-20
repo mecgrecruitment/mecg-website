@@ -1,0 +1,431 @@
+{
+  "scope": "Later-working-tree finding navigation; this is neither a frozen review packet nor new reviewer votes. No new voters launched by this index.",
+  "basedOnCompletedReports": 74,
+  "triagedReports": 73,
+  "frozenSnapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "ownerScopeDecisions": "current-owner-decisions.md",
+  "groups": {
+    "Unavailable approved project evidence": [
+      {
+        "seat": "panel-v2-001",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-84",
+        "disposition": "Confirmed missing external authority/facts. Honest pending copy remains; no case study, approval, workload number or meeting time will be invented. Current-cycle Board workload facts have now been requested asynchronously; approved project artifact request remains unanswered from earlier work. No current code change can supply those facts. V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-002",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-003",
+        "file": "src/app/(marketing)/home/page.tsx:67-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:107-108",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-004",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-80; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-005",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:108; src/app/(marketing)/home/page.tsx:80",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-006",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-007",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-81",
+        "disposition": "Confirmed external content/authority dependency. The approved fallback is empty and the UI accurately says pending. Existing publication and withdrawal boundaries are implemented and locally verified; no real approved artifact, scope or result can be supplied by code. Earlier request remains unanswered. No fabricated case study or approval; V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-008",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/work/page.tsx:56-63",
+        "disposition": "Confirmed external content/approval dependency: approved engagement facts/artifact remain unavailable. Honest pending copy and approval boundary remain. No invented outcomes or new authority. Frozen V2 verdict unchanged."
+      },
+      {
+        "seat": "panel-v2-009",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108; src/app/(marketing)/work/page.tsx:56-63",
+        "disposition": "Confirmed external engagement content/approval dependency. Existing approved-publication path works locally, while no real approved artifact/question/method/handoff has been supplied. Honest pending copy remains; no invented approval or outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-010",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx: selected-client-profile",
+        "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+      },
+      {
+        "seat": "panel-v2-011",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:107-108",
+        "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+      },
+      {
+        "seat": "panel-v2-012",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+      },
+      {
+        "seat": "panel-v2-013",
+        "file": "src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-82",
+        "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+      },
+      {
+        "seat": "panel-v2-014",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:99-108",
+        "disposition": "Confirmed external approved engagement content/authority dependency. Approved fallback remains empty and pending disclosure is truthful. Existing publication path is locally verified; no actual approved question, method, artifact or outcome supplied. No fabricated content or retrospective V2 vote change."
+      },
+      {
+        "seat": "panel-v2-031",
+        "file": "src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5",
+        "disposition": "Confirmed missing approved real engagement evidence. Existing approval/publication path is locally verified, while actual authorized question/method/artifact/outcome has not been supplied. Honest pending state remains. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-051",
+        "file": "src/components/client-project-grid.tsx:99\u2013108; src/content/projects.public.ts:3\u20135; src/app/(marketing)/work/page.tsx:56\u201363",
+        "disposition": "Confirmed missing actual approved engagement evidence. Existing publication boundary remains; no authorized real artifact or outcomes supplied and no content invented. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-015",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-016",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-032",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:102-109",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-033",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:108",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-042",
+        "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:67-81",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-052",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "disposition": "Confirmed missing approved actual engagement evidence. Client/Board authorization and real artifact have not been supplied; preserve honest pending disclosure and existing approval boundary, invent no outcomes. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-053",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "disposition": "Confirmed missing approved actual engagement evidence. Preserve truthful pending state and existing approval boundary; no approved artifact or outcomes supplied. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-017",
+        "file": "src/app/(marketing)/home/page.tsx:67-97; src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-018",
+        "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-034",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:109-112",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-035",
+        "file": "src/content/projects.public.ts:5; src/app/(marketing)/home/page.tsx:66-80; src/components/client-project-grid.tsx:108-114",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-054",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:99\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-055",
+        "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-019",
+        "file": "src/content/projects.public.ts:3\u20135; src/app/(marketing)/home/page.tsx:67\u201397; src/components/client-project-grid.tsx:103\u2013108",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-036",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:103-108",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-020",
+        "file": "src/app/(marketing)/home/page.tsx:66\u201397; src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-037",
+        "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-056",
+        "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+        "disposition": "User confirms2026-10-17 no approved project material is available. Preserve truthful pending disclosure and approval boundary; no invented artifacts/outcomes or repeated requests. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Owner-excluded membership-time publication": [
+      {
+        "seat": "panel-v2-001",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-031",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-061",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-032",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-033",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-063",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx:160",
+        "disposition": "Superseded for the current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes that FAQ, special contact action and preparation cross-reference; do not request or invent these facts. This changes current scope, not the historical frozen V2 verdict. See ../current-owner-decisions.md."
+      },
+      {
+        "seat": "panel-v2-034",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-035",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-065",
+        "file": "src/lib/join-content.ts:86",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-036",
+        "file": "src/lib/join-content.ts:75,86; src/app/(marketing)/join/page.tsx (commitment FAQ)",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-037",
+        "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-066",
+        "file": "src/lib/join-content.ts:75,86",
+        "disposition": "Superseded for current working tree by explicit owner decision2026-10-17: exclude membership hours, mandatory meetings and peak commitments. Join removes the FAQ/contact action/preparation cross-reference; do not request or invent these facts. See ../current-owner-decisions.md. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Deck actions, uncertainty and keyboard context": [
+      {
+        "seat": "panel-v2-021",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,473",
+        "disposition": "Addressed and locally verified on the later working tree; see deck-result-recovery.md (55/55 focused browser checks). Frozen V2 snapshot and verdict remain unchanged. Hosted providers, human/AT validation and publication authority remain separate."
+      },
+      {
+        "seat": "panel-v2-022",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-292,470-476",
+        "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-023",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:211-216,332,374",
+        "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-023",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,324-328,473",
+        "disposition": "Resolved in later working tree: 44px measured controls at 320/390px, wrapping footer, explicit new/final-card heading focus and subsequent Tab continuation; result failure/unknown recovery remains announced and bounded. Final 75/75 five-project browser matrix, focused lint and TypeScript pass. See ../deck-touch-and-context.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-025",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+        "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-026",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:222-240",
+        "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-027",
+        "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-296",
+        "disposition": "Resolved in later working tree: bounded full request/body and validated result receipt; persistent rolealert/atomic failure with focus and retry association; unknown result locks mutation until saved-result review/reload without advancing applicant. See ../deck-result-recovery.md and ../deck-touch-and-context.md75-check final matrix. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Scoring-guide acknowledgement recovery": [
+      {
+        "seat": "panel-v2-021",
+        "file": "src/app/admin/rounds/rubric-editor.tsx:60-84,107,210",
+        "disposition": "Addressed and locally verified on the later working tree; see operator-write-receipts.md (55 API tests and all 80 browser scenarios have passing coverage across recorded runs). Frozen V2 snapshot and verdict remain unchanged. Hosted providers, human/AT validation and publication authority remain separate."
+      },
+      {
+        "seat": "panel-v2-024",
+        "file": "src/app/admin/rounds/rubric-editor.tsx",
+        "disposition": "Resolved in later working tree together with021: full request/body bounded to15 seconds; exact round/rubric receipt; editable retained criteria on uncertainty, save locked pending authorized reload, private export before reload, focused outcome. Existing operator-write proof records55 API tests and80 browser checks with passing split-run coverage, including stalls/unknown writes. See ../operator-write-receipts.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-026",
+        "file": "src/app/admin/rounds/rubric-editor.tsx:60-84",
+        "disposition": "Resolved in later working tree: full-body15sec deadline, exact round and actual rubric receipt, retained editable criteria with private download, save locked on unknown until authorized reload, focused result. Existing55API/80scopedbrowser passing evidence includes stalled headers/body and retained content; ../operator-write-receipts.md. Current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Revision-safe bounded Group Case saves": [
+      {
+        "seat": "panel-v2-071",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Addressed on later working tree: revision-safe SQL, exact mutation replay, full JSON deadline, serial intent drain and explicit conflict choices/private copy. SQL verified including real two-session first-save conflict. Final Group Case browser matrix90/90 and focusedAPI/helper/SSR30/30 pass; see group-case-client-revisions.md and group-case-v2-integration-tests.md. Frozen V2 snapshot and vote unchanged."
+      },
+      {
+        "seat": "panel-v2-072",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree with revision-safe serialized writes, bounded request/body, exact current-mutation replay and private copy/conflict recovery. Prior Group Case proof covers 95 scoped configuration checks across overlapping runs; see ../group-case-write-revisions.md and consolidated grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-073",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree with revision-safe serialized writes, bounded request/body, exact current-mutation replay and private copy/conflict recovery. Prior Group Case proof covers 95 scoped configuration checks across overlapping runs; see ../group-case-write-revisions.md and consolidated grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-074",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree: bounded request/body, revision-safe serialization, exact uncertain mutation replay before newer edits, private copy and explicit conflict recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for scoped proof;95 covered configuration checks across overlapping runs are not one95-check suite. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-045",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-075",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-076",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-077",
+        "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+        "disposition": "Resolved in later working tree: bounded full response, revision-safe exact mutation receipt, serialized newer observations, private backup/conflict/retry recovery. See ../group-case-v2-integration-tests.md and ../grading-write-recovery-checkpoint.md for95coveredconfigurationchecks across overlapping runs, not a single95-check suite. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Individual-release acknowledgement recovery": [
+      {
+        "seat": "panel-v2-081",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+        "disposition": "Addressed on later working tree with bounded full-body release confirmation, exact decision receipt, persistent uncertainty and authoritative full-reload recovery. See operator-write-receipts.md for 55 API tests and recorded passing coverage of all 80 browser checks. Frozen V2 verdict unchanged; no hosted delivery proof claimed."
+      },
+      {
+        "seat": "panel-v2-082",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-19; src/lib/use-action.ts:28-39",
+        "disposition": "Resolved in later working tree with action-specific bounded individual-release receipt, unknown-outcome lock and authoritative reconciliation. Prior operator-write proof covers 55 API and 80 scoped browser checks across runs. See ../grading-write-recovery-checkpoint.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-084",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:24-36",
+        "disposition": "Resolved in later working tree with081/082: current ReleaseButton bounds full request/body to15seconds, validates the exact decision-specific released/notified/queued receipt, preserves an unknown-outcome lock, focuses persistent recovery and requires authorized full-page status reload before another release review. Root rechecked current source2026-10-17. Existing55 API tests and80 scoped browser checks have passing evidence; see ../operator-write-receipts.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-044",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+        "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-085",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:25-35",
+        "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-087",
+        "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:25-35",
+        "disposition": "Resolved in later working tree: full-body deadline, exact decision-specific release receipt, unknown-outcome lock, focused recovery and authorized full-page readback before another release. Existing55API/80scopedbrowser passing evidence in ../operator-write-receipts.md; current source independently rechecked2026-10-17. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Other reviewed finding": [
+      {
+        "seat": "panel-v2-091",
+        "file": "tests/e2e/account-provisioning.spec.ts:5-45; docs/reviews/2026-10-redesign/account-provisioning-followup.md",
+        "disposition": "Confirmed external hosted integration evidence gap. Local intercepted browser/API/SQL verification cannot prove real Clerk/Supabase/email reconciliation. User states no staging environment exists. No production writes or provider proof fabricated; V2 vote unchanged."
+      }
+    ],
+    "Round-close focus continuation": [
+      {
+        "seat": "panel-v2-043",
+        "file": "src/app/admin/round-status-control.tsx:55-65,154,187",
+        "disposition": "Resolved in later working tree: completed or authoritatively reconciled close dismisses to persistent status heading, then Tab reaches enabled results link; cancel still restores trigger. 90/90 full matrix plus 10/10 affected follow-up and clean lint. See ../round-close-completion-focus.md. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-083",
+        "file": "src/app/admin/round-status-control.tsx:55-65,151-154,187-188",
+        "disposition": "Resolved in later working tree: completed or authoritatively reconciled close dismisses to persistent status heading, then Tab reaches enabled results link; cancel still restores trigger. 90/90 full matrix plus 10/10 affected follow-up and clean lint. See ../round-close-completion-focus.md. Frozen V2 vote unchanged."
+      }
+    ],
+    "Truthful draft/requested-change application state": [
+      {
+        "seat": "panel-v2-062",
+        "file": "src/app/applicant/page.tsx:23-30,43-49,263-284,366-371",
+        "disposition": "Resolved in later working tree: explicit not-submitted draft and requested-change states in hero/history, no Submitted step for editable states, guarded current-cycle Continue/Resubmit and truthful unavailable/unknown access. 24 focused, 45 broader tests and eight styled synthetic actual-shell SSR captures pass. See ../applicant-editable-status.md. No hosted proof implied. Frozen V2 vote unchanged."
+      },
+      {
+        "seat": "panel-v2-064",
+        "file": "src/app/applicant/page.tsx:26\u201330,43\u201349,153\u2013159,263\u2013284,366\u2013370",
+        "disposition": "Resolved in later working tree: explicit draft/requested-change hero/history, no Submitted pipeline for editable states, guarded current-cycle application action and truthful unknown/unavailable access. Actualdashboard24focused/45regressiontests and8styledsyntheticSSRcaptures pass. See ../applicant-editable-status.md; no hostedjourney claim. Historical finding and frozen V2 vote unchanged."
+      }
+    ],
+    "Sequential keyboard evidence boundary": [
+      {
+        "seat": "panel-v2-063",
+        "file": "tests/e2e/application-reliability.spec.ts:8-42; tests/e2e/application-combine.spec.ts:34-44,61-66",
+        "disposition": "Local keyboard evidence strengthened: new sequential Tab/Shift+Tab, Enter/Space, native radio/select journey passes5/5 browser configurations through validation, recovery, material fields, consent and confirmed navigation. Actual hosted authentication/upload/status journey remains unproven; navigation boundary and separate actual-dashboard SSR proof are explicitly distinguished. See ../application-keyboard-continuity.md. Frozen V2 vote unchanged."
+      }
+    ],
+    "Offer deadline captured-value recovery": [
+      {
+        "seat": "panel-v2-046",
+        "file": "src/app/admin/decision-form.tsx:263-307 (OfferDeadlineForm)",
+        "disposition": "Confirmed in current tree, reproduced and repaired2026-10-17: captured date/action locks, exact application/date RPC-backed receipt, dated confirmation, unsaved edit state, explicit clear, bounded unknown-outcome recovery. All861Node,50browserchecks plus10repeatedcapturefollowups, lint/build/types pass. See ../offer-deadline-write-recovery.md. NoSQL/eligibility changes, no hostedacceptance claim. Frozen V2 vote unchanged."
+      }
+    ]
+  },
+  "receiptSha256": {
+    "applicant-editable-status.md": "d97089f7c1903526235f1915293a25b3cec3d21be5d60368e77e29a8a9523149",
+    "application-keyboard-continuity.md": "bd2301f43b67633e61633384345562ee2c9f15dc0beacd848e9c4de8caa0662e",
+    "current-owner-decisions.md": "fda4d7c298581b45f446d95cb15f4b388bf31f11076fffc4d9e468e4ed6c4003",
+    "deck-mobile-density.md": "0a2fd48dd3d9973909390574d168b6a55143ad18c00e4fc28f738f03f511ea27",
+    "deck-result-recovery.md": "6e14ebe964079378bd2c57fdc60a33a86da770ee77bb8936fe09ba3e97c2952d",
+    "generic-evaluation-cas.md": "b3cf4b846db1a991113ef85d419e4efbfa8934fe50c3d70f6be528ebd93c334f",
+    "grading-write-recovery-checkpoint.md": "f892ec4c3d641f424554c26eba6915076c64b08a5e6f2474e081ea590590c835",
+    "group-case-v2-integration-tests.md": "e61f342bfb9a7ae96f9850b0b3ff5d61f60b4065e21216159181feaef17ec668",
+    "offer-deadline-write-recovery.md": "9ae88ca79ad3367cccffe93c4df7e8ad5478c832b7898c27a12e7b961939dbad",
+    "operator-write-receipts.md": "9f08444cc6e95cfb64b0479947740c2a3f3202e1ce861acbc0a7b708defec41f",
+    "round-close-completion-focus.md": "85769527fe1d7a108e7c9713c597896c1cae6b43de4676a92b979dac43945350",
+    "screening-review-interface-verification.md": "3fb54a259467d59e45c985b6df85de58629c486fb0b178754d1c180ded1bf60c"
+  },
+  "remainingProof": "No staging exists; actual Clerk/Supabase/storage/email integrated journeys remain unverified. Current owner excludes time-expectation publication and confirms no approved project material. Preserve all independent dissent."
+}

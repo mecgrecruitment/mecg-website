@@ -1,0 +1,65 @@
+{
+  "seatId": "panel-v2-026",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The frozen revision improves accessible interaction substantially. The earlier deck keyboard collision is guarded against interactive targets and modified/handled events; explicit result controls exist. Reduced motion now suppresses the deck, starts still before preference detection, and supports a tab-local presenter override beneath the OS preference. The 35-check motion log supports those focused synthetic assertions. I traced the actual Home \u2192 Contact inquiry journey through source and keyboard/error tests: native fields, associated errors, first-invalid focus, locked pending values and preserved uncertain delivery are credible improvements. Mobile captures show coherent Precision Instrument hierarchy and readable recovery choices; changed-field radio groups and a private both-copy download reduce long-answer recovery effort. However, consequential deck application and scoring-guide saving still have indefinite pending paths. Together with absent integrated authenticated keyboard/assistive-technology acceptance and missing approved work/workload facts, this does not meet the unchanged broad world-class criterion. This is source and supplied-artifact assessment, not observed human task success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/inventory metadata)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/globals.css (focus and motion rules)",
+    "src/lib/client-fetch.ts",
+    "src/lib/run-action.ts",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt/privacy excerpts)",
+    "docs/policies/recruitment-policy.md (retention excerpts)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log (result and cases)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact/deck results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:222-240",
+      "evidence": "reveal() enters drumroll and awaits runAction at line 236. run-action.ts:9-14 and client-fetch.ts:121-124 impose no request/body deadline. step/jump/revisit are blocked during drumroll; Previous/Next are disabled at 470/476. A rejected request merely resets phase with an error rendered as a plain paragraph at 473, without an alert or authoritative result reconciliation.",
+      "userImpact": "A stalled result request can strand the presenter indefinitely. A lost acknowledgement can describe a consequential applied result as failure and leave a screen-reader operator without announced uncertainty. These are source-derived paths, not reproduced hosted incidents.",
+      "suggestedFix": "Bound request and body consumption; announce an unknown-outcome state, retain the applicant context, and reconcile authoritative stage results before enabling another application. Add stalled and committed-but-lost response checks with keyboard recovery."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rounds/rubric-editor.tsx:60-84",
+      "evidence": "save() sets pending and awaits bare authorizedFetch; only finally clears pending. The entire editable fieldset is disabled at line 107. authorizedFetch supplies session retry but no deadline.",
+      "userImpact": "An operator editing a long scoring guide can remain at Saving indefinitely, unable to edit or retry in place; refreshing risks losing the unconfirmed text. Field-linked validation fixes do not cover this pending path.",
+      "suggestedFix": "Bound the save acknowledgement, preserve the captured guide, announce uncertain saving, restore controls/focus and provide authoritative reload/comparison before retry. Verify a nonsettling request and retained content."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/email acceptance, real authenticated prepare/apply/recover/status/operator keyboard journey, or actual delivery/session termination was supplied.",
+    "No screen-reader session, physical iPhone/macOS Safari testing or observed human comprehension/task success; local engine tests and captures establish narrower scope.",
+    "No final deck screenshot or real private-workspace visual acceptance; the recovery capture is a synthetic intercepted harness.",
+    "Approved engagement artifacts, Board-confirmed membership workload, retention operations and policy remediation remain unresolved. Original identifying-resume access is accurately disclosed in the inspected receipt; that disclosure is not anonymity or policy approval."
+  ]
+}

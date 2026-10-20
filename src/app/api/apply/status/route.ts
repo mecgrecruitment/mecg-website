@@ -32,6 +32,8 @@ export async function GET(req: NextRequest) {
   }
   if (!user) return respond({ error: "Sign in before checking your application" }, 401, "AUTH_REQUIRED");
 
+  const cycleId = req.nextUrl.searchParams.get("cycleId");
+  if (!cycleId || cycleId.length > 240) return respond({ error: "Reload the application before checking submission status." }, 400, "CYCLE_REQUIRED");
   const supabase = await createClient();
   const rpc = supabase.rpc.bind(supabase) as unknown as (
     name: "my_application_submission_status",
@@ -43,5 +45,15 @@ export async function GET(req: NextRequest) {
   if (result.error) return respond({ error: "Application status is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE");
   const status = parseSubmissionStatus(result.data);
   if (status === undefined) return respond({ error: "Application status is temporarily unavailable. Try again shortly." }, 503, "INVALID_STATUS_RESPONSE");
-  return respond({ application: status }, 200);
+  if (!status) return respond({ application: null }, 200);
+  // The legacy status RPC returns the latest non-archived application. An older
+  // cycle's submission must never clear recovery for the form being submitted.
+  let match;
+  try {
+    match = await supabase.from("applications").select("id").eq("id", status.applicationId).eq("cycle_id", cycleId).maybeSingle();
+  } catch { return respond({ error: "Application status is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE"); }
+  if (match.error) return respond({ error: "Application status is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE");
+  if (!match.data) return respond({ application: null }, 200);
+  if (match.data.id !== status.applicationId) return respond({ error: "Application status is temporarily unavailable." }, 503, "INVALID_STATUS_RESPONSE");
+  return respond({ application: { ...status, cycleId } }, 200);
 }

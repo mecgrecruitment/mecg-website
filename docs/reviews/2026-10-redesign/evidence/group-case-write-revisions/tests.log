@@ -1,0 +1,29 @@
+Connecting to local database...
+/home/rahil/mecg-website/supabase/tests/application_draft_concurrency.sql .. ok
+/home/rahil/mecg-website/supabase/tests/batch_release_diagnostics.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/grading_contract_consistency.sql ... ok
+/home/rahil/mecg-website/supabase/tests/group_case_rating.sql .............. 
+# Failed test 14: "a published round cannot be graded"
+#       caught: 42501: forbidden
+#       wanted: 55000: round is not open for grading
+# Looks like you failed 1 test of 42
+Failed 1/42 subtests 
+/home/rahil/mecg-website/supabase/tests/group_case_reviewer_quality.sql .... ok
+/home/rahil/mecg-website/supabase/tests/group_case_write_revisions.sql ..... ok
+/home/rahil/mecg-website/supabase/tests/hash_votes.sql ..................... ok
+/home/rahil/mecg-website/supabase/tests/provisioning_incidents.sql ......... ok
+/home/rahil/mecg-website/supabase/tests/release_evidence_diagnostics.sql ... ok
+/home/rahil/mecg-website/supabase/tests/round_close_summary.sql ............ ok
+/home/rahil/mecg-website/supabase/tests/rush_foundation.sql ................ ok
+/home/rahil/mecg-website/supabase/tests/screening_release_visibility.sql ... ok
+/home/rahil/mecg-website/supabase/tests/speed_dating_pairs.sql ............. ok
+/home/rahil/mecg-website/supabase/tests/staff_assisted_checkin.sql ......... ok
+/home/rahil/mecg-website/supabase/tests/stage_hash_flow.sql ................ ok
+
+Test Summary Report
+-------------------
+/home/rahil/mecg-website/supabase/tests/group_case_rating.sql            (Wstat: 0 Tests: 42 Failed: 1)
+  Failed test:  14
+Files=15, Tests=783,  1 wallclock secs ( 0.04 usr  0.02 sys +  0.07 cusr  0.04 csys =  0.17 CPU)
+Result: FAIL
+error running container: exit 1

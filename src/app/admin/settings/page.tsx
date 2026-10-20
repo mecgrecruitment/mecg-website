@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -60,7 +60,7 @@ function parseQuestions(value: unknown): IntakeQuestion[] | null {
 
 export default async function SettingsPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "MANAGE_CYCLE");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "MANAGE_CYCLE")) redirect("/admin");
   const supabase = await createClient();
   const [cycleResult, questionsResult, submittedResult, analyticsResult] = await Promise.all([

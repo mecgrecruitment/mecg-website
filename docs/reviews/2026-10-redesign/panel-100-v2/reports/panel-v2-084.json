@@ -1,0 +1,38 @@
+{
+  "seatId": "panel-v2-084",
+  "lens": "Recruitment operator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected operator journey\u2014selected cohort to interview overview, unfinished evidence, close confirmation, release review and round-specific diagnostics\u2014has substantial safeguards. Usable staffing excludes recused/missed records; submitted forms are explicitly distinct from qualifying evidence. Canonical validity determines Group Case attention. Close recovery reads authoritative status and preserves uncertainty across same-tab reload. Batch release bounds response consumption, retains the complete reviewed cohort through filters and restores keyboard focus. The supplied mobile diagnostics capture is readable, with specific counts and a clear closed-round owner escalation; it is a synthetic harness, not observed authenticated task success. The public homepage coherently uses the Precision Instrument identity, states the no-fee semester proposition early and labels unpublished project evidence honestly. Applicant receipt copy accurately discloses identifying original-resume access. However, the actual individual-release route retains weaker service-failure handling than batch release. That consequential inconsistency prevents world-class agreement and warrants holding release until repaired and independently verified. The logged 780 Node passes, 753 isolated SQL assertions and focused browser successes establish useful local scopes, not hosted operator acceptance. Approved engagement evidence, workload facts and Board remediation authority also remain unavailable.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json",
+    "docs/PRODUCT.md; docs/DESIGN.md; docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md; operator-review-and-scale.md; cohort-workspace-selection.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; src/lib/join-content.ts; src/app/applicant/page.tsx (receipt disclosure)",
+    "src/app/admin/rounds/page.tsx; rounds/coverage.ts; rounds/coverage.test.ts; src/lib/round-cohort.ts",
+    "src/app/admin/round-board.tsx; group-case-coverage.ts; group-case-coverage.test.ts; round-status-control.tsx; decision-form.tsx",
+    "src/lib/workspace-cycle.ts; src/components/workspace-cycle-switcher.tsx; src/lib/use-action.ts; run-action.ts; client-fetch.ts",
+    "src/app/admin/applications/[id]/release-evidence/page.tsx; evidence-view.tsx; src/app/api/admin/decisions/route.ts",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql; supabase/tests/release_evidence_diagnostics.sql",
+    "tests/e2e/operator-review.spec.ts; release-reliability.spec.ts; release-evidence.spec.ts; operator-close.spec.ts (recovery cases)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-{node,build,lint,browser}.log (final results); release-evidence-sql/tests.log (final results)",
+    "captures/PROVENANCE.json; captures/public-home-mobile-390.png; captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:24-36",
+      "evidence": "ReleaseButton delegates RELEASE to useAction/runAction. runAction awaits authorizedFetch and response.json without a deadline and returns ok:true for every response.ok, including a null/malformed body. The control disables itself while pending and announces Outcome released on that unchecked success. A thrown response loss produces only Could not release and does not refresh unless a released:true body was received. This control is mounted for locked outcomes in applications/[id]/page.tsx:552 and hash/page.tsx:414. The inspected release-reliability.spec.ts exercises RELEASE_ALL through the batch harness, not this individual control.",
+      "userImpact": "An operator releasing one outcome can remain indefinitely at Releasing during a stalled request/body. A lost acknowledgement after commit leaves a stale locked row with generic failure, while malformed 2xx can falsely announce release. The stronger batch recovery does not protect this path.",
+      "suggestedFix": "Use a full request/body deadline and validate an action-specific release receipt. Preserve an explicit unknown outcome on timeout, response loss or malformed success, refresh authoritative decision state and require reconciliation before another release. Add focused individual-control stalled-body, malformed-success and committed-response-loss checks."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/RLS/storage/email integration or real authenticated operator recovery journey was supplied; no live tasks were performed.",
+    "Closed-round remediation remains dependent on Board-approved policy; diagnostic routing cannot itself recover insufficient locked evidence.",
+    "No observed human task completion, screen-reader session, physical iPhone or macOS Safari evidence. Private visual assessment is limited to the supplied synthetic diagnostics capture.",
+    "Client-approved actual engagement artifacts, current membership workload facts and approved retention/privacy operations remain missing."
+  ]
+}

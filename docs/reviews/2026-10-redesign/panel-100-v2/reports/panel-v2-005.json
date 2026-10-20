@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-005",
+  "lens": "Apple-inspired clarity; ambiguous result",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public composition is disciplined and recognizably MECG: strong title hierarchy, restrained accent, useful hairlines and two legible audience actions. The mobile disclosure makes the process illustration optional, while no-fee and semester facts now precede the inquiry. I independently rechecked the prior ambiguous-inquiry objection: ContactForm locks captured fields, validates its receipt, bounds the complete fetch/body wait, retains answers on uncertainty and reuses an unchanged in-page delivery intent. The API forwards that idempotency key and requires a provider message ID. Focused keyboard, malformed, interrupted and stalled-response tests supply credible local evidence; they do not establish real delivery. The actual client journey from proposition through Work to inquiry still cannot supply an inspectable MECG deliverable. That central information task remains materially incomplete, so I disagree with the broad world-class claim despite the substantial clarity improvements. Release readiness remains unproven without hosted integration and policy acceptance. This is a simulated design lens, not Apple or human endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/lib/site-content.ts",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "docs/policies/recruitment-policy.md",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts (journey excerpts)",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (contact results)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-browser.log",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:108; src/app/(marketing)/home/page.tsx:80",
+      "evidence": "The approved fallback remains empty. Current organization profiles explicitly withhold project scope, methods, deliverables and outcomes; the supplied final homepage captures show the pending-client-approval state. Renaming the fallback to Past partnerships correctly fixes the former overpromise but does not provide an engagement example.",
+      "userImpact": "An organization can assess the proposed process and affiliations but cannot judge the specificity or quality of MECG analysis before investing in an inquiry.",
+      "suggestedFix": "Content owners should obtain client and Board approval for one bounded real engagement: question, contribution, methods, redacted deliverable and handoff limits. Publish through the existing boundary; retain the truthful pending state until approval."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk/Supabase/storage/Resend integration, provider acceptance/inbox arrival, hosted session expiry and consequential operator recovery; no staging exists.",
+    "Observed human task completion, screen-reader journeys, physical iPhone/macOS Safari, and full authenticated keyboard application/evaluation/operator journeys.",
+    "Board approval of resume/blind-review conflicts, retention and closed-round remediation; current identifying-resume disclosure is accurate, not policy approval.",
+    "Current Board-confirmed membership workload and approved real project evidence remain unavailable.",
+    "Private visual craft beyond supplied captures and full grading/release database behavior were not independently exercised by this seat. In-page inquiry keys do not provide durable deduplication across reloads or beyond provider retention."
+  ]
+}

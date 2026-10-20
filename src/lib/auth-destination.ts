@@ -9,6 +9,7 @@ export function resolveAuthDestination(input: {
   memberships: readonly AccessMembership[];
   hasApplication: boolean;
   canStartApplication: boolean;
+  hasEditableApplication: boolean;
 }): AuthDestination {
   if (!input.active) return "/access-denied";
 
@@ -19,6 +20,15 @@ export function resolveAuthDestination(input: {
   if (roles.has("MEMBER")) return "/member";
   // A past application must not trap someone on the old decision. If a cycle is
   // open that they have not applied to, applying is their live business.
-  if (input.canStartApplication) return "/apply";
+  if (input.canStartApplication || input.hasEditableApplication) return "/apply";
   return input.hasApplication ? "/applicant" : "/apply";
+}
+
+// intake_schema selects the current eligible open cycle and returns draft only
+// for caller-owned DRAFT/NEEDS_INFO rows. History alone cannot answer this.
+export function hasEditableIntakeApplication(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return "open" in value && value.open === true
+    && "cycleId" in value && typeof value.cycleId === "string" && !!value.cycleId.trim()
+    && "draft" in value && !!value.draft && typeof value.draft === "object" && !Array.isArray(value.draft);
 }

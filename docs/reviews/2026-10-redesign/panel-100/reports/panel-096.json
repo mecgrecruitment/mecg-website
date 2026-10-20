@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-096",
+  "lens": "Owner and access-sensitive user; long or difficult content",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The reviewed implementation has credible privacy safeguards: unknown provisioning acknowledgements preserve accounts, incident logs omit lookup identity, owner-only records retain necessary recovery details, and resolution explicitly records remediation without repairing accounts. Applicant materials and final review accurately disclose original-resume visibility. Desktop/mobile hero captures show a coherent Precision Instrument hierarchy and distinct client/student actions; pending case-study approval is stated rather than replaced with invented outcomes. However, the owner recovery journey can lose the incident cycle when moving to People, undermining the instruction to check that cycle before changing access. This prevents unqualified world-class acceptance for this lens. This is an independent simulated AI assessment of frozen source and local evidence, not observed human or hosted task success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx (application entry/materials guidance)",
+    "src/app/apply/application-form.tsx (MaterialsStep and ReviewStep)",
+    "src/app/api/apply/resume/route.ts",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/rush-controls.tsx (useRushAction and PeopleControls)",
+    "src/app/admin/member-accounts.ts",
+    "src/lib/cycles.ts",
+    "src/app/api/admin/rush/route.ts (account provisioning branches)",
+    "src/app/api/admin/rush/route.test.ts (provisioning cases)",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/provisioning-incident.test.ts",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/page.test.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-final-node.log (relevant cases)",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-browser.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/provisioning/page.tsx:61",
+      "evidence": "ProvisioningPage accepts an explicit authorized cycle at lines 36\u201338 and tells owners to check \"this cycle\" in People at line 66, but Back to People links to /admin/people without context. PeoplePage at src/app/admin/people/page.tsx:70\u201377 accepts no search parameters and independently selects WORKSPACE_ACCESS. src/lib/cycles.ts:32\u201340 prioritizes active/newer cycles. Thus an incident for an older cycle can lead to another cycle\u2019s roster and controls.",
+      "userImpact": "An owner following the recovery instructions can inspect the wrong membership, miss existing access, or perform a retry/change against another cycle. The cycle heading helps detection but does not preserve the intended recovery task.",
+      "suggestedFix": "Carry the incident cycle into the People link and have PeoplePage validate and honor that requested cycle. Keep the cycle visible beside recovery actions and add a two-cycle journey check that verifies the roster and mutation target remain the incident cycle."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, hosted Clerk/Supabase/storage/email integration or actual end-to-end account remediation was available; provider uncertainty and compensation are supported by local mocks/source only.",
+    "The supplied browser log proves eight synthetic resolution-button checks; it does not demonstrate authenticated owner queue navigation, long incident queues, long identity strings, or cross-cycle recovery. Queue tests render mocked React SSR.",
+    "No human comprehension study establishes that owners understand manual remediation or applicants understand the resume/written-packet distinction; retention policy and Board privacy decisions remain unresolved.",
+    "No authenticated queue capture, assistive-technology session, physical-device, Safari or Firefox evidence was inspected. Public hero captures cannot establish private-workspace visual usability."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-v2-007",
+  "lens": "Apple-inspired clarity; recovery and retry (simulated AI lens, not an Apple employee or human participant)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected revision expresses Precision Instrument coherently: the mobile homepage has an unmistakable offer, explicit no-fee/semester terms, two audience actions and a restrained optional process instrument. The contact journey explains the next conversation, locks the submitted fields, validates its acknowledgement, retains uncertain inquiries and permits bounded retries with a stable in-page request identity. Application recovery now provides changed-field comparison, exact radio choices and a candid private-download warning; current source makes whole-copy actions secondary. Submission clears recovery only after a receipt or authoritative reconciliation and explains unconfirmed outcomes without asserting failure. These address the relevant earlier objections rather than merely restyling them. However, polished local states and intercepted browser checks cannot establish successful recovery through real sessions, storage and providers. The public proposition also lacks inspectable approved engagement evidence. With consequential grading/operator journeys outside my direct exercised scope and important hosted and human evidence absent, the broad world-class claim remains unproven; this is not conditional agreement or release approval.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/apply/application-form.tsx (submission, recovery, materials and review sections)",
+    "src/app/applicant/page.tsx (receipt/privacy disclosure)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final result)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact scenarios)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (tail)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-81",
+      "evidence": "The approved fallback list is empty. The current homepage correctly switches to Past partnerships / Across industries and explicitly states case studies are pending client approval; the supplied public-home-mobile-390.png shows that fallback, not a concrete engagement question, method or handoff.",
+      "userImpact": "A prospective client understands the offer and next action but cannot inspect the substance or relevance of completed MECG work before investing time in an inquiry. Honest affiliation and process descriptions leave this decision incomplete.",
+      "suggestedFix": "Obtain client and Board approval for one bounded actual engagement: question, contribution, method, limitations and a redacted deliverable or factual handoff. Publish through the existing approval boundary; retain the truthful pending state until then."
+    }
+  ],
+  "notVerified": [
+    "Real Clerk session expiry, Supabase RPC/RLS, resume upload/storage and Resend delivery or accepted-but-unacknowledged recovery; local intercepted tests establish their stated scope only.",
+    "A complete authenticated keyboard applicant recovery-to-status journey, real grading/operator task completion, screen-reader use, physical iPhone and macOS Safari.",
+    "Observed human comprehension and task success; this seat is an AI simulation.",
+    "Approved engagement artifacts, current Board-confirmed workload facts, retention operations and Board-approved closed-round remediation.",
+    "The supplied synthetic recovery capture has an orange whole-copy button while current source uses secondary buttons; it supports content/layout inspection but is not exact proof of every final button treatment."
+  ]
+}

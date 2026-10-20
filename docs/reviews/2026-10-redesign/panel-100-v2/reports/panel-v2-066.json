@@ -1,0 +1,39 @@
+{
+  "seatId": "panel-v2-066",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The applicant journey is substantially more considered than the original whole-copy recovery described in the prior objections. I traced Home \u2192 Join/preparation \u2192 Apply \u2192 recovery/review/submission \u2192 applicant next actions in current source. Changed fields, exact per-field choices, unchanged-field disclosure and a candid private download make long conflicting answers manageable; the supplied mobile capture shows readable text and reachable actions. Combining explicitly adopts the reviewed server revision and clears consent. Receipt validation, same-cycle reconciliation, preserved uncertain submissions and accurate original-resume disclosure address the relevant earlier objections. The 105-pass log supports its intercepted local scenarios, not real authenticated completion. The public identity is coherent and restrained, with honest partnership boundaries. However, schedule-fit facts remain absent, approved consulting artifacts are unavailable, and the complete authenticated application/status and consequential operator journeys lack hosted acceptance. These material unknowns prevent an unqualified world-class answer or release acceptance; I found no new recovery defect to invent.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json identity/header",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; src/app/(marketing)/join/page.tsx; src/lib/join-content.ts; src/lib/public-recruitment.ts (loader/action/status)",
+    "src/app/apply/page.tsx (intake/auth/loading boundaries); application-form.tsx; application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt/deadlines/next-action/current application); next-action.ts",
+    "src/lib/auth-destination.ts; src/lib/application-submission.ts; src/lib/client-fetch.ts",
+    "src/app/api/apply/route.ts; src/app/api/apply/status/route.ts",
+    "supabase/migrations/20261016190000_application_draft_revisions.sql (revision triggers, validation and intake read excerpts)",
+    "tests/e2e/application-combine.spec.ts; tests/e2e/application-reliability.spec.ts (submission scenarios and recovery assertions)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md; evidence/application-combine-browser.log; evidence/release-evidence-sql/tests.log",
+    "captures/PROVENANCE.json; captures/synthetic-application-mixed-copies-mobile.png; captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/join-content.ts:75,86",
+      "evidence": "Preparation asks students to assess schedule fit, but the weekly-commitment answer explicitly says expected hours, mandatory meetings and peak commitments are unpublished. Join supplies a direct Board email, which truthfully mitigates but does not answer the question.",
+      "userImpact": "A student with a difficult semester cannot independently decide whether membership fits before investing in recruitment.",
+      "suggestedFix": "Obtain Board-confirmed current-semester weekly ranges, required times and peak expectations; publish them with a date. Retain the candid contact fallback until approved facts exist."
+    }
+  ],
+  "notVerified": [
+    "No actual Clerk/Supabase/storage/email integrated acceptance, multi-device account recovery, session expiry or hosted migration rollout was observed.",
+    "No complete keyboard-only authenticated prepare/apply/upload/recover/status journey or assistive-technology session; click/check harness tests and source focus handling establish narrower evidence.",
+    "Synthetic recovery screenshot is not a real applicant session; normal authenticated form/status visual states, physical iPhone and macOS Safari remain unverified.",
+    "Grading/operator/provisioning/release correctness was not independently audited end to end in this applicant-focused review.",
+    "Client-approved project artifacts, current workload facts, Board retention/privacy and closed-round remediation authority remain outstanding; truthful resume disclosure does not resolve the policy conflict."
+  ]
+}

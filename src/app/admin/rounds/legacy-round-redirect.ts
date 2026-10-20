@@ -1,14 +1,13 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 
 export async function redirectLegacyRound(kind: string) {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS")
-    ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS")
-    ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const cycleId = await selectWorkspaceCycle(user.memberships, ["RECRUITMENT_OPERATIONS", "HASH_PANEL_ACCESS", "MANAGE_CYCLE"]);
   if (!cycleId) redirect("/member");
 
   const supabase = await createClient();
@@ -19,7 +18,7 @@ export async function redirectLegacyRound(kind: string) {
     .eq("kind", kind)
     .maybeSingle();
   if (error) throw error;
-  if (round) redirect(`/admin/rounds/${round.id}`);
+  if (round) redirect(withWorkspaceCycle(`/admin/rounds/${round.id}`, cycleId));
 
-  redirect(hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS") ? "/admin/rounds" : "/admin");
+  redirect(withWorkspaceCycle(hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS") ? "/admin/rounds" : "/admin", cycleId));
 }

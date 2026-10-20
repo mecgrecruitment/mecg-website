@@ -40,13 +40,13 @@ const OPENS_AT = new Date(Date.now() + 15 * 60_000).toISOString();
 const CLOSES_AT = new Date(Date.now() + 7 * 86_400_000).toISOString();
 const SIGNED_IN_USER = { id: "u1", email: "ada@umich.edu", name: "Ada", active: true, memberships: [] };
 
-async function mockPage(t: TestContext) {
+async function mockPage(t: TestContext, options: { timelineUnavailable?: boolean; malformedSchema?: boolean } = {}) {
   const recruitment = await import("@/lib/public-recruitment");
   t.mock.module("@/lib/public-recruitment", {
     namedExports: {
       ...recruitment,
       // Only the network call is faked; the window logic under test is real.
-      fetchPublicRecruitment: async () => ({ cycle: { name: "Fall 2026", status: "OPEN", opensAt: OPENS_AT, closesAt: CLOSES_AT } }),
+      fetchPublicRecruitment: async () => options.timelineUnavailable ? { kind: "unavailable", cycle: null, events: [] } : ({ kind: "available", events: [], cycle: { name: "Fall 2026", status: "OPEN", opensAt: OPENS_AT, closesAt: CLOSES_AT } }),
     },
   });
   t.mock.module("next/navigation", {
@@ -66,7 +66,7 @@ async function mockPage(t: TestContext) {
       // intake_schema reports open:false for the entire window before opens_at.
       createClient: async () => ({
         rpc: async (name: string) => (name === "intake_schema"
-          ? { data: { open: false, cycleName: "Fall 2026", questions: [] }, error: null }
+          ? { data: { ...(options.malformedSchema ? {} : { open: false }), cycleName: "Fall 2026", questions: [] }, error: null }
           : { data: false, error: null }),
       }),
     },
@@ -86,4 +86,25 @@ test("a signed-in applicant before opens_at sees the countdown, not a closed bad
   assert.doesNotMatch(markup, /Applications closed/);
   assert.match(markup, /Applications open in/);
   assert.match(markup, /Applications open at \d{1,2}:\d{2}\s?(AM|PM)/);
+});
+
+
+test("a signed-in applicant with unavailable opening dates is not told the deadline passed", async (t) => {
+  await mockPage(t, { timelineUnavailable: true });
+  const specifier = "./page.tsx?case=timeline-unavailable";
+  const { default: ApplyPage } = await import(specifier) as { default: () => Promise<ReactElement> };
+  const markup = renderToStaticMarkup(await ApplyPage());
+  assert.doesNotMatch(markup, /Applications closed|Applications are currently closed/);
+  assert.match(markup, /Not accepting submissions/);
+  assert.match(markup, /could not load the opening timeline/);
+  assert.match(markup, /browser recovery copy has not been removed/);
+});
+
+test("an intake schema missing its open flag is unavailable rather than closed", async (t) => {
+  await mockPage(t, { malformedSchema: true });
+  const specifier = "./page.tsx?case=malformed-open-flag";
+  const { default: ApplyPage } = await import(specifier) as { default: () => Promise<ReactElement> };
+  const markup = renderToStaticMarkup(await ApplyPage());
+  assert.match(markup, /The application could not be loaded/);
+  assert.doesNotMatch(markup, /Applications closed|Applications are currently closed/);
 });

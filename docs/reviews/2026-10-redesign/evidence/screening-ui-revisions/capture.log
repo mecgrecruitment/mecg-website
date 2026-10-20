@@ -1,0 +1,7 @@
+
+Running 2 tests using 2 workers
+
+  ✓  2 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:70:7 › screening conflict lets the reviewer export both private copies then choose local (3.8s)
+  ✓  1 [mobile-webkit] › tests/e2e/screening-cas.spec.ts:70:7 › screening conflict lets the reviewer export both private copies then choose local (4.0s)
+
+  2 passed (4.8s)

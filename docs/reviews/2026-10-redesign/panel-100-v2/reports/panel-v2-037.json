@@ -1,0 +1,43 @@
+{
+  "seatId": "panel-v2-037",
+  "lens": "Information and discoverability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public information architecture is coherent and the supplied desktop/mobile homepage captures show a restrained, legible Precision Instrument composition. Cost and semester duration now precede inquiry. I traced Home \u2192 Join \u2192 preparation/evaluation/FAQ and outage recovery in actual source, and the client terms \u2192 inquiry journey in source and its intercepted browser test. The original recruitment objection is resolved locally: unavailable, no-cycle and empty-event states differ; outage offers reload/application/contact, while no-cycle suppresses unsupported signup. Focused SSR/parser assertions and the final Node log support this. Canonicals, complete social metadata, private noindex defaults and request-time case/image lookup are sensible; the publication script exercises synthetic publish/withdraw without rebuilding. Nevertheless, central information tasks remain incomplete: clients cannot inspect actual delivery evidence and students cannot independently establish schedule fit. Those substantive content gaps prevent my agreement with the unchanged broad world-class question. Hosted reliability and complete authenticated task success also remain unproven; this is an independent AI source/artifact review, not observed human success.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json (identity/inventory header)",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/{prior-findings-and-responses.json (all 141),EVIDENCE-INDEX.md,RESPONSES.md,UNRESOLVED.md}",
+    "src/app/(marketing)/{home,work,join}/page.tsx; join/page.test.ts; contact/contact-form.tsx",
+    "src/lib/{public-recruitment.ts,public-recruitment.test.ts,join-content.ts,seo.ts,seo.test.ts}; src/lib/projects/public-projects.ts; src/lib/supabase/public.ts",
+    "src/app/{robots.ts,sitemap.ts,seo-routes.test.ts}; src/app/(marketing)/work/[slug]/{page.tsx,opengraph-image.tsx}",
+    "src/content/projects.public.ts; src/components/{site-header.tsx,site-footer.tsx,client-project-grid.tsx}; src/app/applicant/page.tsx:292\u2013313",
+    "scripts/verify-publication.mjs; tests/e2e/public-journeys.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (relevant checks/totals); release-evidence-final-build.log (tail); integrated-followup-browser.log (tail)",
+    "captures/public-home-mobile-390.png; captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108",
+      "evidence": "The approved static collection is empty; selected organizations explicitly withhold MECG scope, methods, deliverables and outcomes. The homepage capture likewise shows pending approval rather than a real engagement. UNRESOLVED.md confirms approved evidence is absent.",
+      "userImpact": "A client can assess the offer and associations but cannot judge the quality or relevance of actual MECG work before inquiry.",
+      "suggestedFix": "Obtain client/Board approval for one bounded engagement with the real question, methods and redacted handoff artifact; publish through the existing boundary. Preserve truthful pending copy until approved."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx (weekly-commitment FAQ)",
+      "evidence": "The FAQ explicitly says weekly hours, mandatory times and peak commitments remain unpublished and provides a direct Board question link. This is an honest mitigation, not the missing schedule information.",
+      "userImpact": "A student cannot independently compare membership with their semester commitments.",
+      "suggestedFix": "Have the Board supply and date a current-cycle weekly range, recurring obligations and peak-week caveat beside preparation/FAQ; invent no estimate."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk sessions/expiry, Supabase RPC/RLS, uploads, Resend delivery and consequential operator recovery in a hosted integrated environment; no staging exists.",
+    "Complete authenticated keyboard applicant/operator journeys, screen-reader sessions, physical iPhone/macOS Safari and human comprehension/task success.",
+    "Client publication approval, current workload facts and Board decisions on resume/privacy retention and closed-round remediation. The inspected applicant receipt accurately discloses identifying original-resume access.",
+    "Publication script execution was not repeated; its source and receipt claim do not establish hosted withdrawal, crawler refresh or social-platform cache behavior. Grading/operator behavior outside the sampled evidence was not independently exercised."
+  ]
+}

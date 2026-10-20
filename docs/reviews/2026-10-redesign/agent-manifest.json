@@ -1,0 +1,126 @@
+[
+  {
+    "id": "homepage",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-homepage-1"
+  },
+  {
+    "id": "application",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-application-1"
+  },
+  {
+    "id": "grading",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-grading-1"
+  },
+  {
+    "id": "seo",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-seo-1"
+  },
+  {
+    "id": "backend",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-backend-1"
+  },
+  {
+    "id": "apple_design",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-apple_design-1"
+  },
+  {
+    "id": "awwwards",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-awwwards-1"
+  },
+  {
+    "id": "client_journey",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-client_journey-1"
+  },
+  {
+    "id": "student_journey",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-student_journey-1"
+  },
+  {
+    "id": "accessibility",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-accessibility-1"
+  },
+  {
+    "id": "mobile",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-mobile-1"
+  },
+  {
+    "id": "content",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-content-1"
+  },
+  {
+    "id": "performance",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-performance-1"
+  },
+  {
+    "id": "seo_review",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-seo_review-1"
+  },
+  {
+    "id": "privacy",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-privacy-1"
+  },
+  {
+    "id": "grading_fairness",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-grading_fairness-1"
+  },
+  {
+    "id": "recovery",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-recovery-1"
+  },
+  {
+    "id": "board_ops",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-board_ops-1"
+  },
+  {
+    "id": "design_system",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-design_system-1"
+  },
+  {
+    "id": "test_strategy",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-test_strategy-1"
+  },
+  {
+    "id": "privacy_fixes",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-privacy_fixes-1"
+  },
+  {
+    "id": "journey_fixes",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-journey_fixes-1"
+  },
+  {
+    "id": "operations_fixes",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-operations_fixes-1"
+  },
+  {
+    "id": "anatomy",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-anatomy-1"
+  },
+  {
+    "id": "application_recovery_conflict",
+    "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-oct16-application-2"
+  },
+  {
+    "id": "finish_review",
+    "nativeTask": "/root/finish_review",
+    "report": "final-review.md",
+    "status": "completed"
+  },
+  {
+    "id": "draft_concurrency",
+    "nativeTask": "/root/draft_concurrency",
+    "report": "draft-concurrency-followup.md",
+    "status": "completed"
+  },
+  {
+    "id": "grading_contracts",
+    "nativeTask": "/root/grading_contracts",
+    "report": "grading-contract-followup.md",
+    "status": "completed"
+  },
+  {
+    "id": "decision_exceptions",
+    "nativeTask": "/root/decision_exceptions",
+    "report": "decision-release-followup.md",
+    "status": "completed"
+  }
+]

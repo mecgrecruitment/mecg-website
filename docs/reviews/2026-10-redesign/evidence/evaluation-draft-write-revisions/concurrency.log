@@ -1,0 +1,92 @@
+{
+  "concurrentFirstSaves": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "saved",
+      "draft": {
+        "ratings": [
+          {
+            "note": "Observed",
+            "score": "4",
+            "criterionId": "draft-cas-criterion"
+          }
+        ],
+        "evidence": "First",
+        "updatedAt": "2026-10-16T22:21:13.074791+00:00"
+      },
+      "revision": "ba2b7ddf-6a4d-401f-abc9-5fa5b5659d52",
+      "mutationId": "40000000-0000-4000-8000-000000000001",
+      "assignmentId": "draft-cas-assignment"
+    },
+    "second": {
+      "kind": "conflict",
+      "snapshot": {
+        "draft": {
+          "ratings": [
+            {
+              "note": "Observed",
+              "score": "4",
+              "criterionId": "draft-cas-criterion"
+            }
+          ],
+          "evidence": "First",
+          "updatedAt": "2026-10-16T22:21:13.074791+00:00"
+        },
+        "revision": "ba2b7ddf-6a4d-401f-abc9-5fa5b5659d52",
+        "assignmentId": "draft-cas-assignment"
+      }
+    }
+  },
+  "saveThenStaleSubmit": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "saved",
+      "draft": {
+        "ratings": [
+          {
+            "note": "Observed",
+            "score": "4",
+            "criterionId": "draft-cas-criterion"
+          }
+        ],
+        "evidence": "Newer",
+        "updatedAt": "2026-10-16T22:21:15.140878+00:00"
+      },
+      "revision": "5cfab405-44ad-44d8-bc8c-b25bbe4158cb",
+      "mutationId": "40000000-0000-4000-8000-000000000003",
+      "assignmentId": "draft-cas-assignment"
+    },
+    "second": {
+      "kind": "conflict",
+      "snapshot": {
+        "draft": {
+          "ratings": [
+            {
+              "note": "Observed",
+              "score": "4",
+              "criterionId": "draft-cas-criterion"
+            }
+          ],
+          "evidence": "Newer",
+          "updatedAt": "2026-10-16T22:21:15.140878+00:00"
+        },
+        "revision": "5cfab405-44ad-44d8-bc8c-b25bbe4158cb",
+        "assignmentId": "draft-cas-assignment"
+      }
+    }
+  },
+  "submitThenLateSave": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "submitted",
+      "score": 75.0,
+      "assignmentId": "draft-cas-assignment2",
+      "evaluationId": "c6e9a70f-0f56-48fd-af31-0a8a5211bdb7"
+    },
+    "second": {
+      "error": "assignment closed"
+    }
+  },
+  "result": "PASS",
+  "noDraftResurrection": true
+}

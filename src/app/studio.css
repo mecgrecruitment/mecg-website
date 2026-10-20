@@ -1,0 +1,92 @@
+/* Open studio: expressive public identity, quieter working surfaces. */
+.studio-hero {
+  background: var(--color-mecg-blue);
+  color: white;
+}
+.studio-hero-context {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 20px;
+  border-bottom: 1px solid rgb(255 255 255 / 24%);
+  font-size: 12px;
+  color: #e1eaff;
+}
+.studio-hero .section-label { color: #e1eaff; }
+.studio-hero .section-label > span { color: #ffd2b5; }
+.studio-hero-description {
+  margin-top: 24px;
+  max-width: 44ch;
+  font-size: 18px;
+  line-height: 1.75;
+  color: #e1eaff;
+}
+.studio-hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(255 255 255 / 24%);
+  font-size: 14px;
+}
+.studio-hero-facts dt { font-size: 12px; color: #e1eaff; }
+.studio-hero-facts dd { margin-top: 4px; font-weight: 600; }
+.studio-hero-photo { min-width: 0; }
+.studio-hero-photo > img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.studio-hero-photo figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #e1eaff;
+}
+.studio-hero-photo figcaption a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: white;
+}
+.studio-hero :focus-visible,
+[class~="bg-mecg-blue"] :focus-visible { outline-color: white; }
+.studio-process-tool { margin-top: 48px; max-width: 720px; }
+.studio-process-tool > figure { border-radius: 12px; }
+.member-community { margin-top: 32px; }
+.member-community-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--workspace-radius-panel);
+}
+.member-community-image img { object-fit: cover; }
+.member-community figcaption {
+  margin-top: 12px;
+  color: var(--workspace-muted);
+  font-size: var(--workspace-text-meta);
+  line-height: 1.5;
+}
+.member-community a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--workspace-control-touch);
+  color: var(--color-mecg-blue);
+  font-weight: 600;
+  font-size: var(--workspace-text-meta);
+}
+@media (max-width: 639px) {
+  .studio-hero-context { padding-block: 16px; }
+  .studio-hero-description { font-size: 16px; line-height: 1.7; }
+  .member-community { max-width: 360px; }
+}

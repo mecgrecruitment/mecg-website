@@ -1,0 +1,42 @@
+{
+  "seatId": "panel-029",
+  "lens": "Accessible interaction — cross-step continuity",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The sampled implementation has a strong accessible interaction foundation, but the evidence does not establish world-class end-to-end accessibility. I traced the public student journey from the homepage through Join preparation and the application steps, including Review edits, validation, browser recovery, saved-copy conflicts and interrupted submission. ApplicationForm uses native inputs/selects, associated error descriptions, first-invalid-field focus, focused step headings, explicit recovery choices, save announcements and disabled submission edits. Its step-change effect respects reduced motion; global CSS supplies contrasting focus outlines and reduced-motion overrides for these sampled surfaces. Public navigation supports Escape focus return, and engagement stations expose pressed state and a live textual handoff. Supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy, readable proposition copy and generously sized primary controls; they cannot demonstrate keyboard operation. The actual public-journey and application-reliability tests, corroborated by the 76-pass Chromium log, verify selected focus and recovery behavior using synthetic APIs, rather than observed applicant success. The proposition remains student-led consulting with two clear audience actions; missing case-study approval is disclosed. Materials and Review accurately disclose original-resume access rather than promise anonymity, and access notes are described as operational and unscored. No confirmed blocking defect emerged from this sample. That is insufficient for an unconditional release or world-class endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/form-field.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx (initial authentication/intake boundary)",
+    "src/app/apply/application-form.tsx (navigation, validation, recovery and rendered steps)",
+    "src/app/apply/headshot-field.tsx",
+    "src/app/globals.css (focus, control sizing and reduced motion)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [],
+  "notVerified": [
+    "No screen-reader or other assistive-technology session establishes announcement order, file-picker focus recovery, dynamic error comprehension, or orientation after Review edits and recovery choices. Programmatic focus assertions cover only selected transitions.",
+    "No staging or hosted integration exists. Clerk sign-up/session expiry, actual Supabase permissions, storage uploads, persistence across authenticated sessions and email delivery were not exercised by this review; mocked success receipts cannot prove these handoffs.",
+    "The supplied Chromium emulation does not establish physical touch usability, Safari/Firefox behavior, zoom/reflow at high magnification, forced-colors visibility or switch/voice-control operation. Static captures show neither focus indicators nor error states.",
+    "I did not inspect every grading/operator/private screen or establish reduced-motion compliance throughout the workspace. No human usability study, formal accessibility audit or deployment acceptance evidence is available. This is a simulated AI lens, not participant endorsement."
+  ]
+}

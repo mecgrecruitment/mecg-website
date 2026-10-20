@@ -45,6 +45,13 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
     assert.deepEqual(await response.json(), { error: "Unauthorized" }, pathname);
   }
 
+  const spoofed = new NextRequest("http://localhost/admin/settings?cycleId=draft-cycle", { headers: { "x-mecg-workspace-cycle": '["attacker-cycle"]' } });
+  const scoped = await handleProxy(signedIn, spoofed);
+  assert.equal(scoped.headers.get("x-middleware-request-x-mecg-workspace-cycle"), '["draft-cycle"]');
+  const unselected = await handleProxy(signedIn, new NextRequest("http://localhost/member", { headers: { "x-mecg-workspace-cycle": '["attacker-cycle"]' } }));
+  assert.equal(unselected.headers.get("x-middleware-request-x-mecg-workspace-cycle"), "[]");
+  const contradictory = await handleProxy(signedIn, request("/admin/settings?cycle=old&cycleId=new"));
+  assert.equal(contradictory.headers.get("x-middleware-request-x-mecg-workspace-cycle"), '["new","old"]');
   const signedInResponse = await handleProxy(signedIn, request("/member"));
   assert.equal(signedInResponse.headers.get("x-middleware-next"), "1");
 

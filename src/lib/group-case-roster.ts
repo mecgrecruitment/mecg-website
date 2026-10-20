@@ -5,12 +5,32 @@ export type GroupCaseCriterion = { id: string; name: string; description: string
 // criterionId -> 1..5, or null when the member marked it not observed.
 export type GroupCaseScores = Record<string, number | null>;
 
+export type GroupCaseQuality = {
+  valid: boolean;
+  coverage: number;
+  observedCount: number;
+  criteriaCount: number;
+  minimumObserved: number;
+  missingRequired: string[];
+};
+
+export type GroupCaseRatingResult = {
+  applicationId: string;
+  scores: GroupCaseScores;
+  note: string;
+  savedAt: string;
+  // Absent with an older database; never infer validity from the score count.
+  quality?: GroupCaseQuality | null;
+};
+
 export type GroupCaseApplicant = {
+  revision: string | null;
   applicationId: string;
   name: string;
   scores: GroupCaseScores;
   note: string;
   savedAt: string | null;
+  quality?: GroupCaseQuality | null;
   // Present only for Board roles; null for everyone else or when no Speed Dating round exists.
   speedDating: GroupCaseSpeedDating | null;
 };
@@ -43,10 +63,12 @@ export function isGroupCaseScores(value: unknown): value is GroupCaseScores {
 function isGroupCaseApplicant(value: unknown): value is GroupCaseApplicant {
   return isRecord(value)
     && typeof value.applicationId === "string"
+    && (value.revision === null || (typeof value.revision === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.revision)))
     && typeof value.name === "string"
     && isGroupCaseScores(value.scores)
     && typeof value.note === "string"
     && (value.savedAt === null || typeof value.savedAt === "string")
+    && (value.quality === undefined || value.quality === null || isGroupCaseQuality(value.quality))
     && (value.speedDating === null || (isRecord(value.speedDating)
       && isNullableNumber(value.speedDating.adjusted)
       && isNullableNumber(value.speedDating.mean)
@@ -75,4 +97,29 @@ export function isGroupCaseRoster(value: unknown): value is GroupCaseRoster {
     && typeof group.groupName === "string"
     && Array.isArray(group.applicants)
     && group.applicants.every(isGroupCaseApplicant));
+}
+
+export function isGroupCaseQuality(value: unknown): value is GroupCaseQuality {
+  return isRecord(value)
+    && typeof value.valid === "boolean"
+    && typeof value.coverage === "number" && Number.isFinite(value.coverage) && value.coverage >= 0 && value.coverage <= 1
+    && [value.observedCount, value.criteriaCount, value.minimumObserved].every((count) => typeof count === "number" && Number.isInteger(count) && count >= 0)
+    && Array.isArray(value.missingRequired) && value.missingRequired.every((name) => typeof name === "string");
+}
+
+export function isGroupCaseRatingResult(value: unknown): value is GroupCaseRatingResult {
+  return isRecord(value) && typeof value.applicationId === "string" && isGroupCaseScores(value.scores)
+    && typeof value.note === "string" && typeof value.savedAt === "string"
+    && (value.quality === undefined || value.quality === null || isGroupCaseQuality(value.quality));
+}
+
+// Present the server verdict and its blockers; this does not calculate validity.
+export function groupCaseQualityMessage(quality: GroupCaseQuality | null | undefined): string {
+  if (!quality) return "Review quality unavailable. Saved evidence does not confirm a qualifying review.";
+  if (quality.valid) return "Your review meets the grading requirements.";
+  const blockers = [];
+  if (quality.observedCount < quality.minimumObserved) blockers.push(`${quality.observedCount} of ${quality.minimumObserved} minimum observations`);
+  if (quality.missingRequired.length) blockers.push(`required: ${quality.missingRequired.join(", ")}`);
+  if (quality.coverage < 0.75) blockers.push(`${Math.floor(quality.coverage * 100)}% weighted coverage; 75% needed`);
+  return `Saved evidence does not yet count as a qualifying review${blockers.length ? ` — ${blockers.join("; ")}` : "."}`;
 }

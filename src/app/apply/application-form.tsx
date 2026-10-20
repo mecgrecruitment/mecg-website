@@ -1,24 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   clearApplicationDraftRecovery,
   createApplicationDraftRecoveryScope,
   loadApplicationDraftRecoverySnapshot,
   saveApplicationDraftRecovery,
+  type ApplicationDraftRecovery,
 } from "@/lib/application-draft-recovery";
-import { fetchWithTimeout, reconcileSubmittedApplication, RequestTimeoutError } from "@/lib/client-fetch";
+import { parseApplicationSubmissionReceipt } from "@/lib/application-submission";
+import { fetchJsonWithTimeout, reconcileSubmittedApplication, RequestTimeoutError } from "@/lib/client-fetch";
 import { uploadResumeFile } from "@/lib/resume-upload";
 import { APPLICATION_FIELD_LIMITS, CLASS_YEAR_LABELS, CLASS_YEARS, COLLEGES, countWords } from "@/lib/workflow";
 import {
   clearApplicationStepRecovery,
+  parseApplicationDraftSaveResult,
+  type ApplicationDraftSaveRequest,
+  type ApplicationDraftSnapshot,
   loadApplicationStepRecovery,
   saveApplicationStepRecovery,
   type ApplicationServerDraft,
   type ApplicationStep,
 } from "./application-server-draft";
 import HeadshotField from "./headshot-field";
+import ApplicationRecoveryReview, { APPLICATION_RECOVERY_FIELDS as RECOVERY_FIELDS } from "./application-recovery-review";
 import { isValidOptionalPhone, isValidOptionalUrl, isValidUniqname } from "@/lib/workflow";
 
 type IntakeQuestion = { key: string; prompt: string; inputType: string; required: boolean; options: string[]; maxWords: number | null };
@@ -30,7 +36,9 @@ type UploadState =
   | { kind: "uploaded"; label: string; size?: number; pageCount?: number }
   | { kind: "error"; message: string };
 type SubmitState = { kind: "idle" } | { kind: "submitting" } | { kind: "error"; message: string };
+type RecoveryDecision = { kind: "checking" } | { kind: "ready" } | { kind: "choice"; draft: ApplicationDraftRecovery; step: Step };
 type PendingSave = { payload: ApplicationServerDraft; sequence: number; focusFailure: boolean };
+
 
 const DRAFT_TIMEOUT_MS = 10_000;
 const SUBMIT_TIMEOUT_MS = 15_000;
@@ -44,9 +52,14 @@ const STEPS: { id: Step; label: string; shortLabel: string }[] = [
 
 // scroll-mb-24 keeps a focused field's ring clear of the sticky Back/Continue bar below `sm`
 // (the bar itself is ~85px tall there); the bar is `sm:static` so no margin is needed at `sm`+.
-const fieldClass = "mt-2 min-h-12 w-full scroll-mb-24 rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy),0_1px_2px_rgba(7,13,31,0.04)] sm:scroll-mb-0";
+const fieldClass = "application-field mt-2 min-h-12 w-full scroll-mb-24 rounded-xl bg-white px-4 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16),0_1px_2px_rgba(7,13,31,0.04)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy),0_1px_2px_rgba(7,13,31,0.04)] sm:scroll-mb-0";
 const selectClass = "select-control mt-2 scroll-mb-24 sm:scroll-mb-0";
 const labelClass = "block text-sm font-semibold text-mecg-navy";
+
+// Accessing sessionStorage itself can throw in browsers with storage disabled.
+function applicationRecoveryStorage(): Storage | null {
+  try { return window.sessionStorage; } catch { return null; }
+}
 
 function guidanceFor(question: IntakeQuestion) {
   return question.maxWords ? `${question.maxWords}-word limit` : "No word limit";
@@ -73,7 +86,7 @@ function FieldError({ id, children, alert = false }: { id: string; children?: st
   return children ? <p id={id} className="mt-2 text-sm text-red-700" role={alert ? "alert" : undefined}>{children}</p> : null;
 }
 
-export default function ApplicationForm({ initialName, email, userId, cycleOpen, preOpenLabel, cycleId, cycleName, questions, initialDraft, initialHasHeadshot = false, headshotSupported = true }: {
+export default function ApplicationForm({ initialName, email, userId, cycleOpen, preOpenLabel, cycleId, cycleName, questions, initialDraft, initialRevision = null, initialHasHeadshot = false, headshotSupported = true }: {
   initialName: string;
   email: string;
   userId: string;
@@ -83,6 +96,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   cycleName: string | null;
   questions: IntakeQuestion[];
   initialDraft: ApplicationServerDraft | null;
+  initialRevision?: string | null;
   initialHasHeadshot?: boolean;
   headshotSupported?: boolean;
 }) {
@@ -120,17 +134,25 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }, []);
   const [saveState, setSaveState] = useState<SaveState>({ kind: "idle" });
   const [draftDirty, setDraftDirty] = useState(false);
+  const [localRecovery, setLocalRecovery] = useState<"pending" | "saved" | "unavailable">("pending");
+  const [recoveredNotice, setRecoveredNotice] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>(initialDraft?.resumeStoragePath ? { kind: "uploaded", label: "Previously uploaded PDF" } : { kind: "idle" });
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
-  const initialized = useRef(false);
+  const [recoveryDecision, setRecoveryDecision] = useState<RecoveryDecision>({ kind: "checking" });
+  const submissionInFlight = useRef(false);
   const autosaveTimer = useRef<number | null>(null);
   const saveInFlight = useRef(false);
   const pendingSave = useRef<PendingSave | null>(null);
   const saveSequence = useRef(0);
+  const revision = useRef(initialRevision);
+  const uncertainSave = useRef<(PendingSave & { request: ApplicationDraftSaveRequest }) | null>(null);
+  const conflictRef = useRef(false);
+  const [conflict, setConflict] = useState<{ local: ApplicationServerDraft; server: ApplicationDraftSnapshot | null } | null>(null);
   const uploadSequence = useRef(0);
   const stepChangeRequested = useRef(false);
   const recoveryInitialized = useRef(false);
   const pendingValidationFocus = useRef<string | null>(null);
+  const pendingRecoveryFocus = useRef(false);
 
   const draftPayload = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumeStoragePath: resumePath, currentStep: step, consent: false }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers, resumePath, step]);
   const recoveryScope = useMemo(() => cycleId ? createApplicationDraftRecoveryScope({
@@ -140,44 +162,73 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }) : null, [cycleId, questions, userId]);
   const recoveryDraft = useMemo(() => ({ name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers }), [name, preferredName, phone, classYear, major, college, uniqname, gradTerm, accessibilityNotes, linkedinUrl, answers]);
 
+  const [initialRecoveryDraft] = useState(recoveryDraft);
+  const latestDraft = useRef(draftPayload);
+  useLayoutEffect(() => { latestDraft.current = draftPayload; }, [draftPayload]);
+
   const cancelPendingSave = useCallback(() => {
     if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
     autosaveTimer.current = null;
   }, []);
 
   const runQueuedSave = useCallback(async function drainSaveQueue() {
-    if (saveInFlight.current) return;
-    const request = pendingSave.current;
-    if (!request) return;
-    pendingSave.current = null;
+    if (saveInFlight.current || submissionInFlight.current || conflictRef.current) return;
+    const queued = uncertainSave.current ?? pendingSave.current;
+    if (!queued || !cycleId) return;
+    if (!uncertainSave.current) pendingSave.current = null;
+    const request = uncertainSave.current ?? {
+      ...queued,
+      request: { draft: queued.payload, expectedRevision: revision.current, mutationId: crypto.randomUUID(), cycleId },
+    };
+    uncertainSave.current = request;
     saveInFlight.current = true;
-    const { payload, sequence, focusFailure } = request;
+    const { sequence, focusFailure } = request;
+    let succeeded = false;
     try {
-      const response = await fetchWithTimeout("/api/apply/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, DRAFT_TIMEOUT_MS);
-      if (!response.ok) {
+      const { response, body } = await fetchJsonWithTimeout("/api/apply/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request.request) }, DRAFT_TIMEOUT_MS);
+      const result = parseApplicationDraftSaveResult(body);
+      if (response.status === 409 && result?.kind === "conflict") {
+        conflictRef.current = true;
+        uncertainSave.current = null;
+        cancelPendingSave();
+        setConflict({ local: latestDraft.current, server: result.snapshot });
+        pendingSave.current = null;
+        setSaveState({ kind: "idle" });
+        return;
+      }
+      if (!response.ok || result?.kind !== "saved") {
+        // A definitive client rejection did not commit. Let corrected edits
+        // replace that request; only uncertain outcomes retain its retry id.
+        if (!response.ok && response.status < 500 && response.status !== 408) uncertainSave.current = null;
         if (response.status === 401) throw new Error("Your session expired. Sign in again to save your application.");
         throw new Error("We could not save your application. Please try again.");
       }
-      if (sequence === saveSequence.current) {
+      revision.current = result.revision;
+      uncertainSave.current = null;
+      succeeded = true;
+      if (sequence === saveSequence.current && !submissionInFlight.current) {
         setSaveState({ kind: "saved", label: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) });
         setDraftDirty(false);
-        if (recoveryScope) clearApplicationDraftRecovery(window.sessionStorage);
+        const storage = applicationRecoveryStorage();
+        if (recoveryScope && storage) clearApplicationDraftRecovery(storage);
       }
     } catch (error) {
-      if (sequence === saveSequence.current) {
-        const message = error instanceof RequestTimeoutError
-          ? "Saving took too long. Your answers are still in this browser. Retry when your connection is stable."
-          : error instanceof Error ? error.message : "We could not save your application. Please try again.";
-        setSaveState({ kind: "error", message });
-        if (focusFailure) window.requestAnimationFrame(() => document.getElementById("draft-save-error")?.focus());
-      }
+      // Preserve the exact mutation on uncertain outcomes. Its retry must be
+      // acknowledged before a later edit can use the returned next revision.
+      const message = error instanceof RequestTimeoutError
+        ? "Saving took too long. Keep this page open and retry when your connection is stable."
+        : error instanceof TypeError ? "We could not save your application. Check your connection and retry."
+        : error instanceof Error ? error.message : "We could not save your application. Please try again.";
+      setSaveState({ kind: "error", message });
+      if (focusFailure) window.requestAnimationFrame(() => document.getElementById("draft-save-error")?.focus());
     } finally {
       saveInFlight.current = false;
-      if (pendingSave.current) void drainSaveQueue();
+      if (succeeded && pendingSave.current) void drainSaveQueue();
     }
-  }, [recoveryScope]);
+  }, [cancelPendingSave, cycleId, recoveryScope]);
 
   const saveDraft = useCallback((payload: typeof draftPayload, focusFailure = false) => {
+    if (!recoveryInitialized.current || submissionInFlight.current || conflictRef.current) return;
     const sequence = ++saveSequence.current;
     pendingSave.current = { payload, sequence, focusFailure };
     setSaveState({ kind: "saving" });
@@ -195,29 +246,47 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }
 
   function handleApplicationChange(event: React.FormEvent<HTMLElement>) {
-    const target = event.target as HTMLInputElement;
-    if (target.type !== "checkbox") markApplicationEdited();
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== "checkbox") markApplicationEdited();
   }
 
   useEffect(() => {
-    if (!recoveryScope) {
-      recoveryInitialized.current = true;
-      return;
-    }
-    const snapshot = loadApplicationDraftRecoverySnapshot(window.sessionStorage, recoveryScope);
-    // A successful matching save clears this snapshot. If it remains, it is
-    // an unacknowledged browser copy and must win without comparing clocks.
-    const recovered = snapshot?.draft ?? null;
-    const recoveredStep = loadApplicationStepRecovery(window.sessionStorage, recoveryScope);
-    recoveryInitialized.current = true;
-    if (!recovered) return;
-    const restoreTimer = window.setTimeout(() => {
+    // A refreshed server render can supply equivalent question objects. Once the
+    // applicant has chosen a copy, that rerender must not reopen the choice.
+    if (recoveryInitialized.current) return;
+    const storage = applicationRecoveryStorage();
+    const snapshot = storage && recoveryScope ? loadApplicationDraftRecoverySnapshot(storage, recoveryScope) : null;
+    const recoveredStep = storage && recoveryScope ? loadApplicationStepRecovery(storage, recoveryScope) : null;
+    const recovered = snapshot?.draft;
+    const saved = initialRecoveryDraft;
+    // Compare values, not timestamps: a browser copy can predate another device's save.
+    const differs = recovered && (RECOVERY_FIELDS.some(({ key }) => recovered[key] !== saved[key])
+      || questions.some(({ key }) => (recovered.answers[key] ?? "") !== (saved.answers[key] ?? "")));
+    const timer = window.setTimeout(() => {
+      if (recovered && differs) {
+        setRecoveryDecision({ kind: "choice", draft: recovered, step: recoveredStep ?? "details" });
+      } else {
+        recoveryInitialized.current = true;
+        setRecoveryDecision({ kind: "ready" });
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [initialRecoveryDraft, questions, recoveryScope]);
+
+  useEffect(() => {
+    if (recoveryDecision.kind === "choice") document.getElementById("recovery-choice-heading")?.focus();
+  }, [recoveryDecision]);
+
+  function chooseRecovery(useBrowser: boolean, combined?: ApplicationDraftRecovery) {
+    if (recoveryDecision.kind !== "choice") return;
+    if (useBrowser) {
+      const recovered = combined ?? recoveryDecision.draft;
       setName(recovered.name);
       setPreferredName(recovered.preferredName);
       setPhone(recovered.phone);
-      setClassYear(CLASS_YEARS.includes(recovered.classYear as (typeof CLASS_YEARS)[number]) ? recovered.classYear : "");
+      setClassYear(CLASS_YEARS.some((value) => value === recovered.classYear) ? recovered.classYear : "");
       setMajor(recovered.major);
-      setCollege(COLLEGES.includes(recovered.college as (typeof COLLEGES)[number]) ? recovered.college : "");
+      setCollege(COLLEGES.some((value) => value === recovered.college) ? recovered.college : "");
       setUniqname(recovered.uniqname);
       setGradTerm(recovered.gradTerm);
       setAccessibilityNotes(recovered.accessibilityNotes);
@@ -226,28 +295,38 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         const value = recovered.answers[question.key] ?? "";
         return [question.key, question.inputType === "select" && value && !question.options.includes(value) ? "" : value];
       })));
-      setStep(recoveredStep ?? "details");
-      setDraftDirty(true);
-    }, 0);
-    return () => window.clearTimeout(restoreTimer);
-  }, [questions, recoveryScope]);
-
-  useEffect(() => {
-    if (!cycleOpen || !draftDirty || !recoveryInitialized.current || !recoveryScope) return;
-    saveApplicationDraftRecovery(window.sessionStorage, recoveryScope, recoveryDraft);
-  }, [cycleOpen, draftDirty, recoveryDraft, recoveryScope]);
-
-  useEffect(() => {
-    if (!cycleOpen || !recoveryInitialized.current || !recoveryScope) return;
-    saveApplicationStepRecovery(window.sessionStorage, recoveryScope, step);
-  }, [cycleOpen, recoveryScope, step]);
-
-  useEffect(() => {
-    if (!cycleOpen) return;
-    if (!initialized.current) {
-      initialized.current = true;
-      return;
+      setStep(recoveryDecision.step);
+      setRecoveredNotice(true);
+      markApplicationEdited();
+    } else {
+      const storage = applicationRecoveryStorage();
+      if (storage) {
+        clearApplicationDraftRecovery(storage);
+        clearApplicationStepRecovery(storage);
+      }
     }
+    recoveryInitialized.current = true;
+    setRecoveryDecision({ kind: "ready" });
+    pendingRecoveryFocus.current = true;
+  }
+
+  useEffect(() => {
+    if (!cycleOpen || !draftDirty || !recoveryInitialized.current || recoveryDecision.kind !== "ready" || !recoveryScope) return;
+    const storage = applicationRecoveryStorage();
+    const saved = storage && saveApplicationDraftRecovery(storage, recoveryScope, recoveryDraft);
+    // Defer the display update; storing the actual recovery copy stays synchronous.
+    const timer = window.setTimeout(() => setLocalRecovery(saved ? "saved" : "unavailable"), 0);
+    return () => window.clearTimeout(timer);
+  }, [cycleOpen, draftDirty, recoveryDecision.kind, recoveryDraft, recoveryScope]);
+
+  useEffect(() => {
+    if (!cycleOpen || !recoveryInitialized.current || recoveryDecision.kind !== "ready" || !recoveryScope) return;
+    const storage = applicationRecoveryStorage();
+    if (storage) saveApplicationStepRecovery(storage, recoveryScope, step);
+  }, [cycleOpen, recoveryDecision.kind, recoveryScope, step]);
+
+  useEffect(() => {
+    if (!cycleOpen || !draftDirty || recoveryDecision.kind !== "ready" || submissionInFlight.current || conflict) return;
     autosaveTimer.current = window.setTimeout(() => {
       autosaveTimer.current = null;
       void saveDraft(draftPayload);
@@ -255,9 +334,19 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     return () => {
       if (autosaveTimer.current !== null) window.clearTimeout(autosaveTimer.current);
     };
-  }, [cycleOpen, draftPayload, saveDraft]);
+  }, [cycleOpen, draftDirty, recoveryDecision.kind, draftPayload, saveDraft, conflict]);
 
   useEffect(() => () => cancelPendingSave(), [cancelPendingSave]);
+
+  useEffect(() => {
+    if (!cycleOpen || !draftDirty) return;
+    const retryOnReconnect = () => {
+      cancelPendingSave();
+      saveDraft(draftPayload);
+    };
+    window.addEventListener("online", retryOnReconnect);
+    return () => window.removeEventListener("online", retryOnReconnect);
+  }, [cancelPendingSave, cycleOpen, draftDirty, draftPayload, saveDraft, conflict]);
 
   useEffect(() => {
     if (!cycleOpen || !draftDirty) return;
@@ -285,7 +374,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }, [step]);
 
   function changeStep(next: Step) {
-    if (next === step) return;
+    if (next === step || submissionInFlight.current) return;
     setStepDirection(STEPS.findIndex((item) => item.id === next) > STEPS.findIndex((item) => item.id === step) ? "forward" : "back");
     stepChangeRequested.current = true;
     saveSequence.current += 1;
@@ -363,19 +452,19 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
   }
 
   async function move(next: Step) {
-    if (uploadState.kind === "uploading" || !validate(step)) return;
+    if (uploadState.kind === "uploading" || headshotUploading || !validate(step)) return;
     cancelPendingSave();
     // A failed save must never trap a student on a step. /api/apply posts the whole client
     // payload and rush.submit_application takes every field as an argument, so the stored
     // draft row is a convenience, not a prerequisite for submitting; sessionStorage recovery
     // covers a reload. The save-error panel (role="alert") still reports the failure, and
     // focus stays with the new step instead of jumping into the sidebar.
-    saveDraft({ ...draftPayload, currentStep: next });
     changeStep(next);
+    saveDraft({ ...draftPayload, currentStep: next });
   }
 
   async function submit() {
-    if (!consent || submitState.kind === "submitting" || uploadState.kind === "uploading") return;
+    if (!consent || conflictRef.current || submissionInFlight.current || uploadState.kind === "uploading" || headshotUploading) return;
     const allErrors = Object.assign({}, ...STEPS.slice(0, 3).map(({ id }) => validationErrors(id)));
     const firstError = Object.keys(allErrors)[0];
     if (firstError) {
@@ -390,42 +479,100 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     cancelPendingSave();
     pendingSave.current = null;
     saveSequence.current += 1;
+    submissionInFlight.current = true;
     setSubmitState({ kind: "submitting" });
-    const finishSubmission = () => {
-      clearApplicationDraftRecovery(window.sessionStorage);
-      clearApplicationStepRecovery(window.sessionStorage);
-      router.replace("/applicant?submitted=1");
+    const finishSubmission = (applicationId: string) => {
+      const storage = applicationRecoveryStorage();
+      if (storage) {
+        clearApplicationDraftRecovery(storage);
+        clearApplicationStepRecovery(storage);
+      }
+      setDraftDirty(false);
+      router.replace(`/applicant?submitted=${encodeURIComponent(applicationId)}`);
       router.refresh();
     };
     try {
-      const request = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...draftPayload, consent: true }) };
+      const request = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...draftPayload, consent: true, expectedRevision: revision.current, cycleId }) };
       let response: Response;
+      let body: unknown;
       try {
-        response = await fetchWithTimeout("/api/apply", request, SUBMIT_TIMEOUT_MS);
+        ({ response, body } = await fetchJsonWithTimeout("/api/apply", request, SUBMIT_TIMEOUT_MS));
       } catch (error) {
         if (!(error instanceof RequestTimeoutError) && !(error instanceof TypeError)) throw error;
-        if (await reconcileSubmittedApplication()) {
-          finishSubmission();
+        const applicationId = cycleId ? await reconcileSubmittedApplication({ cycleId }) : null;
+        if (applicationId) {
+          finishSubmission(applicationId);
           return;
         }
         throw new RequestTimeoutError();
       }
-      if (!response.ok) {
-        if ([502, 503, 504].includes(response.status) && await reconcileSubmittedApplication()) {
-          finishSubmission();
+      if (response.status === 409) {
+        const result = parseApplicationDraftSaveResult(body);
+        if (result?.kind === "conflict") {
+          conflictRef.current = true;
+          uncertainSave.current = null;
+          pendingSave.current = null;
+          setConflict({ local: latestDraft.current, server: result.snapshot });
+          submissionInFlight.current = false;
+          setSubmitState({ kind: "idle" });
+          setConsent(false);
           return;
         }
-        const body = await response.json().catch(() => null);
-        throw new Error(body?.error ?? "The application could not be submitted.");
       }
-      finishSubmission();
+      if (!response.ok) {
+        if ([500, 502, 503, 504].includes(response.status)) {
+          const applicationId = cycleId ? await reconcileSubmittedApplication({ cycleId }) : null;
+          if (applicationId) { finishSubmission(applicationId); return; }
+          throw new RequestTimeoutError();
+        }
+        throw new Error(body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "The application could not be submitted.");
+      }
+      const applicationId = parseApplicationSubmissionReceipt(body) ?? (cycleId ? await reconcileSubmittedApplication({ cycleId }) : null);
+      if (!applicationId) throw new RequestTimeoutError();
+      finishSubmission(applicationId);
     } catch (error) {
       const message = error instanceof RequestTimeoutError || error instanceof TypeError
         ? "We could not confirm whether your application was received. Check your connection, then try Submit again; duplicate submissions are prevented."
         : error instanceof Error ? error.message : "The application could not be submitted.";
+      submissionInFlight.current = false;
       setSubmitState({ kind: "error", message });
     }
   }
+
+  function resolveConflict(useLocal: boolean, combined?: ApplicationServerDraft) {
+    if (!conflict) return;
+    const selected = combined ?? (useLocal ? conflict.local : conflict.server?.draft);
+    if (!selected) return;
+    revision.current = conflict.server?.revision ?? null;
+    setName(selected.name); setPreferredName(selected.preferredName); setPhone(selected.phone);
+    setClassYear(selected.classYear); setMajor(selected.major); setCollege(selected.college);
+    setUniqname(selected.uniqname); setGradTerm(selected.gradTerm);
+    setAccessibilityNotes(selected.accessibilityNotes); setLinkedinUrl(selected.linkedinUrl);
+    setAnswers(selected.answers); setResumePath(selected.resumeStoragePath); setStep(selected.currentStep);
+    setUploadState(selected.resumeStoragePath ? { kind: "uploaded", label: "Previously uploaded PDF" } : { kind: "idle" });
+    setConsent(false);
+    setConsentNotice("Review the chosen copy before consenting to submit.");
+    conflictRef.current = false;
+    setConflict(null);
+    setSaveState({ kind: "idle" });
+    setDraftDirty(useLocal);
+    if (!useLocal) {
+      const storage = applicationRecoveryStorage();
+      if (storage) { clearApplicationDraftRecovery(storage); clearApplicationStepRecovery(storage); }
+    }
+    pendingRecoveryFocus.current = true;
+  }
+
+  useEffect(() => {
+    if (conflict) document.getElementById("draft-conflict-heading")?.focus();
+  }, [conflict]);
+
+  useEffect(() => {
+    if (pendingRecoveryFocus.current && !conflict && recoveryDecision.kind === "ready") {
+      document.getElementById("application-step-heading")?.focus();
+      pendingRecoveryFocus.current = false;
+    }
+  }, [conflict, recoveryDecision.kind]);
 
   // Before opens_at the cycle is open, it just has not started, and intake_schema still reports
   // open:false. Saying "closed" there would contradict the countdown a few lines above it on the
@@ -438,27 +585,62 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     ? <div className="mt-8 rounded-2xl bg-amber-50 p-6 text-amber-900"><p className="font-semibold">{preOpenLabel}.</p><p className="mt-2 text-sm leading-6 text-amber-900/80">Keep this page open. The application appears here on its own when the countdown reaches zero.</p></div>
     : <div className="mt-8 rounded-2xl bg-red-50 p-6 text-red-900"><p className="font-semibold">Applications are currently closed.</p><p className="mt-2 text-sm leading-6 text-red-800/80">Check the recruitment page for the next opening date, or email the MECG board if you expected to apply today.</p></div>;
 
+  if (recoveryDecision.kind === "checking") return <p className="mt-6" role="status">Checking for browser answers...</p>;
+  if (recoveryDecision.kind === "choice") return (
+    <section aria-labelledby="recovery-choice-heading" aria-describedby="recovery-choice-description" className="surface-card mt-6 max-w-3xl bg-white p-6 sm:p-8">
+      <h2 id="recovery-choice-heading" tabIndex={-1} className="text-2xl font-semibold">Choose which answers to continue with</h2>
+      <p id="recovery-choice-description" className="mt-3 leading-7 text-mecg-navy/70">This tab has browser answers that differ from your saved draft. Either copy may be older. Editing and saving are paused until you choose.</p>
+      <p className="mt-3 text-sm leading-6 text-mecg-navy/70">Recovering browser answers replaces the answers in your saved draft when they sync. Keeping your saved draft discards this browser copy. Browser recovery is limited to this tab, expires after 24 hours, and can be lost when the tab closes or browser storage is cleared. Your uploaded materials stay with your saved draft.</p>
+      <ApplicationRecoveryReview saved={initialRecoveryDraft} browser={recoveryDecision.draft} questions={questions} onCombine={(combined) => chooseRecovery(true, combined)} />
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button type="button" className="button-secondary" onClick={() => chooseRecovery(true)}>Recover browser answers</button>
+        <button type="button" className="button-secondary" onClick={() => chooseRecovery(false)}>Keep saved draft</button>
+      </div>
+    </section>
+  );
+
+  if (conflict) return (
+    <section aria-labelledby="draft-conflict-heading" className="surface-card mt-6 max-w-3xl bg-white p-6 sm:p-8">
+      <h2 id="draft-conflict-heading" tabIndex={-1} className="text-2xl font-semibold">Your saved draft changed elsewhere</h2>
+      <p className="mt-3 leading-7 text-mecg-navy/70">Saving and submitting are paused. Your answers on this page have been kept. Compare both copies, then choose which one to continue with.</p>
+      {!conflict.server && <p className="mt-3 text-sm leading-6 text-mecg-navy/70">The previous saved draft no longer exists. Keeping this page will create a new draft if applications are still open.</p>}
+      <ApplicationRecoveryReview expanded saved={conflict.server?.draft ?? null} browser={conflict.local} questions={questions} resume={{ saved: conflict.server?.draft.resumeStoragePath ?? "", browser: conflict.local.resumeStoragePath }} onCombine={(combined, resumeSource) => resolveConflict(true, { ...conflict.local, ...combined, resumeStoragePath: resumeSource === "saved" ? conflict.server?.draft.resumeStoragePath ?? "" : conflict.local.resumeStoragePath })} />
+      <div className="mt-5 border-b border-mecg-navy/10 pb-5">
+        <div><h3 className="font-semibold">Resume</h3><div className="mt-2 grid gap-3 text-sm leading-6 sm:grid-cols-2"><div><p className="font-medium">Saved draft</p>{conflict.server?.draft.resumeStoragePath ? <a className="inline-flex min-h-11 items-center underline underline-offset-4" href={`/api/apply/resume?path=${encodeURIComponent(conflict.server.draft.resumeStoragePath)}`} target="_blank" rel="noopener noreferrer">View saved PDF (opens a new tab)</a> : <p>Not provided</p>}</div><div><p className="font-medium">Browser answers</p>{conflict.local.resumeStoragePath ? <a className="inline-flex min-h-11 items-center underline underline-offset-4" href={`/api/apply/resume?path=${encodeURIComponent(conflict.local.resumeStoragePath)}`} target="_blank" rel="noopener noreferrer">View this page’s PDF (opens a new tab)</a> : <p>Not provided</p>}</div></div>{conflict.local.resumeStoragePath !== (conflict.server?.draft.resumeStoragePath ?? "") && <p className="mt-2 text-sm leading-6 text-mecg-navy/70">These copies use different resumes. Choosing a copy also chooses its uploaded PDF.</p>}</div>
+      </div>
+      <p className="mt-4 text-sm leading-6 text-mecg-navy/70">Keeping this page will replace the saved copy when it syncs. Using the saved copy discards the changes on this page. To keep changes from both, compare the changed answers and continue with your combined choices.</p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button type="button" className="button-secondary" onClick={() => resolveConflict(true)}>Keep this page’s answers</button>
+        {conflict.server && <button type="button" className="button-secondary" onClick={() => resolveConflict(false)}>Use the saved copy</button>}
+      </div>
+    </section>
+  );
+
   const currentIndex = STEPS.findIndex((item) => item.id === step);
-  const completed = (id: Step) => STEPS.findIndex((item) => item.id === id) < currentIndex;
+  const completed = (id: Step) => id !== "review" && STEPS.findIndex((item) => item.id === id) < currentIndex && Object.keys(validationErrors(id)).length === 0;
   const saving = saveState.kind === "saving";
   const uploading = uploadState.kind === "uploading";
+  const submitting = submitState.kind === "submitting";
+  const localSaveLabel = draftDirty
+    ? localRecovery === "saved" ? "Saved in this tab. Waiting to sync." : localRecovery === "unavailable" ? "Changes are only on this page. Keep it open until saved." : "Changes waiting to save."
+    : "Your answers save automatically.";
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,720px)] lg:items-start lg:gap-10">
+    <div className="application-editor mt-6 grid gap-6 lg:grid-cols-[200px_minmax(0,720px)] lg:items-start lg:gap-8">
       <aside className="order-2 hidden lg:order-1 lg:sticky lg:top-8 lg:block">
-        <div className="rounded-2xl bg-mecg-navy p-5 text-white shadow-[0_18px_50px_rgba(7,13,31,0.16)]">
-          <p className="text-[13px] text-mecg-orange">{cycleName ?? "Current cycle"}</p>
+        <div className="application-step-guide">
+          <p className="text-[13px] text-mecg-navy/65">{cycleName ?? "Current cycle"}</p>
           <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:block lg:space-y-2" aria-label="Application progress">
             {STEPS.map((item, index) => {
               const active = item.id === step;
-              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex} className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs transition-colors sm:flex-col sm:items-start sm:text-sm lg:flex-row lg:gap-3 ${active ? "bg-white/12 text-white" : completed(item.id) ? "text-white/80 hover:bg-white/8" : "cursor-default text-white/40"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full tabular text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-white text-mecg-navy" : "bg-white/8"}`}>{completed(item.id) ? "✓" : index + 1}</span><span>{item.shortLabel}</span></button></li>;
+              return <li key={item.id}><button type="button" onClick={() => index <= currentIndex && changeStep(item.id)} disabled={index > currentIndex || submitting} className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs transition-colors sm:flex-col sm:items-start sm:text-sm lg:flex-row lg:gap-3 ${active ? "bg-mecg-navy/[0.06] text-mecg-navy" : completed(item.id) ? "text-mecg-navy/80 hover:bg-mecg-navy/[0.04]" : "cursor-default text-mecg-navy/60"}`} aria-current={active ? "step" : undefined}><span className={`grid size-7 shrink-0 place-items-center rounded-full tabular text-xs ${active ? "bg-mecg-orange text-mecg-navy" : completed(item.id) ? "bg-mecg-navy text-white" : "bg-mecg-navy/[0.06]"}`}>{completed(item.id) ? "✓" : index + 1}</span><span>{item.shortLabel}{index < currentIndex && !completed(item.id) && <span className="block text-xs font-normal text-mecg-orange-ink">Needs attention</span>}</span></button></li>;
             })}
           </ol>
-          <div className="mt-5 border-t border-white/10 pt-4 text-xs leading-5 text-white/70">
+          <div className="mt-5 border-t border-mecg-navy/10 pt-4 text-xs leading-5 text-mecg-navy/65">
             {saveState.kind === "saving" && <p aria-hidden="true">Saving changes...</p>}
-            {saveState.kind === "saved" && <p className="tabular-nums" role="status" aria-live="polite">Saved at {saveState.label}</p>}
-            {saveState.kind === "error" && <div id="draft-save-error" className="text-red-200" role="alert" tabIndex={-1}><p>{saveState.message}</p><button type="button" onClick={() => void saveDraft(draftPayload, true)} disabled={saving} className="mt-2 min-h-11 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
-            {saveState.kind === "idle" && <p>{draftDirty ? "Unsaved changes. Saving shortly..." : "Your answers save automatically."}</p>}
+            {saveState.kind === "saved" && <p className="tabular-nums" role="status" aria-live="polite">Saved to your account at {saveState.label}</p>}
+            {saveState.kind === "error" && <div id="draft-save-error" className="text-red-800" role="alert" tabIndex={-1}><p>{saveState.message}</p><button type="button" onClick={() => void saveDraft(draftPayload, true)} disabled={saving || submitting} className="mt-2 min-h-11 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
+            {saveState.kind === "idle" && <p>{localSaveLabel}</p>}
           </div>
         </div>
         <p className="mt-4 px-2 text-xs leading-5 text-mecg-navy/65">Need help? <a className="underline underline-offset-2" href="mailto:mecg-board@umich.edu">Email the recruitment team.</a></p>
@@ -469,24 +651,28 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
           <div className="flex items-center justify-between gap-4">
             <p className="text-[13px] font-semibold text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}</p>
             <p className="text-xs font-semibold text-mecg-navy/65" aria-live="polite">
-              {saveState.kind === "saving" ? "Saving…" : saveState.kind === "saved" ? "Saved" : saveState.kind === "error" ? "Save failed" : STEPS[currentIndex].label}
+              {saveState.kind === "saving" ? "Saving…" : saveState.kind === "saved" ? "Saved" : saveState.kind === "error" ? "Could not sync" : draftDirty && localRecovery === "saved" ? "Saved in this tab" : STEPS[currentIndex].label}
             </p>
           </div>
           <div className="progress-track mt-3" aria-hidden="true">
             <div className="progress-fill" style={{ transform: `scaleX(${(currentIndex + 1) / STEPS.length})` }} />
           </div>
-          {saveState.kind === "error" && <div className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert"><p>{saveState.message}</p><button type="button" onClick={() => saveDraft(draftPayload)} disabled={saving} className="mt-2 min-h-10 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
+          {saveState.kind === "error" && <div className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert"><p>{saveState.message}</p><button type="button" onClick={() => saveDraft(draftPayload)} disabled={saving || submitting} className="mt-2 min-h-11 font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">Retry save</button></div>}
         </div>
 
+        {recoveredNotice && <p role="status" className="mb-5 border-b border-mecg-navy/10 pb-4 text-sm leading-6 text-mecg-navy/70">Restored your unsynced answers from this tab. Check your materials and review before submitting.</p>}
+        {draftDirty && localRecovery === "unavailable" && <p role="status" className="mb-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-900">Tab recovery is unavailable. Keep this page open until your changes are saved to your account.</p>}
+        <fieldset disabled={submitting} className="m-0 min-w-0 border-0 p-0">
         <div key={step} className="step-seat" data-direction={stepDirection}>
           <p className="hidden text-[13px] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
           {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} />}
           {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
-          {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} initialHasHeadshot={initialHasHeadshot} setHeadshotReady={setHeadshotReady} headshotError={errors.headshot} headshotSupported={headshotSupported} setHeadshotUploading={setHeadshotUploading} linkedinError={errors.linkedinUrl} accessibilityNotesError={errors.accessibilityNotes} />}
-          {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded"} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading} />}
+          {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} initialHasHeadshot={headshotReady} setHeadshotReady={setHeadshotReady} headshotError={errors.headshot} headshotSupported={headshotSupported} setHeadshotUploading={setHeadshotUploading} linkedinError={errors.linkedinUrl} accessibilityNotesError={errors.accessibilityNotes} />}
+          {step === "review" && <ReviewStep values={{ name, preferredName, email, phone, classYear, major, college, uniqname, gradTerm, linkedinUrl, accessibilityNotes }} questions={questions} answers={answers} resumeLabel={resumePath ? uploadState.kind === "uploaded" ? uploadState.label : "Resume uploaded" : "Not uploaded"} headshotStatus={headshotSupported ? headshotReady ? "Uploaded" : "Not uploaded" : null} consent={consent} consentNotice={consentNotice} setConsent={(value) => { setConsent(value); if (value) setConsentNotice(""); }} submitState={submitState} submit={submit} changeStep={changeStep} uploading={uploading || headshotUploading} />}
         </div>
+        </fieldset>
 
-        {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={uploading || headshotUploading} aria-busy={uploading || headshotUploading} className="button-dark flex-1 bg-mecg-navy sm:flex-none">{uploading ? "Uploading resume..." : headshotUploading ? "Uploading photo..." : "Save and continue"}</button></div>}
+        {step !== "review" && <div className="sticky bottom-0 z-10 -mx-6 mt-7 flex items-center justify-between gap-3 border-t border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-5 backdrop-blur sm:static sm:mx-0 sm:px-0 sm:pb-0"><button type="button" onClick={() => changeStep(STEPS[Math.max(0, currentIndex - 1)].id)} disabled={currentIndex === 0} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-mecg-navy/65 disabled:invisible">Back</button><button type="button" onClick={() => void move(STEPS[currentIndex + 1].id)} disabled={uploading || headshotUploading} aria-busy={uploading || headshotUploading} className="button-dark flex-1 bg-mecg-navy sm:flex-none">{uploading ? "Uploading resume..." : headshotUploading ? "Uploading photo..." : "Continue"}</button></div>}
       </section>
     </div>
   );
@@ -498,10 +684,10 @@ function StepHeading({ children }: { children: React.ReactNode }) {
 
 function DetailsStep({ values, setters, email, errors }: { values: Record<string, string>; setters: Record<string, (value: string) => void>; email: string; errors: Record<string, string> }) {
   const describedBy = (key: string) => errors[key] ? `${key}-error` : undefined;
-  return <><StepHeading>Start with the basics.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">These details stay separate from the anonymous first review of your written responses.</p><div className="mt-8 grid gap-5 sm:grid-cols-2">
+  return <><StepHeading>Start with the basics.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">These profile details stay separate from the written-response packet used for first-pass review.</p><div className="mt-8 grid gap-5 sm:grid-cols-2">
     <div className={labelClass}><label htmlFor="name">Full name <span className="text-mecg-orange-ink">(required)</span></label><input id="name" value={values.name} onChange={(e) => setters.setName(e.target.value)} autoComplete="name" maxLength={APPLICATION_FIELD_LIMITS.name} required className={fieldClass} aria-invalid={Boolean(errors.name)} aria-describedby={describedBy("name")} /><FieldError id="name-error">{errors.name}</FieldError></div>
     <div className={labelClass}><label htmlFor="preferredName">Preferred name <span className="font-normal text-mecg-navy/60">Optional</span></label><input id="preferredName" value={values.preferredName} onChange={(e) => setters.setPreferredName(e.target.value)} autoComplete="nickname" maxLength={APPLICATION_FIELD_LIMITS.preferredName} className={fieldClass} aria-invalid={Boolean(errors.preferredName)} aria-describedby={describedBy("preferredName")} /><FieldError id="preferredName-error">{errors.preferredName}</FieldError></div>
-    <div className="sm:col-span-2"><p className={labelClass}>Verified email</p><div className="mt-2 flex min-h-12 items-center justify-between rounded-xl bg-mecg-blue/8 px-4 text-sm"><span>{email}</span><span className="font-semibold text-emerald-700">✓ Verified</span></div></div>
+    <div className="sm:col-span-2"><p className={labelClass}>Verified email</p><div className="mt-2 flex min-h-12 flex-wrap items-center justify-between gap-2 rounded-xl bg-mecg-blue/8 px-4 text-sm"><span className="min-w-0 break-all">{email}</span><span className="font-semibold text-emerald-700">✓ Verified</span></div></div>
     <div className={labelClass}><label htmlFor="phone">Phone <span className="font-normal text-mecg-navy/60">Optional</span></label><input id="phone" value={values.phone} onChange={(e) => setters.setPhone(e.target.value)} type="tel" autoComplete="tel" maxLength={APPLICATION_FIELD_LIMITS.phone} className={fieldClass} aria-invalid={Boolean(errors.phone)} aria-describedby={describedBy("phone")} /><FieldError id="phone-error">{errors.phone}</FieldError></div>
     <div className={labelClass}><label htmlFor="uniqname">Uniqname <span className="text-mecg-orange-ink">(required)</span></label><input id="uniqname" value={values.uniqname} onChange={(e) => setters.setUniqname(e.target.value.toLowerCase())} autoCapitalize="none" maxLength={APPLICATION_FIELD_LIMITS.uniqname} required className={fieldClass} aria-invalid={Boolean(errors.uniqname)} aria-describedby={describedBy("uniqname")} /><FieldError id="uniqname-error">{errors.uniqname}</FieldError></div>
     <div className={labelClass}><label htmlFor="classYear">Year <span className="text-mecg-orange-ink">(required)</span></label><select id="classYear" value={values.classYear} onChange={(e) => setters.setClassYear(e.target.value)} required className={selectClass} aria-invalid={Boolean(errors.classYear)} aria-describedby={describedBy("classYear")}><option value="">Select year</option>{CLASS_YEARS.map((year) => <option key={year} value={year}>{CLASS_YEAR_LABELS[year]}</option>)}</select><FieldError id="classYear-error">{errors.classYear}</FieldError></div>
@@ -531,7 +717,7 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
 
 function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAccessibilityNotes, uploadState, resumePath, uploadResume, error, initialHasHeadshot, setHeadshotReady, headshotError, headshotSupported, setHeadshotUploading, linkedinError, accessibilityNotesError }: { linkedinUrl: string; setLinkedinUrl: (value: string) => void; accessibilityNotes: string; setAccessibilityNotes: (value: string) => void; uploadState: UploadState; resumePath: string; uploadResume: (file: File) => Promise<void>; error?: string; initialHasHeadshot: boolean; setHeadshotReady: (ready: boolean) => void; headshotError?: string; headshotSupported: boolean; setHeadshotUploading: (busy: boolean) => void; linkedinError?: string; accessibilityNotesError?: string }) {
   const resumeDescription = ["resume-guidance", error ? "resume-error" : "", uploadState.kind === "error" ? "resume-upload-error" : ""].filter(Boolean).join(" ");
-  return <><StepHeading>Add your materials.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Your resume is stored securely and is not included in anonymous first-pass review.</p><div className="mt-8 space-y-6">
+  return <><StepHeading>Add your materials.</StepHeading><p className="mt-3 max-w-xl text-pretty leading-7 text-mecg-navy/60">Your resume is stored privately. Assigned first-pass reviewers can view the original PDF for context, including any identifying information it contains.</p><div className="mt-8 space-y-6">
     <label htmlFor="resume" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy"><input id="resume" type="file" accept="application/pdf" required={!resumePath} disabled={uploadState.kind === "uploading"} className="sr-only" aria-invalid={Boolean(error || uploadState.kind === "error")} aria-describedby={resumeDescription} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void uploadResume(file); }} /><span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">↑</span><span className="mt-4 block font-semibold">{uploadState.kind === "uploading" ? "Uploading resume..." : resumePath ? "Replace your resume" : "Upload your resume (required)"}</span><span id="resume-guidance" className="mt-1 block text-sm text-mecg-navy/65">PDF only, up to 10 MB</span>{uploadState.kind === "uploaded" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ {uploadState.label}</span>}</label>
     {uploadState.kind === "uploading" && <p className="text-sm text-mecg-navy/65" role="status" aria-live="polite">Uploading and checking {uploadState.label}...</p>}{uploadState.kind === "uploaded" && <p className="text-sm text-emerald-800" role="status" aria-live="polite">Resume verified{uploadState.pageCount ? ` · ${uploadState.pageCount} ${uploadState.pageCount === 1 ? "page" : "pages"}` : ""}{uploadState.size ? ` · ${(uploadState.size / 1024 / 1024).toFixed(1)} MB` : ""}. {resumePath && <a className="font-semibold underline underline-offset-2" href={`/api/apply/resume?path=${encodeURIComponent(resumePath)}`} target="_blank" rel="noreferrer">View PDF</a>}</p>}{uploadState.kind === "error" && <FieldError id="resume-upload-error" alert>{uploadState.message}</FieldError>}<FieldError id="resume-error">{error}</FieldError>
     {headshotSupported ? <div><HeadshotField onUploaded={setHeadshotReady} initialHasHeadshot={initialHasHeadshot} onBusyChange={setHeadshotUploading} validationError={headshotError} /><FieldError id="headshot-error">{headshotError}</FieldError></div> : null}
@@ -540,18 +726,19 @@ function MaterialsStep({ linkedinUrl, setLinkedinUrl, accessibilityNotes, setAcc
   </div></>;
 }
 
-function ReviewStep({ values, questions, answers, resumeLabel, consent, consentNotice, setConsent, submitState, submit, changeStep, uploading }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; consent: boolean; consentNotice: string; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; changeStep: (step: Step) => void; uploading: boolean }) {
+function ReviewStep({ values, questions, answers, resumeLabel, headshotStatus, consent, consentNotice, setConsent, submitState, submit, changeStep, uploading }: { values: Record<string, string>; questions: IntakeQuestion[]; answers: Record<string, string>; resumeLabel: string; headshotStatus: string | null; consent: boolean; consentNotice: string; setConsent: (value: boolean) => void; submitState: SubmitState; submit: () => Promise<void>; changeStep: (step: Step) => void; uploading: boolean }) {
   const classYearLabel = CLASS_YEARS.includes(values.classYear as (typeof CLASS_YEARS)[number]) ? CLASS_YEAR_LABELS[values.classYear as (typeof CLASS_YEARS)[number]] : values.classYear;
   return <><StepHeading>Review before you submit.</StepHeading><p className="mt-3 text-pretty leading-7 text-mecg-navy/60">You will not be able to edit this application after submission.</p><div className="mt-8 space-y-4">
     <ReviewCard title="About you" edit={() => changeStep("details")}><dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2"><ReviewItem label="Full name" value={values.name} /><ReviewItem label="Preferred name" value={values.preferredName} /><ReviewItem label="Email" value={values.email} /><ReviewItem label="Phone" value={values.phone} /><ReviewItem label="Uniqname" value={values.uniqname} /><ReviewItem label="Class year" value={classYearLabel} /><ReviewItem label="College" value={values.college} /><ReviewItem label="Major" value={values.major} /><ReviewItem label="Expected graduation" value={values.gradTerm} /></dl></ReviewCard>
     <ReviewCard title="Written responses" edit={() => changeStep("responses")}><ul className="space-y-4">{questions.map((question) => <li key={question.key}><p className="font-medium">{question.prompt}</p><p className="mt-1 whitespace-pre-wrap break-words text-mecg-navy/70">{answers[question.key] || "Not provided"}</p></li>)}</ul></ReviewCard>
-    <ReviewCard title="Materials and access" edit={() => changeStep("materials")}><dl className="space-y-3"><ReviewItem label="Resume" value={resumeLabel} /><ReviewItem label="LinkedIn URL" value={values.linkedinUrl} /><ReviewItem label="Scheduling or access needs" value={values.accessibilityNotes} preserveWhitespace /></dl></ReviewCard>
-  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How the first read works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">First-pass reviewers receive redacted written responses. They do not receive your name, email, LinkedIn profile, resume, or access notes.</p></div>
+    <ReviewCard title="Materials and access" edit={() => changeStep("materials")}><dl className="space-y-3"><ReviewItem label="Resume" value={resumeLabel} />{headshotStatus && <ReviewItem label="Photo" value={headshotStatus} />}<ReviewItem label="LinkedIn URL" value={values.linkedinUrl} /><ReviewItem label="Scheduling or access needs" value={values.accessibilityNotes} preserveWhitespace /></dl></ReviewCard>
+  </div><div className="mt-6 rounded-2xl bg-mecg-blue/8 p-5"><p className="font-semibold">How the first read works</p><p className="mt-2 text-sm leading-6 text-mecg-navy/65">The written-response packet omits your profile name, email, LinkedIn profile, and access notes. Assigned reviewers can also view your original resume, which may contain identifying information.</p></div>
   <label className="mt-6 flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-mecg-orange" /><span className="text-sm leading-6">I reviewed my application and consent to MECG using this information to administer the current recruitment cycle.</span></label>
   {consentNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{consentNotice}</p>}
   {submitState.kind === "error" && <div className="mt-4"><FieldError id="submit-error" alert>{submitState.message}</FieldError></div>}
+  <p id="submission-guidance" className="mt-4 text-sm leading-6 text-mecg-navy/65">Saving a draft does not submit your application. After submission is confirmed, you will see your applicant status page.</p>
   <p className="sr-only" role="status" aria-live="polite">{submitState.kind === "submitting" ? "Submitting your application. Please wait." : ""}</p>
-  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} aria-busy={submitState.kind === "submitting"} className="button-primary">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
+  <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button type="button" onClick={() => changeStep("materials")} className="min-h-12 rounded-xl px-5 font-semibold text-mecg-navy/65">Back</button><button type="button" onClick={() => void submit()} disabled={!consent || submitState.kind === "submitting" || uploading} aria-busy={submitState.kind === "submitting"} className="button-primary" aria-describedby="submission-guidance">{submitState.kind === "submitting" ? "Submitting application..." : "Submit application"}</button></div></>;
 }
 
 function ReviewItem({ label, value, preserveWhitespace = false }: { label: string; value: string; preserveWhitespace?: boolean }) {
@@ -559,5 +746,5 @@ function ReviewItem({ label, value, preserveWhitespace = false }: { label: strin
 }
 
 function ReviewCard({ title, edit, children }: { title: string; edit: () => void; children: React.ReactNode }) {
-  return <section className="rounded-2xl bg-mecg-navy/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold">{title}</h3><button type="button" onClick={edit} className="min-h-10 px-2 text-sm font-semibold text-mecg-blue underline underline-offset-2">Edit</button></div><div className="mt-3 text-sm leading-6">{children}</div></section>;
+  return <section className="rounded-2xl bg-mecg-navy/[0.035] p-5"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold">{title}</h3><button type="button" onClick={edit} aria-label={`Edit ${title.toLowerCase()}`} className="min-h-11 px-2 text-sm font-semibold text-mecg-blue underline underline-offset-2">Edit</button></div><div className="mt-3 text-sm leading-6">{children}</div></section>;
 }

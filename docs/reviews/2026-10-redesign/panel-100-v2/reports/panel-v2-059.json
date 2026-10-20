@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-v2-059",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client journey now connects a clear no-fee, semester-long offer to services, team size, client responsibilities, confidentiality discussion and a useful inquiry. Desktop and mobile homepage captures show coherent Precision Instrument hierarchy, restrained color and well-separated audience actions. I traced Home \u2192 Work \u2192 practical questions \u2192 Contact in actual source and checked the corresponding intercepted browser journey. The former mobile continuity defect is resolved: a native organization selector puts the selected profile immediately below it, with first/middle/last selection checks in the supplied logs. Inquiry recovery also materially improves: pending fields lock, malformed receipts preserve answers, deadlines restore controls, field errors receive focus and unchanged retries reuse a delivery key. Nevertheless, a prospective client still cannot inspect an actual MECG decision, method or handoff. That directly prevents the evidence-assessment part of my assigned task, so I disagree with the broad world-class claim. Local verification supports implementation quality within its recorded scope; it does not establish actual delivery or the private recruitment/operator service end to end. Overall release readiness remains unproven.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory format)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 original objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (services, facts, process and FAQs)",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts (delivery implementation)",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (client/profile cases)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact cases and final result)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log (ending)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:103\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+      "evidence": "The approved fallback remains empty. Organization profiles expressly withhold project scope, methods, deliverables and outcomes pending approval; Selected work renders only when publicProjects has records. The supplied homepage captures show the corresponding pending-client-approval status, and UNRESOLVED.md confirms actual approved engagement evidence is absent. Changing the empty-state heading to Past partnerships fixes the promise mismatch but does not supply delivery evidence.",
+      "userImpact": "A client can establish fit and organizational associations but cannot assess the rigor or relevance of a real MECG recommendation before investing time and access in an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement with its question, MECG contribution, methods, constraints and redacted handoff excerpt. Publish through the existing approval boundary; preserve the honest pending state until permission exists."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance/delivery, production configuration and Board response time; intercepted contact receipts are synthetic.",
+    "Hosted Clerk/Supabase/RLS/storage integration, authenticated application/status and consequential grading/operator recovery; these were not independently exercised in this seat.",
+    "Observed human comprehension/task success, assistive-technology use, physical iPhone or macOS Safari behavior, and full sequential keyboard traversal across Home, Work and Contact.",
+    "Approved real engagement artifacts, current membership workload facts and Board decisions on original-resume access, retention and closed-round remediation."
+  ]
+}

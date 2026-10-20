@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A · A project brief on the desk</title>
+<link rel="stylesheet" href="base.css">
+<style>
+body { background: var(--paper); }
+.hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: 0 48px; padding-block: 40px 0; align-items: start; }
+h1 { font-size: clamp(40px, 5vw, 64px); line-height: 1.04; letter-spacing: -0.04em; font-weight: 600; margin-top: 24px; }
+h1 span { color: var(--blue); }
+.lede { margin-top: 24px; font-size: 18px; color: var(--muted); max-width: 40ch; }
+.actions { display: flex; gap: 24px; align-items: center; margin-top: 32px; }
+.stage { position: relative; padding-bottom: 120px; }
+.photo { border-radius: 16px; overflow: hidden; aspect-ratio: 1600/1126; box-shadow: 0 1px 0 var(--rule); }
+.photo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.2); transform-origin: 50% 62%; }
+.card { position: absolute; left: -96px; bottom: 0; width: min(440px, 80%); background: var(--blue); color: white; border-radius: 16px; padding: 28px; box-shadow: 0 24px 48px -24px rgb(18 33 62 / 55%); }
+.card small { font-size: 13px; color: #c9d8f3; }
+.card h2 { font-size: 28px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; margin-top: 8px; transition: opacity 160ms; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.chips button { font: inherit; font-size: 13px; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid rgb(255 255 255 / 30%); background: transparent; color: white; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: white; color: var(--blue); border-color: white; font-weight: 600; }
+.card .link { color: white; }
+.facts { border-top: 1px solid var(--rule); margin-top: 40px; padding-block: 24px 32px; }
+@media (max-width: 767px) {
+  .hero { grid-template-columns: 1fr; }
+  h1 { font-size: 40px; }
+  .stage { margin-top: 32px; padding-bottom: 0; }
+  .card { position: relative; left: auto; width: auto; margin: -56px 16px 0; }
+  .actions { flex-wrap: wrap; gap: 8px 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .card h2 { transition: none; } }
+</style></head>
+<body>
+<div class="wrap">
+<header class="site"><img src="http://localhost:3100/logos/mecg-color.svg" alt="MECG" height="36"><nav><a>Client Services</a><a>Our Team</a><a>Contact Us</a><a class="btn">Join MECG</a></nav></header>
+<section class="hero">
+  <div>
+    <h1>Pro bono consulting, <span>led by Michigan students.</span></h1>
+    <p class="lede">A student team spends a semester on your organization's real question, then hands you a recommendation you can act on.</p>
+    <div class="actions"><a class="btn" href="#">Discuss a project →</a><a class="link" href="#">Join MECG →</a></div>
+  </div>
+  <div class="stage">
+    <div class="photo"><img src="http://localhost:3100/mecg/members-professional.jpeg" alt="MECG members visiting PwC in Chicago"></div>
+    <div class="card" aria-live="polite">
+      <small id="area">Example question · Strategy</small>
+      <h2 id="q">Where should we grow next?</h2>
+      <div class="chips" role="group" aria-label="Explore a project area">
+        <button aria-pressed="true" data-q="Where should we grow next?">Strategy</button>
+        <button aria-pressed="false" data-q="Could this process work better?">Operations</button>
+        <button aria-pressed="false" data-q="What is our data telling us?">Data</button>
+        <button aria-pressed="false" data-q="What should we build first?">Product</button>
+        <button aria-pressed="false" data-q="How do we reach the right people?">Marketing</button>
+      </div>
+    </div>
+  </div>
+</section>
+<dl class="facts"><div><b>70+</b><span>Members active in 2026</span></div><div><b>30+</b><span>Organizations since founding</span></div><div><b>1</b><span>Semester per engagement</span></div><div><b>$0</b><span>Consulting fee</span></div></dl>
+</div>
+<script>
+document.querySelectorAll('.chips button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.chips button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  document.getElementById('q').textContent = b.dataset.q;
+  document.getElementById('area').textContent = 'Example question · ' + b.textContent;
+});
+</script>
+</body></html>

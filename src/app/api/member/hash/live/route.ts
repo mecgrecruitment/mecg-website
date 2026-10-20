@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { hasPermission } from "@/lib/authorization";
+import { workspaceCycleSelection } from "@/lib/workspace-cycle-url";
 import { canonicalMajor } from "@/lib/major";
-import { CLASS_YEAR_LABELS, type ClassYear } from "@/lib/workflow";
-import { applicationStatusLabel } from "@/lib/labels";
+import { CLASS_YEAR_LABELS } from "@/lib/workflow";
 
 // The phone follows the projector: it reads which applicant the board is
 // presenting and that applicant's grader notes. No counts, ever; the tally is
@@ -13,7 +13,11 @@ import { applicationStatusLabel } from "@/lib/labels";
 export async function GET(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
+  const selection = workspaceCycleSelection(request.nextUrl.searchParams);
+  if (selection.kind === "invalid") return NextResponse.json({ error: "Invalid cohort selection" }, { status: 400 });
+  const cycleMembership = user.memberships.find((membership) => membership.active
+    && (selection.kind !== "selected" || membership.cycleId === selection.cycleId)
+    && hasPermission(user.memberships, membership.cycleId, "WORKSPACE_ACCESS"));
   if (!cycleMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const requestedId = request.nextUrl.searchParams.get("applicationId") ?? "";
   if (requestedId.length > 200) return NextResponse.json({ error: "Invalid applicant" }, { status: 400 });
@@ -24,24 +28,26 @@ export async function GET(request: NextRequest) {
     const mapped = mapRpcError(cycleError, "Could not load the hash");
     return NextResponse.json(mapped.body, { status: mapped.status });
   }
-  const presentingId = cycleRow.hash_presenting_application_id;
-  // The projector can sit on someone the board already stamped, who is off the
-  // member's ballot. The phone still needs a name to pin, so read it here with
-  // the service role: it is the applicant on the wall, not a secret.
-  let presenting: { id: string; name: string; meta: string; decided: string | null } | null = null;
-  if (presentingId) {
-    const { data: row } = await createAdminClient().from("applications").select("id,status,pnms!inner(name,major,class_year)").eq("id", presentingId).eq("cycle_id", cycleMembership.cycleId).maybeSingle();
-    if (row) {
-      const pnm = row.pnms;
-      presenting = {
-        id: row.id,
-        name: pnm.name,
-        meta: [pnm.major ? canonicalMajor(pnm.major) : "", pnm.class_year ? CLASS_YEAR_LABELS[pnm.class_year as ClassYear] ?? pnm.class_year : ""].filter(Boolean).join(" · "),
-        decided: ["IN_PROCESS", "REJECTED", "OFFERED", "WAITLISTED"].includes(row.status) ? applicationStatusLabel(row.status) : null,
-      };
-    }
+  // The ballot is the visibility boundary: it excludes conflicts, closed stages,
+  // ineligible voters/statuses, and applicants with recorded decisions.
+  const { data: ballot, error: ballotError } = await supabase.rpc("hash_ballot", { target_cycle_id: cycleMembership.cycleId });
+  if (ballotError) {
+    const mapped = mapRpcError(ballotError, "Could not load the hash");
+    return NextResponse.json(mapped.body, { status: mapped.status });
   }
-  const applicationId = requestedId || presentingId;
+  const row = ballot?.find((applicant) => applicant.id === cycleRow.hash_presenting_application_id);
+  const presenting = row ? {
+    id: row.id,
+    name: row.name,
+    meta: [row.major ? canonicalMajor(row.major) : "", row.class_year ? Object.entries(CLASS_YEAR_LABELS).find(([year]) => year === row.class_year)?.[1] ?? row.class_year : ""].filter(Boolean).join(" · "),
+    decided: null,
+  } : null;
+  const presentingId = presenting?.id ?? null;
+  // Notes have weaker decision guards than the ballot. Gate explicit requests as
+  // well as the presenter so neither can expose an applicant off this ballot.
+  const applicationId = requestedId
+    ? ballot?.find((applicant) => applicant.id === requestedId)?.id ?? null
+    : presentingId;
   let notes: { source: string; note: string }[] = [];
   if (applicationId) {
     const { data, error } = await supabase.rpc("hash_applicant_notes", { target_application_id: applicationId });

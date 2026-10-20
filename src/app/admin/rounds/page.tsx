@@ -1,9 +1,11 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
+import { roundStaffingSummary } from "./coverage";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -22,7 +24,7 @@ function roundKindLabel(kind: string) {
 
 export default async function RoundsPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS")) redirect("/admin");
   const canExport = hasPermission(user.memberships, cycleId, "EXPORT");
   const supabase = await createClient();
@@ -42,14 +44,13 @@ export default async function RoundsPage() {
 
   const activeApplications = (appsResult.data ?? []).filter((application) =>
     !["WITHDRAWN", "REJECTED", "WAITLISTED", "OFFERED"].includes(application.status));
-  const activeApplicationIds = new Set(activeApplications.map((application) => application.id));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-6xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
         title="Interviews"
-        description="See every round's readiness, then open one workspace to manage its scoring guide, groups, assignments, and results."
+        description="See each round's staffing and submitted forms, then open its workspace to manage its scoring guide, groups, assignments, and results."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/rounds" />
 
@@ -57,25 +58,22 @@ export default async function RoundsPage() {
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview rounds</h2>
-            <p className="mt-1 text-sm text-mecg-navy/55">Open a round to resolve coverage gaps and manage its evaluation workflow.</p>
+            <p className="mt-1 text-sm text-mecg-navy/55">Staffing counts usable assignments within each round’s cohort. Submitted forms may contain partial observations; open the round to check qualifying evidence.</p>
           </div>
           <p className="tabular text-xs font-semibold text-mecg-navy/55">{activeApplications.length} active applicants</p>
         </div>
 
         <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
           {(roundsResult.data ?? []).map((round) => {
-            const assignments = (assignmentsResult.data ?? []).filter((assignment) =>
-              assignment.round_id === round.id && activeApplicationIds.has(assignment.application_id));
-            const submitted = assignments.filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
-            const assignmentCounts = new Map<string, number>();
-            for (const assignment of assignments) {
-              assignmentCounts.set(assignment.application_id, (assignmentCounts.get(assignment.application_id) ?? 0) + 1);
-            }
-            const covered = activeApplications.filter((application) => (assignmentCounts.get(application.id) ?? 0) >= 2).length;
+            const staffing = roundStaffingSummary({
+              roundKind: round.kind,
+              applications: appsResult.data ?? [],
+              assignments: (assignmentsResult.data ?? []).filter((assignment) => assignment.round_id === round.id),
+            });
             return (
               <Link
                 key={round.id}
-                href={round.kind === "APPLICATION_SCREEN" ? "/admin/screening" : `/admin/rounds/${round.id}`}
+                href={withWorkspaceCycle(round.kind === "APPLICATION_SCREEN" ? "/admin/screening" : `/admin/rounds/${round.id}`, cycleId)}
                 className="group grid gap-3 py-4 transition-colors hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
               >
                 <div className="min-w-0">
@@ -85,16 +83,20 @@ export default async function RoundsPage() {
                   </div>
                   <p className="mt-1 text-xs text-mecg-navy/55">{roundKindLabel(round.kind)} · weight {round.weight}</p>
                 </div>
-                <dl className="grid grid-cols-2 gap-x-6 text-xs sm:text-right">
-                  <div>
-                    <dt className="text-mecg-navy/50">Coverage</dt>
-                    <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{covered}/{activeApplications.length} twice</dd>
-                  </div>
-                  <div>
-                    <dt className="text-mecg-navy/50">Forms</dt>
-                    <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{submitted}/{assignments.length} submitted</dd>
-                  </div>
-                </dl>
+                {round.kind === "APPLICATION_SCREEN" ? (
+                  <p className="max-w-xs text-xs leading-5 text-mecg-navy/65">Screening assignments and progress are in the application review workspace.</p>
+                ) : (
+                  <dl className="grid grid-cols-2 gap-x-6 text-xs sm:text-right">
+                    <div>
+                      <dt className="text-mecg-navy/65">Staffing</dt>
+                      <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{staffing.staffedTwice}/{staffing.cohortSize} with 2+ assigned</dd>
+                    </div>
+                    <div>
+                      <dt className="text-mecg-navy/65">Submitted forms</dt>
+                      <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{staffing.submittedForms}/{staffing.assignedForms}</dd>
+                    </div>
+                  </dl>
+                )}
                 <span className="text-sm font-semibold text-mecg-blue">Open →</span>
               </Link>
             );
@@ -113,7 +115,7 @@ export default async function RoundsPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             {canExport && <a href={`/api/admin/export?cycleId=${cycleId}`} className="button-secondary text-sm">Export attendance</a>}
-            <Link href="/admin/events/new" className="button-primary text-sm">New event</Link>
+            <Link href={withWorkspaceCycle("/admin/events/new", cycleId)} className="button-primary text-sm">New event</Link>
           </div>
         </div>
         <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
@@ -121,7 +123,7 @@ export default async function RoundsPage() {
             const capacity = event.event_slots.reduce((sum, slot) => sum + slot.capacity, 0);
             const reservations = event.event_slots.reduce((sum, slot) => sum + slot.slot_rsvps.length, 0);
             return (
-              <Link key={event.id} href={`/admin/events/${event.id}`} className="group grid gap-2 py-4 hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6">
+              <Link key={event.id} href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)} className="group grid gap-2 py-4 hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{event.name}</h3>

@@ -1,0 +1,10 @@
+
+Running 5 tests using 2 workers
+
+  ✓  1 [mobile-chromium] › tests/e2e/application-keyboard.spec.ts:29:5 › native keyboard traverses validation, revision recovery, materials and consent before confirmed navigation (3.8s)
+  ✓  2 [chromium] › tests/e2e/application-keyboard.spec.ts:29:5 › native keyboard traverses validation, revision recovery, materials and consent before confirmed navigation (4.0s)
+  ✓  3 [firefox] › tests/e2e/application-keyboard.spec.ts:29:5 › native keyboard traverses validation, revision recovery, materials and consent before confirmed navigation (4.5s)
+  ✓  4 [webkit] › tests/e2e/application-keyboard.spec.ts:29:5 › native keyboard traverses validation, revision recovery, materials and consent before confirmed navigation (6.6s)
+  ✓  5 [mobile-webkit] › tests/e2e/application-keyboard.spec.ts:29:5 › native keyboard traverses validation, revision recovery, materials and consent before confirmed navigation (5.7s)
+
+  5 passed (15.9s)

@@ -1,3 +1,5 @@
+import { selectWorkspaceMembership } from "@/lib/workspace-cycle";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
@@ -6,13 +8,14 @@ import WorkspaceNav from "@/components/workspace-nav";
 import { createClient } from "@/lib/supabase/server";
 import PillNav from "@/components/pill-nav";
 import SectionLabel from "@/components/section-label";
-import ImpressionForm from "./impression-form";
+import ObservationRoster from "./observation-roster";
+import { observationFailure } from "./observation-state";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { screeningRpc } from "@/lib/screening-rpc";
 
 export const metadata: Metadata = { title: "Event Observations" };
 
-type ObservationRow = {
+export type ObservationRow = {
   application_id: string;
   applicant_name: string;
   observation_id: string | null;
@@ -26,10 +29,15 @@ function formatStart(startsAt: string) {
 
 export default async function EventGradingPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
   const [user, { event: eventParam }] = await Promise.all([requireMember(), searchParams]);
+  const membership = await selectWorkspaceMembership(user);
+  const cycleId = membership?.cycleId ?? null;
   const supabase = await createClient();
   const { data: events, error: eventsError } = await supabase.rpc("my_grading_events");
   if (eventsError) throw eventsError;
-  const eventRows = events ?? [];
+  const { data: cycleEvents, error: cycleEventsError } = cycleId ? await supabase.from("events").select("id").eq("cycle_id", cycleId) : { data: [], error: null };
+  if (cycleEventsError) throw cycleEventsError;
+  const cycleEventIds = new Set((cycleEvents ?? []).map((event) => event.id));
+  const eventRows = (events ?? []).filter((event) => cycleEventIds.has(event.event_id));
   const selected = eventRows.find((row) => row.event_id === eventParam)
     ?? eventRows.find((row) => row.grading_open)
     ?? eventRows[0];
@@ -38,16 +46,16 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
     : null;
   const rosterRows = roster?.data ?? [];
   const observedCount = rosterRows.filter((row) => row.observation_id).length;
-  const firstUnobservedId = rosterRows.find((row) => !row.observation_id)?.application_id;
+  const failure = roster?.error ? observationFailure(roster.error) : null;
   const navLinks: Array<readonly [string, string]> = [
-    ["/member", "All work"],
-    ...eventRows.map((row) => [`/member/event?event=${row.event_id}`, row.event_name] as const),
+    [withWorkspaceCycle("/member", cycleId), "All work"],
+    ...eventRows.map((row) => [withWorkspaceCycle(`/member/event?event=${row.event_id}`, cycleId), row.event_name] as const),
   ];
-  const workspaceCycleId = user.memberships.find((membership) => membership.active)?.cycleId ?? null;
-  const currentWorkspace = selected ? `/member/event?event=${selected.event_id}` : "/member/event";
+  const workspaceCycleId = cycleId;
+  const currentWorkspace = withWorkspaceCycle(selected ? `/member/event?event=${selected.event_id}` : "/member/event", cycleId);
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
+    <main className="workspace-private workspace-stack mx-auto flex max-w-3xl flex-col">
       <WorkspaceHeader
         eyebrow="Event observations"
         title={selected ? selected.event_name : "No event selected"}
@@ -59,14 +67,14 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
       {!selected ? (
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
           <p className="font-semibold text-mecg-navy">No event observations yet</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Check in at a rush event to capture factual follow-up context.</p>
-          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
+          <p className="mt-1 text-sm text-mecg-navy/55">Assigned events appear here when they are available. Check with the event organizer if you expected an event.</p>
+          <Link href={withWorkspaceCycle("/member", cycleId)} className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
-      ) : roster?.error ? (
+      ) : failure ? (
         <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
-          <p className="font-semibold text-mecg-navy">The observation window is closed</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Observations for this event can no longer be added or edited.</p>
-          <Link href="/member" className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
+          <p className="font-semibold text-mecg-navy">{failure.title}</p>
+          <p className="mt-1 text-sm text-mecg-navy/55">{failure.detail}</p>
+          <Link href={currentWorkspace} className="button-secondary mt-4 inline-flex text-sm">Reload event</Link>
         </div>
       ) : (
         <section>
@@ -78,44 +86,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
               <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? observedCount / rosterRows.length : 0})` }} />
             </div>
           </div>
-          <div className="mt-3.5 flex flex-col gap-4">
-            {rosterRows.map((row) => (
-              <article key={row.application_id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6">
-                <h3 className="text-lg font-semibold text-mecg-navy">{row.applicant_name}</h3>
-                {row.observation_id ? (
-                  <details className="group mt-3 rounded-xl">
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                      <span className="text-sm font-semibold text-mecg-navy">Observation saved · edit</span>
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
-                        <path d="M5 8l5 5 5-5" />
-                      </svg>
-                    </summary>
-                    <div className="disclosure-panel">
-                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} initial={{ tags: row.tags ?? [], note: row.note ?? "" }} />
-                    </div>
-                  </details>
-                ) : (
-                  <details className="group mt-3 rounded-xl" open={row.application_id === firstUnobservedId}>
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
-                      <span className="text-sm font-semibold text-mecg-navy">No observation yet</span>
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-navy/60">
-                        <path d="M5 8l5 5 5-5" />
-                      </svg>
-                    </summary>
-                    <div className="disclosure-panel">
-                      <ImpressionForm eventId={selected.event_id} applicationId={row.application_id} />
-                    </div>
-                  </details>
-                )}
-              </article>
-            ))}
-            {!rosterRows.length && (
-              <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
-                <p className="font-semibold text-mecg-navy">No applicants available</p>
-                <p className="mt-1 text-sm text-mecg-navy/55">Checked-in applicants will appear here, minus your declared conflicts. Check-in controls visibility only; it is never scoring evidence.</p>
-              </div>
-            )}
-          </div>
+          <ObservationRoster eventId={selected.event_id} rows={rosterRows} />
         </section>
       )}
     </main>

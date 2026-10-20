@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-024",
+  "lens": "Accessible interaction \u2014 service failure",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision has strong native-control foundations, associated application errors, explicit recovery choices, 44px primary targets and reduced-motion support. Mobile capture hierarchy is coherent with Precision Instrument. Synthetic operator coverage failures correctly disable closing and offer retry; Escape restores focus. However, contact and sign-out failure recovery remain incomplete at consequential public entry points. These source-confirmed gaps prevent my unqualified world-class agreement. This is an independent simulated AI accessibility assessment, not observed user success or a conformance audit; the hold concerns the identified recovery gaps, and fixing them would still require independent verification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/form-field.tsx",
+    "src/components/site-header.tsx",
+    "src/components/workspace-state.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/globals.css",
+    "src/app/apply/application-form.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/email.ts (timeout references)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (lines 1\u2013112)",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (sampled entries and final result)",
+    "evidence/mecg-round-close-final-e2e.log",
+    "captures/mobile-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:13\u201335,51\u201353",
+      "evidence": "submit sets sending, then awaits raw fetch and response.json without a client deadline; Send message stays disabled until either settles. The adjacent live-region message is cleared during the wait. The supplied public journey test intercepts a successful response only. The server email timeout does not bound a stalled browser-to-server request or response body.",
+      "userImpact": "A client using keyboard or assistive technology can remain at Sending indefinitely without an announced recovery state or a way to retry within the form. Their project inquiry has an uncertain delivery outcome.",
+      "suggestedFix": "Bound the full request/response operation, preserve entered values, announce that delivery could not be confirmed and expose the existing email alternative. Restore an actionable state and add a delayed/nonsettling-response regression without claiming that timeout proves non-delivery."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/site-header.tsx:19\u201333,127",
+      "evidence": "logout closes mobile navigation through onNavigate before awaiting clerk.signOut. It has finally to clear busy but no catch, rendered error or live-region receipt when signOut rejects.",
+      "userImpact": "On provider/network rejection, the menu disappears and there is no accessible explanation that sign-out failed or session state is uncertain. Users may incorrectly infer completion or struggle to find the retry action.",
+      "suggestedFix": "Handle rejection with persistent, announced failure guidance and a reachable retry action; preserve or restore focus to that action. Test a rejected signOut promise on desktop and mobile, while treating hosted session behavior as separately unverified."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, real authenticated operator session, human study or assistive-technology session exists in this evidence. Clerk failure presentation and actual session termination were not executed.",
+    "No physical-device, Safari/Firefox, screen-reader announcements, high zoom/reflow or complete keyboard traversal was observed. Captures are static; the operator image is synthetic and its scrollable lower actions are not proof of reachability.",
+    "Application recovery tests use intercepted APIs; supplied 76-case and 18-case logs represent separate runs. I ran no tests or shared browser.",
+    "Public copy withholds unapproved case results and application review copy discloses original-resume identification; Board policy approval, client publication approval and actual privacy/RLS integration remain outside this review."
+  ]
+}

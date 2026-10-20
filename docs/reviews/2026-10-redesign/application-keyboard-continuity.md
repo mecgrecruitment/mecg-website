@@ -1,0 +1,13 @@
+# Native keyboard application continuity
+
+Frozen V2 seat063 correctly distinguished heading-focus assertions from a sequential keyboard application task. The working tree now contains one focused native keyboard journey in `tests/e2e/application-keyboard.spec.ts`. It uses Tab/Shift+Tab, Enter, Space, ArrowLeft/ArrowRight, a native select and typed text. It does not call click, check, fill, selectOption or programmatic focus on application controls.
+
+The journey clears the required name, activates Continue, verifies invalid-field focus and its associated visible error, corrects the name, and encounters a synthetic competing draft revision. It changes recovery radio choices with native arrows, combines local name and saved response, verifies the restored step heading and exact retained values, changes the native year select, and exercises reverse Tab. It then edits the written response, traverses materials, enters optional LinkedIn/access information, reaches review, activates consent with Space, and submits with Enter. Confirmed navigation and recovery clearing require the intercepted application acknowledgement; the test also checks that combined answers save against the competing revision.
+
+**5/5 checks passed**: desktop/mobile Chromium, Firefox, desktop/mobile WebKit. The initial Chromium development run also passed. TypeScript, focused ESLint and whitespace checks passed. [Raw results and exact source hashes](evidence/application-keyboard/) retain the proof. The established official Playwright1.64.1 Linux Docker image reused the existing local gated Next server; no provider records or SQL changed.
+
+## Scope limits
+
+This checks the actual interactive application components and native sequential keyboard behavior in a fictional local harness. The resume is an already-uploaded fixture. It does not choose/upload a file, exercise Clerk authentication, enter from real signed-in preparation, or prove provider session/storage/database/email integration. `/applicant?submitted=e2e` is explicitly intercepted with a document named Local applicant navigation boundary. That document is not presented as the actual dashboard. Actual dashboard rendering and receipt/privacy gating are separately covered by the [applicant SSR receipt](applicant-editable-status.md); those tests do not turn this into a complete authenticated journey.
+
+Native focus targets are checked as visible and inside the viewport. No screen reader, physical device, observed human usability session or complete accessibility conformance is claimed. This later proof narrows the local keyboard evidence gap without altering seat063's frozen vote or supplying the still-missing hosted journey.

@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-v2-061",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected applicant journey is substantially coherent. The public proposition immediately explains student-led, no-fee, semester-long consulting; Join explains eligibility, preparation and evaluated versus unscored events. Source distinguishes unavailable recruitment from unpublished dates. The mobile homepage capture has disciplined hierarchy, and the synthetic recovery capture presents readable changed-field comparisons and explicit choices. Application source distinguishes saving from submitting, protects uncertain acknowledgements, combines exact saved/browser fields and resets consent after conflict resolution. The actual dashboard source and SSR assertions correct the earlier anonymous-review claim: assigned reviewers may see the identifying original resume, and the received banner requires owned stored submitted state. These are meaningful improvements, not grounds to repeat stale objections. However, I cannot establish the broad world-class claim from local source, intercepted browser journeys and SSR. The complete authenticated preparation/upload/recovery/status journey, keyboard completion and consequential operator integrations remain unproven. Membership scheduling facts and approved engagement evidence are still missing. Release readiness is separately unproven because actual provider acceptance has not been supplied. This is a simulated AI applicant lens, not observed student task success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (package inventory)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (submission, recovery, save feedback and review)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (dashboard receipt, deadline and next-action logic)",
+    "src/app/api/apply/status/route.ts",
+    "src/lib/auth-destination.ts",
+    "src/lib/auth-routing.test.ts",
+    "src/app/applicant/next-action-page.test.ts (receipt/deadline assertions)",
+    "supabase/migrations/20260911145642_screening_resume.sql",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (sampled recovery/receipt scenarios)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (terminal result)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly-commitment answer explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published. Join renders a direct Board email fallback, but no current workload facts. This confirms the remaining substance of the original schedule-fit objection, with improved truthful disclosure.",
+      "userImpact": "A first-time student cannot determine whether membership fits classes, employment or other obligations before investing in applying; a separate Board conversation remains necessary.",
+      "suggestedFix": "Have the Board approve and publish a dated current-semester typical weekly range, mandatory times and peak-period expectations alongside preparation. Retain the honest unavailable statement until facts are approved; do not invent hours."
+    }
+  ],
+  "notVerified": [
+    "No hosted acceptance for Clerk sessions/expiry, caller-scoped Supabase RPC/RLS, uploads/storage, email delivery or actual operator recovery; no staging exists in the supplied evidence.",
+    "Browser submission scenarios intercept the destination with a synthetic Submitted heading; separate dashboard SSR assertions do not establish a continuous authenticated applicant journey.",
+    "No complete keyboard-only prepare/apply/file-selection/conflict/consent/status journey, screen-reader session, physical iPhone/macOS Safari check or observed human comprehension.",
+    "No approved client engagement artifacts or current Board workload facts; policy approval for original-resume/blind-review conflict, retention and closed-round remediation remains external.",
+    "Private visual assessment is limited to the supplied synthetic recovery capture; grading and operator behavior were not exhaustively inspected or exercised by this seat."
+  ]
+}

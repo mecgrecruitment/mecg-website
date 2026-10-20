@@ -1,0 +1,10 @@
+
+Running 5 tests using 2 workers
+
+  ✓  2 [mobile-chromium] › tests/e2e/application-reliability.spec.ts:113:5 › a server acknowledgement failure with unavailable status reads preserves recovery and explains safe retry (4.1s)
+  ✓  1 [chromium] › tests/e2e/application-reliability.spec.ts:113:5 › a server acknowledgement failure with unavailable status reads preserves recovery and explains safe retry (4.2s)
+  ✓  3 [firefox] › tests/e2e/application-reliability.spec.ts:113:5 › a server acknowledgement failure with unavailable status reads preserves recovery and explains safe retry (5.3s)
+  ✓  4 [webkit] › tests/e2e/application-reliability.spec.ts:113:5 › a server acknowledgement failure with unavailable status reads preserves recovery and explains safe retry (7.6s)
+  ✓  5 [mobile-webkit] › tests/e2e/application-reliability.spec.ts:113:5 › a server acknowledgement failure with unavailable status reads preserves recovery and explains safe retry (5.5s)
+
+  5 passed (17.0s)

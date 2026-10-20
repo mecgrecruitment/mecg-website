@@ -1,0 +1,150 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        40,
+        30,
+        28,
+        20,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 15.9,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 17,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        46.08,
+        40,
+        36,
+        20,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 15.9,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": false,
+        "crossers": 0
+      },
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 16,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [
+      "Split hero: the headline sits on one side and the picture on the other, nothing overlapping or breaking the frame. This was every v1 hero. Lock type and image together, let an object cross the edge, or let the picture own the screen (finish.md §2)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        76,
+        40,
+        36,
+        20,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 15.9,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": true,
+        "crossers": 0
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 16,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [
+      "Split hero: the headline sits on one side and the picture on the other, nothing overlapping or breaking the frame. This was every v1 hero. Lock type and image together, let an object cross the edge, or let the picture own the screen (finish.md §2)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        76,
+        40,
+        36,
+        20,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 15.9,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": true,
+        "crossers": 0
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 16,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 42
+    }
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-v2-067",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected preparation-to-application recovery journey is substantially clearer and more protective. The public proposition identifies student-led, no-fee, semester consulting; Join explains eligibility, materials and evaluation. Current source distinguishes recruitment lookup failure from unpublished dates. Application recovery pauses writes, compares changed fields, allows exact per-field combinations, offers a clearly private both-copy download, and retains revision checking and fresh consent. The supplied mobile recovery capture is readable and its long response wraps within the card; it is a synthetic harness. The recorded 105 passing application checks support those local interactions. Submission now validates a receipt or same-cycle stored status before clearing recovery, and the dashboard independently gates confirmation and repeats original identifying resume access. These address the relevant prior objections in the inspected scope. However, an actual authenticated prepare/apply/upload/recover/status journey and consequential grading/operator recovery remain unverified across hosted dependencies. Browser fixtures replace the submission destination with a synthetic heading; dashboard SSR checks are useful separate evidence, not observed continuity. Together with missing membership workload facts and approved engagement proof, these limits prevent an unqualified world-class conclusion or integrated release recommendation.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (recovery, save, submission and materials)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/lib/auth-destination.ts",
+    "src/lib/auth-routing.test.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/api/apply/status/route.ts",
+    "src/app/applicant/page.tsx (dashboard loading, next action and confirmation)",
+    "src/app/applicant/next-action-page.test.ts (receipt/deadline cases)",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (interrupted submission, receipt, storage and recovery scenarios)",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (terminal result)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly-commitment answer explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published; Join renders this with a Board email fallback. This is an honestly disclosed remaining information gap, not a false statement or new regression.",
+      "userImpact": "A student can prepare materials and begin applying but cannot independently determine whether membership fits their semester.",
+      "suggestedFix": "Obtain Board-confirmed current-semester weekly range, recurring mandatory times and peak-period expectations, then date and publish them near preparation. Retain the truthful fallback until confirmed."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk identity/session expiry, Supabase RPC/RLS, storage uploads, email receipts and actual account recovery; no staging exists.",
+    "Complete sequential keyboard and assistive-technology applicant journey through real authenticated status; physical iPhone/macOS Safari and observed human task success.",
+    "Actual graded evidence, release and operator recovery; these workflows were not independently exercised by this seat.",
+    "Approved project artifacts/results, current membership workload facts and Board decisions concerning original-resume review, retention and closed-round remediation."
+  ]
+}

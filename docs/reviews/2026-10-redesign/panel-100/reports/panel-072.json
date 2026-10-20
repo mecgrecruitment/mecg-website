@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-072",
+  "lens": "Member evaluator — narrow mobile viewport (simulated user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public mobile capture is legible and coherent with Precision Instrument: a clear consulting proposition, two useful actions and restrained engineering detail. Source honestly marks case studies pending approval and discloses original-resume access. I traced My work → calibrated assignment → rating/evidence → review → receipt-gated lock in source; native radios, explicit not-observed handling and readiness checks support that journey. However, the separate Group Case entry flow blocks observation-only saving and does not tell members whether saved evidence is valid. These gaps prevent unqualified acceptance for this evaluator task. This is an independent AI source/artifact assessment, not observed user success or a live authenticated mobile session.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx:731-746",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/member/page.tsx:200-274",
+    "src/app/member/assignment-navigation.ts",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/lib/group-case-roster.ts",
+    "src/lib/group-case-results.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql:1-35,191-325",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (relevant journey/coverage entries)",
+    "evidence/mecg-privacy-final-node.log (relevant readiness/submission/results entries)",
+    "captures/mobile-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:195-210",
+      "evidence": "editNote returns with “Pick a star to save” whenever every score is null; flushNote also requires a scored criterion. There is no note backup here. Conversely, rate_group_case_applicant in supabase/migrations/20261016191000_grading_contract_consistency.sql:267-279 permits a zero-score save when clean_note is present.",
+      "userImpact": "A member who records an observation before confidently assigning a score cannot persist it. Leaving or refreshing loses that note, and the prompt encourages premature scoring of uncertain evidence.",
+      "suggestedFix": "Save nonblank notes with null scores using the existing RPC contract; retain unsaved notes on failure and show an explicit observation-only receipt."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:348-355",
+      "evidence": "The member row reports only “N of M rated” and Saved (333-337). GroupCaseRoster has no minimum-observed or validity field in src/lib/group-case-roster.ts. Database quality separately requires 75% weighted coverage, rubric minimum and required criteria (20261016191000_grading_contract_consistency.sql:5-33); Board results explain these prerequisites in src/lib/group-case-results.ts:evaluationPrerequisites.",
+      "userImpact": "A narrow-screen evaluator can verify persistence but cannot distinguish their partial observations from valid completion or identify exactly what remains needed. Equal rated counts can represent different weighted/required coverage.",
+      "suggestedFix": "Return authoritative per-reviewer validity and blockers with the roster/save receipt; display “Saved partial observations” versus “Valid evaluation saved,” weighted coverage and missing required criteria without pressuring members to invent observations."
+    }
+  ],
+  "notVerified": [
+    "No evaluator capture or authenticated mobile interaction was supplied; layout with the software keyboard, long notes/names, focus movement and task completion remains unobserved.",
+    "No staging or hosted Clerk/Supabase/RLS/storage/email integration, deployment or migration rollout was tested. Supplied local logs and synthetic browser fixtures do not establish these.",
+    "No human usability study, physical-device/Safari/Firefox or assistive-technology validation exists. Public client outcomes/artifacts await approval; Board resolution of original-resume/blind-review policy remains external."
+  ]
+}

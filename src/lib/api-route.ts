@@ -16,20 +16,32 @@ export async function readJsonBody(
     return { error: "too_large" };
   }
 
-  const reader = request.body?.getReader();
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  try {
+    reader = request.body?.getReader();
+  } catch {
+    return { error: "invalid_json" };
+  }
   if (!reader) return { error: "invalid_json" };
 
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    totalBytes += value.byteLength;
-    if (totalBytes > maxBytes) {
-      await reader.cancel().catch(() => undefined);
-      return { error: "too_large" };
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel().catch(() => undefined);
+        return { error: "too_large" };
+      }
+      chunks.push(value);
     }
-    chunks.push(value);
+  } catch {
+    // A disconnected or aborted upload is not a complete JSON document.
+    return { error: "invalid_json" };
+  } finally {
+    reader.releaseLock();
   }
 
   const bytes = new Uint8Array(totalBytes);

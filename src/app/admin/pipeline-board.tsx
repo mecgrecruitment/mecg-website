@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   type DraggableProvidedDragHandleProps,
   type DropResult,
 } from "@hello-pangea/dnd";
+import { advancementReceipt, canSelectForAdvancement, snapshotAdvancement } from "./pipeline-selection";
 import PipelineStatusForm from "./pipeline-status-form";
 import {
   KANBAN_TRACK_CLASS_NAME,
@@ -22,6 +23,7 @@ import {
 import StatusPill from "@/components/status-pill";
 import SegmentedControl from "@/components/segmented-control";
 import { initials } from "@/lib/initials";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { applicationStatusLabel } from "@/lib/labels";
 import { canonicalMajor } from "@/lib/major";
 import {
@@ -30,7 +32,7 @@ import {
   isPipelineStatus,
   type PipelineStatus,
 } from "@/lib/workflow";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { authorizedFetch, fetchJsonWithTimeout, RequestTimeoutError } from "@/lib/client-fetch";
 
 type PipelineApplication = {
   id: string;
@@ -48,6 +50,20 @@ type ApplicantView = "ALL" | "PIPELINE";
 type ResumeFilter = "ALL" | "ON_FILE" | "MISSING";
 type StatusFilter = "ALL" | PipelineStatus;
 type RosterSort = "NAME" | "MAJOR" | "NEWEST" | "OLDEST";
+
+function rosterLocation(params: Pick<URLSearchParams, "get">): { view: ApplicantView; query: string; statusFilter: StatusFilter; resumeFilter: ResumeFilter; sort: RosterSort; showDecided: boolean } {
+  const filter = params.get("filter");
+  const resume = params.get("resume");
+  const order = params.get("sort");
+  return {
+    view: params.get("view") === "PIPELINE" ? "PIPELINE" : "ALL",
+    query: params.get("query") ?? "",
+    statusFilter: filter && isPipelineStatus(filter) ? filter : "ALL",
+    resumeFilter: resume === "ON_FILE" || resume === "MISSING" ? resume : filter === "MISSING_RESUME" ? "MISSING" : "ALL",
+    sort: order === "MAJOR" || order === "NEWEST" || order === "OLDEST" ? order : "NAME",
+    showDecided: params.get("decided") === "1",
+  };
+}
 
 const ACTIVE_STATUSES = PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status));
 // Columns bigger than this get their own search box.
@@ -119,7 +135,7 @@ function ApplicantCard({
             {initials(application.name)}
           </span>
         )}
-        <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
+        <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
           {application.name}
         </Link>
       </div>
@@ -153,7 +169,6 @@ function ApplicantCard({
 function ApplicantRoster({
   applications,
   total,
-  canOperate,
   canAdvance,
   cycleId,
   statusFilter,
@@ -164,11 +179,11 @@ function ApplicantRoster({
   onSortChange,
   selectedIds,
   onToggleSelected,
+  selectionPending,
   returnTo,
 }: {
   applications: PipelineApplication[];
   total: number;
-  canOperate: boolean;
   canAdvance: boolean;
   cycleId: string;
   statusFilter: StatusFilter;
@@ -179,11 +194,12 @@ function ApplicantRoster({
   onSortChange: (sort: RosterSort) => void;
   selectedIds: Set<string>;
   onToggleSelected: (applicationId: string) => void;
+  selectionPending: boolean;
   returnTo: string;
 }) {
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-end justify-between gap-3 rounded-2xl bg-mecg-navy/[0.025] p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+      <div className="applicant-roster-toolbar flex flex-wrap items-end justify-between gap-3 rounded-2xl bg-mecg-navy/[0.025] p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
         <div className="flex flex-wrap gap-3">
           <label className="text-xs font-medium text-mecg-navy/65">
             <span className="mb-1 block">Status</span>
@@ -237,13 +253,14 @@ function ApplicantRoster({
       </div>
 
       {applications.length ? (
-        <ul className="mt-3 flex flex-col gap-2" aria-label="All applicants">
+        <ul className="applicant-roster mt-3 flex flex-col gap-2" aria-label="All applicants">
           {applications.map((application) => (
-            <li key={application.id} className={`grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:items-center ${canAdvance ? "md:grid-cols-[auto_minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]" : "md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]"}`}>
-              {canAdvance && (["ELIGIBLE", "INVITED", "GROUP_CASE", "IN_PROCESS"].includes(application.status) ? (
+            <li key={application.id} className={`applicant-roster-row grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:items-center ${canAdvance ? "md:grid-cols-[auto_minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]" : "md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]"}`}>
+              {canAdvance && (canSelectForAdvancement(application.status) ? (
                   <label className="inline-flex min-h-11 items-center gap-2 text-xs font-medium text-mecg-navy/65">
                     <input
                       type="checkbox"
+                      disabled={selectionPending}
                       checked={selectedIds.has(application.id)}
                       onChange={() => onToggleSelected(application.id)}
                       className="h-5 w-5 accent-mecg-navy"
@@ -256,9 +273,7 @@ function ApplicantRoster({
                   {initials(application.name)}
                 </span>
                 <div className="min-w-0">
-                  <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="font-semibold text-mecg-navy hover:underline">
-                    {application.name}
-                  </Link>
+                  <p className="font-semibold text-mecg-navy">{application.name}</p>
                   <p className="mt-0.5 truncate text-xs text-mecg-navy/60">{[application.contact, canonicalMajor(application.major)].filter(Boolean).join(" · ")}</p>
                 </div>
               </div>
@@ -271,25 +286,15 @@ function ApplicantRoster({
               <p className={`text-xs font-medium ${application.hasResume ? "text-mecg-navy/60" : "text-mecg-orange-ink"}`}>
                 {application.hasResume ? "Resume on file" : "Missing resume"}
               </p>
-              {canOperate ? (
-                <PipelineStatusForm
-                  applicationId={application.id}
-                  cycleId={cycleId}
-                  status={application.status}
-                  controlId={`roster-${application.id}`}
-                  canAdvance={canAdvance}
-                />
-              ) : (
-                <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-mecg-blue hover:underline">
-                  Open file
-                </Link>
-              )}
+              <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} aria-label={`Open file for ${application.name}`} className="inline-flex min-h-11 items-center justify-end gap-2 text-xs font-semibold text-mecg-navy hover:underline">
+                Open file <span aria-hidden="true">→</span>
+              </Link>
             </li>
           ))}
         </ul>
       ) : (
         <p className="mt-3 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-8 text-center text-sm text-mecg-navy/60">
-          No applicants match these filters.
+          {total === 0 ? "No submitted applicants in this cycle yet." : "No applicants match these filters. Change the search, status or resume filter to see more."}
         </p>
       )}
     </div>
@@ -311,35 +316,78 @@ function PipelineBoardInner({
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const filterParam = searchParams.get("filter");
+  const location = rosterLocation(searchParams);
+  const locationKey = JSON.stringify(location);
+  const [lastLocationKey, setLastLocationKey] = useState(locationKey);
   const [boardApplications, setBoardApplications] = useState(applications);
   const [applicationSource, setApplicationSource] = useState(applications);
-  const [view, setView] = useState<ApplicantView>(searchParams.get("view") === "PIPELINE" ? "PIPELINE" : "ALL");
-  const [query, setQuery] = useState(searchParams.get("query") ?? "");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
-    filterParam && isPipelineStatus(filterParam) ? filterParam : "ALL",
-  );
-  const [resumeFilter, setResumeFilter] = useState<ResumeFilter>(() => {
-    const resumeParam = searchParams.get("resume");
-    if (resumeParam === "ON_FILE" || resumeParam === "MISSING") return resumeParam;
-    return filterParam === "MISSING_RESUME" ? "MISSING" : "ALL";
-  });
-  const [sort, setSort] = useState<RosterSort>(() => {
-    const sortParam = searchParams.get("sort");
-    return sortParam === "MAJOR" || sortParam === "NEWEST" || sortParam === "OLDEST" ? sortParam : "NAME";
-  });
-  const [showDecided, setShowDecided] = useState(searchParams.get("decided") === "1");
+  const [view, setView] = useState<ApplicantView>(location.view);
+  const [query, setQuery] = useState(location.query);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(location.statusFilter);
+  const [resumeFilter, setResumeFilter] = useState<ResumeFilter>(location.resumeFilter);
+  const [sort, setSort] = useState<RosterSort>(location.sort);
+  const [showDecided, setShowDecided] = useState(location.showDecided);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [confirmingAdvance, setConfirmingAdvance] = useState(false);
-  // Two-step confirm for "Advance all" in the Passed application round column.
-  const [confirmingStageAdvance, setConfirmingStageAdvance] = useState(false);
+  const [advanceReview, setAdvanceReview] = useState<ReturnType<typeof snapshotAdvancement> | null>(null);
+  const [showSelected, setShowSelected] = useState(false);
+  const advanceReviewRef = useRef<HTMLDivElement>(null);
+  const advanceTriggerRef = useRef<HTMLButtonElement>(null);
+  const advanceResultRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (advanceReview) {
+      advanceReviewRef.current?.focus();
+      advanceReviewRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [advanceReview]);
   const [advancePending, setAdvancePending] = useState(false);
   const [advanceNotice, setAdvanceNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
+  useEffect(() => {
+    if (advanceNotice && !advancePending && !advanceReview) advanceResultRef.current?.focus();
+  }, [advanceNotice, advancePending, advanceReview]);
   const [draggingApplicationId, setDraggingApplicationId] = useState<string | null>(null);
   const [movingIds, setMovingIds] = useState<Set<string>>(new Set());
   const [pendingMoveTargets, setPendingMoveTargets] = useState<Map<string, PipelineStatus>>(new Map());
   const [moveNotice, setMoveNotice] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const dragHandleElements = useRef(new Map<string, HTMLButtonElement>());
+
+  useEffect(() => {
+    // An explicit attention click also resets local filters when its URL is
+    // already current. Scope this to the same page/cohort and leave selection
+    // and in-flight mutation state intact.
+    const openQueue = (event: MouseEvent) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || !(event.target instanceof Element)) return;
+      const link = event.target.closest("a[data-roster-queue]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const url = new URL(link.href);
+      if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || url.searchParams.get("cycleId") !== cycleId) return;
+      const next = rosterLocation(url.searchParams);
+      setView(next.view);
+      setQuery(next.query);
+      setStatusFilter(next.statusFilter);
+      setResumeFilter(next.resumeFilter);
+      setSort(next.sort);
+      setShowDecided(next.showDecided);
+      setShowSelected(false);
+      setAdvanceReview(null);
+    };
+    document.addEventListener("click", openQueue);
+    return () => document.removeEventListener("click", openQueue);
+  }, [cycleId]);
+
+  // Next preserves this client instance on query-only navigation. Apply the
+  // requested queue before rendering; retain selected IDs and their hidden count,
+  // but require a fresh advancement review after the visible context changes.
+  if (lastLocationKey !== locationKey) {
+    setLastLocationKey(locationKey);
+    setView(location.view);
+    setQuery(location.query);
+    setStatusFilter(location.statusFilter);
+    setResumeFilter(location.resumeFilter);
+    setSort(location.sort);
+    setShowDecided(location.showDecided);
+    setShowSelected(false);
+    setAdvanceReview(null);
+  }
 
   if (applicationSource !== applications) {
     setApplicationSource(applications);
@@ -417,39 +465,49 @@ function PipelineBoardInner({
   }
 
   function toggleSelected(applicationId: string) {
+    if (advancePending) return;
     setSelectedIds((current) => {
       const next = new Set(current);
       if (next.has(applicationId)) next.delete(applicationId);
       else next.add(applicationId);
       return next;
     });
-    setConfirmingAdvance(false);
+    setAdvanceReview(null);
     setAdvanceNotice(null);
   }
 
   async function advanceToSpeedDating(ids: string[]) {
-    if (!canAdvance || ids.length === 0) return;
+    if (!canAdvance || advancePending || ids.length === 0) return;
     const count = ids.length;
     setAdvancePending(true);
     setAdvanceNotice(null);
     try {
-      const response = await authorizedFetch("/api/admin/rush", {
+      const { response, body } = await fetchJsonWithTimeout("/api/admin/rush", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "ADVANCE_SPEED_DATING", cycleId, applicationIds: ids }),
-      });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(body?.error ?? "Could not advance applicants");
-      const result = body?.id && typeof body.id === "object" ? body.id : {};
-      const assignments = typeof result.newAssignments === "number" ? result.newAssignments : count * 2;
-      const notifications = typeof result.notificationsEnqueued === "number" ? result.notificationsEnqueued : 0;
+      }, 15_000, authorizedFetch);
+      if (!response.ok) {
+        if (response.status >= 500 || response.status === 408) throw new RequestTimeoutError();
+        throw new Error(body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "Could not advance applicants");
+      }
+      const result = advancementReceipt(body, count);
+      if (!result) throw new RequestTimeoutError();
+      const assignments = result.newAssignments;
+      const notifications = result.notificationsEnqueued;
       setAdvanceNotice({ kind: "success", message: `Advanced ${count} applicant${count === 1 ? "" : "s"}, created ${assignments} assignment${assignments === 1 ? "" : "s"}, and queued ${notifications} notification${notifications === 1 ? "" : "s"}.` });
       setSelectedIds(new Set());
-      setConfirmingAdvance(false);
-      setConfirmingStageAdvance(false);
+      setAdvanceReview(null);
+      setShowSelected(false);
       router.refresh();
     } catch (error) {
-      setAdvanceNotice({ kind: "error", message: error instanceof Error ? error.message : "Could not advance applicants" });
+      if (error instanceof RequestTimeoutError || error instanceof TypeError) {
+        setAdvanceReview(null);
+        setSelectedIds(new Set());
+        setShowSelected(false);
+        setAdvanceNotice({ kind: "error", message: "Advancement could not be confirmed. Some changes may already be saved. Refresh the board and check the Speed Dating roster before reviewing another cohort." });
+        router.refresh();
+      } else setAdvanceNotice({ kind: "error", message: error instanceof Error ? error.message : "Could not advance applicants" });
     } finally {
       setAdvancePending(false);
     }
@@ -472,7 +530,7 @@ function PipelineBoardInner({
   }), [resumeFilter, searchResults, statusFilter]);
 
   const rosterApplications = useMemo(() => {
-    const rows = [...filteredApplications];
+    const rows = showSelected ? boardApplications.filter((application) => selectedIds.has(application.id)) : [...filteredApplications];
     if (sort === "MAJOR") {
       // Blank majors sort last so the roster does not open on a wall of empties.
       return rows.sort((a, b) =>
@@ -483,7 +541,21 @@ function PipelineBoardInner({
     if (sort === "NEWEST") return rows.sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
     if (sort === "OLDEST") return rows.sort((a, b) => a.submittedAt.localeCompare(b.submittedAt));
     return rows.sort((a, b) => a.name.localeCompare(b.name));
-  }, [filteredApplications, sort]);
+  }, [boardApplications, filteredApplications, selectedIds, showSelected, sort]);
+
+  const visibleIds = new Set((view === "ALL" ? rosterApplications : searchResults.filter((application) => {
+    if (DECIDED_PIPELINE_STATUSES.has(application.status)) return showDecided;
+    const term = (columnQueries[application.status] ?? "").trim().toLowerCase();
+    return !term || matchesApplicant(application, term);
+  })).map((application) => application.id));
+  const selectedApplications = boardApplications.filter((application) => selectedIds.has(application.id));
+  const hiddenSelectedCount = selectedApplications.filter((application) => !visibleIds.has(application.id)).length;
+  const eligibleShown = boardApplications.filter((application) => visibleIds.has(application.id) && canSelectForAdvancement(application.status));
+
+  function reviewAdvancement(ids: ReadonlySet<string>) {
+    setAdvanceReview(snapshotAdvancement(boardApplications, ids, visibleIds));
+    setAdvanceNotice(null);
+  }
 
   const decidedCount = boardApplications.filter((application) => DECIDED_PIPELINE_STATUSES.has(application.status)).length;
   const draggingApplication = draggingApplicationId
@@ -501,21 +573,21 @@ function PipelineBoardInner({
     if (sort !== "NAME") params.set("sort", sort);
     if (showDecided) params.set("decided", "1");
     const serialized = params.toString();
-    return serialized ? `/admin?${serialized}` : "/admin";
-  }, [query, resumeFilter, showDecided, sort, statusFilter, view]);
+    return withWorkspaceCycle(serialized ? `/admin?${serialized}` : "/admin", cycleId);
+  }, [cycleId, query, resumeFilter, showDecided, sort, statusFilter, view]);
 
   return (
     <section id="applicants">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Applicants</h2>
+        <h2 className="text-base font-semibold tracking-[-0.02em]">Applicants</h2>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
-          <p className="text-sm text-mecg-navy/60">{boardApplications.length} submitted applicants in this cycle</p>
+          <p className="text-sm text-mecg-navy/60">{boardApplications.length} submitted</p>
           <label>
             <span className="sr-only">Search applicants by name or contact</span>
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => { setQuery(event.target.value); setShowSelected(false); }}
               placeholder="Search name or contact…"
               className="field-control min-h-11 w-full rounded-xl bg-white text-sm sm:w-64"
             />
@@ -523,8 +595,8 @@ function PipelineBoardInner({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="w-full max-w-xs">
+      <div className="applicant-list-actions mt-4 flex flex-wrap items-center gap-2">
+        <div className="applicant-view-switch w-full max-w-xs">
           <SegmentedControl
             name="Applicant view"
             value={view}
@@ -536,34 +608,46 @@ function PipelineBoardInner({
           />
         </div>
         {canOperate && (
-          <Link href="/admin/referrals" className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-mecg-blue shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]">
+          <Link href={withWorkspaceCycle("/admin/referrals", cycleId)} className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-mecg-blue shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]">
             Referrals · {referralCount}
           </Link>
         )}
+        {canAdvance && selectedApplications.length === 0 && <button type="button" disabled={advancePending || !eligibleShown.length} className="ml-auto inline-flex min-h-11 items-center text-xs font-medium text-mecg-navy/65 hover:text-mecg-navy" onClick={() => { setSelectedIds(new Set(eligibleShown.map(application => application.id))); setAdvanceReview(null); }}>Select eligible shown</button>}
       </div>
 
-      {canAdvance && selectedIds.size > 0 && (
-        <div className="mt-3 rounded-2xl bg-mecg-navy p-3.5 text-white">
+      {canAdvance && (selectedApplications.length > 0 || advanceNotice?.kind === "error") && (
+        <div className="applicant-bulk-actions mt-3 rounded-2xl bg-mecg-navy p-3.5 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm"><span className="font-semibold">{selectedIds.size} selected</span> · {selectedIds.size * 2} evaluator assignments required</p>
-              {confirmingAdvance && <p className="mt-1 text-xs text-white/65">The whole cohort stops if any applicant cannot be staffed. No partial changes are saved.</p>}
+            <p className="text-sm" aria-live="polite"><span className="font-semibold">{selectedApplications.length} selected</span> · {hiddenSelectedCount} hidden</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" disabled={advancePending || !eligibleShown.length} className="button-ghost-light text-sm" onClick={() => {
+                setSelectedIds((current) => new Set([...current, ...eligibleShown.map((application) => application.id)]));
+                setAdvanceReview(null);
+              }}>Select eligible shown</button>
+              <button type="button" disabled={advancePending || !selectedApplications.length} aria-pressed={showSelected && view === "ALL"} className="button-ghost-light text-sm" onClick={() => { setView("ALL"); setShowSelected((current) => view !== "ALL" || !current); }}>{showSelected && view === "ALL" ? "Show filtered applicants" : "Show selected"}</button>
+              <button type="button" disabled={advancePending || !selectedIds.size} className="button-ghost-light text-sm" onClick={() => { setSelectedIds(new Set()); setAdvanceReview(null); setShowSelected(false); }}>Clear selection</button>
+              <button ref={advanceTriggerRef} type="button" disabled={advancePending || !selectedApplications.length} className="button-light text-sm" onClick={() => reviewAdvancement(selectedIds)}>Review advancement</button>
             </div>
-            {confirmingAdvance ? (
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="button-ghost-light text-sm" disabled={advancePending} onClick={() => setConfirmingAdvance(false)}>Cancel</button>
-                <button type="button" className="button-light text-sm" disabled={advancePending} onClick={() => advanceToSpeedDating([...selectedIds])}>
-                  {advancePending ? "Advancing…" : `Confirm ${selectedIds.size} applicants`}
-                </button>
-              </div>
-            ) : (
-              <button type="button" className="button-light text-sm" onClick={() => setConfirmingAdvance(true)}>Review advancement</button>
-            )}
           </div>
+          {showSelected && view === "ALL" && <p className="mt-2 text-sm text-white/65">Showing the selected cohort across all search, status and resume filters.</p>}
+          {advanceReview && (
+            <div ref={advanceReviewRef} tabIndex={-1} className="mt-4 border-t border-white/20 pt-4" role="region" aria-label="Review advancement to Speed Dating">
+              <h3 className="text-base font-semibold">Advance {advanceReview.length} applicants to Speed Dating</h3>
+              <p className="mt-2 text-sm text-white/65">{advanceReview.length * 2} evaluator assignments required. The whole cohort stops if any applicant cannot be staffed. No partial changes are saved.</p>
+              <p className="mt-2 text-sm text-white/65">This review keeps the applicants listed below fixed. Hidden labels reflect the view when review opened.</p>
+              <ul className="mt-3 max-h-64 overflow-y-auto text-sm" aria-label="Applicants in this advancement">
+                {advanceReview.map((application) => <li key={application.id} className="flex flex-wrap justify-between gap-2 border-t border-white/12 py-2"><Link className="inline-flex min-h-11 items-center underline" href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)}>{application.name}</Link>{application.hidden && <span className="self-center text-white/65">Hidden by current view at review</span>}</li>)}
+              </ul>
+              <div className="mt-3 flex flex-wrap justify-end gap-2">
+                <button type="button" className="button-ghost-light text-sm" disabled={advancePending} onClick={() => { setAdvanceReview(null); window.requestAnimationFrame(() => advanceTriggerRef.current?.focus()); }}>Cancel</button>
+                <button type="button" className="button-light text-sm" disabled={advancePending || !advanceReview.length} onClick={() => void advanceToSpeedDating(advanceReview.map((application) => application.id))}>{advancePending ? "Advancing…" : `Confirm ${advanceReview.length} applicants to Speed Dating`}</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {advanceNotice && (
-        <p role={advanceNotice.kind === "error" ? "alert" : "status"} className={`mt-3 rounded-xl px-4 py-3 text-sm ${advanceNotice.kind === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-900"}`}>
+        <p ref={advanceResultRef} tabIndex={-1} role={advanceNotice.kind === "error" ? "alert" : "status"} className={`mt-3 rounded-xl px-4 py-3 text-sm ${advanceNotice.kind === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-900"}`}>
           {advanceNotice.message}
         </p>
       )}
@@ -573,17 +657,17 @@ function PipelineBoardInner({
           <ApplicantRoster
             applications={rosterApplications}
             total={boardApplications.length}
-            canOperate={canOperate}
             canAdvance={canAdvance}
             cycleId={cycleId}
             statusFilter={statusFilter}
             resumeFilter={resumeFilter}
             sort={sort}
-            onStatusFilterChange={setStatusFilter}
-            onResumeFilterChange={setResumeFilter}
+            onStatusFilterChange={(value) => { setStatusFilter(value); setShowSelected(false); }}
+            onResumeFilterChange={(value) => { setResumeFilter(value); setShowSelected(false); }}
             onSortChange={setSort}
             selectedIds={selectedIds}
             onToggleSelected={toggleSelected}
+            selectionPending={advancePending}
             returnTo={returnTo}
           />
         </div>
@@ -618,19 +702,9 @@ function PipelineBoardInner({
                     </div>
                     {status === "ELIGIBLE" && canAdvance && column.length > 0 && (
                       <div className="mb-1.5 flex flex-wrap items-center gap-1.5 px-0.5">
-                        {confirmingStageAdvance ? (
-                          <>
-                            <button type="button" className="button-secondary text-xs" disabled={advancePending} onClick={() => advanceToSpeedDating(column.map((application) => application.id))}>
-                              {advancePending ? "Advancing…" : `Confirm ${column.length}`}
-                            </button>
-                            <button type="button" className="button-secondary text-xs" disabled={advancePending} onClick={() => setConfirmingStageAdvance(false)}>Cancel</button>
-                            <p className="w-full text-[11px] text-mecg-navy/60">The whole cohort stops if any applicant cannot be staffed.</p>
-                          </>
-                        ) : (
-                          <button type="button" className="button-secondary text-xs" onClick={() => { setConfirmingStageAdvance(true); setAdvanceNotice(null); }}>
-                            {columnTerm ? `Advance ${column.length} shown` : `Advance all ${column.length} to Speed Dating`}
-                          </button>
-                        )}
+                        <button type="button" disabled={advancePending} className="button-secondary text-xs" onClick={() => reviewAdvancement(new Set(column.map((application) => application.id)))}>
+                          {columnTerm ? `Review ${column.length} shown` : `Review all ${column.length} for Speed Dating`}
+                        </button>
                       </div>
                     )}
                     {(stageApplications.length > COLUMN_SEARCH_THRESHOLD || columnTerm) && (
@@ -736,7 +810,7 @@ function PipelineBoardInner({
                       <div className="mt-1.5 flex flex-col gap-1.5">
                         {column.map((application) => (
                           <div key={application.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2.5 py-1.5 text-[12px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
-                            <Link href={`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy hover:underline">
+                            <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy hover:underline">
                               {application.name}
                             </Link>
                             {canOperate && (

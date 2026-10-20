@@ -1,0 +1,22 @@
+{
+  "page": "/home",
+  "revision": "later working tree after mobile disclosure and complementary engagement copy",
+  "lighthouseVersion": "13.5.0",
+  "fetchTime": "2026-10-16T21:42:58.301Z",
+  "scores": {
+    "performance": 0.98,
+    "accessibility": 1,
+    "best-practices": 1,
+    "seo": 1
+  },
+  "metrics": {
+    "largest-contentful-paint": 2346.3004,
+    "cumulative-layout-shift": 0,
+    "total-blocking-time": 35
+  },
+  "runWarnings": [],
+  "rawFiles": {
+    ".audit/lighthouse/home-composition-mobile.report.json": "ef3f3816442c501689a80a30259ccce4ae9063ff326442b394a4a17ac04bd943",
+    ".audit/lighthouse/home-composition-mobile.report.html": "b0c33277b0b33764786deb7b661144c77b3572110bf5390ef7bc3855c9b8f6fa"
+  }
+}

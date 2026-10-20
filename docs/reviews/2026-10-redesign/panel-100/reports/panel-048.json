@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-048",
+  "lens": "Product systems and reliability \u2014 factual comprehension (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition clearly identifies student-led consulting and gives organizations and students distinct next steps. Precision Instrument is coherent in the supplied desktop hero. Recovery choices explain which copy will be replaced, and original-resume access is disclosed without claiming PDF anonymization. The synthetic mobile close-grading capture communicates irreversible consequences, partial versus valid evidence, incomplete work and snapshot freshness clearly; its source rejects unavailable or malformed coverage. However, submission confirmation has a weaker receipt boundary than draft saving and incident resolution. Local fixture tests and PostgreSQL race evidence support specific safeguards, but cannot establish hosted reliability or observed user comprehension. World-class acceptance therefore remains unproven, with the receipt issue requiring correction before release.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/lib/application-draft-recovery.ts",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/lib/client-fetch.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/api/admin/round-close/route.ts",
+    "src/lib/round-close-summary.ts",
+    "src/lib/round-evidence.ts",
+    "src/lib/decision-release.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-privacy-browser.log",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:493-538",
+      "evidence": "submit() calls finishSubmission() for every response.ok without reading a success body; finishSubmission clears browser recovery and navigates to ?submitted=1. The actual API returns {applicationId} (src/app/api/apply/route.ts:102-112). tests/e2e/application-reliability.spec.ts:64-79 explicitly accepts HTTP 200 with {} as submission success; the malformed-receipt regression at lines 342-350 covers only draft saving. The applicant receipt at src/app/applicant/page.tsx:281-285 is selected by the query parameter.",
+      "userImpact": "A malformed successful response can discard unsynced browser answers and initiate a received-state journey without a valid application receipt. This is a source-supported failure path, not an observed hosted incident; the normal route validates its RPC result.",
+      "suggestedFix": "Validate the submission receipt before clearing recovery. Treat missing or malformed applicationId as uncertain, reconcile persisted submission status, and preserve answers if confirmation fails. Bind the received banner to verified application state. Replace the empty-success fixture and add malformed/HTML/empty success cases that assert recovery remains until confirmation."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in this evidence; session expiry, upload transitions and migration/application rollout were not exercised here.",
+    "Application journey assessment used actual source and intercepted-fixture test/log evidence, not a live authenticated applicant session or observed human task success.",
+    "Operator capture is synthetic; actual Board comprehension, irreversible closure and release behavior under hosted concurrent activity remain unverified. Coverage is explicitly advisory until the freeze write.",
+    "No physical-device, Safari, Firefox, assistive-technology or formal accessibility validation; no human study, client publication approvals or measured conversion evidence."
+  ]
+}

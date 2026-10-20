@@ -1,0 +1,124 @@
+
+Running 45 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (405ms)
+  ✓   2 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline lost preserves the proposal and locks another write pending readback (420ms)
+  ✓   3 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline malformed preserves the proposal and locks another write pending readback (392ms)
+  ✓   4 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-application preserves the proposal and locks another write pending readback (397ms)
+  ✓   6 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline headers-stalled preserves the proposal and locks another write pending readback (368ms)
+  ✓   5 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-date preserves the proposal and locks another write pending readback (397ms)
+  ✓   8 [chromium] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt (343ms)
+  ✓   7 [chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline body-stalled preserves the proposal and locks another write pending readback (397ms)
+  ✓   9 [chromium] › tests/e2e/offer-deadline.spec.ts:97:5 › a definite refusal keeps the proposed date editable for correction (421ms)
+  ✓  10 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (445ms)
+  ✓  11 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline lost preserves the proposal and locks another write pending readback (413ms)
+  ✓  12 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline malformed preserves the proposal and locks another write pending readback (378ms)
+  ✓  13 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-application preserves the proposal and locks another write pending readback (380ms)
+  ✓  14 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-date preserves the proposal and locks another write pending readback (376ms)
+  ✓  16 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline body-stalled preserves the proposal and locks another write pending readback (362ms)
+  ✓  15 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline headers-stalled preserves the proposal and locks another write pending readback (389ms)
+  ✓  17 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt (372ms)
+  ✓  18 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:97:5 › a definite refusal keeps the proposed date editable for correction (415ms)
+  ✓  19 [firefox] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (1.2s)
+  ✓  20 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline lost preserves the proposal and locks another write pending readback (1.2s)
+  ✓  21 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline malformed preserves the proposal and locks another write pending readback (691ms)
+  ✓  22 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-application preserves the proposal and locks another write pending readback (687ms)
+  ✓  23 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-date preserves the proposal and locks another write pending readback (650ms)
+  ✓  24 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline headers-stalled preserves the proposal and locks another write pending readback (657ms)
+  ✓  25 [firefox] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline body-stalled preserves the proposal and locks another write pending readback (701ms)
+  ✓  26 [firefox] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt (640ms)
+  ✓  27 [firefox] › tests/e2e/offer-deadline.spec.ts:97:5 › a definite refusal keeps the proposed date editable for correction (665ms)
+  ✓  29 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline lost preserves the proposal and locks another write pending readback (1.0s)
+  ✓  28 [webkit] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (1.3s)
+  ✓  30 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline malformed preserves the proposal and locks another write pending readback (500ms)
+  ✓  31 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-application preserves the proposal and locks another write pending readback (480ms)
+  ✓  32 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-date preserves the proposal and locks another write pending readback (528ms)
+  ✓  33 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline headers-stalled preserves the proposal and locks another write pending readback (587ms)
+  ✓  34 [webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline body-stalled preserves the proposal and locks another write pending readback (560ms)
+  ✓  36 [webkit] › tests/e2e/offer-deadline.spec.ts:97:5 › a definite refusal keeps the proposed date editable for correction (535ms)
+  ✓  37 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (503ms)
+  ✓  38 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline lost preserves the proposal and locks another write pending readback (448ms)
+  ✓  39 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline malformed preserves the proposal and locks another write pending readback (458ms)
+  ✓  40 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-application preserves the proposal and locks another write pending readback (466ms)
+  ✓  41 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline wrong-date preserves the proposal and locks another write pending readback (452ms)
+  ✓  42 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline headers-stalled preserves the proposal and locks another write pending readback (508ms)
+  ✓  43 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:33:7 › deadline body-stalled preserves the proposal and locks another write pending readback (480ms)
+  ✘  35 [webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt (5.5s)
+  ✓  45 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:97:5 › a definite refusal keeps the proposed date editable for correction (580ms)
+  ✘  44 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt (5.5s)
+
+
+  1) [webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Offer deadline save result', { exact: true })
+    Expected substring: "Deadline cleared. This offer has no deadline."
+    Received string:    "Changes not saved."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByLabel('Offer deadline save result', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Offer deadline save result', { exact: true })
+        14 × locator resolved to <div tabindex="-1" id="_R_klritpesnelb_-result" aria-label="Offer deadline save result">…</div>
+           - unexpected value "Changes not saved."
+
+
+      91 |   await page.getByLabel("Offer deadline (Detroit time)").fill("");
+      92 |   await page.getByRole("button", { name: "Save deadline", exact: true }).click();
+    > 93 |   await expect(page.getByLabel("Offer deadline save result", { exact: true })).toContainText("Deadline cleared. This offer has no deadline.");
+         |                                                                                ^
+      94 |   expect(captured).toEqual({ action: "SET_DEADLINE", applicationId: "synthetic-offer", expiresAt: "" });
+      95 | });
+      96 |
+        at /work/tests/e2e/offer-deadline.spec.ts:93:80
+
+    Error Context: .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Offer deadline save result', { exact: true })
+    Expected substring: "Deadline cleared. This offer has no deadline."
+    Received string:    "Changes not saved."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByLabel('Offer deadline save result', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Offer deadline save result', { exact: true })
+        14 × locator resolved to <div tabindex="-1" id="_R_klritpesnelb_-result" aria-label="Offer deadline save result">…</div>
+           - unexpected value "Changes not saved."
+
+
+      91 |   await page.getByLabel("Offer deadline (Detroit time)").fill("");
+      92 |   await page.getByRole("button", { name: "Save deadline", exact: true }).click();
+    > 93 |   await expect(page.getByLabel("Offer deadline save result", { exact: true })).toContainText("Deadline cleared. This offer has no deadline.");
+         |                                                                                ^
+      94 |   expect(captured).toEqual({ action: "SET_DEADLINE", applicationId: "synthetic-offer", expiresAt: "" });
+      95 | });
+      96 |
+        at /work/tests/e2e/offer-deadline.spec.ts:93:80
+
+    Error Context: .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-mobile-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-mobile-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/offer-deadline-final/offer-deadline-clearing-a--cd266-licit-matching-null-receipt-mobile-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt 
+    [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:83:5 › clearing a deadline requires an explicit matching null receipt 
+  43 passed (22.2s)

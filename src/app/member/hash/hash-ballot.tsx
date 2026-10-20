@@ -32,9 +32,12 @@ function grow(node: HTMLTextAreaElement | null) {
   node.style.height = `${node.scrollHeight}px`;
 }
 
-async function fetchLive(applicationId?: string): Promise<Live | null> {
+async function fetchLive(cycleId?: string, applicationId?: string): Promise<Live | null> {
   try {
-    const query = applicationId ? `?applicationId=${encodeURIComponent(applicationId)}` : "";
+    const params = new URLSearchParams();
+    if (cycleId) params.set("cycleId", cycleId);
+    if (applicationId) params.set("applicationId", applicationId);
+    const query = params.size ? `?${params.toString()}` : "";
     const response = await authorizedFetch(`/api/member/hash/live${query}`, { cache: "no-store" });
     if (!response.ok) return null;
     const body: Partial<Live> | null = await response.json().catch(() => null);
@@ -131,7 +134,7 @@ function BallotRow({ id, name, meta, row, rowStatus, dark, onCast, onEditNote, o
   );
 }
 
-export default function HashBallot({ applicants, votes, presentingId }: { applicants: BallotApplicant[]; votes: BallotVote[]; presentingId: string | null }) {
+export default function HashBallot({ applicants, votes, presentingId, cycleId }: { cycleId?: string; applicants: BallotApplicant[]; votes: BallotVote[]; presentingId: string | null }) {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Record<string, Row>>(() => {
     const mine = new Map(votes.map((vote) => [vote.application_id, vote]));
@@ -180,13 +183,13 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
     let active = true;
     async function tick() {
       if (document.visibilityState !== "visible") return;
-      const next = await fetchLive();
+      const next = await fetchLive(cycleId);
       if (active && next) setLive(next);
     }
     void tick();
     const interval = window.setInterval(tick, LIVE_POLL_MS);
     return () => { active = false; window.clearInterval(interval); };
-  }, []);
+  }, [cycleId]);
 
   useEffect(() => {
     if (live.presentingId === lastPresented.current) return;
@@ -266,7 +269,7 @@ export default function HashBallot({ applicants, votes, presentingId }: { applic
     const opening = !openNotes[applicationId];
     setOpenNotes((current) => ({ ...current, [applicationId]: opening }));
     if (!opening || notesById[applicationId]) return;
-    void fetchLive(applicationId).then((result) => {
+    void fetchLive(cycleId, applicationId).then((result) => {
       if (result) setNotesById((current) => ({ ...current, [applicationId]: result.notes }));
     });
   }

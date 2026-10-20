@@ -1,0 +1,19 @@
+import { NextRequest, NextResponse } from 'next/server';
+export function proxy(request: NextRequest) {
+  const url = request.nextUrl;
+  if (!['GET', 'HEAD'].includes(request.method)) return NextResponse.json({ error: 'This is a read-only preview. Sample changes are not saved.' }, { status: 409 });
+  if (url.pathname === '/preview-role') {
+    const role = url.searchParams.get('role') ?? 'board';
+    const paths: Record<string, string> = { reviewer: '/member/screening', board: '/admin', owner: '/admin/people', member: '/member', panel: '/admin/hash', applicant: '/applicant' };
+    const requested = url.searchParams.get('to');
+    const destination = requested && /^\/(admin|member|applicant|apply)(\/|$)/.test(requested) ? requested : paths[role] ?? '/admin';
+    const response = NextResponse.redirect(new URL(destination, request.url));
+    response.cookies.set('preview-role', role, { sameSite: 'lax', path: '/' });
+    return response;
+  }
+  if (url.pathname.startsWith('/api/')) return NextResponse.json({ error: 'This is a read-only preview. Sample changes are not saved.' }, { status: 409 });
+  const headers = new Headers(request.headers);
+  headers.set('x-mecg-workspace-cycle', '[]');
+  return NextResponse.next({ request: { headers } });
+}
+export const config = { matcher: ['/api/:path*', '/((?!_next|.*\\..*).*)'] };

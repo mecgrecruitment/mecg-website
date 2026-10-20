@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-v2-014",
+  "lens": "Editorial and brand craft; kind: designer; angle: service failure",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected public composition has a clear, coherent voice: strong sans headings, restrained mono metadata, hairline organization and useful navy section changes. The supplied desktop and mobile home captures preserve hierarchy without replacing the established identity. No-fee and semester facts now appear at the decision point. The real PwC photograph is appropriately framed and captioned as a member visit. I verified the revised partnership heading, adjacent native mobile organization selector and optional mobile bench against current source and scoped tests; those historical layout objections are addressed within the supplied local scope. The Work-to-Contact journey explains terms and next steps. Its current form protects pending input, validates receipts, preserves uncertain inquiries and bounds waiting; corrected local focus evidence supports recovery. Nevertheless, the central client task remains incomplete: visitors cannot examine the substance of an actual recommendation or handoff. Honest pending language improves editorial accuracy but does not establish consulting craft. That material information gap determines disagreement, independently of the extensive local checks. I recommend holding broad release acceptance until substantive proof and integrated service acceptance are available; this is an AI source/artifact review, not observed user success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx (resume disclosures)",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (public/client/contact entries)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (corrected contact focus entries)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-expanded-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:99-108",
+      "evidence": "The approved fallback remains empty. Home now accurately says Past partnerships / Across industries and displays pending approval; organization details provide business descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes. The supplied desktop/mobile captures show that fallback. The photograph at home/page.tsx:135-136 documents a PwC visit, not a consulting deliverable.",
+      "userImpact": "A prospective client can understand the service and recognize organizations, but cannot assess whether MECG research and recommendations are sufficiently rigorous or relevant before committing time and information.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement: actual decision, constraints, methods and a redacted deliverable with an honest handoff/result and limits. Feature it through the approved publication boundary before general capabilities or people. Retain truthful pending copy until approval; invent no outcome."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance or actual inquiry delivery; intercepted local responses establish UI behavior only. No staging exists.",
+    "No observed human comprehension/task success, assistive-technology session, physical iPhone or macOS Safari verification.",
+    "No supplied Work/Contact/Join/Team final visual captures inspected; their complete responsive visual treatment and authenticated application/grading/operator journeys are not established by the home captures.",
+    "Board-confirmed membership workload remains unavailable. Original identifying-resume access is now disclosed, but Board privacy/retention and closed-round remediation decisions remain unresolved.",
+    "The expanded 320px capture has a disclosed screenshot-only header adjustment; it does not establish normal sticky-header behavior."
+  ]
+}

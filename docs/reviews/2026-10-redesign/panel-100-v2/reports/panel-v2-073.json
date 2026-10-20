@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-v2-073",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public mobile capture has a coherent Precision Instrument hierarchy, a clear no-fee/semester proposition, and honest separation of partnerships from unpublished project evidence. The evaluator journey is substantially stronger: Group Case accepts observation-only notes and reports canonical partial/qualifying status; My Work routes Group Case separately from immutable generic submissions. The generic evaluation form now focuses its review heading, returns focus after Keep editing, preserves divergent drafts and distinguishes confirmed backups from memory-only work. The supplied keyboard review test and local SQL read/receipt tests support these specific repairs. However, the Group Case save path still has an indefinite-wait failure that blocks verification and subsequent saves for that applicant. I would hold this revision for that correction and focused validation. Across the unchanged broad question, missing approved work evidence, actual authenticated keyboard acceptance and hosted provider integration also prevent me from regarding the purpose as fully accomplished. This is a simulated AI source/evidence review, not observed member usability or human endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "captures/public-home-mobile-390.png",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "src/app/member/page.tsx (Group Case routing and evaluation entry)",
+    "src/app/member/evaluation-form.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/member/group-case/workspace-state.ts",
+    "src/lib/group-case-roster.ts",
+    "src/lib/client-fetch.ts",
+    "tests/e2e/evaluation-backup.spec.ts",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "tests/e2e/member-work-continuity.spec.ts",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql (writer guards)",
+    "supabase/tests/group_case_reviewer_quality.sql",
+    "docs/reviews/2026-10-redesign/group-case-evaluator-followup.md",
+    "docs/reviews/2026-10-redesign/evidence/evaluator-recovery-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final result)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save awaits the prior inflight promise at line 149, then unbounded authorizedFetch/retryOnNetworkError at 157-161 and response.json at 162. client-fetch.ts supplies no deadline in those helpers. A never-settling request/body never reaches finally or the error state. The copy-before-leaving guidance and Retry save are rendered only for error/hint at roster lines 420-423, excluding saving. The supplied Group Case tests cover rejected and malformed receipts, not a stalled request/body.",
+      "userImpact": "A reviewer can remain at Saving indefinitely. Later edits queue behind the unresolved save, so neither further grading nor retry confirms persistence; leaving can lose observations held only in memory. This is source-derived, not a live incident reproduction.",
+      "suggestedFix": "Bound the complete request and body read, release the queue on timeout, retain the exact current payload and announce an unknown save outcome with reachable retry/copy guidance. Preserve ordering so a late earlier write cannot overwrite newer observations. Add focused stalled-request and stalled-body cases followed by a newer edit and recovery."
+    }
+  ],
+  "notVerified": [
+    "No real authenticated keyboard journey through calibration, observation entry, recovery and locked/read-only state; the focused review test begins with clicked scores and programmatic focus.",
+    "No supplied final evaluator screenshot, screen-reader session, physical iPhone or macOS Safari observation; private visual usability remains source/test inferred.",
+    "No hosted Clerk/session-expiry, Supabase RPC/RLS/storage, email or consequential operator acceptance; isolated SQL and intercepted browser APIs have narrower scope.",
+    "Client-approved engagement artifacts and current Board-confirmed membership workload remain absent; retention, original-resume policy reconciliation and closed-round remediation authority remain unresolved."
+  ]
+}

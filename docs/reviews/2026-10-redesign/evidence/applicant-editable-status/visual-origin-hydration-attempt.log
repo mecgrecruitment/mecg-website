@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'A clearer wayto your nextdecision.'
+- 'Your application is a draft.'
+
+    at file:///work/.audit/applicant-editable-status/capture.mjs:21:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'A clearer wayto your nextdecision.',
+  expected: 'Your application is a draft.',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

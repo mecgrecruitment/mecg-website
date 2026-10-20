@@ -1,0 +1,994 @@
+
+Running 38 tests using 2 workers
+
+(node:1711529) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711530) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 [chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations (1ms)
+  ✘   2 [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits (1ms)
+(node:1711554) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711555) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   3 [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local (1ms)
+  ✘   4 [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits (1ms)
+(node:1711578) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711579) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   5 [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server (1ms)
+  ✘   6 [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt (1ms)
+(node:1711603) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711609) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   7 [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt (1ms)
+  ✘   8 [chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save (1ms)
+(node:1711645) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   9 [chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit (1ms)
+  ✘  10 [chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision (1ms)
+(node:1711670) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711676) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  11 [chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock (1ms)
+  ✘  12 [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry (1ms)
+(node:1711696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711697) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  13 [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry (1ms)
+  ✘  14 [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry (1ms)
+(node:1711722) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  15 [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry (1ms)
+  ✘  16 [chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal (1ms)
+(node:1711869) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711875) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  17 [chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry (1ms)
+  ✘  18 [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving (1ms)
+(node:1711894) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711900) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  19 [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy (1ms)
+  ✘  20 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations (1ms)
+(node:1711921) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711927) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  21 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits (1ms)
+  ✘  22 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits (1ms)
+(node:1711948) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1711949) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  23 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local (1ms)
+  ✘  24 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server (1ms)
+(node:1712012) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712011) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  25 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt (1ms)
+  ✘  26 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt (1ms)
+(node:1712035) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712041) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  27 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save (1ms)
+  ✘  28 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit (1ms)
+(node:1712060) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712067) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  29 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision (1ms)
+  ✘  30 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock (1ms)
+(node:1712084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712091) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  31 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry (1ms)
+  ✘  32 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry (1ms)
+(node:1712185) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  33 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry (1ms)
+  ✘  34 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry (1ms)
+(node:1712209) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  35 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal (1ms)
+  ✘  36 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry (1ms)
+(node:1712229) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1712240) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  37 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving (1ms)
+  ✘  38 [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy (1ms)
+
+
+  1) [chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-se-892c7-draining-newer-observations-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-se-892c7-draining-newer-observations-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-se-892c7-draining-newer-observations-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-se-892c7-draining-newer-observations-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-se-892c7-draining-newer-observations-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-se-892c7-draining-newer-observations-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-lo-593f7--request-before-newer-edits-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-bo-d7893--request-before-newer-edits-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-co-e63bb-te-copies-then-choose-local-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-co-58884-e-copies-then-choose-server-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-bl-9747f-ted-before-a-server-receipt-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-qu-eb366-ted-before-a-server-receipt-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-re-f6fc1-hout-assuming-a-server-save-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-initial-revi-466e2-nds-no-save-or-final-submit-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-final-screen-4373a-t-and-forwards-its-revision-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-final-screen-ce36c-er-claims-a-successful-lock-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-d4751-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  32) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-8d1ac-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  33) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-24cfd-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-unknown-scre-19ed7-data-and-blocks-blind-retry-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  35) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-failed-repla-f2f72--another-deliberate-recusal-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  36) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-screening-fu-706a9--choice-and-rating-geometry-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  37) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-retrying-an--c4c7c-ry-only-edits-before-saving-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  38) [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy 
+
+    Error: browserType.launch: Executable doesn't exist at /home/rahil/.cache/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/screening-cas-retrying-an--e9f5a--and-compares-a-server-copy-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  38 failed
+    [chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations 
+    [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits 
+    [chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits 
+    [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local 
+    [chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server 
+    [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt 
+    [chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt 
+    [chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save 
+    [chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit 
+    [chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision 
+    [chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock 
+    [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry 
+    [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry 
+    [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry 
+    [chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry 
+    [chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal 
+    [chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry 
+    [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving 
+    [chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:41:5 › screening serializes an earlier pending save before draining newer observations 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening lost draft receipt retries the exact committed request before newer edits 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:53:7 › screening body-timeout draft receipt retries the exact committed request before newer edits 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose local 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:68:7 › screening conflict lets the reviewer export both private copies then choose server 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening blocked session backup never claims observations are protected before a server receipt 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:84:7 › screening quota session backup never claims observations are protected before a server receipt 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:94:5 › screening recovers exact session observations after reload without assuming a server save 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:101:5 › initial revision failure permits private scoring and recusal but sends no save or final submit 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:110:5 › final screening submit waits for the latest receipt and forwards its revision 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:120:5 › final screening CAS conflict retains both versions and never claims a successful lock 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT malformed outcome preserves private data and blocks blind retry 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening SUBMIT lost outcome preserves private data and blocks blind retry 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE malformed outcome preserves private data and blocks blind retry 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:130:7 › unknown screening RECUSE lost outcome preserves private data and blocks blind retry 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:145:5 › failed replacement coverage retains screening observations and permits another deliberate recusal 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:155:5 › screening full error feedback below ratings preserves native pointer-up choice and rating geometry 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits before saving 
+    [mobile-chromium] › tests/e2e/screening-cas.spec.ts:169:7 › retrying an unavailable initial revision retains memory-only edits and compares a server copy 

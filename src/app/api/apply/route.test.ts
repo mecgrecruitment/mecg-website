@@ -29,6 +29,8 @@ const FAKE_USER = { id: "u1", email: "ada@umich.edu", name: "Ada", active: true,
  * passes check:sql, tsc and lint and only fails in production as PGRST202 —
  * a dead portal. Asserting the key set here is what catches that drift. */
 const SUBMIT_APPLICATION_ARGUMENTS = [
+  "expected_revision",
+  "cycle_id",
   "applicant_name",
   "applicant_contact",
   "preferred_name",
@@ -54,7 +56,7 @@ function postRequest(body: unknown, headers: Record<string, string> = {}) {
   return new NextRequest("http://localhost/api/apply", {
     method: "POST",
     headers: { "content-type": "application/json", ...headers },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...(body && typeof body === "object" ? body : {}), expectedRevision: null, cycleId: "cycle" }),
   });
 }
 
@@ -90,11 +92,22 @@ function mockCommon(t: test.TestContext, client: unknown, options: {
   return rateLimitKeys;
 }
 
+test("POST /api/apply rejects an empty submission ID without scheduling a receipt", async (t) => {
+  const { client } = fakeSupabaseClient({ submit_application_v2: () => ({ data: { applicationId: "", submittedNow: true }, error: null }) });
+  let receipts = 0;
+  mockCommon(t, client, { schedule: () => { receipts += 1; } });
+  const { POST } = await importRoute("empty-submission-id");
+  const response = await POST(postRequest(VALID_BODY));
+  assert.equal(response.status, 500);
+  assert.equal((await response.json()).code, "INVALID_SUBMISSION_RESPONSE");
+  assert.equal(receipts, 0);
+});
+
 // The per-user key alone is not a ceiling: with user.id in the bucket name the
 // IP is only a discriminator, so N minted accounts on one host buy N buckets.
 test("POST /api/apply rate limits per user and per IP, not either alone", async (t) => {
   const { client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
+    submit_application_v2: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
   });
   const keys = mockCommon(t, client);
   const { POST } = await importRoute("rate-limit-key");
@@ -209,7 +222,7 @@ test("POST /api/apply returns 503 when rate limiting is unavailable", async (t) 
 
 test("POST /api/apply submits all fields in one persistence call", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
+    submit_application_v2: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("success");
@@ -219,8 +232,10 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
   assert.equal(calls.length, 1);
   assert.deepEqual(Object.keys(calls[0].args ?? {}), SUBMIT_APPLICATION_ARGUMENTS);
   assert.deepEqual(calls[0], {
-    name: "submit_application_reliable",
+    name: "submit_application_v2",
     args: {
+      expected_revision: null,
+      cycle_id: "cycle",
       applicant_name: "Ada Lovelace",
       applicant_contact: "ada@umich.edu",
       preferred_name: undefined,
@@ -241,7 +256,7 @@ test("POST /api/apply submits all fields in one persistence call", async (t) => 
 
 test("POST /api/apply does not resend confirmation for an idempotent retry", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
+    submit_application_v2: () => ({ data: { applicationId: "application-1", submittedNow: false }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("retry");
@@ -251,29 +266,23 @@ test("POST /api/apply does not resend confirmation for an idempotent retry", asy
   assert.equal(calls.length, 1);
 });
 
-test("POST /api/apply falls back safely when the reliable RPC is not deployed yet", async (t) => {
+test("POST /api/apply fails closed when the revision-aware RPC is absent", async (t) => {
   const scheduled: unknown[] = [];
   const { calls, client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: null, error: { code: "PGRST202", message: "function missing" } }),
-    submit_application: () => ({ data: { applicationId: "application-1", submittedNow: true }, error: null }),
+    submit_application_v2: () => ({ data: null, error: { code: "PGRST202", message: "function missing" } }),
   });
   mockCommon(t, client, { schedule: (input) => scheduled.push(input) });
-  const { POST } = await importRoute("old-database-fallback");
+  const { POST } = await importRoute("missing-cas-database");
   const res = await POST(postRequest(VALID_BODY));
-  assert.equal(res.status, 201);
-  assert.deepEqual(calls.map((call) => call.name), ["submit_application_reliable", "submit_application"]);
-  assert.deepEqual(scheduled, [{
-    applicationId: "application-1",
-    applicantName: "Ada Lovelace",
-    recipient: "ada@umich.edu",
-    durableOutbox: false,
-  }]);
+  assert.equal(res.status, 500);
+  assert.deepEqual(calls.map((call) => call.name), ["submit_application_v2"]);
+  assert.deepEqual(scheduled, []);
 });
 
 test("POST /api/apply maps RPC failures without leaking database messages", async (t) => {
   const secret = "duplicate normalized_contact ada@umich.edu";
   const { client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: null, error: { code: "23505", message: secret } }),
+    submit_application_v2: () => ({ data: null, error: { code: "23505", message: secret } }),
   });
   mockCommon(t, client);
   t.mock.method(console, "error", () => undefined);
@@ -287,7 +296,7 @@ test("POST /api/apply maps RPC failures without leaking database messages", asyn
 
 test("POST /api/apply returns a generic error for unknown RPC failures", async (t) => {
   const { client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: null, error: { code: "XX000", message: "internal table detail" } }),
+    submit_application_v2: () => ({ data: null, error: { code: "XX000", message: "internal table detail" } }),
   });
   mockCommon(t, client);
   t.mock.method(console, "error", () => undefined);
@@ -299,7 +308,7 @@ test("POST /api/apply returns a generic error for unknown RPC failures", async (
 
 test("POST /api/apply does not wait for notification delivery after commit", async (t) => {
   const { calls, client } = fakeSupabaseClient({
-    submit_application_reliable: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
+    submit_application_v2: () => ({ data: { applicationId: "application-2", submittedNow: true }, error: null }),
   });
   mockCommon(t, client);
   const { POST } = await importRoute("email-failure");
@@ -307,4 +316,24 @@ test("POST /api/apply does not wait for notification delivery after commit", asy
   assert.equal(res.status, 201);
   assert.deepEqual(await res.json(), { applicationId: "application-2" });
   assert.equal(calls.length, 1);
+});
+
+test("POST /api/apply returns the newer draft when the submission revision is stale", async (t) => {
+  const { client } = fakeSupabaseClient({ submit_application_v2: () => ({ data: { kind: "conflict", draft: null }, error: null }) });
+  const scheduled: unknown[] = [];
+  mockCommon(t, client, { schedule: (input) => scheduled.push(input) });
+  const { POST } = await importRoute("stale-submit");
+  const response = await POST(postRequest(VALID_BODY));
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).code, "DRAFT_REVISION_CONFLICT");
+  assert.deepEqual(scheduled, []);
+});
+
+test("POST /api/apply requires the revision contract even for otherwise valid legacy submissions", async (t) => {
+  const { calls, client } = fakeSupabaseClient({});
+  mockCommon(t, client);
+  const { POST } = await importRoute("missing-submit-revision");
+  const response = await POST(new NextRequest("http://localhost/api/apply", { method: "POST", body: JSON.stringify(VALID_BODY) }));
+  assert.equal(response.status, 400);
+  assert.deepEqual(calls, []);
 });

@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-v2-056",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client offer is clear and the Precision Instrument presentation is coherent: no consulting fee and semester duration appear immediately, practical responsibilities and confidentiality expectations are explained, and the Work-to-Contact journey requests useful project context. The supplied desktop/mobile home captures show disciplined hierarchy, restrained color, readable prose and accurately captioned culture photography. The earlier remote mobile-profile result is corrected by an adjacent native selector. Contact source and focused browser evidence substantiate locked pending fields, field-linked corrections, bounded waits, validated receipts and preserved uncertain inquiries. These are meaningful improvements. Nevertheless, judging actual consulting evidence is a central client task, and this revision still provides no inspectable MECG engagement or handoff. Organization descriptions and a process illustration cannot establish the quality of the proposed work. That substantive incompleteness makes my answer to the unchanged broad world-class question disagree. Release readiness remains unproven because local intercepted submissions do not establish actual provider delivery or integrated private workflows; I found no additional source defect in the sampled client recovery path.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings and historical responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (figures, organization examples, services, engagement facts/steps/FAQs)",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/applicant/page.tsx:307 (receipt privacy wording)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (client/profile/contact results and recorded focus failure)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (corrected contact results and completion)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (completion)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log (completion)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-lint.log",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "The fallback release list is empty. Selected profiles describe the organizations, then explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work omits Selected work when that list is empty. The supplied home captures and home/page.tsx:78-80 likewise show the pending-approval state. The public-project loader can read approved database records, but no actual approved engagement is supplied in this package.",
+      "userImpact": "A prospective client can evaluate proposed scope and responsibilities but cannot inspect comparable reasoning, deliverable quality or limits before committing time and access. The evidence-assessment portion of the focal task remains incomplete.",
+      "suggestedFix": "Have content owners obtain client and Board approval for one bounded real engagement showing its question, methods, student contribution, redacted handoff and limitations. Publish through the existing approval boundary. Preserve the truthful pending state until approval; fabricate no outcomes."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance or inbox delivery; in-page provider idempotency is limited by provider retention and does not survive reload.",
+    "No observed human comprehension, complete client keyboard journey from proof through FAQ to inquiry, screen-reader session, physical iPhone or macOS Safari validation. Focused form keyboard coverage is narrower.",
+    "No final Work or Contact capture was supplied; their visual assessment here is source-based. Private application, grading and operator behavior was not independently exercised by this seat.",
+    "Board-confirmed workload facts, privacy/retention/remediation approvals and authentic approved project artifacts remain absent; documented local tests and AI review do not establish them."
+  ]
+}

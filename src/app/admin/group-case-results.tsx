@@ -4,44 +4,15 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { GROUP_CASE_SCORE_BANDS } from "@/lib/rubrics";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
+import { evaluationPrerequisites, roundPrerequisites, type GroupCaseResults } from "@/lib/group-case-results";
 import { fixed, useLiveRefresh } from "./speed-dating-results";
-
-// Shape of the group_case_results RPC. Applicants arrive sorted mean desc
-// (nulls last). "weighted" is a grader's 8..40 score over the criteria they
-// observed; "mean" averages those across graders.
-export type GroupCaseResults = {
-  roundId: string;
-  roundName: string;
-  roundStatus: string;
-  criteria: Array<{ id: string; key: string; name: string; weight: number; position: number }>;
-  summary: { applicants: number; graded: number; graders: number; evaluations: number };
-  applicants: Array<{
-    applicationId: string;
-    name: string;
-    status: string;
-    groupName: string | null;
-    count: number;
-    mean: number | null;
-    criterionMeans: Record<string, number | null>;
-    evaluations: Array<{
-      evaluatorId: string;
-      evaluatorName: string;
-      weighted: number | null;
-      scoredCount: number;
-      criteriaCount: number;
-      scores: Record<string, number | null>;
-      note: string;
-      submittedAt: string;
-    }>;
-  }>;
-  graders: Array<{ evaluatorId: string; evaluatorName: string; count: number; mean: number | null; notes: number }>;
-};
+export type { GroupCaseResults } from "@/lib/group-case-results";
 
 type SortKey = "mean" | "count";
 type Direction = "desc" | "asc";
 type Row = GroupCaseResults["applicants"][number];
 
-const HEAD = "px-4 py-3 text-[13px] font-semibold text-mecg-navy/55";
+const HEAD = "px-4 py-3 text-[13px] font-semibold text-mecg-navy/65";
 const CELL = "px-4 py-3 text-[13px] text-mecg-navy/70";
 const CRITERION_COLUMN = "hidden md:table-cell";
 
@@ -97,14 +68,15 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
   return (
     <div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <p className="tabular text-sm text-mecg-navy/55">
-          {summary.graded}/{summary.applicants} graded · {summary.graders} grader{summary.graders === 1 ? "" : "s"} · {summary.evaluations} rating{summary.evaluations === 1 ? "" : "s"}
+        <p className="tabular text-sm text-mecg-navy/65">
+          {summary.graded}/{summary.applicants} with two valid evaluators · {summary.graders} grader{summary.graders === 1 ? "" : "s"} · {summary.evaluations} valid evaluation{summary.evaluations === 1 ? "" : "s"} · {summary.savedEvaluations} saved observation{summary.savedEvaluations === 1 ? "" : "s"}
         </p>
-        <p className="text-xs text-mecg-navy/45">Live · updated {secondsAgo}s ago</p>
+        <p className="text-xs text-mecg-navy/65">Live · updated {secondsAgo}s ago</p>
         {canExport && (
           <a href={exportHref} className="button-secondary text-sm sm:ml-auto" download>Excel backup</a>
         )}
       </div>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-mecg-navy/70">Round scores require two independent valid evaluations. Each evaluation must observe required criteria, its rubric minimum and at least 75% of rubric weight. Partial scores and notes remain visible as evidence. A score alone does not authorize a decision; the round must be frozen and Board approvals still apply.</p>
       <input
         type="search"
         value={query}
@@ -118,13 +90,14 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
       <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${results.roundName} results`}>
         <div className="min-w-[40rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
           <table className="w-full text-left text-sm">
+            <caption className="border-b border-mecg-navy/10 bg-white px-4 py-3 text-left text-xs leading-5 text-mecg-navy/65">Criterion columns show raw 1–5 observations, including partial evaluations. The valid mean uses only evaluations that meet every observation prerequisite.</caption>
             <thead>
               <tr className="border-b border-mecg-navy/10">
                 <th className={HEAD}>Applicant</th>
                 <th className={HEAD}>Table</th>
-                <SortHeader label="Score" sortKey="mean" active={sort.key === "mean"} direction={sort.direction} onSort={sortBy} />
-                <th className={HEAD}>Band</th>
-                <SortHeader label="Graders" sortKey="count" active={sort.key === "count"} direction={sort.direction} onSort={sortBy} />
+                <SortHeader label="Valid mean /40" sortKey="mean" active={sort.key === "mean"} direction={sort.direction} onSort={sortBy} />
+                <th className={HEAD}>Score band</th>
+                <SortHeader label="Valid / saved" sortKey="count" active={sort.key === "count"} direction={sort.direction} onSort={sortBy} />
                 {criteria.map((criterion) => (
                   <th key={criterion.id} className={`${HEAD} ${CRITERION_COLUMN} w-16`} title={criterion.name}>{criterion.name.split(/\s+/)[0]}</th>
                 ))}
@@ -133,18 +106,18 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
             </thead>
             <tbody>
               {visible.map((applicant) => {
-                const ungraded = applicant.count === 0;
+                const ungraded = applicant.savedCount === 0;
                 const open = expanded.has(applicant.applicationId);
                 return (
                   <tr key={applicant.applicationId} className={`border-b border-mecg-navy/10 bg-white align-top ${ungraded ? "opacity-60" : ""}`}>
                     <td className="px-4 py-3">
                       <Link href={`/admin/applications/${applicant.applicationId}`} className="text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">{applicant.name}</Link>
-                      {ungraded && <p className="mt-1 text-xs text-mecg-navy/55">Not yet graded</p>}
+                      <p className="mt-1 max-w-xs text-xs leading-5 text-mecg-navy/65">{roundPrerequisites(applicant)}</p>
                     </td>
                     <td className={CELL}>{applicant.groupName ?? "—"}</td>
                     <td className={`${CELL} tabular font-bold text-mecg-navy`}>{fixed(applicant.mean)}</td>
                     <td className={CELL}>{bandLabel(applicant.mean)}</td>
-                    <td className={`${CELL} tabular`}>{applicant.count}</td>
+                    <td className={`${CELL} tabular`}>{applicant.count} / {applicant.savedCount}</td>
                     {criteria.map((criterion) => (
                       <td key={criterion.id} className={`${CELL} ${CRITERION_COLUMN} tabular`}>{fixed(applicant.criterionMeans[criterion.id] ?? null)}</td>
                     ))}
@@ -153,15 +126,16 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
                         {applicant.evaluations.length > 0 && (
                           <>
                             <button type="button" aria-expanded={open} onClick={() => toggleExpanded(applicant.applicationId)} className="text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">
-                              {open ? "Hide" : "Notes"}
+                              {open ? "Hide evidence" : "Evidence"}
                             </button>
                             {open && (
                               <ul className="mt-2 flex w-64 flex-col gap-3">
                                 {applicant.evaluations.map((evaluation) => (
                                   <li key={evaluation.evaluatorId} className="text-xs text-mecg-navy/70">
                                     <p>
-                                      <span className="font-semibold text-mecg-navy">{evaluation.evaluatorName}</span> · <span className="tabular">{fixed(evaluation.weighted)}</span>/40 · {evaluation.scoredCount}/{evaluation.criteriaCount} observed
+                                      <span className="font-semibold text-mecg-navy">{evaluation.evaluatorName}</span> · {evaluation.valid ? <><span className="tabular">{fixed(evaluation.weighted)}</span>/40</> : "Saved observation"}
                                     </p>
+                                    <p className="mt-1 leading-5">{evaluationPrerequisites(evaluation)}</p>
                                     <div className="mt-1 flex flex-wrap gap-1">
                                       {criteria.map((criterion) => evaluation.scores[criterion.id] == null ? null : (
                                         <span key={criterion.id} className="rounded-full bg-mecg-navy/[0.055] px-2 py-0.5 tabular" title={criterion.name}>
@@ -182,7 +156,7 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
                 );
               })}
               {!visible.length && (
-                <tr><td colSpan={columnCount} className="bg-white p-6 text-center text-sm text-mecg-navy/55">{results.applicants.length ? "No applicant matches." : "No Group Case applicants yet."}</td></tr>
+                <tr><td colSpan={columnCount} className="bg-white p-6 text-center text-sm text-mecg-navy/65">{results.applicants.length ? "No applicant matches." : "No Group Case applicants yet."}</td></tr>
               )}
             </tbody>
           </table>

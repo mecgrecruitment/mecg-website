@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-v2-068",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is concise and the supplied homepage capture shows coherent Precision Instrument hierarchy. Join clearly explains eligibility, preparation and evaluation, distinguishes recruitment lookup failure from unpublished dates, and preserves application access during an outage. The application source and focused browser evidence support materially better receipt validation, truthful unknown-submission feedback, changed-field comparison, exact per-answer choices and private backup downloads. Submission confirmation now preserves the original identifying-resume disclosure. However, the actual status/history page still describes an editable draft as submitted and moving through review, with no resume-draft next action. That directly undermines this seat's saved-versus-submitted comprehension task even though login routing was repaired. I cannot consider the broad revision world-class with this remaining state error and absent workload facts. Local intercepted journeys and SQL evidence also leave actual authenticated completion, uploads and operator integration unproven. This is an AI source/artifact assessment, not observed student success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (terminal result)",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/lib/public-recruitment.test.ts",
+    "src/lib/auth-destination.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (submission, conflict and form rendering)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "supabase/migrations/20260830100000_harden_applicant_workflow.sql (applicant_dashboard)",
+    "supabase/migrations/20260901000000_allow_reapplication.sql (can_start_application)",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (receipt/uncertainty scenarios)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:26-49,154-159,263-284,369-373",
+      "evidence": "The page deliberately permits destination /apply for history access. applicant_dashboard returns all owned applications ordered newest first, including DRAFT (20260830100000_harden_applicant_workflow.sql:389-403). applicationHeadline defaults DRAFT to 'moving through review'; pipelineStage defaults it to stage 0, whose label is Submitted. The current-application body repeats the review claim. can_start_application returns false for any existing current-cycle application (20260901000000_allow_reapplication.sql:32-41), so a saved draft does not receive the Start application action; the page instead falls through to schedule guidance, potentially 'You're caught up'. The /apply Past applications link makes this reachable during normal repeat-applicant work.",
+      "userImpact": "A student opening history/status with a saved, unsubmitted current draft can believe it entered review and has no outstanding submission task. NEEDS_INFO likewise lacks a clear return-to-edit action here. This is source-derived, not a hosted reproduction.",
+      "suggestedFix": "Render explicit draft and requested-changes states before review/schedule branches, with a truthful not-submitted message and an authorized Continue application link to /apply. Exclude drafts from the submitted stepper. Add real dashboard SSR coverage for prior-cycle history plus a current DRAFT and NEEDS_INFO."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk session and expiry, Supabase RPC/RLS, file storage/upload, email delivery, and consequential grading/operator recovery; no staging exists.",
+    "Complete authenticated keyboard prepare/apply/recover/status journey, screen-reader use, physical iPhone/macOS Safari, or observed human comprehension.",
+    "Board-confirmed weekly hours, required meeting times and peak commitments remain unpublished; approved engagement artifacts are absent.",
+    "Board authority for resume/blind-review policy, retention operations and closed-round remediation remains outstanding.",
+    "Private visual assessment is limited to the supplied synthetic recovery capture; full authenticated status/operator screens were not visually observed."
+  ]
+}

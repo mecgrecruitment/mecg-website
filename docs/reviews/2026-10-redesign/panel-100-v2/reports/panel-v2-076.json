@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-v2-076",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public mobile capture and homepage source present a coherent Precision Instrument identity and clearly state the no-fee, semester-long proposition. Partnership and culture material are honestly distinguished from approved engagement proof. In the member journey from My work to Group Case, note-only observations now persist without invented scores; confirmed canonical blockers distinguish incomplete evidence from a qualifying review, and closed rounds remain reviewable. The generic evaluation form preserves divergent copies until an explicit choice, offers private downloads, reports actual backup success, and moves focus into the final review. These are substantial improvements to the relevant original objections. However, Group Case still has an unbounded saving path that can strand subsequent observations for an applicant. That directly undermines reliable completion of my focal task, so I do not consider the broad revision world-class and recommend holding acceptance until corrected. Hosted integration and real task-success evidence also remain missing; local fixture passes cannot establish them.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "captures/public-home-mobile-390.png",
+    "src/app/applicant/page.tsx (receipt privacy wording)",
+    "src/app/member/page.tsx (task routing and completion separation)",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/lib/client-fetch.ts",
+    "tests/e2e/evaluation-backup.spec.ts",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "docs/reviews/2026-10-redesign/group-case-evaluator-followup.md",
+    "docs/reviews/2026-10-redesign/member-work-continuity.md",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (final results)",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql",
+    "supabase/tests/group_case_reviewer_quality.sql",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save waits on the previous applicant request at line 149, then awaits retryOnNetworkError(authorizedFetch(...)) and response.json() at lines 157-162 without a deadline. client-fetch.ts:113-126 and 136-151 add session/network retries but no bound on a pending attempt or response body. The queue is released only in finally at 178-179. Recovery/copy guidance and Retry save render only for error/hint, not saving (roster lines 420-423). This is a source-derived failure path; I did not run a stalled browser reproduction. Existing group-case-evidence.spec.ts covers resolved errors and eventually released delayed responses, not a permanently stalled save.",
+      "userImpact": "If a connection or response body stalls, the row can remain Saving indefinitely. Later edits for that applicant queue behind it, so a reviewer cannot confirm their long observation or complete a qualifying review through the available retry controls. Reloading risks memory-only evidence.",
+      "suggestedFix": "Bound the complete save/body lifecycle and show explicit unconfirmed outcome with retained payload and copy/recovery guidance. Preserve serialization and protect against a late older write replacing newer evidence; test stalled headers/body plus subsequent edits and eventual reconciliation."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/session, Supabase RPC/RLS, storage, email or consequential operator acceptance; no staging exists.",
+    "No observed human reviewer success, screen-reader session, physical iPhone or macOS Safari evidence.",
+    "No supplied final visual capture of the evaluator recovery or Group Case screens; these were source/test reviewed.",
+    "Approved project artifacts, current membership workload facts, retention decisions and Board-approved closed-round remediation remain absent.",
+    "I inspected selected local evidence and source; I did not execute the suite or establish complete application/operator behavior."
+  ]
+}

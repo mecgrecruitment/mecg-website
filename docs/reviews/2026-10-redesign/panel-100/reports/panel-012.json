@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-012",
+  "lens": "Editorial and brand craft \u2014 narrow mobile viewport; simulated AI expertise, not a human participant",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public presentation has an authored engineering-document identity: legible mobile display type, restrained blue/orange hierarchy, numbered sections, hairline rows and clearly differentiated client/student actions. The real PwC-visit photograph is accurately captioned as member activity rather than project evidence. However, the consulting proposition still lacks inspectable engagement proof, and the narrow-mobile sequence spends substantial space explaining process before showing credibility. Those are material editorial limits to a world-class claim. I traced the client journey from services and fee FAQ to the contact form, its confirmation/error states and server email handoff. Supplied desktop/mobile tests record that journey passing, but intercept the contact API; this is local synthetic evidence, not observed user success or delivered email. Release readiness across the public/private product remains unproven within this seat\u2019s scope.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/mobile-hero.png",
+    "captures/mobile.png",
+    "captures/desktop.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/join/page.tsx:55-174",
+    "src/app/(marketing)/team/page.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx:731-746 (privacy disclosure excerpts)",
+    "src/app/globals.css:8-13,104-126",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public cases and final total)",
+    "evidence/publication-proof-result.json"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97; src/content/projects.public.ts:3-5",
+      "evidence": "The captured Selected work section contains industry-level prose, a pending-client-approval status and six organization names/logos. PUBLIC_PROJECTS is empty; /work/page.tsx:56-63 omits Selected work when no approved projects exist. The member photograph at home/page.tsx:134-136 is a PwC visit, not a consulting artifact.",
+      "userImpact": "A prospective client can inspect who MECG has worked with and the promised process, but cannot judge the quality or specificity of an actual recommendation or deliverable.",
+      "suggestedFix": "Have content owners obtain approval for one concise engagement: client question, constraints, method, redacted deliverable image and factual handoff/result. Feature it before process exposition. Preserve the honest pending status until approval; do not invent an outcome."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:39-56,100-118",
+      "evidence": "At the supplied 390px capture, the stacked hero and complete engagement bench occupy approximately the first 1,400px before organization figures. The bench at line 48 renders all four station controls and a readout; section 04 later repeats all four ENGAGEMENT_STEPS with their outputs.",
+      "userImpact": "A narrow-screen reader traverses a large process explanation before seeing credibility, then encounters the same explanation again. This weakens the intended proof-first editorial hierarchy.",
+      "suggestedFix": "On narrow viewports, place the organization/engagement proof before the full bench, or provide a compact bench disclosure. Retain one complete four-step explanation and use the later section for complementary terms rather than repeating its copy."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, real client inquiry delivery, human study, conversion measurement or observed task success exists in this evidence.",
+    "Only supplied homepage captures support visual judgment; join, team, work and contact responsive treatments were source/test reviewed, not visually observed by this seat.",
+    "Physical narrow devices, 320px rendering, Safari/Firefox, text enlargement and assistive technology were not exercised; system-font differences remain unknown.",
+    "Client approval and project-artifact quality remain outstanding. The publication fixture proves rendering transitions, not approval or hosted permissions.",
+    "Original-resume access is disclosed in application copy; no anonymity claim is inferred. Live authorization, storage, retention policy, grading and operator success were not verified."
+  ]
+}

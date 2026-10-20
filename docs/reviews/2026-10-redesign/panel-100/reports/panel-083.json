@@ -1,0 +1,62 @@
+{
+  "seatId": "panel-083",
+  "lens": "Recruitment operator — keyboard-oriented use (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied hero and synthetic close-dialog captures show coherent Precision Instrument hierarchy. Source supports cohort selection, unfinished-work counts, explicit grading closure, evidence review and per-applicant release diagnostics. The close dialog has notably deliberate keyboard cancellation and distinguishes valid evidence from submissions. However, other confirmation flows lose focus on cancellation, and the release recovery instructions become impossible after an incomplete round is closed. These prevent unqualified world-class acceptance for this operator task. This is source/capture/log review, not observed operator success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "src/app/apply/application-form.tsx:731-746 (privacy disclosure)",
+    "src/app/admin/pipeline-board.tsx",
+    "src/app/admin/round-board.tsx",
+    "src/app/admin/rounds/[roundId]/page.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/app/admin/group-case-results.tsx",
+    "src/app/admin/speed-dating-results.tsx:1-95",
+    "src/lib/decision-release.ts",
+    "src/lib/workflow.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-round-close-full-e2e.log (sampled public/operator results)",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql:58-74,596-632",
+    "supabase/migrations/20261016192000_batch_release_diagnostics.sql",
+    "supabase/tests/batch_release_diagnostics.sql",
+    "captures/desktop-hero.png",
+    "captures/round-close-desktop.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/pipeline-board.tsx:593; src/app/admin/decision-form.tsx:214",
+      "evidence": "Advancement Cancel only calls setAdvanceReview(null); release Cancel only calls setReview(null). Each unmounts the focused button without returning focus. Advancement explicitly focuses its review region on opening (lines 339-345), but has no matching cancellation restoration. The close-grading dialog implements restoration separately.",
+      "userImpact": "A keyboard operator cancelling a consequential cohort or release review loses a stable focus destination and must reorient before continuing.",
+      "suggestedFix": "Keep refs to both review triggers and restore focus after cancellation; restore an appropriate stable control or result heading when confirmation removes the focused control. Add keyboard-only cancellation and continuation checks for both flows."
+    },
+    {
+      "severity": "medium",
+      "file": "src/lib/decision-release.ts:7",
+      "evidence": "EVIDENCE_NOT_READY always says to complete and freeze evaluations. RoundStatusControl lines 95-106 explicitly allows closing incomplete work with no reopening transition; workflow.ts permits FROZEN only to FINALIZED. decision_release_blocker checks is_decision_ready, whose 1910 migration requires two valid locked evaluators in every weighted round. Thus the same advice is shown when completion is no longer possible through this workflow.",
+      "userImpact": "An operator investigating a blocked outcome after premature closure receives an impossible next step rather than a usable escalation path.",
+      "suggestedFix": "Distinguish open-round incompleteness from closed-round insufficiency, identify the affected round and missing evidence, and direct closed cases to the recruitment owner through a Board-approved remediation process. Preserve existing grading and release safeguards."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated cohort-to-release journey, hosted Clerk/Supabase/RLS/storage/email integration, deployment or staging evidence exists. The 18 close tests use a synthetic harness and intercepted APIs.",
+    "No human operator study, complete keyboard-only journey, assistive-technology, Safari/Firefox or physical-device validation; supplied private captures show only the synthetic close dialog.",
+    "Source-reviewed client journey: home action to contact form and confirmation; the supplied public test intercepts contact submission, so actual Board delivery is unknown.",
+    "Original-resume access is accurately disclosed in application source; no anonymous-PDF claim is justified. Board policy reconciliation, approved case-study outcomes and publication permissions remain external decisions.",
+    "A supported operational remedy for insufficient evidence after irreversible closure was not established by inspected evidence."
+  ]
+}

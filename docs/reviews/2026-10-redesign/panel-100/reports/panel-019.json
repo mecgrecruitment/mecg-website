@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-019",
+  "lens": "Editorial and brand craft \u2014 cross-step continuity (simulated expertise, not human research)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The homepage has a coherent editorial identity: strong sans headlines, mono metadata, restrained orange, hairline organization and real, accurately captioned member photography. Desktop and mobile captures preserve hierarchy and proof-before-people order. The client journey carries the decision/scoping vocabulary from Home through Work to Contact, with useful confidentiality and next-step copy. However, the central promise is supported by organization names and process descriptions rather than approved engagement evidence, and the mobile organization selector separates an action from its explanatory result. Those gaps prevent my unqualified world-class agreement. Release readiness remains unproven: the inspected journey evidence is local Chromium automation with intercepted contact delivery, not hosted integration or observed user success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/lib/site-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/page-intro.tsx",
+    "src/components/marketing-section.tsx",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/globals.css (font declarations)",
+    "src/app/(marketing)/join/page.tsx (materials excerpt)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34-71",
+      "evidence": "Below sm, the grid has one column; each of the 15 PAST_PROJECTS buttons is min-h-36. Clicking only sets selectedName (line 45), while selected-client-profile is appended after the entire grid (lines 67-71). There is no scroll or focus handoff. This is a source-derived responsive issue; no Work capture was supplied.",
+      "userImpact": "A narrow-screen client selecting an early organization must pass roughly two thousand pixels of other logos to reach its details. Selection styling appears, but the substantive result is remote, weakening continuity from the homepage\u2019s compact proof rows.",
+      "suggestedFix": "On narrow layouts, reveal the profile immediately after the selected organization, or provide an explicit accessible handoff to the result. Verify first and last selections on mobile with keyboard and touch."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:77-97",
+      "evidence": "The captured Selected work section renders generic industry prose and the pending-client-approval status instead of an engagement. src/content/projects.public.ts:3-5 deliberately contains no approved records. ClientProjectGrid lines 93-102 provides company descriptions followed by another pending-release statement.",
+      "userImpact": "Visitors can establish that partnerships exist, but cannot inspect how MECG framed a question, analyzed evidence or delivered a useful recommendation. The culture photograph proves community rather than consulting craft.",
+      "suggestedFix": "Have content owners obtain client and Board approval for one specific engagement narrative and a redacted deliverable or working artifact, then publish through the existing boundary. Keep the honest pending state until approval; do not fabricate outcomes."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted acceptance exists; Clerk, Supabase/RLS, storage and actual email delivery were not exercised by this review.",
+    "The public journey test and matching 76-pass log prove local scripted assertions; contact success is intercepted. No human comprehension, inquiry completion or conversion evidence exists.",
+    "Only homepage desktop/mobile captures were available for public visual inspection. Work and Contact composition and selector behavior were source reviewed, not visually or interactively observed.",
+    "Physical devices, Safari, Firefox, assistive technology and non-Linux font rendering remain unknown.",
+    "Client publication approvals, factual substantiation of organization statistics, and Board resolution of original-resume privacy policy were not independently verified. This review does not certify private workflows."
+  ]
+}

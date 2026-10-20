@@ -146,6 +146,7 @@ test("SET_DEADLINE resolves the application's real cycle and reaches the audited
     expiresAt: "2030-09-10T20:00:00.000Z",
   }));
   assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { kind: "deadline-set", applicationId: "application-1", expiresAt: "2030-09-10T20:00:00.000Z" });
   assert.deepEqual(rpcCalls, [{
     name: "set_offer_deadline",
     args: { target_application_id: "application-1", expires_at: "2030-09-10T20:00:00.000Z" },
@@ -180,15 +181,28 @@ test("SET_DEADLINE rejects an offset-less wall time at the API boundary", async 
   assert.deepEqual(rpcCalls, []);
 });
 
-test("POST /api/admin/decisions rejects payloads over the 16 KiB cap before parsing", async (t) => {
+test("POST /api/admin/decisions rejects payloads over the 1 MiB cap before parsing", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
   t.mock.module("@/lib/supabase/server", {
     namedExports: { createClient: async () => { throw new Error("createClient should not be called"); } },
   });
   const { POST } = await importRoute("413");
-  const request = postRequest({ action: "PREVIEW" }, { "content-length": String(16 * 1024 + 1) });
+  const request = postRequest({ action: "PREVIEW" }, { "content-length": String(1024 * 1024 + 1) });
   t.mock.method(request, "json", async () => { throw new Error("json should not be read"); });
+  const res = await POST(request);
+  assert.equal(res.status, 413);
+});
+
+test("POST /api/admin/decisions bounds oversized streamed bodies without Content-Length", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", {
+    namedExports: { createClient: async () => { throw new Error("createClient should not be called"); } },
+  });
+  const { POST } = await importRoute("413-streamed");
+  const request = postRequest({ action: "PREVIEW", preview: "x".repeat(1024 * 1024) });
+  assert.equal(request.headers.has("content-length"), false);
   const res = await POST(request);
   assert.equal(res.status, 413);
 });
@@ -217,6 +231,7 @@ test("RELEASE attempts the durable notification created by the release transacti
   const { POST } = await importRoute("release-delivers-outbox");
   const res = await POST(postRequest({ action: "RELEASE", decisionId: "decision-1" }));
   assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { decisionId: "decision-1", released: true, notified: true, queued: false });
   assert.deepEqual(deliveredIds, ["notification-1"]);
   assert.deepEqual(rpcCalls.map((call) => call.name), ["release_decision", "decision_notification_id"]);
 });
@@ -241,5 +256,123 @@ test("RELEASE remains successful and reports queued when provider delivery is de
   const { POST } = await importRoute("release-queues-outbox");
   const res = await POST(postRequest({ action: "RELEASE", decisionId: "decision-1" }));
   assert.equal(res.status, 202);
-  assert.deepEqual(await res.json(), { released: true, notified: false, queued: true });
+  assert.deepEqual(await res.json(), { decisionId: "decision-1", released: true, notified: false, queued: true });
 });
+
+test("RELEASE_PREFLIGHT uses release permission and does not mutate decisions", async (t) => {
+  const items = [{ decisionId: "d1", applicationId: "a1", outcome: "OFFER", reasonCode: null }];
+  const { client, rpcCalls } = fakeSupabaseClient({ rpcHandlers: { decision_release_preflight: () => ({ data: { items }, error: null }) } });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importRoute("release-preflight");
+  const res = await POST(postRequest({ action: "RELEASE_PREFLIGHT", cycleId: "real-cycle" }));
+  assert.equal(res.status, 200);
+  const response = await res.json();
+  assert.deepEqual(response.items, items);
+  assert.match(response.applicantLabels.a1, /^Applicant [0-9A-F]{6}$/);
+  assert.deepEqual(rpcCalls, [{ name: "decision_release_preflight", args: { target_cycle_id: "real-cycle" } }]);
+});
+
+test("reviewed RELEASE_ALL forwards exact snapshot rather than releasing an expanded cohort", async (t) => {
+  const snapshot = [{ decisionId: "d1", outcome: "WAITLIST", reasonCode: null }];
+  const { client, rpcCalls } = fakeSupabaseClient({ rpcHandlers: { release_decision_batch: () => ({ data: { released: 1, skipped: 0, items: [] }, error: null }) } });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importRoute("release-snapshot");
+  const res = await POST(postRequest({ action: "RELEASE_ALL", cycleId: "real-cycle", snapshot }));
+  assert.equal(res.status, 202);
+  assert.deepEqual(rpcCalls, [{ name: "release_decision_batch", args: { target_cycle_id: "real-cycle", expected_decisions: snapshot } }]);
+});
+
+test("reviewed RELEASE_ALL accepts 500 decisions above 16 KiB without truncating the snapshot", async (t) => {
+  const snapshot = Array.from({ length: 500 }, (_, index) => ({
+    decisionId: `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+    outcome: "WAITLIST",
+    reasonCode: null,
+  }));
+  const body = { action: "RELEASE_ALL", cycleId: "real-cycle", snapshot };
+  assert.ok(Buffer.byteLength(JSON.stringify(body)) > 16 * 1024);
+  const { client, rpcCalls } = fakeSupabaseClient({ rpcHandlers: {
+    release_decision_batch: () => ({ data: { released: 500, skipped: 0,
+      items: snapshot.map((item, index) => ({ ...item, applicationId: `application-${index}` })),
+    }, error: null }),
+  } });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importRoute("release-large-snapshot");
+  const res = await POST(postRequest(body));
+  assert.equal(res.status, 202);
+  assert.deepEqual(rpcCalls, [{ name: "release_decision_batch", args: { target_cycle_id: "real-cycle", expected_decisions: snapshot } }]);
+});
+
+test("snapshot drift is a recoverable conflict and never exposes SQL error details", async (t) => {
+  const { client } = fakeSupabaseClient({ rpcHandlers: { release_decision_batch: () => ({ data: null, error: { code: "40001", message: "internal secret" } }) } });
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importRoute("release-drift");
+  const res = await POST(postRequest({ action: "RELEASE_ALL", cycleId: "real-cycle", snapshot: [] }));
+  assert.equal(res.status, 409);
+  assert.doesNotMatch(JSON.stringify(await res.json()), /internal secret/);
+});
+
+test("invalid release snapshots cannot invoke either batch RPC", async (t) => {
+  const { client, rpcCalls } = fakeSupabaseClient({});
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  const { POST } = await importRoute("release-invalid-snapshot");
+  const res = await POST(postRequest({ action: "RELEASE_ALL", cycleId: "real-cycle", snapshot: [{ decisionId: "d1", outcome: "OFFER", reasonCode: "UNKNOWN" }] }));
+  assert.equal(res.status, 400);
+  assert.deepEqual(rpcCalls, []);
+});
+
+for (const scenario of ["lookup-failure", "delivery-throws", "delivery-failed"] as const) {
+  test(`confirmed RELEASE retains decision-specific receipt when ${scenario}`, async (t) => {
+    const { client } = fakeSupabaseClient({ applicationId: "app-1", realCycleId: "real-cycle", rpcHandlers: {
+      release_decision: () => ({ data: null, error: null }),
+      decision_notification_id: () => scenario === "lookup-failure" ? { data: null, error: { code: "XX000", message: "private error" } } : { data: "notification-1", error: null },
+    } });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+    t.mock.module("@/lib/notifications", { namedExports: { deliverNotification: async () => {
+      if (scenario === "delivery-throws") throw new Error("private delivery error");
+      return { attempted: true, delivered: false, status: "FAILED" };
+    } } });
+    const { POST } = await importRoute(`release-receipt-${scenario}`);
+    const response = await POST(postRequest({ action: "RELEASE", decisionId: "decision-1" }));
+    assert.equal(response.status, 202);
+    assert.deepEqual(await response.json(), { decisionId: "decision-1", released: true, notified: false, queued: scenario !== "delivery-failed" });
+  });
+}
+
+for (const value of ["", "2030-09-10T16:00:00-04:00"]) {
+  test(`SET_DEADLINE binds its ${value ? "normalized date" : "clear"} receipt to the exact application`, async (t) => {
+    const { client, rpcCalls } = fakeSupabaseClient({ realCycleId: "real-cycle", rpcHandlers: { set_offer_deadline: () => ({ data: true, error: null }) } });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+    const { POST } = await importRoute(`deadline-receipt-${value ? "offset" : "clear"}`);
+    const res = await POST(postRequest({ action: "SET_DEADLINE", applicationId: "application-1", expiresAt: value }));
+    assert.equal(res.status, 200);
+    const expected = value ? "2030-09-10T20:00:00.000Z" : null;
+    assert.deepEqual(await res.json(), { kind: "deadline-set", applicationId: "application-1", expiresAt: expected });
+    assert.deepEqual(rpcCalls[0]?.args, { target_application_id: "application-1", expires_at: expected });
+  });
+}
+for (const [label, acknowledgement] of [["missing", null], ["false", false], ["unrelated", { ok: true }]] as const) {
+  test(`SET_DEADLINE does not confirm a ${label} RPC acknowledgement`, async (t) => {
+    const { client } = fakeSupabaseClient({ realCycleId: "real-cycle", rpcHandlers: { set_offer_deadline: () => ({ data: acknowledgement, error: null }) } });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => panelUser("real-cycle") } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({ admin: true }) } });
+    const { POST } = await importRoute(`deadline-unconfirmed-${label}`);
+    const res = await POST(postRequest({ action: "SET_DEADLINE", applicationId: "application-1", expiresAt: "" }));
+    assert.equal(res.status, 503);
+    assert.match((await res.json()).error, /could not be confirmed/);
+  });
+}

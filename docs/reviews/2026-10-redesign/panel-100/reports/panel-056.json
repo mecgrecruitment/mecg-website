@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-056",
+  "lens": "Prospective client \u2014 long or difficult content",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The offer is understandable: student-led, pro-bono work, a semester, 6\u20138 members, research and recommendations. Client responsibilities, confidentiality discussion and a useful inquiry prompt are present. The desktop/mobile homepage captures show coherent Precision Instrument hierarchy and readable grouping, although the mobile page is long. I traced home \u2192 work \u2192 contact \u2192 API/email, and checked the supplied client-journey test and passing log. However, clients cannot assess an actual approved engagement, and the long mobile organization selector separates selection from its result. These prevent my unqualified world-class agreement. Release readiness remains unproven because the contact confirmation is mocked and actual mailbox delivery is untested. This is a simulated client lens based on source and supplied captures, not observed client success or a review of the whole private workspace.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5",
+      "evidence": "PUBLIC_PROJECTS is empty; the receipt/open-items confirm approved artifacts remain absent. Home lines 78\u201380 show a pending-approval status; client-project-grid.tsx:97\u2013103 says scope, methods, deliverables and outcomes are pending release. Organization descriptions in site-content.ts:21\u2013129 describe those businesses rather than MECG work.",
+      "userImpact": "A prospective client can identify recognizable organizations but cannot judge the depth, limits or practical quality of comparable work before investing time in an inquiry.",
+      "suggestedFix": "Obtain client/board approval for a concise engagement example with the real question, methods, deliverable excerpt and limitations. Preserve the pending status until approval; do not invent outcomes."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34-71",
+      "evidence": "Below sm the grid has one column; all 15 PAST_PROJECTS buttons have min-h-36. The selected profile renders only after the whole grid (67\u201371). Clicking only sets selectedName (45); there is no focus transfer, scroll or adjacent result link.",
+      "userImpact": "On a narrow screen, selecting an early organization leaves its details far below the visible tile. The visitor must traverse roughly 2,000 pixels of remaining tiles to find the result, increasing effort in an already long evidence journey. This is source-derived, not an observed usability result.",
+      "suggestedFix": "Place the selected details directly after the selected tile on mobile, or provide an explicit accessible action that moves to the profile. Verify an early-tile selection at 390px with keyboard and touch."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, human study or observed prospective-client task completion exists.",
+    "Actual Resend configuration, board mailbox receipt, replies and the stated one-week response expectation were not verified. The browser test intercepts /api/contact; route tests mock email delivery.",
+    "No supplied Work/Contact visual captures or live interaction were available to establish their visual/focus behavior. Only homepage desktop/mobile captures were inspected.",
+    "NDA execution authority, client publication approvals and factual validation of organization/stat claims remain owner responsibilities; source copy does not establish them.",
+    "Physical devices, Safari/Firefox and assistive-technology behavior were not tested; private application/grading/operator workflows were outside this seat\u2019s direct inspection."
+  ]
+}

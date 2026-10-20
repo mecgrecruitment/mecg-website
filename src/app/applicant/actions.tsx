@@ -203,7 +203,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" className={selected === "accept" ? "button-primary" : "button-secondary"} disabled={pending} onClick={() => void respond()}>
-              {pending ? "Saving…" : "Confirm"}
+              {pending ? "Saving…" : selected === "accept" ? "Confirm acceptance" : "Confirm decline"}
             </button>
             <button type="button" className="button-secondary" disabled={pending} onClick={cancel}>Cancel</button>
           </div>

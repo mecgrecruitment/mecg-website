@@ -24,6 +24,7 @@ export default function ImpressionForm({
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     if (!tags.length && !note.trim()) {
       setError("Add a neutral tag or a short observation before saving.");
       return;
@@ -43,9 +44,10 @@ export default function ImpressionForm({
         return;
       }
       setSaved(true);
-      window.setTimeout(() => router.refresh(), 220);
+      router.refresh();
     } catch {
       setError("Could not save observation. Check your connection and try again.");
+    } finally {
       setPending(false);
     }
   }
@@ -66,7 +68,7 @@ export default function ImpressionForm({
               aria-pressed={selected}
               aria-label={`${selected ? "Remove" : "Add"} tag: ${tag}`}
               disabled={pending}
-              onClick={() => setTags((current) => selected ? current.filter((existing) => existing !== tag) : [...current, tag])}
+              onClick={() => { setSaved(false); setTags((current) => selected ? current.filter((existing) => existing !== tag) : [...current, tag]); }}
               className={`min-h-11 rounded-xl px-3.5 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                 selected
                   ? "bg-mecg-navy text-white"
@@ -85,7 +87,7 @@ export default function ImpressionForm({
         value={note}
         maxLength={1000}
         disabled={pending}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => { setSaved(false); setNote(event.target.value); }}
         aria-describedby={`impression-note-count-${applicationId}`}
       />
       <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>

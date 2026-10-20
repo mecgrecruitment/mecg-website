@@ -1,0 +1,18 @@
+
+Shot http://localhost:3100/work at 390, 768, 1280, 1440px with Playwright Chromium -> /tmp/wdp-shots/work
+  /tmp/wdp-shots/work/390.png
+  /tmp/wdp-shots/work/768.png
+  /tmp/wdp-shots/work/1280.png
+  /tmp/wdp-shots/work/1440.png
+  /tmp/wdp-shots/work/sheet.png
+
+Page problems:
+  console: %c%s%c public_projects failed background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #fff
+
+fonts {"Avenir Next":"94%","ui-monospace":"6%"}  body 15.9px  sizes [60, 36, 20, 16, 14, 12, 11]  hues [30, 210]  boxes 18  card grids 0  focus stops 42
+  warn  [390,768,1280,1440] 10 text elements at 11px: 11px "/ Client services"; 11px "01"; 11px "/ Past partnerships"
+  warn  [390,768,1280,1440] 10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.
+  warn  [390,768,1280,1440] 5 numbered uppercase labels ("01 —"). Numbered mono eyebrows are the anti-slop house style; see slop.md "The overcorrection".
+  warn  [390,768,1280,1440] Two-beat aphorism headline ("A focused question. A useful answer."). Every generated hero is one now; say the specific thing instead (copy.md).
+
+No FAILs. The scan only catches mechanical tells. Now open every PNG with your own eyes.

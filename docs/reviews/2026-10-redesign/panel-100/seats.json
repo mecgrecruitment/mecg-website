@@ -1,0 +1,702 @@
+[
+  {
+    "seatId": "panel-001",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-002",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-003",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-004",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-005",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-006",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-007",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-008",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-009",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-010",
+    "kind": "designer",
+    "lens": "Apple-inspired clarity",
+    "task": "Assess proposition hierarchy, next actions, state feedback and restraint while preserving MECG identity.",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-011",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-012",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-013",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-014",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-015",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-016",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-017",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-018",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-019",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-020",
+    "kind": "designer",
+    "lens": "Editorial and brand craft",
+    "task": "Assess public typography, composition, real photography, proof order and coherent responsive treatment.",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-021",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-022",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-023",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-024",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-025",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-026",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-027",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-028",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-029",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-030",
+    "kind": "designer",
+    "lens": "Accessible interaction",
+    "task": "Assess native controls, keyboard/focus, error association, touch targets, reduced motion and available evidence limits.",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-031",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-032",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-033",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-034",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-035",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-036",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-037",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-038",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-039",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-040",
+    "kind": "designer",
+    "lens": "Information and discoverability",
+    "task": "Assess client/student information, navigation, public indexing/social metadata and truthful publication lifecycle.",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-041",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-042",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-043",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-044",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-045",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-046",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-047",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-048",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-049",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-050",
+    "kind": "designer",
+    "lens": "Product systems and reliability",
+    "task": "Assess draft recovery, evidence validity, irreversible operator actions and truthful receipts as interface design.",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-051",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-052",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-053",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-054",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-055",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-056",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-057",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-058",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-059",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-060",
+    "kind": "user",
+    "lens": "Prospective client",
+    "task": "Can a client understand the offer, judge evidence and scope, locate responsibilities and make a useful inquiry?",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-061",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-062",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-063",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-064",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-065",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-066",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-067",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-068",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-069",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-070",
+    "kind": "user",
+    "lens": "Prospective applicant",
+    "task": "Can a student prepare, apply, distinguish saved/submitted state, recover conflicting copies and understand their next step?",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-071",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-072",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-073",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-074",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-075",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-076",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-077",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-078",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-079",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-080",
+    "kind": "user",
+    "lens": "Member evaluator",
+    "task": "Can a reviewer enter observations, distinguish partial from valid evidence, handle unknowns and verify a submission?",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-081",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-082",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-083",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-084",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-085",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-086",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-087",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-088",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-089",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-090",
+    "kind": "user",
+    "lens": "Recruitment operator",
+    "task": "Can an operator manage cohorts, see unfinished work, close grading deliberately, review outcomes and recover blocked releases?",
+    "angle": "overall coherence"
+  },
+  {
+    "seatId": "panel-091",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "first encounter"
+  },
+  {
+    "seatId": "panel-092",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "narrow mobile viewport"
+  },
+  {
+    "seatId": "panel-093",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "keyboard-oriented use"
+  },
+  {
+    "seatId": "panel-094",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "service failure"
+  },
+  {
+    "seatId": "panel-095",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "ambiguous result"
+  },
+  {
+    "seatId": "panel-096",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "long or difficult content"
+  },
+  {
+    "seatId": "panel-097",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "recovery and retry"
+  },
+  {
+    "seatId": "panel-098",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "factual comprehension"
+  },
+  {
+    "seatId": "panel-099",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "cross-step continuity"
+  },
+  {
+    "seatId": "panel-100",
+    "kind": "user",
+    "lens": "Owner and access-sensitive user",
+    "task": "Can an owner recover partial account provisioning without leaked identity, unintended access deletion or false success, and can a user understand privacy boundaries?",
+    "angle": "overall coherence"
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-098",
+  "lens": "Owner and access-sensitive user \u2014 factual comprehension (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is understandable and visually coherent with Precision Instrument: student-led consulting, two audience actions, explicit engagement expectations and honestly pending case studies. Applicant materials/review copy accurately distinguishes omitted profile fields from an identifying original resume. Provisioning source preserves accounts after uncertain identity writes and membership failures; incident identity is restricted to current cycle owners, and resolution explicitly records remediation rather than repairing accounts. However, the recovery journey loses the incident cycle when returning to People, undermining the instruction to verify that cycle\u2019s access. Hold for that correction and integrated recovery evidence. This is an independent AI source/artifact assessment, not observed owner or applicant success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/policies/recruitment-policy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/application-form.tsx (MaterialsStep/ReviewStep and recovery excerpts)",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/rush-controls.tsx (useRushAction/PeopleControls)",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/api/admin/rush/route.test.ts (provisioning cases)",
+    "src/lib/cycles.ts",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/operational-log.ts",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-final-node.log (relevant named cases)",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/provisioning/page.tsx:61",
+      "evidence": "ProvisioningPage accepts an authorized requested cycle at lines 35\u201338 and tells owners to check \u201cthis cycle\u2019s membership in People\u201d at line 66, but Back to People links to /admin/people without context at line 61. PeoplePage, src/app/admin/people/page.tsx:70\u201375, accepts no searchParams and selects WORKSPACE_ACCESS without a requested cycle. src/lib/cycles.ts:selectAuthorizedCycleId then prefers active-status/newer cycles. PeopleControls posts its resulting cycleId for access changes.",
+      "userImpact": "An owner reviewing an older or nondefault cycle can land in a different cycle\u2019s membership controls, incorrectly conclude access is missing, or remediate the wrong cycle. An owner who only has ordinary membership in the preferred cycle can instead lose access to the needed controls. Authorization still applies; this is a recovery-context defect, not demonstrated unauthorized deletion.",
+      "suggestedFix": "Carry the incident cycle into the People link and make People honor an explicitly requested authorized cycle. Retain that cycle through recovery navigation. Add a focused two-cycle test proving the inspected membership and subsequent remediation target the incident\u2019s cycle."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration exists: actual Clerk creation/lookups, session expiry, Supabase JWT/RLS wiring, storage and email remain unverified together.",
+    "The eight logged provisioning browser checks intercept HTTP in a synthetic button harness; they do not exercise the real owner queue or complete account recovery. SQL permission assertions are local fixtures, and route provisioning tests mock providers.",
+    "No authenticated owner-screen captures, real-user comprehension study, assistive-technology session, physical-device, Safari or Firefox evidence was supplied. Public capture review cannot establish private-screen visual craft or usability.",
+    "Original-resume access is disclosed, but Board policy approval and applicant/resume retention periods remain unresolved. No client-approved outcome artifacts or measured conversion gains establish broader world-class acceptance."
+  ]
+}

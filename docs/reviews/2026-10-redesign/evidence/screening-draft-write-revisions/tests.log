@@ -1,0 +1,21 @@
+Connecting to local database...
+/home/rahil/mecg-website/supabase/tests/application_draft_concurrency.sql ..... ok
+/home/rahil/mecg-website/supabase/tests/batch_release_diagnostics.sql ......... ok
+/home/rahil/mecg-website/supabase/tests/evaluation_draft_write_revisions.sql .. ok
+/home/rahil/mecg-website/supabase/tests/grading_contract_consistency.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/group_case_rating.sql ................. ok
+/home/rahil/mecg-website/supabase/tests/group_case_reviewer_quality.sql ....... ok
+/home/rahil/mecg-website/supabase/tests/group_case_write_revisions.sql ........ ok
+/home/rahil/mecg-website/supabase/tests/hash_votes.sql ........................ ok
+/home/rahil/mecg-website/supabase/tests/provisioning_incidents.sql ............ ok
+/home/rahil/mecg-website/supabase/tests/release_evidence_diagnostics.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/round_close_summary.sql ............... ok
+/home/rahil/mecg-website/supabase/tests/rush_foundation.sql ................... ok
+/home/rahil/mecg-website/supabase/tests/screening_draft_write_revisions.sql ... ok
+/home/rahil/mecg-website/supabase/tests/screening_release_visibility.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/speed_dating_pairs.sql ................ ok
+/home/rahil/mecg-website/supabase/tests/staff_assisted_checkin.sql ............ ok
+/home/rahil/mecg-website/supabase/tests/stage_hash_flow.sql ................... ok
+All tests successful.
+Files=17, Tests=872,  2 wallclock secs ( 0.05 usr  0.01 sys +  0.08 cusr  0.04 csys =  0.18 CPU)
+Result: PASS

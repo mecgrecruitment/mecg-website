@@ -1,0 +1,68 @@
+{
+  "seatId": "panel-v2-034",
+  "lens": "Information and discoverability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed public information architecture is coherent and useful. The homepage makes cost and semester duration immediately discoverable, separates client and student actions, and accurately labels partnerships rather than promising unavailable case studies. The supplied mobile capture has a clear reading order and a compact optional process figure. I traced the student preparation/recruitment journey and the client terms-to-contact journey in source and focused tests. The original service-failure objection is resolved: RPC errors and malformed data become unavailable, Join preserves application access and retry/contact guidance, and a successful no-cycle response suppresses unsupported signup. Current SSR tests and the final Node log support those distinctions. Canonical/social metadata, private noindex defaults, dynamic case/image lookups and the minute-revalidated sitemap form a credible publication design. These strengths do not establish the unchanged broad world-class claim: clients still cannot inspect actual consulting work, students still lack workload facts, and consequential authenticated/provider journeys have no hosted acceptance. Release readiness across that integrated scope is also unproven; this is not an observed human usability verdict.",
+  "inspected": [
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/join/page.test.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/public-recruitment.ts",
+    "src/lib/public-recruitment.test.ts",
+    "src/lib/join-content.ts",
+    "src/lib/seo.ts",
+    "src/app/robots.ts",
+    "src/app/sitemap.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/work/[slug]/opengraph-image.tsx",
+    "src/app/(marketing)/work/[slug]/twitter-image.tsx",
+    "src/lib/supabase/public.ts",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "scripts/verify-publication.mjs",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (relevant assertions and totals)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:109-112",
+      "evidence": "The approved fallback remains empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes. Home accurately shows pending approval instead of an engagement example.",
+      "userImpact": "A prospective client can understand the offer but cannot assess an actual MECG analysis or handoff before committing time to an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement question, method and redacted deliverable/handoff with limits, then publish through the existing release boundary. Retain truthful pending copy until approved."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly-commitment answer explicitly says current hours, mandatory meeting times and peak commitments are unpublished; Join provides a direct Board email question link.",
+      "userImpact": "Students still need a separate conversation to determine schedule fit before applying, even after finding the right FAQ.",
+      "suggestedFix": "Publish a dated, Board-confirmed current-semester range, required meeting expectations and peak-week caveat when available. Do not invent hours."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk session/expiry, Supabase RPC/RLS, storage/upload, actual email delivery, provisioning or operator recovery acceptance. Local fixtures and SQL evidence have narrower scope.",
+    "No observed human task completion, full authenticated keyboard journey, physical iPhone/macOS Safari or assistive-technology session.",
+    "Actual live project publication/withdrawal, social crawler caches and search indexing were not exercised here; the publication script uses a synthetic local RPC fixture.",
+    "Board approval of original-resume/blind-review policy, retention operations and closed-round remediation remains outstanding. The inspected applicant receipt truthfully discloses identifying resume access."
+  ]
+}

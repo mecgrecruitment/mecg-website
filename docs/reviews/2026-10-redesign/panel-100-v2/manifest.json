@@ -1,0 +1,2078 @@
+{
+  "roundId": "mecg-panel-v2",
+  "status": "completed",
+  "panelType": "100 independently spawned AI reviewers; simulated expert/user lenses, no human or Apple endorsement",
+  "requestedSeats": 100,
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "snapshotPath": "/tmp/mecg-panel-20261016-v2",
+  "snapshotFinalized": true,
+  "voterLaunchAuthorized": true,
+  "priorSnapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "concurrencyLimit": 2,
+  "acceptedAgentCount": 102,
+  "completedReports": 100,
+  "attempts": [
+    {
+      "seatId": "panel-v2-001",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_001",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-001.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-002",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_002",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-002.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-003",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_003",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-003.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-004",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_004",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-004.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-005",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_005",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-005.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-006",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_006",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-006.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-007",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_007",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-007.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-008",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_008",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-008.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-009",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_009",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-009.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-010",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_010",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-010.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-011",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_011",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-011.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-012",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_012",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-012.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-013",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_013",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-013.json",
+      "attempt": 1
+    },
+    {
+      "taskId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-panel-v2-seat-014-attempt-1",
+      "childThreadId": "thread:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-panel-v2-seat-014-attempt-1",
+      "childRunId": "run:thread:thread%3Adelegated-task%3Acommand%253Amcp%253A67f6eb97-6c7a-4914-adf4-5171a80fc37d%253Adelegate-task%253Amecg-panel-v2-seat-014-attempt-1:ordinal:1",
+      "childNodeId": "node:delegated-task:command%3Amcp%3A67f6eb97-6c7a-4914-adf4-5171a80fc37d%3Adelegate-task%3Amecg-panel-v2-seat-014-attempt-1",
+      "status": "completed",
+      "workState": "result_available",
+      "hasPendingChildRuns": false,
+      "latestTerminalRunId": null,
+      "latestTerminalStatus": null,
+      "latestTerminalSummary": null,
+      "latestTerminalResultContextTransferId": null,
+      "providerInstanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "summary": null,
+      "resultContextTransferId": null,
+      "waitTimedOut": false,
+      "seatId": "panel-v2-014",
+      "backend": "T3-owned delegated agent",
+      "report": "reports/panel-v2-014.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-071",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_071",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-071.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-081",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_081",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-081.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-021",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_021",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-021.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-091",
+      "backend": "native",
+      "taskName": "/root/panel_100_coordinator/panel_v2_091",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only.",
+      "status": "completed",
+      "report": "reports/panel-v2-091.json",
+      "attempt": 1
+    },
+    {
+      "seatId": "panel-v2-031",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_031",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native tool exposes canonical task handle only. Fresh fork_turns:none; no model override. Complete materialized task supplied at /tmp/mecg-panel-v2-031-prompt.txt, mandatory full read.",
+      "status": "completed",
+      "report": "reports/panel-v2-031.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:27:28.612292+00:00"
+    },
+    {
+      "seatId": "panel-v2-041",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_041",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native canonical task handle. Fresh fork_turns:none; no model override. Complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-041.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:29:21.637129+00:00"
+    },
+    {
+      "seatId": "panel-v2-051",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_051",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native canonical task handle. Fresh fork_turns:none; no model override. Complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-051.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:31:16.142879+00:00"
+    },
+    {
+      "seatId": "panel-v2-061",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_061",
+      "actualToolAgentId": null,
+      "agentIdNote": "Native canonical task handle. Fresh fork_turns:none; no model override. Complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-061.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:31:59.412516+00:00",
+      "schemaCorrection": "Original reviewer corrected only lens suffix to exact assignment after terminal; verdict and all substantive fields preserved."
+    },
+    {
+      "seatId": "panel-v2-022",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_022",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-022.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:33:12.133672+00:00"
+    },
+    {
+      "seatId": "panel-v2-072",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_072",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-072.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:33:50.127376+00:00"
+    },
+    {
+      "seatId": "panel-v2-082",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_082",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-082.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:35:17.319796+00:00"
+    },
+    {
+      "seatId": "panel-v2-092",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_092",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-092.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:37:03.698300+00:00"
+    },
+    {
+      "seatId": "panel-v2-015",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_015",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-015.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:38:44.974479+00:00"
+    },
+    {
+      "seatId": "panel-v2-032",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_032",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-032.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:40:18.334847+00:00"
+    },
+    {
+      "seatId": "panel-v2-042",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_042",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-042.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:42:17.447258+00:00"
+    },
+    {
+      "seatId": "panel-v2-052",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_052",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-052.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:43:55.431238+00:00"
+    },
+    {
+      "seatId": "panel-v2-062",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_062",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-062.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:45:38.135613+00:00"
+    },
+    {
+      "seatId": "panel-v2-023",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_023",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-023.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:47:33.431883+00:00"
+    },
+    {
+      "seatId": "panel-v2-073",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_073",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-073.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:49:23.495878+00:00"
+    },
+    {
+      "seatId": "panel-v2-083",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_083",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-083.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:51:10.991785+00:00"
+    },
+    {
+      "seatId": "panel-v2-093",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_093",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-093.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:52:55.031007+00:00"
+    },
+    {
+      "seatId": "panel-v2-016",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_016",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-016.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:54:15.901455+00:00"
+    },
+    {
+      "seatId": "panel-v2-033",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_033",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-033.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:55:48.513485+00:00"
+    },
+    {
+      "seatId": "panel-v2-043",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_043",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-043.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:57:38.494846+00:00"
+    },
+    {
+      "seatId": "panel-v2-053",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_053",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-053.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:59:21.010174+00:00"
+    },
+    {
+      "seatId": "panel-v2-063",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_063",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-063.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T22:59:43.787976+00:00"
+    },
+    {
+      "seatId": "panel-v2-024",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_024",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-024.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T23:01:07.830977+00:00"
+    },
+    {
+      "seatId": "panel-v2-074",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_074",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "completed",
+      "report": "reports/panel-v2-074.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-16T23:02:16.409052+00:00"
+    },
+    {
+      "seatId": "panel-v2-084",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_084",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "interrupted",
+      "report": "reports/panel-v2-084.json",
+      "attempt": 1,
+      "interruptionEvidence": "2026-10-17 root verified prior coordinator/children absent from native live tree after provider usage limit; new coordinator independently observed only root and itself. No report file or terminal completion exists; not a vote."
+    },
+    {
+      "seatId": "panel-v2-094",
+      "backend": "native",
+      "taskName": "/root/panel_100_resume/panel_v2_094",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt required.",
+      "status": "interrupted",
+      "report": "reports/panel-v2-094.json",
+      "attempt": 1,
+      "interruptionEvidence": "2026-10-17 root verified prior coordinator/children absent from native live tree after provider usage limit; new coordinator independently observed only root and itself. No report file or terminal completion exists; not a vote."
+    },
+    {
+      "seatId": "panel-v2-084",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_084_attempt2",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited codex/gpt-6.1-sol; mandatory complete materialized prompt first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-084.json",
+      "attempt": 2,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:14:52.634008+00:00",
+      "schemaCorrection": "Original reviewer corrected only lens suffix to exact assignment after terminal; verdict and all substantive fields preserved."
+    },
+    {
+      "seatId": "panel-v2-094",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_094_attempt2",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited codex/gpt-6.1-sol; mandatory complete materialized prompt first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-094.json",
+      "attempt": 2,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:14:26.549083+00:00",
+      "schemaCorrection": "Original reviewer corrected only lens suffix to exact assignment after terminal; verdict and all substantive fields preserved."
+    },
+    {
+      "seatId": "panel-v2-017",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_017_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-017.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:16:30.438230+00:00"
+    },
+    {
+      "seatId": "panel-v2-034",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_034_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-034.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:16:39.465419+00:00"
+    },
+    {
+      "seatId": "panel-v2-044",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_044_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-044.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:18:24.745015+00:00"
+    },
+    {
+      "seatId": "panel-v2-054",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_054_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-054.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:18:46.438372+00:00"
+    },
+    {
+      "seatId": "panel-v2-064",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_064_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-064.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:20:42.663387+00:00"
+    },
+    {
+      "seatId": "panel-v2-025",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_025_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-025.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:20:55.566011+00:00"
+    },
+    {
+      "seatId": "panel-v2-075",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_075_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-075.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:22:45.531133+00:00"
+    },
+    {
+      "seatId": "panel-v2-085",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_085_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-085.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:22:58.825296+00:00"
+    },
+    {
+      "seatId": "panel-v2-095",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_095_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-095.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:24:44.065640+00:00"
+    },
+    {
+      "seatId": "panel-v2-018",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_018_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-018.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:25:01.574853+00:00"
+    },
+    {
+      "seatId": "panel-v2-035",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_035_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-035.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:26:54.617309+00:00"
+    },
+    {
+      "seatId": "panel-v2-045",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_045_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-045.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:27:55.586217+00:00"
+    },
+    {
+      "seatId": "panel-v2-055",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_055_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-055.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:29:06.018178+00:00"
+    },
+    {
+      "seatId": "panel-v2-065",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_065_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-065.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:30:45.365521+00:00"
+    },
+    {
+      "seatId": "panel-v2-026",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_026_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-026.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:31:23.193531+00:00"
+    },
+    {
+      "seatId": "panel-v2-076",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_076_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-076.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:32:36.387545+00:00"
+    },
+    {
+      "seatId": "panel-v2-086",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_086_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-086.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:33:41.523337+00:00"
+    },
+    {
+      "seatId": "panel-v2-096",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_096_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-096.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:34:35.484485+00:00"
+    },
+    {
+      "seatId": "panel-v2-019",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_019_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-019.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:35:32.499833+00:00"
+    },
+    {
+      "seatId": "panel-v2-036",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_036_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-036.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:36:26.939242+00:00"
+    },
+    {
+      "seatId": "panel-v2-046",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_046_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-046.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:38:35.054656+00:00"
+    },
+    {
+      "seatId": "panel-v2-056",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_056_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-056.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:38:22.740462+00:00"
+    },
+    {
+      "seatId": "panel-v2-066",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_066_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-066.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:40:13.826557+00:00"
+    },
+    {
+      "seatId": "panel-v2-027",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_027_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-027.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:40:35.927831+00:00"
+    },
+    {
+      "seatId": "panel-v2-077",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_077_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-077.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:42:08.634136+00:00"
+    },
+    {
+      "seatId": "panel-v2-087",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_087_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-087.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:42:44.704838+00:00"
+    },
+    {
+      "seatId": "panel-v2-097",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_097_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-097.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:43:58.310895+00:00"
+    },
+    {
+      "seatId": "panel-v2-020",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_020_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-020.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:44:30.041482+00:00"
+    },
+    {
+      "seatId": "panel-v2-037",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_037_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-037.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:46:08.690139+00:00"
+    },
+    {
+      "seatId": "panel-v2-047",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_047_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-047.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:46:44.252655+00:00"
+    },
+    {
+      "seatId": "panel-v2-057",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_057_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-057.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:47:59.697495+00:00"
+    },
+    {
+      "seatId": "panel-v2-067",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_067_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-067.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:48:39.533767+00:00"
+    },
+    {
+      "seatId": "panel-v2-028",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_028_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-028.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:50:13.097689+00:00"
+    },
+    {
+      "seatId": "panel-v2-078",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_078_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-078.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:50:37.927840+00:00"
+    },
+    {
+      "seatId": "panel-v2-088",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_088_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-088.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:52:13.701075+00:00"
+    },
+    {
+      "seatId": "panel-v2-098",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_098_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-098.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:53:07.822022+00:00"
+    },
+    {
+      "seatId": "panel-v2-038",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_038_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-038.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:54:16.082349+00:00"
+    },
+    {
+      "seatId": "panel-v2-048",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_048_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-048.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:54:56.339249+00:00"
+    },
+    {
+      "seatId": "panel-v2-058",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_058_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-058.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:56:12.459871+00:00"
+    },
+    {
+      "seatId": "panel-v2-068",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_068_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-068.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:57:14.868544+00:00"
+    },
+    {
+      "seatId": "panel-v2-029",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_029_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-029.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:58:28.209559+00:00"
+    },
+    {
+      "seatId": "panel-v2-079",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_079_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-079.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T12:59:39.336812+00:00"
+    },
+    {
+      "seatId": "panel-v2-089",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_089_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-089.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:00:32.727355+00:00"
+    },
+    {
+      "seatId": "panel-v2-099",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_099_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-099.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:02:04.950269+00:00"
+    },
+    {
+      "seatId": "panel-v2-039",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_039_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-039.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:02:35.513878+00:00"
+    },
+    {
+      "seatId": "panel-v2-049",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_049_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-049.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:04:07.449553+00:00"
+    },
+    {
+      "seatId": "panel-v2-059",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_059_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-059.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:04:49.793206+00:00"
+    },
+    {
+      "seatId": "panel-v2-069",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_069_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-069.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:06:12.318271+00:00"
+    },
+    {
+      "seatId": "panel-v2-030",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_030_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-030.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:06:56.189029+00:00"
+    },
+    {
+      "seatId": "panel-v2-080",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_080_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-080.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:08:15.823279+00:00"
+    },
+    {
+      "seatId": "panel-v2-090",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_090_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-090.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:09:22.416566+00:00"
+    },
+    {
+      "seatId": "panel-v2-100",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_100_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-100.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:10:34.343617+00:00"
+    },
+    {
+      "seatId": "panel-v2-040",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_040_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-040.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:11:44.181220+00:00"
+    },
+    {
+      "seatId": "panel-v2-050",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_050_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-050.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:12:52.225798+00:00"
+    },
+    {
+      "seatId": "panel-v2-060",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_060_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-060.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:13:48.892352+00:00"
+    },
+    {
+      "seatId": "panel-v2-070",
+      "backend": "native",
+      "taskName": "/root/panel_resume_oct17/v2_070_attempt1",
+      "actualToolAgentId": null,
+      "agentIdNote": "Fresh fork_turns:none, inherited model; complete materialized prompt mandatory first read.",
+      "status": "completed",
+      "report": "reports/panel-v2-070.json",
+      "attempt": 1,
+      "terminalStatusEvidence": "Native completion message received by coordinator",
+      "completedAt": "2026-10-17T13:14:23.284341+00:00"
+    }
+  ],
+  "coordinatorIsVoter": false,
+  "nativeFallback": "Prefer supported native spawning; use fresh T3-owned delegate_task when native thread limit rejects. Never reuse child threads.",
+  "clientRequestIdPattern": "mecg-panel-v2-seat-NNN-attempt-1",
+  "seats": [
+    {
+      "seatId": "panel-v2-001",
+      "lens": "Apple-inspired clarity",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-001.json"
+    },
+    {
+      "seatId": "panel-v2-002",
+      "lens": "Apple-inspired clarity",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-002.json"
+    },
+    {
+      "seatId": "panel-v2-003",
+      "lens": "Apple-inspired clarity",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-003.json"
+    },
+    {
+      "seatId": "panel-v2-004",
+      "lens": "Apple-inspired clarity",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-004.json"
+    },
+    {
+      "seatId": "panel-v2-005",
+      "lens": "Apple-inspired clarity",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-005.json"
+    },
+    {
+      "seatId": "panel-v2-006",
+      "lens": "Apple-inspired clarity",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-006.json"
+    },
+    {
+      "seatId": "panel-v2-007",
+      "lens": "Apple-inspired clarity",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-007.json"
+    },
+    {
+      "seatId": "panel-v2-008",
+      "lens": "Apple-inspired clarity",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-008.json"
+    },
+    {
+      "seatId": "panel-v2-009",
+      "lens": "Apple-inspired clarity",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-009.json"
+    },
+    {
+      "seatId": "panel-v2-010",
+      "lens": "Apple-inspired clarity",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-010.json"
+    },
+    {
+      "seatId": "panel-v2-011",
+      "lens": "Editorial and brand craft",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-011.json"
+    },
+    {
+      "seatId": "panel-v2-012",
+      "lens": "Editorial and brand craft",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-012.json"
+    },
+    {
+      "seatId": "panel-v2-013",
+      "lens": "Editorial and brand craft",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-013.json"
+    },
+    {
+      "seatId": "panel-v2-014",
+      "lens": "Editorial and brand craft",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-014.json"
+    },
+    {
+      "seatId": "panel-v2-015",
+      "lens": "Editorial and brand craft",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-015.json"
+    },
+    {
+      "seatId": "panel-v2-016",
+      "lens": "Editorial and brand craft",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-016.json"
+    },
+    {
+      "seatId": "panel-v2-017",
+      "lens": "Editorial and brand craft",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-017.json"
+    },
+    {
+      "seatId": "panel-v2-018",
+      "lens": "Editorial and brand craft",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-018.json"
+    },
+    {
+      "seatId": "panel-v2-019",
+      "lens": "Editorial and brand craft",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-019.json"
+    },
+    {
+      "seatId": "panel-v2-020",
+      "lens": "Editorial and brand craft",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-020.json"
+    },
+    {
+      "seatId": "panel-v2-021",
+      "lens": "Accessible interaction",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-021.json"
+    },
+    {
+      "seatId": "panel-v2-022",
+      "lens": "Accessible interaction",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-022.json"
+    },
+    {
+      "seatId": "panel-v2-023",
+      "lens": "Accessible interaction",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-023.json"
+    },
+    {
+      "seatId": "panel-v2-024",
+      "lens": "Accessible interaction",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-024.json"
+    },
+    {
+      "seatId": "panel-v2-025",
+      "lens": "Accessible interaction",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-025.json"
+    },
+    {
+      "seatId": "panel-v2-026",
+      "lens": "Accessible interaction",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-026.json"
+    },
+    {
+      "seatId": "panel-v2-027",
+      "lens": "Accessible interaction",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-027.json"
+    },
+    {
+      "seatId": "panel-v2-028",
+      "lens": "Accessible interaction",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-028.json"
+    },
+    {
+      "seatId": "panel-v2-029",
+      "lens": "Accessible interaction",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-029.json"
+    },
+    {
+      "seatId": "panel-v2-030",
+      "lens": "Accessible interaction",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-030.json"
+    },
+    {
+      "seatId": "panel-v2-031",
+      "lens": "Information and discoverability",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-031.json"
+    },
+    {
+      "seatId": "panel-v2-032",
+      "lens": "Information and discoverability",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-032.json"
+    },
+    {
+      "seatId": "panel-v2-033",
+      "lens": "Information and discoverability",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-033.json"
+    },
+    {
+      "seatId": "panel-v2-034",
+      "lens": "Information and discoverability",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-034.json"
+    },
+    {
+      "seatId": "panel-v2-035",
+      "lens": "Information and discoverability",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-035.json"
+    },
+    {
+      "seatId": "panel-v2-036",
+      "lens": "Information and discoverability",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-036.json"
+    },
+    {
+      "seatId": "panel-v2-037",
+      "lens": "Information and discoverability",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-037.json"
+    },
+    {
+      "seatId": "panel-v2-038",
+      "lens": "Information and discoverability",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-038.json"
+    },
+    {
+      "seatId": "panel-v2-039",
+      "lens": "Information and discoverability",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-039.json"
+    },
+    {
+      "seatId": "panel-v2-040",
+      "lens": "Information and discoverability",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-040.json"
+    },
+    {
+      "seatId": "panel-v2-041",
+      "lens": "Product systems and reliability",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-041.json"
+    },
+    {
+      "seatId": "panel-v2-042",
+      "lens": "Product systems and reliability",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-042.json"
+    },
+    {
+      "seatId": "panel-v2-043",
+      "lens": "Product systems and reliability",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-043.json"
+    },
+    {
+      "seatId": "panel-v2-044",
+      "lens": "Product systems and reliability",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-044.json"
+    },
+    {
+      "seatId": "panel-v2-045",
+      "lens": "Product systems and reliability",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-045.json"
+    },
+    {
+      "seatId": "panel-v2-046",
+      "lens": "Product systems and reliability",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-046.json"
+    },
+    {
+      "seatId": "panel-v2-047",
+      "lens": "Product systems and reliability",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-047.json"
+    },
+    {
+      "seatId": "panel-v2-048",
+      "lens": "Product systems and reliability",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-048.json"
+    },
+    {
+      "seatId": "panel-v2-049",
+      "lens": "Product systems and reliability",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-049.json"
+    },
+    {
+      "seatId": "panel-v2-050",
+      "lens": "Product systems and reliability",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-050.json"
+    },
+    {
+      "seatId": "panel-v2-051",
+      "lens": "Prospective client",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-051.json"
+    },
+    {
+      "seatId": "panel-v2-052",
+      "lens": "Prospective client",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-052.json"
+    },
+    {
+      "seatId": "panel-v2-053",
+      "lens": "Prospective client",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-053.json"
+    },
+    {
+      "seatId": "panel-v2-054",
+      "lens": "Prospective client",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-054.json"
+    },
+    {
+      "seatId": "panel-v2-055",
+      "lens": "Prospective client",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-055.json"
+    },
+    {
+      "seatId": "panel-v2-056",
+      "lens": "Prospective client",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-056.json"
+    },
+    {
+      "seatId": "panel-v2-057",
+      "lens": "Prospective client",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-057.json"
+    },
+    {
+      "seatId": "panel-v2-058",
+      "lens": "Prospective client",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-058.json"
+    },
+    {
+      "seatId": "panel-v2-059",
+      "lens": "Prospective client",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-059.json"
+    },
+    {
+      "seatId": "panel-v2-060",
+      "lens": "Prospective client",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-060.json"
+    },
+    {
+      "seatId": "panel-v2-061",
+      "lens": "Prospective applicant",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-061.json"
+    },
+    {
+      "seatId": "panel-v2-062",
+      "lens": "Prospective applicant",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-062.json"
+    },
+    {
+      "seatId": "panel-v2-063",
+      "lens": "Prospective applicant",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-063.json"
+    },
+    {
+      "seatId": "panel-v2-064",
+      "lens": "Prospective applicant",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-064.json"
+    },
+    {
+      "seatId": "panel-v2-065",
+      "lens": "Prospective applicant",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-065.json"
+    },
+    {
+      "seatId": "panel-v2-066",
+      "lens": "Prospective applicant",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-066.json"
+    },
+    {
+      "seatId": "panel-v2-067",
+      "lens": "Prospective applicant",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-067.json"
+    },
+    {
+      "seatId": "panel-v2-068",
+      "lens": "Prospective applicant",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-068.json"
+    },
+    {
+      "seatId": "panel-v2-069",
+      "lens": "Prospective applicant",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-069.json"
+    },
+    {
+      "seatId": "panel-v2-070",
+      "lens": "Prospective applicant",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-070.json"
+    },
+    {
+      "seatId": "panel-v2-071",
+      "lens": "Member evaluator",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-071.json"
+    },
+    {
+      "seatId": "panel-v2-072",
+      "lens": "Member evaluator",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-072.json"
+    },
+    {
+      "seatId": "panel-v2-073",
+      "lens": "Member evaluator",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-073.json"
+    },
+    {
+      "seatId": "panel-v2-074",
+      "lens": "Member evaluator",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-074.json"
+    },
+    {
+      "seatId": "panel-v2-075",
+      "lens": "Member evaluator",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-075.json"
+    },
+    {
+      "seatId": "panel-v2-076",
+      "lens": "Member evaluator",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-076.json"
+    },
+    {
+      "seatId": "panel-v2-077",
+      "lens": "Member evaluator",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-077.json"
+    },
+    {
+      "seatId": "panel-v2-078",
+      "lens": "Member evaluator",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-078.json"
+    },
+    {
+      "seatId": "panel-v2-079",
+      "lens": "Member evaluator",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-079.json"
+    },
+    {
+      "seatId": "panel-v2-080",
+      "lens": "Member evaluator",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-080.json"
+    },
+    {
+      "seatId": "panel-v2-081",
+      "lens": "Recruitment operator",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-081.json"
+    },
+    {
+      "seatId": "panel-v2-082",
+      "lens": "Recruitment operator",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-082.json"
+    },
+    {
+      "seatId": "panel-v2-083",
+      "lens": "Recruitment operator",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-083.json"
+    },
+    {
+      "seatId": "panel-v2-084",
+      "lens": "Recruitment operator",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-084.json"
+    },
+    {
+      "seatId": "panel-v2-085",
+      "lens": "Recruitment operator",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-085.json"
+    },
+    {
+      "seatId": "panel-v2-086",
+      "lens": "Recruitment operator",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-086.json"
+    },
+    {
+      "seatId": "panel-v2-087",
+      "lens": "Recruitment operator",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-087.json"
+    },
+    {
+      "seatId": "panel-v2-088",
+      "lens": "Recruitment operator",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-088.json"
+    },
+    {
+      "seatId": "panel-v2-089",
+      "lens": "Recruitment operator",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-089.json"
+    },
+    {
+      "seatId": "panel-v2-090",
+      "lens": "Recruitment operator",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-090.json"
+    },
+    {
+      "seatId": "panel-v2-091",
+      "lens": "Owner and access-sensitive user",
+      "angle": "first encounter",
+      "status": "completed",
+      "report": "reports/panel-v2-091.json"
+    },
+    {
+      "seatId": "panel-v2-092",
+      "lens": "Owner and access-sensitive user",
+      "angle": "narrow mobile viewport",
+      "status": "completed",
+      "report": "reports/panel-v2-092.json"
+    },
+    {
+      "seatId": "panel-v2-093",
+      "lens": "Owner and access-sensitive user",
+      "angle": "keyboard-oriented use",
+      "status": "completed",
+      "report": "reports/panel-v2-093.json"
+    },
+    {
+      "seatId": "panel-v2-094",
+      "lens": "Owner and access-sensitive user",
+      "angle": "service failure",
+      "status": "completed",
+      "report": "reports/panel-v2-094.json"
+    },
+    {
+      "seatId": "panel-v2-095",
+      "lens": "Owner and access-sensitive user",
+      "angle": "ambiguous result",
+      "status": "completed",
+      "report": "reports/panel-v2-095.json"
+    },
+    {
+      "seatId": "panel-v2-096",
+      "lens": "Owner and access-sensitive user",
+      "angle": "long or difficult content",
+      "status": "completed",
+      "report": "reports/panel-v2-096.json"
+    },
+    {
+      "seatId": "panel-v2-097",
+      "lens": "Owner and access-sensitive user",
+      "angle": "recovery and retry",
+      "status": "completed",
+      "report": "reports/panel-v2-097.json"
+    },
+    {
+      "seatId": "panel-v2-098",
+      "lens": "Owner and access-sensitive user",
+      "angle": "factual comprehension",
+      "status": "completed",
+      "report": "reports/panel-v2-098.json"
+    },
+    {
+      "seatId": "panel-v2-099",
+      "lens": "Owner and access-sensitive user",
+      "angle": "cross-step continuity",
+      "status": "completed",
+      "report": "reports/panel-v2-099.json"
+    },
+    {
+      "seatId": "panel-v2-100",
+      "lens": "Owner and access-sensitive user",
+      "angle": "overall coherence",
+      "status": "completed",
+      "report": "reports/panel-v2-100.json"
+    }
+  ],
+  "freeze": {
+    "roundId": "mecg-panel-v2",
+    "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+    "snapshotPath": "/tmp/mecg-panel-20261016-v2",
+    "frozenAt": "2026-10-16T21:52:25.968127+00:00",
+    "fileCount": 981,
+    "captureCount": 7,
+    "rootAuthorizedFreezeAndVoterLaunch": true,
+    "excluded": [
+      ".git",
+      "node_modules",
+      ".next",
+      ".audit except selected copied captures/lab",
+      "test-results",
+      "tsconfig.tsbuildinfo",
+      "local secret env files (example retained)",
+      "supabase temporary runtime state",
+      "V1 votes/manifest/aggregate/summary",
+      "V2 in-progress reports"
+    ],
+    "metadataNotInContentHash": [
+      "content-manifest.json",
+      "SNAPSHOT.json"
+    ],
+    "reviewContent": "Full source/assets/tests/migrations/docs and actual selected final captures/logs; original objections/responses included; V1 votes excluded as guidance"
+  },
+  "launchOrderNote": "After early public lenses, prioritize071 evaluator,081 operator,021 accessibility,091 owner; preserve original seat assignments, remaining balanced lenses/angles.",
+  "preferredNextSeats": [
+    "panel-v2-031",
+    "panel-v2-041",
+    "panel-v2-051",
+    "panel-v2-061"
+  ],
+  "temporaryCapReason": "Root explicitly raised cap to two after applicant implementation agent terminal.",
+  "launchHeldByRoot": false,
+  "holdReason": null,
+  "partialValidationPassed": true,
+  "remainingSeats": 0,
+  "lastCheckpointAt": "2026-10-17T13:15:23.328847+00:00",
+  "resumeCoordinator": "/root/panel_resume_oct17",
+  "catalogConfirmed": {
+    "inheritedProviderInstanceId": "codex",
+    "inheritedModel": "gpt-6.1-sol",
+    "noModelOverride": true
+  },
+  "resumeSnapshotVerification": {
+    "verifiedFiles": 981,
+    "allHashesMatch": true,
+    "byCoordinator": "/root/panel_resume_oct17"
+  },
+  "immutableAcceptedReportHashes": {
+    "panel-v2-001": "f04c3185e35d15e7a69bf61ec7e5b69037f6e72d480aa4243150e862f1180bcb",
+    "panel-v2-002": "2ba27c41f073a081479319f1c9fa388fc2ae93885d81588fd290a29689c828f4",
+    "panel-v2-003": "96f9a7541427865db4b9c405525cb086083781163eb106820f799aa67b8b8d0f",
+    "panel-v2-004": "135e581fce234c4b67292f1ef25f30f58470c5d69c0e2e72b4d92ac8f4719a3a",
+    "panel-v2-005": "afaf059074fbe02005d516e67ed439d9c335c7b60f907468a8c9e67080f0f0ff",
+    "panel-v2-006": "394085ccd7b392b6f7e519d5b48ef17d29fe152301fbe46915f34251a97ae2ef",
+    "panel-v2-007": "632c34efa3c93b1136cc9b6214944e9e57d0b0412e59c7cdfd6b4d302b38eead",
+    "panel-v2-008": "772d81e1a599064e18972f7367693a4b554b0907dc487d54d4d1d32e883727f2",
+    "panel-v2-009": "45a56554cc4aedb0c13874e0a1d47070b01c3670cabe8e3faf67737e96c7f136",
+    "panel-v2-010": "c373b8fb5e7831a4ee7c372ddaaf21f8fd78a6cf4ca519aa021bd998310fa4e0",
+    "panel-v2-011": "4b7fb4d87f4e3f4b1087e58f013e95f53efec3f62f0b84144bf8a0eeb959c893",
+    "panel-v2-012": "84f52707524dd8628f3ff9c1f1eb851a5fd7c04c0768c0516ac5a49f83e4de69",
+    "panel-v2-013": "1f3614a247bb373576ba045b3c0106c356e3af05179f10e80ebdd3e8d897f75d",
+    "panel-v2-014": "ea0fce9b9eec850c750ca68007f135db9468854fb8e796e41317a1ddb7b12ff0",
+    "panel-v2-071": "00a858353f35db0daab2f6ad4b4db1d59ada40750efcfae3d59d1df15f8d0ace",
+    "panel-v2-081": "d19b0def4c2adc78465edff20d5a7ef4b2c1b6bf8ba929e937d1bbf193c8295d",
+    "panel-v2-021": "714b59442a5729a1bea53baab6e80b387b6e7b944c11caf28e6cbeb79de0a61c",
+    "panel-v2-091": "c3c3d81d4839b63a4e8efdd403c3db4b9dd5fefec93a6a2212182afab0cdb375",
+    "panel-v2-031": "97434c88ef1aad7dadced9a3027116164a01e584608200f50b127fa293f26426",
+    "panel-v2-041": "8dbe0fe734fe5763b4a92e9848d2ac9f6c0c3134a102faf2f2970c3ceac4023d",
+    "panel-v2-051": "1d834651b714d829090b5856d5d78381cb787a52cdf2e86e9c3ca48bc90116ad",
+    "panel-v2-061": "b7684dc3ccc55f759dfb0302454ae882f6ac11477cdc6f034933ba495c3242d8",
+    "panel-v2-022": "eb222558d50dedb04d12acda41aaa6affb46ed4c79f4c95796c83678291c03a5",
+    "panel-v2-072": "3cc33a73b8a3a9ea0d740c32ec31a91705b2eec8d761e96997d7a0bd9329e4c6",
+    "panel-v2-082": "e13d05f61d0de051438ff051221ce14b4dbaaf6da9708d2b8c4e82b742d26e2b",
+    "panel-v2-092": "66e5ba05eb1e1fd0f1da8e58a082640abb00fb416c081c88541229ff30287c98",
+    "panel-v2-015": "5198600134c784e6db04c87876d7c8f24e3443b78910f17ea1c8dc4bef8566a4",
+    "panel-v2-032": "7ace5f64e2cdbeb154a5e4e8434cd62dd4c20d2e254383aa82b452dd4a9f8123",
+    "panel-v2-042": "1214eda742abdce386038b37d463a0fdfef88d5b3557c7e7e5b9b77a2ef92746",
+    "panel-v2-052": "5d5da2340165b2cbca391e3cf469e1a43e6ded473e0171abebdefa48a0ac5654",
+    "panel-v2-062": "1655d15b5586ae26423c0669a50fb60313450c20a2b583e36d3c84e6cdf85c21",
+    "panel-v2-023": "99bc569d967bc4adede6efc38dcfb6776f80d529b98a8fc010d63bdc2a0f200f",
+    "panel-v2-073": "122ad92c945ff5f239fd82b366a655a3c1a5f82a795811c42ff898f813551e2b",
+    "panel-v2-083": "0805b8b396f7c6b1cd06f0136d047faf3c59a94592123f691e5a325a3646cb17",
+    "panel-v2-093": "2ce345ccf5d5d077acd3f8701cf9ea6bdb3e74d577d45c7c1142d8777474341c",
+    "panel-v2-016": "11894c5e9f1e8beb5fbdf40e3fa8c39b1e9936dca3254b46328b8313ea2e1484",
+    "panel-v2-033": "5637bfba3cb0441bf9bc720d0c8e5d713bfd099f2c2c660854659643705c7d1e",
+    "panel-v2-043": "cccf960c50baac314da920f425a90dcb23fb36e8f5ccf0482bd4f6c5e4209538",
+    "panel-v2-053": "cef80a06486eead81a2e5ffce5215a40934b4097233c43a7a9abc93cc97a499a",
+    "panel-v2-063": "a7f02b8444179a02f0535693a918deabfadd245f9db06e52a1c033a1d8b142ff",
+    "panel-v2-024": "e3f917bb59bf04ac3aaf528cccd665132b18d16b0b41d6f7f64f6179a0dc07f8",
+    "panel-v2-074": "fb04de188c2becb069b5cee1c1b2a6566678247ae1bdd274fb96e3e10b3f5516",
+    "panel-v2-084": "84b62626bd05a9ae0bd5caf88857cd8ac2fb0971372140a6aaec4381398eb1f6",
+    "panel-v2-094": "ae2896607536bf8fab7b29209507472f4b10cf1cbe16739036278ec06d1309f8",
+    "panel-v2-017": "458547ea920834d4fb9d76d22d639a301863c37242b1b33225b0736da6c0b6d1",
+    "panel-v2-034": "9ca1f2a882f69a007de32e2b1eca872982eb2961058c330744642d92948bddff",
+    "panel-v2-044": "efa654db02bcecac8624288d22ed95ec865130d564cb7ee3805dbdb660e0f697",
+    "panel-v2-054": "7c13f2b216a4958197668e25a64b05f91d2378016a9adb1fa4fbf57c7ac6d4b3",
+    "panel-v2-064": "778abb92529e0b35c3e0644afc011ed00c3b833353c0d7c6b8dd494f25eb78c7",
+    "panel-v2-025": "35ed1f465f56e2f5a98865c8cb4cf6cebd8e57975d1a3b078a5671dff3a82fb2",
+    "panel-v2-075": "19074bd0c5b18f20c844525b04746d717960e79216f5c2c566d8c40a0706b8a0",
+    "panel-v2-085": "f7db7d1a726b6ae8ad5333246d69080cd36df3b99a700f74b1149bd4123d75d1",
+    "panel-v2-095": "11853d502205b1590e487b309d6905b547b2c6e042f4872900698f0f260de9bc",
+    "panel-v2-018": "c13f99ec9d7e18e2c636cf371dae40af24162565d54d819b1c5e3902dccc4792",
+    "panel-v2-035": "b9be52612101102dd95268e7ba690ce83e621d30bc8ad2667e683b63a80cbf2f",
+    "panel-v2-045": "d97448062dc678311c920c5636cf59ca6b4545b3600dcd43b5103cec35869573",
+    "panel-v2-055": "d95867733f100c5eda72a7db0d9289992b5e0330854823e27ff010379068f686",
+    "panel-v2-065": "42d83d6cc466ecc62d99832181f6945d487f5b3fafa49827c48351a136b6b292",
+    "panel-v2-026": "b3551ff0aab67c45d35dcc4e5c54561a9174f849fb6401380d7c84ab952e5434",
+    "panel-v2-076": "900f94646c9bff7cc814aa4c4ffcd4d156b5d8107124e01de61ce4393dbd9cff",
+    "panel-v2-086": "642414e83484205f0993f559bcc0e31c95ce0709d655e8c808b509b245b79f46",
+    "panel-v2-096": "4793857d9b7b426c0cda965d7f57fbeed5ad76fd26469d218ad58620df33ee65",
+    "panel-v2-019": "eb4ce9ef8c90789eedaf36ec39eb9528957e7ee9377e26ba5c0768db73fec9b8",
+    "panel-v2-036": "3c58f6c861c4de3b74e478167988db6e27a06fe4445bade8aad4740b2d532703",
+    "panel-v2-046": "fc29a8b3276b3b02d9429caccf2bdbc6cbc2d0d35fecaf15a3b5adaa93d16b89",
+    "panel-v2-056": "4688318f316309b469478d3ecc36f219417b3c5400ff2908abc69a97f693eebc",
+    "panel-v2-066": "29615a3bb184fd867c81e031c037e067da5a3d9430b45fd712bd79f851b1684d",
+    "panel-v2-027": "1c2473ffd462ed22fe7c143c350d2ddb0ed814643840829f8ba7cc3d9e46a342",
+    "panel-v2-077": "0e8ee7b3119a14da210284440789caa9c1a870e20bce20f099f91a53aa8c5912",
+    "panel-v2-087": "37754ad082cb47562c2a2f8f062a47f1840e95153d1520129af19dffd0fbc3ae",
+    "panel-v2-097": "8d167980ebabf90c22e89c32ccc0f7ec969ba47e1a58c55250f83c9fe2387aab",
+    "panel-v2-020": "ad2e66c2ad52abdc92a29a4a8c195f125728f01e5e0b8a91610821eed0e0f62f",
+    "panel-v2-037": "599df219bc3fc3854bb7b8fc1ef93d95e8f629310a082e1a19f2395b89bdf6d1",
+    "panel-v2-047": "1c57e859e41ffcca70ae5fb945f20551f7a19a2ca851033d5ebdf8f789618f47",
+    "panel-v2-057": "aa6adad5795f62e419b3002e0d98300d3b3df0b776eebf983fd381d96636f3a1",
+    "panel-v2-067": "c2469f1fda7c5ff6e7d28d4e80d37b6110dbb5647622e3e95daaabcee14aa7d5",
+    "panel-v2-028": "39a24bef63e453e13b7caa0ca9b712e46770286f8532d1164a31627a8b738985",
+    "panel-v2-078": "6c3787bf825be6dd3c3216032bd7621c1dd4cfc360e4f693f06c9c3e8f09ea00",
+    "panel-v2-088": "0d72ccd4c2b58958f23a48a02a2810a2bd147950aee913cbaab34ca4811ba7e1",
+    "panel-v2-098": "9e0e8b04a9c62ec2c1bd234ff6bf8dead44f2dd3cfcc2bdfd4e2eb93b800e663",
+    "panel-v2-038": "bc2aa494cfd8cc1f1f9694916d6bddc0b5463a1c0b87a80e9a93ca445187cf6f",
+    "panel-v2-048": "b3955044041ce70f2c36aab57c0bcf07317987c7467883b3958ef6924fb10062",
+    "panel-v2-058": "59f6484f6dbfe95feb5ec317448a36e7049d8ea95bc1efd315f05320be530fba",
+    "panel-v2-068": "d9376b7a44b218eba9d90026b9258fb7a61cc48c59e39e85ce36dee589a65ee2",
+    "panel-v2-029": "7d4c5dcc3c381cbdf039eca9cd061215571dc4fa5648dce2677f3eb91cb0ada8",
+    "panel-v2-079": "ecd4adb1ac99c1db17596434da22652981906acbcd99af51e017a2fa91e04da4",
+    "panel-v2-089": "4baa85e47ae238c669ea02750b559d36f3c7448b33793ffe206f860f5605343b",
+    "panel-v2-099": "7597bbdbd0cced39305df71ec04ac6cdcc88c436e81e5e412e5c8fb6315c0eac",
+    "panel-v2-039": "bf5c9995830c6c477deb5ee6d12430f631af38bf76c2a81c59084addc34dde67",
+    "panel-v2-049": "e1e30f8818c16e28540cbf134bdd1fb697a5faecad059e416f01c970fb645f93",
+    "panel-v2-059": "1b4d68ca9917768cce8627c57c0444049d93cc50521612d90a8cdbfee4e0b667",
+    "panel-v2-069": "49f868159c34f83a1cd7b6557dbe4ee0b0fbdabfeec8561651687b7dac65b8de",
+    "panel-v2-030": "b8a93694c3aba3cf4c586a481669643547841a1b3676ac29b40e3cb410902982",
+    "panel-v2-080": "cbd72765fad5ceaa1e93e42cb30aa6130e7d755cd1beb6a9416e72a69681edef",
+    "panel-v2-090": "8fd55ae81d3c62a92d19df89a921868b229543d11d01f6d681ce4dff84aafba4",
+    "panel-v2-100": "310ca682883a9f5b75298f2d233be32263da0b93a30f1e79a76d2654678dcdb0",
+    "panel-v2-040": "c7319b3f46fa756fbaeb3339276884140084d0576a851ee1d352f83a50cb3889",
+    "panel-v2-050": "7fef87fcd2ffd877937cb8083dd979a469203119377bc8e84af534e2d921c086",
+    "panel-v2-060": "1b4baa020a8fcd192e10915e4bf14402a900e1d3a8faa427a4fd193a2e09c2fe",
+    "panel-v2-070": "cc62b882acf1fcae1c88b7013c1b912a6d84644da84b5cea2a19d95136279b1d"
+  },
+  "completedAt": "2026-10-17T13:15:23.288642+00:00",
+  "finalValidationPassed": true,
+  "aggregate": "aggregate.json",
+  "summary": "summary.md"
+}

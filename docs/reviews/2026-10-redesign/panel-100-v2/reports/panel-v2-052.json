@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-v2-052",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "From this simulated AI client lens, the narrow-screen revision is coherent and substantially easier to qualify: the hero states no consulting fee and one semester, the bench is optional, and partnership figures precede extended process material. The supplied 390px capture preserves clear hierarchy, readable prose and accurately captioned culture photography. Source inspection confirms that the old remote mobile organization result is replaced by an adjacent native selector/profile. The client journey from Home to Work, responsibilities/FAQs and Contact provides useful scope, NDA, meeting and next-step information. Contact now protects pending inputs, validates acknowledgements, preserves uncertain messages and reuses an unchanged delivery intent; focused intercepted tests substantiate these local behaviors. However, the central evidence task remains incomplete: no approved engagement demonstrates MECG reasoning or a useful handoff. That substantive absence prevents my agreement with the broad world-class question despite the visual and interaction improvements. Release readiness is separately unproven because actual delivery and hosted integration were not demonstrated. This is source/artifact assessment, not observed client success or human endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory opening)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/data-retention.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (services, terms, process and FAQs)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results and final total)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-expanded-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "The committed approved-project list is empty. Selected organization profiles provide business descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work renders Selected work only when publicProjects is nonempty. The supplied 390px homepage capture shows the pending-approval state; release-open-items.md confirms actual approved artifacts remain absent. The partnership heading now accurately describes this limitation, but does not supply project proof.",
+      "userImpact": "A mobile client can understand fit and responsibilities but cannot judge the analytical quality, relevance or usefulness of a comparable MECG engagement before investing in an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded real engagement with its question, methods, constraints and redacted deliverable or handoff. Publish through the existing approval boundary and feature it clearly. Retain the honest pending state until authorized; invent no outcomes."
+    }
+  ],
+  "notVerified": [
+    "Actual contact receipt and reply through Resend; provider idempotency under real lost acknowledgements and across reloads.",
+    "Hosted Clerk sessions, Supabase RPC/RLS, storage, provisioning and consequential operator recovery; no staging exists. Private application/grading/operator workflows were not directly exercised by this seat.",
+    "Human comprehension and task success, physical iPhone/macOS Safari, screen-reader use and complete keyboard navigation from public proof through inquiry; the inspected keyboard test covers the contact form with intercepted delivery.",
+    "A final Work/Contact mobile screenshot is not supplied; their layout was assessed from source and scoped tests, not directly observed here.",
+    "Board-approved retention/privacy operations, original-resume policy resolution, closed-round remediation and current membership workload facts remain outside the demonstrated evidence."
+  ]
+}

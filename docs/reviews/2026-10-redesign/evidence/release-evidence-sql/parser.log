@@ -1,0 +1,2 @@
+Parsed 184 SQL files and 465 function bodies.
+Checked 96 RPC names and 26 table names against the migrations and the generated types.

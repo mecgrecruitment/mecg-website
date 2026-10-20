@@ -1,0 +1,47 @@
+{
+  "seatId": "panel-022",
+  "lens": "Accessible interaction \u2014 narrow mobile viewport; simulated AI review lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The sampled mobile public experience has a strong accessibility foundation: native links/buttons, visible labels, 44px-or-larger principal targets, a skip link, contrasting focus styles, and reduced-motion handling for the engagement instrument. The supplied 390px captures show coherent Precision Instrument hierarchy and stacked actions without apparent clipping. I traced the actual work-to-contact inquiry journey through source and its recorded synthetic browser check. The proposition identifies student-led consulting; contact explains pro-bono scope and confidentiality discussion, while home explicitly withholds unapproved case studies. Sampled application review copy accurately discloses identifying original resumes. However, contact validation recovery lacks field-specific guidance, and the supplied tests do not establish assistive-technology task completion. These are independent AI source/capture judgments, not observed human success or accessibility certification. Broad world-class agreement and integrated release readiness remain unproven.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx:1-150",
+    "src/lib/site-content.ts:1-100",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/form-field.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/globals.css:85-152,409-455,569-596",
+    "src/app/apply/application-form.tsx (validation/focus matches and MaterialsStep/ReviewStep excerpts)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:25-28,42-53; src/app/api/contact/route.ts:9-10,28-32",
+      "evidence": "The API trims text and merges every invalid field into HTTP 400 with \u201cCheck the form fields and try again\u201d. ContactForm renders that message only in the bottom alert; it neither passes FormField.error nor associates the server error with a control. For example, a whitespace-only name satisfies native required but becomes empty after server trimming. The browser journey test covers intercepted success only.",
+      "userImpact": "A narrow-screen or screen-reader visitor receives no identification of which field needs correction and must search and guess after submission. Native validation does not cover this server/client mismatch.",
+      "suggestedFix": "Return structured field errors for validation failures, pass them to FormField and the message textarea through aria-invalid/aria-describedby, and focus the first invalid field or a linked error summary. Add a focused whitespace-input rejection/recovery check."
+    }
+  ],
+  "notVerified": [
+    "No browser was driven in this review. Supplied captures establish appearance only; keyboard traversal, sticky-header focus visibility, zoom/reflow and mobile virtual-keyboard behavior were not independently exercised.",
+    "The recorded menu test overrides the viewport to 820\u00d7600 even in its mobile project. It proves that sampled Escape/focus-return case, not complete keyboard navigation at 390px. Instrument tests verify selection and transition duration, not spoken live-region output.",
+    "No VoiceOver/TalkBack or desktop screen-reader evidence, physical-device, Safari or Firefox validation, or observed disabled-user task success is supplied.",
+    "No staging, hosted Clerk/Supabase/storage/email integration or authenticated end-to-end acceptance exists. The contact confirmation uses intercepted HTTP; private application excerpts are source evidence only. Other private workflows were not comprehensively audited by this seat."
+  ]
+}

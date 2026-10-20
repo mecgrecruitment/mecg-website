@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import { requireAdmin } from "@/lib/auth";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { screeningRpc, type ScreeningOverview } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/labels";
@@ -16,7 +16,7 @@ const signed = (value: number, digits: number) => `${value < 0 ? "-" : "+"}${Mat
 
 export default async function CalibratedScreeningPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
   const { data: overview, error } = await screeningRpc<ScreeningOverview>(supabase, "screening_admin_overview", { target_cycle_id: cycleId });

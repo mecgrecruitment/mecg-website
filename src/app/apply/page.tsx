@@ -16,7 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
-import { parseApplicationServerDraft } from "./application-server-draft";
+import { parseApplicationDraftSnapshot } from "./application-server-draft";
 import { isMissingSchemaObject } from "@/lib/schema-availability";
 
 export const metadata: Metadata = { title: "Apply" };
@@ -42,7 +42,7 @@ function parseOptions(value: unknown): string[] | null {
 // Returns null for anything malformed. A dropped question row would let an applicant submit with no
 // written responses at all, so a bad row fails the whole page loudly instead.
 function parseIntakeSchema(value: unknown): IntakeSchema | null {
-  if (!isRecord(value)) return null;
+  if (!isRecord(value) || typeof value.open !== "boolean") return null;
   const questions: IntakeQuestion[] = [];
   if (value.questions !== undefined) {
     if (!Array.isArray(value.questions)) return null;
@@ -109,16 +109,18 @@ export default async function ApplyPage() {
   if (intakeError) console.error("intake_schema failed", intakeError);
   const schema = intakeError ? null : parseIntakeSchema(intake);
   // A failed or malformed schema is not the same thing as a closed cycle; never say "closed" for it.
-  const schemaUnavailable = Boolean(user) && !schema;
-  if (schemaUnavailable && !intakeError) console.error("intake_schema returned an unusable payload", intake);
-  const draft = parseApplicationServerDraft(schema?.draft);
+  const snapshot = parseApplicationDraftSnapshot(schema?.draft);
+  const schemaUnavailable = Boolean(user) && (!schema || (schema.draft != null && !snapshot));
+  if (schemaUnavailable && !intakeError) console.error("intake_schema returned an unusable payload");
+  const draft = snapshot?.draft ?? null;
   // Before opens_at the cycle is OPEN, it just has not started, and intake_schema
   // still says open:false. Telling that applicant "Applications closed" sends
   // someone who signed up at 19:45 home fifteen minutes early.
+  const openingTimelineUnavailable = schema?.open === false && recruitment.kind === "unavailable";
   const preOpenLabel = upcomingCycle?.opensAt ? `Applications open at ${formatRecruitmentTime(upcomingCycle.opensAt)}` : null;
 
   return (
-    <main className="min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
+    <main className="application-intake min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
       <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-4">
           <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
@@ -157,7 +159,7 @@ export default async function ApplyPage() {
             against the eyebrow, which is what a status pill is for. */}
         <div className={`flex flex-wrap items-start justify-between gap-5 ${user ? "" : "text-center"}`}>
           <div className={user ? "" : "mx-auto"}>
-            <p className="text-[13px] text-mecg-orange-ink">Application intake</p>
+            <p className="text-[13px] font-semibold text-mecg-blue">Application intake</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
             <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/65">
               {user
@@ -170,10 +172,22 @@ export default async function ApplyPage() {
           </div>
           {user && !schemaUnavailable && (typeof schema?.open === "boolean" || preOpenLabel) && (
             <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema?.open ? "bg-emerald-50 text-emerald-800" : preOpenLabel ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800"}`}>
-              {schema?.open ? "Applications open · About 15 minutes" : preOpenLabel ?? "Applications closed"}
+              {schema?.open ? "Applications open · About 15 minutes" : preOpenLabel ?? (openingTimelineUnavailable ? "Not accepting submissions" : "Applications closed")}
             </div>
           )}
         </div>
+
+        {!user && (
+          <section aria-labelledby="application-materials" className="mt-7 border-y border-mecg-navy/15 py-5 text-left">
+            <h2 id="application-materials" className="font-semibold">Before you create an account</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-mecg-navy/70">
+              <li>Have a resume ready as a PDF, up to 10 MB.</li>
+              <li>Prepare your written responses and a photo if requested by the application.</li>
+              <li>You can save a draft, return to it, and review before submitting.</li>
+            </ul>
+            <Link href="/join#how-we-evaluate" className="mt-3 inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">See the process and evaluation criteria</Link>
+          </section>
+        )}
 
         {user && schema?.needsInfo === true && (
           <div className="mt-5">
@@ -201,6 +215,8 @@ export default async function ApplyPage() {
               a moment, and email mecg-board@umich.edu if it keeps happening.
             </OperationNotice>
           </div>
+        ) : user && openingTimelineUnavailable ? (
+          <div className="mt-5"><OperationNotice kind="info">The application is not accepting submissions right now. We could not load the opening timeline, so we cannot confirm the next opening date. Reload in a moment, or email <a href="mailto:mecg-board@umich.edu" className="underline">mecg-board@umich.edu</a> if you expected to apply today. Your browser recovery copy has not been removed.</OperationNotice></div>
         ) : user ? (
           <ApplicationForm
             initialName={user.name}
@@ -212,6 +228,7 @@ export default async function ApplyPage() {
             cycleName={schema?.cycleName ?? null}
             questions={schema?.questions ?? []}
             initialDraft={draft}
+            initialRevision={snapshot?.revision ?? null}
             initialHasHeadshot={hasHeadshot === true}
             headshotSupported={!isMissingSchemaObject(headshotError)}
           />

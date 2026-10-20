@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-062",
+  "lens": "Prospective applicant \u2014 narrow mobile viewport; simulated user lens, not human research",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected applicant journey has a clear foundation: the mobile homepage offers Join MECG, Join explains eligibility, preparation and evaluation, and the four-step form separates saving from submission. Recovery pauses editing, compares copies, explains replacement consequences and requires an explicit choice. The supplied Pixel 7 test log supports those synthetic interactions, including interrupted submission, but does not establish success with actual identity, uploads or recruitment data. The homepage capture has coherent typography, restrained color and legible stacked actions. However, the final confirmation reintroduces an anonymity promise inconsistent with the original-resume disclosure. Correct that factual assurance before release; broader world-class acceptance also remains limited by missing private-screen visual and hosted evidence.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts (organization figures and past-project entries)",
+    "src/lib/join-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "captures/mobile-hero.png",
+    "src/app/apply/page.tsx (entry, authentication and intake parsing)",
+    "src/app/apply/application-form.tsx (save, submit, recovery, mobile chrome and review)",
+    "src/lib/application-draft-recovery.ts (storage contract and expiry)",
+    "src/app/applicant/page.tsx (next-action selection and receipt)",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action.test.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "supabase/migrations/20260911145642_screening_resume.sql (authorization and resume criteria)",
+    "playwright.config.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (reliability and recovery cases)",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:285",
+      "evidence": "The submitted=1 confirmation says written responses enter \u201canonymous first-pass review.\u201d Application Materials and Review instead disclose original identifying resume access (application-form.tsx:731,746). The reviewer resume GET route authorizes and streams that PDF; migration 20260911145642_screening_resume.sql establishes the access contract.",
+      "userImpact": "At the moment a student expects a definitive explanation of what happens next, the confirmation can suggest reviewers cannot identify them. That undermines the more accurate disclosure they saw before consenting.",
+      "suggestedFix": "Describe the written packet as omitting profile identifiers and repeat that assigned reviewers may view the original resume. Add a confirmation-copy assertion covering this disclosure; preserve the existing Board access policy."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or deployment evidence exists: actual Clerk sessions, Supabase RPC/RLS, storage transitions and email delivery remain unverified.",
+    "No private applicant screenshots were supplied. Mobile form, conflict comparison and dashboard craft were assessed from source and synthetic assertions, not an observed authenticated session.",
+    "No human task success, comprehension or abandonment evidence exists. This is one independent AI acceptance assessment, not student endorsement.",
+    "Physical-device keyboard and sticky-control behavior, Safari/Firefox and assistive technology were not exercised. Public capture inspection covered the supplied mobile homepage hero only.",
+    "Public organization figures and client names were read as repository facts, not independently audited. Client-approved outcomes and project artifacts remain absent."
+  ]
+}

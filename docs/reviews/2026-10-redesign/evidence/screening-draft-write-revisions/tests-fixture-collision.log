@@ -1,0 +1,31 @@
+Connecting to local database...
+/home/rahil/mecg-website/supabase/tests/application_draft_concurrency.sql ..... ok
+/home/rahil/mecg-website/supabase/tests/batch_release_diagnostics.sql ......... ok
+/home/rahil/mecg-website/supabase/tests/evaluation_draft_write_revisions.sql .. ok
+/home/rahil/mecg-website/supabase/tests/grading_contract_consistency.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/group_case_rating.sql ................. ok
+/home/rahil/mecg-website/supabase/tests/group_case_reviewer_quality.sql ....... ok
+/home/rahil/mecg-website/supabase/tests/group_case_write_revisions.sql ........ ok
+/home/rahil/mecg-website/supabase/tests/hash_votes.sql ........................ ok
+/home/rahil/mecg-website/supabase/tests/provisioning_incidents.sql ............ ok
+/home/rahil/mecg-website/supabase/tests/release_evidence_diagnostics.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/round_close_summary.sql ............... ok
+/home/rahil/mecg-website/supabase/tests/rush_foundation.sql ................... ok
+psql:/home/rahil/mecg-website/supabase/tests/screening_draft_write_revisions.sql:7: ERROR:  duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(79000000-0000-4000-8000-000000000001) already exists.
+/home/rahil/mecg-website/supabase/tests/screening_draft_write_revisions.sql ... 
+Dubious, test returned 3 (wstat 768, 0x300)
+Failed 51/51 subtests 
+/home/rahil/mecg-website/supabase/tests/screening_release_visibility.sql ...... ok
+/home/rahil/mecg-website/supabase/tests/speed_dating_pairs.sql ................ ok
+/home/rahil/mecg-website/supabase/tests/staff_assisted_checkin.sql ............ ok
+/home/rahil/mecg-website/supabase/tests/stage_hash_flow.sql ................... ok
+
+Test Summary Report
+-------------------
+/home/rahil/mecg-website/supabase/tests/screening_draft_write_revisions.sql (Wstat: 768 (exited 3) Tests: 0 Failed: 0)
+  Non-zero exit status: 3
+  Parse errors: Bad plan.  You planned 51 tests but ran 0.
+Files=17, Tests=821,  1 wallclock secs ( 0.04 usr  0.03 sys +  0.07 cusr  0.05 csys =  0.19 CPU)
+Result: FAIL
+error running container: exit 1

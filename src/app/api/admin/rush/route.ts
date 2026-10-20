@@ -11,6 +11,8 @@ import { HASH_STAGES, type HashStage } from "@/lib/hash-tally";
 import { createClerkClient } from "@clerk/backend";
 import { CLERK_PASSWORD_MAX_LENGTH, CLERK_PASSWORD_MIN_LENGTH, hasValidClerkPasswordLength } from "@/lib/clerk-password";
 import { withClerkTimeout } from "@/lib/clerk-retry";
+import { creationOutcomeIsUncertain, recordProvisioningFailure } from "@/lib/provisioning-incident";
+import { operationalLog } from "@/lib/operational-log";
 import { requireClerkIssuer, requireEnv } from "@/lib/env";
 
 type CycleStatus = Database["rush"]["Enums"]["cycle_status"];
@@ -91,6 +93,7 @@ export async function POST(req: NextRequest) {
     const role = typeof body.role === "string" && ["MEMBER", "BOARD", "PANEL", "RECRUITMENT_COMMITTEE"].includes(body.role) ? body.role as "MEMBER" | "BOARD" | "PANEL" | "RECRUITMENT_COMMITTEE" : "MEMBER";
     if (!email || !name || !hasValidClerkPasswordLength(password)) return NextResponse.json({ error: `Valid name, email, and a password between ${CLERK_PASSWORD_MIN_LENGTH} and ${CLERK_PASSWORD_MAX_LENGTH} characters are required` }, { status: 400 });
     const admin = createAdminClient();
+    const clerkIssuer = requireClerkIssuer();
     const clerk = createClerkClient({ secretKey: requireEnv("CLERK_SECRET_KEY") });
     const [firstName, ...lastName] = name.split(/\s+/);
     let created: Awaited<ReturnType<typeof clerk.users.createUser>>;
@@ -99,35 +102,44 @@ export async function POST(req: NextRequest) {
         emailAddress: [email], password, firstName, lastName: lastName.join(" ") || undefined,
       }));
     } catch (createError) {
-      console.error("admin add_user failed", createError);
-      return NextResponse.json({ error: "Could not create user" }, { status: 409 });
+      if (creationOutcomeIsUncertain(createError)) {
+        const incident = await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: null, appUserId: null, phase: "CREATE_ACCOUNT", clerkCleanupFailed: false, profileCleanupFailed: false });
+        return NextResponse.json(incident, { status: 500 });
+      }
+      operationalLog("warn", { event: "provisioning.create_rejected", code: "CLIENT_REJECTION" });
+      return NextResponse.json({ error: "The account could not be created. Check the details or use Add existing account if it already exists." }, { status: 409 });
     }
-    const { data: appUserId, error: identityError } = await admin.rpc("ensure_external_identity", {
-      identity_issuer: requireClerkIssuer(), identity_subject: created.id,
+    const identity = await admin.rpc("ensure_external_identity", {
+      identity_issuer: clerkIssuer, identity_subject: created.id,
       identity_email: email, identity_display_name: name,
-    });
-    // A Clerk account left behind without a membership is a dead end: createUser
-    // rejects that email forever, so a rollback that fails has to be reported
-    // with the email and Clerk id instead of swallowed, or a bulk import just
-    // sees an unexplained 409 on the retry.
-    const orphanMessage = `An authentication account was created for ${email} but not granted membership, and automatic cleanup failed. Remove ${email} in Clerk before retrying that email.`;
+    }).then((result) => result, () => ({ data: null, error: { code: "", message: "transport unavailable" } }));
+    const appUserId = identity.data;
+    const identityError = identity.error;
+    // An unknown acknowledgement can follow a committed identity write. Preserve
+    // the account for reconciliation; never guess that an unacknowledged write failed.
+    if (identityError && !new Set(["22023", "23505", "42501"]).has(identityError.code ?? "")) {
+      return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: created.id, appUserId, phase: "IDENTITY_LINK", clerkCleanupFailed: false, profileCleanupFailed: false }), { status: 500 });
+    }
     if (identityError) {
       const rollbackError = await withClerkTimeout(() => clerk.users.deleteUser(created.id)).then(() => null, (deleteError: unknown) => deleteError);
       if (rollbackError) {
-        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError, identityError);
-        return NextResponse.json({ error: orphanMessage }, { status: 500 });
+        return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: created.id, appUserId: null, phase: "IDENTITY_LINK", clerkCleanupFailed: true, profileCleanupFailed: false }), { status: 500 });
       }
       return NextResponse.json({ error: "Could not provision user" }, { status: 500 });
     }
-    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: role }));
-    if (error) {
-      const rollbackError = await withClerkTimeout(() => clerk.users.deleteUser(created.id)).then(() => null, (deleteError: unknown) => deleteError);
-      const { error: profileError } = await admin.from("profiles").delete().eq("id", appUserId);
-      if (rollbackError || profileError) {
-        console.error(`admin add_user rollback failed for ${email} (clerk ${created.id})`, rollbackError ?? profileError, error);
-        return NextResponse.json({ error: orphanMessage }, { status: 500 });
-      }
+    if (!appUserId) {
+      return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: created.id, appUserId: null, phase: "IDENTITY_LINK", clerkCleanupFailed: false, profileCleanupFailed: false }), { status: 500 });
     }
+    const membership = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: role })
+      .then((result) => result, () => ({ data: null, error: { code: "", message: "transport unavailable" } }));
+    if (membership.error || typeof membership.data !== "string" || !membership.data.trim()) {
+      // Identity reconciliation can claim existing allowlisted memberships. A later
+      // grant failure does not establish ownership of every profile side effect;
+      // deleting the account/profile could remove legitimate access. Preserve the
+      // partial state and route it to its owner instead of destructive compensation.
+      return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: created.id, appUserId, phase: "MEMBERSHIP_GRANT", clerkCleanupFailed: false, profileCleanupFailed: false }), { status: 500 });
+    }
+    data = membership.data;
   } else if (action === "ADD_EXISTING_USER") {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     if (!email || !memberRole) return NextResponse.json({ error: "Valid email and role are required" }, { status: 400 });
@@ -137,8 +149,8 @@ export async function POST(req: NextRequest) {
     try {
       existingUser = (await withClerkTimeout(() => clerk.users.getUserList({ emailAddress: [email], limit: 2 }))).data
         .find((candidate) => candidate.emailAddresses.some((address) => address.emailAddress.toLowerCase() === email));
-    } catch (usersError) {
-      console.error("admin find_existing_user failed", usersError);
+    } catch {
+      operationalLog("error", { event: "provisioning.lookup_failed", code: "PROVIDER_UNAVAILABLE" });
       return NextResponse.json({ error: "Could not look up the account" }, { status: 500 });
     }
     if (!existingUser) return NextResponse.json({ error: "No authentication account uses that email" }, { status: 404 });
@@ -146,13 +158,21 @@ export async function POST(req: NextRequest) {
     const externalId = typeof existingUser.externalId === "string" && /^[0-9a-f-]{36}$/i.test(existingUser.externalId)
       ? existingUser.externalId
       : undefined;
-    const { data: appUserId, error: identityError } = await admin.rpc("ensure_external_identity", {
+    const identity = await admin.rpc("ensure_external_identity", {
       identity_issuer: requireClerkIssuer(), identity_subject: existingUser.id,
       identity_email: email, identity_display_name: existingName,
       existing_app_user_id: externalId,
-    });
-    if (identityError) return NextResponse.json({ error: "Could not provision the account" }, { status: 409 });
-    ({ data, error } = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: memberRole }));
+    }).then((result) => result, () => ({ data: null, error: { code: "", message: "transport unavailable" } }));
+    const appUserId = identity.data;
+    if (identity.error || !appUserId) {
+      return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: existingUser.id, appUserId: appUserId || null, phase: "IDENTITY_LINK", clerkCleanupFailed: false, profileCleanupFailed: false }), { status: 500 });
+    }
+    const membership = await supabase.rpc("grant_membership", { target_user_id: appUserId, target_cycle_id: cycleId, target_role: memberRole })
+      .then((result) => result, () => ({ data: null, error: { code: "", message: "transport unavailable" } }));
+    if (membership.error || typeof membership.data !== "string" || !membership.data.trim()) {
+      return NextResponse.json(await recordProvisioningFailure(admin, { cycleId, requestedBy: user.id, email, clerkUserId: existingUser.id, appUserId, phase: "MEMBERSHIP_GRANT", clerkCleanupFailed: false, profileCleanupFailed: false }), { status: 500 });
+    }
+    data = membership.data;
   } else if (action === "SET_MEMBER_ROLE") {
     if (!memberRole) return NextResponse.json({ error: "Invalid member role" }, { status: 400 });
     ({ data, error } = await supabase.rpc("set_membership_role", { target_user_id: String(body.userId), target_cycle_id: cycleId, target_role: memberRole }));
@@ -274,9 +294,13 @@ export async function POST(req: NextRequest) {
   }
 
   if (error) {
-    console.error(`admin rush ${action} failed`, error);
+    operationalLog("error", { event: "admin.action_failed", code: action });
     const { body: errorBody, status } = mapRpcError(error);
     return NextResponse.json(errorBody, { status });
+  }
+  if (action === "SET_RUBRIC_CRITERIA") {
+    if (typeof data !== "string" || !data.trim()) return NextResponse.json({ error: "Scoring guide save could not be confirmed. It may already be saved; reload the current guide before another save." }, { status: 500 });
+    return NextResponse.json({ id: data, roundId: body.roundId }, { status: 201 });
   }
   return NextResponse.json(data === undefined || data === null ? { ok: true } : { id: data }, { status: 201 });
 }

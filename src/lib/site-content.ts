@@ -148,11 +148,11 @@ export const PILLARS = [
 ] as const;
 
 export const SERVICES = [
-  { title: "Strategy", body: "We help clients think through growth, positioning, competitors, customers, and practical next steps." },
-  { title: "Operations & Management", body: "We look at how work gets done and recommend ways to make processes clearer, smoother, or easier to manage." },
-  { title: "Data Analytics", body: "We organize information, look for patterns, and turn data into insights that clients can use." },
-  { title: "Product Development", body: "We support early product thinking through user research, feature ideas, customer needs, and launch planning." },
-  { title: "Marketing", body: "We help clients understand their audience, refine messaging, and improve how they appear online or in the market." },
+  { title: "Strategy", body: "We help clients think through growth, positioning, competitors, customers, and practical next steps.", question: "Where should we grow next?", approach: "Explore customers, competitors and positioning to compare possible directions for the business." },
+  { title: "Operations & Management", body: "We look at how work gets done and recommend ways to make processes clearer, smoother, or easier to manage.", question: "Could this process work better?", approach: "Understand how work gets done, find friction and identify practical ways to improve the process." },
+  { title: "Data Analytics", body: "We organize information, look for patterns, and turn data into insights that clients can use.", question: "What is our data telling us?", approach: "Organize the available information, look for patterns and connect the findings to a decision." },
+  { title: "Product Development", body: "We support early product thinking through user research, feature ideas, customer needs, and launch planning.", question: "What should we build first?", approach: "Investigate customer needs, explore feature ideas and clarify the next step for a product." },
+  { title: "Marketing", body: "We help clients understand their audience, refine messaging, and improve how they appear online or in the market.", question: "How do we reach the right people?", approach: "Explore the audience, messaging and market to help shape a clearer marketing direction." },
 ] as const;
 
 export const SEMESTER_FACTS = [
@@ -165,7 +165,7 @@ export const SEMESTER_FACTS = [
 export const HOMEPAGE_LEADERS = BOARD.slice(0, 3);
 
 export const ENGAGEMENT_STEPS = [
-  ["01", "Explore fit", "We learn the decision, timing, available information, and the people who will use the work.", "A shared view of whether MECG is the right team."],
+  ["01", "Explore fit", "We learn what you’re deciding, by when, what you already know, and who will use the answer.", "A shared view of whether MECG is the right team."],
   ["02", "Scope the project", "Together, we define the question, client responsibilities, confidentiality needs, and what a useful answer looks like.", "An agreed project scope and working cadence."],
   ["03", "Build the evidence", "A team of 6–8 members researches, interviews, analyzes, and checks assumptions with the client.", "Research, analysis, and working materials."],
   ["04", "Recommend and hand off", "We present the recommendation, its limits, and the practical next steps the client can take.", "A decision brief, supporting files, and implementation plan."],

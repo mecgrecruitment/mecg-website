@@ -1,0 +1,32 @@
+{
+  "seatId": "panel-v2-099",
+  "lens": "Owner and access-sensitive user",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected owner recovery journey is substantially more coherent than the original objections describe. Both account paths now require a membership receipt, preserve partial accounts after uncertain identity/grant writes, and return opaque incident references. The browser control bounds the complete response wait, retains entered details on ambiguity, and explains that access may already exist. Recovery links carry the cycle; the queue's People link now carries that same cycle through a server selector that validates current membership/capability rather than silently falling back. People tabs support associated panels, roving focus and Arrow/Home/End navigation while preserving forms. The owner-only incident SQL and resolution action distinguish recording remediation from changing accounts. I found no new demonstrated defect in this sampled chain. The source/tests support these corrections; they do not establish an actual owner's successful recovery across Clerk and Supabase. The desktop/mobile homepage captures show a coherent Precision Instrument hierarchy, clear no-fee/semester proposition, restrained actions and honest pending project evidence. Application materials, final review and received-state copy consistently disclose identifying original-resume access. Nevertheless, the unchanged broad world-class claim remains unproven: consequential authenticated integration and full recovery task success are unavailable, approved engagement artifacts and current membership workload facts are absent, and privacy/remediation policy authority remains outstanding. I would hold consequential release acceptance until those operational boundaries are exercised with controlled accounts.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json (identity/header)",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md; account-provisioning-followup.md; cohort-workspace-selection.md",
+    "src/app/(marketing)/home/page.tsx; src/lib/site-content.ts; src/content/projects.public.ts",
+    "src/app/admin/provisioning/page.tsx; page.test.ts; resolve-button.tsx",
+    "src/app/admin/people/page.tsx; people-workspace.tsx; src/app/admin/account-provisioning.tsx; src/app/admin/rush-controls.tsx (PeopleControls)",
+    "src/app/api/admin/rush/route.ts (account branches); route.test.ts (provisioning cases); src/lib/provisioning-incident.ts",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts; src/lib/workspace-cycle.ts; src/lib/authorization.ts; src/proxy.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql; supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/account-provisioning.spec.ts; tests/e2e/cohort-workspace-selection.spec.ts",
+    "src/app/apply/application-form.tsx (MaterialsStep/ReviewStep); src/app/applicant/page.tsx (received disclosure)",
+    "captures/public-home-mobile-390.png; captures/public-home-desktop-1280.png; captures/PROVENANCE.json",
+    "docs/reviews/2026-10-redesign/evidence/account-provisioning-browser.log; release-evidence-final-node.log (summary); release-evidence-sql/tests.log (summary)"
+  ],
+  "findings": [],
+  "notVerified": [
+    "Hosted Clerk creation/session expiry, Supabase RPC/RLS and actual committed-but-unacknowledged provisioning recovery; local intercepted requests and isolated SQL prove narrower contracts.",
+    "A complete authenticated older-cycle incident \u2192 People inspection \u2192 membership remediation \u2192 resolution journey, including keyboard traversal and real owner understanding. The supplied cohort browser fixture exercises navigation components, not this full chain.",
+    "Visual craft of the real authenticated incident queue/People states; no final focal private capture was supplied. Public screenshots use local unavailable-service fixtures.",
+    "Physical iPhone/macOS Safari, screen-reader sessions, observed human success, client-approved project artifacts and Board-confirmed workload expectations.",
+    "Board-approved retention/privacy operations, original-resume policy reconciliation and closed-round remediation policy."
+  ]
+}

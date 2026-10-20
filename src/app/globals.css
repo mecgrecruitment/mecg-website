@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./workspace.css";
 
 :root {
   --background: #ffffff;
@@ -11,7 +12,7 @@
    */
   --font-ui: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-numeric: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  --paper: #f4f1ec;
+  --paper: #f5f8fd;
   --line: rgb(7 13 31 / 12%);
   --shadow-card: 0 18px 55px rgb(7 13 31 / 9%);
   --t-control: 150ms;
@@ -28,17 +29,23 @@
 }
 
 @theme {
-  --color-mecg-blue: #3f63af;
+  --color-mecg-blue: #254f9f;
   --color-mecg-orange: #fe904d;
   --color-mecg-orange-ink: #a83e0b;
   --color-mecg-navy: #070d1f;
   --color-mecg-paper-workspace: #f5f4ef;
+  --color-public-ground: #f5f8fd;
+  --color-public-ink: #12213e;
+  --color-public-muted: #52627c;
+  --color-public-rule: #d8e1ed;
+  --color-public-edge: #b1bfd5;
+  --color-public-deep: #142c57;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-paper: #f4f1ec;
+  --color-paper: var(--paper);
   --font-sans: var(--font-ui);
   --font-mono: var(--font-numeric);
 }
@@ -97,8 +104,14 @@ textarea:focus-visible {
 }
 
 [class~="bg-mecg-navy"] :focus-visible,
-[class~="bg-mecg-navy/95"] :focus-visible {
+[class~="bg-mecg-navy/95"] :focus-visible,
+[class~="bg-public-deep"] :focus-visible {
   outline-color: var(--color-mecg-orange);
+}
+
+/* Navy is under 3:1 on the deeper #254f9f blue field. */
+[class~="bg-mecg-blue"] :focus-visible {
+  outline-color: white;
 }
 
 .button-primary,
@@ -111,7 +124,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 2px;
+  border-radius: 8px;
   padding: 0.7rem 1.35rem;
   font-weight: 600;
   transition-property: transform, filter, background-color, color;
@@ -406,7 +419,7 @@ details[open] > summary .disclosure-chevron {
   }
 }
 
-/* Hash projector deck. Outside the reduced-motion guard on purpose; see below. */
+/* Hash projector deck. Reduced-motion overrides below retain static results. */
 @keyframes deck-enter-fly {
   0% {
     opacity: 0;
@@ -566,19 +579,35 @@ details[open] > summary .disclosure-chevron {
   animation: deck-pulse 1.2s ease-in-out infinite;
 }
 
+/* Presentation controls can reduce motion for a shared display even when the
+   presenter's OS has no preference. OS reduction remains a separate hard cap. */
+.deck-root[data-motion="off"],
+.deck-root[data-motion="off"] *,
+.deck-root[data-motion="off"] *::before,
+.deck-root[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
   }
 
-  /* The hash deck is a projector, never a phone: it keeps its show. */
-  *:not(.deck-root, .deck-root *),
-  *:not(.deck-root, .deck-root *)::before,
-  *:not(.deck-root, .deck-root *)::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .deck-root,
+  .deck-root * {
+    animation: none !important;
+    transition: none !important;
   }
 
   .button-primary:active,
@@ -654,4 +683,66 @@ details[open] > summary .disclosure-chevron {
     font-family: var(--font-numeric), monospace;
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Public headings speak in the display face; body copy stays on the system stack. */
+/* Archivo's compressed widths shrink its word space; open it back up at text and heading sizes. */
+[data-marketing] main :is(h1, h2) {
+  font-family: var(--font-display), var(--font-ui);
+  font-stretch: 88%;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+  word-spacing: 0.1em;
+}
+
+.display-face {
+  font-family: var(--font-display), var(--font-ui);
+  font-stretch: 88%;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+  word-spacing: 0.1em;
+}
+
+/* One poster word per page: compressed, heavy, set to fill the width. */
+.poster-word {
+  display: block;
+  font-family: var(--font-display), var(--font-ui);
+  font-stretch: 70%;
+  font-weight: 900;
+  line-height: 0.84;
+  letter-spacing: -0.02em;
+  word-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+[data-marketing] :is(.button-primary, .button-light, .button-secondary) {
+  white-space: nowrap;
+}
+
+/* Windows High Contrast strips backgrounds and box-shadows, so give controls a real edge. */
+@media (forced-colors: active) {
+  :is(.button-primary, .button-secondary, .button-light),
+  [data-marketing] button,
+  input:not([type="checkbox"], [type="radio"]),
+  textarea,
+  select {
+    border: 1px solid ButtonText;
+  }
+}
+
+/* Blue question objects are lit from their top-left corner with neighbouring blues. */
+.public-lit {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgb(66 120 210 / 55%) 0%, transparent 60%),
+    linear-gradient(160deg, #2a58ab 0%, #1f4690 100%);
+  color: white;
+}
+.public-lit :focus-visible { outline-color: white; }
+
+[data-marketing] .section-label {
+  font-size: 0.8125rem;
+  color: var(--color-mecg-blue);
+}
+.section-label[data-tone="dark"] {
+  color: rgb(255 255 255 / 70%);
 }

@@ -1,6 +1,64 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mapRpcError, mapRpcErrorVerbose, rateLimitRouteResponse, requestReference, routeJsonResponse } from "./api-route.ts";
+import { mapRpcError, mapRpcErrorVerbose, rateLimitRouteResponse, readJsonBody, requestReference, routeJsonResponse } from "./api-route.ts";
+
+function streamedRequest(body: ReadableStream<Uint8Array>, headers?: HeadersInit) {
+  // Node requires duplex for stream bodies; the DOM RequestInit omits it.
+  const init: RequestInit & { duplex: "half" } = { method: "POST", body, duplex: "half", headers };
+  return new Request("http://localhost", init);
+}
+
+test("readJsonBody parses JSON split across UTF-8 byte boundaries and releases the stream", async () => {
+  const bytes = new TextEncoder().encode('{"name":"Zoë"}');
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const byte of bytes) controller.enqueue(Uint8Array.of(byte));
+      controller.close();
+    },
+  });
+  const request = streamedRequest(body);
+  assert.deepEqual(await readJsonBody(request, bytes.length), { data: { name: "Zoë" } });
+  assert.equal(body.locked, false);
+});
+
+test("readJsonBody rejects an interrupted stream even after receiving valid JSON", async () => {
+  let pulled = false;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (pulled) controller.error(new Error("connection reset"));
+      else {
+        pulled = true;
+        controller.enqueue(new TextEncoder().encode('{"consent":true}'));
+      }
+    },
+  });
+  const request = streamedRequest(body);
+  assert.deepEqual(await readJsonBody(request, 1024), { error: "invalid_json" });
+  assert.equal(body.locked, false);
+});
+
+test("readJsonBody rejects an already locked body without stealing its reader", async () => {
+  const request = new Request("http://localhost", { method: "POST", body: "{}" });
+  const reader = request.body!.getReader();
+  try {
+    assert.deepEqual(await readJsonBody(request, 1024), { error: "invalid_json" });
+    assert.equal(request.body!.locked, true);
+  } finally {
+    reader.releaseLock();
+  }
+});
+
+test("readJsonBody enforces actual byte size despite a smaller declared length", async () => {
+  let cancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) { controller.enqueue(new TextEncoder().encode('"ëë"')); },
+    cancel() { cancelled = true; },
+  });
+  const request = streamedRequest(body, { "content-length": "1" });
+  assert.deepEqual(await readJsonBody(request, 4), { error: "too_large" });
+  assert.equal(cancelled, true);
+  assert.equal(body.locked, false);
+});
 
 test("requestReference accepts a safe upstream request id and rejects log injection", () => {
   assert.equal(requestReference({ headers: new Headers({ "x-request-id": "edge:request-1" }) }), "edge:request-1");

@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-v2-080",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The evaluator journey is substantially more coherent: explicit not-observed choices, readiness requirements, review-heading focus, validated lock receipts, guarded browser storage and separate backup signatures support honest entry and verification. Group Case accepts note-only evidence, shows the canonical qualifying/incomplete verdict and specific blockers, and My work routes editable observations away from immutable written submissions. The supplied mobile homepage has a consistent Precision Instrument hierarchy and clearly states the no-fee, semester-long proposition; pending case-study and original-resume disclosures respect factual/privacy boundaries. I independently rechecked the relevant original objections against source and supplied tests rather than treating responses as approval. However, Group Case still has an unbounded save path that can strand recovery for an applicant. More broadly, local intercepted browser checks and isolated SQL do not establish the actual authenticated evaluator-to-operator journey, and approved work evidence remains missing. These limits prevent an unqualified world-class agreement; I recommend holding release for the save recovery correction and integrated acceptance.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings and historical responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/group-case-evaluator-followup.md",
+    "docs/reviews/2026-10-redesign/member-work-continuity.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/app/member/page.tsx (assignment filtering and Group Case navigation)",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/workspace-state.ts",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/group-case-roster.ts",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/app/apply/application-form.tsx (materials/review disclosures)",
+    "src/app/applicant/page.tsx (received disclosure)",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (quality helper)",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql",
+    "supabase/tests/group_case_reviewer_quality.sql",
+    "tests/e2e/evaluation-backup.spec.ts",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/evaluator-recovery-browser.log (final cases/result)",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (relevant cases/result)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (summary)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-180",
+      "evidence": "save sets Saving at line 148, serializes subsequent writes behind inflight at line 149, then awaits authorizedFetch through retryOnNetworkError at lines 157-161 and response.json at line 162 without a deadline. src/lib/client-fetch.ts authorizedFetch has no timeout; retryOnNetworkError only retries rejected promises. A nonsettling request/body therefore never reaches catch/finally. Retry/copy guidance is rendered only for error/hint at roster lines 420-424; further queued saves remain behind the unresolved promise. Existing group-case-evidence.spec.ts covers settled errors and delayed-but-released receipts, not a permanently stalled request/body.",
+      "userImpact": "During unreliable connectivity, a reviewer can remain at Saving indefinitely, unable to confirm evidence or complete a queued retry for that applicant. Unsaved observations remain only in the open page without the normal recovery guidance. This is source-derived, not an observed hosted incident.",
+      "suggestedFix": "Bound the full request and JSON-body wait; surface an explicit unconfirmed outcome with retained notes/scores and copy guidance. Ensure the serialized queue recovers without permitting an older uncertain full-score write to overwrite newer evidence. Add stalled-request and stalled-body checks."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk session expiry, Supabase RPC/RLS, storage, provider delivery and consequential evaluator/operator recovery in a hosted integrated journey; no staging exists.",
+    "Observed human task success, screen-reader use, physical iPhone or macOS Safari. The recorded five-configuration browser passes use synthetic harnesses.",
+    "Final private evaluator visual craft: no final evaluator capture is supplied; this assessment uses source/tests for those screens.",
+    "Client-approved engagement artifacts, current Board-confirmed workload facts and outstanding Board privacy/retention/closed-round remediation decisions."
+  ]
+}

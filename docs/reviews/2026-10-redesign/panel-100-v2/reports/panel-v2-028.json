@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-v2-028",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected public proposition and inquiry journey are clear: cost and duration precede the action, the mobile bench is optional, and pending case-study approval is stated honestly. The supplied mobile captures show coherent Precision Instrument hierarchy; the synthetic recovery capture makes exact choices and backup consequences legible. Contact now locks submitted inputs, associates errors and restores first-invalid focus. The former deck shortcut collision and reduced-motion exception are corrected in current source, with native controls, tab-local presentation motion reduction and an OS preference ceiling. The seven-scenario, five-configuration deck log supports those focused claims. However, consequential deck application still lacks bounded, truthful recovery, and its failure message lacks an announcement mechanism. These are current source findings, not observed hosted incidents. Together with absent integrated authenticated and assistive-technology acceptance, they prevent my broad world-class agreement; passing local checks cannot supply that conclusion.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/app/globals.css (focus, targets, motion rules)",
+    "src/lib/run-action.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/applicant/page.tsx (receipt/privacy copy)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (final results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236",
+      "evidence": "reveal awaits runAction after entering drumroll. run-action.ts:9\u201314 awaits authorizedFetch and response.json without a deadline; client-fetch.ts:authorizedFetch supplies no default deadline. The reveal button (373) and previous/revisit/next controls (470\u2013476) remain disabled while drumroll persists. A rejected acknowledgement simply clears phase and says Could not apply the result (237), without authoritative reconciliation.",
+      "userImpact": "A stalled write/body can strand the operator in Applying result. A lost acknowledgement can invite another application despite an unknown committed result.",
+      "suggestedFix": "Bound the full operation; announce an unknown outcome, reconcile the applicant\u2019s authoritative stage result, and require reconciliation before enabling repeat application. Cover stalled body and committed-write/lost-response cases."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:473",
+      "evidence": "The result failure is rendered as an ordinary footer paragraph. The separate live region reports drumroll/stamped states but does not include error; failure resets phase and empties that region. No failure focus transfer is present.",
+      "userImpact": "A screen-reader operator activating Reveal can receive Applying room result without an announced explanation when application fails.",
+      "suggestedFix": "Expose failure/uncertainty in a persistent alert or live region and keep a reachable recovery action; verify failure announcement and keyboard continuation."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk sessions, Supabase authorization/storage, delivery and consequential operator recovery; no staging supplied.",
+    "Complete authenticated keyboard journeys, screen-reader task completion and physical-device/Safari behavior. Local harness checks are not those observations.",
+    "Approved actual engagement artifacts, current Board-confirmed membership workload and unresolved retention/remediation policy authority.",
+    "Private visual states beyond the supplied synthetic recovery capture; no live authenticated deck capture was supplied."
+  ]
+}

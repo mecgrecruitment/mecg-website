@@ -1,0 +1,64 @@
+{
+  "seatId": "panel-v2-023",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "This simulated AI keyboard-oriented review finds substantial improvement, but the remaining consequential deck focus and failure-feedback gaps prevent world-class agreement. The public mobile capture shows a coherent Precision Instrument hierarchy with fee and semester facts before the optional bench. Home/Work/Contact source supports a clear inquiry journey, native FAQ disclosure and a bounded, receipt-checked form. The actual keyboard contact test traverses the form with Tab and submits with Enter; its delivery is intercepted. Field-linked contact and rubric errors, persistent sign-out retry, and application comparison radio groups are meaningful strengths. Deck shortcut filtering and explicit controls resolve the prior native-activation collision; source and the 35-pass motion log support both OS reduction and a tab-local shared-display control. However, these local successes do not establish complete authenticated keyboard or screen-reader journeys. The hold recommendation concerns the remaining deck interaction defects, separately from the broader missing content and hosted acceptance evidence.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity metadata)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/globals.css (focus and motion rules)",
+    "src/lib/run-action.ts",
+    "src/app/apply/application-form.tsx (privacy disclosures)",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/rubric-validation.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final relevant results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:211-216,332,374",
+      "evidence": "Next unapplied applicant calls advance(), which clears phase through leave() and selects another entry. Its button is conditional on stamped phase and inside the card keyed by entry.id. No effect/ref assigns focus after that focused subtree is removed. The supplied deck tests stop at visibility of Next unapplied applicant and do not activate it and assert continuation focus. This is source-derived, not a live reproduction.",
+      "userImpact": "A keyboard presenter advancing an applied result loses the focused control and a stable location for inspecting or acting on the next applicant.",
+      "suggestedFix": "After explicit advance, focus a programmatically focusable new-applicant heading or another deliberate stable destination. Handle the final-card case too; test Enter activation, focus destination and subsequent Tab order."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:236-237,324-328,473",
+      "evidence": "A failed APPLY_STAGE_HASH sets error and clears phase. Both existing polite status regions announce applicant/phase only; clearing phase empties the result message. The error is rendered as an ordinary footer paragraph without a live role, association or focus transfer.",
+      "userImpact": "A screen-reader keyboard operator may hear Applying room result without being informed that application failed or where to recover. Visual footer feedback does not provide equivalent automatic feedback.",
+      "suggestedFix": "Expose the failure through a persistent alert/status region and associate it with the explicit retry control. Add a rejected apply test asserting the error announcement semantics and reachable retry focus."
+    }
+  ],
+  "notVerified": [
+    "No actual assistive-technology session, observed human task success, physical iPhone or macOS Safari evidence; no full authenticated prepare/apply/recover/status/operator keyboard journey.",
+    "Hosted Clerk session termination/expiry, Supabase RPC/RLS, uploads/storage, email delivery, provisioning and consequential recovery remain unverified; local harnesses and Linux engines establish narrower scope.",
+    "Approved engagement artifacts and current Board-confirmed workload facts remain absent. Original identifying resume access is accurately disclosed in inspected materials/receipt copy, but policy conflict, retention operations and closed-round remediation still require Board authority.",
+    "Private-screen visual craft beyond supplied synthetic recovery capture and source review; no live applicant/operator or grading outcome was observed."
+  ]
+}

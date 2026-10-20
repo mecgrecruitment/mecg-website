@@ -54,5 +54,5 @@ export function secondaryDestinationLabel(
   links: readonly WorkspaceNavLink[],
 ) {
   const currentPath = current.split(/[?#]/, 1)[0];
-  return links.find(([href]) => href === currentPath)?.[1];
+  return links.find(([href]) => href.split(/[?#]/, 1)[0] === currentPath)?.[1];
 }

@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-044",
+  "lens": "Product systems and reliability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The revision handles several difficult failures thoughtfully: application recovery compares changed fields and offers exact combined answers plus a private download; final submission validates receipts before clearing recovery; close-grading explicitly reconciles uncertain outcomes; batch release bounds waits and requires fresh review after uncertainty. The public mobile composition is coherent and restrained, states the no-fee semester proposition early, and distinguishes partnerships from approved work. However, the actual single-outcome release action still bypasses the safer acknowledgement model. That inconsistency at an irreversible operator action prevents world-class agreement. Local source and synthetic browser/SQL evidence support these strengths, but do not establish actual authenticated task completion or hosted reliability. Missing approved engagement evidence and workload facts also leave the broad purpose incompletely substantiated.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx:465-540",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt/privacy branches)",
+    "src/app/admin/decision-form.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/admin/applications/[id]/page.tsx:535-558",
+    "src/app/api/admin/decisions/route.ts:105-138",
+    "src/lib/run-action.ts",
+    "src/lib/use-action.ts",
+    "src/lib/client-fetch.ts",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/release-reliability.spec.ts",
+    "tests/e2e/operator-review.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (scenario/receipt assertions)",
+    "docs/reviews/2026-10-redesign/evidence/{release-evidence-final-browser,application-combine-browser,release-evidence-final-node,release-evidence-final-build,release-evidence-final-lint}.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (final result)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18",
+      "evidence": "ReleaseButton is rendered for locked decisions in admin/applications/[id]/page.tsx:552 and Hash (source references inspected). It calls useAction/runAction, which awaits authorizedFetch and response.json without a deadline, accepts every successful HTTP response including a null/malformed body, and maps transport loss to 'Could not release'. Only result.ok or released:true triggers refresh. The batch release tests in release-reliability.spec.ts exercise ReleaseAllButton, so their lost/stalled coverage does not cover this live alternative.",
+      "userImpact": "A stalled single release can remain at Releasing indefinitely. A committed release followed by response loss leaves a stale locked row and generic failure with retry available; a malformed successful response can announce release without a verified receipt. Operators receive different certainty for the same irreversible outcome depending on entry point.",
+      "suggestedFix": "Give single release the same bounded full-body wait, validated action-specific receipt, explicit unknown-outcome feedback and authoritative readback as batch release. Add focused single-release stalled-body, malformed-success and commit-then-lost-response checks."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/session expiry, Supabase RPC/RLS, uploads, notification delivery, provisioning and consequential-action recovery; no staging exists.",
+    "Complete authenticated keyboard journeys, assistive-technology use, physical iPhone/macOS Safari and observed human task success.",
+    "Real client-approved engagement artifacts/results, current Board-confirmed workload facts, and Board-approved retention/blind-review/remediation policies.",
+    "Private visual states beyond the two supplied synthetic captures; screenshots and intercepted APIs are not live account evidence."
+  ]
+}

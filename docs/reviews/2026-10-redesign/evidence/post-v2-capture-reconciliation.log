@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [mobile-chromium] › tests/e2e/application-combine.spec.ts:9:5 › stale browser recovery exports both copies and combines selected answers without an early write (3.0s)
+
+  1 passed (3.6s)

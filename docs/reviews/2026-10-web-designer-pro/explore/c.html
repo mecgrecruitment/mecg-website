@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C · A roster</title>
+<link rel="stylesheet" href="base.css">
+<style>
+.field { background: var(--blue); color: white; padding-bottom: 160px; }
+header.site img { filter: brightness(0) invert(1); }
+.hero { padding-top: 56px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: end; }
+h1 { font-size: clamp(44px, 5.6vw, 72px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 600; }
+.lede { color: #e1eaff; font-size: 18px; }
+.actions { display: flex; gap: 20px; margin-top: 24px; }
+.actions .link { color: white; }
+.roster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: -120px; }
+.roster figure { position: relative; }
+.roster img { aspect-ratio: 4/5; width: 100%; object-fit: cover; object-position: top; border-radius: 12px; box-shadow: 0 20px 40px -24px rgb(18 33 62 / 60%); transition: transform 200ms ease-out; }
+.roster figure:hover img, .roster figure:focus-within img { transform: translateY(-6px); }
+.roster figcaption { margin-top: 12px; font-size: 14px; font-weight: 600; }
+.roster figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.logos { display: flex; gap: 32px; align-items: center; padding-block: 40px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
+@media (max-width: 767px) {
+  .hero { grid-template-columns: 1fr; padding-top: 32px; }
+  h1 { font-size: 44px; }
+  .roster { grid-template-columns: repeat(5, 44%); overflow-x: auto; margin-top: -120px; padding-bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .roster img { transition: none; } }
+</style></head>
+<body>
+<section class="field"><div class="wrap">
+<header class="site"><img src="http://localhost:3100/logos/mecg-color.svg" alt="MECG" height="36"><nav><a>Client Services</a><a>Our Team</a><a>Contact Us</a><a class="btn">Join MECG</a></nav></header>
+<div class="hero"><h1>Pro bono consulting, led by Michigan students.</h1><div><p class="lede">Meet the people who will run your semester: a board of ten and teams of six to eight members.</p><div class="actions"><a class="btn">Discuss a project →</a><a class="link">Join MECG →</a></div></div></div>
+</div></section>
+<div class="wrap">
+<div class="roster">
+<figure><img src="http://localhost:3100/board/annie-new.jpeg" alt=""><figcaption>Annie Callam<span>President</span></figcaption></figure>
+<figure><img src="http://localhost:3100/board/nandini.jpeg" alt=""><figcaption>Nandini Tatiwala<span>VP External</span></figcaption></figure>
+<figure><img src="http://localhost:3100/board/abby.jpeg" alt=""><figcaption>Abby Osterhart<span>VP Internal</span></figcaption></figure>
+<figure><img src="http://localhost:3100/board/jandy.jpeg" alt=""><figcaption>Jandy Arias<span>VP Recruitment</span></figcaption></figure>
+<figure><img src="http://localhost:3100/board/blake.jpeg" alt=""><figcaption>Blake Stark<span>VP Consulting</span></figcaption></figure>
+</div>
+<p class="logos">Worked with General Motors · Legendary Sports Xperiences · Glo Skin Spa · Koops Automation · Gypsy Spirits · Here Here Market</p>
+</div>
+</body></html>

@@ -1,10 +1,11 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import { requireAdmin } from "@/lib/auth";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { screeningRpc, type ScreeningOverview } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";
 import StatusPill from "@/components/status-pill";
@@ -20,7 +21,7 @@ const TD = "px-4 py-3 text-[13px] text-mecg-navy/55";
 
 export default async function ScreeningAdminPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
   const [{ data: overview, error }, { data: memberships }, { count: submittedCount }] = await Promise.all([
@@ -87,7 +88,7 @@ export default async function ScreeningAdminPage() {
       <WorkspaceHeader
         eyebrow="Recruitment operations"
         title="Application review"
-        description="Choose readers, approve the identity-free copies, send them out, then close and rank. Readers never see who wrote what."
+        description="Choose readers, approve the identity-free copies, assign review work, then close and review the internal ranking. Readers never see who wrote what."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
       <ScreeningControls cycleId={cycleId} members={members} submittedCount={submittedCount ?? 0} batch={batch || undefined} packetList={packetList || undefined} packetsHidden={packetsHidden} canRelease={user.memberships.some((membership) => membership.cycleId === cycleId && membership.role === "OWNER")} />
@@ -144,8 +145,8 @@ export default async function ScreeningAdminPage() {
       )}
       {overview?.status === "FROZEN" && (
         <section>
-          <h2 className="text-xl font-semibold">Ranking</h2>
-          <p className="mt-1 text-sm text-mecg-navy/55">{ranked.length} applicants · tied averages share a rank · <Link href="/admin/screening/calibrated" className="font-semibold text-mecg-navy underline-offset-2 hover:underline">Reader-adjusted ranking</Link></p>
+          <h2 className="text-xl font-semibold">Internal ranking</h2>
+          <p className="mt-1 text-sm text-mecg-navy/55">{ranked.length} applicants · tied averages share a rank · <Link href={withWorkspaceCycle("/admin/screening/calibrated", cycleId)} className="font-semibold text-mecg-navy underline-offset-2 hover:underline">Reader-adjusted ranking</Link></p>
           <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="Screening ranking">
             <div className="min-w-[80rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
               <table className="w-full text-left text-sm">

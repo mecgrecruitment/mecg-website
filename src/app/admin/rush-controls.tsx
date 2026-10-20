@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import RoundStatusControl from "./round-status-control";
+import { AccountProvisioningRecovery, useAccountProvisioning } from "./account-provisioning";
+import { requestRoundClose } from "./round-close-request";
 import FormField from "@/components/form-field";
 import { CLERK_PASSWORD_MIN_LENGTH } from "@/lib/clerk-password";
-import { canTransitionCycle, canTransitionRound } from "@/lib/workflow";
-import { cycleStatusLabel, memberRoleLabel, roundStatusLabel } from "@/lib/labels";
+import { canTransitionCycle } from "@/lib/workflow";
+import { cycleStatusLabel, memberRoleLabel } from "@/lib/labels";
+import { clonedCycleDestination, withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { authorizedFetch } from "@/lib/client-fetch";
 
 type Option = { id: string; label: string };
@@ -15,7 +19,6 @@ type MemberAccount = { id: string; name: string; role: MemberRole; roles: Member
 const NO_DUPLICATE_ACCOUNT_IDS: string[] = [];
 
 const CYCLE_STATUSES = ["DRAFT", "OPEN", "IN_PROCESS", "DECISION_LOCK", "CLOSED", "ARCHIVED"];
-const ROUND_STATUSES = ["DRAFT", "PUBLISHED", "ACTIVE", "FROZEN", "FINALIZED", "ARCHIVED"];
 const MEMBER_ROLES: readonly { value: MemberRole; label: string }[] = [
   { value: "MEMBER", label: "Member" },
   { value: "BOARD", label: "Board operations" },
@@ -37,10 +40,12 @@ function Select({
   required?: boolean;
   children: ReactNode;
 }) {
+  const id = useId();
   return (
-    <label className="block text-sm font-medium">
-      {label}
+    <div className="block text-sm font-medium">
+      <label htmlFor={id}>{label}</label>
       <select
+        id={id}
         name={name}
         defaultValue={defaultValue}
         required={required}
@@ -48,7 +53,7 @@ function Select({
       >
         {children}
       </select>
-    </label>
+    </div>
   );
 }
 
@@ -75,6 +80,17 @@ function useRushAction(cycleId: string) {
         setError(body?.error ?? "Request failed");
         return false;
       }
+      if (payload.action === "CLONE_CYCLE") {
+        const receipt: unknown = await response.json().catch(() => null);
+        const destination = clonedCycleDestination(receipt);
+        if (!destination) {
+          setError("The cycle may have been created, but its destination could not be confirmed. Reload the cohort list before cloning again.");
+          return false;
+        }
+        form?.reset();
+        router.push(destination);
+        return true;
+      }
       form?.reset();
       router.refresh();
       return true;
@@ -86,7 +102,14 @@ function useRushAction(cycleId: string) {
     }
   }
 
-  return { act, pending, error };
+  async function closeRound(roundId: string) {
+    setPending(true);
+    setError("");
+    try { return await requestRoundClose(cycleId, roundId); }
+    finally { setPending(false); }
+  }
+
+  return { act, closeRound, pending, error };
 }
 
 function ErrorNotice({ error }: { error: string }) {
@@ -135,7 +158,7 @@ export function PeopleControls({
   memberAccounts,
   duplicateAccountIds = NO_DUPLICATE_ACCOUNT_IDS,
 }: ControlProps & { currentUserId: string; memberAccounts: MemberAccount[]; duplicateAccountIds?: string[] }) {
-  const { act, pending, error } = useRushAction(cycleId);
+  const provisioning = useAccountProvisioning(cycleId);
   const [showAdd, setShowAdd] = useState(false);
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"ALL" | MemberRole>("ALL");
@@ -153,24 +176,28 @@ export function PeopleControls({
     <section aria-labelledby="access-heading">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div><p className="text-[13px] font-semibold text-mecg-navy/55">Owner controls</p><h2 id="access-heading" className="mt-1 text-xl font-semibold">Membership access</h2><p className="mt-1 text-sm text-mecg-navy/60">Roles are exclusive for this cycle. Every change is recorded in Activity.</p></div>
-        <div className="flex gap-2"><Link href="/admin/audit" className="button-secondary">View activity</Link><button type="button" onClick={() => setShowAdd((value) => !value)} aria-expanded={showAdd} className="button-primary">{showAdd ? "Close" : "Add person"}</button></div>
+        <div className="flex gap-2"><Link href={withWorkspaceCycle("/admin/audit", cycleId)} className="button-secondary">View activity</Link><button type="button" disabled={provisioning.pending} onClick={() => setShowAdd((value) => !value)} aria-expanded={showAdd} className="button-primary">{showAdd ? "Close" : "Add person"}</button></div>
       </div>
 
       {duplicateAccountIds.length > 0 && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-950 shadow-[inset_0_0_0_1px_rgba(180,83,9,0.18)]"><p className="font-semibold">Possible duplicate accounts need review</p><p className="mt-1 leading-6">{duplicateAccountIds.length} account records share an exact verified email with another profile. They remain separate so no history or permissions are silently merged.</p></div>}
 
-      {showAdd && <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <JsonActionForm className={CARD} onSubmitData={(data, form) => void act({ action: "ADD_USER", name: data.get("name"), email: data.get("email"), password: data.get("password"), role: data.get("role") }, form)}>
-          <h3 className="text-base font-semibold">Create a new account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Use this only when the person does not already have a Clerk account.</p>
-          <div className="mt-3 flex flex-col gap-2.5"><FormField label="Full name" name="name" required placeholder="Full name" /><FormField label="Email" name="email" type="email" required placeholder="Email" /><FormField label="Temporary password" name="password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} required placeholder={`At least ${CLERK_PASSWORD_MIN_LENGTH} characters`} /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={pending} className="button-primary mt-1 w-full">Create account</button></div>
+      {showAdd && <div className="mt-4 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
+        <JsonActionForm className={CARD} onSubmitData={(data, form) => void provisioning.act({ action: "ADD_USER", name: data.get("name"), email: data.get("email"), password: data.get("password"), role: data.get("role") }, form)}>
+          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Create a new account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Use this only when the person does not already have a Clerk account.</p>
+          <div className="mt-3 flex flex-col gap-2.5"><FormField label="Full name" name="name" required placeholder="Full name" /><FormField label="Email" name="email" type="email" required placeholder="Email" /><FormField label="Temporary password" name="password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} required placeholder={`At least ${CLERK_PASSWORD_MIN_LENGTH} characters`} /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={provisioning.pending} className="button-primary mt-1 w-full">Create account</button></div>
+          </fieldset>
         </JsonActionForm>
-        <JsonActionForm className={CARD} onSubmitData={(data, form) => void act({ action: "ADD_EXISTING_USER", email: data.get("email"), role: data.get("role") }, form)}>
-          <h3 className="text-base font-semibold">Add an existing account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Give an existing account access to this recruitment cycle.</p>
-          <div className="mt-3 flex flex-col gap-2.5"><FormField label="Email" name="email" type="email" required placeholder="name@umich.edu" /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={pending} className="button-primary mt-1 w-full">Add to cycle</button></div>
+        <JsonActionForm className={CARD} onSubmitData={(data, form) => void provisioning.act({ action: "ADD_EXISTING_USER", email: data.get("email"), role: data.get("role") }, form)}>
+          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Add an existing account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Give an existing account access to this recruitment cycle.</p>
+          <div className="mt-3 flex flex-col gap-2.5"><FormField label="Email" name="email" type="email" required placeholder="name@umich.edu" /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={provisioning.pending} className="button-primary mt-1 w-full">Add to cycle</button></div>
+          </fieldset>
         </JsonActionForm>
-        <ErrorNotice error={error} />
+        <ErrorNotice error={provisioning.error} />
+        {provisioning.success && <p role="status" className="text-sm text-mecg-navy lg:col-span-2">{provisioning.success}</p>}
+        {provisioning.needsRecovery && <AccountProvisioningRecovery cycleId={cycleId} />}
       </div>}
 
-      <div className="mt-5 rounded-2xl bg-paper p-4 sm:p-5">
+      <div className="mt-5 workspace-panel rounded-2xl bg-paper p-4 sm:p-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(15rem,1fr)_13rem_11rem]">
           <label><span className="sr-only">Search accounts</span><input value={query} onChange={(event) => setQuery(event.target.value)} className="field-control text-base sm:text-sm" placeholder="Search member name" /></label>
           <label><span className="sr-only">Filter accounts by role</span><select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "ALL" | MemberRole)} className="select-control text-base sm:text-sm"><option value="ALL">Every role</option>{MEMBER_ROLES.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label>
@@ -287,7 +314,9 @@ export function RoundControls({
   applications,
   assignments,
   assignable = true,
+  canManageStatus,
 }: ControlProps & {
+  canManageStatus: boolean;
   rounds: (Option & { status: string })[];
   memberAccounts: MemberAccount[];
   applications: Option[];
@@ -296,7 +325,7 @@ export function RoundControls({
   // the assign and reassign panels are hidden and only round status remains.
   assignable?: boolean;
 }) {
-  const { act, pending, error } = useRushAction(cycleId);
+  const { act, closeRound, pending, error } = useRushAction(cycleId);
   const activeMemberAccounts = memberAccounts.filter((member) => member.active !== false);
   return (
     <section className="flex flex-col gap-5">
@@ -323,35 +352,18 @@ export function RoundControls({
           </div>
         </JsonActionForm>}
 
-        <div className="rounded-2xl bg-paper p-5">
+        {canManageStatus && <div className="workspace-panel rounded-2xl bg-paper p-5">
           <p className="text-[13px] font-semibold text-mecg-navy/50">Round status</p>
           <p className="mt-1 text-sm text-mecg-navy/55">Evaluation forms open when a round is open and lock when it is closed to edits.</p>
           <div className="mt-3 flex flex-col gap-2">
             {rounds.map((round) => (
-              <JsonActionForm
-                key={round.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-3.5 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]"
-                onSubmitData={(data) => void act({ action: "SET_ROUND_STATUS", roundId: round.id, status: data.get("status") })}
-              >
-                <span className="text-[13px] font-semibold">{round.label}</span>
-                <div className="flex items-center gap-2">
-                  <select
-                    name="status"
-                    aria-label={`Status for ${round.label}`}
-                    defaultValue={round.status}
-                    className="select-control w-44 text-[13px]"
-                  >
-                    {ROUND_STATUSES.filter((status) => canTransitionRound(round.status, status)).map((status) => <option key={status} value={status}>{roundStatusLabel(status)}</option>)}
-                  </select>
-                  <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-mecg-navy hover:bg-mecg-blue/[0.12]">Save</button>
-                </div>
-              </JsonActionForm>
+              <RoundStatusControl key={`${round.id}:${round.status}`} round={round} act={act} closeRound={closeRound} pending={pending} error={error} />
             ))}
             {!rounds.length && <p className="text-sm text-mecg-navy/45">No rounds configured yet.</p>}
           </div>
-        </div>
+        </div>}
       </div>
-      {assignable && <div className="rounded-2xl bg-paper p-5">
+      {assignable && <div className="workspace-panel rounded-2xl bg-paper p-5">
         <p className="text-[13px] font-semibold text-mecg-navy/50">Open assignments</p>
         <p className="mt-1 text-sm text-mecg-navy/55">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
         <div className="mt-3 grid gap-2">
@@ -378,7 +390,7 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
   const nextStatuses = CYCLE_STATUSES.filter((status) => canTransitionCycle(cycleStatus, status));
   return (
     <section className="flex flex-col gap-3">
-      <div className="rounded-2xl bg-paper p-5">
+      <div className="workspace-panel rounded-2xl bg-paper p-5">
         <p className="text-[13px] font-semibold text-mecg-navy/50">Cycle status</p>
         <p className="mt-1 text-sm text-mecg-navy/55">
           Currently {cycleStatusLabel(cycleStatus)}. Only the transitions the workflow allows are listed.
@@ -411,13 +423,13 @@ export function CloneCycleForm({ cycleId, cycleName }: ControlProps & { cycleNam
   return (
     <section className="flex flex-col gap-3">
       <JsonActionForm
-        className="rounded-2xl bg-paper p-5"
+        className="workspace-panel rounded-2xl bg-paper p-5"
         onSubmitData={(data, form) => void act({ action: "CLONE_CYCLE", name: data.get("name") }, form)}
       >
         <p className="text-[13px] font-semibold text-mecg-navy/50">Start the next cycle</p>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">
           Copies the rounds, each round&rsquo;s current scoring guide, the application questions and everyone&rsquo;s access from
-          {" "}{cycleName}. No applicants, evaluations, decisions or events come across. The new cycle starts as a draft.
+          {" "}{cycleName}. No applicants, evaluations, decisions or events come across. The new cycle starts as a draft. Only one unfinished cycle is allowed; close the current cycle before starting the next.
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <div className="min-w-64 flex-1">

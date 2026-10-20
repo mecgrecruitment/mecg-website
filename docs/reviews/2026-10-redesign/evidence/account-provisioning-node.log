@@ -1,0 +1,51 @@
+{"timestamp":"2026-10-16T21:22:27.277Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"14a33e3d-cc66-43aa-82d1-3ccf445c831c","code":"MEMBERSHIP_GRANT","detail":{"recorded":true,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T21:22:27.283Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"6c0d1d7c-3b9f-4bf2-b286-6e7846c252e4","code":"MEMBERSHIP_GRANT","detail":{"recorded":false,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T21:22:27.290Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"1ee040e1-c3af-48ee-88b4-64ee5852991d","code":"IDENTITY_LINK","detail":{"recorded":false,"clerkCleanupFailed":true,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T21:22:27.383Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"08686108-149a-4219-be03-e5b7b18fd07b","code":"MEMBERSHIP_GRANT","detail":{"recorded":true,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+(node:1133015) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1133015) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1133015) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ admin account creation enforces Clerk's 8-character password boundary (32.762108ms)
+✔ owner can deactivate a cycle membership with an audit reason (23.45148ms)
+✔ board cannot deactivate a membership (6.298097ms)
+✔ board can unassign an untouched evaluator assignment (6.424742ms)
+✔ board can atomically advance a distinct applicant cohort to Speed Dating (7.666177ms)
+✔ board can form Group Case teams of a chosen size (6.374068ms)
+✔ panel cannot form Group Case teams (5.484753ms)
+✔ committee cannot advance applicants (6.227777ms)
+✔ reassignment requires both assignment and replacement evaluator (6.734695ms)
+✔ board can set a validated application window through the audited RPC (7.381941ms)
+✔ application window rejects malformed or reversed dates before the RPC (5.688239ms)
+✔ RSVP slots require offset-aware ordered times and a bounded integer capacity (6.787723ms)
+✔ a rejected membership grant preserves linked access and records restricted recovery (8.462239ms)
+✔ an uncertain membership grant preserves accounts for reconciliation (5.725649ms)
+✔ a failed Clerk rollback after ensure_external_identity uses an incident reference (6.420213ms)
+✔ account provisioning handles create-unknown without unsafe cleanup or identity logs (5.938663ms)
+✔ account provisioning handles create-rejected without unsafe cleanup or identity logs (6.241603ms)
+✔ account provisioning handles identity-unknown without unsafe cleanup or identity logs (6.370331ms)
+✔ account provisioning handles identity-empty without unsafe cleanup or identity logs (5.291526ms)
+✔ account provisioning handles identity-denied-clean without unsafe cleanup or identity logs (6.057723ms)
+✔ account provisioning handles identity-connection without unsafe cleanup or identity logs (5.383285ms)
+✔ account provisioning handles identity-completion-unknown without unsafe cleanup or identity logs (6.209604ms)
+✔ existing account identity-unknown records opaque recovery without destructive compensation (6.341958ms)
+✔ existing account identity-error records opaque recovery without destructive compensation (5.766564ms)
+✔ existing account identity-missing records opaque recovery without destructive compensation (5.406378ms)
+✔ existing account grant-unknown records opaque recovery without destructive compensation (5.911573ms)
+✔ existing account grant-error records opaque recovery without destructive compensation (5.225784ms)
+✔ existing account grant-missing records opaque recovery without destructive compensation (5.280605ms)
+✔ existing account incident-store-failed records opaque recovery without destructive compensation (5.667822ms)
+✔ existing account success records opaque recovery without destructive compensation (6.419823ms)
+✔ new account missing membership receipt preserves partial access and records recovery (5.942891ms)
+(node:1133015) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/rush/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 382.951767

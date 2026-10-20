@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-v2-010",
+  "lens": "Simulated Apple-inspired clarity lens; overall coherence, hierarchy, next actions, state feedback and restraint within Precision Instrument. Not a human participant or Apple employee.",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The supplied desktop and mobile homepage captures show a coherent, deliberate engineering-document identity: readable proposition, restrained accent, useful hairlines and two audience actions. Cost and duration now precede inquiry. The optional mobile bench resolves the earlier process-before-proof burden without discarding the signature interaction; later working expectations complement it. I traced the actual Work-to-Contact inquiry journey through source and browser assertions: pending fields lock, malformed receipts preserve text, delivery uncertainty is explicit, and field errors restore useful focus. These are meaningful clarity improvements. The mixed-copy capture and implementation also give applicants explicit changed-field choices and a private backup rather than requiring manual whole-copy salvage. Applicant receipt copy now consistently discloses identifying original-resume access. Nevertheless, the central client decision still lacks any inspectable approved MECG engagement, method or handoff. Honest partnership labeling fixes an overpromise but cannot complete that task. That concrete content deficit prevents my world-class agreement. Unverified hosted consequential workflows and unresolved policy authority additionally prevent a broad release endorsement; local passing logs are valuable within their recorded scope.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/join-content.ts",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log (completion)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-lint.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx: selected-client-profile",
+      "evidence": "The current homepage correctly renders Past partnerships and Case studies pending client approval. PUBLIC_PROJECTS is empty; selected organization profiles explicitly withhold MECG scope, methods, deliverables and outcomes. Both inspected public captures show affiliation evidence and a culture photograph, without an actual consulting artifact.",
+      "userImpact": "A prospective organization can understand the offer and terms but cannot judge the substance or usefulness of comparable MECG work before committing to a conversation.",
+      "suggestedFix": "Have content owners secure client and Board approval for one bounded real engagement: decision question, MECG method, redacted handoff excerpt and limitations. Feature it through the existing approval boundary. Preserve the accurate pending state until approval exists."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance, authenticated recovery/status/operator task success or deployment verification was supplied; I did not execute these journeys.",
+    "No observed human comprehension, assistive-technology session, physical iPhone or macOS Safari evidence. Synthetic private captures and local keyboard assertions establish narrower scope.",
+    "Board-confirmed workload facts, original-resume/blind-review policy resolution, retention and closed-round remediation approval remain unavailable.",
+    "Grading, release diagnostics and provisioning were not independently exercised in this seat. Historical objections and implementation responses were read, but their entirety is not certified by this focused review."
+  ]
+}

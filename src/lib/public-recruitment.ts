@@ -7,9 +7,30 @@ export type PublicRecruitmentCycle = {
   closesAt?: string | null;
 };
 
-export type PublicRecruitment = {
-  cycle?: PublicRecruitmentCycle | null;
-};
+export type PublicRecruitmentEvent = { id: string; name: string; kind: string; startsAt: string; endsAt: string | null; location: string | null; visibility: "PUBLIC" };
+export type PublicRecruitment =
+  | { kind: "available"; cycle: PublicRecruitmentCycle | null; events: PublicRecruitmentEvent[] }
+  | { kind: "unavailable"; cycle: null; events: [] };
+
+const UNAVAILABLE: PublicRecruitment = { kind: "unavailable", cycle: null, events: [] };
+const nullableDate = (value: unknown): value is string | null => value === null || typeof value === "string" && Number.isFinite(Date.parse(value));
+
+export function parsePublicRecruitment(value: unknown): PublicRecruitment {
+  if (!value || typeof value !== "object" || !("cycle" in value) || !("events" in value) || !Array.isArray(value.events)) return UNAVAILABLE;
+  let cycle: PublicRecruitmentCycle | null = null;
+  if (value.cycle !== null) {
+    const candidate = value.cycle;
+    if (!candidate || typeof candidate !== "object" || !("name" in candidate) || typeof candidate.name !== "string" || !candidate.name.trim() || !("status" in candidate) || (candidate.status !== "DRAFT" && candidate.status !== "OPEN" && candidate.status !== "IN_PROCESS") || !("opensAt" in candidate) || !nullableDate(candidate.opensAt) || !("closesAt" in candidate) || !nullableDate(candidate.closesAt)) return UNAVAILABLE;
+    cycle = { name: candidate.name, status: candidate.status, opensAt: candidate.opensAt, closesAt: candidate.closesAt };
+  }
+  const events: PublicRecruitmentEvent[] = [];
+  for (const event of value.events) {
+    if (!event || typeof event !== "object" || typeof event.id !== "string" || !event.id || typeof event.name !== "string" || typeof event.kind !== "string" || typeof event.startsAt !== "string" || !Number.isFinite(Date.parse(event.startsAt)) || !nullableDate(event.endsAt) || !(event.location === null || typeof event.location === "string") || event.visibility !== "PUBLIC") return UNAVAILABLE;
+    events.push({ id: event.id, name: event.name, kind: event.kind, startsAt: event.startsAt, endsAt: event.endsAt, location: event.location, visibility: "PUBLIC" });
+  }
+  if (cycle === null && events.length > 0) return UNAVAILABLE;
+  return { kind: "available", cycle, events };
+}
 
 export type RecruitmentAction = {
   href: string;
@@ -118,7 +139,11 @@ export function recruitmentAction(
 }
 
 export async function fetchPublicRecruitment(): Promise<PublicRecruitment> {
-  const supabase = createPublicClient();
-  const { data } = await supabase.rpc("public_recruitment");
-  return data && typeof data === "object" ? data as PublicRecruitment : { cycle: null };
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase.rpc("public_recruitment");
+    return error ? UNAVAILABLE : parsePublicRecruitment(data);
+  } catch {
+    return UNAVAILABLE;
+  }
 }

@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-097",
+  "lens": "Owner and access-sensitive user \u2014 recovery and retry",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected design presents a clear student-led consulting proposition and coherent Precision Instrument hierarchy on supplied desktop/mobile captures. Source-tracing the owner journey from People to account creation, incident review and resolution shows deliberate protection against destructive retries: uncertain identity writes and failed membership grants preserve accounts, operational logs use opaque references, and the owner queue explains manual checks before retry. Resolution explicitly records remediation rather than repairing accounts, and requires an explicit receipt. Applicant materials and final review accurately disclose that assigned first-pass reviewers can read identifying information in original resumes. Local SQL permission tests and synthetic browser evidence are useful, but they do not establish successful recovery with hosted identity, storage and sessions, or user understanding. The account-creation receipt gap below also prevents unqualified acceptance.",
+  "inspected": [
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/policies/recruitment-policy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/admin/people/page.tsx:109",
+    "src/app/admin/rush-controls.tsx:58-185",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/api/admin/rush/route.test.ts:261-405",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/operational-log.ts",
+    "src/lib/clerk-retry.ts",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/page.test.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/app/api/admin/provisioning/[id]/resolve/route.test.ts",
+    "src/app/apply/application-form.tsx:698-747",
+    "supabase/migrations/20260905120000_membership_allowlist.sql:96-200",
+    "supabase/migrations/20260911145058_board_screening_readers.sql:64-125",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-final-node.log:summary",
+    "evidence/mecg-privacy-db-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/api/admin/rush/route.ts:133-142,293; src/app/admin/rush-controls.tsx:73-80",
+      "evidence": "ADD_USER checks membership.error but accepts an empty membership.data. The common return converts null/undefined into HTTP 201 {ok:true}; useRushAction accepts every 2xx response without reading its receipt and resets the form. Unlike identity-empty handling at lines 130-131 and ResolveButton receipt validation, missing membership acknowledgment is treated as success. This is a source-demonstrated conditional path, not an observed hosted failure.",
+      "userImpact": "An empty or malformed success acknowledgment can clear owner-entered details and imply completed access without a membership receipt or recovery incident, making safe reconciliation harder.",
+      "suggestedFix": "Require a valid membership ID for ADD_USER and ADD_EXISTING_USER; route missing acknowledgments to restricted reconciliation while preserving accounts. Validate the creation receipt before clearing the form, and add focused empty/malformed-success cases."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists; actual timeout-after-commit recovery, provider lookup, session expiry and cross-cycle access preservation were not exercised end to end.",
+    "The eight passing browser cases use a synthetic resolve-button harness and intercepted HTTP; the real authenticated owner queue has source/SSR evidence only. No owner recovery capture or observed complete recovery journey was supplied.",
+    "No human usability study establishes understanding of privacy disclosures or manual remediation. Resume policy approval and retention periods remain unresolved external decisions.",
+    "Supplied Chromium captures do not establish assistive-technology, physical-device, Safari or Firefox acceptance. No full suite or external action was run by this seat."
+  ]
+}

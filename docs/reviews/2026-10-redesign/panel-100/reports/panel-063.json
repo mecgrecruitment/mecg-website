@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-063",
+  "lens": "Prospective applicant; keyboard-oriented use (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed source supports a coherent applicant journey: the public proposition identifies student-led consulting, Join explains eligibility, preparation and evaluation, and the application separates draft saving from submission. Native fields, explicit validation focus, step-heading focus, and recovery comparisons are promising for keyboard use. Browser and server conflicts pause writes until an explicit choice; the review step explains consent and the submission transition. Applicant next-action logic distinguishes scheduling outages from having nothing to do. Desktop-hero and mobile captures show a consistent Precision Instrument identity, readable hierarchy and clear student entry points, but do not show private applicant screens. Original-resume access is accurately disclosed in Materials and Review; pending client proof is labeled without invented outcomes. Supplied local tests and the database race log support specific reliability claims. They do not establish a complete keyboard-only journey, hosted integration, or observed student success, so an unqualified world-class or release endorsement is not established.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/apply/headshot-field.tsx",
+    "src/app/apply/applicant-signup-form.tsx",
+    "src/app/applicant/page.tsx (dashboard loading, next-action selection and receipt)",
+    "src/app/applicant/next-action.ts",
+    "src/app/globals.css (focus and field rules)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (navigation, storage failure, submission lock, recovery and conflict cases)",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "tests/e2e/application-reliability.spec.ts",
+      "evidence": "The interrupted-submit journey at lines 8\u201342 advances with click/check and replaces /applicant with a synthetic Submitted heading. Recovery cases beginning at lines 155 and 231 assert heading focus but choose copies with click. public-journeys.spec.ts:13\u201327 checks Escape focus return after programmatic focus; its preparation journey at lines 30\u201337 uses clicks. These checks do not demonstrate sequential keyboard access through preparation, file selection, conflict choice, consent, submission and the real next-action surface.",
+      "userImpact": "A keyboard-dependent applicant has only partial evidence that they can complete the full task and locate the next action after recovery or submission; no actual keyboard failure is claimed.",
+      "suggestedFix": "Add a focused keyboard-only applicant acceptance scenario using Tab/Shift+Tab, Enter/Space and native select keys, asserting visible focus and focus return across validation, both conflict choices and submission. Include the real applicant status rendering; separately record authenticated integration validation when an environment exists."
+    }
+  ],
+  "notVerified": [
+    "No live browser or new tests were run by this seat; the journey was traced through source and supplied synthetic test evidence, not observed with a student.",
+    "No staging or hosted Clerk signup/session-expiry, Supabase RPC/RLS, storage upload or email-delivery acceptance exists in this package.",
+    "Private application/recovery/status visual craft, long keyboard traversal and focus visibility at zoom were not demonstrated by supplied captures.",
+    "Physical devices, Safari, Firefox, screen readers and actual applicant understanding of saved/submitted state remain unverified.",
+    "Migration/application rollout coordination, Board privacy policy resolution and client publication approvals remain external dependencies."
+  ]
+}

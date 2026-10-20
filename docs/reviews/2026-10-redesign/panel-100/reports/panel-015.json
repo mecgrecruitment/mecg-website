@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-015",
+  "lens": "Editorial and brand craft",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The supplied homepage captures show a distinctive, coherent Precision Instrument identity: strong sans headlines, mono metadata, disciplined hairlines, restrained color, and a genuinely contextual drafting-bench figure. Desktop columns become a legible mobile sequence, and real member photography is accurately captioned as a PwC visit rather than project delivery. Organization figures and named partnerships precede people. However, the selected-work promise currently resolves to organizational affiliation rather than inspectable consulting work. This is an honest interim presentation, but insufficient evidence for an unqualified world-class judgment. I traced the client journey from Work through engagement FAQs to the contact form, its API, and the passing desktop/mobile journey log; its submission is intercepted, so this establishes local interface coverage rather than actual inquiry delivery or observed user success. This is a simulated editorial review, not human endorsement or broad private-workflow acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx:731-746 (privacy disclosure excerpts)",
+    "src/app/globals.css:font tokens (excerpts)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:93-103; src/content/projects.public.ts:3-5",
+      "evidence": "The captured Selected work section promises \u201cReal organizations. Specific questions.\u201d but its fallback supplies no specific question and states case studies are pending approval. Selecting a past organization renders its general business description, followed by notice that scope, methods, deliverables and outcomes remain pending. The committed approved-project fallback is empty. DESIGN.md section 7 explicitly confirms zero project artifacts.",
+      "userImpact": "A prospective client can identify recognizable affiliations and understand the process, but cannot judge the substance or quality of MECG consulting before contacting the board. The strongest visual proof remains culture photography and an explanatory illustration.",
+      "suggestedFix": "Obtain client and board approval for one representative engagement with its actual decision question, constraints, methods and a redacted deliverable image; publish through the existing release boundary and feature it before culture photography. Until approval exists, align the fallback heading with past partnerships rather than promising specific questions. Do not invent outcomes or expose confidential material."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted acceptance exists; live Clerk sessions, Supabase/RLS, storage and contact-email delivery remain unverified. The contact browser test fulfills a synthetic 200 response.",
+    "No human comprehension, conversion or usability study exists. Source/test review cannot establish whether clients understand or trust the proposition.",
+    "Supplied visual evidence covers Linux fallback fonts and Chromium desktop/mobile emulation; Safari, Firefox, physical devices, assistive technology, intermediate widths and zoom were not independently exercised.",
+    "Approved client artifacts/results and permission provenance were not available. The publication-proof JSON demonstrates fixture publication mechanics, not client approval.",
+    "Private grading/operator journeys were outside this seat\u2019s detailed inspection. Original-resume disclosure was checked in source and correctly allows identifying PDF contents; deployed access behavior and Board policy resolution were not verified."
+  ]
+}

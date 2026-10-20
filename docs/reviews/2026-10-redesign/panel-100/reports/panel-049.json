@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-049",
+  "lens": "Product systems and reliability \u2014 cross-step continuity (simulated AI expert lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The sampled interfaces form a thoughtful system: public copy explains student-led consulting without invented outcomes; application recovery pauses writes for an explicit comparison; grading close separates partial submissions from valid independent evidence and plainly states irreversibility. The supplied desktop hero and synthetic mobile operator capture show coherent Precision Instrument hierarchy and readable consequence copy. However, submission-to-dashboard continuity still permits an unverified success receipt and premature recovery deletion. That contradicts the otherwise careful treatment of uncertain acknowledgements. Hold the reviewed release for a targeted correction and independent recheck. This is source, capture and supplied local-test assessment, not observed applicant/operator success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/apply/route.ts",
+    "src/app/api/apply/status/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/application-receipt-delivery.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/round-evidence.ts",
+    "src/lib/decision-release.ts",
+    "supabase/migrations/20260830100000_harden_applicant_workflow.sql",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-final-node.log",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:493-538; src/app/applicant/page.tsx:281-285",
+      "evidence": "submit() calls finishSubmission() for every response.ok without reading the success body; finishSubmission clears both browser recovery records and redirects with submitted=1. ApplicantDashboard renders its received/all-set banner solely from that query flag. Its applicant_dashboard RPC includes DRAFT rows (20260830100000_harden_applicant_workflow.sql:389-405), and the page does not gate this banner on display_status. tests/e2e/application-reliability.spec.ts:64-80 explicitly treats HTTP 200 with {} as successful submission, while intercepting the destination. The real submission API returns an applicationId after RPC validation; the client never checks that contract.",
+      "userImpact": "An empty/malformed successful response loses the local recovery copy and presents completion without application evidence. Separately, a saved or revisited submitted=1 URL can tell an applicant with a draft that MECG received it. These are source-demonstrable paths, not observed hosted incidents.",
+      "suggestedFix": "Validate the submission receipt before clearing recovery; reconcile malformed success responses against authoritative status and preserve answers if unconfirmed. Carry the confirmed application identity into navigation and gate dashboard receipt copy on that application\u2019s submitted state. Add focused coverage for empty/invalid success bodies and submitted=1 on a draft or earlier-cycle record."
+    }
+  ],
+  "notVerified": [
+    "No live Clerk session, hosted Supabase RPC/RLS, storage transition, email delivery, migration rollout or authenticated end-to-end journey was exercised. Supplied SQL and browser logs establish isolated fixtures only.",
+    "The close-grading snapshot is advisory; actual operator comprehension and concurrent work changing between review and freeze remain unverified. No human usability study exists.",
+    "Original resume access is expressly disclosed in Materials and Review; this does not establish anonymization or Board resolution of the older blind-review policy conflict.",
+    "No client-approved project artifacts/outcomes were available. Safari, Firefox, physical devices and assistive technology were not inspected; screenshots do not prove keyboard or screen-reader task success."
+  ]
+}

@@ -1,0 +1,31 @@
+import { expect, test } from "@playwright/test";
+
+test("successive attention links replace conflicting roster filters and preserve explicit hidden selection", async ({ page }) => {
+  await page.goto("/apply/test-harness/pipeline-navigation?cycleId=synthetic-cycle");
+  await expect(page.locator('[data-application-harness-ready="true"]')).toBeAttached();
+  await page.getByRole("checkbox", { name: "Select Eligible Example" }).check();
+  await page.getByRole("searchbox", { name: "Search applicants" }).fill("Eligible");
+  await page.getByRole("link", { name: "New submissions", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveValue("SUBMITTED");
+  await expect(page.getByRole("searchbox", { name: "Search applicants" })).toHaveValue("");
+  await expect(page.getByText("Submitted Example", { exact: true })).toBeVisible();
+  await expect(page.getByText("Final Example", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "By stage", exact: true }).click();
+  await page.getByRole("searchbox", { name: "Search applicants" }).fill("No match");
+  await page.getByRole("link", { name: "In final review", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveValue("FINAL_REVIEW");
+  await expect(page.getByRole("button", { name: "All applicants", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("Final Example", { exact: true })).toBeVisible();
+  await expect(page.getByRole("searchbox", { name: "Search applicants" })).toHaveValue("");
+  await page.getByRole("searchbox", { name: "Search applicants" }).fill("No match again");
+  await page.getByRole("link", { name: "In final review", exact: true }).click();
+  await expect(page.getByRole("searchbox", { name: "Search applicants" })).toHaveValue("");
+  await expect(page.getByText("Final Example", { exact: true })).toBeVisible();
+  await expect(page.getByText(/1 selected/).first()).toBeVisible();
+  await expect(page.getByText(/1 hidden/).first()).toBeVisible();
+  await page.getByRole("link", { name: "Missing resumes", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Resume", exact: true })).toHaveValue("MISSING");
+  await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveValue("ALL");
+  await expect(page.getByText("Submitted Example", { exact: true })).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("cycleId")).toBe("synthetic-cycle");
+});

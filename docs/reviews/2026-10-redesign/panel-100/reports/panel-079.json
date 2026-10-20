@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-079",
+  "lens": "Member evaluator \u2014 cross-step continuity (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition and supplied desktop/mobile hero captures are clear and coherent with Precision Instrument. Source tracing of My work \u2192 calibration \u2192 observation entry \u2192 saved evidence \u2192 return to My work exposes a material completion-status contradiction and a note-only persistence gap. Standard evaluations have useful readiness checks, explicit not-observed choices, review-before-lock and receipt validation; those strengths do not carry consistently into Group Case. Local SQL tests protect scoring validity, but do not establish evaluator task success. This is an independent AI source/evidence assessment, not a human usability observation or hosted acceptance result.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/member/page.tsx",
+    "src/app/member/calibration/[roundId]/page.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/app/admin/group-case-coverage.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql",
+    "supabase/tests/grading_contract_consistency.sql:65-125",
+    "src/app/apply/application-form.tsx:731-746",
+    "src/app/member/screening/[assignmentId]/page.tsx:23-69",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public-journey entries)",
+    "evidence/mecg-privacy-final-node.log (grading/readiness/submission entries and totals)",
+    "evidence/mecg-privacy-db-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/page.tsx",
+      "evidence": "isSubmitted at lines 27-29 treats any SUBMITTED record as complete; lines 250-251 tell that reviewer the evaluation is locked, and lines 299-310 list finished work. Yet rate_group_case_applicant in migration 20261016191000, lines 308-339, marks even a one-star partial save SUBMITTED and permits subsequent updates. GroupCaseRoster shows only Started grading and dimensions rated, without canonical validity blockers. SQL tests at grading_contract_consistency.sql:85-112 explicitly demonstrate invalid saved one-star and insufficient-coverage evaluations.",
+      "userImpact": "A reviewer returning from Group Case can see incomplete, still-editable evidence described as finished and locked, obscuring both remaining observations and the route to correct them.",
+      "suggestedFix": "Carry canonical saved/partial/valid/locked state into the roster and My work. Show missing requirements and a continue-grading link; reserve locked copy for an actual frozen/locked evaluation. Verify one-star save \u2192 return \u2192 resume \u2192 valid \u2192 freeze continuity."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx",
+      "evidence": "editNote at lines 195-203 returns without saving when no score exists; flushNote at lines 206-210 also requires a score. Calibration lines 92-98 instruct members to note flags regardless of score. The SQL fixture at grading_contract_consistency.sql:70-80 verifies that note-only evidence can be saved without counting as valid.",
+      "userImpact": "A reviewer with a useful qualitative observation but insufficient scoring evidence must invent a rating or leave the note unsaved; navigating away loses that observation.",
+      "suggestedFix": "Persist nonblank note-only observations with null scores, show their save receipt and partial status, and cover typing a flag with every dimension unobserved followed by navigation and restoration."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated evaluator journey, staging environment, hosted Clerk/Supabase/RLS/storage integration or email delivery was exercised. Supplied logs are local evidence; no tests were run for this review.",
+    "No private evaluator capture, assistive-technology session, physical-device, Safari/Firefox validation or observed human task success establishes private-screen visual usability or accessibility.",
+    "Original-resume access is accurately disclosed in applicant copy and authorized through the resume route; this does not establish anonymization or resolve the outstanding Board policy decision.",
+    "Client-approved outcomes/artifacts and real operator acceptance remain absent. Supplied public screenshots support visual inspection only, not conversion or world-class acceptance."
+  ]
+}

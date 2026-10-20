@@ -3,36 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import SignOutAction from "@/components/sign-out-action";
 
 const NAV_LINKS = [
-  { href: "/team", label: "Our Team" },
   { href: "/work", label: "Client Services" },
-  { href: "/join", label: "Join Our Team" },
+  { href: "/team", label: "Our Team" },
   { href: "/contact", label: "Contact Us" },
 ];
 
 function SignOutControl({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
   const clerk = useClerk();
-  const [busy, setBusy] = useState(false);
-
-  async function logout() {
-    if (busy) return;
-    setBusy(true);
-    onNavigate?.();
-    try {
-      await clerk.signOut({ redirectUrl: "/login" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <button type="button" onClick={logout} disabled={busy} className={`${className} disabled:cursor-wait disabled:opacity-50 disabled:scale-100`}>
-      {busy ? "Signing out…" : "Sign out"}
-    </button>
-  );
+  return <SignOutAction className={className} signOut={() => clerk.signOut({ redirectUrl: "/login" })} onComplete={onNavigate} />;
 }
 
 // Core 3 removed <SignedIn>/<SignedOut>; its <Show> replacement renders nothing
@@ -70,52 +53,62 @@ function ClerkPrimaryAction({ className, onNavigate }: { className: string; onNa
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-mecg-navy/95 text-white shadow-[0_8px_30px_rgba(7,13,31,0.16)] backdrop-blur">
-      <div className="mx-auto flex min-h-18 max-w-[90rem] items-center justify-between px-6 sm:px-10 xl:px-24">
-        <Link href="/home" className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-orange" aria-label="MECG home">
-          <Image src="/logos/mecg-white.svg" alt="MECG" width={168} height={44} priority className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
+    <header
+      className="sticky top-0 z-50 border-b border-public-rule bg-public-ground/95 px-6 text-public-ink backdrop-blur-sm sm:px-10"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) {
+          setOpen(false);
+          menuButton.current?.focus();
+        }
+      }}
+    >
+      <div className="mx-auto flex min-h-18 max-w-6xl items-center justify-between">
+        <Link href="/home" className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-blue" aria-label="MECG home">
+          <Image src="/logos/mecg-color.svg" alt="MECG" width={168} height={44} preload className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
         </Link>
-        <nav aria-label="Main navigation" className="hidden items-center gap-6 text-sm font-medium md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-5 text-sm font-medium lg:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              aria-current={pathname === href ? "page" : undefined}
-              className={`inline-flex min-h-10 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${pathname === href ? "border-mecg-orange text-white" : "border-transparent text-white/60 hover:border-white/35 hover:text-white"}`}
+              aria-current={(pathname === href || pathname.startsWith(`${href}/`)) ? "page" : undefined}
+              className={`inline-flex min-h-11 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "border-mecg-orange text-public-ink" : "border-transparent text-public-muted hover:border-public-edge hover:text-mecg-blue"}`}
             >
               {label}
             </Link>
           ))}
-          <AuthControl className="inline-flex min-h-10 items-center border-b border-transparent text-white/60 transition-[border-color,color,transform] duration-150 hover:border-white/35 hover:text-white active:scale-96" />
+          <AuthControl className="inline-flex min-h-11 items-center border-b border-transparent text-public-muted transition-[border-color,color,transform] duration-150 hover:border-public-edge hover:text-mecg-blue active:scale-96" />
           <PrimaryAction className="button-primary" />
         </nav>
         <button
+          ref={menuButton}
           type="button"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((value) => !value)}
-          className="flex min-h-11 min-w-11 items-center justify-center border border-white/20 text-sm transition-[background-color,transform] duration-150 hover:bg-white/8 active:scale-96 md:hidden"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-public-edge px-3 text-sm transition-[background-color,transform] duration-150 hover:bg-white active:scale-96 lg:hidden"
         >
           {open ? "Close" : "Menu"}
         </button>
       </div>
       {open && (
-        <nav id="mobile-menu" aria-label="Mobile navigation" className="border-t border-white/10 px-6 py-5 sm:px-10 md:hidden">
+        <nav id="mobile-menu" aria-label="Mobile navigation" className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-public-rule py-5 lg:hidden">
           <div className="mx-auto flex max-w-6xl flex-col">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                aria-current={pathname === href ? "page" : undefined}
+                aria-current={(pathname === href || pathname.startsWith(`${href}/`)) ? "page" : undefined}
                 onClick={() => setOpen(false)}
-                className={`border-b border-white/10 py-4 text-lg transition-[color,transform] duration-150 active:translate-x-0.5 ${pathname === href ? "text-mecg-orange" : "text-white"}`}
+                className={`border-b border-public-rule py-4 text-lg transition-[color,transform] duration-150 active:translate-x-0.5 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "font-semibold text-mecg-blue" : "text-public-ink"}`}
               >
                 {label}
               </Link>
             ))}
-            <AuthControl className="border-b border-white/10 py-4 text-left text-lg text-white" onNavigate={() => setOpen(false)} />
+            <AuthControl className="border-b border-public-rule py-4 text-left text-lg text-public-ink" onNavigate={() => setOpen(false)} />
             <PrimaryAction className="button-primary mt-5 text-center" onNavigate={() => setOpen(false)} />
           </div>
         </nav>

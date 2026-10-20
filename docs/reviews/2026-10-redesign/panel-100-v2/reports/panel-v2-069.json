@@ -1,0 +1,50 @@
+{
+  "seatId": "panel-v2-069",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected preparation-to-application-to-status journey has strong continuity in source. Join explains eligibility, materials and evaluation; application review explicitly distinguishes saving from submitting. Current intake capability repairs the repeat-applicant draft routing objection, with a lifecycle regression exercising currentDestination. Recovery now pauses writes, compares changed fields, offers exact per-field choices and a private both-copy download, then clears consent and uses the reviewed server revision. The supplied synthetic mobile capture is readable and makes these choices explicit, although long essays still require substantial scrolling. Submission validates a receipt or reconciles stored status before clearing recovery, and the dashboard independently gates its received banner and repeats identifying-resume access. The public capture shows a coherent Precision Instrument hierarchy and honest partnership/approval boundaries. These are substantial strengths, but source and intercepted tests do not establish completion with real identity, storage and database services. Missing workload facts also leave a student's schedule-fit decision incomplete. Consequently I cannot give an unqualified world-class agreement or establish release readiness from this package.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/auth-destination.ts",
+    "src/lib/auth-routing.test.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx:470-760",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx:120-340",
+    "tests/e2e/application-combine.spec.ts",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final result)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "captures/public-home-desktop-1280.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly commitment FAQ explicitly says expected weekly hours, mandatory meeting times and peak-week commitments are not published. JoinPage supplies a direct Board email, which truthfully mitigates the absence but does not provide the facts.",
+      "userImpact": "A student cannot independently assess semester schedule fit before preparing and applying, particularly if they cannot attend an event or obtain a timely reply.",
+      "suggestedFix": "Obtain Board-confirmed current-semester hours, recurring required times and peak-period expectations; publish them with a review date near preparation. Retain the present uncertainty and contact route until confirmed."
+    }
+  ],
+  "notVerified": [
+    "Real authenticated end-to-end prepare/apply/upload/recover/status journey, session expiry and cross-device concurrency; no staging exists.",
+    "Complete sequential keyboard applicant journey or screen-reader task success; focused harness checks are narrower.",
+    "Hosted grading/operator recovery and decision release; these were not independently exercised in this seat.",
+    "Physical iPhone/macOS Safari and human comprehension or task-success evidence.",
+    "Approved engagement artifacts, current workload facts, Board decisions on original-resume review, retention and closed-round remediation."
+  ]
+}

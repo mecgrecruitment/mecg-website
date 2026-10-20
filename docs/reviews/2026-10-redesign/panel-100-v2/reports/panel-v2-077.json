@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-v2-077",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile captures show a coherent Precision Instrument identity, clear no-fee semester proposition, restrained hierarchy and honest pending-project disclosure. The evaluator recovery changes substantively address the prior objections: guarded storage acquisition, exact backup signatures, explicit divergent-copy selection/download, review focus and bounded written-evaluation requests are present. The inspected My work \u2192 Group Case journey correctly separates editable observations from immutable written submissions. Note-only saves and canonical minimum/required/coverage blockers preserve honest unknowns; SQL fixtures verify own-review privacy and persisted quality. However, Group Case still has an unbounded save path that can prevent recovery and subsequent saves for an applicant. That concrete recovery defect defeats unqualified world-class agreement from this lens. The recorded 55-check evaluator and 55-check member runs establish useful synthetic interaction coverage, not actual authenticated task success. Missing approved engagement evidence, workload facts and hosted integration acceptance also prevent treating the broad website proposition and consequential workflows as fully established.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (all 981 file hashes verified)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/evaluator-recovery.md",
+    "docs/reviews/2026-10-redesign/member-work-continuity.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/applicant/page.tsx (resume disclosure)",
+    "src/app/member/page.tsx (Group Case routing excerpts)",
+    "src/app/member/evaluation-form.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/workspace-state.ts",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/group-case-roster.ts",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (quality predicate)",
+    "supabase/tests/group_case_reviewer_quality.sql",
+    "tests/e2e/evaluation-backup.spec.ts",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/evaluator-recovery-browser.log (result tail)",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (result tail)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (result tail)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save awaits the previous per-applicant promise at line 149, then bare authorizedFetch through retryOnNetworkError at lines 157-161 and unbounded response.json at line 162. Neither helper supplies a deadline (src/lib/client-fetch.ts:authorizedFetch/retryOnNetworkError). A nonsettling request/body never reaches finally to release the queue. Retry/copy guidance renders only for error/hint at roster lines 420-423. Existing Group Case tests cover resolved failures and delayed eventual receipts, not a permanently stalled save. This is source-derived, not a reproduced hosted incident.",
+      "userImpact": "The row can remain Saving indefinitely. Later notes/stars and manual retries queue behind the unresolved operation; the reviewer cannot confirm persistence or reach a reliable recovery state before leaving.",
+      "suggestedFix": "Bound the full request/body lifecycle, release the queue on timeout, preserve the current payload and expose explicit unconfirmed-save/copy guidance. Add a focused stalled-request and stalled-body regression proving subsequent retry can proceed without claiming non-delivery."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/session expiry, Supabase RPC/RLS, resume/storage, email and consequential operator recovery; no staging or hosted acceptance supplied.",
+    "Real authenticated end-to-end keyboard journeys, screen-reader use, human comprehension, physical iPhone/macOS Safari, and private evaluator visual craft; supplied public images do not establish these.",
+    "Concurrent cross-device evaluator writes have no demonstrated revision/CAS guarantee.",
+    "Approved project artifacts, Board-confirmed membership workload, and Board privacy/retention/closed-round remediation decisions remain outstanding."
+  ]
+}

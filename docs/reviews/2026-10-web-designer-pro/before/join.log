@@ -1,0 +1,15 @@
+
+Shot http://localhost:3100/join at 390, 768, 1280, 1440px with Playwright Chromium -> /tmp/wdp-shots/join
+  /tmp/wdp-shots/join/390.png
+  /tmp/wdp-shots/join/768.png
+  /tmp/wdp-shots/join/1280.png
+  /tmp/wdp-shots/join/1440.png
+  /tmp/wdp-shots/join/sheet.png
+
+fonts {"Avenir Next":"92%","ui-monospace":"8%"}  body 15.9px  sizes [60, 36, 24, 20, 16, 14, 12, 11]  hues [30, 210]  boxes 20  card grids 0  focus stops 29
+  FAIL  [768] Control label wraps onto two lines: "Check application access". Give it room or shorten it.
+  warn  [390,768,1280,1440] 10 text elements at 11px: 11px "/ Students / Every major"; 11px "01"; 11px "/ Published dates"
+  warn  [390,768,1280,1440] 10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.
+  warn  [390,768,1280,1440] 5 numbered uppercase labels ("01 —"). Numbered mono eyebrows are the anti-slop house style; see slop.md "The overcorrection".
+
+1 FAIL(s). The scan only catches mechanical tells. Now open every PNG with your own eyes.

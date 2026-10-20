@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-v2-012",
+  "lens": "Editorial and brand craft; narrow mobile viewport (simulated AI reviewer)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The supplied 320px and 390px homepage captures show a coherent Precision Instrument identity: strong sans headings, restrained mono metadata, useful hairlines, clear audience actions and a real, accurately captioned culture photograph. Current hero copy immediately supplies the no-fee and semester terms. I independently verified the former mobile process-order objection is addressed: the bench opens from a labeled native button, 320px station controls stack without clipped labels, and the later working-together section supplies complementary expectations. The Work selector now places its result adjacent on mobile. These improvements support polished public presentation, but the central client task still lacks inspectable consulting work. Partnerships demonstrate association; they do not demonstrate the quality of a recommendation. That substantive editorial gap prevents world-class agreement. The reviewed client journey is source/test evidence from Work through the inquiry form, with intercepted delivery rather than observed human or hosted success. Broader application, grading and operator acceptance cannot be inferred from this focal review or the local test totals; release readiness remains unproven.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (141 findings and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (final summary)",
+    "captures/public-home-mobile-320.png",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-expanded-mobile-320.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-97; src/components/client-project-grid.tsx:103-108",
+      "evidence": "The approved release list remains empty. Home renders the honest partnership/pending-approval fallback rather than a decision, method or deliverable. Selected organization details explicitly withhold scope, methods, deliverables and outcomes. The supplied mobile captures show that fallback; home/page.tsx:135-136 correctly identifies the photograph as a PwC member visit.",
+      "userImpact": "A prospective client can understand fit and recognize partners, but cannot inspect the substance or practical quality of comparable MECG work before inquiring. Improved ordering cannot supply the missing proof.",
+      "suggestedFix": "Content owners should obtain client and Board approval for one bounded engagement with its actual question, method, constraints and redacted deliverable or factual handoff. Feature it through the existing publication boundary before process exposition. Preserve pending disclosures until approval; fabricate no outcome."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance, actual inquiry delivery or consequential operator recovery was supplied; no staging exists.",
+    "No observed human comprehension/task success, physical iPhone/macOS Safari or assistive-technology session was inspected. Supplied captures are local artifacts; the expanded capture has a disclosed screenshot-only sticky-header adjustment.",
+    "Private application/grading/operator visual craft and complete authenticated keyboard journeys were not established by this focal review. Local Node summary and scoped browser logs are not integrated provider evidence.",
+    "Approved project artifacts, current Board-confirmed membership workload, and Board decisions on original-resume policy, retention and closed-round remediation remain unavailable. The current applicant receipt accurately discloses identifying original-resume access."
+  ]
+}

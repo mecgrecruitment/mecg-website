@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fetchWithTimeout, reconcileSubmittedApplication, RequestTimeoutError } from "./client-fetch.ts";
+import { fetchJsonWithTimeout, fetchWithTimeout, reconcileSubmittedApplication, RequestTimeoutError } from "./client-fetch.ts";
 
 test("fetchWithTimeout returns a response and clears its deadline", async () => {
   const response = await fetchWithTimeout("https://example.test", {}, 50, async () => new Response("ok"));
@@ -18,15 +18,26 @@ test("submission reconciliation polls through stale draft status until committed
   let attempts = 0;
   const fetcher: typeof fetch = async () => {
     attempts += 1;
-    return Response.json({ application: { submitted: attempts >= 3 } });
+    return Response.json({ application: { applicationId: "app-1", cycleId: "cycle-1", submitted: attempts >= 3 } });
   };
-  assert.equal(await reconcileSubmittedApplication({ fetcher, waits: [0, 0, 0] }), true);
+  assert.equal(await reconcileSubmittedApplication({ cycleId: "cycle-1", fetcher, waits: [0, 0, 0] }), "app-1");
   assert.equal(attempts, 3);
 });
 
 test("submission reconciliation keeps a non-committed result ambiguous", async () => {
   const fetcher: typeof fetch = async () => Response.json({ application: null });
-  assert.equal(await reconcileSubmittedApplication({ fetcher, waits: [0, 0] }), false);
+  assert.equal(await reconcileSubmittedApplication({ cycleId: "cycle-1", fetcher, waits: [0, 0] }), null);
+});
+
+test("submission reconciliation rejects malformed or other-cycle receipts", async () => {
+  for (const application of [{ submitted: true }, { applicationId: "old-app", cycleId: "old-cycle", submitted: true }, { applicationId: " ", cycleId: "cycle-1", submitted: true }]) {
+    assert.equal(await reconcileSubmittedApplication({ cycleId: "cycle-1", fetcher: async () => Response.json({ application }), waits: [0] }), null);
+  }
+});
+
+test("JSON request deadline covers a response body that never completes", async () => {
+  const body = new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new TextEncoder().encode("{")); } });
+  await assert.rejects(fetchJsonWithTimeout("https://example.test", {}, 5, async () => new Response(body)), RequestTimeoutError);
 });
 
 import { authorizedFetch, refreshSessionToken, retryOnNetworkError, SESSION_EXPIRED_MESSAGE } from "./client-fetch.ts";

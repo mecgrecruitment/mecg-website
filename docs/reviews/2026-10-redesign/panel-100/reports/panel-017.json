@@ -1,0 +1,47 @@
+{
+  "seatId": "panel-017",
+  "lens": "Editorial and brand craft \u2014 recovery and retry (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The supplied homepage captures show a coherent Precision Instrument identity: clear sans-serif hierarchy, restrained mono metadata, hairline structure, a captioned real member photograph and a sensible mobile stack. Organization proof precedes people, and client/student actions are explicit. Recovery source explains which copies exist, pauses saving before choice, offers comparison and states replacement consequences; retry language distinguishes local preservation from account saving. I traced the work-to-contact inquiry journey in source and the supplied synthetic browser test/log, rather than observing a real client complete it. The editorial presentation is strong, but approved engagement evidence is absent and hosted recovery, delivery and human comprehension remain unverified. Those limits do not support an unqualified world-class or release verdict. This is an independent AI assessment, not human endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx (save queue, recovery/conflict UI, save notices and resume disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (interrupted submit, blocked storage, reload recovery, copy choice and committed-500 cases)",
+    "evidence/mecg-round-close-full-e2e.log (public/recovery entries and 76-pass summary)",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:78-97",
+      "evidence": "The captured Selected work section renders generic industry prose and \u201cCase studies pending client approval\u201d, then organization names/sectors. client-project-grid.tsx likewise says scope, methods, deliverables and outcomes await release. DESIGN.md \u00a77 and release-open-items.md confirm that approved case studies and actual project artifacts are absent.",
+      "userImpact": "A prospective client can verify recognizable associations and understand the process, but cannot inspect what MECG actually produced. The illustrated bench explains an engagement; the PwC visit photograph establishes community. Neither supplies project evidence for the central promise of useful recommendations.",
+      "suggestedFix": "Have content owners obtain client and Board approval for at least one engagement containing its actual decision question, methods and a redacted deliverable image with a precise caption. Feature it through the existing approved-publication path before the people section. Preserve the honest pending state until approval; invent no outcomes."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration exists in this evidence: Clerk expiry/re-authentication, Supabase/RLS, storage transitions and real email delivery remain unverified. Contact confirmation tests intercept HTTP; application tests use a synthetic harness.",
+    "No observed human task success or comprehension of recovery/replacement choices; source review and passing fixture tests are not a human study.",
+    "Recovery/conflict screens have no supplied visual captures. Their narrow-screen composition and long-answer comparison legibility were assessed only from source.",
+    "Only supplied Linux/Chromium desktop/mobile imagery was inspected; Safari, Firefox, physical devices and assistive-technology behavior remain unknown.",
+    "No independent verification of organization statistics, publication permissions or Board resolution of original-resume policy. The inspected applicant copy accurately discloses identifying resume access; it does not establish anonymity.",
+    "Private grading/operator workflows and full release readiness were outside this seat\u2019s inspected implementation scope."
+  ]
+}

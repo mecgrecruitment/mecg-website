@@ -1,0 +1,16 @@
+{
+  "count": 11,
+  "files": {
+    "supabase/migrations/20261016190000_application_draft_revisions.sql": "2854d9557428d208d9d2ef7fd44d72b3a541213908352326ffa893daba51ad4b",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql": "47b14cd8a27d784f9c4782d8d6fc9422586fea746ac6b86f3f5a95f2cf3628b9",
+    "supabase/migrations/20261016192000_batch_release_diagnostics.sql": "0b1f0f0906f47f48e36a05cfa52cc897fc310c3fd4f1dd732812ef1e246467ac",
+    "supabase/migrations/20261016193000_operator_contract_fixes.sql": "8c52fc45db3896b277d8d92482e227d5b8f0fb689fdd798822b0a207dcdaf2d5",
+    "supabase/migrations/20261016194000_round_close_summary.sql": "b14624f702922d743f015ee930c32c6b51f4e403d26fa36dd00dfb8654e4811f",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql": "b5e48a33658dc8b68cab5c2a7eb37a8609c650554a6f064bae46e5e1fbe7ac0b",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql": "730c96399dd716c41125f56a42a3456d831e93dcb97a67f4efec513444a62328",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql": "3f7d99d09ca041dc47591071fd44a24adbaca6672b878538ed1dfc058748eee1",
+    "supabase/migrations/20261016202000_group_case_write_revisions.sql": "cf70bd39f5731ed5232aeb5f724ae4bb1bcd3d9d9729a8a6c5b517426609b91e",
+    "supabase/migrations/20261016203000_evaluation_draft_write_revisions.sql": "93a3cacbb7e441ff0dcc796e7eb0095b78b55182c0a1429a4daae97577478368",
+    "supabase/migrations/20261016210000_screening_draft_write_revisions.sql": "425c07c5ec9c4de52a19c3be4c467922dd114895b2aec215379c6a5c523f284b"
+  }
+}

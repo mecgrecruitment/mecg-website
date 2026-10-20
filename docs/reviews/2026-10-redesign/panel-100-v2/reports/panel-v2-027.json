@@ -1,0 +1,57 @@
+{
+  "seatId": "panel-v2-027",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected revision offers a coherent, restrained public proposition and materially better recovery interactions. Home makes cost and semester duration explicit, and the mobile capture preserves a readable hierarchy with an optional process disclosure. I traced Home\u2019s project action through the actual Contact page and form: pending fields are locked, trimmed validation identifies and focuses the affected control, invalid acknowledgements preserve the inquiry, and uncertain delivery restores retry. Application recovery uses labeled native radio groups, changed-field comparisons, private copy download, and focus at recovery headings; supplied synthetic captures show readable stacked comparisons. Current deck source isolates native activation from global shortcuts and honors both device reduction and a persistent tab-local motion control, including removal of decorative delay. The focused browser assertions support those specific claims. Rubric validation and sign-out retry also associate explanatory feedback. These improvements do not establish the unchanged broad world-class claim: complete real authenticated keyboard recovery/status/operator tasks and screen-reader success remain unobserved. Approved engagement proof, membership workload facts and policy decisions are also absent. I cannot infer integrated release readiness from intercepted providers and separate local runs.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/apply/application-form.tsx (recovery, focus and submission sections)",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (controls, shortcuts, reveal and motion)",
+    "src/app/admin/rounds/rubric-editor.tsx (validation controls)",
+    "src/app/globals.css (focus, target and motion rules)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/sign-out-recovery.spec.ts",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log (completion)",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (completion)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (completion)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:39,289-296",
+      "evidence": "SORT_BUTTON provides text-xs and py-1 without a minimum height; By score, A to Z and Revisits use it directly. Exit likewise has no minimum target. Presentation motion explicitly adds min-h-11. globals.css applies its 44px button minimum only to named button utility classes, which these controls do not use. This conflicts with DESIGN.md\u2019s 44px interaction floor; it is source-derived, not a measured touch failure.",
+      "userImpact": "Touch operators receive smaller, less forgiving sort/filter/exit targets than the adjacent presentation control.",
+      "suggestedFix": "Give these header controls an inline-flex 44px minimum target and verify their rendered bounds and wrapping at narrow widths."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk sign-out/session expiry, Supabase authorization and persistence, uploads/storage, email delivery and consequential operator recovery in an integrated hosted environment; no staging exists.",
+    "A complete sequential keyboard preparation/application/recovery/status/operator journey, physical iPhone/macOS Safari, or screen-reader/assistive-technology session. Focused harness tests are useful but narrower.",
+    "Human comprehension/task success, authenticated private visual states beyond the supplied synthetic recovery capture, and measured touch usability.",
+    "Client-approved project artifacts/results, current Board-confirmed workload requirements, and Board/privacy approval for original-resume access, retention and closed-round remediation. Existing disclosures do not supply these approvals."
+  ]
+}

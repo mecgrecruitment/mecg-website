@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-v2-053",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "As a simulated AI reviewer considering keyboard-oriented client use, I find a coherent, carefully composed site with a clear pro-bono, semester-long offer. The desktop and mobile homepage captures support the Precision Instrument identity: strong hierarchy, restrained structure, named partnerships and a clearly separate culture photograph. Source traces a useful Home → Client Services → practical FAQs → Contact inquiry journey. Cost, team size, client responsibilities, confidentiality discussion and next steps are discoverable. The former misleading empty-work heading is corrected, and the narrow organization selector now places its profile immediately beside the control. Contact submission locks captured fields, validates its receipt, preserves uncertain inquiries, reuses an in-page delivery identity, and focuses associated invalid controls after unlocking. The supplied corrected browser log establishes focused native keyboard submission and error recovery across five configurations; it does not establish the entire discovery journey by keyboard. I disagree with the broad world-class claim because the central client evidence task remains incomplete: no approved actual engagement or deliverable is available to judge MECG’s analytical contribution. This is a substantive known content limitation despite honest disclosure. Hosted delivery and consequential private workflows remain unproven, so my separate release recommendation is unproven. This review is source/artifact inspection, not observed human task success or professional endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/globals.css (focus rules)",
+    "src/lib/site-content.ts (services, semester facts, steps, FAQs)",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/applicant/page.tsx (receipt privacy disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (relevant client passes and contact focus failure)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact corrected passes)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3–5; src/components/client-project-grid.tsx:103–108; src/app/(marketing)/work/page.tsx:56–63",
+      "evidence": "The approved fallback is empty. Selected profiles explicitly withhold MECG scope, methods, deliverables and outcomes pending approval, while Work renders Selected work only when published projects exist. The supplied homepage captures show the pending-approval state; the final unresolved record confirms actual approved engagement evidence is still absent.",
+      "userImpact": "A prospective client can understand fit and recognize past organizations but cannot inspect comparable reasoning, contribution or handoff quality before committing time and information.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its real decision, methods, constraints, MECG contribution and redacted deliverable or handoff. Publish through the existing approval boundary; retain the honest pending status until authorized."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance, actual inquiry delivery or Board reply timing was verified; no staging exists.",
+    "Complete sequential keyboard traversal from homepage through organization selection, FAQ activation, anchored inquiry, correction and completion is not demonstrated by the inspected focused tests. No actual keyboard failure is asserted.",
+    "No screen-reader session, physical iPhone/macOS Safari test, observed human comprehension or task-success study was supplied.",
+    "Application, grading, release and owner workflows were not independently exercised in authenticated sessions by this seat; local receipts and synthetic coverage do not prove their hosted behavior.",
+    "Board privacy/retention and closed-round remediation authority, current membership workload facts and permission to publish real client artifacts remain unresolved external dependencies."
+  ]
+}

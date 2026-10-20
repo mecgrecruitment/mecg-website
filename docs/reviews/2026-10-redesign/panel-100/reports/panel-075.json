@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-075",
+  "lens": "Member evaluator \u2014 ambiguous result",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The source-reviewed member journey supports observations, explicit not-observed ratings, readiness checks, review before locking, and receipt-based confirmation. A 409 correctly remains unconfirmed and directs the evaluator to My work, whose server-derived status distinguishes locked work. Group Case Board summaries clearly separate saved partial observations from valid independent evaluations. Supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy and distinct audience actions. Public copy acknowledges pending client approval; applicant copy accurately discloses original-resume access. However, evaluator draft recovery can erase newer unsynced evidence, and backup assurances exceed confirmed storage state. These defects prevent agreement and warrant holding this workflow. This is a simulated AI member lens, source/log/capture review, not observed user success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/apply/application-form.tsx:731-746",
+    "src/app/member/page.tsx (assignment/status journey excerpts)",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/lib/evaluation-draft-recovery.test.ts (storage excerpts)",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/admin/group-case-results.tsx (partial/valid display excerpts)",
+    "src/lib/group-case-results.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (quality and aggregation excerpts)",
+    "supabase/tests/grading_contract_consistency.sql (validity assertions)",
+    "evidence/mecg-privacy-final-node.log (evaluation checks)",
+    "evidence/mecg-privacy-db-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/evaluation-form.tsx:94-100,166-174",
+      "evidence": "loadDraft always chooses a valid server draft over the browser copy. The subsequent writeEvaluationDraft effect writes those recovered values back to browser storage. Scenario: save A to server, edit B while server saves fail, reload after connectivity returns; server A wins and overwrites browser B without comparison or choice.",
+      "userImpact": "An evaluator can lose newer ratings and observable evidence precisely while recovering from a save outage.",
+      "suggestedFix": "Preserve differing browser/server drafts, compare a confirmed revision or saved signature, and offer an explicit recovery choice before overwriting either copy. Add an outage/edit/reload regression."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/evaluation-form.tsx:166-174,195-201",
+      "evidence": "The form ignores writeEvaluationDraft\u2019s boolean result, yet save-error copy says \"Your browser backup is current\"; load-error copy at line 157 also promises a backup. src/lib/evaluation-draft-recovery.ts:177-182 returns false for oversized snapshots or storage failures.",
+      "userImpact": "With unavailable/quota-limited storage and a server failure, the reviewer may leave believing evidence is recoverable when neither copy was saved.",
+      "suggestedFix": "Track backup-write success and show an honest unsaved warning with keep-open/copy guidance when both persistence paths fail; cover storage-denied and quota failures."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated evaluator session or hosted Clerk/Supabase/RLS/storage/email integration was exercised; supplied local tests do not establish it.",
+    "No real member task observation, ambiguous-result recovery study, or human acceptance evidence exists. The identified loss paths are source-derived, not browser-reproduced here.",
+    "Private evaluator screens have no supplied live authenticated captures; their visual craft, keyboard/screen-reader operation, physical-device behavior, Safari and Firefox remain unverified.",
+    "Board approval of original-resume policy, client-approved project outcomes/artifacts, and migration/application rollout remain external dependencies."
+  ]
+}

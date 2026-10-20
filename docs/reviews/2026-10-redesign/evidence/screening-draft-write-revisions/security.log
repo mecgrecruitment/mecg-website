@@ -1,0 +1,25 @@
+                              function                               | prosecdef |  owner   |      proconfig       | anon_execute | authenticated_execute | service_execute 
+---------------------------------------------------------------------+-----------+----------+----------------------+--------------+-----------------------+-----------------
+ rush.assert_screening_draft_access(text,boolean)                    | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.assert_screening_draft_writable(text)                          | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.get_screening_review_draft(text)                               | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.get_screening_review_draft_v2(text)                            | t         | postgres | {"search_path=\"\""} | f            | t                     | t
+ rush.recuse_screening_assignment(text,text)                         | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.recuse_screening_assignment_v2(text,text)                      | t         | postgres | {"search_path=\"\""} | f            | t                     | t
+ rush.save_screening_review_draft(text,jsonb,text,text)              | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.save_screening_review_draft_v2(text,jsonb,text,text,uuid,uuid) | t         | postgres | {"search_path=\"\""} | f            | t                     | t
+ rush.screening_draft_snapshot(text)                                 | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.submit_screening_review(text,jsonb,text,text)                  | t         | postgres | {"search_path=\"\""} | f            | f                     | t
+ rush.submit_screening_review_v2(text,jsonb,text,text,uuid)          | t         | postgres | {"search_path=\"\""} | f            | t                     | t
+(11 rows)
+
+ relrowsecurity | relforcerowsecurity | authenticated_select | authenticated_update 
+----------------+---------------------+----------------------+----------------------
+ t              | t                   | f                    | f
+(1 row)
+
+ migrations 
+------------
+        173
+(1 row)
+

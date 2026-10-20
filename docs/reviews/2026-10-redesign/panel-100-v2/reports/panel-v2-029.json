@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-v2-029",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision has credible accessible foundations and substantial verified improvements. The homepage clearly states the semester and no-fee proposition; its mobile capture retains a coherent Precision Instrument hierarchy without presenting culture photography as project proof. Following the actual home-to-contact source journey, native fields, associated trimmed-input errors, post-unlock focus and announced receipts support correction and completion. The recorded contact keyboard scenario uses sequential Tab and native Enter, although it starts on Contact and intercepts delivery. Deck shortcuts now exclude interactive targets; native result controls and tab-local motion suppression respect the operating-system preference. Rubric guidance is associated with the failing fields, and sign-out failure preserves a reachable announced retry. These resolve the relevant earlier objections within their demonstrated scope. However, deck action failure still lacks an announced recovery receipt. More broadly, isolated fixtures and source inspection do not establish accessible completion across real application, grading and operator journeys. Missing hosted integration, assistive-technology observation, approved engagement evidence and membership workload facts prevent an unqualified world-class judgment. Hold to address the concrete feedback gap and complete consequential integration acceptance; this is an independent AI source/evidence review, not observed human success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/globals.css",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/lib/run-action.ts",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/apply/application-form.tsx (materials/review privacy disclosure)",
+    "src/app/applicant/page.tsx (received disclosure)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "tests/e2e/rubric-validation.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log (35-pass scoped result)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact assertions and 110-pass result)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (relevant contact/rubric entries)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx:237,319-325,473",
+      "evidence": "reveal() handles an unsuccessful APPLY_STAGE_HASH by setting error and clearing phase (237). The polite result region only announces drumroll/stamped states and becomes empty on failure (319-325); the actual error renders as an ordinary footer paragraph at 473, without role, live region or focus transfer. The supplied deck tests exercise successful reveal and shortcut isolation, not rejected result feedback.",
+      "userImpact": "A screen-reader operator can hear that application is in progress but receive no automatic explanation when it fails, while the visible failure appears remotely in the footer. Consequential result recovery requires searching for the explanation.",
+      "suggestedFix": "Expose the error through a persistent alert/status region near the action, associate recovery guidance with the result control, and add a rejected-result keyboard regression verifying announcement semantics and a reachable retry. Keep uncertain commit outcomes distinct from confirmed rejection."
+    }
+  ],
+  "notVerified": [
+    "Real Clerk/Supabase/storage/Resend integration, session expiry and complete authenticated keyboard prepare/apply/recover/status/grading/operator journeys; no staging exists.",
+    "Screen-reader announcement behavior, physical iPhone/macOS Safari, observed human task success and complete private-screen visual/touch-target coverage; synthetic screenshots and Linux engines do not establish these.",
+    "Client-approved engagement artifacts/results, current Board-confirmed workload expectations, original-resume/blind-review policy resolution, retention operations and closed-round remediation authority remain unavailable."
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-v2-043",
+  "lens": "Product systems and reliability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed revision shows coherent Precision Instrument craft and substantially stronger reliability feedback. The public proposition immediately states the semester and no-fee offer; partnership copy honestly separates recognizable organizations from approved project evidence. The supplied mobile recovery capture makes changed-field choices and private backup consequences readable. Following the source/test application journey, saving pauses for divergent copies, combination preserves exact selected answers and revision checks, and final submission requires a receipt or authoritative reconciliation before recovery is cleared. The applicant receipt checks stored state and discloses identifying original-resume access. The earlier close-grading ambiguity objection is addressed: bounded requests, authoritative readback, explicit unknown outcomes and a same-tab recovery marker prevent misleading cancellation and repeat confirmation. Canonical SQL distinguishes persistence from valid independent evidence. However, local synthetic checks do not establish complete authenticated keyboard task success or actual provider recovery. Approved work evidence and current membership workload facts also remain absent. Those material limits prevent unqualified world-class agreement or a proven release recommendation. This is an independent simulated AI assessment, not human usability observation.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx (submission/recovery sections)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt sections)",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/round-close-request.ts",
+    "src/app/member/group-case/group-case-roster.tsx (save/quality sections)",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (quality function)",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts (keyboard scenario)",
+    "docs/reviews/2026-10-redesign/operator-close-ambiguity.md",
+    "docs/reviews/2026-10-redesign/release-evidence-diagnostics.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (operator cases)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (tail)",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (tail)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (tail)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/app/admin/round-status-control.tsx:55-65,154,187",
+      "evidence": "Dialog cleanup always calls trigger.focus(), but confirmed closure sets closeState to closed and disables that trigger. Dismiss then removes the focused dialog control and attempts to focus an unfocusable disabled button. The committed-freeze browser case verifies dismissal and disabled state, but does not assert a usable focus destination. This is a source-derived gap, not an observed hosted failure.",
+      "userImpact": "A keyboard operator finishing a successful irreversible close has no explicit stable focus handoff to continue reviewing the round.",
+      "suggestedFix": "After confirmed closure, focus an enabled round-review link or a programmatically focusable closed-status heading outside the dialog. Retain trigger restoration for cancellation and unresolved outcomes; assert the success-dismissal destination in the focused keyboard test."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk sessions/expiry, Supabase RPC/RLS/JWT wiring, uploads/storage, email delivery, provisioning and consequential-write recovery; no staging exists.",
+    "Complete real authenticated keyboard preparation/application/recovery/status/operator journeys; focused intercepted tests establish narrower behavior.",
+    "Screen-reader or other assistive-technology sessions, physical iPhone/macOS Safari, human comprehension and task success.",
+    "Client-approved project artifacts/results, Board-confirmed workload facts, policy/retention/remediation approvals; session recovery markers can be unavailable or cleared.",
+    "Live authenticated private visual states beyond supplied synthetic captures."
+  ]
+}

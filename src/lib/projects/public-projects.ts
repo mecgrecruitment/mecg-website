@@ -1,7 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
 import { PUBLIC_PROJECTS } from "@/content/projects.public";
-import { getSupabasePublicEnv } from "@/lib/env";
-import type { Database } from "@/lib/supabase/database.types";
 import type { PublicProjectCard, PublicProjectDetail } from "./public-types";
 
 // Projects now live in rush.projects. src/content/projects.public.ts stays as
@@ -12,18 +11,6 @@ import type { PublicProjectCard, PublicProjectDetail } from "./public-types";
 // Same client construction as the join page: built here rather than through
 // lib/supabase/server so it never touches cookies(), which is the only thing
 // that would force these pages out of the ISR cache.
-function readClient() {
-  // getSupabasePublicEnv, not requireEnv: it resolves the MECG_-prefixed names
-  // this deployment actually uses and falls back to the plain ones. Reading a
-  // single hard-coded name here would throw during prerender wherever only the
-  // prefixed pair is set, which includes CI.
-  const { url, anonKey } = getSupabasePublicEnv();
-  return createClient<Database, "rush">(url, anonKey, {
-    db: { schema: "rush" },
-    auth: { persistSession: false },
-  });
-}
-
 function textOf(value: unknown) {
   return typeof value === "string" ? value : "";
 }
@@ -55,9 +42,11 @@ function parseProjects(value: unknown): readonly PublicProjectDetail[] {
   });
 }
 
-async function loadProjects(): Promise<readonly PublicProjectDetail[]> {
+// Metadata and the page share one authoritative read within a server render.
+// React cache does not persist publication state between requests.
+const loadProjects = cache(async (): Promise<readonly PublicProjectDetail[]> => {
   try {
-    const { data, error } = await readClient().rpc("public_projects");
+    const { data, error } = await createPublicClient().rpc("public_projects");
     if (error) {
       console.error("public_projects failed", error);
       return PUBLIC_PROJECTS;
@@ -68,7 +57,7 @@ async function loadProjects(): Promise<readonly PublicProjectDetail[]> {
     console.error("public_projects unavailable", loadError);
     return PUBLIC_PROJECTS;
   }
-}
+});
 
 export async function listPublicProjectCards(): Promise<readonly PublicProjectCard[]> {
   return loadProjects();

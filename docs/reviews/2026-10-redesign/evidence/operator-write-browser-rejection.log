@@ -1,0 +1,15 @@
+
+Running 10 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (342ms)
+  ✓   2 [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (385ms)
+  ✓   3 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (372ms)
+  ✓   4 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (362ms)
+  ✓   5 [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (1.3s)
+  ✓   6 [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (1.2s)
+  ✓   8 [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (848ms)
+  ✓   7 [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (1.0s)
+  ✓   9 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (480ms)
+  ✓  10 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (560ms)
+
+  10 passed (6.2s)

@@ -1,10 +1,16 @@
+import { notFound } from "next/navigation";
+import { requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import { hasPermission } from "@/lib/authorization";
 import { canVoteInStage, currentHashStage } from "@/lib/hash-tally";
 import type { CurrentUser } from "@/lib/auth";
 import { loadWorkspaceContext } from "@/lib/workspace-context";
 import { workspaceAdminTools, workspaceMemberTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
-import PillNav from "./pill-nav";
-import WorkspaceMoreMenu from "./workspace-more-menu";
+import { withWorkspaceCycle, workspacePermissionsForPath } from "@/lib/workspace-cycle-url";
+import { cycleStatusLabel } from "@/lib/labels";
+import WorkspaceCycleSwitcher from "./workspace-cycle-switcher";
+import WorkspaceSidebar from "./workspace-sidebar";
+import LogoutButton from "./logout-button";
+
 
 // One nav for the whole internal workspace. Before this, /admin had BoardNav,
 // /member hand-rolled its own link array, and every sub-page had neither: you
@@ -30,6 +36,8 @@ export default async function WorkspaceNav({
   // One cycle-bound contract keeps live navigation state consistent and avoids
   // repeating independent screening, grading-event, and round queries on every
   // internal page. Safe defaults preserve role-based navigation if it fails.
+  const requestedCycle = await requestedWorkspaceCycleId();
+  if (requestedCycle && !hasPermission(user.memberships, requestedCycle, "WORKSPACE_ACCESS")) notFound();
   const { data: workspaceContext } = await loadWorkspaceContext(cycleId);
   const currentContext = workspaceContext?.cycleId === cycleId ? workspaceContext : null;
   const isScreeningReviewer = currentContext?.isScreeningReviewer ?? false;
@@ -47,12 +55,12 @@ export default async function WorkspaceNav({
     return stage !== null && canVoteInStage(membership.role, stage);
   });
   const isBoard = user.memberships.some((membership) =>
-    membership.active && ["BOARD", "OWNER"].includes(membership.role));
+    membership.active && membership.cycleId === cycleId && ["BOARD", "OWNER"].includes(membership.role));
   const isOwner = user.memberships.some((membership) =>
-    membership.active && membership.role === "OWNER");
+    membership.active && membership.cycleId === cycleId && membership.role === "OWNER");
 
   const primary: WorkspaceNavLink[] = [
-    ["/member", `My work${currentContext?.openTaskCount ? ` · ${currentContext.openTaskCount}` : ""}`],
+    ["/member", "My work"],
     ...(can("RECRUITMENT_OPERATIONS")
       ? ([
         ["/admin", "Recruitment"],
@@ -80,14 +88,24 @@ export default async function WorkspaceNav({
     isBoard,
     isOwner,
   });
+  const scoped = (links: readonly WorkspaceNavLink[]): WorkspaceNavLink[] => links.map(([href, label]) => [withWorkspaceCycle(href, cycleId), label]);
+  const cycles = Array.from(new Map(user.memberships.filter((membership) => workspacePermissionsForPath(current).some((permission) => hasPermission(user.memberships, membership.cycleId, permission)))
+    .map((membership) => [membership.cycleId, { id: membership.cycleId, name: membership.cycle.name, status: cycleStatusLabel(membership.cycle.status) }])).values());
   return (
     <>
-      <div className="workspace-nav-shell sticky top-3 z-30 flex items-center gap-1 rounded-2xl bg-white/92 p-1.5 shadow-[0_10px_30px_rgba(7,13,31,0.08),inset_0_0_0_1px_rgba(7,13,31,0.08)] backdrop-blur-xl">
-        <div className="min-w-0 flex-1">
-          <PillNav ariaLabel="Workspace" current={current} links={primary} matchPathOnly />
-        </div>
-        <WorkspaceMoreMenu current={current} myTools={myTools} adminTools={adminTools} />
-      </div>
+      <WorkspaceSidebar
+        current={current}
+        cycle={user.memberships.find((membership) => membership.cycleId === cycleId)?.cycle.name ?? "Current cycle"}
+        account={user.name}
+        groups={[
+          { label: "My work", links: scoped([...primary.filter(([href]) => href === "/member"), ...myTools.filter(([href]) => href !== "/admin/people" && href !== "/member/refer")]) },
+          { label: "Recruitment", links: scoped(primary.filter(([href]) => href !== "/member")) },
+          { label: "Community", links: scoped(myTools.filter(([href]) => href === "/admin/people" || href === "/member/refer")) },
+          { label: "Administration", links: scoped(adminTools) },
+        ]}
+        switcher={cycles.length > 1 ? <WorkspaceCycleSwitcher cycleId={cycleId} cycles={cycles} /> : undefined}
+        signOut={<LogoutButton className="workspace-sign-out" />}
+      />
       <span id="workspace-content" tabIndex={-1} className="sr-only">Workspace content</span>
     </>
   );

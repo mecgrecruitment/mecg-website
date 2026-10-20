@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-080",
+  "lens": "Member evaluator",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile hero is coherent with Precision Instrument: readable proposition, distinct client/student actions and a restrained process figure. Source tracing My work \u2192 calibration \u2192 evaluation \u2192 review and lock shows explicit unknowns, actionable readiness checks and receipt-dependent submission confirmation. Original-resume access is disclosed rather than presented as anonymity; pending client case studies are identified honestly. However, recovery assurances can overstate persistence, and the inline Group Case reviewer cannot distinguish saved partial evidence from a valid contribution at the point of work. These are material trust and completion gaps for this seat. This is simulated AI source/capture review, not observed user success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/member/page.tsx",
+    "src/app/member/calibration/[roundId]/page.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/apply/application-form.tsx:731,746",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql",
+    "supabase/tests/grading_contract_consistency.sql",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/authenticated-clerk.spec.ts",
+    "evidence/mecg-privacy-final-node.log",
+    "evidence/mecg-privacy-db-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/evaluation-form.tsx",
+      "evidence": "Lines 166\u2013174 ignore writeEvaluationDraft\u2019s boolean result; lines 195\u2013200 nevertheless say \u201cYour browser backup is current.\u201d The helper returns false on storage failure at src/lib/evaluation-draft-recovery.ts:177\u2013182. Lines 153\u2013158 also promise browser retention without a successful write.",
+      "userImpact": "When server saves and browser storage both fail, an evaluator may reload or leave believing their observations are recoverable, then lose them.",
+      "suggestedFix": "Track successful browser persistence and condition recovery copy on its result. Safely acquire sessionStorage inside the guarded boundary; show an explicit unsaved state when neither copy is confirmed, with a way to retain the text before leaving."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx",
+      "evidence": "Line 223 reports only \u201cStarted grading\u201d; rows show \u201cSaved\u201d and a raw rated count (lines 327\u2013355). The roster contract has no minimumObservedCriteria or validity result. In contrast, evaluation_observation_quality in migration 20261016191000:5\u201335 requires minimum count, required criteria and 75% weighted coverage; grading_contract_consistency.sql:108\u2013124 demonstrates that coverage alone can still be invalid.",
+      "userImpact": "A member can verify storage but cannot verify whether their partial observations count as valid evidence, or which missing observation prevents completion.",
+      "suggestedFix": "Return authoritative per-review quality with the roster/save receipt and show \u201cPartial observations saved\u201d versus \u201cValid evidence saved,\u201d including missing requirements. Explain how unobserved dimensions remain excluded without encouraging invented ratings."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in this evidence; no actual authenticated reviewer session or session-expiry recovery was exercised by this seat.",
+    "No supplied evaluator-screen capture establishes private-screen visual craft or keyboard/assistive-technology task success. Public captures cover Linux/Chromium rendering only.",
+    "Local logs report 673 Node tests and 709 database assertions; sampled tests support rule consistency and receipt handling, not human comprehension, operational acceptance, production deployment or all concurrency scenarios.",
+    "Board approval of the original-resume policy, approved client outcomes/artifacts, physical-device/Safari/Firefox behavior and real member task success remain unknown."
+  ]
+}

@@ -1,0 +1,137 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        40,
+        30,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 16,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        46.08,
+        36,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        76,
+        36,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": false,
+        "crossers": 0
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        76,
+        36,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": false,
+        "crossers": 0
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 15,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 29
+    }
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-045",
+  "lens": "Product systems and reliability \u2014 ambiguous result",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the inspected captures coherently express Precision Instrument. Draft recovery preserves explicit choice, revision conflicts and exact uncertain-write retries. Coverage distinguishes submitted observations from valid independent evidence, and closing explains its irreversible consequence. However, final application and round-close acknowledgements fall below that standard: transport success can stand in for a receipt, and a lost close acknowledgement leaves misleading controls. These are source-supported interface reliability defects, not observed production incidents. This simulated AI review does not establish human task success or hosted readiness.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png",
+    "src/app/apply/application-form.tsx",
+    "src/lib/application-draft-recovery.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/rush-controls.tsx",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/decision-release.ts",
+    "src/lib/round-evidence.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-privacy-browser.log"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/apply/application-form.tsx:493-538; src/app/applicant/page.tsx:281-286",
+      "evidence": "submit() calls finishSubmission() for every response.ok without parsing applicationId. finishSubmission clears browser recovery and redirects with submitted=1; the dashboard renders \u201cMECG received your application\u201d from that query flag alone. The actual API contract returns applicationId (api/apply/route.ts:112), but the storage-disabled browser test explicitly accepts 200 {} as successful submission.",
+      "userImpact": "An empty or malformed successful response can discard the recovery copy and present a received receipt without verified application state. Reloading a submitted=1 URL also repeats a receipt independently of current state.",
+      "suggestedFix": "Validate the submission receipt before clearing recovery; reconcile authoritative submitted state for missing or malformed receipts. Gate the dashboard receipt on persisted submitted state. Add a malformed-2xx final-submit regression."
+    },
+    {
+      "severity": "high",
+      "file": "src/app/admin/rush-controls.tsx:64-85; src/app/admin/round-status-control.tsx:60-66",
+      "evidence": "useRushAction reports only \u201cRequest failed\u201d on a thrown close POST and does not refresh or reconcile. RoundStatusControl retains ready coverage and its open confirmation after act returns false, including the \u201cKeep grading open\u201d and close controls. operator-close.spec.ts:85 tests a failed coverage GET, not a lost acknowledgement after the irreversible POST commits.",
+      "userImpact": "After grading actually freezes but the acknowledgement is lost, operators can be left believing grading remains open and retrying from stale coverage. Any 2xx also closes the modal without validating a status receipt.",
+      "suggestedFix": "Represent unknown close outcomes explicitly, reread authoritative round status, and disable further close actions until reconciled. Confirm the persisted status with a specific receipt; test committed-write/connection-loss and malformed-success responses."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, hosted Clerk/Supabase/RLS/storage/email integration or actual authenticated operator journey exists in this evidence. No tests were executed during this review.",
+    "Application journey was traced through source and intercepted-fixture tests, not observed with a real applicant. The round-close capture is synthetic; operator comprehension and successful recovery remain unobserved.",
+    "Physical devices, Safari/Firefox, assistive technology, formal accessibility conformance and human usability are unverified.",
+    "Client-approved outcomes/artifacts remain absent. Original resume access is disclosed and does not anonymize PDF content; Board policy resolution and provisioning retention approval remain external dependencies."
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-013",
+  "lens": "Editorial and brand craft; keyboard-oriented use (simulated AI panel lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public presentation is coherent and carefully composed: restrained sans/mono roles, numbered sections, hairline structure, clear client/student actions, and a real, accurately captioned member photograph survive the supplied desktop/mobile layouts. The proposition explains student-led research and recommendations without invented outcomes. Organization figures and named partnerships precede people, but the central promise still lacks an inspectable engagement or actual work artifact. That limits world-class editorial persuasion for a client choosing a consulting team. I traced Home \u2192 Client Services \u2192 Contact in source and the supplied client-journey test/log; the inquiry confirmation uses intercepted HTTP. Native station buttons, a skip link, focus styles and menu Escape return support keyboard intent, but this is not observed end-to-end keyboard success. This independent AI assessment does not establish human endorsement or hosted release readiness.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/form-field.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx:731-746 (privacy disclosure excerpts)",
+    "src/app/globals.css (font, focus and scroll rules)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public test entries and total)",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97; src/content/projects.public.ts:3-5",
+      "evidence": "The captured Selected work section renders the fallback at home/page.tsx:78-80: general industry coverage and \u201cCase studies pending client approval.\u201d Lines 88-95 then supply organization names/sectors, rather than a project question, method or handoff. PUBLIC_PROJECTS is empty. The only homepage photograph, lines 135-136, is correctly identified as a PwC visit, not project evidence. Both full-page captures show this proof gap.",
+      "userImpact": "A prospective client can verify the claimed kinds of partners and understand the proposed process, but cannot judge the specificity or quality of the team\u2019s actual consulting work before inquiring.",
+      "suggestedFix": "Obtain client and MECG approval for one concise engagement example: the actual decision, methods, constraints and handoff, plus a redacted deliverable excerpt if permitted. Publish through the existing approval boundary and feature it before the people section. Keep the honest pending status until approval; do not fabricate a result or repurpose culture photography as project proof."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment or hosted Clerk/Supabase/storage/email integration evidence exists; contact delivery and actual board response time remain unverified.",
+    "No complete Tab/Shift+Tab/Enter/Space journey was observed. The supplied menu test clicks its trigger and programmatically focuses a link before Escape; the station test uses clicks. Focus visibility during scroll, zoom, FAQ operation and browser navigation therefore remain important keyboard unknowns.",
+    "No physical-device, Safari, Firefox, assistive-technology or human task-success evidence. Captures use Linux fallback fonts; other system-font metrics were not visually verified.",
+    "Client publication approval, underlying organization statistics and original-resume policy approval were not independently authenticated. Reviewed applicant copy accurately discloses original-PDF access; that is not anonymization.",
+    "Private operator/applicant workflows beyond the sampled privacy copy were outside this editorial seat\u2019s direct inspection."
+  ]
+}

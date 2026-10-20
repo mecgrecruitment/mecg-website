@@ -90,7 +90,7 @@ export default function QuestionEditor({
   }
 
   return (
-    <section className="rounded-2xl bg-paper p-5">
+    <section className="workspace-panel rounded-2xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-mecg-navy/65">Application questions</p>

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
-import { resolveAuthDestination, type AccessRole, type AuthDestination } from "@/lib/auth-destination";
+import { hasEditableIntakeApplication, resolveAuthDestination, type AccessRole, type AuthDestination } from "@/lib/auth-destination";
 import { hasPermission } from "@/lib/authorization";
 import { resolveCurrentIdentity } from "@/lib/identity/clerk-server";
 
@@ -51,7 +51,7 @@ export async function destinationForUser(
   // hide a real outage.
   if (canStartResult.error) console.error("can_start_application failed, treating as false", canStartResult.error);
 
-  return resolveAuthDestination({
+  const access = {
     active: profileResult.data?.active === true,
     memberships: (membershipResult.data ?? []).map((membership) => ({
       role: membership.role as AccessRole,
@@ -59,7 +59,17 @@ export async function destinationForUser(
     })),
     hasApplication: applicantResult.data === true,
     canStartApplication: canStartResult.data === true,
-  });
+    hasEditableApplication: false,
+  };
+  const destination = resolveAuthDestination(access);
+  if (destination !== "/applicant") return destination;
+  // A saved new-cycle draft makes can_start_application false, while a past
+  // submission still makes is_applicant true. Check the authoritative editable
+  // intake before routing someone away from their saved work. Internal roles
+  // never need this extra applicant-only read.
+  const intakeResult = await supabase.rpc("intake_schema");
+  if (intakeResult.error) throw intakeResult.error;
+  return resolveAuthDestination({ ...access, hasEditableApplication: hasEditableIntakeApplication(intakeResult.data) });
 }
 
 export async function currentDestination(): Promise<AuthDestination | null> {

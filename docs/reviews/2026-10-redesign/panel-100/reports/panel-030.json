@@ -1,0 +1,47 @@
+{
+  "seatId": "panel-030",
+  "lens": "Accessible interaction \u2014 overall coherence",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The sampled public experience coherently expresses Precision Instrument: readable proposition, distinct client/student actions, native disclosure and station buttons, generous primary targets, skip navigation, and contrasting focus rules. Desktop/mobile hero captures support visual coherence. I traced the client journey from services and pro-bono FAQ to the contact form and its confirmation; supplied Chromium logs show that journey passing with intercepted HTTP, not actual delivery. Application source associates field errors, focuses failed fields, and accurately discloses original-resume access rather than promising anonymity. Evaluator ratings use native radios with visible peer focus. However, scoring-guide validation is less accessible, and the available local evidence cannot establish world-class accessibility across the complete authenticated workflow. This is an independent simulated expertise assessment, not observed human success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/form-field.tsx",
+    "src/app/globals.css (focus, targets and reduced-motion rules)",
+    "src/app/apply/application-form.tsx (validation/focus, recovery, materials and review excerpts)",
+    "src/app/apply/headshot-field.tsx",
+    "src/app/member/evaluation-form.tsx (rating and evidence controls)",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public journey results and completion)",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rounds/rubric-editor.tsx",
+      "evidence": "RubricEditor lines 49\u201352 disables saving for blank names, out-of-range weights, duplicate keys and invalid key syntax. Name/weight controls lack associated explanatory errors; Key at lines 138\u2013143 has aria-invalid only for syntax, without aria-describedby. The syntax explanation at lines 164\u2013166 has no association, and duplicate feedback near the save control is not linked to affected inputs.",
+      "userImpact": "An operator navigating by fields can encounter a disabled save action without a field-level explanation of what needs correction, particularly for duplicate keys or an empty name. This is a source finding, not an observed screen-reader failure.",
+      "suggestedFix": "Give each criterion stable field/error IDs; associate specific validation guidance with aria-describedby and aria-invalid for every failing condition, including duplicates. Provide a discoverable validation summary or disabled-save explanation and verify correction using keyboard and a screen reader."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, actual Clerk session flow, Supabase/storage permission behavior or email delivery was observed; successful intercepted contact responses are local UI evidence only.",
+    "No screen-reader, switch/voice input, physical touch-device, Safari/Firefox, forced-colors, zoom/reflow or complete keyboard-only journey was exercised by this seat.",
+    "Private grading/operator workflows were sampled in source only; complete modal focus containment, focus restoration and all error/recovery announcements remain unverified.",
+    "Reduced-motion instrument behavior has a supplied passing Chromium assertion; global rules explicitly exempt deck-root, whose motion and operator accessibility were not assessed. No formal accessibility conformance or real-user task-success evidence exists."
+  ]
+}

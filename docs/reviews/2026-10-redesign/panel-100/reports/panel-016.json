@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-016",
+  "lens": "Editorial and brand craft \u2014 long or difficult content; simulated expertise/user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The homepage has an authored Precision Instrument identity: a strong sans hierarchy, restrained mono annotations, useful hairline structure, clear client/student actions, and real, accurately captioned member photography. Desktop and mobile captures preserve the same editorial sequence without squeezing desktop columns onto a phone. Organization figures and named partnerships precede people, and missing case studies are disclosed rather than filled with invented outcomes. However, the client-services organization selector creates a substantial narrow-screen reading and response-discovery problem. The public proof layer also remains names and organization descriptions rather than approved engagement evidence, so I cannot call the overall persuasion world-class. I traced the actual client-services-to-contact journey in source and supplied test/log evidence; its confirmation is tested with intercepted HTTP, not observed delivery or human task success. Release readiness remains unproven beyond the supplied local evidence.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx (partial)",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/globals.css (font declarations)",
+    "src/app/apply/application-form.tsx (MaterialsStep and first-read disclosure excerpts)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (final results and public-journey entries)",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34-71",
+      "evidence": "Below sm, the grid has one column; every organization button has min-h-36 (line 46). WorkPage passes all PAST_PROJECTS at src/app/(marketing)/work/page.tsx:40; src/lib/site-content.ts:21-129 contains 15 organizations. The only selected profile is rendered after the entire grid (lines 67-71), while onClick only changes selectedName (line 45). Selecting the first tile therefore places its profile after at least 2,160px of tiles, without scrolling or moving focus to it. The supplied public journey test never exercises this selector.",
+      "userImpact": "On a narrow screen, a client exploring an early partnership can see the pressed tile but miss its descriptive response several screens below. The full logo stack also delays capabilities and practical engagement information in an already long page.",
+      "suggestedFix": "Use compact organization rows with inline disclosure on phones, or position and deliberately reveal the selected profile beside its trigger. Preserve keyboard access and the approval caveat. Verify first and last selections at 390px with the actual 15 names and long descriptions."
+    }
+  ],
+  "notVerified": [
+    "No client-services, expanded organization-profile, Join, or long case-study captures were supplied; their visual and interaction conclusions are source-based, not live observations. Homepage captures do not prove those layouts.",
+    "No approved case-study outcomes or project artifacts currently establish the promised work quality; publishing them requires client/Board approval. Member culture photography is not project evidence.",
+    "The reviewed application copy explicitly discloses original identifying resume access; I did not verify hosted access enforcement, approve the underlying Board policy, or inspect every private workflow.",
+    "No staging, deployment, real Clerk/Supabase/storage/email integration, human study, physical-device, Safari/Firefox, assistive-technology or formal accessibility evidence establishes broad release readiness. Local Chromium checks and source review do not establish observed user success."
+  ]
+}

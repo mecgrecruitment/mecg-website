@@ -2,6 +2,17 @@ begin;
 set local role postgres;
 set local search_path = extensions, public;
 select extensions.plan(371);
+
+-- Retain these grading fixtures through the revision-guarded public boundary.
+create function pg_temp.submit_evaluation_compat(target_assignment_id text,submitted_ratings jsonb,submitted_evidence text)
+returns table(evaluation_id text,score numeric) language plpgsql as $$
+declare receipt jsonb;
+begin
+  receipt:=rush.submit_evaluation_v2(target_assignment_id,submitted_ratings,submitted_evidence,
+    (rush.get_evaluation_draft_v2(target_assignment_id)->>'revision')::uuid);
+  if receipt->>'kind'<>'submitted' then raise exception 'fixture revision conflict' using errcode='40001'; end if;
+  evaluation_id:=receipt->>'evaluationId';score:=(receipt->>'score')::numeric;return next;
+end $$;
 select extensions.has_schema('rush', 'rush schema exists');
 select extensions.has_table('rush','profiles','profiles table exists');
 select extensions.has_table('rush','rush_cycles','cycles table exists');
@@ -113,7 +124,7 @@ select extensions.ok(position('existing slot outside event bounds' in pg_get_fun
 select extensions.ok(position('workflow_test_claims(applicant_id,''service_role'')' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0 and position('submit_application_self_test' in pg_get_functiondef('rush.verify_full_workflow(uuid,uuid,uuid)'::regprocedure)) > 0, 'workflow verifier retains the service-role claim for its guarded fixture call');
 select extensions.ok(exists(select 1 from pg_proc p where p.oid='rush.workflow_test_claims(uuid,text)'::regprocedure and p.prosecdef and p.proconfig @> array['search_path=""']), 'workflow test claims helper is a hardened security definer');
 select extensions.ok(not has_function_privilege('authenticated','rush.workflow_test_claims(uuid,text)','EXECUTE') and not has_function_privilege('service_role','rush.workflow_test_claims(uuid,text)','EXECUTE'), 'workflow test claims helper is reachable only inside the verifier');
-select extensions.ok(position('array[''applicationId'',''applicantName'',''evidence'',''reviewerId'',''reviewerName'']' in replace(pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure), ' ', '')) > 0 and position('array[''note'']' in replace(pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure), ' ', '')) > 0 and position('b.status=''FROZEN''' in replace(pg_get_functiondef('rush.screening_admin_overview(text)'::regprocedure), ' ', '')) > 0, 'frozen screening output redacts applicant, reviewer identity, evidence and rating notes outside Board and Owner');
+select extensions.has_function('rush','release_screening_results',array['text'],'frozen screening results have an explicit owner-controlled release boundary (behavior verified in screening_release_visibility.sql)');
 select extensions.ok(position('CLOSED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ARCHIVED' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('ATTENDANCE_EXPORT' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0 and position('DECISION_PREVIEW' in pg_get_functiondef('rush.has_cycle_capability(text,text)'::regprocedure)) = 0, 'committee capabilities end for closed cycles and exclude transitions, export, and preview');
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) > 0 and position('ROUND_COORDINATION' in pg_get_functiondef('rush.set_round_status(text,rush.round_status)'::regprocedure)) = 0, 'round transitions retain strict board authorization');
 select extensions.ok(position('has_cycle_role' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) > 0 and position('has_cycle_capability' in pg_get_functiondef('rush.export_attendance(text)'::regprocedure)) = 0, 'attendance export retains strict board authorization');
@@ -413,7 +424,7 @@ set local "request.jwt.claim.sub" = '10000000-0000-4000-8000-000000000001';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"10000000-0000-4000-8000-000000000001","role":"authenticated"}';
 set local role authenticated;
 select extensions.throws_ok(
-  $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
+  $$select pg_temp.submit_evaluation_compat('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
   '22023','required criteria or observation coverage missing',
   '80 percent weight does not bypass the explicit observed criterion minimum');
 set local role postgres;
@@ -423,7 +434,7 @@ select extensions.lives_ok(
   $$select rush.acknowledge_round_calibration('10000000-0000-4000-8000-000000000042','10000000-0000-4000-8000-000000000052')$$,
   'the assigned evaluator can acknowledge the active rubric before submitting');
 select extensions.lives_ok(
-  $$select rush.submit_evaluation('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
+  $$select pg_temp.submit_evaluation_compat('10000000-0000-4000-8000-000000000071','[{"criterionId":"10000000-0000-4000-8000-000000000061","score":4},{"criterionId":"10000000-0000-4000-8000-000000000062","score":null},{"criterionId":"10000000-0000-4000-8000-000000000063","score":null}]'::jsonb,'Evidence')$$,
   'the same ratings pass when the rubric explicitly requires one observation');
 set local role postgres;
 

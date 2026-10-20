@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-094",
+  "lens": "Owner and access-sensitive user \u2014 service failure (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected source has careful partial-provisioning safeguards: uncertain identity writes and failed membership grants preserve accounts, restricted incidents carry lookup identity, and resolution records remediation rather than claiming account repair. The owner queue distinguishes load failure from an empty queue; its button requires an explicit resolution receipt. Applicant materials and final review accurately disclose original-resume identity exposure. The public proposition and supplied desktop/mobile hero captures are clear and coherent with Precision Instrument; missing case-study approval is stated rather than replaced with invented outcomes. However, the initiating account form loses reconciliation guidance when its entire response is lost. Local SQL and mocked browser evidence cannot establish hosted owner recovery, privacy enforcement across providers, or actual user understanding. An unqualified world-class agreement is therefore unsupported.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/apply/application-form.tsx (materials and review privacy copy)",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/rush-controls.tsx (useRushAction and PeopleControls)",
+    "src/app/api/admin/rush/route.ts (provisioning branches)",
+    "src/app/api/admin/rush/route.test.ts (provisioning cases)",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/provisioning-incident.test.ts",
+    "src/lib/operational-log.ts",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/page.test.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "supabase/migrations/20260905120000_membership_allowlist.sql (ensure_external_identity)",
+    "supabase/migrations/20260911145058_board_screening_readers.sql (grant_membership)",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-final-node.log (summary)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rush-controls.tsx:59\u201385",
+      "evidence": "useRushAction catches a transport failure with only setError(\"Request failed\") and clears pending in finally. PeopleControls wires the same action to Create account at lines 162\u2013165. The server can already have completed Clerk creation, identity linking and membership grant (src/app/api/admin/rush/route.ts:101\u2013142) before the response is lost. The inspected provisioning browser tests cover lost resolution responses, not a lost ADD_USER response.",
+      "userImpact": "An owner cannot distinguish a failed request from completed or partial provisioning and can retry account creation without checking existing access. This undermines the otherwise explicit recovery journey during a service interruption.",
+      "suggestedFix": "Give ADD_USER transport/ambiguous-response failures account-specific uncertainty guidance: retain the form, ask the owner to check Clerk and People before retrying, and link to the incident queue. Add a focused intercepted-response test for a committed creation whose response is lost."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in this evidence; actual creation, timeout reconciliation, current-session RLS and cross-cycle access preservation were not observed end to end.",
+    "The eight resolution browser checks use a synthetic harness and intercepted HTTP; the owner queue has source/SSR evidence, without an authenticated visual capture or observed owner task completion.",
+    "No human study establishes that applicants understand original-resume visibility or owners correctly complete manual remediation before recording resolution.",
+    "Retention policy approval, real client publication approval, assistive-technology behavior and non-Chromium/device behavior remain outside this inspection."
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-004",
+  "lens": "Apple-inspired clarity; service failure (simulated AI review lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The supplied desktop hero and mobile capture establish a coherent, restrained Precision Instrument identity: strong proposition hierarchy, specific client/student actions, readable explanatory copy and a process figure tied to useful outputs. The reviewed client journey connects engagement terms to inquiry guidance and a clear next step. However, public service-failure feedback still conflates unknown state with factual absence, and inquiry success is asserted without validating its receipt. These gaps prevent world-class agreement through this lens. This is independent AI source/capture review, not observed human task success or Apple endorsement. Hold for the identified feedback corrections; hosted readiness also remains unproven.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/components/site-header.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/public-recruitment.ts",
+    "src/lib/supabase/public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/apply/application-form.tsx:731-746",
+    "src/app/applicant/page.tsx:421-436",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-privacy-final-node.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/public-recruitment.ts:120-123; src/app/(marketing)/join/page.tsx:47-50,68-81",
+      "evidence": "fetchPublicRecruitment discards the RPC error and returns cycle:null when data is absent. Join defaults events to [] and then states: \u201cThe Board has not published events for this cycle yet.\u201d A failed lookup therefore produces an unsupported explanation for the empty timeline and replaces application access with interest-list guidance.",
+      "userImpact": "During a recruitment service outage, students cannot distinguish missing information from genuinely unpublished events and may miss an active application window.",
+      "suggestedFix": "Carry an explicit unavailable result through the public recruitment loader. Show a lookup-failure message with retry and board contact; reserve unpublished-event copy for a successful empty lookup. Add a focused regression for RPC failure while a cycle exists."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:24-32",
+      "evidence": "JSON parsing falls back to null, but any HTTP success reaches form.reset() and \u201cYour message was sent.\u201d No check requires the API\u2019s {ok:true} receipt. The browser journey at tests/e2e/public-journeys.spec.ts:46-53 supplies only a valid mocked receipt; route tests cover provider rejection, not malformed successful responses at the form.",
+      "userImpact": "A malformed successful response clears the visitor\u2019s inquiry and gives certainty unsupported by a valid acknowledgement.",
+      "suggestedFix": "Require the expected success receipt before clearing fields. Preserve the message on missing/malformed acknowledgement and explain that delivery could not be confirmed, with the board email as recovery. Cover malformed 2xx responses in a focused form check."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration evidence exists: actual Clerk sessions, Supabase/RLS, storage and board email receipt remain unverified.",
+    "The supplied client journey passed with intercepted HTTP; I did not execute a live inquiry or observe real-user task success.",
+    "Contact failure-state rendering has no supplied capture; visual judgment is limited to the supplied homepage captures, not authenticated screens.",
+    "Original-resume identity exposure is explicitly disclosed in the application source; Board policy resolution and retention approval remain external. No anonymization of original PDFs is inferred.",
+    "Client-approved outcomes/artifacts remain absent; the empty publication boundary and synthetic publication proof do not establish real client approval.",
+    "Physical devices, Safari/Firefox, assistive technology and broad operator acceptance were not verified."
+  ]
+}

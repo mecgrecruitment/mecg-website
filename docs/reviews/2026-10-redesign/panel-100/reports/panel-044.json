@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-044",
+  "lens": "Product systems and reliability \u2014 service failure (simulated AI expertise)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The frozen revision has thoughtful failure-state design: competing drafts are compared before replacement, uncertain saves retain their mutation identity, partial grading is distinguished from valid independent evidence, and batch receipts separate applicant visibility from email delivery. The desktop proposition and synthetic mobile close dialog show coherent Precision Instrument hierarchy and explicit consequences. However, unbounded requests leave important journeys without a usable recovery state. Broad world-class acceptance remains unproven: source and synthetic fixtures are not observed applicant/operator success or hosted integration proof. Hold release acceptance pending the bounded-failure correction and integration evidence.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/apply/application-form.tsx",
+    "src/lib/client-fetch.ts",
+    "src/lib/run-action.ts",
+    "src/lib/use-action.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/decision-release.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (opening interrupted-submit journey and save acknowledgement)",
+    "supabase/tests/batch_release_diagnostics.sql",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (validity/readiness excerpts)",
+    "evidence/mecg-draft-race-final.log",
+    "evidence/mecg-round-close-final-e2e.log (final results)",
+    "evidence/mecg-privacy-db-final.log (final results)",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/decision-form.tsx:147-181; src/app/admin/provisioning/resolve-button.tsx:22; src/app/(marketing)/contact/contact-form.tsx:19-35",
+      "evidence": "ReleaseAllButton.releaseReviewed awaits authorizedFetch without a deadline; its busy/pending locks clear only after that promise settles. ResolveButton and ContactForm likewise await unbounded requests while disabling their action. src/lib/client-fetch.ts authorizedFetch adds session retry but no request deadline. Thus a stalled transport does not reach the otherwise useful unknown-result/error guidance. ContactForm also reports definite non-delivery on a rejected connection, although the email could already have been accepted.",
+      "userImpact": "A service stall can strand an operator during an irreversible release or leave a prospective client indefinitely at Sending. A lost acknowledgement gives the client no truthful distinction between failed delivery and an unknown result, encouraging duplicate inquiries.",
+      "suggestedFix": "Bound the complete request/response wait, preserve input, and expose an explicit unknown-result state. For releases, direct the operator to refreshed authoritative outcomes before retrying; for contact, explain that receipt is unconfirmed and offer the board email. Add focused delayed-response and post-commit connection-loss checks rather than only immediate failures."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/RLS/storage/email integration exists in this evidence; local SQL assertions and intercepted browser requests do not establish it.",
+    "No actual applicant or operator task success was observed. The inspected interrupted-submit journey is a synthetic harness, and the close capture uses synthetic data.",
+    "Hosted migration/client rollout, session expiry during uploads, and real save/submit concurrency beyond the recorded two-session initial-save race remain unverified.",
+    "Original-resume access is disclosed in Materials and Review; Board resolution of the conflicting blind-review policy and retention policy remain external decisions.",
+    "Client-approved outcomes/artifacts, assistive-technology use, Safari/Firefox and physical-device behavior remain unverified. This review ran no tests or browser session."
+  ]
+}

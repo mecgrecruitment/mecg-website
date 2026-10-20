@@ -9,6 +9,10 @@ export default function ApplicantOnboarding({ items }: { items: ApplicantOnboard
   const { pending, error, success, run } = useAction("/applicant/onboarding", "Could not update onboarding. Try again.");
   const [completed, setCompleted] = useState(() => new Set(items.filter((item) => item.completedAt).map((item) => item.key)));
   const done = completed.size;
+  const yourItems = items.filter((item) => ONBOARDING_LABELS[item.key]?.selfCompletable);
+  const boardItems = items.filter((item) => !ONBOARDING_LABELS[item.key]?.selfCompletable);
+  const yourRemaining = yourItems.filter((item) => !completed.has(item.key)).length;
+  const groups = [{ title: "Your steps", items: yourItems }, { title: "MECG is arranging", items: boardItems }];
 
   async function toggle(item: ApplicantOnboardingItem) {
     const next = !completed.has(item.key);
@@ -31,8 +35,11 @@ export default function ApplicantOnboarding({ items }: { items: ApplicantOnboard
         <span className="tabular text-sm font-semibold text-mecg-navy/60">{Math.round((done / items.length) * 100)}%</span>
       </div>
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-mecg-navy/10" aria-hidden="true"><div className="h-full bg-mecg-orange" style={{ width: `${(done / items.length) * 100}%` }} /></div>
-      <ol className="mt-4 grid gap-2">
-        {items.map((item) => {
+      {yourRemaining === 0 && yourItems.length > 0 && <p className="mt-4 text-sm text-mecg-navy/65">Your steps are complete. Any unfinished Board steps are listed below.</p>}
+      {groups.filter((group) => group.items.length > 0).map((group) => <div key={group.title} className="mt-5">
+      <h3 className="text-sm font-semibold">{group.title}</h3>
+      <ol className="mt-2 grid gap-2">
+        {group.items.map((item) => {
           const copy = ONBOARDING_LABELS[item.key] ?? { title: item.key, detail: "", selfCompletable: false };
           const isDone = completed.has(item.key);
           return (
@@ -50,6 +57,7 @@ export default function ApplicantOnboarding({ items }: { items: ApplicantOnboard
           );
         })}
       </ol>
+      </div>)}
       <div className="mt-3 space-y-2"><OperationNotice kind="error">{error}</OperationNotice><OperationNotice kind="success">{success}</OperationNotice></div>
     </section>
   );

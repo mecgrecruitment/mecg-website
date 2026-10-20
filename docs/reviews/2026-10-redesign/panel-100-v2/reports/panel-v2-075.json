@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-075",
+  "lens": "Member evaluator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision has a coherent Precision Instrument presentation and substantially stronger evaluator safeguards. The public hero states the no-fee semester offer; partnership copy accurately separates affiliations from approved project evidence. In the source-traced My work \u2192 Group Case journey, editable observations no longer masquerade as locked written evaluations. Note-only saves remain incomplete, while canonical quality identifies minimum observations, required criteria and weighted coverage. Written-evaluation recovery preserves divergent copies, tracks actual browser backup success, offers private downloads and moves keyboard focus through review before locking. Supplied synthetic browser assertions and isolated SQL logs substantiate these bounded improvements. However, Group Case still lacks a bounded acknowledgement wait: a stalled save blocks subsequent evidence for that applicant indefinitely. That directly undermines my ambiguous-result task and prevents world-class agreement. Approved engagement proof, current membership workload facts and actual authenticated acceptance also remain missing. Desktop/mobile captures support public visual craft only; they do not establish private-task comprehension or hosted integration.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "src/app/member/page.tsx (Group Case continuity sections)",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/client-fetch.ts (authorizedFetch/retryOnNetworkError)",
+    "src/lib/group-case-roster.ts",
+    "src/lib/evaluation-submission.ts",
+    "supabase/migrations/20261016200000_group_case_reviewer_quality.sql (grading guards/note-only contract)",
+    "supabase/tests/group_case_reviewer_quality.sql",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "tests/e2e/evaluation-backup.spec.ts",
+    "docs/reviews/2026-10-redesign/evaluator-recovery.md",
+    "docs/reviews/2026-10-redesign/group-case-evaluator-followup.md",
+    "docs/reviews/2026-10-redesign/member-work-continuity.md",
+    "docs/reviews/2026-10-redesign/evidence/evaluator-recovery-browser.log (final cases/result)",
+    "docs/reviews/2026-10-redesign/evidence/member-work-browser.log (final cases/result)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (quality-suite and final result)",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save awaits the preceding inflight promise (149), then retryOnNetworkError(authorizedFetch(...)) (157-161) and response.json() (162), without a deadline. client-fetch.ts:113-153 supplies session retry/network-rejection retry, not a timeout. finish only runs after settlement (178-179). Recovery controls at roster lines 431-437 appear only for error/hint. The supplied group-case-evidence.spec.ts covers resolved failures and delayed receipts, not a permanently stalled request/body.",
+      "userImpact": "A stalled observation save can remain Saving indefinitely. Later scores/notes for that applicant queue behind the unresolved promise, so further editing or Retry cannot obtain a receipt. Unsaved observations exist only in the open page.",
+      "suggestedFix": "Bound the complete authorization/request/body wait, release the per-applicant queue on timeout and show an explicit unconfirmed state with copy/retry guidance. Preserve sequence protection and avoid treating abort as proof of noncommit. Add stalled-header and stalled-body checks that verify later evidence can be saved."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/RLS/storage/email integration or real authenticated evaluator/operator completion was supplied; no staging exists.",
+    "No final evaluator screenshot, observed human reviewer task success, screen-reader session, physical iPhone or macOS Safari evidence was supplied. Source review and synthetic fixtures are not those observations.",
+    "Board approval of resume/blind-review policy, retention operations and closed-round remediation remains outstanding. Original identifying resume access is accurately disclosed, not anonymized.",
+    "Approved client deliverables/outcomes and current Board-confirmed weekly membership commitments remain absent.",
+    "Concurrent cross-device evaluator draft writes have no demonstrated revision/CAS guarantee; this review did not establish one."
+  ]
+}

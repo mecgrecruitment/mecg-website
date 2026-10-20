@@ -1,0 +1,93 @@
+{
+  "scope": "Actual server-rendered dashboard and PortalShell with synthetic own-RPC fixtures; image framework adapter and interactive child stubs; current local CSS; no authenticated/provider journey",
+  "results": [
+    {
+      "fixture": "draft-open",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "heading": "Your application is a draft.",
+      "nextAction": "Draft · Not submitted\n\nFinish your application\n\nYour draft is saved, but it has not been submitted. Continue to review and submit your application.\n\nContinue application",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "needs_info-open",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "heading": "Your application needs changes.",
+      "nextAction": "Changes requested · Resubmission needed\n\nReview and resubmit your application\n\nReview the requested changes, then submit your application again while the application window is open.\n\nReview and resubmit",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "draft-closed",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "heading": "Your application is a draft.",
+      "nextAction": "Draft · Not submitted\n\nApplication editing is unavailable\n\nThis draft has not been submitted. Saving your work does not submit your application. Editing and submission are not available right now. Contact the recruitment team if you need help with this application.\n\nContact recruitment team",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "needs_info-closed",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "heading": "Your application needs changes.",
+      "nextAction": "Changes requested · Resubmission needed\n\nApplication editing is unavailable\n\nThe Board requested more information. Your application needs to be reviewed and resubmitted. Editing and submission are not available right now. Contact the recruitment team if you need help with this application.\n\nContact recruitment team",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "draft-open",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "heading": "Your application is a draft.",
+      "nextAction": "Draft · Not submitted\n\nFinish your application\n\nYour draft is saved, but it has not been submitted. Continue to review and submit your application.\n\nContinue application",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "needs_info-open",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "heading": "Your application needs changes.",
+      "nextAction": "Changes requested · Resubmission needed\n\nReview and resubmit your application\n\nReview the requested changes, then submit your application again while the application window is open.\n\nReview and resubmit",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "draft-closed",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "heading": "Your application is a draft.",
+      "nextAction": "Draft · Not submitted\n\nApplication editing is unavailable\n\nThis draft has not been submitted. Saving your work does not submit your application. Editing and submission are not available right now. Contact the recruitment team if you need help with this application.\n\nContact recruitment team",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    },
+    {
+      "fixture": "needs_info-closed",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "heading": "Your application needs changes.",
+      "nextAction": "Changes requested · Resubmission needed\n\nApplication editing is unavailable\n\nThe Board requested more information. Your application needs to be reviewed and resubmitted. Editing and submission are not available right now. Contact the recruitment team if you need help with this application.\n\nContact recruitment team",
+      "noHorizontalOverflow": true,
+      "heroPipelineSteps": 0
+    }
+  ]
+}

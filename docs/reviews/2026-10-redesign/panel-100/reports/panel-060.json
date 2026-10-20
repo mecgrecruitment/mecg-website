@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-060",
+  "lens": "Prospective client — overall coherence (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client offer and next step are coherent, but the current proof layer does not let a prospective client judge the quality or relevance of MECG’s work. The homepage identifies student-led research and recommendations; Client Services supplies pro-bono cost, semester duration, team size, NDA support, and client contributions of time, context and access. The source-traced journey from /work through its FAQ and Work with MECG link to /contact#message gives useful inquiry prompts and identifies the board as recipient. Desktop/mobile homepage captures show consistent Precision Instrument hierarchy, clear audience actions and a readable mobile hero. Organization profiles carefully distinguish business descriptions from unpublished MECG engagement details, and the contact API escapes message content and returns failure when its email helper fails. These are strengths, not proof of observed client task success. The supplied browser log confirms the client journey passed in both emulated viewports, but its test intercepts contact delivery. Missing approved project evidence is a substantive weakness for this seat’s evidence-judgment task; hosted delivery and broader acceptance remain unknown.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-panel-build.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:93-113",
+      "evidence": "The expanded profile renders the organization description, says MECG scope/methods/deliverables/outcomes are pending approval, and links to the organization’s website. src/content/projects.public.ts:3-5 contains an empty approved-project fallback; src/app/(marketing)/work/page.tsx:56-63 omits Selected work when no projects exist. captures/desktop.png likewise shows a pending-approval status instead of an engagement example. DESIGN.md section 7 and release-open-items.md confirm actual project artifacts and approved case studies remain absent.",
+      "userImpact": "A client can understand the proposed process but cannot inspect a comparable problem, method or deliverable to assess capability. Recognizable organizations establish association without showing what MECG contributed.",
+      "suggestedFix": "Obtain client and board approval for at least one concise engagement with its actual question, student contribution, methods, deliverable excerpt and limits, then publish it through the existing approved-project path. Keep the pending status until approval; do not fabricate results or imply that organization profiles demonstrate outcomes."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration exists. Actual inquiry receipt, sender configuration, board reply handling and the one-week response commitment were not exercised; the browser test mocks HTTP success and route tests mock email.",
+    "No human client study or observed inquiry success exists. This is source, supplied-log and capture review by an AI panel seat.",
+    "Client publication permissions, underlying organization/member statistics and real engagement delivery quality were not independently established.",
+    "No supplied work/contact captures establish those pages’ rendered visual craft; private application/grading/operator behavior, live authorization and storage were outside this seat’s inspection.",
+    "Physical devices, Safari, Firefox, assistive technology, complete accessibility conformance and confidentiality/retention operations were not verified."
+  ]
+}

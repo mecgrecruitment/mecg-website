@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-065",
+  "lens": "Prospective applicant \u2014 ambiguous result (simulated user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed applicant journey is thoughtfully structured: Join explains eligibility, evaluation and preparation; Apply separates draft saving from submission; recovery pauses writes and compares copies before a destructive choice. The supplied desktop and mobile homepage captures show coherent Precision Instrument hierarchy and a visible student action. Public content identifies student-led consulting and labels unpublished case-study proof honestly. The application review accurately discloses original-resume access rather than promising fully anonymous review. However, an unresolved submission acknowledgement can still degrade to an unhelpful generic error. More broadly, the passing intercepted-browser checks and isolated database race do not establish that a student can complete the hosted identity/upload/submission/status journey. I cannot give an unconditional world-class or release endorsement from this evidence. This is independent AI source/evidence review, not observed student success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/apply/route.ts",
+    "src/app/api/apply/status/route.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action-page.test.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "supabase/migrations/20260907120000_applicant_submission_reliability.sql:435-464",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:530-542",
+      "evidence": "After HTTP 500/502/503/504, unsuccessful reconciliation falls through to body.error or \u201cThe application could not be submitted.\u201d Only thrown timeout/network errors receive the explicit unknown-receipt and safe-retry guidance. src/lib/client-fetch.ts:54-59 explicitly notes that failed/negative reconciliation cannot prove non-commit. The RPC catch at src/app/api/apply/route.ts:75-83 can produce 503 after an unknown acknowledgement. The supplied browser case at tests/e2e/application-reliability.spec.ts:206-229 covers a 500 followed by successful status confirmation, not exhausted/unavailable status reads.",
+      "userImpact": "A student whose write may have committed but whose status cannot be checked sees a generic failure or service-outage message without knowing whether they applied or whether clicking Submit again is safe.",
+      "suggestedFix": "When a potentially ambiguous server failure remains unconfirmed, show the same explicit unknown-receipt and duplicate-safe retry guidance used for timeouts, preserve answers, and add a focused browser case for 503/500 plus exhausted status failures."
+    }
+  ],
+  "notVerified": [
+    "No staging environment, hosted integration or human study exists; actual Clerk sessions, RPC/RLS, upload storage and receipt email delivery were not exercised together.",
+    "No supplied authenticated application/recovery/status captures establish private-screen visual quality; those judgments are limited to source and synthetic tests.",
+    "The inspected logs show local intercepted Chromium checks and a two-session PostgreSQL initial-save race, not every save/upload/submit concurrency scenario.",
+    "Physical devices, Safari, Firefox and assistive-technology task completion remain unverified."
+  ]
+}

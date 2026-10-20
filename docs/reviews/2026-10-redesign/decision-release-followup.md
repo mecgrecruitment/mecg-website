@@ -1,0 +1,13 @@
+# Batch decision release follow-up
+
+Implemented a review step that asks the database which locked outcomes are eligible for the current actor. The confirmation lists applicant codes, actual outcomes, eligible/blocked counts, and safe reasons with dossier links and concrete recovery actions. Locked no longer means ready. The exact reviewed decision IDs, outcomes and eligibility codes are checked again before mutation; changed cohorts/outcomes/readiness require a fresh review. Newly inserted decisions cannot silently join an in-flight release.
+
+Release still calls the existing `release_decision` function for each applicant in an exception subtransaction. Its permissions, conflict checks, canonical evidence gate, approval/hash-derived policy, withdrawal guard, application transition and idempotent transactional outbox remain authoritative. Failed applicants roll back independently. Unexpected failures use `RELEASE_FAILED`, rather than claiming a conflict or missing evidence. Safe expected guard failures can report their current reason. No provider error strings enter result rows, audit metadata or route logs.
+
+Applicant pseudonyms are computed by the API on the server and validated for client display; the client bundle does not import the Node hashing module.
+
+The result keeps aggregate `released`/`skipped` fields for existing clients and adds item diagnostics. The reviewed UI uses the snapshot RPC; legacy clients can still call the aggregate wrapper. The result distinguishes applicant-visible outcomes from queued emails, links the delivery log, and offers a fresh review of remaining locked outcomes for retry. Unknown network/response results direct operators to reconcile current state before retrying.
+
+Checks performed in this work: targeted TypeScript compilation and ESLint passed; 20 route/helper tests passed. New `supabase/tests/batch_release_diagnostics.sql` exercises synthetic real database fixtures, exact snapshot/outcome/eligibility drift, manual approval quorum, recusal/withdrawal/evidence reasons, injected unrelated outbox failure, per-item rollback, legacy compatibility and idempotent/resolved retries. The parent session executed all 28 checks successfully against isolated PostgreSQL after the companion grading migration.
+
+Limitations: live Clerk/RLS/browser operator acceptance and delivery-provider behavior remain staging checks. No production data, email delivery, deployment or policy changes occurred. Evidence readiness intentionally uses the canonical database helper maintained by the grading migration; this work does not redefine scoring or quorum. A 100-person real participant panel is still external evidence.

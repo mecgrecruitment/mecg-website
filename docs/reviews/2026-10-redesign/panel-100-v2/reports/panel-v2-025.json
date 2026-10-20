@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-v2-025",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected revision shows substantial interaction care: native controls, contrasting focus rules, field-associated contact errors, post-unlock first-invalid focus, protected pending inquiry values, and explicit uncertain-delivery recovery. I traced the actual homepage project CTA into the contact form and compared its implementation with the keyboard, validation and interrupted-request tests. Desktop and mobile homepage captures show coherent Precision Instrument hierarchy and an honest partnership/publication boundary. The prior deck shortcut collision and reduced-motion exception are addressed in current source and focused synthetic browser evidence: interactive targets are excluded, explicit result controls exist, and both presenter and OS preferences suppress motion and decorative delay. Rubric guidance and sign-out recovery also address their relevant original objections. Nevertheless, a consequential deck failure lacks announced feedback, and the supplied local evidence does not establish complete authenticated keyboard or assistive-technology task success across application, grading and operator workflows. Together with absent approved engagement proof and hosted integration acceptance, these limits leave the unchanged broad world-class proposition unproven. Hold acceptance pending the concrete feedback correction and the outstanding consequential-workflow verification; this is an AI source/artifact review, not observed human usability.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "src/app/globals.css (focus and reduced-motion rules)",
+    "src/lib/run-action.ts",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/applicant/page.tsx (receipt/privacy copy)",
+    "src/app/apply/application-form.tsx (materials/review privacy copy)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "docs/reviews/2026-10-redesign/shared-display-motion.md",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+      "evidence": "reveal() at lines 236\u2013237 sets error and clears phase when APPLY_STAGE_HASH fails. The result live region at lines 327\u2013329 only describes drumroll/stamped phases, so it becomes empty on failure. The actual error is rendered as an ordinary footer paragraph at line 473, with no alert/live semantics, association or focus transfer. deck-accessibility.spec.ts intercepts successful result writes and does not cover this failure receipt.",
+      "userImpact": "A screen-reader operator can hear that a room result is being applied without receiving the failure explanation or a directed recovery destination. The error may be visually distant from the action. This is source-derived, not an observed assistive-technology incident.",
+      "suggestedFix": "Announce the application error through a persistent alert or the result status region, associate it with the retry control, and preserve a useful focus destination after unlocking. Add a rejected-result keyboard regression asserting the accessible failure message and retry path."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated end-to-end keyboard applicant/status, evaluator or operator journey; no screen-reader session, human task observation, physical iPhone or macOS Safari evidence.",
+    "No hosted Clerk/session-expiry, Supabase RPC/RLS, upload/storage, email-delivery, provisioning or consequential-write recovery acceptance. Synthetic intercepted APIs and local logs establish narrower scopes.",
+    "No deck capture or live private-screen visual inspection was supplied for this focal surface; private feedback assessment is source/test based.",
+    "Approved engagement artifacts and current Board-confirmed membership workload remain absent. Original-resume access is accurately disclosed in inspected copy, but Board privacy/retention/remediation decisions remain outstanding."
+  ]
+}

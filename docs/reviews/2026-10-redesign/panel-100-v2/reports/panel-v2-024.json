@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-v2-024",
+  "lens": "Accessible interaction",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile captures show a coherent Precision Instrument identity, readable hierarchy, immediate no-fee/semester facts and clearly separated culture photography and pending project proof. I traced the client journey from the homepage inquiry action into the actual contact form and its failure handling. Contact now preserves the captured inquiry, bounds waiting, validates acknowledgement, associates field errors and focuses the unlocked invalid control. The supplied keyboard journey and cross-engine logs support that local scope. Shared sign-out preserves navigation, announces uncertainty and restores retry focus. Deck shortcuts exclude native interactive targets, and both OS reduction and a tab-local shared-display control suppress decorative motion and reveal delay. Rubric field-error associations address the historical validation objection. However, rubric saving still has an unbounded disabled state during a service stall. This contradicts dependable accessible recovery in an operator workflow. Together with missing approved work evidence, unpublished membership commitments and absent hosted/assistive-technology acceptance, that prevents world-class agreement. Hold is my release recommendation pending the identified recovery correction and meaningful integrated acceptance; it is separate from the broad quality verdict. This is a simulated AI source/artifact review, not observed human task success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/components/sign-out-action.tsx",
+    "src/components/site-header.tsx",
+    "src/lib/client-fetch.ts",
+    "src/app/admin/rounds/rubric-editor.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (interaction/motion sections)",
+    "src/app/globals.css (reduced-motion rules)",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "src/app/apply/application-form.tsx (resume disclosures)",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/sign-out-recovery.spec.ts",
+    "tests/e2e/deck-accessibility.spec.ts",
+    "tests/e2e/rubric-validation.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact/sign-out cases and result)",
+    "docs/reviews/2026-10-redesign/evidence/deck-motion-browser.log (final cases/result)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rounds/rubric-editor.tsx",
+      "evidence": "save() lines 60\u201384 awaits authorizedFetch without a deadline; its non-success response.json() also has no deadline. pending clears only in finally, while line 107 disables the whole editing fieldset. authorizedFetch in src/lib/client-fetch.ts:113\u2013129 forwards ordinary fetch and adds session retry, not an operation deadline. tests/e2e/rubric-validation.spec.ts resolves its delayed save with a 409; it does not exercise a permanently stalled request/body.",
+      "userImpact": "During a network/service stall, a keyboard operator remains at Saving with all rubric controls unavailable and no announced uncertainty or recovery action. Reloading risks discarding the unsaved rubric changes. This is source-established, not a reproduced hosted incident.",
+      "suggestedFix": "Bound the complete save/body wait, preserve the proposed rubric, announce an unknown acknowledgement and provide a reachable reconciliation/retry action. Read the persisted rubric before replaying an uncertain write. Add stalled-header/body and lost-acknowledgement checks that verify restored controls, focus and retained changes."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk sign-out/session expiry, Supabase RPC/RLS, storage/upload and email delivery or consequential operator recovery against hosted services; no staging exists.",
+    "Screen-reader announcements, physical touch/device behavior and complete real authenticated keyboard application/evaluation/operator journeys. Supplied private harnesses and intercepted APIs are synthetic.",
+    "Private-screen visual craft beyond provided source/tests; no rubric or sign-out failure capture was supplied.",
+    "Client-authorized engagement artifacts, current Board-confirmed membership workload and approval of resume/privacy/retention/closed-round remediation policy remain outstanding."
+  ]
+}

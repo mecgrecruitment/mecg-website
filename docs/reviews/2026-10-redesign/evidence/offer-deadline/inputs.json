@@ -1,0 +1,9 @@
+{
+  "src/app/admin/decision-form.tsx": "9e4779fb0dcda511ef63f615fddb45cb027e0157e47bb1ba15d9196e8a27cb06",
+  "src/app/api/admin/decisions/route.ts": "52d300ed6f7c0bdcb0e3eb40bb78fd7c4a1af10b4f2c59185b9fab672c1dfc9c",
+  "src/app/api/admin/decisions/route.test.ts": "9b8d3412cb69c7424925e3cb5448edae182455dfbe0438a679c330279d33a067",
+  "src/lib/supabase/database.types.ts": "90f1e0d6c53f44596e273239eb528d6a5ff6b63de6ef9fc3ff62d3061b337a83",
+  "src/app/apply/test-harness/offer-deadline/page.tsx": "9964566070a93aa52219ad49c8a2144b3b1c10e17c79599b7da6c33508c14d70",
+  "tests/e2e/offer-deadline.spec.ts": "5167421b933f370c501cedbc92ba985912b34d326c85205f9708f1fec12f0808",
+  "supabase/migrations/20260902210000_offer_deadline_state_guard.sql": "59863af92b05b5037997841bc7b9b53c18e99ea62a4f8b391e83fe10a3d3d3b1"
+}

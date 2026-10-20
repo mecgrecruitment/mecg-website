@@ -51,7 +51,7 @@ test("admin resume route returns not found for an application without an attache
   assert.equal(response.status, 404);
 });
 
-test("admin resume route redirects an authorized user to a short-lived URL", async (t) => {
+test("admin resume route streams an authorized PDF without exposing the storage credential", async (t) => {
   const client = {
     rpc: async (name: string, args: Record<string, unknown>) => {
       assert.equal(name, "authorize_resume_access");
@@ -69,12 +69,20 @@ test("admin resume route redirects an authorized user to a short-lived URL", asy
   };
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+    assert.equal(String(input), SIGNED_URL);
+    assert.equal(init?.cache, "no-store");
+    return new Response("%PDF-private", { headers: { location: SIGNED_URL, "set-cookie": "storage=secret" } });
+  });
   const { GET } = await importRoute("success");
 
   const response = await GET(request(), context());
 
-  assert.equal(response.status, 307);
-  assert.equal(response.headers.get("location"), SIGNED_URL);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("location"), null);
+  assert.equal(response.headers.get("set-cookie"), null);
+  assert.equal(response.headers.get("content-type"), "application/pdf");
+  assert.equal(await response.text(), "%PDF-private");
   assert.equal(response.headers.get("cache-control"), "private, no-store");
 });
 

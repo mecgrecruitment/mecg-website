@@ -1,0 +1,15 @@
+
+Running 10 tests using 2 workers
+
+  ✓   2 [chromium] › tests/e2e/offer-deadline.spec.ts:37:7 › deadline malformed preserves the proposal and locks another write pending readback (445ms)
+  ✓   1 [chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (455ms)
+  ✓   3 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (490ms)
+  ✓   4 [mobile-chromium] › tests/e2e/offer-deadline.spec.ts:37:7 › deadline malformed preserves the proposal and locks another write pending readback (519ms)
+  ✓   5 [firefox] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (1.3s)
+  ✓   6 [firefox] › tests/e2e/offer-deadline.spec.ts:37:7 › deadline malformed preserves the proposal and locks another write pending readback (1.3s)
+  ✓   8 [webkit] › tests/e2e/offer-deadline.spec.ts:37:7 › deadline malformed preserves the proposal and locks another write pending readback (1.1s)
+  ✓   7 [webkit] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (1.4s)
+  ✓   9 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:37:7 › deadline malformed preserves the proposal and locks another write pending readback (717ms)
+  ✓  10 [mobile-webkit] › tests/e2e/offer-deadline.spec.ts:4:5 › pending deadline locks its captured date and success names the confirmed value (790ms)
+
+  10 passed (7.0s)

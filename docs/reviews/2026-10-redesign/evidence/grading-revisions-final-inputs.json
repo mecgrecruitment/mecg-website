@@ -1,0 +1,18 @@
+{
+  "src/app/member/group-case/group-case-roster.tsx": "7fe4b372302cfa44ad6277e8754011f4b97a9d5f9f80323ae58712de5693f337",
+  "src/app/apply/test-harness/group-case/page.tsx": "9247da8288798389fda2ba9eb938349bec5c12bafa35ae730e758ecb8a7b427e",
+  "src/lib/group-case-write.ts": "6748d835cfb37ff96d98d8a68ecbb445e3da8c86647fd939f70414bebd852e85",
+  "src/lib/group-case-roster.ts": "c632a8c739afc40268fc3576df1a6b65ffc99d9c7f52101b99d8d431993697dc",
+  "src/app/member/group-case/page.tsx": "fa11d7aea6401107b420ca0d4b3551064dc22443fe0780da98866a89ecf4ffce",
+  "src/app/api/member/group-case/ratings/route.ts": "00cd50f907746a78a453b0228c63c1340ee3c91e779e317296536cec82d24442",
+  "src/app/member/evaluation-form.tsx": "b8b7f8757edbef5524c4ef2b254ebb4c9e5cc231de251495d6ba3e57f066d923",
+  "src/lib/evaluation-draft-write.ts": "0d8d0392bf7b16f6c40a2f476f4c5896606d6f39c7d1dae63a818eaf3b1bfc4d",
+  "src/lib/evaluation-submission.ts": "9286da1d29723311e11816c8b273ed79a3a9ed8ce70ee2fc585213071e988c47",
+  "src/app/api/member/evaluations/[assignmentId]/draft/route.ts": "3a9637a9ad3242b79e2ed6b0ce025e87f1d199d816750dd9467f429c6c6834a6",
+  "src/app/api/member/evaluations/[assignmentId]/route.ts": "5a4a674404daf2dbc4d2c27ded5f09203ac77945310f84de733bc3271791e023",
+  "supabase/migrations/20261016202000_group_case_write_revisions.sql": "cf70bd39f5731ed5232aeb5f724ae4bb1bcd3d9d9729a8a6c5b517426609b91e",
+  "supabase/migrations/20261016203000_evaluation_draft_write_revisions.sql": "93a3cacbb7e441ff0dcc796e7eb0095b78b55182c0a1429a4daae97577478368",
+  "tests/e2e/group-case-navigation.spec.ts": "6604f4a8b2c61b191fd9dff31dfc548ca97c9f0852ca65c9d7208b4f81842517",
+  "tests/e2e/group-case-revisions.spec.ts": "756cfdddd5de8e08ebe4381b1c067e54b96abb8f710872073d72910012b9507c",
+  "tests/e2e/evaluation-cas.spec.ts": "a017df643877732005f92ff520a2a476299460a89e0e06392df01905016e25ad"
+}

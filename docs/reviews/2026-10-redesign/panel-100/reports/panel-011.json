@@ -1,0 +1,47 @@
+{
+  "seatId": "panel-011",
+  "lens": "Editorial and brand craft \u2014 first encounter (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public composition is disciplined and recognizably Precision Instrument: strong sans headlines, restrained mono metadata, useful hairlines, readable prose and consistent navy/paper/orange roles. Desktop and mobile captures preserve hierarchy and give both audiences a clear next action. The captioned member photograph is credible culture imagery. However, the central client proposition still lacks an inspectable example of MECG\u2019s actual work. Named organizations and a polished process illustration establish association and intent, rather than demonstrate the quality of research or recommendations. That is a material editorial shortfall against a world-class claim for a consulting site. I traced the real client inquiry implementation from homepage CTA through engagement terms, contact guidance, form feedback and API handler; the supplied passing journey test intercepts delivery. This is source/capture assessment by an AI panel seat, not observed user success. Release readiness remains unproven without hosted integration evidence.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97; src/content/projects.public.ts:3-5",
+      "evidence": "The captured \u201cReal organizations. Specific questions.\u201d section renders the generic fallback at home/page.tsx:79-80 and \u201cCase studies pending client approval,\u201d followed by organization/sector rows. PUBLIC_PROJECTS is empty. The only homepage photograph at lines 135-136 is explicitly a PwC member visit. DESIGN.md \u00a77 confirms zero project artifacts. The work page likewise omits Selected work when publicProjects is empty (lines 56-63).",
+      "userImpact": "A prospective client can understand the service and its terms but cannot inspect a real question, method, deliverable or bounded result before choosing to inquire. The precision of the presentation currently exceeds the specificity of its proof.",
+      "suggestedFix": "Obtain client and MECG approval for at least one concrete engagement: decision question, methods, redacted deliverable image and factual handoff or result with limits. Feature that evidence ahead of the general capabilities/process material and retain the culture photograph in its people context. Keep the honest pending status until approval; do not fabricate outcomes."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, hosted Clerk/Supabase/storage/email integration or actual board receipt of an inquiry was available. The contact test fulfills /api/contact with synthetic success; the publication artifact verifies a local fixture, not approved live content.",
+    "No human first-encounter comprehension, client confidence, application completion, conversion gain or operator acceptance was observed.",
+    "Only supplied homepage desktop/mobile visual captures were inspected; other public pages were source-reviewed where listed. Physical devices, Safari, Firefox, assistive technology and alternate platform font rendering remain unknown.",
+    "Client publication permissions and independent substantiation of organization counts, partnership history and the one-week response commitment were not verified. Original-resume access remains an explicitly unresolved Board policy boundary; no anonymous-review claim or private workflow acceptance is established here."
+  ]
+}

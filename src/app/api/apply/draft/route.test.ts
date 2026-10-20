@@ -30,7 +30,7 @@ function postRequest(body: unknown) {
   return new NextRequest("http://localhost/api/apply/draft", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ draft: body, expectedRevision: null, mutationId: "10000000-0000-4000-8000-000000000001", cycleId: "cycle" }),
   });
 }
 
@@ -45,15 +45,15 @@ function fakeDatabase(actorId: () => string, profiles: Record<string, string | n
   const client = {
     rpc: async (name: string, args?: Record<string, unknown>): Promise<RpcResponse> => {
       calls.push({ name, args });
-      if (name === "application_draft") return { data: DRAFT_BODY, error: null };
-      if (name !== "save_application_draft") throw new Error(`unexpected rpc call: ${name}`);
+      if (name === "application_draft") return { data: { ...DRAFT_BODY, revision: "10000000-0000-4000-8000-000000000001" }, error: null };
+      if (name !== "save_application_draft_v2") throw new Error(`unexpected rpc call: ${name}`);
       // scripts/check-sql.py:91-95 compares RPC names only, never argument
       // names, so a call with invented arguments passes check:sql, tsc and
       // lint and dies at runtime as PGRST202 with the portal down. This
       // assertion is that guard: the key set must match the argument list of
       // rush.save_application_draft(payload jsonb) in
       // supabase/migrations/20260830100000_harden_applicant_workflow.sql:336.
-      assert.deepEqual(Object.keys(args ?? {}), ["payload"], "the draft RPC takes the payload only");
+      assert.deepEqual(Object.keys(args ?? {}), ["payload", "expected_revision", "mutation_id", "cycle_id"], "the draft RPC requires revision, retry identity and cycle");
       assert.equal((args?.payload as { currentStep?: string })?.currentStep, "responses", "the exact form step is saved");
       const owner = actorId();
       const normalized = (profiles[owner] ?? "").trim().toLowerCase();
@@ -66,7 +66,7 @@ function fakeDatabase(actorId: () => string, profiles: Record<string, string | n
         }
         pnms.push({ authUserId: owner, normalizedContact: normalized });
       }
-      return { data: `application-${owner}`, error: null };
+      return { data: { kind: "saved", revision: "20000000-0000-4000-8000-000000000001" }, error: null };
     },
   };
   return { pnms, calls, client };
@@ -184,4 +184,35 @@ test("POST /api/apply/draft maps a contact conflict without leaking database det
   assert.equal(body.error, "This email is already linked to another account. Email mecg-board@umich.edu and we will merge them.");
   assert.equal(body.code, "APPLICANT_IDENTITY_CONFLICT");
   assert.equal(JSON.stringify(body).includes("pnms_normalized_contact_key"), false);
+});
+
+test("POST /api/apply/draft returns a recoverable revision conflict and never reports it saved", async (t) => {
+  const server = { ...DRAFT_BODY, name: "Other device", revision: "30000000-0000-4000-8000-000000000001" };
+  const client = { rpc: async () => ({ data: { kind: "conflict", draft: server }, error: null }) };
+  mockCommon(t, () => fakeUser("conflict-user"), client);
+  const { POST } = await importRoute("revision-conflict");
+  const response = await POST(postRequest(DRAFT_BODY));
+  assert.equal(response.status, 409);
+  const body = await response.json();
+  assert.equal(body.code, "DRAFT_REVISION_CONFLICT");
+  assert.equal(body.draft.name, "Other device");
+  assert.equal(body.draft.revision, server.revision);
+  assert.equal(body.ok, undefined);
+});
+
+test("POST /api/apply/draft refuses a legacy or malformed save acknowledgement", async (t) => {
+  mockCommon(t, () => fakeUser("receipt-user"), { rpc: async () => ({ data: "application-id", error: null }) });
+  const { POST } = await importRoute("invalid-save-receipt");
+  const response = await POST(postRequest(DRAFT_BODY));
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).code, "INVALID_SAVE_RECEIPT");
+});
+
+test("POST /api/apply/draft rejects a payload without a revision precondition before the RPC", async (t) => {
+  let called = false;
+  mockCommon(t, () => fakeUser("legacy-user"), { rpc: async () => { called = true; return { data: null, error: null }; } });
+  const { POST } = await importRoute("missing-revision");
+  const response = await POST(new NextRequest("http://localhost/api/apply/draft", { method: "POST", body: JSON.stringify(DRAFT_BODY) }));
+  assert.equal(response.status, 400);
+  assert.equal(called, false);
 });

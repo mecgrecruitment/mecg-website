@@ -15,7 +15,7 @@
     "verify:workflow": "node scripts/verify-full-workflow.mjs",
     "verify:auth": "node scripts/verify-auth-routing.mjs",
     "test:supabase": "supabase test db --linked supabase/tests/rush_foundation.sql",
-    "test:supabase:local": "supabase test db supabase/tests/rush_foundation.sql",
+    "test:supabase:local": "supabase test db supabase/tests",
     "supabase:link": "supabase link --project-ref chrxtsohxazngabdcpzb",
     "supabase:sync-env": "node scripts/sync-supabase-public-key.mjs",
     "supabase:verify-project": "node scripts/verify-supabase-project.mjs",
@@ -27,7 +27,12 @@
     "clerk:load-signup": "node scripts/load-test-clerk-signup.mjs",
     "rush:top": "node scripts/rush-top.mjs",
     "backup:rush": "node scripts/backup-rush.mjs",
-    "attendance": "node scripts/attendance.mjs"
+    "attendance": "node scripts/attendance.mjs",
+    "verify:publication": "node scripts/verify-publication.mjs",
+    "verify:draft-race": "node scripts/verify-draft-race.mjs",
+    "test:e2e:cross-browser": "PLAYWRIGHT_CROSS_BROWSER=1 playwright test --project=firefox --project=webkit --project=mobile-webkit",
+    "preview:workspaces": "node scripts/preview-workspaces.mjs",
+    "verify:release-config": "node scripts/verify-release-config.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",
@@ -35,7 +40,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
-    "next": "16.3.1",
+    "next": "16.3.8",
     "pdfjs-dist": "^6.3.289",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
@@ -44,15 +49,15 @@
   },
   "devDependencies": {
     "@clerk/testing": "^2.2.32",
-    "@next/env": "16.3.1",
-    "@playwright/test": "1.62.1",
+    "@next/env": "16.3.8",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-093",
+  "lens": "Owner and access-sensitive user; keyboard-oriented use (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected local implementation has credible safeguards: uncertain identity writes and membership failures preserve partial accounts, diagnostic logs use opaque references, incident identity is owner/cycle restricted, and resolution requires an explicit receipt while clearly stating it does not repair accounts. Applicant materials and final review accurately disclose original-resume access rather than promise anonymity. Desktop/mobile hero captures show a coherent Precision Instrument hierarchy and clear client/student actions; pending case-study approval is explicit in source. I traced the source journey from Home through Join and Apply materials/review, and the owner journey from People through incident guidance, membership inspection and resolution. These are source/test traces, not observed task success. The People tabs have a keyboard interaction gap, and supplied browser checks neither exercise keyboard recovery nor authenticate a real owner queue. With no hosted integration or human acceptance evidence, an unqualified world-class verdict and release recommendation remain unproven.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (materials/review disclosure excerpts)",
+    "src/app/admin/people/page.tsx (recovery link excerpt)",
+    "src/app/admin/people/people-workspace.tsx",
+    "src/app/admin/people/onboarding.tsx",
+    "src/app/admin/rush-controls.tsx (useRushAction and PeopleControls)",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/app/api/admin/rush/route.ts",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/use-action.ts",
+    "src/components/operation-notice.tsx",
+    "src/app/globals.css (focus/button excerpts)",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log (provisioning result)",
+    "evidence/mecg-privacy-final-node.log (relevant privacy/provisioning results)",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/people/people-workspace.tsx:31-49",
+      "evidence": "The People views declare role=\"tablist\" and role=\"tab\", but each tab only handles onClick; there is no arrow-key handler or roving tabIndex. The panel has no aria-labelledby association with its tab. All tabs remain in the ordinary Tab sequence.",
+      "userImpact": "An owner following incident guidance back to People encounters tabs that do not support the keyboard interaction their semantics imply. Tab plus Enter remains usable, but arrow navigation fails and the active panel lacks its tab-derived accessible name.",
+      "suggestedFix": "Implement associated tab/panel IDs, roving focus and Left/Right/Home/End keyboard behavior, or use ordinary view-selection buttons with appropriate pressed state. Verify reaching Access and returning to incident recovery using only the keyboard."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment or hosted Clerk/Supabase/storage/email integration exists in the supplied evidence; provider timeouts, webhook effects and real authorization/session expiry were not exercised end to end.",
+    "The eight supplied recovery browser cases use a synthetic harness, intercepted responses, click activation and programmatic dialog accept/dismiss. They do not prove keyboard focus continuity after a resolved incident disappears, screen-reader announcements or actual owner remediation success.",
+    "No authenticated owner-queue capture is supplied. Its visual density, long-identity wrapping and focus visibility were assessed only from source; public captures cannot establish private-screen craft.",
+    "Actual users understanding the resume/privacy boundary, Board approval of that policy, retention decisions, and physical-device/Safari/Firefox/assistive-technology behavior remain unverified."
+  ]
+}

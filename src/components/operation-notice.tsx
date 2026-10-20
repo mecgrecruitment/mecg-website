@@ -20,7 +20,7 @@ export default function OperationNotice({
       id={id}
       role={kind === "error" ? "alert" : "status"}
       aria-live={kind === "error" ? "assertive" : "polite"}
-      className={`panel-seat rounded-xl px-4 py-3 text-sm leading-6 ${appearance}`}
+      className={`operation-notice panel-seat rounded-xl px-4 py-3 text-sm leading-6 ${appearance}`}
     >
       {children}
     </p>

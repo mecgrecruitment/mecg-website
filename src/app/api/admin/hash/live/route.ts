@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { workspaceCycleSelection } from "@/lib/workspace-cycle-url";
 import { mapRpcError } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -7,10 +8,13 @@ import { createClient } from "@/lib/supabase/server";
 
 // The deck polls this while the board presents. Counts stay board-side: the
 // member phone reads /api/member/hash/live, which never carries a tally.
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS") ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE");
+  const selection = workspaceCycleSelection(request.nextUrl.searchParams);
+  if (selection.kind === "invalid") return NextResponse.json({ error: "Invalid cohort selection" }, { status: 400 });
+  const requested = selection.kind === "selected" ? selection.cycleId : null;
+  const cycleId = selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS", requested) ?? selectAuthorizedCycleId(user.memberships, "MANAGE_CYCLE", requested);
   if (!cycleId || !(hasPermission(user.memberships, cycleId, "HASH_PANEL_ACCESS") || hasPermission(user.memberships, cycleId, "MANAGE_CYCLE"))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

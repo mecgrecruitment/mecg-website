@@ -1,0 +1,62 @@
+{
+  "seatId": "panel-095",
+  "lens": "Owner and access-sensitive user; ambiguous result (simulated AI panel seat)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile heroes communicate a coherent, legible Precision Instrument identity and a clear student-led consulting proposition. I traced Home to Join to Apply through source, including materials and review disclosures: original resumes can identify applicants, and the copy now says so. Owner incident access is restricted by cycle/current role in SQL, uncertain new-account writes preserve access, and resolution explicitly records remediation without repairing accounts. However, ambiguous outcomes remain poorly handled in the actual add-person journey. This prevents unqualified acceptance for this access-sensitive task. This is source/capture and supplied local-test evidence, not observed user success or hosted integration acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (MaterialsStep/ReviewStep)",
+    "src/app/api/apply/resume/route.ts",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/rush-controls.tsx (useRushAction/PeopleControls)",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/api/admin/rush/route.test.ts (provisioning cases)",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/operational-log.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/app/api/admin/provisioning/[id]/resolve/route.test.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log (summary)",
+    "evidence/mecg-privacy-final-node.log (summary)",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rush-controls.tsx:64-83",
+      "evidence": "useRushAction resets the form and refreshes for every response.ok without reading a success receipt (78-80); a thrown fetch becomes only \u201cRequest failed\u201d (81-83). PeopleControls uses this for both account creation and existing-account access (162,166). Unlike ResolveButton, it neither validates acknowledgement nor explains uncertain completion.",
+      "userImpact": "A lost response after a committed account/membership write looks like failure and invites retry. A malformed successful response clears the entered details without confirming the intended operation.",
+      "suggestedFix": "Require an action-specific receipt before resetting. Preserve form details on uncertain responses and explicitly direct the owner to inspect People, Clerk and account incidents before retrying. Add focused lost-response and malformed-receipt checks for the actual PeopleControls flow."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/api/admin/rush/route.ts:143-167",
+      "evidence": "ADD_EXISTING_USER links identity and grants membership without the incident recording/transport classification used by ADD_USER. An identity RPC error becomes a generic 409 at 166; the grant at 167 falls through to generic action error handling, and thrown RPC failures escape this branch.",
+      "userImpact": "The existing-account operation owners use to finish partial provisioning can itself have an uncertain commit without creating a recovery-queue entry or giving phase-specific reconciliation guidance.",
+      "suggestedFix": "Apply restricted incident recording and bounded uncertain-outcome responses to existing-account identity/grant failures too; preserve existing access and test acknowledgement loss after each write."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in the evidence; current-role/session-expiry behavior and provider compensation were not exercised end to end.",
+    "The eight passing privacy browser checks use an intercepted synthetic resolution-button harness; they do not demonstrate actual owner queue loading, account lookup, repair or the complete add-person journey.",
+    "No authenticated owner-queue capture, human usability study, assistive-technology session, physical-device or Safari/Firefox evidence was available. Source review does not establish privacy comprehension or successful recovery.",
+    "Retention policy and Board approval of original-resume access remain external decisions; client-approved project artifacts/results remain absent."
+  ]
+}

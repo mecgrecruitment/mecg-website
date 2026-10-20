@@ -1,0 +1,22 @@
+# Offer deadline: captured value and receipt recovery
+
+2026-10-17. Later local working tree; frozen V2 seat046 and its verdict remain unchanged.
+
+The original form captured dateA while leaving its uncontrolled date input editable. A delayed acknowledgement could display generic success beside a different visible dateB. The local before-fix regression reproduced the pending input remaining enabled.
+
+The editor now captures one value, synchronously guards duplicate actions and locks its date/save/clear controls during the write. It requires an exact application/date receipt before announcing a dated confirmation in Detroit/Eastern time. Editing afterward clears that confirmation and announces unsaved changes. State is keyed by application identity. Clearing is an explicit Clear deadline action and requires a matching null-date receipt; the date field becomes empty only for that proposal. The input has a44px minimum target and a visible navy focus treatment.
+
+The existing canonical `set_offer_deadline` RPC returns booleantrue only after its guarded update/audit transaction succeeds. The API now requires that actualtrue acknowledgement and emits `{kind:deadline-set,applicationId,expiresAt}` with the exact normalized requested value or null. A missing/false/unrelated RPC acknowledgement becomes uncertain503. Its application-cycle lookup, DECIDE permission, active/unanswered-offer requirements, future-date check and audit policy remain unchanged. No SQL, deadline eligibility or offer-response policy changed. The RPC argument type now accurately permits null for the already-supported clear operation, removing the old double type assertion.
+
+The complete client request and JSON-body wait is bounded to15seconds. Lost responses, timeouts, stalled bodies, malformed2xx or receipts naming another application/date preserve the proposed value, focus persistent uncertainty and lock further writes. The operator must reload the authorized current offer and check its stored deadline before another change. No automatic replay or claim that abort proves noncommit is made. Definite4xx refusals retain the editable proposal; nonexistent Detroit daylight-saving times fail locally without a request. This change does not add database revision/CAS or guarantee that another operator cannot change the deadline after a receipt.
+
+## Verification
+
+- Complete Node suite: **861/861 pass**, including5 added API cases for normalized/cleared bound receipts and missing/false/unrelated RPC acknowledgements. The existing allowed-application case also verifies the new exact receipt.
+- Main browser matrix: **50/50 pass**,10 journeys in each of Chromium, mobile Chromium, Firefox, WebKit and mobile WebKit. Covers captured date locking, post-success unsaved edits, lost/malformed/wrong-target/wrong-date/stalled-header/stalled-body outcomes, explicit clear, known refusal/retry and local daylight-saving refusal.
+- Final narrow screenshot/target follow-up: **10/10 pass**, repeating the pending/confirmed and malformed-acknowledgement journeys at390px. Input target height is at least44px and no horizontal overflow occurs. Confirmed and unknown mobile-WebKit screenshots were inspected. These repeat main cases; do not add them into60distinct checks.
+- Production build including TypeScript, full ESLint plus final changed-test lint, final TypeScript and whitespace checks pass. Mechanical design detector returned no findings.
+
+[Raw logs, exact input hashes and captures](evidence/offer-deadline/) retain the genuine before-fix pending failure. Initial new API tests lacked their server-only admin module mock; that setup error is retained alongside the corrected861-pass run. The first broader browser pass recorded43/45: two WebKit clear-by-empty-field cases did not issue a POST. The explicit Clear deadline action supplies a direct cross-engine clearing path, independently of a native datetime control's partial/empty edit state; final clear checks pass in all five configurations. The evidence does not assert a browser-internal cause from those failures.
+
+The gated fixture renders the real form with fictional offer identity/current date; both harness flags are required. All deadline requests were intercepted locally. No real offer, provider account, hosted database, email or deployment was changed. The official Playwright1.64.1 Linux runner reused the task-local server. These checks prove their local scopes, not hosted operator acceptance or physical-device/assistive-technology behavior.

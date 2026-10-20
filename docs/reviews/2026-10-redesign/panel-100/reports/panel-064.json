@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-064",
+  "lens": "Prospective applicant \u2014 service failure (simulated AI user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected applicant flow offers useful preparation, explicit saved-versus-submitted guidance, comparison before discarding conflicting answers, and reconciliation after uncertain submission. The supplied Chromium logs support these synthetic journeys. Desktop/mobile hero captures show coherent Precision Instrument typography, spacing and identifiable student navigation. However, two lookup failures still turn unknown recruitment information into misleading next steps. These matter particularly near application and offer deadlines. This is an independent AI source/evidence assessment, not observed student success or a verdict on uninspected operator workflows.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/apply/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/public-recruitment.ts:120-123; src/app/(marketing)/join/page.tsx:47-54,68-81",
+      "evidence": "fetchPublicRecruitment discards the RPC error and returns {cycle:null} when data is absent. Join then selects the inactive interest-list action and states \u201cThe Board has not published events for this cycle yet.\u201d This same path is reachable when the service fails during an open cycle.",
+      "userImpact": "A student can mistake an outage for unavailable recruitment and leave without applying or checking an existing deadline.",
+      "suggestedFix": "Preserve a distinct unavailable result; show retry/contact guidance and a direct application/status link when recruitment availability cannot be checked. Test an RPC failure separately from a successful empty cycle."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/applicant/page.tsx:180,189-190,214-221,365-366",
+      "evidence": "A my_offer_deadlines error is only logged. Missing data becomes {}, offerExpired becomes false, the next-action card says to record an offer response, and the deadline notice returns null. Thus unavailable deadline data renders like an offer with no deadline.",
+      "userImpact": "An admitted applicant loses time-sensitive response information during an outage and may believe a response window remains open when it has expired.",
+      "suggestedFix": "Track deadline lookup availability explicitly. Display an unavailable deadline warning with retry and Board contact guidance, and avoid asserting that the response window is open until it is known. Cover failed lookup with future and expired offers."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or human study exists. Clerk session expiry/re-authentication, real Supabase RPC/RLS, storage transitions, receipt email delivery and hosted save/submit races remain unverified.",
+    "The inspected interrupted-submit and conflict journeys use a local test harness and intercepted APIs; their logged passes do not prove real applicant completion. The two-session PostgreSQL artifact proves only its initial-save race.",
+    "Private application/recovery/status visual craft was source-reviewed; supplied inspected captures cover the public hero only. Physical devices, Safari, Firefox and assistive-technology task completion remain unknown.",
+    "Client outcomes/artifacts lack publication approval. Original-resume reviewer access is accurately disclosed in Materials/Review; resolving the underlying anonymity policy remains a Board decision."
+  ]
+}

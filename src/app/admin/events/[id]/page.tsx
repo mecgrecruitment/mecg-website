@@ -1,3 +1,4 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import QRCode from "qrcode";
@@ -16,6 +17,7 @@ import AssistedCheckinForm from "./assisted-checkin-form";
 import { summarizeEventObservations } from "./observation-summary";
 import { formatEasternDateTime } from "@/lib/date-time";
 import AttendanceRefresh from "./attendance-refresh";
+import { statusLabel } from "@/lib/labels";
 
 export default async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ token?: string }> }) {
   const user = await requireAdmin();
@@ -30,6 +32,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
     || (!hasPermission(user.memberships, event.cycle_id, "MANAGE_CYCLE")
       && !hasPermission(user.memberships, event.cycle_id, "RECRUITMENT_OPERATIONS"))
   ) redirect("/access-denied");
+  const cycleId = event.cycle_id;
   const [
     { data: slots, error: slotsError },
     { data: checkins, error: checkinsError },
@@ -81,40 +84,31 @@ export default async function EventDetailPage({ params, searchParams }: { params
         eyebrow="Attendance event"
         title={event.name}
         description={formatEasternDateTime(event.starts_at)}
-        action={<Link href="/admin/rounds" className="button-secondary text-sm">Back to interviews</Link>}
+        action={<Link href={withWorkspaceCycle("/admin/rounds", cycleId)} className="button-secondary text-sm">Back to interviews</Link>}
       />
       {event.cycle_id && <WorkspaceNav user={user} cycleId={event.cycle_id} current="/admin/rounds" />}
 
-      <EventControls event={{
-        id: event.id, name: event.name, kind: event.kind, status: event.status,
-        location: event.location, visibility: event.visibility, startsAt: event.starts_at,
-        endsAt: event.ends_at ?? event.checkin_closes_at,
-        checkinOpensAt: event.checkin_opens_at, checkinClosesAt: event.checkin_closes_at,
-      }} />
-
-      <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="text-[13px] font-semibold text-mecg-navy/60">Operational attendance only</p>
+      <nav aria-label="Event sections" className="flex flex-wrap gap-2">
+        <a href="#event-checkin" className="button-secondary">Record attendance</a>
+        <a href="#event-attendance" className="button-secondary">Live attendance</a>
+        <a href="#event-qr" className="button-secondary">Check-in QR</a>
+        <a href="#event-observations" className="button-secondary">Observations</a>
+        <a href="#event-slots" className="button-secondary">RSVP slots</a>
+        <a href="#event-settings" className="button-secondary">Event settings</a>
+      </nav>
+      <section className="workspace-panel">
+        <h2 className="text-base font-semibold">{statusLabel(event.status)} · Attendance event</h2>
+        <p className="mt-2 text-sm text-mecg-navy/65">Attendance and event observations are operational context. They do not establish round staffing, qualifying evaluations or applicant readiness.</p>
         <p className="mt-3 text-sm text-mecg-navy/60">
           Check-in window: {formatEasternDateTime(event.checkin_opens_at)} to {formatEasternDateTime(event.checkin_closes_at)}
         </p>
       </section>
 
-      <AssistedCheckinForm eventId={event.id} locked={event.status === "CLOSED" || event.status === "CANCELLED"} />
+      <section id="event-checkin" aria-label="Record attendance"><AssistedCheckinForm eventId={event.id} locked={event.status === "CLOSED" || event.status === "CANCELLED"} /></section>
 
-      <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="text-[13px] font-semibold text-mecg-navy/60">Member observations</p>
-        <p className="mt-2 text-sm leading-6 text-mecg-navy/55">Tags and anonymous notes provide event context. They do not affect applicant scores, readiness, or rank.</p>
-        <p className="mt-3 text-sm">
-          Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
-        </p>
-        <div className="mt-3.5">
-          <GradingToggle eventId={event.id} cycleId={event.cycle_id} enabled={event.member_grading} />
-        </div>
-      </section>
-
-      <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+      <section id="event-attendance" className="workspace-panel">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[13px] font-semibold text-mecg-navy/60">Live attendance</p>
+          <h2 className="text-base font-semibold">Live attendance</h2>
           <AttendanceRefresh />
         </div>
         {(checkinsError || memberCheckinsError || applicationsError) && (
@@ -128,12 +122,13 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <p className="mt-1.5 text-sm">
           Member check-ins: <strong className="font-semibold text-mecg-navy">{memberCheckinsError ? "Unavailable" : memberCheckinCount ?? 0}</strong>
         </p>
+        {impressionsError && <p role="alert" className="mt-3 text-sm text-red-800">Observation records could not be loaded. Refresh to check them; missing records do not mean no observations.</p>}
         <ul className="mt-3 flex flex-col gap-1.5">
           {coverage.map((entry) => (
             <li key={entry.applicationId} className="border-t border-mecg-navy/[0.08] py-3 text-sm first:border-t-0">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-medium text-mecg-navy">{entry.name}</span>
-                <span className="tabular text-mecg-navy/55">{entry.observationCount} observation{entry.observationCount === 1 ? "" : "s"}</span>
+                <span className="tabular text-mecg-navy/55">{impressionsError ? "Observations unavailable" : `${entry.observationCount} observation${entry.observationCount === 1 ? "" : "s"}`}</span>
               </div>
               {entry.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -155,8 +150,8 @@ export default async function EventDetailPage({ params, searchParams }: { params
         )}
       </section>
 
-      <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-        <p className="text-[13px] font-semibold text-mecg-navy/60">Check-in QR code</p>
+      <section id="event-qr" className="workspace-panel">
+        <h2 className="text-base font-semibold">Check-in QR code</h2>
         {qrDataUrl ? (
           <div className="mt-3 flex flex-col items-start gap-2">
             <Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} className="rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" />
@@ -168,14 +163,23 @@ export default async function EventDetailPage({ params, searchParams }: { params
           </p>
         )}
         <div className="mt-3.5">
-          <RotateButton eventId={event.id} />
+          <RotateButton eventId={event.id} cycleId={cycleId} />
         </div>
       </section>
 
-      {event.cycle_id && <SlotForm cycleId={event.cycle_id} eventId={event.id} />}
+      <section id="event-observations" className="workspace-panel">
+        <h2 className="text-base font-semibold">Member observations</h2>
+        <p className="mt-2 text-sm leading-6 text-mecg-navy/55">Tags and anonymous notes provide event context. They do not affect applicant scores, readiness, or rank.</p>
+        <p className="mt-3 text-sm">
+          Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
+        </p>
+        <div className="mt-3.5">
+          <GradingToggle eventId={event.id} cycleId={event.cycle_id} enabled={event.member_grading} />
+        </div>
+      </section>
 
-      <section>
-        <p className="text-[13px] font-semibold text-mecg-navy/60">RSVP slots</p>
+      <section id="event-slots">
+        <h2 className="text-base font-semibold">RSVP slots</h2>
         <ul className="mt-3 flex flex-col gap-1.5">
           {(slots ?? []).map((slot) => (
             <li key={slot.id} className="text-sm text-mecg-navy/70">
@@ -186,7 +190,17 @@ export default async function EventDetailPage({ params, searchParams }: { params
         {slotsError
           ? <p className="text-sm text-mecg-orange-ink">Slots could not be loaded. Reload before adding one, this list may be incomplete.</p>
           : !slots?.length && <p className="text-sm text-mecg-navy/60">No slots yet.</p>}
+        {event.cycle_id && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Add an RSVP slot</summary><SlotForm cycleId={event.cycle_id} eventId={event.id} /></details>}
       </section>
+      <details id="event-settings" className="workspace-panel">
+        <summary className="min-h-11 cursor-pointer text-base font-semibold">Event details and lifecycle</summary>
+      <EventControls event={{
+        id: event.id, name: event.name, kind: event.kind, status: event.status,
+        location: event.location, visibility: event.visibility, startsAt: event.starts_at,
+        endsAt: event.ends_at ?? event.checkin_closes_at,
+        checkinOpensAt: event.checkin_opens_at, checkinClosesAt: event.checkin_closes_at,
+      }} />
+      </details>
     </main>
   );
 }

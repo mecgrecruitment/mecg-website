@@ -55,3 +55,18 @@ test("step recovery is scoped and clearable", () => {
   clearApplicationStepRecovery(storage);
   assert.equal(loadApplicationStepRecovery(storage, scope), null);
 });
+
+test("revision boundaries reject legacy acknowledgements, missing preconditions and malformed snapshots", async () => {
+  const { parseApplicationDraftSaveRequest, parseApplicationDraftSaveResult, parseApplicationDraftSnapshot } = await import("./application-server-draft");
+  const revision = "10000000-0000-4000-8000-000000000001";
+  assert.equal(parseApplicationDraftSaveResult({ ok: true }), null);
+  assert.equal(parseApplicationDraftSaveResult({ kind: "saved", revision: "yesterday" }), null);
+  assert.deepEqual(parseApplicationDraftSaveResult({ kind: "saved", revision }), { kind: "saved", revision });
+  assert.equal(parseApplicationDraftSaveRequest(valid), null);
+  assert.equal(parseApplicationDraftSaveRequest({ draft: valid, mutationId: revision, cycleId: "cycle" }), null);
+  assert.ok(parseApplicationDraftSaveRequest({ draft: valid, expectedRevision: null, mutationId: revision, cycleId: "cycle" }));
+  assert.equal(parseApplicationDraftSnapshot({ ...valid, revision: "2026-10-16" }), null);
+  assert.equal(parseApplicationDraftSnapshot({ ...valid, revision })?.revision, revision);
+  assert.equal(parseApplicationDraftSaveResult({ kind: "conflict", draft: { ...valid } }), null);
+  assert.deepEqual(parseApplicationDraftSaveResult({ kind: "conflict", draft: null }), { kind: "conflict", snapshot: null });
+});

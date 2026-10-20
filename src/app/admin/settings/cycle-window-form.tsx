@@ -54,7 +54,7 @@ export default function CycleWindowForm({
   }
 
   return (
-    <section className="rounded-2xl bg-paper p-5">
+    <section className="workspace-panel rounded-2xl bg-paper p-5">
       <p className="text-[13px] font-semibold text-mecg-navy/50">Application window</p>
       <p className="mt-1 text-sm leading-6 text-mecg-navy/55">
         Times are entered and displayed in Detroit time. The public form also opens only once the cycle status is Applications open.

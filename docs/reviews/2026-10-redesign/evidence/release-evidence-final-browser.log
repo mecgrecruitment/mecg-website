@@ -1,0 +1,20 @@
+
+Running 15 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/release-evidence.spec.ts:23:5 › complete evidence does not promise release, approval or notification (346ms)
+  ✓   2 [chromium] › tests/e2e/release-evidence.spec.ts:3:5 › blocked evidence identifies each round, counts and a safe authorized repair destination (604ms)
+  ✓   3 [chromium] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (933ms)
+  ✓   4 [mobile-chromium] › tests/e2e/release-evidence.spec.ts:3:5 › blocked evidence identifies each round, counts and a safe authorized repair destination (1.4s)
+  ✓   5 [mobile-chromium] › tests/e2e/release-evidence.spec.ts:23:5 › complete evidence does not promise release, approval or notification (899ms)
+  ✓   6 [mobile-chromium] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (737ms)
+  ✓   7 [firefox] › tests/e2e/release-evidence.spec.ts:3:5 › blocked evidence identifies each round, counts and a safe authorized repair destination (1.3s)
+  ✓   8 [firefox] › tests/e2e/release-evidence.spec.ts:23:5 › complete evidence does not promise release, approval or notification (1.0s)
+  ✓   9 [firefox] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (687ms)
+  ✓  11 [webkit] › tests/e2e/release-evidence.spec.ts:23:5 › complete evidence does not promise release, approval or notification (759ms)
+  ✓  10 [webkit] › tests/e2e/release-evidence.spec.ts:3:5 › blocked evidence identifies each round, counts and a safe authorized repair destination (1.3s)
+  ✓  12 [webkit] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (626ms)
+  ✓  14 [mobile-webkit] › tests/e2e/release-evidence.spec.ts:23:5 › complete evidence does not promise release, approval or notification (430ms)
+  ✓  13 [mobile-webkit] › tests/e2e/release-evidence.spec.ts:3:5 › blocked evidence identifies each round, counts and a safe authorized repair destination (612ms)
+  ✓  15 [mobile-webkit] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (451ms)
+
+  15 passed (9.7s)

@@ -1,0 +1,135 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Client services\"; 11px \"01\"; 11px \"/ Past partnerships\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\".",
+      "Two-beat aphorism headline (\"A focused question. A useful answer.\"). Every generated hero is one now; say the specific thing instead (copy.md)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        36,
+        30,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 18,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Client services\"; 11px \"01\"; 11px \"/ Past partnerships\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\".",
+      "Two-beat aphorism headline (\"A focused question. A useful answer.\"). Every generated hero is one now; say the specific thing instead (copy.md)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        60,
+        36,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 18,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Client services\"; 11px \"01\"; 11px \"/ Past partnerships\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\".",
+      "Two-beat aphorism headline (\"A focused question. A useful answer.\"). Every generated hero is one now; say the specific thing instead (copy.md)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        60,
+        36,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 18,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Client services\"; 11px \"01\"; 11px \"/ Past partnerships\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\".",
+      "Two-beat aphorism headline (\"A focused question. A useful answer.\"). Every generated hero is one now; say the specific thing instead (copy.md)."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "94%",
+        "ui-monospace": "6%"
+      },
+      "sizes": [
+        60,
+        36,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 18,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 42
+    }
+  }
+]

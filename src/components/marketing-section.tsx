@@ -5,7 +5,7 @@ const TONES = {
   paper: "bg-paper text-mecg-navy",
   softBlue: "bg-mecg-blue/[0.07] text-mecg-navy",
   blue: "bg-mecg-blue text-white",
-  navy: "bg-mecg-navy text-white",
+  navy: "bg-public-deep text-white",
 } as const;
 
 const SPACING = {

@@ -1,0 +1,55 @@
+(node:1606467) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1606467) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1606467) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ evaluation draft v2 route get (28.770994ms)
+✔ evaluation draft v2 route write (5.162338ms)
+✔ evaluation draft v2 route conflict (3.153693ms)
+✔ evaluation draft v2 route malformed (3.128346ms)
+✔ evaluation draft v2 route legacy (3.284044ms)
+✔ evaluation draft v2 route delete (3.1792ms)
+(node:1606467) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/evaluations/%5BassignmentId%5D/draft/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1606468) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1606468) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1606468) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/evaluations/[assignmentId] rejects payloads over the 128 KiB cap before parsing (29.053828ms)
+✔ evaluation final submit v2 missing-revision (4.275849ms)
+✔ evaluation final submit v2 conflict (3.437518ms)
+✔ evaluation final submit v2 bound-receipt (3.765936ms)
+✔ evaluation final submit v2 wrong-assignment (3.60095ms)
+(node:1606468) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/evaluations/%5BassignmentId%5D/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1606479) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ draft writes require explicit revision and replay identity, including first save (0.939748ms)
+✔ snapshot distinguishes no-row from an existing hidden old-rubric revision (0.121655ms)
+✔ saved draft receipts require valid content timestamp revision and mutation (0.276581ms)
+✔ conflicts preserve the authoritative content or absent-draft snapshot (0.121986ms)
+(node:1606479) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation-draft-write.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1606480) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ only an accepted submission with an evaluation receipt permits draft cleanup (0.786365ms)
+✔ all conflict responses retain work, including ambiguous retry and closed-assignment failures (0.147333ms)
+✔ failed authorization, validation, and service responses never become receipts (0.107669ms)
+✔ unknown successful and service receipts never assert that the assignment is still open (0.105645ms)
+(node:1606480) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation-submission.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 181.985337

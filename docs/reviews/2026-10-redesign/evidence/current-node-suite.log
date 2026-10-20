@@ -1,0 +1,1750 @@
+
+> mecgwebsite@0.1.0 test
+> node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test 'src/**/*.test.ts' 'src/**/*.test.js' 'scripts/**/*.test.mjs' 'scripts/**/*.test.js'
+
+(node:857662) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ pagination stops at the first short page (19.664782ms)
+✔ the CSV has one column per question in sort order and guards a leading = (0.861422ms)
+✔ a full run writes every file and records resume failures without throwing (38.7584ms)
+✔ dry-run prints counts and writes nothing (5.503795ms)
+✔ a failed table fetch throws (0.953583ms)
+✔ Clerk fixtures use the documented non-delivery test subaddress (0.912176ms)
+✔ Clerk fixture addresses stay within email local-part limits (0.197335ms)
+(node:857663) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857663) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/scripts/clerk-test-email.test.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ draft and review records cannot produce public routes (1.142793ms)
+✔ the exporter releases only approved, allowlisted fields (0.480568ms)
+✔ publishable records fail closed without both approvals (0.381185ms)
+✔ generated source contains only the released data (0.284657ms)
+(node:857664) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857675) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ the resume finalize deployment includes the PDF.js runtime worker (1.651383ms)
+(node:857675) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/next.config.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857676) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857676) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/scripts/retry-after.test.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Retry-After is honored for Clerk 429 responses (30.847875ms)
+✔ non-rate-limit errors and malformed Retry-After values are not retried (0.473486ms)
+(node:857682) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ a valid roster normalizes the email and keeps the name as a note (1.681578ms)
+✔ OWNER is never granted from a roster (0.504383ms)
+✔ an unknown role is refused rather than silently downgraded (0.282151ms)
+✔ a duplicate email is refused, including one that differs only by case (0.32428ms)
+✔ a malformed email is refused (0.226829ms)
+✔ nothing is planned from an empty roster (0.120954ms)
+✔ DNS names normalize case and the absolute-name suffix (1.198976ms)
+✔ public infrastructure accepts the complete Clerk CNAME contract (0.373691ms)
+✔ public infrastructure reports unresolved Clerk records (0.622551ms)
+(node:857683) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857683) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/scripts/verify-public-infrastructure.test.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857694) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857694) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857694) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+(node:857694) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:857694) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/(marketing)/join/page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Join distinguishes outage recruitment data (483.051833ms)
+✔ Join distinguishes no-cycle recruitment data (80.791171ms)
+✔ Join distinguishes empty-events recruitment data (62.295169ms)
+(node:857698) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ keeps Recruitment filters, search, view, and hash in a same-origin return path (1.185641ms)
+✔ rejects external, protocol-relative, malformed, and non-Recruitment destinations (0.187006ms)
+✔ previous and next navigation stays inside the originating roster filters (1.008344ms)
+(node:857698) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/applications/%5Bid%5D/dossier-navigation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857706) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ summarizes event observations without a numeric score (1.57931ms)
+(node:857706) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/events/%5Bid%5D/observation-summary.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857714) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857714) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/events/event-datetime.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ event input values always render in Detroit rather than the host timezone (1.126222ms)
+✔ Detroit wall time converts to the correct instant across daylight saving seasons (1.125701ms)
+✔ an unchanged ambiguous Detroit wall time preserves its original instant (0.170094ms)
+✔ a new ambiguous Detroit wall time is rejected (0.633111ms)
+✔ a nonexistent Detroit wall time is rejected (3.86246ms)
+(node:857721) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ recused and missed assignments do not count as Group Case coverage (1.377817ms)
+✔ one usable assignment is partial and two open assignments are in progress (0.144567ms)
+✔ coverage completes only after both required evaluations submit (0.115995ms)
+✔ coverage ranking puts applicants needing assignment first (0.146981ms)
+(node:857721) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/group-case-coverage.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857734) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ cycle readiness names missing and open rounds (1.574851ms)
+✔ applicant readiness requires two locked evaluations in every weighted round (0.425006ms)
+✔ score spread is review evidence but does not block a database-ready decision (0.316255ms)
+✔ speed dating spread is not review evidence (0.131784ms)
+✔ canonical readiness can block when visible evidence appears complete (0.126564ms)
+(node:857734) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/hash/decision-readiness.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857773) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857773) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/member-accounts.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ memberAccountsFor preserves all roles and selects the strongest role (1.404767ms)
+✔ duplicateAccountIdsFor uses exact normalized email rather than display name (0.212653ms)
+(node:857776) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857776) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/people/directory-model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ directory search spans profile metadata and roles (1.577105ms)
+✔ Board filter includes owners and sorting remains stable by name (7.588498ms)
+✔ directoryInitials handles one and multiple names (0.615388ms)
+(node:857779) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857779) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857779) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ only Board or Owner can mutate onboarding (98.119144ms)
+✔ Board completion uses the audited completion RPC (27.331675ms)
+(node:857779) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/people/onboarding/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857790) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857790) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/pipeline-kanban.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Kanban removes the single-column template before desktop column flow (0.972007ms)
+✔ Kanban destinations contain the current and legal active stages (1.120642ms)
+✔ Kanban hides Speed Dating from users who cannot advance (0.202975ms)
+✔ Kanban moves reject the source, skipped stages, and decided stages (0.143906ms)
+✔ optimistic moves change only the selected application (2.636193ms)
+✔ moves to INVITED enroll through ADVANCE_SPEED_DATING, other moves flip status (0.350618ms)
+(node:857797) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857797) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/pipeline-selection.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ advancement selection preserves the existing enrollment statuses (1.920871ms)
+✔ cross-filter review includes A and B and identifies hidden A (0.402424ms)
+✔ source removal is not presented as a reviewable applicant (0.148355ms)
+(node:857804) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857804) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857804) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:857804) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+✔ nonowners cannot load incident data or render provider identity information (492.508155ms)
+✔ the owner queue scopes caller reads to the actual cycle and paginates100 oldest unresolved records (270.602428ms)
+✔ an incident outage renders recovery without claiming an empty or resolved queue (77.806113ms)
+(node:857804) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/provisioning/page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857819) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857819) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/round-close-request.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ round close deadline bounds stalled headers and aborts the request (23.124378ms)
+✔ round close deadline bounds stalled body and aborts the request (85.048952ms)
+✔ round close request reads and parses the complete acknowledgement (5.868037ms)
+(node:857820) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857820) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/screening/reader-calibration.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a reader who always scores 10 below a co-reader gets a -5 lean and the co-reader +5 (4.54376ms)
+✔ adjusting for reader lean can flip the ranking (21.310575ms)
+✔ reader effects average to zero, and reviews without a reviewer share one effect (1.520992ms)
+✔ empty input returns empty arrays (0.511425ms)
+(node:857826) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ ranked screening results sort by average score, then name, then code, with dense ranks (14.196153ms)
+✔ z-score is the population z-score of each applicant's average (0.598957ms)
+✔ z-score is null for a single applicant and when every average is equal (0.231568ms)
+✔ average is per applicant, not per review (0.315574ms)
+✔ dense ranking increments by one after a tie (0.427791ms)
+(node:857826) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/screening/screening-result-groups.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857835) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857835) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/admin/settings/recruitment-analytics.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ parses aggregate analytics without accepting identity fields (1.799387ms)
+✔ normalizes the pre-close response to an unavailable panel (0.323749ms)
+✔ rejects partial or malformed aggregate payloads (0.360256ms)
+✔ database analytics stay Board or Owner gated and omit identity keys (3.511051ms)
+(node:857849) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857849) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/account/password/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy Supabase auth endpoint is retired (7.218033ms)
+resume access denied { code: '42501', message: 'forbidden' }
+resume access denied { code: 'P0002', message: 'resume not found' }
+(node:857858) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857858) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857858) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ admin resume route requires authentication (140.857049ms)
+✔ admin resume route returns forbidden when the access RPC denies the user (45.873432ms)
+✔ admin resume route returns not found for an application without an attached resume (40.379286ms)
+✔ admin resume route streams an authorized PDF without exposing the storage credential (22.447146ms)
+✔ admin resume route reports a signed URL failure as unavailable (14.723108ms)
+(node:857858) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/admin-resume-route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+decision action failed { action: 'RELEASE_ALL', code: '40001' }
+(node:857867) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857867) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857867) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ PREVIEW is forbidden when the caller only holds DECIDE in the cycleId they supplied, not the decision's real cycle (113.774073ms)
+✔ PREVIEW succeeds based on the decision's real cycle even when the client omits/misstates cycleId (19.034567ms)
+✔ RELEASE_ALL is accepted as a cycle-scoped release action (31.631404ms)
+✔ SET_DEADLINE rejects an impossible calendar date at the API boundary (17.2724ms)
+✔ SET_DEADLINE is forbidden when the caller only belongs to a client-claimed cycle (25.671116ms)
+✔ SET_DEADLINE resolves the application's real cycle and reaches the audited RPC (32.65711ms)
+✔ SET_DEADLINE rejects a missing application before querying the database (12.121307ms)
+✔ SET_DEADLINE rejects an offset-less wall time at the API boundary (14.689886ms)
+✔ POST /api/admin/decisions rejects payloads over the 1 MiB cap before parsing (21.495196ms)
+✔ POST /api/admin/decisions bounds oversized streamed bodies without Content-Length (28.960206ms)
+✔ RELEASE attempts the durable notification created by the release transaction (31.622467ms)
+✔ RELEASE remains successful and reports queued when provider delivery is deferred (15.203896ms)
+✔ RELEASE_PREFLIGHT uses release permission and does not mutate decisions (19.676624ms)
+✔ reviewed RELEASE_ALL forwards exact snapshot rather than releasing an expanded cohort (19.40383ms)
+✔ reviewed RELEASE_ALL accepts 500 decisions above 16 KiB without truncating the snapshot (20.861635ms)
+✔ snapshot drift is a recoverable conflict and never exposes SQL error details (39.441922ms)
+✔ invalid release snapshots cannot invoke either batch RPC (12.06832ms)
+(node:857867) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/decisions/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+staff-assisted check-in failed { code: 'P0002', message: 'applicant missing' }
+staff-assisted check-in failed { code: '22023', message: 'ambiguous applicant identifier' }
+(node:857874) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857874) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857874) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ assisted check-in requires an authenticated applicant-operations user (84.92834ms)
+✔ assisted check-in rejects a regular member before invoking the RPC (24.279674ms)
+✔ assisted check-in bounds and validates its input (21.414657ms)
+✔ assisted check-in passes an exact identifier to the database-owned lookup (12.613557ms)
+✔ assisted check-in maps a cross-cycle lookup failure (22.654369ms)
+✔ assisted check-in maps an ambiguous database lookup failure (30.676669ms)
+(node:857874) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/events/assisted-checkin-route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857887) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857887) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857887) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ PATCH rejects moving a published event into the past before calling the RPC (92.346613ms)
+✔ PATCH rejects an impossible calendar date before calling the RPC (23.17428ms)
+(node:857887) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/events/event-route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857890) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857890) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857890) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ attendance export rejects an unauthorized cycle before querying (230.505965ms)
+✔ attendance export neutralizes spreadsheet formulas and disables caching (19.009421ms)
+✔ Group Case backup exports blank rubric cells with stable recovery identifiers (16.658865ms)
+✔ Group Case backup rejects a missing round before querying (17.181853ms)
+✔ Speed Dating export rejects a missing round before querying (20.005973ms)
+✔ Speed Dating export hides a round from another cycle (29.639191ms)
+✔ Speed Dating summary exports one ranked row per applicant (51.290887ms)
+✔ Speed Dating scores export escapes notes with commas and quotes (32.151725ms)
+(node:857890) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/export/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857905) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857905) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857905) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ manual retry is Board-authorized, audited by RPC, and immediately attempted (154.004824ms)
+✔ recruitment committee cannot retry a decision notification (56.464902ms)
+(node:857905) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/notifications/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857913) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857913) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857913) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ operations readiness rejects an anonymous request (146.317624ms)
+✔ operations readiness is restricted to owners (22.668586ms)
+✔ operations readiness reports a healthy configuration without exposing values (16.399116ms)
+✔ operations readiness returns 503 when required configuration is missing (11.853763ms)
+(node:857913) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/operations/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857953) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857953) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857953) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:857953) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/provisioning/%5Bid%5D/resolve/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ unauthenticated resolution never initializes a data client (112.947245ms)
+✔ Board access alone cannot resolve provisioning incidents (32.552757ms)
+✔ the real incident cycle defeats an owner role in another cycle (13.578701ms)
+✔ malformed incident references are rejected before querying (23.651042ms)
+✔ a lookup outage preserves the incident and does not leak database PII (16.558941ms)
+✔ invisible or missing incidents cannot invoke the resolver (36.993797ms)
+✔ resolution invokes only the caller-scoped canonical RPC (34.556341ms)
+✔ a role revocation enforced by the RPC fails without claiming resolution (36.156078ms)
+✔ a database failure returns no raw identity diagnostics (11.874011ms)
+✔ a transport exception preserves the action without logging identity diagnostics (19.837301ms)
+(node:857956) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857956) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857956) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:857956) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/round-close/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ round close summary requires a signed-in identity before querying data (46.848314ms)
+✔ round close summary rejects missing, repeated, blank and oversized round identifiers (46.602951ms)
+✔ round close summary treats invisible RLS rows as not found (24.457733ms)
+✔ caller cycle claims and panel role cannot authorize closing the round's real cycle (68.686003ms)
+✔ board gets validated live coverage via the caller client and no-store response (19.212126ms)
+✔ RPC permission recheck and disappearing round remain forbidden/not found (52.762928ms)
+✔ lookup, RPC and thrown infrastructure errors expose only generic unavailable responses (37.030615ms)
+✔ malformed or wrong-round summaries cannot be presented as verified coverage (37.484114ms)
+{"timestamp":"2026-10-16T20:44:57.042Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"0305caf6-3e2a-49e6-abd9-c2459e7acec5","code":"MEMBERSHIP_GRANT","detail":{"recorded":true,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T20:44:57.086Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"983ce69f-5dc1-4167-ad1d-03c65902e484","code":"MEMBERSHIP_GRANT","detail":{"recorded":false,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T20:44:57.128Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"d4acaf5d-330a-496d-9bf2-c38bd6f72c12","code":"IDENTITY_LINK","detail":{"recorded":false,"clerkCleanupFailed":true,"profileCleanupFailed":false}}
+(node:857964) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857964) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857964) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ admin account creation enforces Clerk's 8-character password boundary (202.490506ms)
+✔ owner can deactivate a cycle membership with an audit reason (128.408677ms)
+✔ board cannot deactivate a membership (53.907574ms)
+✔ board can unassign an untouched evaluator assignment (64.347713ms)
+✔ board can atomically advance a distinct applicant cohort to Speed Dating (53.700812ms)
+✔ board can form Group Case teams of a chosen size (28.933376ms)
+✔ panel cannot form Group Case teams (52.037938ms)
+✔ committee cannot advance applicants (29.996281ms)
+✔ reassignment requires both assignment and replacement evaluator (27.739249ms)
+✔ board can set a validated application window through the audited RPC (46.387602ms)
+✔ application window rejects malformed or reversed dates before the RPC (48.525274ms)
+✔ RSVP slots require offset-aware ordered times and a bounded integer capacity (36.22741ms)
+✔ a rejected membership grant preserves linked access and records restricted recovery (20.603558ms)
+✔ an uncertain membership grant preserves accounts for reconciliation (42.216682ms)
+✔ a failed Clerk rollback after ensure_external_identity uses an incident reference (42.827471ms)
+✔ account provisioning handles create-unknown without unsafe cleanup or identity logs (36.619305ms)
+✔ account provisioning handles create-rejected without unsafe cleanup or identity logs (54.079161ms)
+✔ account provisioning handles identity-unknown without unsafe cleanup or identity logs (24.524857ms)
+✔ account provisioning handles identity-empty without unsafe cleanup or identity logs (19.434928ms)
+✔ account provisioning handles identity-denied-clean without unsafe cleanup or identity logs (28.272545ms)
+✔ account provisioning handles identity-connection without unsafe cleanup or identity logs (28.154877ms)
+✔ account provisioning handles identity-completion-unknown without unsafe cleanup or identity logs (27.081493ms)
+(node:857964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/rush/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857977) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857977) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857977) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/admin/screening rejects payloads over the 64 KiB cap before parsing (75.950623ms)
+✔ POST /api/admin/screening APPROVE_ALL calls approve_screening_packets and returns its summary (17.704098ms)
+✔ POST /api/admin/screening RESET calls reset_screening_batch (22.741671ms)
+✔ POST /api/admin/screening REASSIGN_READER calls reassign_screening_reader and returns the count (15.688231ms)
+✔ POST /api/admin/screening surfaces the RPC message for a 55000 refusal (14.626349ms)
+(node:857977) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/screening/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:857981) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:857981) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:857981) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/admin/setup returns 401 when unauthenticated (88.093921ms)
+✔ POST /api/admin/setup returns 403 for an authenticated user with no OWNER membership anywhere (18.349922ms)
+✔ POST /api/admin/setup returns 403 for a bare authenticated user with zero memberships (16.409906ms)
+✔ POST /api/admin/setup rejects payloads over the 2 KiB cap before parsing (21.918929ms)
+✔ POST /api/admin/setup creates a cycle for an OWNER (40.092174ms)
+(node:857981) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/setup/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858038) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858038) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858038) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/applicant/buddy returns 429 without calling the RPC when rate limited (39.87329ms)
+✔ POST /api/applicant/buddy books a slot when not rate limited (22.684745ms)
+(node:858038) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/applicant/buddy/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858040) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858040) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858040) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858040) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/applicant/offer/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ POST /api/applicant/offer returns 429 without calling the RPC when rate limited (48.059884ms)
+✔ POST /api/applicant/offer responds when not rate limited (27.135813ms)
+(node:858048) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858048) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858048) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/applicant/rsvp returns 429 without calling the RPC when rate limited (145.415026ms)
+✔ POST /api/applicant/rsvp reserves a slot when not rate limited (43.967689ms)
+(node:858048) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/applicant/rsvp/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858057) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858057) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858057) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/applicant/survey returns 429 without calling the RPC when rate limited (89.514938ms)
+✔ POST /api/applicant/survey submits when not rate limited (49.101078ms)
+(node:858057) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/applicant/survey/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T20:44:56.596Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"7b5a83bc-b415-4329-8684-a0acf7717639","code":"AUTH_REQUIRED","durationMs":1,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:56.649Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"81ce8ac2-8edc-4c1e-84fb-cf31a201a860","code":"INVALID_DRAFT","durationMs":3,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.668Z","level":"info","service":"mecg-recruitment","event":"application.draft.load","requestId":"2b54ce90-7f23-49c4-b557-75d4c1fd1bfc","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.696Z","level":"info","service":"mecg-recruitment","event":"application.draft.save","requestId":"90b40310-cea9-4c21-b799-f605e395d682","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.699Z","level":"info","service":"mecg-recruitment","event":"application.draft.save","requestId":"54646d39-bac4-4453-9ea1-a58eea9905e3","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.733Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"0179d0ba-c891-4afd-8cf6-1271f91f7657","code":"DRAFT_REJECTED","durationMs":2,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.749Z","level":"info","service":"mecg-recruitment","event":"application.draft.save","requestId":"807d255d-2c4f-4824-b3bc-feb9a35b1ec8","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.779Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"9ac5e6d0-bff3-451e-8509-f092821b0f10","code":"RATE_LIMITED","durationMs":1,"detail":{"status":429}}
+{"timestamp":"2026-10-16T20:44:56.801Z","level":"error","service":"mecg-recruitment","event":"application.draft.save","requestId":"f498bdba-383a-4a03-8522-20710ae91ee9","code":"SERVICE_UNAVAILABLE","durationMs":0,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:56.820Z","level":"info","service":"mecg-recruitment","event":"application.draft.save","requestId":"1a88103b-e0db-4328-938e-2e2ebe4f730b","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.822Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"0d6de5f1-bc80-422e-82b8-84656c72c878","code":"APPLICANT_IDENTITY_CONFLICT","durationMs":1,"detail":{"status":409}}
+{"timestamp":"2026-10-16T20:44:56.838Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"66184471-0e5d-41d2-ac81-26d1c72eeff9","code":"DRAFT_REVISION_CONFLICT","durationMs":0,"detail":{"status":409}}
+{"timestamp":"2026-10-16T20:44:56.862Z","level":"error","service":"mecg-recruitment","event":"application.draft.save","requestId":"0b6aa044-3c14-4a0d-af77-aa383ffa54e3","code":"INVALID_SAVE_RECEIPT","durationMs":0,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:56.878Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"38585525-0a0b-49b5-8460-f2150b01b783","code":"INVALID_DRAFT","durationMs":0,"detail":{"status":400}}
+(node:858065) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858065) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858065) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/apply/draft returns 401 when unauthenticated (151.928236ms)
+✔ POST /api/apply/draft rejects an unknown form step before persistence (45.763569ms)
+✔ GET /api/apply/draft loads only through the caller-scoped RPC (18.734543ms)
+✔ POST /api/apply/draft saves drafts for two different applicants without a contact collision (34.220982ms)
+✔ POST /api/apply/draft surfaces a profile with no verified email instead of writing a placeholder (29.18434ms)
+(node:858065) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/draft/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ POST /api/apply/draft rate limits per user and per IP, not either alone (16.096446ms)
+✔ POST /api/apply/draft returns 429 without persisting when rate limited (30.550115ms)
+✔ POST /api/apply/draft returns 503 when rate limiting is unavailable (21.038552ms)
+✔ POST /api/apply/draft maps a contact conflict without leaking database detail (20.500377ms)
+✔ POST /api/apply/draft returns a recoverable revision conflict and never reports it saved (14.976866ms)
+✔ POST /api/apply/draft refuses a legacy or malformed save acknowledgement (23.84487ms)
+✔ POST /api/apply/draft rejects a payload without a revision precondition before the RPC (15.651383ms)
+{"timestamp":"2026-10-16T20:44:56.457Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"bc5efc22-adc5-4de5-9cab-2e8b8de0ab4a","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:56.480Z","level":"error","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"2f0d2d81-4b36-4ad2-9f6a-79a07a05e14b","code":"SERVICE_UNAVAILABLE","durationMs":1,"detail":{"status":503}}
+(node:858089) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858089) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858089) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858089) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/headshot/headshot-routes.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T20:44:56.506Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"14c68fa1-df97-4cea-b7d9-aabce01523d5","code":"INVALID_FILE","durationMs":10,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.536Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"c001218d-2b8c-48ed-a287-075f631bc208","code":"INVALID_FILE","durationMs":5,"detail":{"status":400}}
+✔ headshot upload requires authentication (104.08904ms)
+✔ headshot upload reports a limiter outage as retryable service unavailability (20.65319ms)
+✔ headshot upload rejects a file that is not declared as WebP (25.034008ms)
+✔ headshot upload rejects a file over the 1 MB limit (29.187467ms)
+{"timestamp":"2026-10-16T20:44:56.563Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"5dc1c27d-d84a-4391-a23f-b515da34ca0f","code":"INVALID_FILE","durationMs":4,"detail":{"status":400}}
+✔ headshot upload rejects bytes that only claim to be WebP (27.080882ms)
+{"timestamp":"2026-10-16T20:44:56.589Z","level":"info","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"2aeb8788-d5bb-4904-99de-a2fb21391c0a","durationMs":6,"detail":{"status":201}}
+✔ headshot upload stores the object the database chose and clears the old one (26.420521ms)
+attach_headshot failed { code: '55000', message: 'applications are closed' }
+{"timestamp":"2026-10-16T20:44:56.622Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"20937b71-807e-4a0a-b2f9-adfb2ea35bec","code":"ATTACH_FAILED","durationMs":4,"detail":{"status":409}}
+headshot access denied { code: '42501', message: 'forbidden' }
+headshot access denied { code: 'P0002', message: 'headshot not found' }
+✔ headshot upload removes the object when attaching it fails (33.191809ms)
+✔ admin headshot route returns forbidden when the access RPC denies the user (48.709525ms)
+✔ admin headshot route returns not found for an application without a photo (27.897752ms)
+✔ admin headshot route streams the bytes to an authorized reviewer (30.88853ms)
+{"timestamp":"2026-10-16T20:44:56.772Z","level":"info","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"b22bde58-0dd4-4e26-a1bc-b7a499086884","durationMs":6,"detail":{"status":201}}
+✔ headshot upload accepts the JPEG fallback and mints a .jpg path (41.952013ms)
+{"timestamp":"2026-10-16T20:44:56.810Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"4aa7ca31-c836-425b-a942-4cd2c954fec4","code":"INVALID_FILE","durationMs":4,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.812Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"ed072b55-01e7-4ef0-9a84-4dd5d05b496b","code":"INVALID_FILE","durationMs":1,"detail":{"status":400}}
+✔ headshot upload still refuses a PNG, and a JPEG that is not really a JPEG (37.778507ms)
+{"timestamp":"2026-10-16T20:44:56.902Z","level":"info","service":"mecg-recruitment","event":"application.resume.start","requestId":"a59b4abe-d3cd-4c25-afeb-2877b1643d94","durationMs":3,"detail":{"status":201}}
+{"timestamp":"2026-10-16T20:44:56.920Z","level":"info","service":"mecg-recruitment","event":"application.resume.start","requestId":"c132f2b2-a744-4693-96ca-60a68cee407b","durationMs":0,"detail":{"status":201}}
+{"timestamp":"2026-10-16T20:44:56.936Z","level":"warn","service":"mecg-recruitment","event":"application.resume.start","requestId":"d6e11003-da7e-403f-87c2-bb9c99aba871","code":"INVALID_FILE","durationMs":0,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.948Z","level":"error","service":"mecg-recruitment","event":"application.resume.start","requestId":"05c62802-888b-4642-ab2c-786fbd635d76","code":"SERVICE_UNAVAILABLE","durationMs":0,"detail":{"status":503}}
+resume signed upload url failed { message: 'boom' }
+{"timestamp":"2026-10-16T20:44:56.960Z","level":"error","service":"mecg-recruitment","event":"application.resume.start","requestId":"e96fabd2-c73e-4fd7-84b1-dd710282bcfc","code":"SIGNED_UPLOAD_FAILED","durationMs":1,"detail":{"status":500}}
+{"timestamp":"2026-10-16T20:44:57.117Z","level":"info","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"6a575f4a-06a4-4250-a7f6-debdf74ecd89","durationMs":133,"detail":{"status":200}}
+resume verification download failed { message: 'temporary outage' }
+{"timestamp":"2026-10-16T20:44:57.134Z","level":"error","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"0ecc2a2a-61d0-4dd6-942e-e40dae0941e5","code":"STORAGE_UNAVAILABLE","durationMs":1,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:57.149Z","level":"warn","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"a8d69ed8-d665-4424-ba85-bb390ad0cc40","code":"INVALID_PDF","durationMs":1,"detail":{"status":400}}
+reject_resume_upload failed { code: '55000', message: 'upload is not pending' }
+{"timestamp":"2026-10-16T20:44:57.167Z","level":"warn","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"0358a60f-1059-4ce0-89ae-294065eeaa7d","code":"INVALID_PDF","durationMs":1,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:57.195Z","level":"info","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"66cf8b78-74d6-4f35-b361-45c4395a34fe","durationMs":7,"detail":{"status":200}}
+attach_ready_resume failed { code: '55000', message: 'review has already started' }
+(node:858100) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858100) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858100) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ resume start creates a server-controlled upload target (553.055022ms)
+✔ resume start ignores a client-supplied path and always uploads to the server-derived object (15.957288ms)
+✔ resume start rejects invalid files before creating an upload (15.079666ms)
+✔ resume start reports a limiter outage as retryable service unavailability (11.666267ms)
+✔ resume start fails closed when the signed upload URL cannot be created (12.460114ms)
+✔ resume finalize verifies bytes and records the digest (156.636509ms)
+✔ resume finalize keeps a pending upload retryable when storage is unavailable (16.774269ms)
+✔ resume finalize rejects and removes non-PDF content (14.339378ms)
+✔ resume finalize never deletes content when rejection loses a race (18.369357ms)
+✔ resume finalize removes files superseded by a successful replacement (28.368342ms)
+✔ resume cancel does not remove a document the database refuses to reject (11.515949ms)
+✔ resume attach points the application at the ready replacement (9.93192ms)
+✔ resume attach preserves the database replacement gate (9.410206ms)
+(node:858100) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/resume/resume-routes.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858114) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858114) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858114) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ applicant resume route: signed-out (218.513907ms)
+✔ applicant resume route: missing-path (21.393198ms)
+✔ applicant resume route: foreign-resume (21.440625ms)
+✔ applicant resume route: ready (18.7438ms)
+✔ applicant resume route: signing-failure (22.838189ms)
+✔ applicant resume route: storage-denied (12.824868ms)
+✔ applicant resume route: network-failure (9.070487ms)
+(node:858114) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/resume/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T20:44:56.563Z","level":"error","service":"mecg-recruitment","event":"application.submit","requestId":"057baec6-1693-4669-bb6f-e7cab6fc62f5","code":"INVALID_SUBMISSION_RESPONSE","durationMs":7,"detail":{"status":500}}
+{"timestamp":"2026-10-16T20:44:56.591Z","level":"info","service":"mecg-recruitment","event":"application.submit","requestId":"e993f139-371f-4e1e-90bc-f3090e603104","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.663Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"7a299be1-98e1-4fdc-93c5-2b15f0d0b46c","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:56.707Z","level":"error","service":"mecg-recruitment","event":"application.submit","requestId":"24971210-4cd1-4687-a643-54fcb1c14e4d","code":"AUTH_SERVICE_UNAVAILABLE","durationMs":0,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:56.733Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"fd660e3e-7ebb-413b-954d-477bcfaba729","code":"PAYLOAD_TOO_LARGE","durationMs":0,"detail":{"status":413}}
+{"timestamp":"2026-10-16T20:44:56.750Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"c532bcb1-0a04-4ef1-a2bd-482dbe0ac40a","code":"PAYLOAD_TOO_LARGE","durationMs":0,"detail":{"status":413}}
+{"timestamp":"2026-10-16T20:44:56.766Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"d0e4ecaa-4a36-4fdd-aeb7-004d9cb74335","code":"INVALID_PAYLOAD","durationMs":0,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.779Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"55e67531-38b8-48fe-88fe-f683400552b8","code":"INVALID_APPLICATION","durationMs":0,"detail":{"status":400}}
+{"timestamp":"2026-10-16T20:44:56.806Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"909a3de3-e9d9-44aa-8029-cb2844fdd951","code":"RATE_LIMITED","durationMs":1,"detail":{"status":429}}
+{"timestamp":"2026-10-16T20:44:56.840Z","level":"error","service":"mecg-recruitment","event":"application.submit","requestId":"apply-test-1","code":"SERVICE_UNAVAILABLE","durationMs":0,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:56.859Z","level":"info","service":"mecg-recruitment","event":"application.submit","requestId":"272ceb73-535b-4294-8ed5-a60e10868cbe","durationMs":0,"detail":{"status":201}}
+{"timestamp":"2026-10-16T20:44:56.879Z","level":"info","service":"mecg-recruitment","event":"application.submit","requestId":"3c88d108-2492-4ad6-b8e4-a08df582dead","durationMs":0,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.903Z","level":"error","service":"mecg-recruitment","event":"application.submit","requestId":"39b3e6c3-02f4-482c-b847-ff73f996f387","code":"SUBMISSION_FAILED","durationMs":0,"detail":{"status":500}}
+{"timestamp":"2026-10-16T20:44:56.923Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"1b46b94b-7902-42e3-96c8-da4e2d50243d","code":"APPLICANT_IDENTITY_CONFLICT","durationMs":0,"detail":{"status":409}}
+{"timestamp":"2026-10-16T20:44:56.975Z","level":"info","service":"mecg-recruitment","event":"application.submit","requestId":"43ccdb10-9937-4bcc-9f56-e52e7f877a71","durationMs":0,"detail":{"status":201}}
+{"timestamp":"2026-10-16T20:44:57.024Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"fc1c492d-fa4b-407e-8dc1-7313f2341596","code":"DRAFT_REVISION_CONFLICT","durationMs":0,"detail":{"status":409}}
+{"timestamp":"2026-10-16T20:44:57.045Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"e0def87a-56d3-40cb-9246-5d314b18bddb","durationMs":0,"detail":{"status":400}}
+(node:858123) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858123) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858123) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/apply rejects an empty submission ID without scheduling a receipt (127.309606ms)
+✔ POST /api/apply rate limits per user and per IP, not either alone (27.233254ms)
+✔ POST /api/apply returns 401 when unauthenticated (69.910527ms)
+✔ POST /api/apply returns 503 rather than 401 when authentication dependencies fail (38.083301ms)
+✔ POST /api/apply rejects declared payloads over 64 KiB before parsing (25.829037ms)
+✔ POST /api/apply rejects streamed payloads over 64 KiB without Content-Length (15.677551ms)
+✔ POST /api/apply rejects malformed JSON safely (17.24017ms)
+✔ POST /api/apply returns 400 when required fields are missing (12.054444ms)
+✔ POST /api/apply returns 429 without persisting when rate limited (27.474319ms)
+✔ POST /api/apply returns 503 when rate limiting is unavailable (33.063541ms)
+✔ POST /api/apply submits all fields in one persistence call (18.626453ms)
+✔ POST /api/apply does not resend confirmation for an idempotent retry (19.854052ms)
+✔ POST /api/apply fails closed when the revision-aware RPC is absent (23.514389ms)
+✔ POST /api/apply maps RPC failures without leaking database messages (19.969806ms)
+✔ POST /api/apply returns a generic error for unknown RPC failures (28.719341ms)
+✔ POST /api/apply does not wait for notification delivery after commit (24.922051ms)
+✔ POST /api/apply returns the newer draft when the submission revision is stale (48.250736ms)
+✔ POST /api/apply requires the revision contract even for otherwise valid legacy submissions (19.6037ms)
+(node:858123) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T20:44:56.489Z","level":"info","service":"mecg-recruitment","event":"application.status","requestId":"status-test-1","durationMs":1,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.509Z","level":"info","service":"mecg-recruitment","event":"application.status","requestId":"status-test-1","durationMs":0,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.544Z","level":"info","service":"mecg-recruitment","event":"application.status","requestId":"status-test-1","durationMs":2,"detail":{"status":200}}
+{"timestamp":"2026-10-16T20:44:56.521Z","level":"error","service":"mecg-recruitment","event":"application.status","requestId":"status-test-1","code":"INVALID_STATUS_RESPONSE","durationMs":0,"detail":{"status":503}}
+{"timestamp":"2026-10-16T20:44:56.582Z","level":"warn","service":"mecg-recruitment","event":"application.status","requestId":"47cb0b30-b556-43ca-accd-98a788779671","code":"CYCLE_REQUIRED","durationMs":0,"detail":{"status":400}}
+(node:858137) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858137) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858137) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ GET /api/apply/status returns caller-scoped submission state without caching (58.57422ms)
+✔ GET /api/apply/status safely represents no application (12.034858ms)
+✔ GET /api/apply/status rejects malformed dependency responses (11.324124ms)
+✔ GET /api/apply/status cannot confirm an application from a different cycle (22.598135ms)
+✔ GET /api/apply/status requires the cycle being submitted (40.270655ms)
+(node:858137) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/apply/status/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858149) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858149) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/auth/forgot-password/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy Supabase auth endpoint is retired (6.738647ms)
+(node:858159) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858159) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/auth/login/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy Supabase auth endpoint is retired (6.21589ms)
+(node:858170) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858170) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/auth/reset-password/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ legacy Supabase auth endpoint is retired (6.531274ms)
+(node:858207) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ legacy Supabase auth endpoint is retired (6.532697ms)
+(node:858207) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/auth/signup/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858229) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858229) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858229) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/contact rejects malformed JSON (64.214538ms)
+✔ POST /api/contact rejects payloads over 16 KiB (19.53885ms)
+✔ POST /api/contact validates fields and rejects subject line breaks (16.04962ms)
+✔ POST /api/contact silently accepts a filled honeypot without sending (28.268086ms)
+✔ POST /api/contact identifies trimmed whitespace errors before attempting delivery (29.362259ms)
+✔ POST /api/contact returns 429 without sending when rate limited (17.847994ms)
+✔ POST /api/contact sends escaped content with reply-to (25.167014ms)
+✔ POST /api/contact reports provider failure (16.774279ms)
+✔ POST /api/contact rejects invalid delivery intent undefined (12.404832ms)
+✔ POST /api/contact rejects invalid delivery intent unbounded-invalid-key (34.533449ms)
+✔ POST /api/contact reports limiter outage separately from quota (24.837736ms)
+✔ POST /api/contact requires a provider receipt before confirming delivery (17.641352ms)
+(node:858229) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/contact/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858242) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858242) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858242) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ GET /api/events/[id]/ics escapes commas, semicolons, backslashes, and newlines per RFC 5545 (102.607681ms)
+✔ GET /api/events/[id]/ics escapes a literal backslash (13.579863ms)
+✔ GET /api/events/[id]/ics returns 404 for an unknown id (15.367188ms)
+✔ GET /api/events/[id]/ics omits URL-like locations (15.701125ms)
+✔ GET /api/events/[id]/ics uses an applicant-owned invite slot when it is not public (19.515136ms)
+(node:858242) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/events/%5Bid%5D/ics/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858252) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858252) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858252) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ GET /api/health returns 200 for a healthy Supabase probe (154.236152ms)
+✔ GET /api/health returns 503 without error details when the RPC fails (11.664152ms)
+✔ GET /api/health cancels a timed-out Supabase probe and returns 503 (26.808528ms)
+✔ GET /api/health reuses a healthy result within the cache window (17.843976ms)
+✔ GET /api/health shares one probe across concurrent cache misses (26.278619ms)
+(node:858252) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/health/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858261) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858261) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858261) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858261) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/maintenance/notifications/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ notification worker reports retryable deliveries as degraded (71.313901ms)
+✔ notification worker logs the thrown category when delivery throws (12.087635ms)
+✔ notification worker treats a concurrently claimed item as skipped (30.845541ms)
+✔ notification worker rejects a missing authorization header (41.126457ms)
+✔ notification worker rejects a wrong secret (44.42828ms)
+✔ notification worker refuses to run when CRON_SECRET is unset (30.619854ms)
+✔ notification worker refuses to run when CRON_SECRET is blank (12.035418ms)
+(node:858277) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858277) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858277) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858277) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/maintenance/prune-resumes/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ GET /api/maintenance/prune-resumes rejects a wrong secret of the same length (44.235103ms)
+✔ GET /api/maintenance/prune-resumes rejects a shorter secret without throwing (21.420779ms)
+✔ GET /api/maintenance/prune-resumes rejects a longer secret without throwing (30.680977ms)
+✔ GET /api/maintenance/prune-resumes rejects a missing authorization header (15.283774ms)
+✔ GET /api/maintenance/prune-resumes accepts the correct secret (26.10592ms)
+✔ GET /api/maintenance/prune-resumes reports deletion failures as degraded (13.241509ms)
+✔ GET /api/maintenance/prune-resumes logs a degraded run when the row retire fails after delete (10.727331ms)
+pending_reminders returned an invalid payload
+reminders: CRON_SECRET is unset, refusing to run
+reminders: CRON_SECRET is unset, refusing to run
+(node:858279) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858279) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858279) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858279) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/maintenance/reminders/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ reminders remain retryable when the email provider fails (83.599353ms)
+✔ reminders log a degraded run when the claim fails (13.849934ms)
+✔ a reminder another run already claimed is not sent again (22.761918ms)
+✔ reminders are claimed before delivery and kept once delivered (21.763111ms)
+✔ reminders fail closed on a malformed database payload (19.539381ms)
+✔ reminders reject a missing authorization header (12.164257ms)
+✔ reminders reject a wrong secret (10.348941ms)
+✔ reminders refuse to run when CRON_SECRET is unset (9.236905ms)
+✔ reminders refuse to run when CRON_SECRET is blank (12.141335ms)
+(node:858293) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858293) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858293) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/buddy rejects payloads over the 2 KiB cap before parsing (58.459448ms)
+✔ POST /api/member/buddy creates a slot for a valid payload (11.642732ms)
+(node:858293) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/buddy/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858296) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858296) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858296) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/conflicts rejects payloads over the 4 KiB cap before parsing (65.628391ms)
+(node:858296) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/conflicts/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858313) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858313) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858313) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/evaluations/[assignmentId] rejects payloads over the 128 KiB cap before parsing (86.488132ms)
+(node:858313) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/evaluations/%5BassignmentId%5D/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858314) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ accepts complete and partially scored evaluation drafts (1.784358ms)
+✔ rejects duplicate criteria and invalid score values (0.230075ms)
+✔ rejects missing and overlong draft fields (0.181867ms)
+(node:858314) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/evaluations/evaluation-draft-payload.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+rate_group_case_applicant failed { code: '55000', message: 'round is frozen' }
+(node:858324) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858324) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858324) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858324) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/group-case/ratings/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ group case rating requires authentication (84.299506ms)
+✔ group case rating validates the body before opening a database client (25.694369ms)
+✔ group case rating passes the round, applicant, scores, and note to the guarded RPC (14.284236ms)
+✔ group case rating defaults the note to an empty string (16.19623ms)
+✔ group case rating surfaces the database's own message when the round is frozen (14.699153ms)
+(node:858331) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858331) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858331) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858331) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/hash/live/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Hash excludes presenter and requested notes absent from caller ballot (other applicant: false) (115.068086ms)
+✔ Hash excludes presenter and requested notes absent from caller ballot (other applicant: true) (22.637007ms)
+✔ Hash uses caller ballot metadata and gates notes for request presenter (15.343344ms)
+✔ Hash uses caller ballot metadata and gates notes for request ?applicationId=other (22.425596ms)
+✔ Hash uses caller ballot metadata and gates notes for request ?applicationId=hidden (25.133552ms)
+✔ Hash rejects missing membership or ballot eligibility: null (30.761055ms)
+✔ Hash rejects missing membership or ballot eligibility: {"memberships":[]} (11.461037ms)
+✔ Hash rejects missing membership or ballot eligibility: {"id":"member","memberships":[{"role":"MEMBER","cycleId":"cycle"}]} (7.78433ms)
+(node:858347) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858347) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858347) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858347) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/impressions/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ event observations reject the retired numeric score contract (40.44673ms)
+✔ event observations accept only the neutral tag vocabulary (29.149135ms)
+✔ event observations call the qualitative RPC without scoring fields (26.555341ms)
+(node:858353) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858353) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858353) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ GET screening resume returns 401 when signed out (65.594118ms)
+✔ GET screening resume returns 404 when the RPC reports P0002 (13.768563ms)
+✔ GET screening resume proxies the signed URL's bytes as an inline PDF (15.577777ms)
+✔ GET screening resume returns 502 when storage refuses the signed URL (23.548562ms)
+(node:858353) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/screening/%5BassignmentId%5D/resume/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858360) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858360) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858360) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ GET loads a draft only through the caller-owned assignment RPC (71.369694ms)
+✔ PUT validates then saves only the current reviewer draft (11.983473ms)
+✔ PUT rejects malformed drafts before opening a database client (9.990539ms)
+(node:858360) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/screening/draft/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858361) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858361) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858361) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/screening rejects payloads over the 128 KiB cap before parsing (146.14243ms)
+✔ POST /api/member/screening returns the next private assignment after submit (25.376872ms)
+✔ POST /api/member/screening requires evidence notes for ratings 1 and 5 only (23.388366ms)
+(node:858361) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/screening/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+rate_speed_dating_applicant failed { code: '55000', message: 'round is frozen' }
+(node:858373) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858373) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858373) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ rating requires authentication (115.249441ms)
+✔ rating validates the body before opening a database client (19.258322ms)
+✔ rating passes the round, applicant, session, score, and note to the guarded RPC (13.460242ms)
+✔ rating defaults the session to 1 and the note to an empty string (12.873758ms)
+✔ rating surfaces the database's own message when the round is frozen (14.078696ms)
+(node:858373) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/speed-dating/ratings/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T20:44:57.683Z","level":"warn","service":"mecg-recruitment","event":"application.draft.load","requestId":"04cc0ee4-49b6-4b74-99db-e482ac0c8e32","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:57.696Z","level":"warn","service":"mecg-recruitment","event":"application.draft.save","requestId":"b5c6629b-32f5-4a44-9da1-7c51e4527013","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:57.715Z","level":"warn","service":"mecg-recruitment","event":"application.headshot.upload","requestId":"e1d5c710-4065-4459-a932-1b584a518673","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:58.040Z","level":"warn","service":"mecg-recruitment","event":"application.resume.finalize","requestId":"0f5eb843-c12c-4fac-851b-de98d4f05e2f","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:58.059Z","level":"warn","service":"mecg-recruitment","event":"application.resume.start","requestId":"28abe589-0eaa-414f-b157-e7290b61fd26","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:58.071Z","level":"warn","service":"mecg-recruitment","event":"application.submit","requestId":"9503fb26-f94c-4274-ad1f-cd3b113feb30","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+{"timestamp":"2026-10-16T20:44:58.079Z","level":"warn","service":"mecg-recruitment","event":"application.status","requestId":"bcdf4965-c4e7-4cb0-9e97-d1908d8de4d9","code":"AUTH_REQUIRED","durationMs":0,"detail":{"status":401}}
+(node:858388) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858388) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858388) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ ./admin/applications/[id]/headshot/route.ts GET -> 401 (100.726795ms)
+✔ ./admin/applications/[id]/resume/route.ts GET -> 401 (31.804073ms)
+✔ ./admin/decisions/route.ts POST -> 401 (103.931609ms)
+✔ ./admin/events/[id]/assisted-checkin/route.ts POST -> 401 (25.746966ms)
+✔ ./admin/events/[id]/rotate/route.ts POST -> 401 (19.96685ms)
+✔ ./admin/events/[id]/route.ts PATCH -> 401 (48.630488ms)
+✔ ./admin/events/[id]/route.ts DELETE -> 401 (46.63493ms)
+✔ ./admin/events/route.ts POST -> 401 (24.695853ms)
+✔ ./admin/export/route.ts GET -> 401 (114.32416ms)
+✔ ./admin/hash-results/route.ts POST -> 401 (21.252146ms)
+✔ ./admin/messages/route.ts POST -> 401 (14.385864ms)
+✔ ./admin/notifications/route.ts POST -> 401 (16.091778ms)
+✔ ./admin/operations/route.ts GET -> 401 (11.184896ms)
+✔ ./admin/projects/route.ts POST -> 401 (8.525871ms)
+✔ ./admin/referrals/route.ts POST -> 401 (8.555075ms)
+✔ ./admin/rush/route.ts POST -> 401 (57.425377ms)
+✔ ./admin/screening/route.ts POST -> 401 (15.500905ms)
+✔ ./admin/setup/route.ts POST -> 401 (7.344107ms)
+✔ ./applicant/buddy/route.ts POST -> 401 (9.216889ms)
+✔ ./applicant/offer/route.ts POST -> 401 (51.362569ms)
+✔ ./applicant/rsvp/route.ts POST -> 401 (8.952781ms)
+✔ ./applicant/survey/route.ts POST -> 401 (10.785418ms)
+✔ ./applicant/withdraw/route.ts POST -> 401 (11.212357ms)
+✔ ./apply/draft/route.ts GET -> 401 (14.697329ms)
+✔ ./apply/draft/route.ts POST -> 401 (12.599611ms)
+✔ ./apply/headshot/route.ts POST -> 401 (18.022366ms)
+✔ ./apply/resume/attach/route.ts POST -> 401 (11.380959ms)
+✔ ./apply/resume/cancel/route.ts POST -> 401 (9.973928ms)
+✔ ./apply/resume/finalize/route.ts POST -> 401 (302.977747ms)
+✔ ./apply/resume/route.ts GET -> 401 (10.753138ms)
+✔ ./apply/resume/start/route.ts POST -> 401 (8.140448ms)
+✔ ./apply/route.ts POST -> 401 (13.544098ms)
+✔ ./apply/status/route.ts GET -> 401 (6.396504ms)
+✔ ./checkin/[token]/route.ts POST -> 401 (4.017587ms)
+✔ ./maintenance/notifications/route.ts GET -> 401 (4.779525ms)
+✔ ./maintenance/notifications/route.ts POST -> 401 (4.218759ms)
+✔ ./maintenance/prune-resumes/route.ts GET -> 401 (3.899368ms)
+✔ ./maintenance/prune-resumes/route.ts POST -> 401 (6.081152ms)
+✔ ./maintenance/reminders/route.ts GET -> 401 (4.06802ms)
+✔ ./maintenance/reminders/route.ts POST -> 401 (4.06272ms)
+✔ ./member/buddy/route.ts POST -> 401 (4.958026ms)
+✔ ./member/conflicts/route.ts POST -> 401 (5.197418ms)
+✔ ./member/evaluations/[assignmentId]/draft/route.ts GET -> 401 (4.647392ms)
+✔ ./member/evaluations/[assignmentId]/draft/route.ts PUT -> 401 (3.062652ms)
+✔ ./member/evaluations/[assignmentId]/draft/route.ts DELETE -> 401 (3.24552ms)
+✔ ./member/evaluations/[assignmentId]/route.ts POST -> 401 (2.854236ms)
+✔ ./member/hash-votes/route.ts POST -> 401 (2.945976ms)
+✔ ./member/impressions/route.ts POST -> 401 (3.788263ms)
+✔ ./member/profile/route.ts POST -> 401 (3.421334ms)
+✔ ./member/referrals/route.ts POST -> 401 (4.253202ms)
+✔ ./member/screening/draft/route.ts GET -> 401 (4.576651ms)
+✔ ./member/screening/draft/route.ts PUT -> 401 (3.640019ms)
+✔ ./member/screening/route.ts POST -> 401 (3.764499ms)
+✔ ../admin/people/onboarding/route.ts POST -> 401 (4.030982ms)
+✔ ../applicant/onboarding/route.ts POST -> 401 (3.960962ms)
+✔ ../applicant/schedule/route.ts POST -> 401 (5.322149ms)
+✔ ../member/calibration/acknowledge/route.ts POST -> 401 (4.059504ms)
+(node:858388) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/unauthenticated-rejection.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858395) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858395) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858395) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ created migration users are reconciled through the prepared UUID ledger (41.833363ms)
+✔ deletion disables only the Clerk identity mapping (22.211861ms)
+✔ supported events require signed delivery identity and timestamp metadata (31.92673ms)
+(node:858395) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/webhooks/clerk/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858397) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858397) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858397) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858397) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+▶ dashboard next action and schedule recover from an isolated schedule RPC failure
+  ✔ failure preserves the application and shows real retry/contact controls without empty claims (11.290832ms)
+  ✔ an offer keeps priority while schedule failure remains recoverable (2.301014ms)
+  ✔ an unavailable offer deadline never implies an open window even with stale future or expired data (3.410124ms)
+  ✔ malformed deadline entries are unknown while contractual missing keys mean no deadline (28.308601ms)
+  ✔ submission banner requires the owned application and authoritative submitted state (6.095668ms)
+  ✔ a subsequent successful lookup restores genuine empty-state copy (1.67136ms)
+✔ dashboard next action and schedule recover from an isolated schedule RPC failure (548.453746ms)
+(node:858397) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/next-action-page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858406) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858406) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/next-action.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ failed schedule lookup requires recovery rather than reassuring the applicant (1.836675ms)
+✔ only a successfully loaded empty schedule gives caught-up reassurance (0.292972ms)
+✔ the earliest future booking wins over open times, ignoring past bookings (1.118187ms)
+✔ legacy single-chat bookings still produce the next confirmed action (0.147613ms)
+✔ available event and chat times are counted while full events are excluded (0.390602ms)
+(node:858419) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858419) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858419) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858419) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/onboarding/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ applicant onboarding allows only self-completable fixed items (76.132039ms)
+(node:858434) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ safeHumanLocation accepts readable places and rejects URLs and controls (2.583045ms)
+(node:858434) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/safe-location.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858438) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858438) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858438) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858438) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/schedule/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ schedule reschedule validates both slots before the RPC (106.842941ms)
+✔ schedule cancellation is rate limited before the RPC (22.737984ms)
+(node:858499) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ status refresh runs only when the page can safely request it (1.11452ms)
+✔ last-checked copy uses deterministic elapsed-minute boundaries (0.423302ms)
+(node:858499) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/applicant/status-refresh-state.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858501) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858501) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858501) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ before the open time the form matches the badge instead of saying closed (287.708982ms)
+✔ after the deadline the form still says applications are closed (50.860611ms)
+✔ move advances the step even when the draft save fails (0.468265ms)
+✔ submission does not wait for autosave and reconciles an ambiguous response (0.372488ms)
+✔ question URL validation rejects whitespace before the database does (0.236296ms)
+✔ resume selection allows browsers that omit the PDF MIME type (0.210078ms)
+(node:858501) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/apply/application-form.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858502) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ parses the allowed application draft and preserves its exact step (2.744694ms)
+✔ defaults legacy drafts to details but rejects unknown, oversized, or unsafe fields (0.499384ms)
+✔ step recovery is scoped and clearable (0.4433ms)
+✔ revision boundaries reject legacy acknowledgements, missing preconditions and malformed snapshots (8.365474ms)
+(node:858502) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/apply/application-server-draft.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+intake_schema returned an unusable payload
+(node:858518) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858518) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858518) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858518) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+✔ a signed-in applicant before opens_at sees the countdown, not a closed badge (202.461401ms)
+✔ a signed-in applicant with unavailable opening dates is not told the deadline passed (34.300599ms)
+✔ an intake schema missing its open flag is unavailable rather than closed (20.87483ms)
+(node:858518) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/apply/page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858534) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858534) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858534) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858534) DeprecationWarning: mock.module(): options.defaultExport is deprecated. Use options.exports.default instead.
+✔ configured login renders the Clerk flow with visible provider identity (177.15481ms)
+(node:858534) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/login/page.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858538) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ evaluation task links identify and target the exact assignment (0.953292ms)
+✔ evaluation task links preserve the active round queue (0.153113ms)
+✔ a requested eligible assignment is selected instead of the first assignment (0.249111ms)
+✔ an unknown assignment cannot open work outside the eligible list (0.109893ms)
+(node:858538) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/assignment-navigation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858545) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858545) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858545) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ calibration acknowledgement requires authentication (29.455812ms)
+✔ calibration acknowledgement validates bounded identifiers (23.86116ms)
+✔ calibration acknowledgement delegates ownership and active-rubric checks to the RPC (23.832397ms)
+(node:858545) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/calibration/acknowledge/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858559) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ a not-yet-deployed calibration RPC cannot interrupt My Work (3.4349ms)
+✔ unrelated calibration failures remain visible (0.983047ms)
+(node:858559) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/calibration/load.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858560) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ accepts partial private screening drafts (1.545577ms)
+✔ rejects duplicate criteria, invalid scores, and overlong evidence (0.245314ms)
+✔ validates reviewer-only progress and formats its deadline (18.063182ms)
+(node:858560) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/screening/screening-draft.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858573) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ screeningReviewBlocker requires an evidence note for ratings 1 and 5 only (2.968197ms)
+✔ screeningReviewBlocker permits extreme ratings when their evidence note is present (0.196514ms)
+✔ screeningRecommendationWarning flags recommendations that run against the ratings (0.282372ms)
+(node:858573) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/screening/screening-review-readiness.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858581) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858581) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858581) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ robots permits public crawling and excludes account and token-bearing routes (1.059639ms)
+✔ sitemap includes only public routes and the approved project loader's slugs (18.244337ms)
+(node:858581) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/seo-routes.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858591) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ the server render before opens_at never claims applications are open (6.098934ms)
+✔ the server render holds placeholder digits until the client clock arrives (0.779972ms)
+(node:858591) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/components/application-countdown.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858607) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ readJsonBody parses JSON split across UTF-8 byte boundaries and releases the stream (37.236987ms)
+✔ readJsonBody rejects an interrupted stream even after receiving valid JSON (1.484084ms)
+✔ readJsonBody rejects an already locked body without stealing its reader (2.096586ms)
+✔ readJsonBody enforces actual byte size despite a smaller declared length (0.931262ms)
+✔ requestReference accepts a safe upstream request id and rejects log injection (0.678364ms)
+✔ routeJsonResponse correlates public errors with privacy-safe operational logs (2.489001ms)
+✔ rateLimitRouteResponse distinguishes an exhausted limit from limiter unavailability (1.397182ms)
+✔ mapRpcErrorVerbose surfaces the Postgres message only for the operator-facing codes (0.421238ms)
+(node:858607) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/api-route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858619) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ applicant code is deterministic and formatted like a candidate code (2.716071ms)
+✔ applicant code differs across applications and never contains the id (0.268206ms)
+(node:858619) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/applicant-code.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858634) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858634) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/application-draft-recovery.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ restores safe draft fields for the same user, cycle, and schema (16.430373ms)
+✔ never serializes a resume path or consent (7.48671ms)
+✔ rejects and removes malformed recovery data (6.604178ms)
+✔ rejects stale, future, wrong-user, wrong-cycle, and wrong-schema snapshots (0.743234ms)
+✔ rejects oversized snapshots without writing them (0.393458ms)
+✔ clear removes a saved recovery snapshot (0.277954ms)
+application receipt sweep delivery failed {
+  notificationId: 'stale-1',
+  error: Error: provider down
+      at deliverNotification (file:///home/rahil/mecg-website/src/lib/application-receipt-delivery.test.ts:22:35)
+      at file:///home/rahil/mecg-website/src/lib/application-receipt-delivery.ts?case=durable.tsx:49:17
+      at async TestContext.<anonymous> (file:///home/rahil/mecg-website/src/lib/application-receipt-delivery.test.ts:30:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+}
+application receipt sweep lookup failed { message: 'boom' }
+(node:858639) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858639) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858639) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858639) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/application-receipt-delivery.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ durable application receipts get an immediate post-response delivery attempt (59.188947ms)
+✔ a sweep lookup failure does not block the receipt (19.528631ms)
+✔ old-database compatibility sends and logs one idempotent direct receipt (21.457076ms)
+(node:858657) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858657) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/auth-destination.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ internal roles route to their workspaces (1.226547ms)
+✔ closed-cycle committee membership does not grant workspace access (0.169343ms)
+✔ applicants route according to submission state (0.129199ms)
+✔ internal access takes priority over applicant history (0.133196ms)
+✔ inactive profiles cannot enter a workspace (0.11353ms)
+✔ a past applicant may start an application in a new open cycle (1.959993ms)
+✔ a first-time applicant with an open cycle goes to apply (0.152813ms)
+✔ a past applicant with no new open cycle keeps their status page (0.128007ms)
+✔ an applicant already in the open cycle stays on their status page (0.17311ms)
+✔ internal roles outrank an open cycle (0.507899ms)
+✔ inactive profiles are denied even with an open cycle (0.147673ms)
+(node:858660) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858660) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/authorization.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ roles receive only their explicit permissions (1.101326ms)
+✔ unknown roles and permissions fail closed (0.159686ms)
+✔ permissions are cycle-scoped and ignore inactive memberships (0.112207ms)
+✔ committee access ends when its cycle closes (0.171336ms)
+✔ closed cycles preserve board and owner recruitment operations (0.131573ms)
+✔ only a bare PANEL membership is treated as panel-only for blind Hash review (0.119811ms)
+(node:858663) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ matches the Clerk production password length policy (0.700174ms)
+(node:858663) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/clerk-password.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858675) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858675) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/clerk-retry.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Clerk signup retry waits for Retry-After with bounded jitter (1.40661ms)
+✔ verification errors without Retry-After are not replayed (0.274687ms)
+✔ new Clerk hook errors expose rate-limit metadata through their cause (0.172919ms)
+(node:858676) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ fetchWithTimeout returns a response and clears its deadline (36.900034ms)
+✔ fetchWithTimeout aborts a request that does not settle (7.087913ms)
+✔ submission reconciliation polls through stale draft status until committed (2.693679ms)
+✔ submission reconciliation keeps a non-committed result ambiguous (1.093331ms)
+✔ submission reconciliation rejects malformed or other-cycle receipts (0.965405ms)
+(node:858676) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/client-fetch.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ JSON request deadline covers a response body that never completes (6.619427ms)
+✔ authorizedFetch retries once with a refreshed session after a 401 (0.493532ms)
+✔ authorizedFetch leaves non-401 responses alone (0.196814ms)
+✔ authorizedFetch reports an expired sign-in when the retry is refused too (1.227439ms)
+✔ refreshSessionToken is a no-op without a Clerk session and bounded with one (5.513683ms)
+✔ retryOnNetworkError retries thrown errors with the given delays and then gives up (0.510674ms)
+✔ retryOnNetworkError stops when the action is superseded (0.17312ms)
+✔ refreshSessionToken shares one in-flight token request (1000.34207ms)
+(node:858699) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ contact receipt field errors allow only named string messages (1.564612ms)
+✔ contact validation measures trimmed content consistently (0.40564ms)
+(node:858699) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/contact-validation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858739) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ cron authorization accepts only the exact bearer secret (24.337721ms)
+(node:858739) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/cron-auth.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858753) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858753) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/cycles.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ cycle selection chooses the highest-priority authorized cycle (1.004777ms)
+✔ cycle selection never lets a newer draft hide a live cycle (0.193458ms)
+✔ cycle selection uses recency only to break a status tie (0.242368ms)
+✔ an explicitly requested unauthorized cycle is rejected (0.099274ms)
+(node:858757) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858757) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/date-time.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ formats winter and summer instants in Detroit time (0.911325ms)
+✔ supports a full date and fails safely for malformed values (0.151741ms)
+✔ strictly parses complete RFC 3339 date-times (0.742603ms)
+✔ rejects abbreviated, offset-less, and impossible date-times (0.137404ms)
+(node:858760) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ preflight distinguishes locked eligibility and preserves exact outcomes/reasons in snapshot (1.794317ms)
+✔ malformed, duplicate and unrecognized reason responses cannot become eligible outcomes (0.266383ms)
+✔ report rejects fabricated or inconsistent aggregate success counts (0.230817ms)
+✔ client release display consumes server pseudonyms and rejects missing/untrusted labels (0.309823ms)
+✔ release client boundary never imports Node crypto or the server hashing helper (9.006189ms)
+(node:858760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/decision-release.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858770) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ Supabase env prefers trimmed nonblank MECG values and falls back (1.712115ms)
+✔ required public and admin configuration throws when blank (0.525512ms)
+✔ Clerk runtime configuration requires keys and the trusted issuer (0.262014ms)
+(node:858770) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/env.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858780) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ round-trips scores, criterion notes, and overall evidence (1.715892ms)
+✔ rejects malformed, stale, future-dated, wrong-assignment, and wrong-rubric snapshots (0.47102ms)
+✔ rejects duplicate, unknown, missing, and invalid criterion values (0.266082ms)
+✔ rejects oversized snapshots and overlong fields (1.429853ms)
+✔ clear removes a stored draft (0.133006ms)
+(node:858780) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation-draft-recovery.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858792) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ readiness separates explicit not observed from unanswered and malformed ratings (1.026347ms)
+✔ readiness honors the rubric minimum even when observed weight exceeds 75% (0.264789ms)
+✔ readiness explains required observations even with sufficient count and weight (0.186685ms)
+✔ readiness requires nonblank evidence for interview ratings 1, 2, and 5 (0.835194ms)
+✔ readiness rejects empty rubrics and ignores scores outside the active rubric (2.242105ms)
+✔ readiness matches existing scoring validity for every completed three-criterion rubric (13.298153ms)
+(node:858792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation-readiness.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858799) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ only an accepted submission with an evaluation receipt permits draft cleanup (1.146289ms)
+(node:858799) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation-submission.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ all conflict responses retain work, including ambiguous retry and closed-assignment failures (0.175224ms)
+✔ failed authorization, validation, and service responses never become receipts (0.160287ms)
+(node:858806) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858806) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/evaluation.test.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ scoreEvaluation converts anchored ratings to a weighted 0-100 score (1.583477ms)
+✔ scoreEvaluation rejects missing required criteria and low coverage (0.189861ms)
+✔ scoreEvaluation enforces observed criterion count independently of weight (0.27624ms)
+✔ scoreEvaluation uses the rubric's explicit observed criterion minimum (0.141071ms)
+✔ aggregateRound keeps a single evaluation pending and flags wide disagreement (0.33027ms)
+✔ combineRoundScores requires every configured round (0.176006ms)
+✔ aggregateRound treats a 25-point spread as disagreement and nothing narrower (2.504089ms)
+✔ combineRoundScores ignores weight-0 rounds such as blind screening (0.200079ms)
+(node:858818) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ Group Case backup validation rejects unsafe or duplicate criterion keys (1.083533ms)
+✔ Group Case CSV includes blank rating cells and Excel-safe text (0.668105ms)
+✔ Group Case workbook is a valid ZIP-shaped XLSX containing the five recovery sheets (9.737471ms)
+(node:858818) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/group-case-export.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858824) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ accepts explicit saved-versus-valid evidence contract (1.048629ms)
+✔ rejects historical shallow payloads without completeness evidence (0.195681ms)
+✔ rejects partial evaluations carrying a full-scale grade (0.143175ms)
+✔ rejects complete labels without two valid evaluators or a mean (0.253258ms)
+✔ does not call notes complete and names each missing prerequisite (0.350888ms)
+✔ reaching two valid evaluators preserves the remaining decision checks (1.693671ms)
+✔ rejects a complete count manufactured from invalid or duplicate evidence (0.145769ms)
+(node:858824) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/group-case-results.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858843) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ a tally below quorum is pending no matter how the votes lean (1.037969ms)
+✔ a tally exactly at quorum counts (0.22671ms)
+✔ a pass is 60% yes of everyone who voted; a tie is nowhere near (0.198607ms)
+✔ unsure counts toward quorum and against the yes share (0.188638ms)
+✔ an all-unsure tally at quorum rejects (0.130752ms)
+✔ an open stage wins, decision lock means the final vote, anything else is closed (0.169012ms)
+✔ the application hash is a board and committee vote; later stages open to every member (0.199228ms)
+(node:858843) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/hash-tally.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858852) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ headshot upload reports a clear timeout (54.339333ms)
+✔ headshot upload preserves server error messages (15.060641ms)
+(node:858852) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/headshot-upload.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858861) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858861) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858861) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858861) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/identity/clerk-server.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a multi-row profiles response no longer throws for a mapped identity (50.82205ms)
+✔ a migrated user claims only the UUID assigned in Clerk externalId (36.536001ms)
+✔ a new applicant with no ledger row still provisions a fresh identity (18.013841ms)
+✔ a malformed externalId cannot claim a legacy profile (16.3422ms)
+✔ an unverified primary email cannot provision an identity (16.326351ms)
+(node:858863) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ initials takes the first two words' first letters, uppercased (1.13609ms)
+✔ initials ignores extra whitespace and empty input (0.191654ms)
+(node:858863) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/initials.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858872) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ JSON-LD serialization cannot terminate its script element (1.266832ms)
+(node:858872) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/json-ld.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858878) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ every IOE spelling collapses to one label (0.954715ms)
+✔ casing does not split a major (0.135371ms)
+✔ a dual-degree parenthetical collapses to the base major (0.11387ms)
+✔ an unknown major passes through as the applicant wrote it (0.0973ms)
+✔ empty and whitespace-only input return nothing (0.095898ms)
+(node:858878) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/major.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858879) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858879) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858879) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858879) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/notifications.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ deliverNotification uses the stable idempotency key and completes a successful attempt (41.908382ms)
+✔ deliverNotification sends a durable application receipt (19.002488ms)
+✔ deliverNotification records a retryable provider failure as pending (26.102223ms)
+✔ deliverNotification does not send when an item is not due (21.148435ms)
+✔ deliverNotification sends an event cancellation with its stable per-applicant key (24.919356ms)
+✔ deliverNotification sends a Speed Dating invitation with escaped round details (8.756427ms)
+✔ deliverNotification sends an evaluator assignment to the Speed Dating workspace (8.064898ms)
+✔ deliverNotification rejects a malformed new-template timestamp before sending (6.195713ms)
+(node:858886) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ operationalLog writes one structured record (3.647092ms)
+✔ operationalLog removes line breaks and bounds metadata (0.612101ms)
+(node:858886) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/operational-log.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858911) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858911) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858911) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ accepts a parsed PDF and records stable metadata (56.673057ms)
+✔ uses the parsed page tree instead of text markers (2.646863ms)
+✔ rejects renamed non-PDF files (0.746149ms)
+✔ rejects truncated, encrypted, and active PDFs (0.282542ms)
+✔ accepts a destination-only OpenAction (1.364963ms)
+✔ rejects a JavaScript OpenAction (0.127296ms)
+✔ does not mistake compressed image data for active content (384.755051ms)
+✔ rejects oversized and overlong resumes (1.285757ms)
+✔ destroys the PDF loading task when parsing times out (11.258062ms)
+(node:858911) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/pdf-validation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858919) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858919) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858919) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ creation transport, timeout and server failures require reconciliation (2.925879ms)
+✔ definitive creation client rejections can be corrected without an orphan claim (0.203536ms)
+✔ incident persistence never leaks identity or raw errors to logs and responses (12.088536ms)
+(node:858919) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/provisioning-incident.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858933) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858933) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858933) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ recruitment action sends visitors to an open application (6.579513ms)
+✔ recruitment action never advertises a future application as open (0.319601ms)
+✔ recruitment action supports an on-page update path while applications are inactive (0.221199ms)
+✔ public recruitment distinguishes an available empty cycle from missing data (2.244429ms)
+✔ public recruitment validates dates and permits only public event fields (1.723236ms)
+✔ failed public recruitment RPC preserves an explicit unavailable outcome (16.578958ms)
+(node:858933) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/public-recruitment.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858935) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858935) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:858935) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+(node:858935) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/rate-limit.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ checkRateLimitStatus reports allowed and limited decisions (38.775541ms)
+✔ checkRateLimitStatus preserves limiter outages as unavailable (6.840305ms)
+✔ legacy boolean limiter wrapper retains explicit fail-open policy (7.976094ms)
+✔ an empty limiter response is an outage rather than an exhausted bucket (6.436338ms)
+✔ a rejected limiter RPC preserves fail-closed and explicit fail-open policies (10.144894ms)
+✔ limiter client setup failures return unavailable (16.419143ms)
+(node:858954) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:858954) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/recovery-marker.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a freshly issued marker verifies for its own user (1.592795ms)
+✔ a marker is worthless without one of its three inputs (0.457165ms)
+✔ an expired marker is rejected (0.177749ms)
+✔ a missing or malformed marker is rejected, never thrown on (0.168702ms)
+✔ a tampered signature is rejected (0.229945ms)
+(node:858972) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ accepts PDFs when the browser leaves the MIME type empty (1.539896ms)
+✔ signed resume upload sends Supabase multipart form data and finalizes (38.600347ms)
+✔ replacement attaches the finalized resume (2.701394ms)
+✔ an upload failure cancels the pending document (1.390941ms)
+✔ a transient finalize failure is retried without cancelling the uploaded document (1.064067ms)
+✔ an attach failure preserves the finalized document (0.876891ms)
+(node:858972) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/resume-upload.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ reports the upload phase that timed out and cancels its pending document (8.439ms)
+▶ uses clear timeout errors for start, verification, and attachment
+  ✔ start (5.450536ms)
+  ✔ finalize (12.660775ms)
+  ✔ attach (7.212233ms)
+✔ uses clear timeout errors for start, verification, and attachment (26.861526ms)
+(node:858974) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ round close boundary retains submitted versus valid counts (1.245323ms)
+✔ round close boundary accepts an explicitly empty cohort (0.233521ms)
+✔ round close boundary refuses missing, invalid and contradictory counts (0.342303ms)
+(node:858974) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/round-close-summary.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858980) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ two independent valid locked evaluations establish evidence but not decision authority (1.759844ms)
+✔ multiple versions and duplicate rows from one evaluator cannot manufacture independence (0.229935ms)
+✔ voided and superseded rows never count as valid locked evaluations (0.133206ms)
+✔ a newer draft cannot fall back to an older submitted version (0.121113ms)
+✔ a rubric minimum remains independent of meeting 75 percent weighted coverage (1.652034ms)
+✔ a missing required criterion and note-only save remain pending (0.255382ms)
+✔ submitted valid evidence can score but cannot count as locked evidence (0.226108ms)
+✔ mismatched rounds and rubric versions do not count (0.174973ms)
+(node:858980) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/round-evidence.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:858988) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ starsFromScore maps the 0..100 round score back onto 1..5 stars (1.877511ms)
+✔ speed dating labels and anchors cover scores 1 through 5 (1.745868ms)
+✔ groupCaseTotal rescales weighted stars onto the guide's 6..40 range (0.371416ms)
+(node:858988) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/rubrics.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859021) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ runAction returns the parsed body on a 2xx response (40.163587ms)
+✔ runAction surfaces the server's error message on a non-2xx response (0.917185ms)
+✔ runAction falls back to the caller's message when the network call throws (0.341802ms)
+✔ runAction falls back to the caller's message when a non-2xx response has no error field (0.776005ms)
+(node:859021) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/run-action.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859031) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ a missing function or column reads as not-yet-migrated (0.848559ms)
+✔ a real failure is never mistaken for a missing object (0.447648ms)
+✔ no error is not a missing object (0.30842ms)
+(node:859031) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/schema-availability.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859055) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ screeningRpc accepts a valid registered RPC response (1.505292ms)
+✔ screeningRpc accepts a complete workspace context (0.359424ms)
+✔ screeningRpc rejects a malformed workspace count (0.201111ms)
+✔ screeningRpc rejects a malformed registered RPC response (0.222812ms)
+✔ screeningRpc validates nested screening detail fields (0.207624ms)
+✔ screeningRpc preserves database errors without shape validation (0.110956ms)
+✔ screeningRpc leaves unconsumed mutation results unchanged (0.121264ms)
+(node:859055) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/screening-rpc.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859068) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ screening distribution gives every packet three distinct balanced reviewers (11.237364ms)
+✔ screening distribution excludes conflicts and reports impossible coverage (1.269807ms)
+✔ screening distribution is reproducible for the same seed (0.729048ms)
+✔ screening distribution respects a low reviewer capacity without overloading peers unnecessarily (0.362069ms)
+✔ screening distribution reports a shortage when reviewers cannot cover the required reviews (0.266773ms)
+(node:859068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/screening.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859072) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ private routes default to noindex and marketing explicitly opts in (1.717915ms)
+✔ every non-home marketing route supplies a complete page-specific social card (1.202353ms)
+✔ case study canonical and social image identify the same approved project (3.612939ms)
+✔ structured data uses canonical breadcrumbs and safely preserves approved text (0.420247ms)
+✔ colocated metadata files own generated image URLs when requested (0.146471ms)
+(node:859072) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/seo.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859079) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ isSpeedDatingRoster accepts the RPC shape (0.910113ms)
+✔ isSpeedDatingRoster rejects malformed applicants and statuses (0.196463ms)
+✔ matchesApplicantName ignores diacritics and case, and matches everyone on an empty query (0.278064ms)
+✔ matchesNote is a case-insensitive includes that never matches an empty query (0.120803ms)
+✔ compareResults keeps ungraded rows last and nulls after values in either direction (0.848649ms)
+(node:859079) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/speed-dating-roster.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859087) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:859087) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:859087) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ session cookie options are httpOnly (0.823042ms)
+✔ refreshSupabaseSession wires cookieOptions into createServerClient (10.146688ms)
+(node:859087) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/supabase/cookie-options.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859088) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:859088) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:859088) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ createClient skips auth() when Clerk is unconfigured (85.903442ms)
+(node:859088) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/supabase/server.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859095) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:859095) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/supabase/timeout.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a query with no signal of its own still gets a deadline (21.09687ms)
+✔ an explicit abortSignal is not clobbered: either source aborts the query (22.413754ms)
+(node:859103) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ word counts match the application limit definition (1.116604ms)
+✔ application field limits are the parser contract (0.427941ms)
+✔ cycle transitions move forward one state and allow idempotent writes (0.147223ms)
+✔ round transitions cannot skip or reopen states (0.10798ms)
+✔ a finalized round can be archived, matching rush.set_round_status (0.155577ms)
+✔ application transitions expose only legal manual next statuses (0.694374ms)
+✔ pipeline status excludes application drafts (0.151369ms)
+✔ criterion submission requires each expected criterion exactly once (0.156399ms)
+✔ person input is normalized and bounded (0.23258ms)
+✔ application intake requires consent, profile fields, and a resume path (0.625927ms)
+✔ application intake accepts only http and https LinkedIn URLs (0.30799ms)
+✔ application intake rejects invalid or oversized answer maps (0.408745ms)
+✔ application drafts restore safe fields and ignore malformed values (0.331042ms)
+✔ application drafts truncate answer count, item length, and total length (0.340089ms)
+✔ uniqname accepts what the database accepts (0.134589ms)
+✔ uniqname rejects what the database rejects, before the applicant submits (0.143455ms)
+✔ phone matches submit_application: blank, or 7 to 32 characters (0.814356ms)
+✔ linkedin matches submit_application, including the whitespace the URL parser hid (0.157672ms)
+(node:859103) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/workflow.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859142) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:859142) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:859142) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ a deployment with the previous database schema still loads member work (26.293947ms)
+✔ real workspace context failures remain visible (4.926296ms)
+(node:859142) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/workspace-context.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:859151) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ live member tools expose screening, voting, and event tasks with the open count (1.545367ms)
+✔ Speed Dating appears for an eligible member without screening access (0.264048ms)
+✔ recruitment operators can discover activity without receiving Board tools (0.144948ms)
+✔ owners receive every administrative destination (0.103471ms)
+✔ the secondary navigation trigger names the current destination (0.218464ms)
+(node:859151) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/workspace-navigation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+api 401 /api/member/profile no-session
+api 401 /api/applicant/buddy no-session
+api 401 /api/apply/resume/start no-session
+api 401 /api/member/profile no-session
+(node:859162) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:859162) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:859162) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ Clerk proxy preserves public, protected-page, protected-API, and signed-in behavior (16.730348ms)
+✔ the proxy matcher skips static assets without skipping dotted app routes (4.528962ms)
+✔ proxy bypasses Clerk only for routes that never read the session (4.910066ms)
+(node:859162) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/proxy.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 699
+ℹ suites 0
+ℹ pass 699
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2924.183177

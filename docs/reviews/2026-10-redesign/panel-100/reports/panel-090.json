@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-090",
+  "lens": "Recruitment operator \u2014 overall coherence (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition and supplied desktop hero show a disciplined Precision Instrument identity, two clear audience actions and honest pending case-study proof. Join explains eligibility, preparation and recruitment stages; application materials accurately disclose original-resume access. I traced the operator journey through round workload, coverage, results, deliberate grading closure and reviewed batch release. Closure explains its irreversible consequence, separates submitted from valid evidence, and handles unavailable counts. Release provides exact outcomes, blocker-specific instructions, dossier links and separate email-delivery status. However, the attention board still calls invalid submitted work Complete, undermining coherence at a consequential operational decision. Correct that before release. Source and supplied local tests support these conclusions; they are not observed operator success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/cycles.ts",
+    "src/app/apply/application-form.tsx:MaterialsStep/ReviewStep",
+    "src/app/admin/rounds/page.tsx",
+    "src/app/admin/rounds/[roundId]/page.tsx",
+    "src/app/admin/round-board.tsx",
+    "src/app/admin/group-case-coverage.ts",
+    "src/app/admin/group-case-results.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/decision-release.ts",
+    "src/app/api/admin/decisions/route.ts",
+    "src/app/api/admin/decisions/route.test.ts:release tests",
+    "supabase/tests/round_close_summary.sql",
+    "supabase/tests/batch_release_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-privacy-db-final.log",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/round-board.tsx:143-145,269-315",
+      "evidence": "The Who still needs attention section derives coverage solely from assignment.status (143-145) and labels SUBMITTED as Complete (314-315). groupCaseCoverageState in src/app/admin/group-case-coverage.ts:16-25 considers two SUBMITTED/LOCKED assignments complete without validating their observations. supabase/tests/round_close_summary.sql:55-59,78-84,98-101 supplies precisely two submitted Group Case assignments with partial ratings and asserts zero valid evaluations and one incomplete applicant. The results section separately explains valid completion at round-board.tsx:349-352.",
+      "userImpact": "An operator can see Complete for an applicant still missing both valid evaluations, deprioritize necessary grading, and encounter a contradictory incomplete count when closing or a blocked release afterward. The close dialog mitigates accidental closure but does not identify the affected applicants.",
+      "suggestedFix": "Derive applicant readiness and attention ordering from canonical valid independent evaluation counts. Keep assignment progress separate and label it explicitly as submitted forms. Add a focused regression using the supplied two-partial-submissions fixture: the attention row must remain incomplete while results and close counts agree."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployment, hosted Clerk/Supabase/RLS/storage/email integration or real operator study exists. No claim of successful authenticated cohort management follows from this review.",
+    "The 18 passing operator browser checks use intercepted APIs and a synthetic harness; the 709-assertion database log concerns isolated PostgreSQL. Their passing results do not establish production behavior.",
+    "Only the supplied public hero and synthetic mobile close dialog were visually inspected; the complete authenticated round/results/release journey was reviewed in source, not exercised live.",
+    "Physical devices, Safari, Firefox and assistive-technology operation remain unverified. Client publication approvals, resume-policy reconciliation and hosted migration rollout remain external dependencies."
+  ]
+}

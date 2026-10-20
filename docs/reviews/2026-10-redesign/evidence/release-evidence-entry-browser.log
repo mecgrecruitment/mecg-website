@@ -1,0 +1,10 @@
+
+Running 5 tests using 2 workers
+
+  ✓  2 [mobile-chromium] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (615ms)
+  ✓  1 [chromium] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (635ms)
+  ✓  3 [firefox] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (2.0s)
+  ✓  4 [webkit] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (2.2s)
+  ✓  5 [mobile-webkit] › tests/e2e/release-evidence.spec.ts:31:5 › blocked release review links directly to the matching applicant evidence and selected cohort (577ms)
+
+  5 passed (5.7s)

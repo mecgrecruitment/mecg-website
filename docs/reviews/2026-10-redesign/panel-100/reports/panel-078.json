@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-078",
+  "lens": "Member evaluator \u2014 factual comprehension (simulated AI user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is understandable and the mobile capture coherently applies Precision Instrument. Original-resume access is accurately disclosed to applicants. Source-tracing My work through calibration, observation entry, review and submission shows strong standard-form guidance: explicit not observed, weighted readiness, final review and receipt-dependent confirmation. However, the dedicated Group Case journey prevents note-only saving and does not tell members whether saved observations qualify as valid evidence. These materially weaken the focal task despite correct downstream database distinctions. This is independent source/test and supplied-capture assessment, not observed user success or live integration acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx (materials and review disclosures)",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/member/page.tsx (assignment routing/calibration)",
+    "src/app/member/calibration/[roundId]/page.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/app/member/evaluation-form.tsx (submission and rendered controls)",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (quality, inline save, results/readiness excerpts)",
+    "supabase/tests/grading_contract_consistency.sql (note-only and validity assertions)",
+    "evidence/mecg-privacy-final-node.log (relevant passing checks)",
+    "evidence/mecg-privacy-db-final.log",
+    "captures/mobile-hero.png",
+    "captures/round-close-desktop.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:195-210",
+      "evidence": "editNote returns with \u201cPick a star to save\u201d when countScored is zero; flushNote likewise saves only when countScored > 0. addFlag uses editNote (213-217). Calibration says leave unobserved dimensions blank and record flags. The SQL rate_group_case_applicant permits a nonempty note with zero scores (migration lines 268-270); grading_contract_consistency.sql explicitly verifies note-only evidence remains saved but invalid.",
+      "userImpact": "A member with a factual observation or flag but insufficient evidence to rate a dimension must leave the note unsaved or invent a rating. Navigating away loses that note.",
+      "suggestedFix": "Save nonempty notes with null scores, preserve their partial status, and show a confirmed save receipt without requiring a star."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:223,332-355",
+      "evidence": "The member sees \u201cStarted grading\u201d, \u201cSaved\u201d, and a dimension count. Neither this roster nor its rubric dialog exposes the active minimum, observed-weight threshold or missing required criteria. GroupCaseRoster lacks minimumObserved/quality fields. In contrast, evaluation_observation_quality in migration 20261016191000 lines 5-33 requires 75% weight, minimum observations and required criteria; the supplied operator capture distinguishes submitted from valid evaluations.",
+      "userImpact": "Members cannot verify whether their saved work counts toward valid independent evidence, or identify what remains needed before grading closes.",
+      "suggestedFix": "Return authoritative per-member quality and active rubric requirements; label saved partial versus valid evidence and explain unmet requirements while retaining honest unknown observations."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or human study exists; Clerk sessions, real RPC/RLS authorization, storage and email were not exercised by this review.",
+    "No live authenticated member screenshots or observed task completion were available. The operator modal capture is a synthetic harness, not live recruitment data.",
+    "Local SQL and Node logs support isolated contracts, not user comprehension. Physical devices, Safari/Firefox, assistive technology and formal accessibility conformance remain unverified.",
+    "Client-approved project outcomes/artifacts remain absent; organizational claims were inspected as supplied product content, not independently authenticated."
+  ]
+}

@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3100);
 const baseURL = `http://127.0.0.1:${port}`;
+const crossBrowserEnabled = process.env.PLAYWRIGHT_CROSS_BROWSER === "1";
 const clerkE2EEnabled = process.env.CLERK_E2E_ENABLED === "1";
 
 export default defineConfig({
@@ -25,6 +26,11 @@ export default defineConfig({
       testIgnore: ["**/clerk.setup.ts", "**/authenticated-clerk.spec.ts"],
       use: { ...devices["Pixel 7"] },
     },
+    ...(crossBrowserEnabled ? [
+      { name: "firefox", testIgnore: ["**/clerk.setup.ts", "**/authenticated-clerk.spec.ts"], use: { ...devices["Desktop Firefox"] } },
+      { name: "webkit", testIgnore: ["**/clerk.setup.ts", "**/authenticated-clerk.spec.ts"], use: { ...devices["Desktop Safari"] } },
+      { name: "mobile-webkit", testIgnore: ["**/clerk.setup.ts", "**/authenticated-clerk.spec.ts"], use: { ...devices["iPhone 13"] } },
+    ] : []),
     ...(clerkE2EEnabled ? [
       { name: "clerk-setup", testMatch: /clerk\.setup\.ts/ },
       {

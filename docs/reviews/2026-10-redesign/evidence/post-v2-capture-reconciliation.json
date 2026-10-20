@@ -1,0 +1,29 @@
+{
+  "reviewSnapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "scope": "Supplemental after freeze; not added to V2 voting package and does not update votes",
+  "sourceChecks": [
+    {
+      "path": "src/app/apply/application-form.tsx",
+      "currentSHA256": "7e161981d2896f350955e5c7a20b1a66b185297186744cabae7f3703a18b6d73",
+      "frozenSHA256": "7e161981d2896f350955e5c7a20b1a66b185297186744cabae7f3703a18b6d73",
+      "identical": true
+    },
+    {
+      "path": "src/app/apply/application-recovery-review.tsx",
+      "currentSHA256": "51ecc8a87fc5c034bc1e05d32841db5374d95ffdb76f68886db8864ba2feb9c2",
+      "frozenSHA256": "51ecc8a87fc5c034bc1e05d32841db5374d95ffdb76f68886db8864ba2feb9c2",
+      "identical": true
+    },
+    {
+      "path": "tests/e2e/application-combine.spec.ts",
+      "currentSHA256": "b0fad2ef8567dac2cbeef8a505266192a1564a7b30ddb771073566a95c77a654",
+      "frozenSHA256": "b0fad2ef8567dac2cbeef8a505266192a1564a7b30ddb771073566a95c77a654",
+      "identical": true
+    }
+  ],
+  "frozenOldCaptureSHA256": "d8475d8a33100f0782478328c4ef1cec6b7bf60c765a5fe3ae71f776e5a1fb75",
+  "freshCapture": ".audit/v2-capture-reconciliation/application-combine-stale--bb943-wers-without-an-early-write-mobile-chromium/mixed-application-copies.png",
+  "freshCaptureSHA256": "c9063c91daf9ac5bc34959e9074b2b9630c22fd31c0933f6682d16fdf529e15c",
+  "testResult": "1/1 mobile Chromium existing recovery combination/export scenario passed",
+  "visualInspection": "Combined choice orange primary; both whole-copy choices secondary; long text and grouping unchanged"
+}

@@ -83,7 +83,7 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false, 
           ? <img src={state.url} alt="" className="mx-auto size-20 rounded-full object-cover shadow-sm" />
           : <span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">☺</span>}
         <span className="mt-4 block font-semibold">{state.kind === "working" ? "Uploading photo..." : uploaded ? "Replace your photo" : "Upload a photo of yourself (required)"}</span>
-        <span id="headshot-guidance" className="mt-1 block text-sm text-mecg-navy/65">A clear photo of your face. Taken with your phone is fine. It is never shown in anonymous review.</span>
+        <span id="headshot-guidance" className="mt-1 block text-sm text-mecg-navy/65">A clear photo of your face. Taken with your phone is fine. Your uploaded photo is not included in the first-pass written-response packet.</span>
         {state.kind === "done" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ Photo uploaded · {state.note}</span>}
       </label>
       {state.kind === "working" && <p className="mt-2 text-sm text-mecg-navy/65" role="status" aria-live="polite">Resizing and uploading your photo...</p>}

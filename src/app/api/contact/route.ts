@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { contactErrors } from "@/lib/contact-validation";
 import { readJsonBody } from "@/lib/api-route";
-import { escapeHtml, sendEmail, wrapEmail } from "@/lib/email";
-import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+import { escapeHtml, sendEmailDetailed, wrapEmail } from "@/lib/email";
+import { checkRateLimitStatus, clientIp } from "@/lib/rate-limit";
 
 const MAX_BODY_BYTES = 16 * 1024;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 
 function textField(body: Record<string, unknown>, name: string) {
   return typeof body[name] === "string" ? body[name].trim() : "";
@@ -25,18 +26,23 @@ export async function POST(request: NextRequest) {
   const subject = textField(body, "subject");
   const message = textField(body, "message");
 
-  const invalid = name.length < 1 || name.length > 100
-    || email.length > 254 || !EMAIL_PATTERN.test(email)
-    || subject.length < 1 || subject.length > 150 || /[\r\n]/.test(subject)
-    || message.length < 10 || message.length > 5000;
-  if (invalid) return NextResponse.json({ error: "Check the form fields and try again" }, { status: 400 });
+  const fields = contactErrors({ name, email, subject, message });
+  if (Object.keys(fields).length) return NextResponse.json({ error: "Check the highlighted fields and try again.", fields }, { status: 400 });
+
+  const requestId = textField(body, "requestId");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) {
+    return NextResponse.json({ error: "Reload this page before sending your message. Keep a copy of your answers." }, { status: 400 });
+  }
 
   const ip = clientIp(request);
-  if (!(await checkRateLimit(`contact:${ip}`))) {
+  const rateLimit = await checkRateLimitStatus(`contact:${ip}`);
+  if (rateLimit === "unavailable") return NextResponse.json({ error: "Message delivery is temporarily unavailable. Your answers are still here; try later or email mecg-board@umich.edu." }, { status: 503 });
+  if (rateLimit === "limited") {
     return NextResponse.json({ error: "Too many messages. Try again later." }, { status: 429 });
   }
 
-  const delivered = await sendEmail({
+  const delivery = await sendEmailDetailed({
+    idempotencyKey: `contact/${requestId}`,
     to: process.env.CONTACT_TO_EMAIL?.trim() || "mecg-board@umich.edu",
     replyTo: email,
     subject: `MECG website: ${subject}`,
@@ -48,6 +54,6 @@ export async function POST(request: NextRequest) {
     ].join("")),
   });
 
-  if (!delivered) return NextResponse.json({ error: "Your message could not be sent. Email mecg-board@umich.edu instead." }, { status: 502 });
+  if (!delivery.delivered || !delivery.providerMessageId?.trim()) return NextResponse.json({ error: "Delivery could not be confirmed. Your message is still here. Retry without editing to reuse this request, or email mecg-board@umich.edu for help." }, { status: 502 });
   return NextResponse.json({ ok: true });
 }

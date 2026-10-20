@@ -1,0 +1,48 @@
+{
+  "seatId": "panel-009",
+  "lens": "Apple-inspired clarity — cross-step continuity (simulated expertise lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The sampled public experience has a clear proposition, recognizable next actions and disciplined visual restraint. Desktop and mobile captures preserve MECG’s engineering-document identity through hairlines, numbered sections, navy and surgical orange. The engagement bench connects each stage to an understandable handoff, and the same source content continues into Client Services. The source-traced client journey reaches an inquiry form with preparation guidance, an explicit board recipient, sending feedback, confirmation and an email fallback. However, its pending-to-success transition can discard newer edits. The supplied successful browser journey intercepts the contact API, so it establishes local navigation and rendered confirmation rather than actual message delivery or observed client success. This limited surface review, absent hosted integration and user acceptance evidence, does not establish the broad world-class claim or release readiness. No other seat votes or historical verdicts informed this assessment.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "snapshot-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts:1-180",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/app/apply/application-form.tsx:729-751 (materials/access disclosure and submission guidance)",
+    "src/app/applicant/page.tsx:270-292 (receipt copy)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (client/instrument cases and run summary)",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:13-32,40-53",
+      "evidence": "submit captures FormData at line 22, awaits the response, then unconditionally calls form.reset() at line 30. Only the submit button is disabled during sending (line 52); name, email, subject and message remain editable (lines 42-49). Thus a correction entered while the request is pending is neither in the submitted payload nor retained after success. tests/e2e/public-journeys.spec.ts:46-52 uses an immediate successful fixture and does not exercise this transition. This is source-derived, not a browser reproduction.",
+      "userImpact": "On a slow request, a client can add important scope or confidentiality information, see the form clear and receive “Your message was sent,” despite that newer information never being sent.",
+      "suggestedFix": "Make the pending state protect the submitted version: either disable editing while sending with clear feedback, or preserve post-submit edits and reset only fields unchanged from the captured payload. Add a delayed-response interaction check covering an edit made during sending."
+    }
+  ],
+  "notVerified": [
+    "No shared browser or external service was used. Actual email delivery, board receipt/reply, production configuration and outage recovery remain unverified; route tests mock email and rate limiting.",
+    "No hosted Clerk/Supabase/storage session, authenticated grading journey, operator acceptance or deployment/migration rollout was inspected end to end. The receipt describes local evidence, not hosted acceptance.",
+    "No human task success, comprehension study, assistive-technology session, physical-device, Safari or Firefox evidence exists in this review. Captures establish sampled appearance only; the tall mobile capture limits fine typographic inspection.",
+    "Client-approved outcomes and project artifacts remain absent. Past-organization labels and pending-approval copy avoid fabricating outcomes, but do not supply engagement-result proof.",
+    "Original-resume access is explicitly disclosed in Materials and Review; it is not anonymization. Board policy approval and actual hosted access enforcement were not independently verified here."
+  ]
+}

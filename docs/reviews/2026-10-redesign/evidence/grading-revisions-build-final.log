@@ -1,0 +1,212 @@
+
+> mecgwebsite@0.1.0 build
+> next build
+
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 19ms
+- Experiments (use with caution):
+  ✓ globalNotFound
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1822ms
+  Running TypeScript ...
+  Finished TypeScript in 1912ms ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/100) ...
+  Generating static pages using 31 workers (25/100) 
+  Generating static pages using 31 workers (50/100) 
+public_projects unavailable Error: Missing required environment variable: NEXT_PUBLIC_MECG_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL
+    at c (src/lib/env.ts:12:21)
+    at <unknown> (src/lib/env.ts:27:10)
+    at <unknown> (src/lib/supabase/public.ts:7:28)
+    at <unknown> (src/lib/projects/public-projects.ts:49:35)
+    at j (src/lib/projects/public-projects.ts:71:17)
+    at n (src/app/(marketing)/home/page.tsx:27:5)
+  10 |
+  11 | function requireSupabaseValue(value: string | undefined, names: string) {
+> 12 |   if (!value) throw new Error(`Missing required environment variable: ${names}`);
+     |                     ^
+  13 |   return value;
+  14 | }
+  15 |
+public_projects unavailable Error: Missing required environment variable: NEXT_PUBLIC_MECG_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL
+    at c (src/lib/env.ts:12:21)
+    at <unknown> (src/lib/env.ts:27:10)
+    at <unknown> (src/lib/supabase/public.ts:7:28)
+    at <unknown> (src/lib/projects/public-projects.ts:49:35)
+    at h (src/lib/projects/public-projects.ts:63:10)
+    at p (src/app/(marketing)/work/page.tsx:24:32)
+  10 |
+  11 | function requireSupabaseValue(value: string | undefined, names: string) {
+> 12 |   if (!value) throw new Error(`Missing required environment variable: ${names}`);
+     |                     ^
+  13 |   return value;
+  14 | }
+  15 |
+  Generating static pages using 31 workers (75/100) 
+public_projects unavailable Error: Missing required environment variable: NEXT_PUBLIC_MECG_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL
+    at s (src/lib/env.ts:12:21)
+    at <unknown> (src/lib/env.ts:27:10)
+    at <unknown> (src/lib/supabase/public.ts:7:28)
+    at <unknown> (src/lib/projects/public-projects.ts:49:35)
+    at l (src/lib/projects/public-projects.ts:75:17)
+    at n (src/app/sitemap.ts:10:15)
+    at o (src/app/sitemap--route-entry.js:14:24)
+  10 |
+  11 | function requireSupabaseValue(value: string | undefined, names: string) {
+> 12 |   if (!value) throw new Error(`Missing required environment variable: ${names}`);
+     |                     ^
+  13 |   return value;
+  14 | }
+  15 |
+✓ Generating static pages using 31 workers (100/100) in 745ms
+  Finalizing page optimization ...
+
+Route (app)                                       Revalidate  Expire
+┌ ○ /_not-found
+├ ○ /access-denied
+├ ○ /admin
+├ ƒ /admin/applications/[id]
+├ ƒ /admin/applications/[id]/release-evidence
+├ ƒ /admin/audit
+├ ƒ /admin/events/[id]
+├ ○ /admin/events/new
+├ ○ /admin/group-case
+├ ○ /admin/groups
+├ ○ /admin/hash
+├ ○ /admin/hash/deliberate
+├ ○ /admin/login
+├ ƒ /admin/messages
+├ ƒ /admin/notifications
+├ ○ /admin/operations
+├ ○ /admin/people
+├ ƒ /admin/people/onboarding
+├ ○ /admin/projects
+├ ○ /admin/provisioning
+├ ○ /admin/referrals
+├ ○ /admin/rounds
+├ ƒ /admin/rounds/[roundId]
+├ ○ /admin/screening
+├ ○ /admin/screening/calibrated
+├ ○ /admin/settings
+├ ○ /admin/speed-dating
+├ ƒ /api/account/password
+├ ƒ /api/admin/applications/[id]/headshot
+├ ƒ /api/admin/applications/[id]/resume
+├ ƒ /api/admin/decisions
+├ ƒ /api/admin/events
+├ ƒ /api/admin/events/[id]
+├ ƒ /api/admin/events/[id]/assisted-checkin
+├ ƒ /api/admin/events/[id]/rotate
+├ ƒ /api/admin/export
+├ ƒ /api/admin/hash-results
+├ ƒ /api/admin/hash/live
+├ ƒ /api/admin/login
+├ ƒ /api/admin/logout
+├ ƒ /api/admin/messages
+├ ƒ /api/admin/notifications
+├ ƒ /api/admin/operations
+├ ƒ /api/admin/projects
+├ ƒ /api/admin/provisioning/[id]/resolve
+├ ƒ /api/admin/referrals
+├ ƒ /api/admin/round-close
+├ ƒ /api/admin/rush
+├ ƒ /api/admin/screening
+├ ƒ /api/admin/setup
+├ ƒ /api/applicant/buddy
+├ ƒ /api/applicant/offer
+├ ƒ /api/applicant/rsvp
+├ ƒ /api/applicant/survey
+├ ƒ /api/applicant/withdraw
+├ ƒ /api/apply
+├ ƒ /api/apply/draft
+├ ƒ /api/apply/headshot
+├ ƒ /api/apply/resume
+├ ƒ /api/apply/resume/attach
+├ ƒ /api/apply/resume/cancel
+├ ƒ /api/apply/resume/finalize
+├ ƒ /api/apply/resume/start
+├ ƒ /api/apply/status
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/signup
+├ ƒ /api/checkin/[token]
+├ ƒ /api/contact
+├ ƒ /api/events/[id]/ics
+├ ƒ /api/health
+├ ƒ /api/interest
+├ ƒ /api/maintenance/notifications
+├ ƒ /api/maintenance/prune-resumes
+├ ƒ /api/maintenance/reminders
+├ ƒ /api/member/buddy
+├ ƒ /api/member/conflicts
+├ ƒ /api/member/evaluations/[assignmentId]
+├ ƒ /api/member/evaluations/[assignmentId]/draft
+├ ƒ /api/member/group-case/ratings
+├ ƒ /api/member/hash-votes
+├ ƒ /api/member/hash/live
+├ ƒ /api/member/impressions
+├ ƒ /api/member/profile
+├ ƒ /api/member/referrals
+├ ƒ /api/member/screening
+├ ƒ /api/member/screening/[assignmentId]/resume
+├ ƒ /api/member/screening/draft
+├ ƒ /api/member/speed-dating/ratings
+├ ƒ /api/webhooks/clerk
+├ ○ /apple-icon.png
+├ ƒ /applicant
+├ ƒ /applicant/[token]
+├ ƒ /applicant/onboarding
+├ ƒ /applicant/schedule
+├ ○ /apply
+├ ƒ /apply/test-harness
+├ ƒ /apply/test-harness/cohort
+├ ƒ /apply/test-harness/deck
+├ ƒ /apply/test-harness/evaluation
+├ ƒ /apply/test-harness/group-case
+├ ƒ /apply/test-harness/interest
+├ ƒ /apply/test-harness/operations
+├ ƒ /apply/test-harness/operator-writes
+├ ƒ /apply/test-harness/people
+├ ƒ /apply/test-harness/pipeline
+├ ƒ /apply/test-harness/provisioning
+├ ƒ /apply/test-harness/release
+├ ƒ /apply/test-harness/release-evidence
+├ ƒ /apply/test-harness/rubric
+├ ƒ /apply/test-harness/sign-out
+├ ƒ /auth/callback
+├ ƒ /checkin/[token]
+├ ○ /contact
+├ ○ /forgot-password
+├ ○ /home                                                 1m      1y
+├ ○ /icon.png
+├ ○ /join                                                 1m      1y
+├ ƒ /login/[[...login]]
+├ ƒ /member
+├ ƒ /member/calibration/[roundId]
+├ ƒ /member/calibration/acknowledge
+├ ƒ /member/event
+├ ○ /member/group-case
+├ ○ /member/hash
+├ ○ /member/refer
+├ ○ /member/screening
+├ ƒ /member/screening/[assignmentId]
+├ ○ /member/speed-dating
+├ ○ /opengraph-image
+├ ○ /reset-password
+├ ○ /robots.txt
+├ ○ /sitemap.xml                                          1m      1y
+├ ○ /team
+├ ○ /work                                                 1m      1y
+├ ƒ /work/[slug]
+├ ƒ /work/[slug]/opengraph-image-11ulvk
+└ ƒ /work/[slug]/twitter-image-11ulvk
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-021",
+  "lens": "Accessible interaction \u2014 first encounter; simulated AI review",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public first encounter is coherent and legible in the supplied desktop/mobile hero captures. Its proposition identifies student consulting and distinct client/student actions; source retains pending client approval rather than inventing outcomes, and applicant review copy accurately discloses original-resume access. I traced the client services \u2192 inquiry journey through actual source and the passing synthetic browser test. Native controls, associated application errors, visible focus treatment, generous public targets and reduced-motion handling are substantial strengths. However, operator keyboard handling can invoke a consequential result action from unrelated focused controls, and the discussion deck deliberately ignores reduced-motion preferences. Those concrete accessibility defects prevent world-class agreement and justify holding release for correction. This is independent AI source/capture assessment, not observed user success or accessibility certification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/layout.tsx",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/form-field.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/lib/site-content.ts (lines 1\u2013150)",
+    "src/app/globals.css (focus, controls and motion rules)",
+    "src/app/apply/application-form.tsx (validation, recovery, navigation and rendered steps)",
+    "src/app/apply/headshot-field.tsx",
+    "src/app/member/evaluation-form.tsx (lines 1\u2013250, 275\u2013403)",
+    "src/components/operation-notice.tsx",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (lines 90\u2013170, 190\u2013380, 420\u2013454)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "playwright.config.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+      "evidence": "The window keydown handler at lines 234\u2013246 excludes only INPUT/TEXTAREA/SELECT and calls reveal() on every other Enter. Native By score/A to Z buttons and Exit link exist at 279\u2013282; reveal() at 214\u2013231 starts a drumroll and can call APPLY_STAGE_HASH. Thus Enter on an unrelated focused button/link also reaches the result shortcut.",
+      "userImpact": "A keyboard operator can unintentionally apply a room result while intending to sort or exit; native activation and the global shortcut compete.",
+      "suggestedFix": "Ignore shortcuts from interactive/contenteditable targets and handled/modifier events. Provide a native Reveal result button. Add focused-button/link Enter regressions asserting no result write."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/globals.css",
+      "evidence": "Lines 574\u2013581 explicitly exclude .deck-root and descendants from reduced-motion overrides. Lines 522\u2013566 define fly/spin/swoosh, shaking, confetti and infinite pulse/shimmer; deliberation-deck.tsx lines 275, 311\u2013328, 348 and 436\u2013439 apply them.",
+      "userImpact": "Motion-sensitive operators and viewers receive large movement and repeated animation despite requesting reduced motion. Projector use does not remove that access need.",
+      "suggestedFix": "Include the deck in reduced-motion overrides, replace motion with immediate static state changes, and verify its computed animation/transition behavior under reduced motion."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or human study exists. Clerk/session expiry, real Supabase/RLS/storage and actual inquiry email delivery remain unverified; the contact test intercepts HTTP success.",
+    "No live browser or full suite was run for this seat. Supplied logs show 76 passing checks; public menu focus and instrument reduced motion are sampled checks, not complete keyboard or assistive-technology coverage.",
+    "No screen-reader, physical-touch-device, Safari/Firefox, zoom/reflow or forced-colors observation. Private screens were source-reviewed; supplied hero captures do not establish their visual or task accessibility."
+  ]
+}

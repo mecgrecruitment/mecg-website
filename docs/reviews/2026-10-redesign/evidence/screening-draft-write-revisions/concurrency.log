@@ -1,0 +1,106 @@
+{
+  "concurrentFirstSaves": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "saved",
+      "draft": {
+        "ratings": [
+          {
+            "note": "Observed",
+            "score": "4",
+            "criterionId": "screen-cas-criterion"
+          }
+        ],
+        "evidence": "First",
+        "updatedAt": "2026-10-16T22:38:19.400977+00:00",
+        "recommendation": "HOLD"
+      },
+      "revision": "24e2d90a-0865-40af-a96e-600b5760d3c8",
+      "mutationId": "40000000-0000-4000-8000-000000000001",
+      "assignmentId": "screen-cas-assignment"
+    },
+    "second": {
+      "kind": "conflict",
+      "snapshot": {
+        "draft": {
+          "ratings": [
+            {
+              "note": "Observed",
+              "score": "4",
+              "criterionId": "screen-cas-criterion"
+            }
+          ],
+          "evidence": "First",
+          "updatedAt": "2026-10-16T22:38:19.400977+00:00",
+          "recommendation": "HOLD"
+        },
+        "revision": "24e2d90a-0865-40af-a96e-600b5760d3c8",
+        "assignmentId": "screen-cas-assignment"
+      }
+    }
+  },
+  "saveThenStaleSubmit": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "saved",
+      "draft": {
+        "ratings": [
+          {
+            "note": "Observed",
+            "score": "4",
+            "criterionId": "screen-cas-criterion"
+          }
+        ],
+        "evidence": "Newer",
+        "updatedAt": "2026-10-16T22:38:21.464232+00:00",
+        "recommendation": "HOLD"
+      },
+      "revision": "4eb1b865-e1ef-4e17-83c4-9d09fe7ccf1e",
+      "mutationId": "40000000-0000-4000-8000-000000000003",
+      "assignmentId": "screen-cas-assignment"
+    },
+    "second": {
+      "kind": "conflict",
+      "snapshot": {
+        "draft": {
+          "ratings": [
+            {
+              "note": "Observed",
+              "score": "4",
+              "criterionId": "screen-cas-criterion"
+            }
+          ],
+          "evidence": "Newer",
+          "updatedAt": "2026-10-16T22:38:21.464232+00:00",
+          "recommendation": "HOLD"
+        },
+        "revision": "4eb1b865-e1ef-4e17-83c4-9d09fe7ccf1e",
+        "assignmentId": "screen-cas-assignment"
+      }
+    }
+  },
+  "submitThenLateSave": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "submitted",
+      "score": 75.0,
+      "reviewId": "3c375ae7-9d43-4db6-b92d-1293368d2c45",
+      "assignmentId": "screen-cas-assignment2"
+    },
+    "second": {
+      "error": "assignment closed"
+    }
+  },
+  "recuseThenLateSave": {
+    "secondObservedWaitingOnAssignmentLock": true,
+    "first": {
+      "kind": "recused",
+      "assignmentId": "screen-cas-assignment3"
+    },
+    "second": {
+      "error": "conflict declared"
+    }
+  },
+  "result": "PASS",
+  "noDraftResurrection": true
+}

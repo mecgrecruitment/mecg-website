@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-v2-063",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "From this simulated AI applicant lens, the revision is coherent and considerably more trustworthy than the historical interaction descriptions. The public proposition states pro bono, semester-long work; Join explains eligibility, materials and evaluation. Its outage state preserves application access instead of inventing recruitment facts. Recovery uses native disclosures and labelled radio groups, distinguishes changed answers, offers both-copy export, and returns focus after selection. Submission validates an acknowledgement or reconciles stored status before clearing recovery; the actual dashboard independently gates its receipt and repeats identifying-resume access. The supplied public and synthetic recovery captures show restrained, readable hierarchy within Precision Instrument. However, these strengths do not establish the unchanged broad world-class claim: the complete keyboard applicant journey remains untested, schedule-fit facts remain unpublished, and actual provider-dependent completion and consequential operator workflows have no hosted acceptance. I cannot infer task success from source, screenshots or intercepted APIs. Release confidence is separately unproven; I found no demonstrated keyboard failure requiring an invented defect.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (package inventory context)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/app/apply/application-form.tsx (recovery, focus, validation, materials and submission sections)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (receipt, deadlines and next actions)",
+    "src/lib/auth-destination.ts",
+    "supabase/migrations/20260911145642_screening_resume.sql (resume-access contract excerpts)",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "src/app/applicant/next-action-page.test.ts (receipt/deadline assertions)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final result)",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "tests/e2e/application-reliability.spec.ts:8-42; tests/e2e/application-combine.spec.ts:34-44,61-66",
+      "evidence": "The submission journey advances with click/check and replaces /applicant with synthetic HTML. New combination checks select radios with check and actions with click. Heading-focus assertions and the recorded 105 passing combinations are useful, but still do not demonstrate sequential keyboard completion through preparation, materials, recovery, consent and the actual status surface. This historical evidence objection remains applicable; no keyboard malfunction is established.",
+      "userImpact": "A keyboard-dependent student lacks demonstrated continuity through the complete consequential application task.",
+      "suggestedFix": "Add a focused Tab/Shift+Tab, Enter/Space and native-radio/select journey through validation, recovery choices, submission and real status rendering, asserting visible focus and useful destinations. Record authenticated integration separately when an environment is available."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86; src/app/(marketing)/join/page.tsx:160",
+      "evidence": "The weekly-commitment FAQ explicitly says expected hours, mandatory meeting times and peak commitments are not published and offers Board email. The fallback is truthful but supplies no planning range.",
+      "userImpact": "Applicants cannot independently judge schedule fit before investing in recruitment.",
+      "suggestedFix": "Obtain Board-confirmed current-semester hours, mandatory times and peak obligations; publish dated guidance without inventing estimates."
+    }
+  ],
+  "notVerified": [
+    "Complete authenticated keyboard prepare/apply/upload/recover/status journey, real session expiry and assistive-technology use; no observed human task success.",
+    "Hosted Clerk, Supabase RPC/RLS, storage and email integration; no staging exists. Local fixtures and SQL checks do not establish these together.",
+    "Grading, release and owner recovery were considered through the supplied scope/limitations, not independently exercised as authenticated operator tasks.",
+    "Approved project artifacts, current workload facts, Board decisions on resume/blind-review policy, retention and closed-round remediation remain unavailable.",
+    "Physical iPhone/macOS Safari and full private-screen visual behavior are unverified; the recovery capture is synthetic."
+  ]
+}

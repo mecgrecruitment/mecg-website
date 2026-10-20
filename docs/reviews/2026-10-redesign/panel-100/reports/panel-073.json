@@ -1,0 +1,62 @@
+{
+  "seatId": "panel-073",
+  "lens": "Member evaluator \u2014 keyboard-oriented use; simulated user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied desktop/mobile hero captures coherently express Precision Instrument. The source-traced My work \u2192 calibrated assignment \u2192 observations \u2192 review \u2192 receipt journey has native radios, explicit unknowns, readiness checks and honest unconfirmed-submission handling. Tests/logs support scoring validity and receipt parsing, not observed evaluator success. Two concrete workflow gaps prevent acceptance: Group Case cannot preserve a note without a score through its UI, and keyboard submission does not lead focus into the final review. This is an independent AI assessment of the frozen local package, not human endorsement or hosted acceptance. Original-resume access is disclosed accurately; pending client approval is presented without invented outcomes.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/member/page.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "src/app/apply/application-form.tsx (materials disclosure)",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/lib/round-evidence.ts",
+    "src/lib/round-evidence.test.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql (rating and validity sections)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-privacy-final-node.log (relevant evaluation/round checks)",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "captures/round-close-desktop.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/group-case/group-case-roster.tsx",
+      "evidence": "editNote, lines 195\u2013203, returns with \u201cPick a star to save\u201d when countScored is zero; flushNote, lines 206\u2013210, also requires a score. The textarea at lines 396\u2013407 uses these handlers. In contrast, rush.rate_group_case_applicant in supabase/migrations/20261016191000_grading_contract_consistency.sql:267\u2013279 accepts zero scores when clean_note is present.",
+      "userImpact": "A reviewer with a useful observation but insufficient basis for a numeric judgment cannot save that observation alone. Leaving the page loses the in-memory note; selecting an unsupported score merely to save undermines evidence integrity.",
+      "suggestedFix": "Save nonblank notes with all criterion scores null through the existing RPC. Keep these explicitly partial and outside valid-completion counts; verify note-only persistence after reload and keyboard blur."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/evaluation-form.tsx",
+      "evidence": "submit at lines 231\u2013234 only sets reviewing. Lines 378\u2013395 insert the review summary before the existing submit button, whose label changes at lines 398\u2013399. No focus transfer or review-region live announcement accompanies this transition.",
+      "userImpact": "Keyboard focus remains on the now-final confirmation control. Forward Tab bypasses the newly inserted summary, and another Enter can lock the evaluation without guiding the reviewer through the ratings and evidence. This is a source-derived risk, not a reproduced browser observation.",
+      "suggestedFix": "Focus a programmatically focusable review heading when entering review, arrange confirmation after the summary, and restore useful focus on Keep editing. Add a focused keyboard-path check for review, editing and locking."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated evaluator screen, reviewer screenshot or keyboard session was available; private visual craft, actual focus behavior and screen-reader announcements remain unverified.",
+    "No staging, hosted Clerk/Supabase/storage/email integration or migration rollout was exercised. The supplied operator capture is a synthetic harness, and intercepted contact success does not prove delivery.",
+    "No human task-success study, assistive-technology audit, physical-device, Safari or Firefox evidence exists. Source/test review cannot establish these outcomes.",
+    "Board resolution of original-resume blind-review policy and client-approved project artifacts/outcomes remain external dependencies."
+  ]
+}

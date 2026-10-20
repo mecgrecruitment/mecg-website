@@ -1,0 +1,56 @@
+{
+  "seatId": "panel-054",
+  "lens": "Prospective client \u2014 service failure (simulated AI acceptance lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The offer is understandable: student-led, pro-bono research and recommendations over a semester, with 6\u20138 members and a responsive client contact. I traced home \u2192 client services \u2192 contact through actual source and the supplied intercepted journey test. Inquiry prompts support a useful first conversation; provider failures have an email fallback. Desktop/mobile homepage captures show coherent Precision Instrument hierarchy and explicit pending-approval disclosure. However, partnership names do not let a client judge delivered work, and the inquiry confirmation has an unchecked success boundary. These limitations and absent hosted delivery evidence prevent an unqualified world-class or release endorsement. This is independent AI source/capture review, not observed client success or a review of every private workflow.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:24\u201332",
+      "evidence": "JSON parse failure becomes null; only response.ok is checked before form.reset() and the sent message. A 2xx response containing null, invalid JSON, or {ok:false} therefore produces the same confirmation as the API contract {ok:true} in src/app/api/contact/route.ts:52. The inspected browser journey supplies only the valid success fixture.",
+      "userImpact": "An anomalous service response can erase a detailed inquiry and tell the client it was sent without a valid acknowledgement. This is a source-derived failure path, not an observed hosted incident.",
+      "suggestedFix": "Require a validated {ok:true} receipt before resetting fields; preserve the inquiry and explain uncertain delivery with the board email alternative on malformed receipts. Add a focused browser check for this failure."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:97\u2013103",
+      "evidence": "Every selected organization states that scope, methods, deliverables and outcomes await approval. src/content/projects.public.ts:5 contains an empty release list; work/page.tsx:56\u201363 omits Selected work when empty. The homepage capture likewise discloses pending case studies.",
+      "userImpact": "A prospective client can understand the process but cannot assess the quality or relevance of a completed engagement from the supplied revision. Organization descriptions establish client context rather than MECG delivery evidence.",
+      "suggestedFix": "Obtain client/board approval for at least one concrete question, method and redacted deliverable or handoff example before treating the portfolio as sufficient world-class proof. Preserve the honest pending state until approval; fabricate no outcomes."
+    }
+  ],
+  "notVerified": [
+    "Actual hosted inquiry delivery, configured recipient, spam handling and board response within the stated week; email API acceptance does not establish inbox receipt.",
+    "Real client comprehension, inquiry completion or recovery success; supplied journey tests intercept contact HTTP and are not a human study.",
+    "Client approval and factual substantiation of partnership/stat claims; confidential data handling, retention and NDA execution in practice.",
+    "Contact/work visual rendering beyond source; supplied public captures inspected here depict the homepage. Physical devices, Safari, Firefox and assistive technology remain unverified.",
+    "No staging or hosted acceptance environment exists; private authenticated integrations and operator workflows are outside this seat\u2019s sampled journey."
+  ]
+}

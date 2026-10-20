@@ -1,0 +1,146 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        39,
+        32,
+        28,
+        24,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 15.6,
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 13,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        46.08,
+        32,
+        28,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.6,
+      "heroLayering": {
+        "overlap": false,
+        "sideBySide": false,
+        "crossers": 2
+      },
+      "hues": [
+        210,
+        30
+      ],
+      "boxes": 11,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        76.8,
+        40,
+        38.4,
+        32,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.6,
+      "heroLayering": {
+        "overlap": true,
+        "sideBySide": true,
+        "crossers": 5
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 11,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "98%",
+        "ui-monospace": "2%"
+      },
+      "sizes": [
+        84,
+        40,
+        32,
+        24,
+        20,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12
+      ],
+      "body": 16.6,
+      "heroLayering": {
+        "overlap": true,
+        "sideBySide": true,
+        "crossers": 5
+      },
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 11,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 35
+    }
+  }
+]

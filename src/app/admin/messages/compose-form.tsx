@@ -77,15 +77,15 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
         return;
       }
       setNotice(result?.failed
-        ? `Sent ${result.sent}. ${result.failed} could not be delivered; the log shows which.`
-        : `Sent ${result?.sent ?? 0} message${result?.sent === 1 ? "" : "s"}.`);
+        ? `Sent ${result.sent} to the provider. ${result.failed} sends failed; check History for details.`
+        : `Sent ${result?.sent ?? 0} message${result?.sent === 1 ? "" : "s"} to the provider. Inbox delivery is not confirmed.`);
       setStatuses([]);
       setSubject("");
       setMessage("");
       setReviewing(false);
       router.refresh();
     } catch {
-      setError("Could not send the message");
+      setError("Could not confirm the send. Check History before sending again.");
     } finally {
       setPending(false);
     }
@@ -149,7 +149,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
       ) : (
         <>
           <p className="text-[13px] font-semibold text-mecg-navy/60">Send to a segment</p>
-          <p className="mt-1 text-sm text-mecg-navy/65">Every send is recorded on the applicant&rsquo;s dossier, delivered or not.</p>
+          <p className="mt-1 text-sm text-mecg-navy/65">Send attempts are recorded on the applicant&rsquo;s dossier. Provider acceptance does not confirm inbox delivery.</p>
 
           <fieldset className="mt-4">
             <legend className="text-sm font-medium">Application status</legend>

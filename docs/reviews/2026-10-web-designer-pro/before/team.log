@@ -1,0 +1,27 @@
+
+Shot http://localhost:3100/team at 390, 768, 1280, 1440px with Playwright Chromium -> /tmp/wdp-shots/team
+  /tmp/wdp-shots/team/390.png
+  /tmp/wdp-shots/team/768.png
+  /tmp/wdp-shots/team/1280.png
+  /tmp/wdp-shots/team/1440.png
+  /tmp/wdp-shots/team/sheet.png
+
+Page problems:
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fannie-new.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fnandini.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fabby.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fjandy.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fblake.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fsumedha.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fmaya.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fluciano.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fselena.jpeg&w=32&q=75 (net::ERR_ABORTED)
+  request failed: http://localhost:3100/_next/image?url=%2Fboard%2Fangela.jpeg&w=32&q=75 (net::ERR_ABORTED)
+
+fonts {"Avenir Next":"92%","ui-monospace":"8%"}  body 14px  sizes [60, 36, 18, 16, 14, 12]  hues [30, 210]  boxes 15  card grids 0  focus stops 26
+  warn  [390] No action in the first 390×844 screen (outside the nav). The one action should be visible without scrolling.
+  warn  [768] No action in the first 768×1024 screen (outside the nav). The one action should be visible without scrolling.
+  warn  [1280] No action in the first 1280×900 screen (outside the nav). The one action should be visible without scrolling.
+  warn  [1440] No action in the first 1440×900 screen (outside the nav). The one action should be visible without scrolling.
+
+No FAILs. The scan only catches mechanical tells. Now open every PNG with your own eyes.

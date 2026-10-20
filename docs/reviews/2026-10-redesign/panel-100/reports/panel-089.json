@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-089",
+  "lens": "Recruitment operator \u2014 cross-step continuity (simulated AI acceptance seat)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied hero and synthetic mobile confirmation capture coherently express Precision Instrument. Source-tracing dashboard \u2192 Interviews \u2192 round \u2192 close grading \u2192 decision preflight/release shows deliberate confirmation, partial-versus-valid evidence, per-applicant blockers, dossier recovery links and honest email state. However, automatic cohort selection and incompatible overview coverage undermine operator continuity. This is an independent source/capture assessment, not observed user success. Local harness and PostgreSQL evidence support specific contracts, not hosted readiness.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/apply/application-form.tsx:MaterialsStep/ReviewStep privacy copy",
+    "src/app/admin/page.tsx",
+    "src/app/admin/rounds/page.tsx",
+    "src/app/admin/rounds/[roundId]/page.tsx",
+    "src/app/admin/round-board.tsx",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/api/admin/round-close/route.ts",
+    "src/app/admin/settings/page.tsx",
+    "src/app/admin/rush-controls.tsx:useRushAction/CloneCycleForm",
+    "src/components/workspace-nav.tsx",
+    "src/lib/cycles.ts",
+    "src/app/admin/decision-form.tsx",
+    "src/lib/decision-release.ts",
+    "src/app/api/admin/decisions/route.test.ts:release tests",
+    "supabase/migrations/20260902170000_post_cutover_function_consistency.sql:clone_cycle",
+    "supabase/migrations/20261016192000_batch_release_diagnostics.sql",
+    "supabase/migrations/20261016194000_round_close_summary.sql",
+    "supabase/tests/round_close_summary.sql:assertions 90\u2013126",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-final-e2e.log",
+    "evidence/mecg-privacy-db-final.log:summary",
+    "captures/desktop-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/lib/cycles.ts:13\u201340; src/app/admin/settings/page.tsx:SettingsPage; src/app/admin/round-board.tsx:54\u201376",
+      "evidence": "The selector ranks OPEN/IN_PROCESS/DECISION_LOCK above DRAFT and accepts an explicit requestedCycleId, but dashboard/settings/round pages call it without one. WorkspaceNav emits unscoped links. CloneCycleForm (rush-controls.tsx:394\u2013416) creates a draft and useRushAction only refreshes; it does not navigate to the returned cycle. RoundBoardPage filters an explicit roundId against the automatically selected cycle and returns notFound when they differ.",
+      "userImpact": "An owner preparing the next draft while the current cycle remains active cannot select its settings through these screens. Authorized older-round links can become 404s when another cohort takes priority, interrupting follow-up and release recovery.",
+      "suggestedFix": "Expose an authorized cohort switcher, preserve its selection across workspace links, navigate to the cloned cohort, and derive explicit round context from its authorized database row. Verify two concurrent cohorts and an older-round deep link."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rounds/page.tsx:43\u201345,66\u201395",
+      "evidence": "Every round uses all non-draft/nonterminal cycle applications as its coverage denominator and counts any two assignment records, including recused/missed records. RoundBoardPage:108\u2013114 instead uses stage-specific applicants; round_close_summary SQL uses actual enrollment UNION assignments and canonical valid independent evaluations.",
+      "userImpact": "A submitted applicant awaiting screening appears as a Group Case coverage gap, while two unusable assignments can appear covered. Operators encounter changing meanings and totals when moving from overview to round to irreversible close confirmation.",
+      "suggestedFix": "Use shared round-cohort definitions and distinguish assigned, submitted and valid coverage explicitly. Add a focused fixture containing pre-interview applicants, actual enrollment and recused assignments."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, deployment or human study exists. Clerk sessions, live Supabase authorization/RLS, storage and email delivery remain unverified end to end.",
+    "No real authenticated operator journey or full private-screen visual capture was available. The 18 passing close tests intercept APIs in a synthetic harness; the mobile modal capture is synthetic.",
+    "Board resolution of original-resume policy, client publication approval, real operator acceptance, physical-device and assistive-technology behavior remain unknown. Applicant source accurately discloses identifying original PDFs."
+  ]
+}

@@ -1,134 +1,73 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import MarketingSection from "@/components/marketing-section";
-import PhotoCarousel from "@/components/photo-carousel";
-import SectionHeading from "@/components/section-heading";
+import HomePhoto from "@/components/home-photo";
+import HomeHeroMotion from "@/components/home-hero-motion";
+import HomeProjectExplorer from "@/components/home-project-explorer";
+import HomeEngagement from "@/components/home-engagement";
+import { marketingMetadata } from "@/lib/seo";
+import { getFeaturedPublicProject } from "@/lib/projects/public-projects";
 import { fetchPublicRecruitment, recruitmentAction } from "@/lib/public-recruitment";
-import { PILLARS, STATS } from "@/lib/site-content";
+import { CLIENT_FAQS, PAST_PROJECTS, SEMESTER_FACTS, STATS } from "@/lib/site-content";
+import "./home.css";
 
 export const revalidate = 60;
-
-export const metadata: Metadata = {
+export const metadata: Metadata = marketingMetadata({
   title: "Michigan Engineering Consulting Group",
-  description: "MECG is a pro-bono consulting group open to all majors at the University of Michigan.",
-  alternates: { canonical: "/home" },
-};
+  description: "Student-led, pro-bono consulting at the University of Michigan. Research, analysis, and practical recommendations for your next decision. Open to all majors.",
+  path: "/home",
+});
 
-const HOME_PHOTOS = [
-  { src: "/mecg/chapter-presentation-2026.jpeg", alt: "MECG members presenting together at a formal chapter event" },
-  { src: "/mecg/chicago-community-2026.jpeg", alt: "MECG members exploring downtown Chicago together" },
-  { src: "/mecg/formal-group-2026.jpeg", alt: "MECG members together at a formal chapter event" },
-  { src: "/mecg/community-formal-group.jpeg", alt: "MECG members dressed for a formal event" },
-  { src: "/mecg/community-maize-day.jpeg", alt: "MECG members celebrating in Michigan colors" },
-  { src: "/mecg/formal-social-2026.jpeg", alt: "Three MECG members at a formal social event" },
-  { src: "/mecg/community-green-day.jpeg", alt: "MECG members together at a community event" },
-] as const;
+function Arrow() {
+  return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 12h15M13 5l7 7-7 7" /></svg>;
+}
 
 export default async function HomePage() {
-  const recruitment = await fetchPublicRecruitment();
+  const [recruitment, featured] = await Promise.all([fetchPublicRecruitment(), getFeaturedPublicProject()]);
   const studentAction = recruitmentAction(recruitment.cycle);
-
   return (
-    <main id="main-content" className="bg-white text-mecg-navy">
-      <section className="relative min-h-[56svh] overflow-hidden bg-mecg-navy text-white">
-        <Image
-          src="/mecg/members-professional.jpeg"
-          alt="MECG members visiting PwC in Chicago"
-          fill
-          preload
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-mecg-navy via-mecg-navy/75 to-mecg-navy/15" />
-        <div className="relative mx-auto flex min-h-[56svh] max-w-6xl items-end px-6 py-10 sm:px-10 sm:py-12">
-          <div className="max-w-4xl">
-            <h1 className="text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
-              Michigan Engineering Consulting Group
-            </h1>
-            <p className="mt-5 max-w-2xl text-pretty text-base leading-7 text-white/85 sm:text-lg">
-              Student-led, pro-bono consulting teams helping organizations make clearer decisions through research, analysis, and practical recommendations.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/contact#message" className="button-primary">Discuss a project <span aria-hidden="true">→</span></Link>
-              <Link href={studentAction.href} className="button-ghost-light">{studentAction.label} <span aria-hidden="true">→</span></Link>
-            </div>
+    <main id="main-content" className="home-page">
+      <section className="home-hero" aria-labelledby="home-title">
+        <HomePhoto />
+        <HomeHeroMotion />
+        <div className="home-container">
+          <div className="home-hero-stage">
+            <h1 id="home-title" aria-label="MECG: pro bono consulting, led by Michigan students."><span className="poster-word home-poster-word">{["M", "E", "C", "G"].map(letter => <span key={letter} className="home-letter">{letter}</span>)}</span> <span className="home-hero-rest">Pro bono consulting, led by Michigan students.</span></h1>
+            <div className="home-hero-actions"><Link href="/contact#message" className="button-primary">Discuss a project <Arrow /></Link><Link href={studentAction.href} className="home-text-link">{studentAction.label} <Arrow /></Link></div>
+          </div>
+          <div className="home-facts">
+            <h2 className="sr-only">MECG at a glance</h2>
+            <dl>{STATS.map(stat => <div key={stat.label}><dt>{stat.label}<span>{stat.context}</span></dt><dd>{stat.value}</dd></div>)}</dl>
           </div>
         </div>
       </section>
 
-      <MarketingSection spacing="compact" tone="navy" aria-labelledby="mecg-proof-title">
-        <h2 id="mecg-proof-title" className="sr-only">MECG at a glance</h2>
-        <dl className="grid gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-4">
-          {STATS.map((stat) => (
-            <div key={stat.label} className="bg-mecg-navy p-5 sm:p-6">
-              <dt className="text-sm font-semibold text-white/75">{stat.label}</dt>
-              <dd className="mt-2">
-                <span className="tabular block text-3xl font-semibold text-white">{stat.value}</span>
-                <span className="mt-1 block text-sm text-white/70">{stat.context}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </MarketingSection>
+      <section className="home-partners home-container" aria-labelledby="partners-title">
+        <h2 id="partners-title" className="sr-only">Organizations we’ve worked with</h2>
+        <ul className="home-partner-list">{PAST_PROJECTS.slice(0, 6).map(client => <li key={client.name}><div className="home-partner-logo"><Image src={client.logo} alt="" fill sizes="56px" className="object-contain" /></div><p>{client.name}<span>{client.industry}</span></p></li>)}</ul>
+        <p className="home-small-note">Six of the 30+ organizations we’ve worked with. Case studies are published with client approval. <Link href="/work" className="home-text-link">See them all <Arrow /></Link></p>
+        {featured && <article className="home-featured"><div><h3>{featured.decision || featured.title}</h3><p>{featured.clientLabel} · {featured.semester}</p></div><p>{featured.context}</p><Link href={`/work/${featured.slug}`} className="home-text-link">Read the engagement <Arrow /></Link></article>}
+      </section>
 
-      <MarketingSection innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-          <SectionHeading>Welcome to MECG</SectionHeading>
-          <p className="text-pretty leading-7 text-mecg-navy/70">
-            MECG is a student-led consulting organization at the University of Michigan. Founded in 2023, our community has grown to over 70 members from diverse academic and personal backgrounds. Through semester-long consulting engagements, MECG has partnered with more than 30 organizations across the country, from local businesses and innovative startups to Fortune 500 companies. Our teams work closely with clients to solve complex business challenges and deliver strategic, data-driven recommendations that create lasting impact.
-          </p>
-      </MarketingSection>
+      <section className="home-questions home-container" id="project-questions" aria-labelledby="questions-title">
+        <h2 id="questions-title">What are you working through?</h2>
+        <p className="home-questions-intro">Five areas, five example questions. Choose one to see where a project could start.</p>
+        <HomeProjectExplorer />
+      </section>
 
-      <MarketingSection tone="paper" innerClassName="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div>
-            <SectionHeading>President&apos;s welcome</SectionHeading>
-            <div className="mt-5 space-y-4 text-pretty leading-7 text-mecg-navy/70">
-              <p>MECG gives students a place to work on real client questions while learning how to listen, analyze, and communicate across disciplines.</p>
-              <p>Project work sits beside education, mentorship, and professional development. You do not need a particular major or prior consulting experience to contribute. Curiosity and follow-through matter more.</p>
-            </div>
-            <p className="mt-7 font-semibold">Annie Callam</p>
-            <p className="mt-1 text-sm text-mecg-navy/60">President of MECG, 2026</p>
-          </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-            <Image src="/about/president.jpg" alt="Annie Callam, President of MECG" fill className="object-cover object-center" sizes="(min-width: 1024px) 36rem, 100vw" />
-          </div>
-      </MarketingSection>
+      <section className="home-process" aria-labelledby="process-title">
+        <div className="home-container">
+          <div className="home-process-grid"><div><h2 id="process-title">How a semester works.</h2><p>You bring the context. We bring a student team and a structured research process. Here’s how a question becomes a recommendation.</p><dl className="home-semester-facts">{SEMESTER_FACTS.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><HomeEngagement /></div>
+          <div className="home-faqs">{[CLIENT_FAQS[2], CLIENT_FAQS[3], CLIENT_FAQS[6]].map(([question, answer]) => <details key={question}><summary>{question}<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m6 9 6 6 6-6" /></svg></summary><p>{answer}</p></details>)}</div>
+        </div>
+      </section>
 
-      <MarketingSection id="our-history" className="scroll-mt-24" innerClassName="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
-          <SectionHeading>Our history</SectionHeading>
-          <div className="grid gap-6 md:grid-cols-[1fr_0.95fr] md:items-center">
-            <div className="space-y-4 text-pretty leading-7 text-mecg-navy/70">
-              <p>Jonny Fay and Aaryan Singh founded MECG in 2023 to give students across the University of Michigan a place to practice consulting while growing professionally and personally.</p>
-              <p>The first member cohort began in Winter 2024. Since then, MECG has grown to more than 70 members and partnered with more than 30 organizations.</p>
-              <Link href="/team" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Meet the current board <span className="ml-2" aria-hidden="true">→</span></Link>
-            </div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mecg-blue/[0.08]">
-              <Image
-                src="/mecg/community-formal-pair.jpeg"
-                alt="MECG members celebrating Michigan's national championship"
-                fill
-                className="object-cover object-center"
-                sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, 100vw"
-              />
-            </div>
-          </div>
-      </MarketingSection>
+      <section className="home-community home-container" aria-labelledby="people-title">
+        <figure className="home-community-figure"><div className="home-community-photo"><Image src="/mecg/chicago-community-2026.jpeg" alt="MECG members together by the Chicago River" fill sizes="(min-width: 768px) 50vw, 100vw" /></div><figcaption>The chapter in Chicago.</figcaption></figure>
+        <div><h2 id="people-title">You’ll know the people<br />you work with.</h2><p>Teams mix majors, so you work beside people who think differently. Members learn through education sessions, mentorship and client work.</p><p>There’s also a chapter to be part of, from professional trips to time together around Ann Arbor.</p><Link href="/team" className="home-text-link">Meet the chapter <Arrow /></Link><Link href={studentAction.href} className="home-text-link">{studentAction.label} <Arrow /></Link></div>
+      </section>
 
-      <MarketingSection tone="softBlue">
-          <SectionHeading>Our pillars</SectionHeading>
-          <div className="mt-8 grid gap-px overflow-hidden rounded-2xl bg-mecg-navy/10 sm:grid-cols-2 lg:grid-cols-4">
-            {PILLARS.map((pillar) => (
-              <article key={pillar.title} className="bg-white p-5 sm:p-6">
-                <h3 className="text-xl font-semibold">{pillar.title}</h3>
-                <p className="mt-4 text-sm leading-6 text-mecg-navy/65">{pillar.body}</p>
-              </article>
-            ))}
-          </div>
-      </MarketingSection>
-
-      <MarketingSection>
-          <PhotoCarousel images={HOME_PHOTOS} label="MECG community photos" />
-      </MarketingSection>
+      <section className="home-next" aria-labelledby="next-title"><div className="home-container home-next-grid"><div><h2 id="next-title">Tell us the decision you’re facing.</h2><p>We’ll talk through fit, timing and what a useful answer would look like.</p><Link href="/contact#message" className="button-primary">Discuss a project <Arrow /></Link></div><div className="home-student-next"><h3>Students: every major, no experience needed.</h3><p>See recruitment dates, how we evaluate applications and how to prepare.</p><Link href={studentAction.href} className="home-next-student-link">{studentAction.label} <Arrow /></Link></div></div></section>
     </main>
   );
 }

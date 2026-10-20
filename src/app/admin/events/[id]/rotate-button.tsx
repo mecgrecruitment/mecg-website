@@ -1,9 +1,10 @@
 "use client";
 
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { useAction } from "@/lib/use-action";
 import OperationNotice from "@/components/operation-notice";
 
-export default function RotateButton({ eventId }: { eventId: string }) {
+export default function RotateButton({ eventId, cycleId }: { eventId: string; cycleId: string }) {
   const { pending: busy, error, success, run, router, setError } = useAction(`/api/admin/events/${eventId}/rotate`, "Could not rotate the QR code.");
 
   async function handleRotate() {
@@ -19,7 +20,7 @@ export default function RotateButton({ eventId }: { eventId: string }) {
       setError("Could not rotate the QR code.");
       return;
     }
-    router.replace(`/admin/events/${eventId}?token=${encodeURIComponent(token)}`);
+    router.replace(withWorkspaceCycle(`/admin/events/${eventId}?token=${encodeURIComponent(token)}`, cycleId));
   }
 
   return (

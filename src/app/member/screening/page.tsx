@@ -1,3 +1,5 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { selectWorkspaceMembership, requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
 import WorkspaceHeader from "@/components/workspace-header";
@@ -17,7 +19,8 @@ function statusTone(status: ScreeningQueueItem["assignment_status"]) {
 
 export default async function ScreeningQueuePage() {
   const user = await requireMember();
-  const cycle = user.memberships.find((membership) => membership.active && ["RECRUITMENT_COMMITTEE", "BOARD", "OWNER"].includes(membership.role));
+  const cycle = await selectWorkspaceMembership(user, ["RECRUITMENT_COMMITTEE", "BOARD", "OWNER"]);
+  const cycleId = cycle?.cycleId ?? await requestedWorkspaceCycleId();
   if (!cycle) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">You are not enrolled as an application reviewer.</p></main>;
   const supabase = await createClient();
   const [{ data: queue, error }, { data: rawContext, error: contextError }] = await Promise.all([
@@ -57,7 +60,7 @@ export default async function ScreeningQueuePage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Up next</p>
                 <p className="mt-1 font-mono text-sm text-mecg-navy/65">{nextApplication.candidate_code}</p>
               </div>
-              <Link href={`/member/screening/${nextApplication.assignment_id}`} className="button-primary">Continue application</Link>
+              <Link href={withWorkspaceCycle(`/member/screening/${nextApplication.assignment_id}`, cycleId)} className="button-primary">Continue application</Link>
             </article>
           )}
           {laterApplications.length > 0 && (
@@ -70,7 +73,7 @@ export default async function ScreeningQueuePage() {
                       <p className="font-mono text-xs text-mecg-navy/60">{item.candidate_code}</p>
                       <StatusPill tone={statusTone(item.assignment_status)}>{assignmentStatusLabel(item.assignment_status)}</StatusPill>
                     </div>
-                    <Link href={`/member/screening/${item.assignment_id}`} className="button-secondary text-sm">Open</Link>
+                    <Link href={withWorkspaceCycle(`/member/screening/${item.assignment_id}`, cycleId)} className="button-secondary text-sm">Open</Link>
                   </article>
                 ))}
               </div>

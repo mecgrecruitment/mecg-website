@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-025",
+  "lens": "Accessible interaction",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public experience has a coherent Precision Instrument hierarchy, legible proposition, native station buttons, generous primary targets, a skip link, and explicit application error associations. Desktop/mobile hero captures support visual clarity. The client journey from engagement terms to contact confirmation is covered by passing Chromium fixture tests, not observed client success. However, the private discussion deck has consequential keyboard interference and deliberately bypasses reduced-motion preferences. Those source-level defects prevent agreement with the broad world-class claim. This is an independent simulated AI accessibility lens, not human endorsement or accessibility certification. Public copy appropriately marks case studies pending approval and application copy discloses original-resume identification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/form-field.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/globals.css",
+    "src/app/apply/application-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/mobile-hero.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/admin/hash/deliberate/deliberation-deck.tsx",
+      "evidence": "Lines 234\u2013245 install a window keydown listener that excludes only INPUT/TEXTAREA/SELECT. Enter on focused native buttons or links therefore also calls reveal()/advance(). reveal() at lines 214\u2013231 can send APPLY_STAGE_HASH after quorum; sort, Exit and navigation controls are rendered at lines 279\u2013284 and 443\u2013450.",
+      "userImpact": "A keyboard operator activating a sort or navigation control can also initiate a consequential result action or advance the discussion. Native control activation is not isolated from the page shortcut. This is source-derived; no live operator reproduction was performed.",
+      "suggestedFix": "Ignore defaultPrevented events and events originating in interactive/contenteditable elements, and scope shortcuts to a deliberate presentation focus surface. Add a regression showing Enter on sort, Exit, Previous and Next never invokes result application."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/globals.css",
+      "evidence": "Lines 523\u2013566 define fly/spin/swoosh entrances, infinite drumroll/shimmer/pulse and confetti. Lines 574\u2013581 explicitly exclude .deck-root and descendants from reduced-motion suppression. deliberation-deck.tsx line 275 mounts that root and lines 436\u2013440 render animated confetti.",
+      "userImpact": "Motion-sensitive operators and viewers still receive substantial movement when their reduced-motion preference is enabled. The passing public instrument test does not cover this exception.",
+      "suggestedFix": "Apply reduced-motion rules to the deck too; replace entrances, drumroll, shake and confetti with static state feedback and verify computed animation behavior under reduced-motion emulation."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration, live authenticated operator journey, email delivery or real applicant submission was observed; local HTTP fixtures do not establish Clerk/Supabase/storage behavior.",
+    "No assistive-technology, physical-device, Safari/Firefox, zoom/reflow or comprehensive keyboard traversal evidence was inspected. Screen-reader announcements and focus visibility across all private states remain unverified.",
+    "Only supplied hero captures were visually inspected. Other private surfaces were sampled from source; no formal accessibility audit or human task-success study exists."
+  ]
+}

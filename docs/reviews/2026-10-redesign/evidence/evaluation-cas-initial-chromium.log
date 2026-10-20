@@ -1,0 +1,23 @@
+
+Running 18 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › quota failure never promises a local evaluation backup; a private copy can be downloaded (966ms)
+  ✓   2 [chromium] › tests/e2e/evaluation-backup.spec.ts:14:7 › access failure never promises a local evaluation backup; a private copy can be downloaded (1.4s)
+  ✓   3 [chromium] › tests/e2e/evaluation-backup.spec.ts:38:5 › a confirmed server save is distinguished from unavailable browser storage (1.1s)
+  ✓   5 [chromium] › tests/e2e/evaluation-backup.spec.ts:58:5 › review keyboard focus visits the summary and returns to editing before final locking (574ms)
+  ✓   4 [chromium] › tests/e2e/evaluation-backup.spec.ts:48:5 › a malformed successful draft receipt never confirms a server backup (1.3s)
+  ✓   6 [chromium] › tests/e2e/evaluation-backup.spec.ts:87:5 › retry during a failed initial lookup preserves memory-only edits without reloading (1.3s)
+  ✓   7 [chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing browser (2.2s)
+  ✓   9 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation load has a bounded wait and preserves recovery (371ms)
+  ✓   8 [chromium] › tests/e2e/evaluation-backup.spec.ts:107:7 › a newer browser evaluation is preserved against an older server copy until choosing server (1.3s)
+  ✓  10 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation save has a bounded wait and preserves recovery (471ms)
+  ✓  12 [chromium] › tests/e2e/evaluation-cas.spec.ts:19:5 › a delayed earlier save drains newer edits under its confirmed revision without reverting text (586ms)
+  ✓  11 [chromium] › tests/e2e/evaluation-backup.spec.ts:145:7 › a stalled evaluation lock has a bounded wait and preserves recovery (1.5s)
+  ✓  13 [chromium] › tests/e2e/evaluation-cas.spec.ts:39:5 › unknown save replays the identical request before sending newer edits (1.3s)
+  ✓  14 [chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses local (2.2s)
+  ✓  15 [chromium] › tests/e2e/evaluation-cas.spec.ts:56:7 › a save conflict preserves both versions and explicitly chooses server (2.2s)
+  ✓  16 [chromium] › tests/e2e/evaluation-cas.spec.ts:76:5 › final locking waits for the latest draft receipt and sends its revision (866ms)
+  ✓  17 [chromium] › tests/e2e/evaluation-cas.spec.ts:91:5 › another-device draft change between review and lock opens an explicit conflict (611ms)
+  ✓  18 [chromium] › tests/e2e/evaluation-cas.spec.ts:106:5 › unavailable initial revision allows private editing but refuses final locking (614ms)
+
+  18 passed (11.2s)

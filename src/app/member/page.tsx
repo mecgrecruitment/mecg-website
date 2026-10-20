@@ -1,5 +1,8 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { selectWorkspaceMembership, requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +19,11 @@ import { screeningRpc, type ScreeningQueueItem } from "@/lib/screening-rpc";
 import { loadWorkspaceContext } from "@/lib/workspace-context";
 import { formatEasternDateTime } from "@/lib/date-time";
 import { loadCalibrationStates } from "./calibration/load";
+import { GROUP_CASE_VISIBLE_STATUSES, groupCaseWorkspaceState } from "./group-case/workspace-state";
 import { evaluationTaskHref, selectedEvaluationAssignment } from "./assignment-navigation";
+import { canVoteInStage, currentHashStage } from "@/lib/hash-tally";
+import { parseScreeningProgress, screeningDeadlineLabel } from "./screening/screening-draft";
+import { orderedWorkTasks, roundWorkOpen, taskDeadline, type MemberWorkTask } from "./work-tasks";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -29,33 +36,40 @@ function isSubmitted(assignment: { status: string; evaluations: Array<{ status: 
     || assignment.evaluations.some((evaluation) => ["SUBMITTED", "LOCKED"].includes(evaluation.status));
 }
 
-function isReady(assignment: { status: string; evaluations: Array<{ status: string }>; rounds: { status: string } }) {
+function isReady(assignment: { status: string; evaluations: Array<{ status: string }>; rounds: { status: string; closes_at: string | null } }) {
   return !isSubmitted(assignment)
     && ["ASSIGNED", "IN_PROGRESS"].includes(assignment.status)
-    && assignment.rounds.status === "ACTIVE";
+    && roundWorkOpen(assignment.rounds);
 }
 
 export default async function MemberPage({ searchParams }: { searchParams: Promise<{ round?: string; assignment?: string }> }) {
   const [user, { round: roundFilter, assignment: requestedAssignmentId }] = await Promise.all([requireMember(), searchParams]);
   // Group Case grading moved to its own page; old links and bookmarks still land there.
-  if (roundFilter === "GROUP_CASE") redirect("/member/group-case");
-  const cycleMembership = user.memberships.find((membership) => ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"].includes(membership.role));
+  if (roundFilter === "GROUP_CASE") redirect(withWorkspaceCycle("/member/group-case", await requestedWorkspaceCycleId()));
+  const cycleMembership = await selectWorkspaceMembership(user, ["MEMBER", "BOARD", "PANEL", "OWNER", "RECRUITMENT_COMMITTEE"]);
+  const cycleId = cycleMembership?.cycleId ?? await requestedWorkspaceCycleId();
   if (!cycleMembership) return null;
 
   const supabase = await createClient();
-  const [{ data: assignments, error }, workspaceContext, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }, { data: activeGroupCaseRound }] = await Promise.all([
-    supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics!rubrics_round_id_fkey(id, version, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
+  const [{ data: assignments, error }, workspaceContext, { data: gradingEvents }, calibrationStates, { data: buddySlots, error: buddySlotsError }, { data: profile }, { data: groupCaseRound, error: groupCaseRoundError }, { data: cycleEvents, error: cycleEventsError }, { data: speedDatingRound, error: speedDatingRoundError }] = await Promise.all([
+    supabase.from("evaluation_assignments").select("id, status, updated_at, applications!inner(id, pnms!inner(name)), rounds!inner(id, kind, name, status, closes_at, rubrics!rubrics_round_id_fkey(id, version, minimum_observed_criteria, rubric_criteria(id, name, description, weight, required, position))), evaluations(status)").eq("evaluator_id", user.id).eq("rounds.cycle_id", cycleMembership.cycleId),
     loadWorkspaceContext(cycleMembership.cycleId),
     supabase.rpc("my_grading_events"),
     loadCalibrationStates(supabase, cycleMembership.cycleId),
     supabase.from("buddy_slots").select("id, starts_at, ends_at").eq("cycle_id", cycleMembership.cycleId).eq("member_id", user.id).order("starts_at"),
     supabase.from("profiles").select("display_name,grad_term,major,position_title,bio").eq("id", user.id).maybeSingle(),
-    supabase.from("rounds").select("id").eq("cycle_id", cycleMembership.cycleId).eq("kind", "GROUP_CASE").eq("status", "ACTIVE").limit(1).maybeSingle(),
+    supabase.from("rounds").select("id, status, closes_at").eq("cycle_id", cycleMembership.cycleId).eq("kind", "GROUP_CASE").in("status", [...GROUP_CASE_VISIBLE_STATUSES]).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("events").select("id").eq("cycle_id", cycleMembership.cycleId),
+    supabase.from("rounds").select("id, kind, status, closes_at").eq("cycle_id", cycleMembership.cycleId).eq("kind", "SPEED_DATING").in("status", ["PUBLISHED", "ACTIVE"]).order("created_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
   if (error) throw error;
+  if (groupCaseRoundError) throw groupCaseRoundError;
+  if (speedDatingRoundError) throw speedDatingRoundError;
+  if (cycleEventsError) throw cycleEventsError;
   if (buddySlotsError) throw buddySlotsError;
   if (workspaceContext.error) throw new Error(workspaceContext.error.message);
   const isScreeningReviewer = workspaceContext.data?.isScreeningReviewer ?? false;
+  const canGradeRoundWork = !isScreeningReviewer && user.memberships.some((membership) => membership.active && membership.cycleId === cycleId && ["MEMBER", "BOARD", "PANEL", "OWNER"].includes(membership.role));
   const { data: applications, error: applicantsError } = isScreeningReviewer
     ? { data: [], error: null }
     : await supabase.rpc("member_applicants", { target_cycle_id: cycleMembership.cycleId });
@@ -64,11 +78,23 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     : { data: [], error: null };
   if (applicantsError) throw applicantsError;
   if (screeningQueue.error) throw new Error(screeningQueue.error.message);
+  const screeningContext = isScreeningReviewer
+    ? await screeningRpc<unknown>(supabase, "screening_reviewer_context", { target_cycle_id: cycleMembership.cycleId })
+    : { data: null, error: null };
+  if (screeningContext.error) throw new Error(screeningContext.error.message);
+  const screeningProgress = parseScreeningProgress(screeningContext.data);
+  const hashStage = currentHashStage(cycleMembership.cycle);
+  const canVote = hashStage !== null && user.memberships.some((membership) => membership.active && membership.cycleId === cycleId && canVoteInStage(membership.role, hashStage));
+  const speedDating = speedDatingRound?.kind === "SPEED_DATING" ? speedDatingRound : null;
+  const speedDatingOpen = speedDating && roundWorkOpen(speedDating);
   const activeRoundFilter = roundFilter === "SPEED_DATING" ? roundFilter : null;
   // Speed Dating assignments are created in groups and must only be submitted
   // through the atomic group workspace. Never expose a member to this legacy
   // one-applicant evaluation form.
-  const assignmentRows = (assignments ?? []).filter((assignment) => assignment.rounds.kind !== "SPEED_DATING");
+  // Inline Group Case observations use SUBMITTED as a persistence state, not
+  // immutable completion. Their own workspace owns quality and editability.
+  const assignmentRows = (assignments ?? []).filter((assignment) => !["SPEED_DATING", "GROUP_CASE"].includes(assignment.rounds.kind));
+  const groupCaseState = groupCaseRound ? groupCaseWorkspaceState(groupCaseRound) : null;
   const openAssignments = assignmentRows.filter(isReady);
   const acknowledgedRubrics = new Set(calibrationStates.filter((state) => state.acknowledgedAt).map((state) => state.rubricId));
   const visible = assignmentRows
@@ -87,8 +113,10 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
     return rubric && acknowledgedRubrics.has(rubric.id) ? [assignment.id] : [];
   });
   const selectedAssignmentId = selectedEvaluationAssignment(eligibleAssignmentIds, requestedAssignmentId);
-  const gradingEvent = (gradingEvents ?? []).find((row) => row.grading_open) ?? (gradingEvents ?? [])[0];
-  const currentWorkspace = activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member";
+  const cycleEventIds = new Set((cycleEvents ?? []).map((event) => event.id));
+  const selectedCycleGradingEvents = (gradingEvents ?? []).filter((event) => cycleEventIds.has(event.event_id));
+  const gradingEvent = selectedCycleGradingEvents.find((row) => row.grading_open) ?? selectedCycleGradingEvents[0];
+  const currentWorkspace = withWorkspaceCycle(activeRoundFilter ? `/member?round=${activeRoundFilter}` : "/member", cycleId);
   const calibrationTasks = Array.from(new Map(openAssignments.flatMap((assignment) => {
     const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
     return rubric && !acknowledgedRubrics.has(rubric.id)
@@ -96,14 +124,14 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         href: `/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`,
         label: `Calibrate for ${assignment.rounds.name}`,
         detail: `Review rubric version ${rubric.version} before evaluating applicants`,
-        dueAt: assignment.rounds.closes_at ? new Date(assignment.rounds.closes_at).getTime() - 1 : -1,
+        dueAt: assignment.rounds.closes_at ? taskDeadline(assignment.rounds.closes_at) - 1 : Number.POSITIVE_INFINITY,
       }] as const]
       : [];
   })).values());
   // One list of what this member actually owes, ordered by deadline. Before
   // this, learning whether you were behind meant visiting /member,
   // /member/screening and /member/event and comparing three separate views.
-  const tasks: Array<{ href: string; label: string; detail: string; dueAt: number }> = [
+  const tasks = orderedWorkTasks([
     ...calibrationTasks,
     ...openAssignments.filter((assignment) => assignment.rounds.kind !== "GROUP_CASE").flatMap((assignment) => {
       const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
@@ -120,78 +148,77 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       .map((item) => ({
         href: `/member/screening/${item.assignment_id}`,
         label: `Screen candidate ${item.candidate_code}`,
-        detail: "First read",
-        dueAt: Number.POSITIVE_INFINITY,
+        detail: screeningProgress ? screeningDeadlineLabel(screeningProgress.deadline) : "First read",
+        dueAt: taskDeadline(screeningProgress?.deadline),
       })),
     ...(gradingEvent?.grading_open
       ? [{
-        href: "/member/event",
+        href: `/member/event?event=${encodeURIComponent(gradingEvent.event_id)}`,
         label: `Add observations from ${gradingEvent.event_name}`,
         detail: "Qualitative observations are open now",
-        dueAt: 0,
+        dueAt: Number.POSITIVE_INFINITY,
       }]
       : []),
-    ...(workspaceContext.data?.hasSpeedDatingRound && !isScreeningReviewer
+    ...(speedDatingOpen && canGradeRoundWork
       ? [{
           href: "/member/speed-dating",
           label: "Grade Speed Dating",
-          detail: "Search the applicants in front of you, tap a star, add a note. Every tap saves.",
-          dueAt: 0,
+          detail: speedDating.closes_at ? `Closes ${formatDeadline(speedDating.closes_at)} · each rating saves separately` : "Search the applicants in front of you. Each rating saves separately.",
+          dueAt: taskDeadline(speedDating.closes_at),
         }]
       : []),
-    ...(activeGroupCaseRound && !isScreeningReviewer
+    ...(groupCaseState?.kind === "active" && canGradeRoundWork
       ? [{
-          href: "/member/group-case",
-          label: "Grade Group Case",
-          detail: "Tap stars for the applicants at your table. Every tap saves.",
-          dueAt: 0,
+          href: withWorkspaceCycle("/member/group-case", cycleId),
+          label: "Continue Group Case observations",
+          detail: groupCaseState.detail,
+          dueAt: taskDeadline(groupCaseRound?.closes_at),
         }]
       : []),
-  ].sort((a, b) => a.dueAt - b.dueAt);
+  ]);
+  // Eligibility does not reveal whether the member has finished their ballot.
+  // Keep voting discoverable without counting it as an unfinished assignment.
+  const availableWork: MemberWorkTask[] = canVote
+    ? [{ href: "/member/hash", label: "Review your Hash ballot", detail: "Voting is open. Your choices are private; each vote saves separately.", dueAt: Number.POSITIVE_INFINITY, action: "Open ballot" }]
+    : [];
+  const preparation: MemberWorkTask[] = speedDating?.status === "PUBLISHED" && canGradeRoundWork
+    ? [{ href: "/member/speed-dating", label: "Prepare for Speed Dating", detail: "The round is published. Ratings open when the Board starts it.", dueAt: Number.POSITIVE_INFINITY }]
+    : [];
   const recentCompletions = assignmentRows
     .filter(isSubmitted)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 6);
-  const assignmentHeading = activeRoundFilter === "SPEED_DATING" ? "Speed Dating" : "All evaluation work";
+  const assignmentHeading = "Assigned evaluations";
+  const unfinishedAssignments = visible.filter((assignment) => !isSubmitted(assignment));
   return (
-    <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
+    <main className="workspace-private workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
         eyebrow={`${cycleMembership.cycle.name} · ${cycleStatusLabel(cycleMembership.cycle.status)}`}
         title="My work"
-        description={`Signed in as ${user.name}`}
+        description="Your assigned reviews and the next thing to finish."
       />
       <WorkspaceNav user={user} cycleId={cycleMembership.cycleId} current={currentWorkspace} />
 
-      <section>
-        <SectionLabel number="01">What you owe</SectionLabel>
-        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">
-          {tasks.length ? `${tasks.length} open ${tasks.length === 1 ? "task" : "tasks"}` : "Nothing is waiting on you"}
-        </h2>
-        <div className="mt-3.5 flex flex-col gap-2">
-          {tasks.map((task) => (
-            <Link
-              key={`${task.href}-${task.label}`}
-              href={task.href}
-              className="task-row flex items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]"
-            >
-              <span className="min-w-0">
-                <span className="block text-[14px] font-semibold text-mecg-navy">{task.label}</span>
-                <span className="mt-0.5 block text-[12px] text-mecg-navy/65">{task.detail}</span>
-              </span>
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="task-row-arrow shrink-0 text-mecg-blue" aria-hidden="true">
-                <path d="M6 4l6 6-6 6" />
-              </svg>
-            </Link>
-          ))}
-          {!tasks.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
-              You are caught up. New work appears here when the Board opens a round or assigns an application.
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section>
+      <div className="member-work-layout">
+        <div className="member-work-primary">
+          <section aria-labelledby="member-next-task">
+            <div className="flex items-center justify-between gap-4">
+              <h2 id="member-next-task" className="member-work-title">{tasks.length ? "Needs you" : "You're up to date"}</h2>
+              <span className="text-xs text-mecg-navy/65">{tasks.length} open {tasks.length === 1 ? "task" : "tasks"}</span>
+            </div>
+            <div className="member-task-list">
+              {tasks.map((task, index) => <Link key={`${task.href}-${task.label}`} href={withWorkspaceCycle(task.href, cycleId)} className="member-task">
+                <span className="member-task-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <div className="member-task-copy"><strong>{task.label}</strong><p>{task.detail}</p></div>
+                <span className="member-task-action">{task.action ?? "Open"}<span aria-hidden="true">→</span></span>
+              </Link>)}
+              {!tasks.length && <p className="py-6 text-sm leading-6 text-mecg-navy/65">No assigned reviews are waiting. Available voting and preparation appear below when they open.</p>}
+            </div>
+          </section>
+          {availableWork.length > 0 && <section className="mt-6 border-t border-mecg-navy/10 pt-5" aria-labelledby="member-available"><h2 id="member-available" className="member-work-title">Voting open</h2>{availableWork.map((task) => <div key={task.href} className="py-3"><Link href={withWorkspaceCycle(task.href, cycleId)} className="inline-flex min-h-11 items-center text-sm font-semibold">{task.label} →</Link><p className="text-sm text-mecg-navy/65">{task.detail}</p></div>)}</section>}
+          {preparation.length > 0 && <section className="mt-6 border-t border-mecg-navy/10 pt-5" aria-labelledby="member-prepare"><h2 id="member-prepare" className="member-work-title">Prepare</h2>{preparation.map((task) => <div key={task.href} className="py-3"><Link href={withWorkspaceCycle(task.href, cycleId)} className="inline-flex min-h-11 items-center text-sm font-semibold">{task.label} →</Link><p className="text-sm text-mecg-navy/65">{task.detail}</p></div>)}</section>}
+          {groupCaseState && groupCaseState.kind !== "active" && canGradeRoundWork && <section className="mt-6 border-t border-mecg-navy/10 pt-5"><h2 className="text-sm font-semibold">Group Case · {groupCaseState.label}</h2><p className="mt-2 text-xs leading-6 text-mecg-navy/65">{groupCaseState.detail}</p><Link href={withWorkspaceCycle("/member/group-case", cycleId)} className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold">{groupCaseState.action} →</Link></section>}
+      {unfinishedAssignments.length > 0 && <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <SectionLabel number="02">Your assignments</SectionLabel>
@@ -203,14 +230,14 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             ariaLabel="Filter assignments by round"
             current={currentWorkspace}
             links={[
-              ["/member", "All work"],
-              ["/member/speed-dating", "Speed Dating"],
-              ["/member/group-case", "Group Case"],
+              [withWorkspaceCycle("/member", cycleId), "All work"],
+              [withWorkspaceCycle("/member/speed-dating", cycleId), "Speed Dating"],
+              [withWorkspaceCycle("/member/group-case", cycleId), "Group Case"],
             ]}
           />
         </div>
         <div className="mt-3.5 flex flex-col gap-4">
-          {visible.map((assignment) => {
+          {unfinishedAssignments.map((assignment) => {
             const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
             const submitted = isSubmitted(assignment);
             const ready = isReady(assignment);
@@ -258,13 +285,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                       </svg>
                     </summary>
                     <div className="disclosure-panel">
-                      <EvaluationForm assignmentId={assignment.id} criteria={criteria} />
+                      <EvaluationForm key={assignment.id} assignmentId={assignment.id} criteria={criteria} minimumObservedCriteria={rubric.minimum_observed_criteria} />
                       <p className="mt-3 text-xs leading-5 text-mecg-navy/50">Saving keeps your draft. Review and lock this evaluation when it is complete; the next ready applicant then moves to the top of My Work.</p>
                     </div>
                   </details>
                 ) : ready && rubric && calibrated ? (
                   <Link
-                    href={evaluationTaskHref(assignment.id, activeRoundFilter ?? undefined)}
+                    href={withWorkspaceCycle(evaluationTaskHref(assignment.id, activeRoundFilter ?? undefined), cycleId)}
                     className="button-secondary mt-3 inline-flex min-h-11 items-center justify-center text-sm"
                   >
                     Grade this applicant
@@ -273,7 +300,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   <div className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-4">
                     <p className="text-sm font-semibold text-mecg-navy">Calibration required before evaluation</p>
                     <p className="mt-1 text-xs leading-5 text-mecg-navy/60">Review the active rubric anchors once for this round. Calibration is advisory and never adjusts your score.</p>
-                    <Link href={`/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`} className="button-primary mt-3 inline-flex text-sm">Review calibration</Link>
+                    <Link href={withWorkspaceCycle(`/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`, cycleId)} className="button-primary mt-3 inline-flex text-sm">Review calibration</Link>
                   </div>
                 ) : ready ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its scoring guide is unavailable. Contact the Board before evaluating.</p>
@@ -281,6 +308,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   <p className="mt-3 text-sm text-mecg-navy/55">You are recused from this applicant. No evaluation is required.</p>
                 ) : assignment.status === "MISSED" ? (
                   <p className="mt-3 text-sm text-mecg-navy/55">This assignment is closed and marked missed.</p>
+                ) : assignment.rounds.status === "ACTIVE" && !roundWorkOpen(assignment.rounds) ? (
+                  <p className="mt-3 text-sm text-mecg-navy/65">The grading deadline has passed or is unavailable. This evaluation cannot be edited.</p>
                 ) : (
                   <p className="mt-3 text-sm text-mecg-navy/55">This form opens when the Board activates the round.</p>
                 )}
@@ -294,11 +323,11 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             </div>
           )}
         </div>
-      </section>
-
-      <section>
-        <SectionLabel number="03">Recent completions</SectionLabel>
-        <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Finished evaluation work</h2>
+      </section>}
+        </div>
+      <aside className="member-work-secondary" aria-label="Activity and account">
+        <h2>Submitted and locked</h2>
+        {recentCompletions.length > 0 && <p className="mt-2 text-xs leading-5 text-mecg-navy/65">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>}
         <div className="mt-3.5 flex flex-col gap-2">
           {recentCompletions.map((assignment) => (
             <div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-paper px-4 py-3">
@@ -309,19 +338,19 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               <span className="text-xs font-semibold text-emerald-800">Submitted</span>
             </div>
           ))}
-          {!recentCompletions.length && <p className="text-sm text-mecg-navy/55">Completed evaluations will appear here.</p>}
+          {!recentCompletions.length && <p className="text-xs leading-6 text-mecg-navy/65">Your submitted evaluations will appear here.</p>}
         </div>
         {!isScreeningReviewer && (
-          <details className="mt-5 rounded-2xl bg-paper p-5">
-            <summary className="cursor-pointer font-semibold text-mecg-navy">Need to report a conflict?</summary>
+          <details className="mt-6 border-t border-mecg-navy/10 pt-4">
+            <summary className="min-h-11 cursor-pointer text-xs font-semibold text-mecg-navy">Report a conflict</summary>
             <div className="mt-4">
               <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />
             </div>
           </details>
         )}
-        <details className="mt-3 rounded-2xl bg-paper p-5">
-          <summary className="cursor-pointer font-semibold text-mecg-navy">Profile and availability</summary>
-          <p className="mt-2 text-sm text-mecg-navy/55">Optional account details and buddy availability live here so they do not compete with assigned work.</p>
+        <details className="mt-4 border-t border-mecg-navy/10 pt-4">
+          <summary className="min-h-11 cursor-pointer text-xs font-semibold text-mecg-navy">Profile and availability</summary>
+          <p className="mt-2 text-sm text-mecg-navy/65">Update your profile or add available times for buddy meetings.</p>
           <div className="mt-4 flex flex-col gap-4">
             <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
             <ProfileForm
@@ -335,7 +364,13 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             />
           </div>
         </details>
-      </section>
+        <figure className="member-community">
+          <div className="member-community-image"><Image src="/mecg/chapter-presentation-2026.jpeg" alt="MECG members together at a chapter presentation" fill sizes="(min-width: 1024px) 216px, 360px" /></div>
+          <figcaption>MECG members at a chapter presentation.</figcaption>
+          <Link href="/team">Meet the chapter <span className="ml-2" aria-hidden="true">→</span></Link>
+        </figure>
+      </aside>
+      </div>
     </main>
   );
 }

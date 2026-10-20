@@ -27,13 +27,13 @@ async function route(testCase: string) {
   return import(`./route.ts?case=${testCase}`) as Promise<typeof import("./route.ts")>;
 }
 
-function client() {
+function client(data: unknown = true) {
   const calls: Array<{ name: string; args: Record<string, unknown> }> = [];
-  return { calls, value: { rpc: async (name: string, args: Record<string, unknown>) => { calls.push({ name, args }); return { data: true, error: null }; } } };
+  return { calls, value: { rpc: async (name: string, args: Record<string, unknown>) => { calls.push({ name, args }); return { data, error: null }; } } };
 }
 
 test("admin account creation enforces Clerk's 8-character password boundary", async (t) => {
-  const fake = client();
+  const fake = client("membership-id");
   const createdPasswords: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
@@ -258,15 +258,16 @@ test("RSVP slots require offset-aware ordered times and a bounded integer capaci
   }]);
 });
 
-test("a failed Clerk rollback after grant_membership names the orphaned account", async (t) => {
+test("a rejected membership grant preserves linked access and records restricted recovery", async (t) => {
   const deleted: string[] = [];
+  const incidents: Record<string, unknown>[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
     rpc: async () => ({ data: null, error: { code: "42501", message: "denied" } }),
   }) } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
     rpc: async () => ({ data: "app-user-1", error: null }),
-    from: () => ({ delete: () => ({ eq: async () => ({ error: null }) }) }),
+    from: (table: string) => { assert.equal(table, "provisioning_incidents"); return { insert: async (row: Record<string, unknown>) => { incidents.push(row); return { error: null }; } }; },
   }) } });
   t.mock.module("@/lib/env", { namedExports: {
     requireClerkIssuer: () => "https://test.clerk.accounts.dev",
@@ -282,17 +283,24 @@ test("a failed Clerk rollback after grant_membership names the orphaned account"
     email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
   }));
   assert.equal(response.status, 500);
-  const { error } = await response.json();
-  assert.match(error, /member@example\.com/);
-  assert.match(error, /Clerk/);
-  assert.deepEqual(deleted, ["user_clerk"]);
+  const payload = await response.json();
+  assert.match(payload.error, /owner review/);
+  assert.match(payload.incidentId, /^[0-9a-f-]{36}$/);
+  assert.doesNotMatch(JSON.stringify(payload), /member@example\.com|user_clerk|unreachable/);
+  assert.deepEqual(deleted, []);
+  assert.equal(payload.remediationRecorded, true);
+  assert.equal(incidents[0].email, "member@example.com");
+  assert.equal(incidents[0].phase, "MEMBERSHIP_GRANT");
+  assert.equal(incidents[0].clerk_user_id, "user_clerk");
+  assert.equal(incidents[0].app_user_id, "app-user-1");
+  assert.equal(incidents[0].clerk_cleanup_failed, false);
 });
 
-test("a successful rollback after grant_membership still reports the RPC's own error", async (t) => {
+test("an uncertain membership grant preserves accounts for reconciliation", async (t) => {
   const deleted: string[] = [];
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
-    rpc: async () => ({ data: null, error: { code: "42501", message: "denied" } }),
+    rpc: async () => { throw new Error("acknowledgement lost"); },
   }) } });
   t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
     rpc: async () => ({ data: "app-user-1", error: null }),
@@ -311,12 +319,12 @@ test("a successful rollback after grant_membership still reports the RPC's own e
     action: "ADD_USER", cycleId: "cycle-1", name: "Test Member",
     email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
   }));
-  assert.equal(response.status, 403);
-  assert.deepEqual(await response.json(), { error: "Request could not be completed" });
-  assert.deepEqual(deleted, ["user_clerk"]);
+  assert.equal(response.status, 500);
+  assert.match((await response.json()).error, /owner review/);
+  assert.deepEqual(deleted, []);
 });
 
-test("a failed Clerk rollback after ensure_external_identity names the orphaned account", async (t) => {
+test("a failed Clerk rollback after ensure_external_identity uses an incident reference", async (t) => {
   const fake = client();
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
@@ -338,8 +346,142 @@ test("a failed Clerk rollback after ensure_external_identity names the orphaned 
     email: "member@example.com", password: "a".repeat(8), role: "MEMBER",
   }));
   assert.equal(response.status, 500);
-  const { error } = await response.json();
-  assert.match(error, /member@example\.com/);
-  assert.match(error, /Clerk/);
+  const payload = await response.json();
+  assert.match(payload.error, /owner review/);
+  assert.match(payload.incidentId, /^[0-9a-f-]{36}$/);
+  assert.doesNotMatch(JSON.stringify(payload), /member@example\.com|user_clerk|unreachable/);
   assert.equal(fake.calls.length, 0);
 });
+
+for (const scenario of ["create-unknown", "create-rejected", "identity-unknown", "identity-empty", "identity-denied-clean", "identity-connection", "identity-completion-unknown"] as const) {
+  test(`account provisioning handles ${scenario} without unsafe cleanup or identity logs`, async (t) => {
+    const stored: Record<string, unknown>[] = [];
+    const deleted: string[] = [];
+    const logs: unknown[][] = [];
+    let grants = 0;
+    t.mock.method(console, "error", (...args: unknown[]) => { logs.push(args); });
+    t.mock.method(console, "warn", (...args: unknown[]) => { logs.push(args); });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({ rpc: async () => { grants += 1; return { data: "membership", error: null }; } }) } });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+      rpc: async () => {
+        if (scenario === "identity-connection" || scenario === "identity-completion-unknown") return { data: null, error: { code: scenario === "identity-connection" ? "08006" : "40003", message: "private-token uncertain commit" } };
+        if (scenario === "identity-unknown") throw new Error("private-token provider failed private@example.invalid");
+        if (scenario === "identity-denied-clean") return { data: null, error: { code: "23505", message: "private-token private@example.invalid" } };
+        return { data: null, error: null };
+      },
+      from: (table: string) => { assert.equal(table, "provisioning_incidents"); return { insert: async (row: Record<string, unknown>) => { stored.push(row); return { error: null }; } }; },
+    }) } });
+    t.mock.module("@/lib/env", { namedExports: { requireClerkIssuer: () => "https://test.clerk.accounts.dev", requireEnv: () => "sk_test" } });
+    t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+      createUser: async () => {
+        if (scenario === "create-unknown") throw new Error("private-token private@example.invalid");
+        if (scenario === "create-rejected") throw { status: 422, message: "private-token private@example.invalid" };
+        return { id: "private-clerk-id" };
+      },
+      deleteUser: async (id: string) => { deleted.push(id); },
+    } }) } });
+    const { POST } = await route(scenario);
+    const response = await POST(request({ action: "ADD_USER", cycleId: "cycle-1", name: "Private Name", email: "private@example.invalid", password: "private-password", role: "MEMBER" }));
+    assert.equal(response.status, scenario === "create-rejected" ? 409 : 500);
+    const result = await response.json();
+    assert.doesNotMatch(JSON.stringify(result), /private@example|private-clerk|private-password|private-token|Private Name/);
+    assert.doesNotMatch(JSON.stringify(logs), /private@example|private-clerk|private-password|private-token|Private Name/);
+    assert.equal(grants, 0);
+    if (scenario === "create-rejected" || scenario === "identity-denied-clean") assert.equal(stored.length, 0);
+    else {
+      assert.equal(stored.length, 1);
+      assert.equal(stored[0].phase, scenario === "create-unknown" ? "CREATE_ACCOUNT" : "IDENTITY_LINK");
+      assert.equal(result.remediationRecorded, true);
+    }
+    assert.deepEqual(deleted, scenario === "identity-denied-clean" ? ["private-clerk-id"] : []);
+  });
+}
+
+for (const scenario of ["identity-unknown", "identity-error", "identity-missing", "grant-unknown", "grant-error", "grant-missing", "incident-store-failed", "success"] as const) {
+  test(`existing account ${scenario} records opaque recovery without destructive compensation`, async (t) => {
+    const incidents: Record<string, unknown>[] = [];
+    const logs: unknown[][] = [];
+    let grants = 0;
+    let deletes = 0;
+    t.mock.method(console, "error", (...args: unknown[]) => { logs.push(args); });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+    t.mock.module("@/lib/env", { namedExports: { requireClerkIssuer: () => "https://test.clerk.accounts.dev", requireEnv: () => "sk_test" } });
+    t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: {
+      getUserList: async () => ({ data: [{ id: "private-existing-clerk", firstName: "Private", lastName: "Person", username: null, externalId: null, emailAddresses: [{ emailAddress: "private@example.invalid" }] }] }),
+      deleteUser: async () => { deletes += 1; },
+    } }) } });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+      rpc: async () => {
+        if (scenario === "identity-unknown") throw new Error("private-provider-token");
+        if (scenario === "identity-error") return { data: null, error: { code: "57014", message: "private-provider-token" } };
+        return { data: scenario === "identity-missing" ? null : "00000000-0000-4000-8000-000000000111", error: null };
+      },
+      from: (table: string) => { assert.equal(table, "provisioning_incidents"); return { insert: async (row: Record<string, unknown>) => { incidents.push(row); if (scenario === "incident-store-failed") throw new Error("private@example.invalid"); return { error: null }; } }; },
+    }) } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({ rpc: async (name: string) => {
+      assert.equal(name, "grant_membership"); grants += 1;
+      if (scenario === "grant-unknown") throw new Error("private-provider-token");
+      return { data: scenario === "grant-missing" ? null : "membership-id", error: scenario === "success" || scenario === "grant-missing" ? null : { code: "57014", message: "private-provider-token" } };
+    } }) } });
+    const { POST } = await route(`existing-${scenario}`);
+    const response = await POST(request({ action: "ADD_EXISTING_USER", cycleId: "cycle-1", email: "private@example.invalid", role: "MEMBER" }));
+    assert.equal(response.status, scenario === "success" ? 201 : 500);
+    const result = await response.json();
+    if (scenario === "success") {
+      assert.equal(result.id, "membership-id");
+      assert.equal(incidents.length, 0); assert.equal(grants, 1); assert.equal(deletes, 0);
+      return;
+    }
+    assert.equal(result.remediationRecorded, scenario !== "incident-store-failed");
+    assert.match(result.incidentId, /^[0-9a-f-]{36}$/);
+    assert.equal(incidents.length, 1);
+    assert.equal(incidents[0]?.phase, scenario.startsWith("identity") ? "IDENTITY_LINK" : "MEMBERSHIP_GRANT");
+    assert.equal(grants, scenario.startsWith("identity") ? 0 : 1);
+    assert.equal(deletes, 0);
+    assert.doesNotMatch(JSON.stringify(result), /private@example|private-existing|private-provider|Private Person|000000000111/);
+    assert.doesNotMatch(JSON.stringify(logs), /private@example|private-existing|private-provider|Private Person|000000000111/);
+  });
+}
+
+test("new account missing membership receipt preserves partial access and records recovery", async (t) => {
+  const incidents: Record<string, unknown>[] = [];
+  let deletes = 0;
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => OWNER } });
+  t.mock.module("@/lib/env", { namedExports: { requireClerkIssuer: () => "https://test.clerk.accounts.dev", requireEnv: () => "sk_test" } });
+  t.mock.module("@clerk/backend", { namedExports: { createClerkClient: () => ({ users: { createUser: async () => ({ id: "synthetic-clerk" }), deleteUser: async () => { deletes += 1; } } }) } });
+  t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({
+    rpc: async () => ({ data: "00000000-0000-4000-8000-000000000111", error: null }),
+    from: () => ({ insert: async (row: Record<string, unknown>) => { incidents.push(row); return { error: null }; } }),
+  }) } });
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({ rpc: async () => ({ data: null, error: null }) }) } });
+  const { POST } = await route("new-empty-membership-receipt");
+  const response = await POST(request({ action: "ADD_USER", cycleId: "cycle-1", email: "synthetic@example.invalid", name: "Synthetic Person", password: "synthetic-password", role: "MEMBER" }));
+  assert.equal(response.status, 500);
+  const body = await response.json();
+  assert.equal(body.remediationRecorded, true);
+  assert.equal(incidents[0]?.phase, "MEMBERSHIP_GRANT");
+  assert.equal(deletes, 0);
+  assert.doesNotMatch(JSON.stringify(body), /synthetic@example|synthetic-password|synthetic-clerk/);
+});
+
+for (const acknowledgement of ["new-text-rubric-id", null, "", { ok: true }]) {
+  test(`rubric save acknowledges the authorized target only with an actual rubric ID: ${JSON.stringify(acknowledgement)}`, async (t) => {
+    const fake = client(acknowledgement);
+    t.mock.module("server-only", { namedExports: {} });
+    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => ({}) } });
+    t.mock.module("@/lib/env", { namedExports: { requireClerkIssuer: () => "https://test.clerk.accounts.dev", requireEnv: () => "sk_test" } });
+    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => BOARD } });
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => fake.value } });
+    const { POST } = await route(`rubric-receipt-${JSON.stringify(acknowledgement)}`);
+    const response = await POST(request({ action: "SET_RUBRIC_CRITERIA", cycleId: "cycle-1", roundId: "round-1", criteria: [] }));
+    assert.deepEqual(fake.calls, [{ name: "set_rubric_criteria", args: { target_round_id: "round-1", criteria: [] } }]);
+    if (typeof acknowledgement === "string" && acknowledgement) {
+      assert.equal(response.status, 201);
+      assert.deepEqual(await response.json(), { id: acknowledgement, roundId: "round-1" });
+    } else {
+      assert.equal(response.status, 500);
+      assert.match((await response.json()).error, /may already be saved/);
+    }
+  });
+}

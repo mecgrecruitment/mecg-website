@@ -1,0 +1,50 @@
+{
+  "seatId": "panel-028",
+  "lens": "Accessible interaction",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The sampled public and application controls have a strong accessible foundation, but the private discussion deck deliberately bypasses reduced-motion preferences. That concrete gap prevents unqualified world-class agreement across the requested scope. The mobile hero capture presents a readable proposition, two clear audience actions and comfortably sized station controls. Source connects native station buttons to a live textual handoff, supplies public skip navigation, and associates application validation errors with fields. I traced the client journey from engagement terms through Contact and read its passing Chromium evidence; its submission response is intercepted, so this is local synthetic journey evidence, not observed client success. Public copy describes student consulting and marks case studies pending approval; application copy accurately warns that assigned reviewers can see identifying information in original resumes. Hold for the motion correction and focused verification. This is an independent AI source/capture assessment, not a human endorsement or accessibility certification.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/form-field.tsx",
+    "src/app/apply/application-form.tsx (validation, focus, fields and resume disclosures)",
+    "src/app/member/evaluation-form.tsx (rating semantics)",
+    "src/app/admin/round-status-control.tsx (dialog focus and overflow)",
+    "src/app/admin/hash/deliberate/deliberation-deck.tsx (motion-bearing render)",
+    "src/app/globals.css (focus and motion rules)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/operator-close.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-round-close-final-e2e.log",
+    "captures/mobile-hero.png",
+    "captures/round-close-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/globals.css:522-581; src/app/admin/hash/deliberate/deliberation-deck.tsx:275-348",
+      "evidence": "The reduce media query at lines 575-577 excludes .deck-root and all descendants. The actual deck root uses that class (275), cards select animated entrances (310-313), the applicant heading uses deck-wordart (328), and the quorum prompt uses deck-pulse (348). CSS defines infinite shimmer (539-540) and pulse (565-566), plus fly/spin/swoosh entrances (522-531). Thus the public instrument reduced-motion test does not cover the deck exception.",
+      "userImpact": "Operators or viewers requesting reduced motion still receive decorative motion around applicant names and decision information, potentially impairing comfort and sustained factual reading during deliberation.",
+      "suggestedFix": "Include the deck in reduced-motion suppression, keeping applicant facts and outcome states immediately visible. Verify computed animation/transition suppression on the actual deck with reduced motion enabled, including card changes and reveal states."
+    }
+  ],
+  "notVerified": [
+    "No screen-reader session, full keyboard-only task completion, zoom/reflow or forced-colors evaluation was supplied or performed; source semantics do not establish announcement quality or user success.",
+    "Touch sizing was sampled from source and supplied captures, not exhaustively measured across private controls. The operator capture is synthetic; its scrollable dialog source and focus tests do not prove physical-device usability.",
+    "No Safari, Firefox, physical-device or hosted acceptance evidence exists. Clerk sessions, real storage/RPC/RLS permissions and email delivery remain unverified integrations.",
+    "The logs show passing local Chromium checks, including menu Escape/focus and instrument reduced motion, rather than a comprehensive accessibility audit. No human study or measured comprehension improvement exists."
+  ]
+}

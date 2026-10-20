@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-018",
+  "lens": "Editorial and brand craft \u2014 factual comprehension (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The public composition is deliberate and coherent: strong sans headings, restrained mono metadata, hairline organization, and a legible mobile stack preserve Precision Instrument. The real PwC-visit photograph is explicitly captioned as a member visit rather than project evidence. Organization figures and past partnerships precede people, and the client journey explains cost, semester scope, confidentiality and the next conversation. However, the central proof section cannot yet demonstrate a specific engagement question, method or deliverable. Its approval caveat is honest, but visual finish and organization names do not establish the quality of consulting work. I traced the client inquiry journey through source and its recorded synthetic browser test; this is not observed user success or evidence of delivered email. The inspected local evidence supports substantial craft, not an unqualified world-class or release-ready conclusion.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/join/page.tsx (targeted excerpts)",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/apply/application-form.tsx:729-746",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:66-97",
+      "evidence": "The captured empty-project state titles section 03 \u201cSelected work\u201d and \u201cReal organizations. Specific questions.\u201d (lines 67\u201369), but lines 79\u201380 provide only cross-industry prose and a pending-approval status. The following rows contain organization/sector only. src/content/projects.public.ts has an empty release list; src/components/client-project-grid.tsx:101\u2013102 confirms scope, methods, deliverables and outcomes remain pending approval. Both full-page captures show this state.",
+      "userImpact": "A prospective client reaches the promised proof before the people section but cannot inspect one actual question MECG addressed. The distinction between past affiliation and demonstrated consulting capability remains unresolved.",
+      "suggestedFix": "For the empty state, use a heading that describes available evidence, such as \u201cPast partnerships,\u201d while retaining the approval status. To substantiate the stronger proof claim, obtain client/Board approval for one real engagement question, method and redacted deliverable with limits, then feature it here. Do not invent outcomes or repurpose culture photography as project proof."
+    }
+  ],
+  "notVerified": [
+    "No hosted deployment, Clerk/Supabase/storage integration or actual contact-email delivery was exercised. The client browser test intercepts /api/contact with a synthetic 200 response (tests/e2e/public-journeys.spec.ts:46).",
+    "No human comprehension, conversion or operator study exists; source and recorded synthetic journeys do not establish user success.",
+    "Only supplied homepage desktop/mobile captures were visually inspected. Other public surfaces were source-reviewed; tablet composition, physical devices, Safari, Firefox, zoom and assistive technology remain unverified.",
+    "Client-approved project artifacts/results and independent substantiation of public membership/partnership figures were not supplied. The original-resume disclosure is explicit in application source; actual authorization and Board policy resolution were not independently tested."
+  ]
+}

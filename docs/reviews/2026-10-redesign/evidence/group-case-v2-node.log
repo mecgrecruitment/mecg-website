@@ -1,0 +1,67 @@
+rate_group_case_applicant_v2 failed { code: '55000' }
+(node:1545722) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1545722) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1545722) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ group case rating requires authentication (25.541288ms)
+✔ group case rating validates the body before opening a database client (6.634743ms)
+✔ group case rating passes the round, applicant, scores, and note to the guarded RPC (4.523528ms)
+✔ group case rating preserves an explicit empty note (3.850863ms)
+✔ group case rating surfaces the database's own message when the round is frozen (4.403245ms)
+✔ group case route preserves a note-only request with null scores and canonical quality (4.059099ms)
+✔ versioned route rejects legacy requests before opening the database (3.446285ms)
+✔ versioned route returns the current conflict snapshot without claiming a save (3.883714ms)
+✔ malformed successful database acknowledgement is unknown, not a successful save (3.594399ms)
+✔ route refuses a wrong-applicant acknowledgement (4.422801ms)
+✔ route refuses a wrong-mutation acknowledgement (3.164955ms)
+✔ route refuses a wrong-conflict-applicant acknowledgement (3.341381ms)
+(node:1545722) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/group-case/ratings/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1545723) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1545723) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1545723) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ My work never labels saved Group Case observations immutable or completed (120.660454ms)
+✔ My work retains written evaluation immutability and finished work (25.630963ms)
+✔ My work and Group Case retain the frozen review path (33.246782ms)
+✔ My work and Group Case retain the finalized review path (25.849147ms)
+✔ My work and Group Case retain the archived review path (26.679063ms)
+✔ an active round past its deadline is read-only and never an open My work task (26.280565ms)
+✔ active work continues through the dedicated workspace without inferred quality (7.822982ms)
+✔ committee-only accounts cannot load the member roster (7.842157ms)
+✔ screening reviewers do not receive Group Case tasks or workspace summaries (20.169441ms)
+✔ roster service failure does not masquerade as no published round (6.413463ms)
+✔ workspace state describes availability, without claiming review validity (0.100646ms)
+(node:1545723) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/member/work-continuity.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1545724) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ note-only receipts keep null scores and the authoritative blockers (1.24904ms)
+✔ client trusts server validity rather than reproducing its predicate (0.094805ms)
+✔ malformed quality cannot cross the RPC boundary (0.172369ms)
+(node:1545724) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/group-case-roster.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1545730) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ versioned writes preserve exact null scores, note, revision and mutation identity (1.145499ms)
+✔ missing or invalid mutation/revision boundaries cannot enter versioned writes (0.139328ms)
+✔ legacy, malformed quality and incomplete saved receipts cannot confirm persistence (0.692481ms)
+✔ roster requires applicant revisions while rubric criteria need no revision field (0.192196ms)
+(node:1545730) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/group-case-write.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 649.376108

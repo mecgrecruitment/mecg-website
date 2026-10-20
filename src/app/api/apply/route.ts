@@ -1,3 +1,4 @@
+import { parseApplicationSubmissionReceipt } from "@/lib/application-submission";
 import { NextRequest } from "next/server";
 import { rateLimitRouteResponse, readJsonBody, requestReference, routeJsonResponse } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
@@ -5,6 +6,8 @@ import { scheduleApplicationReceiptDelivery } from "@/lib/application-receipt-de
 import { checkRateLimitStatus, clientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { parseApplicationIntake } from "@/lib/workflow";
+
+import { isDraftRevision, parseApplicationDraftSaveResult } from "@/app/apply/application-server-draft";
 
 const MAX_REQUEST_BYTES = 64 * 1024;
 
@@ -30,7 +33,14 @@ export async function POST(req: NextRequest) {
   if (parsedBody.error) {
     return respond({ error: "Invalid application payload" }, 400, "INVALID_PAYLOAD");
   }
-  const intake = parseApplicationIntake(parsedBody.data, user.email);
+  const envelope = parsedBody.data;
+  if (!envelope || typeof envelope !== "object" || Array.isArray(envelope)
+    || !("expectedRevision" in envelope) || !(envelope.expectedRevision === null || isDraftRevision(envelope.expectedRevision))
+    || !("cycleId" in envelope) || typeof envelope.cycleId !== "string" || !envelope.cycleId || envelope.cycleId.length > 240) {
+    return respond({ error: "Reload the application before submitting; your answers have been kept.", code: "DRAFT_PRECONDITION_REQUIRED" }, 400);
+  }
+  const { expectedRevision, cycleId, ...payload } = envelope;
+  const intake = parseApplicationIntake(payload, user.email);
   if (!intake) {
     return respond({ error: "A valid name, resume, answers, and consent are required" }, 400, "INVALID_APPLICATION");
   }
@@ -46,6 +56,8 @@ export async function POST(req: NextRequest) {
   const ipLimit = await checkRateLimitStatus(`apply-ip:${ip}`);
   if (ipLimit !== "allowed") return rateLimitRouteResponse("application.submit", requestId, startedAt, ipLimit, undefined, 3600);
   const rpcArgs = {
+    expected_revision: expectedRevision,
+    cycle_id: cycleId,
     applicant_name: intake.name,
     applicant_contact: user.email,
     preferred_name: intake.preferredName ?? undefined,
@@ -62,13 +74,9 @@ export async function POST(req: NextRequest) {
     accessibility_notes: intake.accessibilityNotes ?? undefined,
   };
   let rpcResult;
-  let durableOutbox = true;
   try {
-    rpcResult = await supabase.rpc("submit_application_reliable", rpcArgs);
-    if (rpcResult.error?.code === "PGRST202") {
-      durableOutbox = false;
-      rpcResult = await supabase.rpc("submit_application", rpcArgs);
-    }
+    // No fallback to a writer without a revision precondition.
+    rpcResult = await supabase.rpc("submit_application_v2", rpcArgs);
   } catch {
     return routeJsonResponse("application.submit", requestId, startedAt, { error: "Submission services are temporarily unavailable. Try again shortly." }, 503, {
       code: "SERVICE_UNAVAILABLE",
@@ -89,16 +97,19 @@ export async function POST(req: NextRequest) {
     if (error.code === "22023") return respond({ error: "Review the highlighted application details and submit again." }, 400, "INVALID_APPLICATION");
     return respond({ error: "An unexpected error occurred" }, 500, "SUBMISSION_FAILED");
   }
+  const conflict = parseApplicationDraftSaveResult(data);
+  if (conflict?.kind === "conflict") return respond({ kind: "conflict", draft: conflict.snapshot ? { ...conflict.snapshot.draft, revision: conflict.snapshot.revision } : null, error: "Your saved draft changed in another tab or device." }, 409, "DRAFT_REVISION_CONFLICT");
   const result = data;
-  if (!result || typeof result !== "object" || Array.isArray(result) || typeof result.applicationId !== "string" || typeof result.submittedNow !== "boolean") {
+  const applicationId = parseApplicationSubmissionReceipt(result);
+  if (!result || typeof result !== "object" || Array.isArray(result) || !applicationId || typeof result.submittedNow !== "boolean") {
     return respond({ error: "An unexpected error occurred" }, 500, "INVALID_SUBMISSION_RESPONSE");
   }
-  const { applicationId, submittedNow } = result;
+  const { submittedNow } = result;
   if (submittedNow) scheduleApplicationReceiptDelivery({
     applicationId,
     applicantName: intake.name,
     recipient: user.email,
-    durableOutbox,
+    durableOutbox: true,
   });
   return respond({ applicationId }, submittedNow ? 201 : 200);
 }

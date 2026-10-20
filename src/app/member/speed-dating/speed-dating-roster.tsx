@@ -138,9 +138,8 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
   }
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mecg-orange-ink">{initial.roundName}</p>
-      <p className="mt-3 text-sm font-semibold text-mecg-navy/65" aria-live="polite">Graded {scored} of {initial.progress.total}</p>
+    <section className="grading-workspace speed-dating-workspace rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-7">
+      <div className="grading-workspace-heading"><h2>Rate your conversations</h2><p aria-live="polite">{scored} of {initial.progress.total} rated</p></div>
       <div className="relative mt-4">
         <svg className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-mecg-navy/45" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
@@ -153,7 +152,7 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
           placeholder="Search a name"
           aria-label="Search applicants"
           autoComplete="off"
-          className="min-h-12 w-full rounded-xl border border-mecg-navy/15 bg-white py-3 pl-12 pr-4 text-base text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
+          className="workspace-search min-h-12 w-full rounded-xl border border-mecg-navy/15 bg-white py-3 pl-12 pr-4 text-base text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
         />
       </div>
       <p className="mt-3 text-xs leading-5 text-mecg-navy/60">

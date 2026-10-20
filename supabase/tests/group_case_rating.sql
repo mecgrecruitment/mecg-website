@@ -3,11 +3,28 @@ set local role postgres;
 set local search_path = extensions, public;
 select extensions.plan(42);
 
+-- Exercise the revision-safe public surface with the original synthetic caller.
+-- Each fixture action is a deliberate fresh edit based on the latest own roster.
+create function pg_temp.rate_group_case_compat(target_round_id text,target_application_id text,scores jsonb,note text)
+returns jsonb language plpgsql as $$
+declare revision uuid;
+begin
+  select (applicant->>'revision')::uuid into revision
+  from jsonb_array_elements(rush.group_case_roster_v2(target_round_id)->'groups') g,
+    jsonb_array_elements(g->'applicants') applicant where applicant->>'applicationId'=target_application_id;
+  return rush.rate_group_case_applicant_v2(target_round_id,target_application_id,scores,note,revision,gen_random_uuid())-'kind'-'revision'-'mutationId';
+end $$;
+
 insert into auth.users(id, email, raw_user_meta_data) values
   ('30000000-0000-4000-8000-000000000001', 'gc-owner@example.invalid', '{"display_name":"Group Case owner"}'::jsonb),
   ('30000000-0000-4000-8000-000000000002', 'gc-member-one@example.invalid', '{"display_name":"Group Case member one"}'::jsonb),
   ('30000000-0000-4000-8000-000000000003', 'gc-member-two@example.invalid', '{"display_name":"Group Case member two"}'::jsonb),
   ('30000000-0000-4000-8000-000000000004', 'gc-committee@example.invalid', '{"display_name":"Group Case committee"}'::jsonb);
+
+insert into rush.auth_identities(issuer,subject,app_user_id)
+ select 'http://127.0.0.1:54321/auth/v1', id::text, id from rush.profiles
+ where id::text like '30000000-%'
+ on conflict (issuer,subject) do nothing;
 
 -- rush_cycles_one_non_terminal_idx allows one live cycle at a time.
 update rush.rush_cycles set status = 'CLOSED' where status in ('DRAFT', 'OPEN', 'IN_PROCESS', 'DECISION_LOCK');
@@ -52,7 +69,7 @@ set local "request.jwt.claim.sub" = '30000000-0000-4000-8000-000000000002';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"30000000-0000-4000-8000-000000000002","role":"authenticated"}';
 set local role authenticated;
 select extensions.is(
-  (select count(*) from jsonb_object_keys(rush.rate_group_case_applicant(
+  (select count(*) from jsonb_object_keys(pg_temp.rate_group_case_compat(
     '30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000031',
     '{"30000000-0000-4000-8000-000000000071":4,"30000000-0000-4000-8000-000000000072":null,"30000000-0000-4000-8000-000000000073":null,"30000000-0000-4000-8000-000000000074":null,"30000000-0000-4000-8000-000000000075":null,"30000000-0000-4000-8000-000000000076":null}'::jsonb,
     ''
@@ -79,7 +96,7 @@ select extensions.is(
 -- 2. Second tap updates in place
 set local role authenticated;
 select extensions.is(
-  rush.rate_group_case_applicant(
+  pg_temp.rate_group_case_compat(
     '30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000031',
     '{"30000000-0000-4000-8000-000000000071":3,"30000000-0000-4000-8000-000000000072":5,"30000000-0000-4000-8000-000000000073":null,"30000000-0000-4000-8000-000000000074":null,"30000000-0000-4000-8000-000000000075":null,"30000000-0000-4000-8000-000000000076":null}'::jsonb,
     'smoke'
@@ -107,7 +124,7 @@ select extensions.is(
 -- 3. Clearing every star on an already-graded applicant is a valid save
 set local role authenticated;
 select extensions.is(
-  rush.rate_group_case_applicant(
+  pg_temp.rate_group_case_compat(
     '30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000031',
     '{"30000000-0000-4000-8000-000000000071":null,"30000000-0000-4000-8000-000000000072":null,"30000000-0000-4000-8000-000000000073":null,"30000000-0000-4000-8000-000000000074":null,"30000000-0000-4000-8000-000000000075":null,"30000000-0000-4000-8000-000000000076":null}'::jsonb,
     ''
@@ -124,20 +141,20 @@ select extensions.is(
 -- 4, 5, 6. Rejected saves
 set local role authenticated;
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000071":null,"30000000-0000-4000-8000-000000000072":null,"30000000-0000-4000-8000-000000000073":null,"30000000-0000-4000-8000-000000000074":null,"30000000-0000-4000-8000-000000000075":null,"30000000-0000-4000-8000-000000000076":null}'::jsonb, '')$$,
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000071":null,"30000000-0000-4000-8000-000000000072":null,"30000000-0000-4000-8000-000000000073":null,"30000000-0000-4000-8000-000000000074":null,"30000000-0000-4000-8000-000000000075":null,"30000000-0000-4000-8000-000000000076":null}'::jsonb, '')$$,
   '22023', 'pick at least one star', 'an empty first save is rejected'
 );
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000071":6}'::jsonb, '')$$,
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000071":6}'::jsonb, '')$$,
   '22023', 'scores must be 1 through 5 or null', 'a score above 5 is rejected'
 );
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000099":4}'::jsonb, '')$$,
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032', '{"30000000-0000-4000-8000-000000000099":4}'::jsonb, '')$$,
   '22023', 'unknown criterion', 'an unknown criterion is rejected'
 );
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000052', '30000000-0000-4000-8000-000000000031', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
-  '55000', 'round is not open for grading', 'a published round cannot be graded'
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000052', '30000000-0000-4000-8000-000000000031', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
+  '42501', 'forbidden', 'a published round in another cycle remains forbidden before replay or write'
 );
 
 -- 7. Conflict declaration hides the applicant and blocks rating
@@ -146,7 +163,7 @@ insert into rush.conflict_declarations(application_id, declarer_id, reason) valu
   ('30000000-0000-4000-8000-000000000033', '30000000-0000-4000-8000-000000000002', 'Roommate');
 set local role authenticated;
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000033', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000033', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
   '42501', 'conflict declared', 'a declared conflict blocks rating'
 );
 select extensions.ok(
@@ -162,7 +179,7 @@ select extensions.ok(
 set local "request.jwt.claim.sub" = '30000000-0000-4000-8000-000000000004';
 set local "request.jwt.claims" = '{"iss":"http://127.0.0.1:54321/auth/v1","sub":"30000000-0000-4000-8000-000000000004","role":"authenticated"}';
 select extensions.throws_ok(
-  $$select rush.rate_group_case_applicant('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000031', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
+  $$select pg_temp.rate_group_case_compat('30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000031', '{"30000000-0000-4000-8000-000000000071":4}'::jsonb, '')$$,
   '42501', 'forbidden', 'a recruitment committee member cannot grade'
 );
 
@@ -202,8 +219,8 @@ select extensions.is(rush.group_case_roster('30000000-0000-4000-8000-00000000005
 
 -- 12. Board results
 -- Member two rates Bravo: Collaboration 5 (weight 25), Problem-Solving 3 (weight 13), the other four not observed.
--- weighted = 8 * (25*5 + 13*3) / (25 + 13) = 8 * 164 / 38 = 34.526... -> 34.5 (unweighted would read 32.0).
-select rush.rate_group_case_applicant(
+-- Raw observations remain visible, but 38% coverage and one evaluator cannot produce a valid round mean.
+select pg_temp.rate_group_case_compat(
   '30000000-0000-4000-8000-000000000051', '30000000-0000-4000-8000-000000000032',
   '{"30000000-0000-4000-8000-000000000071":5,"30000000-0000-4000-8000-000000000072":3}'::jsonb,
   'sharp'
@@ -219,13 +236,13 @@ select extensions.is(rush.group_case_results('30000000-0000-4000-8000-0000000000
 select extensions.is(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'summary' ->> 'graders', '1', 'a cleared rating does not count as a grader');
 select extensions.is(
   (select a ->> 'mean' from jsonb_array_elements(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'applicants') a where a ->> 'applicationId' = '30000000-0000-4000-8000-000000000032'),
-  '34.5', 'the weighted mean counts only the criteria the grader scored'
+  null::text, 'a partial observation cannot establish a round mean'
 );
 select extensions.is(
   (select a -> 'evaluations' -> 0 ->> 'scoredCount' from jsonb_array_elements(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'applicants') a where a ->> 'applicationId' = '30000000-0000-4000-8000-000000000032'),
   '2', 'the evaluation reports how many criteria were scored'
 );
-select extensions.is(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'applicants' -> 0 ->> 'applicationId', '30000000-0000-4000-8000-000000000032', 'the rated applicant ranks first');
+select extensions.is(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'applicants' -> 0 ->> 'applicationId', '30000000-0000-4000-8000-000000000031', 'applicants without completed valid scores sort by name');
 select extensions.is(
   (select a ->> 'count' from jsonb_array_elements(rush.group_case_results('30000000-0000-4000-8000-000000000051') -> 'applicants') a where a ->> 'applicationId' = '30000000-0000-4000-8000-000000000033'),
   '0', 'an unrated applicant has no evaluations'

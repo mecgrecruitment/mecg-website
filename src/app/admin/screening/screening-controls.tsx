@@ -53,7 +53,7 @@ function Step({ number, title, state, summary, open = state === "active", childr
         <h2 className={`text-lg font-semibold tracking-[-0.01em] ${state === "active" ? "text-mecg-navy" : "text-mecg-navy/60"}`}>
           <span className="sr-only">Step {number}{state === "done" ? ", done" : ""}: </span>{title}
         </h2>
-        {summary && <p className="mt-1 text-sm text-mecg-navy/55">{summary}</p>}
+        {summary && <div className="mt-1 text-sm text-mecg-navy/65">{summary}</div>}
         {open && children && <div className="mt-4">{children}</div>}
       </div>
     </li>
@@ -109,7 +109,7 @@ export default function ScreeningControls({
 
   const unapproved = batch ? batch.pending + batch.rejected : 0;
   const readerCount = batch ? batch.reviewers.length : reviewerIds.length;
-  const step2Done = Boolean(batch) && unapproved === 0;
+  const step2Done = Boolean(batch) && (batch?.status !== "DRAFT" || unapproved === 0);
   const step3Done = Boolean(batch) && batch?.status !== "DRAFT";
   const reviewsLeft = batch ? batch.assigned - batch.submitted : 0;
   const canReset = Boolean(batch) && (batch?.status === "DRAFT" || (batch?.status === "PUBLISHED" && batch.submitted === 0));
@@ -119,7 +119,7 @@ export default function ScreeningControls({
   const missingFromBatch = batch?.status === "DRAFT" ? submittedCount - batch.packets : 0;
   const step1State = batch ? "done" : "active";
   const step2State = !batch ? "todo" : step2Done ? "done" : "active";
-  const step3State = !batch ? "todo" : step3Done ? "done" : "active";
+  const step3State = !batch || !step2Done ? "todo" : step3Done ? "done" : "active";
   const step4State = !batch || batch.status === "DRAFT" ? "todo" : batch.status === "FROZEN" ? "done" : "active";
   const notices = <div className="mt-4 space-y-2"><OperationNotice kind="error">{error}</OperationNotice><OperationNotice kind="success">{success}</OperationNotice></div>;
 
@@ -215,18 +215,18 @@ export default function ScreeningControls({
 
       <Step
         number={3}
-        title="Send out"
+        title="Assign readers and open review"
         state={step3State}
-        summary={batch && step3Done ? `Sent ${batch.assigned} reads to ${readerCount} readers` : undefined}
+        summary={batch && step3Done ? `${batch.assigned} reads assigned to ${readerCount} readers` : undefined}
       >
         {batch && (
           <>
             <p className="text-sm tabular-nums text-mecg-navy/70">
               {batch.approved} applications × {READS_PER_APPLICATION} = {batch.approved * READS_PER_APPLICATION} reads across {readerCount} readers, about {perReader(batch.approved * READS_PER_APPLICATION, readerCount)} each
             </p>
-            <button type="button" disabled={pending || unapproved > 0} onClick={() => void act({ action: "DISTRIBUTE", batchId: batch.id }, "Readers assigned. Review is open.")} className="button-primary mt-4 disabled:opacity-50">
+            {batch.status === "DRAFT" && <button type="button" disabled={pending || unapproved > 0} onClick={() => void act({ action: "DISTRIBUTE", batchId: batch.id }, "Readers assigned. Review is open.")} className="button-primary mt-4 disabled:opacity-50">
               Assign readers and open review
-            </button>
+            </button>}
             {unapproved > 0 && <p className="mt-2 text-xs text-mecg-navy/55">{unapproved} application{unapproved === 1 ? "" : "s"} still need approving in step 2.</p>}
             {step3State === "active" && notices}
           </>
@@ -235,13 +235,15 @@ export default function ScreeningControls({
 
       <Step
         number={4}
-        title="Track and close"
+        title="Track, close and release internal ranking"
+        open={Boolean(batch) && batch?.status !== "DRAFT"}
         state={step4State}
-        summary={batch?.status === "FROZEN" ? `Closed · ${batch.submitted} of ${batch.assigned} reviews submitted${batch.releasedAt ? " · released to Board" : ""}` : undefined}
+        summary={batch?.status === "FROZEN" ? `Closed · ${batch.submitted} of ${batch.assigned} reviews submitted${batch.releasedAt ? " · internal ranking visible to Board and Recruitment Committee" : ""}` : undefined}
       >
         {batch && (
           <>
             <p className="text-sm font-semibold tabular-nums text-mecg-navy">{batch.submitted} of {batch.assigned} reviews submitted</p>
+            <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label="Reader workload">
             <table className="mt-3 w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-mecg-navy/10 text-[13px] text-mecg-navy/55">
@@ -270,16 +272,18 @@ export default function ScreeningControls({
                 ))}
               </tbody>
             </table>
-            <button type="button" disabled={pending || reviewsLeft > 0} onClick={() => void act({ action: "FREEZE", batchId: batch.id }, "Review closed. Ranking is below.")} className="button-primary mt-4 disabled:opacity-50">
+            </div>
+            {batch.status === "PUBLISHED" && <button type="button" disabled={pending || reviewsLeft > 0} onClick={() => void act({ action: "FREEZE", batchId: batch.id }, "Review closed. Internal ranking is below.")} className="button-primary mt-4 disabled:opacity-50">
               Close review and rank
-            </button>
+            </button>}
             {reviewsLeft > 0 && <p className="mt-2 text-xs text-mecg-navy/55">Waiting on {reviewsLeft} review{reviewsLeft === 1 ? "" : "s"}.</p>}
             {batch.status === "FROZEN" && !batch.releasedAt && (
               canRelease
-                ? <button type="button" disabled={pending} onClick={() => void act({ action: "RELEASE", batchId: batch.id }, "Ranking released to Board and the Recruitment Committee.")} className="button-primary mt-4 disabled:opacity-50">Release ranking to Board</button>
-                : <p className="mt-2 text-xs text-mecg-navy/55">Only Owners see the ranking until one of them releases it.</p>
+                ? <button type="button" disabled={pending} onClick={() => void act({ action: "RELEASE", batchId: batch.id }, "Internal ranking is visible to Board and the Recruitment Committee. Applicant outcomes are unchanged.")} className="button-primary mt-4 disabled:opacity-50">Release internal ranking to Board</button>
+                : <p className="mt-2 text-xs text-mecg-navy/55">Only Owners see the internal ranking until one of them releases it to Board and Recruitment Committee.</p>
             )}
-            {step4State === "active" && notices}
+            {batch.status === "FROZEN" && <p className="mt-3 text-sm text-mecg-navy/65">Review closed. {batch.releasedAt ? "Internal ranking is visible to Board and Recruitment Committee." : "Internal ranking has not been released to Board and Recruitment Committee."} Applicant outcomes are unchanged.</p>}
+            {notices}
           </>
         )}
       </Step>

@@ -1,0 +1,445 @@
+
+Running 80 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: lost keeps an uncertain write locked and restores useful focus (347ms)
+  ✓   2 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: malformed keeps an uncertain write locked and restores useful focus (347ms)
+  ✓   3 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: body-stalled keeps an uncertain write locked and restores useful focus (355ms)
+  ✓   4 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: headers-stalled keeps an uncertain write locked and restores useful focus (355ms)
+  ✓   5 [chromium] › tests/e2e/operator-write-receipts.spec.ts:64:7 › release: an operation-specific receipt confirms the write (345ms)
+  ✓   6 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: lost keeps an uncertain write locked and restores useful focus (774ms)
+  ✓   7 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: malformed keeps an uncertain write locked and restores useful focus (701ms)
+  ✓   8 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: headers-stalled keeps an uncertain write locked and restores useful focus (728ms)
+  ✓   9 [chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: body-stalled keeps an uncertain write locked and restores useful focus (715ms)
+  ✓  10 [chromium] › tests/e2e/operator-write-receipts.spec.ts:64:7 › rubric: an operation-specific receipt confirms the write (323ms)
+  ✓  11 [chromium] › tests/e2e/operator-write-receipts.spec.ts:77:7 › release: a receipt for another target cannot confirm this operation (332ms)
+  ✘  12 [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (331ms)
+  ✓  13 [chromium] › tests/e2e/operator-write-receipts.spec.ts:77:7 › rubric: a receipt for another target cannot confirm this operation (329ms)
+  ✓  14 [chromium] › tests/e2e/rubric-validation.spec.ts:3:5 › rubric errors explain every disabled-save condition at its field (372ms)
+  ✘  15 [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (384ms)
+  ✓  16 [chromium] › tests/e2e/rubric-validation.spec.ts:30:5 › saving freezes the exact rubric until a rejected write restores editing (303ms)
+  ✓  17 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: lost keeps an uncertain write locked and restores useful focus (342ms)
+  ✓  18 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: malformed keeps an uncertain write locked and restores useful focus (347ms)
+  ✓  19 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: headers-stalled keeps an uncertain write locked and restores useful focus (305ms)
+  ✓  20 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: body-stalled keeps an uncertain write locked and restores useful focus (299ms)
+  ✓  21 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:64:7 › release: an operation-specific receipt confirms the write (308ms)
+  ✓  22 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: lost keeps an uncertain write locked and restores useful focus (1.3s)
+  ✓  23 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: malformed keeps an uncertain write locked and restores useful focus (1.2s)
+  ✓  24 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: headers-stalled keeps an uncertain write locked and restores useful focus (1.2s)
+  ✓  25 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: body-stalled keeps an uncertain write locked and restores useful focus (1.2s)
+  ✓  26 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:64:7 › rubric: an operation-specific receipt confirms the write (352ms)
+  ✓  27 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:77:7 › release: a receipt for another target cannot confirm this operation (322ms)
+  ✓  29 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:77:7 › rubric: a receipt for another target cannot confirm this operation (340ms)
+  ✘  28 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (368ms)
+  ✘  30 [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (356ms)
+  ✓  31 [mobile-chromium] › tests/e2e/rubric-validation.spec.ts:3:5 › rubric errors explain every disabled-save condition at its field (406ms)
+  ✓  32 [mobile-chromium] › tests/e2e/rubric-validation.spec.ts:30:5 › saving freezes the exact rubric until a rejected write restores editing (328ms)
+  ✓  33 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: lost keeps an uncertain write locked and restores useful focus (1.3s)
+  ✓  34 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: malformed keeps an uncertain write locked and restores useful focus (1.3s)
+  ✓  35 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: headers-stalled keeps an uncertain write locked and restores useful focus (677ms)
+  ✓  36 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: body-stalled keeps an uncertain write locked and restores useful focus (660ms)
+  ✓  37 [firefox] › tests/e2e/operator-write-receipts.spec.ts:64:7 › release: an operation-specific receipt confirms the write (649ms)
+  ✓  38 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: lost keeps an uncertain write locked and restores useful focus (713ms)
+  ✓  39 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: malformed keeps an uncertain write locked and restores useful focus (696ms)
+  ✓  40 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: headers-stalled keeps an uncertain write locked and restores useful focus (674ms)
+  ✓  41 [firefox] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: body-stalled keeps an uncertain write locked and restores useful focus (696ms)
+  ✓  42 [firefox] › tests/e2e/operator-write-receipts.spec.ts:64:7 › rubric: an operation-specific receipt confirms the write (634ms)
+  ✓  43 [firefox] › tests/e2e/operator-write-receipts.spec.ts:77:7 › release: a receipt for another target cannot confirm this operation (656ms)
+  ✘  44 [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (709ms)
+  ✓  45 [firefox] › tests/e2e/operator-write-receipts.spec.ts:77:7 › rubric: a receipt for another target cannot confirm this operation (613ms)
+  ✓  46 [firefox] › tests/e2e/rubric-validation.spec.ts:3:5 › rubric errors explain every disabled-save condition at its field (739ms)
+  ✓  48 [firefox] › tests/e2e/rubric-validation.spec.ts:30:5 › saving freezes the exact rubric until a rejected write restores editing (614ms)
+  ✘  47 [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (1.3s)
+  ✓  49 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: lost keeps an uncertain write locked and restores useful focus (452ms)
+  ✓  50 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: malformed keeps an uncertain write locked and restores useful focus (428ms)
+  ✓  51 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: headers-stalled keeps an uncertain write locked and restores useful focus (452ms)
+  ✓  52 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: body-stalled keeps an uncertain write locked and restores useful focus (521ms)
+  ✓  53 [webkit] › tests/e2e/operator-write-receipts.spec.ts:64:7 › release: an operation-specific receipt confirms the write (488ms)
+  ✓  54 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: lost keeps an uncertain write locked and restores useful focus (877ms)
+  ✓  55 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: malformed keeps an uncertain write locked and restores useful focus (815ms)
+  ✓  56 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: headers-stalled keeps an uncertain write locked and restores useful focus (832ms)
+  ✓  57 [webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: body-stalled keeps an uncertain write locked and restores useful focus (910ms)
+  ✓  58 [webkit] › tests/e2e/operator-write-receipts.spec.ts:64:7 › rubric: an operation-specific receipt confirms the write (482ms)
+  ✓  59 [webkit] › tests/e2e/operator-write-receipts.spec.ts:77:7 › release: a receipt for another target cannot confirm this operation (430ms)
+  ✘  60 [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (471ms)
+  ✓  61 [webkit] › tests/e2e/operator-write-receipts.spec.ts:77:7 › rubric: a receipt for another target cannot confirm this operation (477ms)
+  ✓  62 [webkit] › tests/e2e/rubric-validation.spec.ts:3:5 › rubric errors explain every disabled-save condition at its field (552ms)
+  ✘  63 [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (599ms)
+  ✓  64 [webkit] › tests/e2e/rubric-validation.spec.ts:30:5 › saving freezes the exact rubric until a rejected write restores editing (535ms)
+  ✓  65 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: lost keeps an uncertain write locked and restores useful focus (413ms)
+  ✓  66 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: malformed keeps an uncertain write locked and restores useful focus (444ms)
+  ✓  67 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: headers-stalled keeps an uncertain write locked and restores useful focus (432ms)
+  ✓  68 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › release: body-stalled keeps an uncertain write locked and restores useful focus (469ms)
+  ✓  69 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:64:7 › release: an operation-specific receipt confirms the write (422ms)
+  ✓  70 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: lost keeps an uncertain write locked and restores useful focus (841ms)
+  ✓  71 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: malformed keeps an uncertain write locked and restores useful focus (882ms)
+  ✓  72 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: headers-stalled keeps an uncertain write locked and restores useful focus (841ms)
+  ✓  73 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:5:9 › rubric: body-stalled keeps an uncertain write locked and restores useful focus (842ms)
+  ✓  74 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:64:7 › rubric: an operation-specific receipt confirms the write (454ms)
+  ✓  75 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:77:7 › release: a receipt for another target cannot confirm this operation (442ms)
+  ✘  76 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction (496ms)
+  ✓  77 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:77:7 › rubric: a receipt for another target cannot confirm this operation (511ms)
+  ✓  78 [mobile-webkit] › tests/e2e/rubric-validation.spec.ts:3:5 › rubric errors explain every disabled-save condition at its field (675ms)
+  ✘  79 [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction (615ms)
+  ✓  80 [mobile-webkit] › tests/e2e/rubric-validation.spec.ts:30:5 › saving freezes the exact rubric until a rejected write restores editing (521ms)
+
+
+  1) [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        - locator resolved to <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div>
+        - unexpected value ""
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        - locator resolved to <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div>
+        - unexpected value ""
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        - locator resolved to <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div>
+        - unexpected value ""
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        - locator resolved to <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div>
+        - unexpected value ""
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-re-d208f-tor-s-choice-for-correction-mobile-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected: "Round rules need correction"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert" aria-live="assertive" class="panel-seat rounded-xl px-4 py-3 text-sm leading-6 bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]">Round rules need correction</p> aka getByText('Round rules need correction')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toHaveText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+       96 |     const trigger = page.getByRole("button", { name: control === "release" ? "Release outcome" : "Save scoring guide", exact: true });
+       97 |     await trigger.click();
+    >  98 |     await expect(page.getByRole("alert")).toHaveText("Round rules need correction");
+          |                                           ^
+       99 |     await expect(trigger).toBeEnabled();
+      100 |     expect(writes).toBe(1);
+      101 |     if (control === "rubric") await expect(page.getByLabel("Name", { exact: true }).first()).toHaveValue("Retained rejected wording");
+        at /work/tests/e2e/operator-write-receipts.spec.ts:98:43
+
+    Error Context: .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace .audit/operator-write-receipts-complete/operator-write-receipts-ru-51a0a-tor-s-choice-for-correction-mobile-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10 failed
+    [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+    [chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+    [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+    [mobile-chromium] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+    [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+    [firefox] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+    [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+    [webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+    [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › release: a known rejection preserves the operator's choice for correction 
+    [mobile-webkit] › tests/e2e/operator-write-receipts.spec.ts:89:7 › rubric: a known rejection preserves the operator's choice for correction 
+  70 passed (27.8s)

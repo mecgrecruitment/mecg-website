@@ -17,13 +17,15 @@ type Readiness = {
   };
 };
 
-const LABELS: Record<keyof Readiness["configuration"], string> = {
+const LABELS = {
   publicSupabase: "Public Supabase configuration",
   serviceRole: "Server administration key",
   resend: "Recruitment email",
   contactRecipient: "Contact recipient",
   cronSecret: "Scheduled-job secret",
-};
+} satisfies Record<keyof Readiness["configuration"], string>;
+
+const CONFIGURATION_KEYS = ["publicSupabase", "serviceRole", "resend", "contactRecipient", "cronSecret"] as const;
 
 async function requestReadiness(): Promise<Readiness> {
   const response = await authorizedFetch("/api/admin/operations", { cache: "no-store" });
@@ -35,13 +37,17 @@ async function requestReadiness(): Promise<Readiness> {
 export default function ReadinessPanel() {
   const [result, setResult] = useState<Readiness | null>(null);
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
 
   async function load() {
+    setPending(true);
     try {
       setResult(await requestReadiness());
       setError("");
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Could not check operations");
+    } finally {
+      setPending(false);
     }
   }
 
@@ -55,40 +61,42 @@ export default function ReadinessPanel() {
     return () => { cancelled = true; };
   }, []);
 
-  if (!result && !error) return <p role="status" className="text-sm text-mecg-navy/65">Checking production dependencies…</p>;
-  if (error) {
+  if (!result && !error) return <p role="status" className="text-sm text-mecg-navy/65">Checking database access and required configuration…</p>;
+  if (error && !result) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-900" role="alert">
         <p>{error}</p>
-        <button type="button" onClick={() => void load()} className="button-secondary mt-4">Try again</button>
+        <button type="button" onClick={() => void load()} disabled={pending} aria-busy={pending} className="button-secondary mt-4">{pending ? "Checking…" : "Try again"}</button>
       </div>
     );
   }
   if (!result) return null;
 
-  const checks = [
-    ["Database", result.database.ok, `${result.database.latencyMs} ms`],
-    ...Object.entries(result.configuration).map(([key, ok]) => [LABELS[key as keyof Readiness["configuration"]], ok, ok ? "Configured" : "Missing"]),
-  ] as Array<[string, boolean, string]>;
+  const checks: Array<[string, boolean, string]> = [
+    ["Database access", result.database.ok, result.database.ok ? `Responded in ${result.database.latencyMs} ms` : "Database check failed. Check database availability and server credentials."],
+    ...CONFIGURATION_KEYS.map((key): [string, boolean, string] => [LABELS[key], result.configuration[key], result.configuration[key] ? "Configured" : "Missing. Ask the deployment owner to check this configuration."]),
+  ];
 
   return (
     <div className="space-y-5">
       <div className={`rounded-2xl p-5 ${result.ready ? "bg-emerald-50 text-emerald-950" : "bg-red-50 text-red-950"}`} role="status">
-        <p className="font-semibold">{result.ready ? "Production dependencies are ready." : "Production dependencies need attention."}</p>
+        <p className="font-semibold">{result.ready ? "Required configuration checks passed." : "Required configuration checks need attention."}</p>
         <p className="mt-1 text-sm opacity-75">Checked {formatEasternDateTime(result.checkedAt)}</p>
       </div>
+      <p className="text-sm text-mecg-navy/65">These checks cover database access and required configuration. Email provider acceptance, inbox delivery and recruitment readiness require separate verification.</p>
+      {error && <p role="alert" className="text-sm text-red-800">Could not refresh checks: {error} The previous result above has not been updated.</p>}
       <ul className="grid gap-3 sm:grid-cols-2">
         {checks.map(([label, ok, detail]) => (
           <li key={label} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
             <div className="flex items-center justify-between gap-4">
               <span className="font-medium text-mecg-navy">{label}</span>
-              <span className={`text-[13px] font-semibold ${ok ? "text-emerald-800" : "text-red-700"}`}>{ok ? "Ready" : "Action"}</span>
+              <span className={`text-[13px] font-semibold ${ok ? "text-emerald-800" : "text-red-700"}`}>{ok ? "Passed" : "Needs attention"}</span>
             </div>
             <p className="mt-2 text-sm text-mecg-navy/65">{detail}</p>
           </li>
         ))}
       </ul>
-      <button type="button" onClick={() => void load()} className="button-secondary">Run check again</button>
+      <button type="button" onClick={() => void load()} disabled={pending} aria-busy={pending} className="button-secondary">{pending ? "Checking…" : "Run check again"}</button>
     </div>
   );
 }

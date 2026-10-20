@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import { cycleStatusLabel } from "@/lib/labels";
 import { formatEasternDateTime } from "@/lib/date-time";
@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Referrals" };
 
 export default async function ReferralsPage() {
   const user = await requireAdmin();
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS");
+  const cycleId = await selectWorkspaceCycle(user.memberships, "RECRUITMENT_OPERATIONS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
   const [cycleResult, referralsResult] = await Promise.all([

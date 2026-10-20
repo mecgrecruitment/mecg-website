@@ -3,7 +3,7 @@ import { mapRpcError, rateLimitRouteResponse, readJsonBody, requestReference, ro
 import { currentUser } from "@/lib/auth";
 import { checkRateLimitStatus, clientIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import { parseApplicationServerDraft } from "@/app/apply/application-server-draft";
+import { parseApplicationDraftSnapshot, parseApplicationDraftSaveRequest, parseApplicationDraftSaveResult } from "@/app/apply/application-server-draft";
 
 const MAX_REQUEST_BYTES = 64 * 1024;
 
@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
       ? respond({ error: "Draft service is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE")
       : respond(body, status, "DRAFT_UNAVAILABLE");
   }
+  if (data != null && !parseApplicationDraftSnapshot(data)) return respond({ error: "Draft service is temporarily unavailable. Keep your browser answers and try again shortly." }, 503, "INVALID_DRAFT_SNAPSHOT");
   return respond({ draft: data ?? null }, 200);
 }
 
@@ -60,8 +61,8 @@ export async function POST(req: NextRequest) {
   if (parsedBody.error) {
     return respond({ error: "Invalid draft payload" }, 400, "INVALID_DRAFT");
   }
-  const draft = parseApplicationServerDraft(parsedBody.data);
-  if (!draft) return respond({ error: "Invalid draft payload" }, 400, "INVALID_DRAFT");
+  const request = parseApplicationDraftSaveRequest(parsedBody.data);
+  if (!request) return respond({ error: "Invalid draft payload" }, 400, "INVALID_DRAFT");
   const supabase = await createClient();
   const ip = clientIp(req);
   // Same both-buckets rule as /api/apply: the per-user key spares a shared NAT,
@@ -73,7 +74,10 @@ export async function POST(req: NextRequest) {
   if (userLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, userLimit, undefined, 3600);
   const ipLimit = await checkRateLimitStatus(`apply-draft-ip:${ip}`);
   if (ipLimit !== "allowed") return rateLimitRouteResponse("application.draft.save", requestId, startedAt, ipLimit, undefined, 3600);
-  const { error } = await supabase.rpc("save_application_draft", { payload: draft });
+  const { data, error } = await draftRpc(supabase)("save_application_draft_v2", {
+    payload: request.draft, expected_revision: request.expectedRevision,
+    mutation_id: request.mutationId, cycle_id: request.cycleId,
+  });
   if (error) {
     // save_application_draft raises 23505 when the applicant's email still
     // belongs to an account that can sign in. Generic "Could not save draft"
@@ -84,5 +88,8 @@ export async function POST(req: NextRequest) {
       ? respond({ error: "Draft service is temporarily unavailable. Try again shortly." }, 503, "SERVICE_UNAVAILABLE")
       : respond(errorBody, status, "DRAFT_REJECTED");
   }
-  return respond({ ok: true }, 200);
+  const result = parseApplicationDraftSaveResult(data);
+  if (!result) return respond({ error: "Draft save could not be confirmed. Keep this page open and retry." }, 503, "INVALID_SAVE_RECEIPT");
+  if (result.kind === "conflict") return respond({ error: "Your saved draft changed in another tab or device.", kind: "conflict", draft: result.snapshot ? { ...result.snapshot.draft, revision: result.snapshot.revision } : null }, 409, "DRAFT_REVISION_CONFLICT");
+  return respond({ kind: "saved", revision: result.revision }, 200);
 }

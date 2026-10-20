@@ -1,0 +1,69 @@
+{
+  "seatId": "panel-v2-033",
+  "lens": "Information and discoverability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public presentation is coherent and unusually clear about cost, semester length, eligibility and publication limits. The supplied desktop/mobile captures show a disciplined hierarchy; the compact mobile bench supports scanning. Source inspection confirms native FAQ disclosures, a skip link, menu Escape focus return, adjacent mobile organization details and complete canonical/social metadata. I traced the actual Work \u2192 engagement FAQ \u2192 Contact journey in source and supplied tests/logs: sequential keyboard form entry passes locally with an intercepted receipt. Recruitment outage/no-cycle/empty-event distinctions are now implemented and covered by actual page SSR assertions, so the historical outage objection is resolved within that scope. Nevertheless, two central information tasks remain incomplete: assessing actual consulting work and assessing membership schedule fit. Honest pending copy improves trust but does not supply those facts. These content deficits prevent my agreement with the unchanged broad world-class question. Hosted consequential workflows and complete authenticated keyboard journeys remain unproven, so release readiness is a separate unproven judgment. This is a simulated AI source/artifact review, not observed human task success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory excerpt)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/join/page.test.ts",
+    "src/app/(marketing)/work/page.tsx (FAQ/action section)",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/layout.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/lib/public-recruitment.ts",
+    "src/lib/public-recruitment.test.ts (failure assertions)",
+    "src/lib/join-content.ts",
+    "src/lib/seo.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/app/robots.ts",
+    "src/app/sitemap.ts",
+    "src/app/layout.tsx",
+    "src/app/applicant/page.tsx (receipt disclosure)",
+    "scripts/verify-publication.mjs",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-final-browser.log (relevant public/keyboard cases)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (ending)",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:5; src/components/client-project-grid.tsx:108",
+      "evidence": "The approved fallback remains empty. The selected organization profile explicitly withholds scope, methods, deliverables and outcomes pending approval; supplied homepage captures show partnerships and pending case studies instead of an inspectable engagement.",
+      "userImpact": "Prospective clients cannot evaluate the substance or relevance of a prior MECG handoff before contacting the Board.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement question, actual method and redacted deliverable/handoff with limits, then publish through the existing boundary. Keep pending disclosure until approval; invent no outcomes."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly commitment answer explicitly says expected weekly hours, mandatory meeting times and peak commitments are not published. The direct Board email in Join is a truthful mitigation.",
+      "userImpact": "A student who finds the relevant FAQ still cannot independently determine whether membership fits their semester.",
+      "suggestedFix": "Publish a dated Board-confirmed current-cycle weekly range, mandatory meeting expectations and peak-period caveat when available, retaining the direct question route."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/storage/Resend acceptance or consequential operator recovery; no staging exists.",
+    "No complete authenticated sequential-keyboard prepare/apply/recover/status/operator journey, assistive-technology session or human comprehension evidence. Local targeted keyboard tests do not establish these.",
+    "Private grading/operator visual craft beyond supplied evidence was not independently exercised; no live accounts were used.",
+    "Board authority for resume policy, retention and closed-round remediation remains outstanding. Publication lifecycle script proves synthetic local rendering scope, not approved real content or hosted withdrawal behavior."
+  ]
+}

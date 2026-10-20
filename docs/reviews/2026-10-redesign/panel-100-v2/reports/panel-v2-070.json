@@ -1,0 +1,53 @@
+{
+  "seatId": "panel-v2-070",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected applicant journey is coherent and substantially stronger than the original objections describe. Join explains eligibility, preparation, evaluated versus open events, and evaluation traits. Recruitment lookup failure now retains direct application access and truthful retry/contact guidance. ApplicationForm distinguishes draft saving from submission, validates submission receipts, reconciles ambiguous outcomes, preserves recovery when unconfirmed, and requires fresh consent after conflict recovery. The applicant confirmation now accurately discloses identifying original-resume access; the earlier anonymity objection is resolved in this source. Changed-field selection and private both-copy export address the whole-copy recovery burden. The supplied synthetic mobile capture shows readable full essays and clear grouped choices, although lengthy comparisons require substantial scrolling. Public mobile composition is restrained and consistent with Precision Instrument. These strengths do not establish the unchanged broad world-class claim: actual authenticated application/upload/status and consequential operator integration remain untested, complete keyboard task success is absent, membership workload facts remain missing, and approved engagement proof and policy decisions remain outstanding. I recommend holding a consequential release until integrated acceptance and the applicable owner decisions are documented; this is not a claim that an inspected local interaction failed.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections)",
+    "docs/policies/recruitment-policy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts (loader/action)",
+    "src/lib/auth-destination.ts",
+    "src/app/apply/page.tsx (intake/routing)",
+    "src/app/apply/application-form.tsx (submission/recovery/materials/review)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx (deadline/receipt/next-action)",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (interruption/storage/receipt cases)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (final results)",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly-commitment answer explicitly says expected hours, mandatory meeting times and peak commitments are not published. Join renders a direct Board email link, an honest fallback rather than the missing facts.",
+      "userImpact": "A prospective applicant cannot independently determine schedule fit before investing in preparation and applying.",
+      "suggestedFix": "Obtain Board-confirmed current-semester weekly range, mandatory times and peak-period expectations, then publish dated guidance beside preparation. Retain the truthful contact fallback until approval."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk sessions/expiry, Supabase RPC/RLS, uploads/storage, actual email delivery and save/submit races across real devices.",
+    "Complete sequential keyboard preparation/application/conflict/review/status journey and screen-reader or physical-device use; inspected browser scenarios use intercepted APIs and synthetic destination HTML.",
+    "Observed human comprehension or task success; this is an independent AI source/artifact review.",
+    "Live authenticated grading/operator workflows, Board policy/retention approval and closed-round remediation acceptance.",
+    "Client-approved project artifacts/results and confirmed current membership commitments."
+  ]
+}

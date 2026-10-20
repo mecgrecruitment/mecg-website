@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-v2-009",
+  "lens": "Simulated Apple-inspired clarity lens; cross-step continuity (independent AI reviewer, not an Apple employee or human participant)",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected revision has a coherent Precision Instrument identity and substantially clearer task progression. Desktop and mobile captures show restrained color, strong reading hierarchy and two distinct audience actions. Cost and duration now precede the inquiry invitation. The optional mobile bench preserves its useful explanation without dominating the page; later engagement content answers complementary practical questions. I traced the client journey from service terms to the anchored inquiry form, its pending state, receipt and uncertain-delivery recovery. Current source protects submitted values, validates acknowledgements, retains uncertain answers and reuses an unchanged in-page request identity. Focused tests and their supplied passing logs support those local behaviors. The former identifying-resume disclosure inconsistency is also corrected in the actual applicant receipt, which is gated on stored submission evidence. These are meaningful improvements in continuity. Nevertheless, a consulting website whose client task includes assessing capability still supplies no inspectable actual engagement. Attractive organization context and a process instrument cannot establish the quality of MECG work. That present information deficiency prevents my unqualified world-class agreement. Release readiness remains unproven because the supplied checks do not exercise the actual hosted identity, storage, database and delivery chain.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/engagement-instrument.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:103-108; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "The approved fallback collection is empty; every organization profile explicitly withholds project scope, methods, deliverables and outcomes pending approval. Work conditionally omits Selected work when no published records exist. Both viewed home captures show the pending case-study state rather than an actual question, method or handoff.",
+      "userImpact": "A prospective organization can understand the proposed engagement but cannot independently assess the relevance or rigor of completed MECG work before investing in an inquiry.",
+      "suggestedFix": "Have authorized content owners obtain client and Board approval for one bounded engagement with its real decision, methods, limitations and redacted handoff artifact, then publish through the established approval boundary. Retain the honest pending state until approval exists."
+    }
+  ],
+  "notVerified": [
+    "No hosted integrated Clerk/Supabase/RLS/storage/Resend acceptance; intercepted contact receipts establish UI behavior rather than email delivery or inbox arrival.",
+    "No complete real authenticated keyboard applicant/operator journey, screen-reader session, observed human comprehension or physical iPhone/macOS Safari evidence.",
+    "Private grading, release, provisioning and recovery visual craft was not inspected in captures by this seat; this is not broad validation of those workflows.",
+    "Board-confirmed current membership workload, original-resume policy reconciliation, retention operations and closed-round remediation authority remain unresolved external facts or decisions."
+  ]
+}

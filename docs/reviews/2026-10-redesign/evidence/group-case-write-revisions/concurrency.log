@@ -1,0 +1,45 @@
+{
+  "result": "PASS",
+  "twoConnections": true,
+  "secondObservedWaitingOnAdvisoryLock": true,
+  "first": {
+    "kind": "saved",
+    "note": "Concurrent first",
+    "scores": {
+      "59000000-0000-4000-8000-000000000071": 4
+    },
+    "quality": {
+      "valid": false,
+      "coverage": 0.25,
+      "criteriaCount": 6,
+      "observedCount": 1,
+      "minimumObserved": 5,
+      "missingRequired": []
+    },
+    "savedAt": "2026-10-16T22:11:12.723727+00:00",
+    "revision": "96d3dbb8-c8a1-4adf-87e3-c34a49eee7d8",
+    "mutationId": "20000000-0000-4000-8000-000000000001",
+    "applicationId": "59000000-0000-4000-8000-000000000031"
+  },
+  "second": {
+    "kind": "conflict",
+    "snapshot": {
+      "note": "Concurrent first",
+      "scores": {
+        "59000000-0000-4000-8000-000000000071": 4
+      },
+      "quality": {
+        "valid": false,
+        "coverage": 0.25,
+        "criteriaCount": 6,
+        "observedCount": 1,
+        "minimumObserved": 5,
+        "missingRequired": []
+      },
+      "savedAt": "2026-10-16T22:11:12.723727+00:00",
+      "revision": "96d3dbb8-c8a1-4adf-87e3-c34a49eee7d8",
+      "applicationId": "59000000-0000-4000-8000-000000000031"
+    }
+  },
+  "ratingAuditWrites": 1
+}

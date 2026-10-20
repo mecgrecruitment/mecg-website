@@ -1,0 +1,62 @@
+{
+  "seatId": "panel-077",
+  "lens": "Member evaluator \u2014 recovery and retry",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied desktop/mobile hero captures show a coherent Precision Instrument identity. I source-traced My work \u2192 selected calibrated assignment \u2192 observations/N/O \u2192 readiness \u2192 review \u2192 lock \u2192 submitted status. Required observations, weighted coverage and receipt-only confirmation are useful safeguards; partial evidence is also excluded from completion in round-evidence and SQL tests. However, evaluator recovery can discard newer observations and misrepresent backup durability. Those defects prevent agreement from this simulated member lens. This is independent AI source/capture review, not observed user success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/member/page.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/lib/evaluation-draft-recovery.test.ts",
+    "src/lib/round-evidence.ts",
+    "src/lib/round-evidence.test.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/api/member/evaluations/[assignmentId]/draft/route.ts",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "src/app/apply/application-form.tsx (privacy/recovery excerpts)",
+    "supabase/tests/grading_contract_consistency.sql (relevant assertions)",
+    "evidence/mecg-privacy-final-node.log (relevant test results)",
+    "evidence/mecg-privacy-db-final.log (summary)",
+    "evidence/mecg-round-close-full-e2e.log (journey/coverage entries)"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/evaluation-form.tsx:94-100,166-174",
+      "evidence": "loadDraft always chooses any valid serverDraft over localDraft. The backup effect then writes the restored server values into sessionStorage. After an autosave fails, newer local observations are therefore replaced by an older server draft on reload; the failed-load Retry at lines 279-281 also reloads. No comparison or recovery choice preserves the differing copy.",
+      "userImpact": "A reviewer returning after unreliable connectivity can lose evidence notes and ratings precisely when relying on recovery.",
+      "suggestedFix": "Preserve both differing drafts, present an explicit recovery choice with version/time context, and avoid rewriting the browser copy until resolved. Add a focused component recovery test for newer browser work after failed server saving."
+    },
+    {
+      "severity": "high",
+      "file": "src/app/member/evaluation-form.tsx:75,166-174,195-200",
+      "evidence": "window.sessionStorage is accessed before the load try block; a throwing storage getter leaves loading unresolved. writeEvaluationDraft returns false for failed storage writes, but its result is ignored while the error notice states \u201cYour browser backup is current\u201d (and load errors promise retained backup at lines 154-158).",
+      "userImpact": "Storage restrictions can disable evaluation entry indefinitely, or encourage leaving the page with observations that were never retained during a server outage.",
+      "suggestedFix": "Guard acquisition of browser storage, track successful backup writes, and state memory-only/unsaved status honestly. Keep entry usable when storage is unavailable and test both throwing access and quota failures."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted Clerk/Supabase/RLS/storage/email integration, deployment, or actual member task observation exists. Local test logs do not establish those outcomes.",
+    "No supplied authenticated evaluator capture establishes visual craft, focus behavior or assistive-technology usability for the focal form; public captures cannot substitute.",
+    "Recovery findings are source-derived failure paths, not browser reproductions. Cross-device concurrency, interrupted requests and actual session expiry remain unverified end to end.",
+    "Original-resume access remains disclosed Board policy, not anonymization; Board resolution and client-approved project artifacts/outcomes remain outstanding. No human study, physical-device, Safari or Firefox acceptance is established."
+  ]
+}

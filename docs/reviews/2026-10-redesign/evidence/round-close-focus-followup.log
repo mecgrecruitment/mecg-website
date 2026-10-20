@@ -1,0 +1,15 @@
+
+Running 10 tests using 2 workers
+
+  ✓   1 [chromium] › tests/e2e/operator-close.spec.ts:100:5 › committed freeze with dropped acknowledgement reconciles FROZEN without a repeat write (660ms)
+  ✓   2 [chromium] › tests/e2e/operator-close.spec.ts:29:5 › coverage distinguishes partial submissions and only explicit confirmation closes (679ms)
+  ✓   4 [mobile-chromium] › tests/e2e/operator-close.spec.ts:100:5 › committed freeze with dropped acknowledgement reconciles FROZEN without a repeat write (474ms)
+  ✓   3 [mobile-chromium] › tests/e2e/operator-close.spec.ts:29:5 › coverage distinguishes partial submissions and only explicit confirmation closes (535ms)
+  ✓   5 [firefox] › tests/e2e/operator-close.spec.ts:29:5 › coverage distinguishes partial submissions and only explicit confirmation closes (1.3s)
+  ✓   6 [firefox] › tests/e2e/operator-close.spec.ts:100:5 › committed freeze with dropped acknowledgement reconciles FROZEN without a repeat write (1.3s)
+  ✓   8 [webkit] › tests/e2e/operator-close.spec.ts:100:5 › committed freeze with dropped acknowledgement reconciles FROZEN without a repeat write (1.8s)
+  ✓   7 [webkit] › tests/e2e/operator-close.spec.ts:29:5 › coverage distinguishes partial submissions and only explicit confirmation closes (2.0s)
+  ✓   9 [mobile-webkit] › tests/e2e/operator-close.spec.ts:29:5 › coverage distinguishes partial submissions and only explicit confirmation closes (983ms)
+  ✓  10 [mobile-webkit] › tests/e2e/operator-close.spec.ts:100:5 › committed freeze with dropped acknowledgement reconciles FROZEN without a repeat write (1.0s)
+
+  10 passed (7.9s)

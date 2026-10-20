@@ -1,22 +1,22 @@
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
 import { createClient } from "@/lib/supabase/server";
-import { selectAuthorizedCycleId } from "@/lib/cycles";
-import SectionLabel from "@/components/section-label";
+import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import SetupForm from "./setup-form";
 import { AddApplicantForm } from "./rush-controls";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import PipelineBoard from "./pipeline-board";
-import { DECIDED_PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
+import { DECIDED_PIPELINE_STATUSES, PIPELINE_STATUSES, isPipelineStatus } from "@/lib/workflow";
 import { formatEasternDateTime } from "@/lib/date-time";
-import { cycleStatusLabel } from "@/lib/labels";
+import { applicationStatusLabel, cycleStatusLabel } from "@/lib/labels";
 import { isMissingSchemaObject } from "@/lib/schema-availability";
 
-export const metadata: Metadata = { title: "Board dashboard" };
+export const metadata: Metadata = { title: "Recruitment" };
 
 function eventDate(startsAt: string) {
   return formatEasternDateTime(startsAt);
@@ -33,6 +33,7 @@ function submittedDate(submittedAt: string) {
 
 export default async function AdminDashboard() {
   const user = await requireAdmin();
+  const cycleId = await selectWorkspaceCycle(user.memberships, ["RECRUITMENT_OPERATIONS", "HASH_PANEL_ACCESS"]);
   const supabase = await createClient();
   const { count: cycleCount, error: countError } = await supabase.from("rush_cycles").select("id", { count: "exact", head: true });
   if (countError) throw countError;
@@ -44,7 +45,6 @@ export default async function AdminDashboard() {
       </main>
     );
   }
-  const cycleId = selectAuthorizedCycleId(user.memberships, "RECRUITMENT_OPERATIONS") ?? selectAuthorizedCycleId(user.memberships, "HASH_PANEL_ACCESS");
   if (!cycleId) redirect("/member");
   const canOperate = hasPermission(user.memberships, cycleId, "RECRUITMENT_OPERATIONS");
   const [cycleResult, roundsResult, appsResult, eventsResult, evaluationAssignmentsResult, eventSlotsResult, referralsResult] = await Promise.all([
@@ -93,6 +93,8 @@ export default async function AdminDashboard() {
   const activeRounds = (roundsResult.data ?? []).filter((round) => ["PUBLISHED", "ACTIVE"].includes(round.status));
   const now = new Date().getTime();
   const nextEvent = events.find((event) => new Date(event.starts_at).getTime() >= now);
+  const upcomingEvents = events.filter((event) => new Date(event.starts_at).getTime() >= now);
+  const pastEvents = events.filter((event) => new Date(event.starts_at).getTime() < now);
   const nextEventSlots = nextEvent ? (eventSlotsResult.data ?? []).filter((slot) => slot.event_id === nextEvent.id) : [];
   const nextEventCapacity = nextEventSlots.reduce((sum, slot) => sum + slot.capacity, 0);
   const nextEventRsvps = nextEventSlots.reduce((sum, slot) => sum + slot.slot_rsvps.length, 0);
@@ -100,13 +102,15 @@ export default async function AdminDashboard() {
   const totalAssignments = evaluationAssignmentsResult.data?.length ?? 0;
   const submittedAssignments = (evaluationAssignmentsResult.data ?? []).filter((assignment) => ["SUBMITTED", "LOCKED"].includes(assignment.status)).length;
 
-  const STATS = [
-    [String(applications.length), "total applicants"],
-    [String(applications.length - decidedCount), "still in the running"],
-    [String(finalReviewCount), "ready for final review"],
-    [String(activeRounds.length), "active rounds"],
-    [`${submittedAssignments}/${totalAssignments}`, "evaluations submitted"],
-  ] as const;
+  const stages = [
+    ...PIPELINE_STATUSES.filter((status) => !DECIDED_PIPELINE_STATUSES.has(status)).map((status) => ({
+      key: status,
+      label: applicationStatusLabel(status),
+      count: applications.filter((application) => application.status === status).length,
+      href: `/admin?filter=${status}#applicants`,
+    })),
+    { key: "DECIDED", label: "Decided", count: decidedCount, href: "/admin?view=PIPELINE&decided=1#applicants" },
+  ];
 
   const attentionItems = [
     missingResumeCount > 0
@@ -116,127 +120,58 @@ export default async function AdminDashboard() {
       ? { count: submittedCount, label: "new submissions", detail: "Waiting for eligibility review", filter: "SUBMITTED" }
       : null,
     finalReviewCount > 0
-      ? { count: finalReviewCount, label: "ready for final review", detail: "Move toward a decision", filter: "FINAL_REVIEW" }
+      ? { count: finalReviewCount, label: "in final review", detail: "Review evidence before a decision", filter: "FINAL_REVIEW" }
       : null,
   ].filter((item): item is { count: number; label: string; detail: string; filter: string } => Boolean(item));
 
   return (
     <main className="workspace-stack mx-auto flex max-w-7xl flex-col">
       <WorkspaceHeader
-        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)}`}
-        title="Board dashboard"
-        description={`Signed in as ${user.name}`}
+        eyebrow={`${cycle.name} · ${cycleStatusLabel(cycle.status)} · ${activeRounds.length} active ${activeRounds.length === 1 ? "round" : "rounds"}`}
+        title="Recruitment"
+        description="Review applicants, resolve the next bottleneck, and keep this cycle moving."
+        action={canOperate ? <Link href={withWorkspaceCycle("/admin/events/new", cycleId)} className="button-secondary">Schedule event</Link> : undefined}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin" />
-      <section>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <SectionLabel>Recruitment overview</SectionLabel>
-          <span className="rounded-full bg-mecg-navy/[0.07] px-2.5 py-1 text-xs font-semibold text-mecg-navy/65">
-            {cycleStatusLabel(cycle.status)}
-          </span>
-        </div>
-        <div className="mt-3.5 border-y border-mecg-navy/10">
-          <div className="grid lg:grid-cols-[1fr_18rem]">
-            <div className="py-4 lg:pr-6">
-              <p className="text-xs font-semibold text-mecg-navy/55">Cycle pulse</p>
-              <h2 className="mt-1.5 text-lg font-semibold tracking-[-0.02em] text-mecg-navy">
-                {applications.length - decidedCount > 0
-                  ? `${applications.length - decidedCount} applicants are moving through review`
-                  : "No applicants are currently in review"}
-              </h2>
-              <dl className="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
-                {STATS.map(([value, label]) => (
-                  <div key={label}>
-                    <dt className="text-xs leading-4 text-mecg-navy/55">{label}</dt>
-                    <dd className="tabular text-lg font-semibold text-mecg-navy">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-            <div className="border-t border-mecg-navy/10 py-4 lg:border-l lg:border-t-0 lg:pl-6">
-              <p className="text-xs font-semibold text-mecg-navy/55">Events</p>
-              {events.length ? (
-                <ul className="mt-2 divide-y divide-mecg-navy/10">
-                  {events.map((event) => (
-                    <li key={event.id} className="py-2 first:pt-0 last:pb-0">
-                      <Link href={`/admin/events/${event.id}`} className="font-semibold text-mecg-navy hover:text-mecg-orange-ink">{event.name}</Link>
-                      <p className="mt-0.5 text-xs text-mecg-navy/55">
-                        {eventDate(event.starts_at)} · <span className="tabular">{event.checkins[0]?.count ?? 0} checked in</span>
-                        {event.id === nextEvent?.id && nextEventCapacity > 0 && <> · <span className="tabular">{nextEventRsvps}/{nextEventCapacity} RSVPs</span></>}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm text-mecg-navy/55">No upcoming events are scheduled.</p>
-                  {canOperate && <Link href="/admin/events/new" className="text-sm font-semibold text-mecg-blue hover:text-mecg-orange-ink">Schedule an event →</Link>}
-                </div>
-              )}
-            </div>
-          </div>
+      <nav className="recruitment-stages" aria-label={`${applications.length} applicants by stage`}>
+        {stages.map((stage) => <Link data-roster-queue key={stage.key} href={withWorkspaceCycle(stage.href, cycleId)} className="recruitment-stage" data-attention={stage.key === "FINAL_REVIEW" && stage.count > 0 ? "" : undefined} data-empty={stage.count === 0 ? "" : undefined}><strong>{stage.count}</strong><span>{stage.label}</span></Link>)}
+      </nav>
+      <div className="recruitment-layout">
+        <aside className="recruitment-rail lg:col-start-2 lg:row-start-1" aria-label="Cycle priorities">
+          <section>
+            <h2>Needs your attention</h2>
+            {attentionItems.length ? attentionItems.map(item => <Link data-roster-queue key={item.label} href={withWorkspaceCycle(`/admin?filter=${item.filter}#applicants`, cycleId)} className="recruitment-queue"><span>{item.count}</span><div><strong>{item.label}</strong><p>{item.detail}</p></div><span aria-hidden="true">→</span></Link>) : <p className="text-sm text-mecg-navy/65">No missing resumes, new submissions or applicants in final review. Evidence and release checks remain in each applicant file.</p>}
+          </section>
+          <section>
+            <h2>Next on the calendar</h2>
+            {upcomingEvents.length ? upcomingEvents.slice(0, 1).map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)}</p><p>{event.checkins[0]?.count ?? 0} checked in{event.id === nextEvent?.id && nextEventCapacity > 0 && <> · {nextEventRsvps}/{nextEventCapacity} RSVPs</>}</p></article>) : <p className="text-sm text-mecg-navy/65">No upcoming events scheduled.</p>}
+            {upcomingEvents.length > 1 && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Later events · {upcomingEvents.length - 1}</summary>{upcomingEvents.slice(1).map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)}</p></article>)}</details>}
+            {pastEvents.length > 0 && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Past events · {pastEvents.length}</summary>{pastEvents.slice().reverse().map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)} · {event.checkins[0]?.count ?? 0} checked in</p></article>)}</details>}
+          </section>
+          <section>
+            <h2>Evaluation progress</h2>
+            <p className="text-sm leading-6 text-mecg-navy/65">{submittedAssignments} of {totalAssignments} assigned evaluations submitted.</p>
+            {canOperate && <Link href={withWorkspaceCycle("/admin/rounds", cycleId)} className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-mecg-navy">Review interview progress →</Link>}
+          </section>
+        </aside>
+        <div className="recruitment-main lg:col-start-1 lg:row-start-1">
+          <PipelineBoard
+            applications={applications.map((application) => ({
+              id: application.id, status: application.status, name: application.pnms.name,
+              contact: application.pnms.contact, major: application.pnms.major ?? "",
+              submittedAt: application.submitted_at, submittedLabel: submittedDate(application.submitted_at),
+              hasResume: Boolean(application.resume_storage_path),
+              hasHeadshot: canOperate && headshotIds.has(application.id),
+            }))}
+            canOperate={canOperate}
+            canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}
+            cycleId={cycle.id}
+            referralCount={referralsResult.count ?? 0}
+          />
+          {canOperate && <details className="recruitment-manual"><summary>Add an applicant manually</summary><p className="mb-4 text-sm text-mecg-navy/65">Use this when someone cannot submit the standard application.</p><AddApplicantForm cycleId={cycle.id} /></details>}
         </div>
 
-        <div className="mt-3.5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[13px] font-semibold text-mecg-navy/65">Needs attention</p>
-              {attentionItems.length > 0 && <p className="mt-0.5 text-sm text-mecg-navy/55">The items most likely to slow this cycle down.</p>}
-            </div>
-            <span className="tabular text-xs font-semibold text-mecg-navy/65">{attentionItems.length} queues</span>
-          </div>
-          {attentionItems.length ? (
-            <div className="mt-2.5 grid border-y border-mecg-navy/10 sm:grid-cols-3 sm:divide-x sm:divide-mecg-navy/10">
-              {attentionItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={`/admin?filter=${item.filter}#applicants`}
-                  className="flex items-center gap-3 border-b border-mecg-navy/10 py-2.5 transition-colors duration-[--t-detent] ease-[--ease-detent] last:border-b-0 hover:bg-mecg-navy/[0.03] sm:border-b-0 sm:px-3 sm:first:pl-0 sm:last:pr-0"
-                >
-                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-mecg-orange/[0.16] px-2 tabular text-sm font-bold text-mecg-orange-ink">{item.count}</span>
-                  <div>
-                    <p className="text-[13px] font-semibold text-mecg-navy">{item.label}</p>
-                    <p className="mt-0.5 text-xs text-mecg-navy/60">{item.detail}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-1 text-sm text-mecg-navy/55">No immediate issues. Everything is moving.</p>
-          )}
-        </div>
-      </section>
-      <PipelineBoard
-        applications={applications.map((application) => ({
-          id: application.id,
-          status: application.status,
-          name: application.pnms.name,
-          contact: application.pnms.contact,
-          major: application.pnms.major ?? "",
-          submittedAt: application.submitted_at,
-          submittedLabel: submittedDate(application.submitted_at),
-          hasResume: Boolean(application.resume_storage_path),
-          // Gated on the same audience the headshot route allows: a panel-only
-          // member loads this board, and would otherwise fire a 403 image
-          // request per card and log an access denial for each one.
-          hasHeadshot: canOperate && headshotIds.has(application.id),
-        }))}
-        canOperate={canOperate || hasPermission(user.memberships, cycle.id, "RECRUITMENT_OPERATIONS")}
-        canAdvance={hasPermission(user.memberships, cycle.id, "MANAGE_CYCLE")}
-        cycleId={cycle.id}
-        referralCount={referralsResult.count ?? 0}
-      />
-      {canOperate && (
-        <section>
-          <details className="rounded-2xl border border-mecg-navy/10 bg-white p-4">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center font-semibold text-mecg-blue marker:content-none">
-              Add an applicant manually
-            </summary>
-            <p className="mb-4 text-sm text-mecg-navy/55">Use this only when someone cannot submit the standard application.</p>
-            <AddApplicantForm cycleId={cycle.id} />
-          </details>
-        </section>
-      )}
+      </div>
     </main>
   );
 }

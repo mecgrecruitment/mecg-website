@@ -1,0 +1,46 @@
+{
+  "seatId": "panel-006",
+  "lens": "Apple-inspired clarity \u2014 long or difficult content (simulated expertise/user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected homepage makes its proposition and two audience actions legible without abandoning Precision Instrument: disciplined typography, hairlines, one accent, real photography, and explicit pending-approval language. The supplied desktop hero and mobile full-page capture support that visual judgment. Longer engagement information is divided into terms, stages and native FAQ disclosures; the instrument names both the process and its handoff. Source tracing of the client journey from Work to Contact shows useful preparation guidance, sending feedback, a success receipt and an email fallback. However, mobile client-profile disclosure separates the selected control from its detailed result. More broadly, the supplied successful journey uses intercepted HTTP and a short synthetic message. It does not establish hosted delivery, difficult-content comprehension or actual user success. I cannot give an unqualified world-class or release endorsement from this evidence.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/lib/site-content.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/application-form.tsx:729-748 (MaterialsStep and ReviewStep privacy/content excerpts)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log (public journey entries)",
+    "captures/mobile.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx",
+      "evidence": "Lines 34\u201365 render the complete grid before the result. Below sm it has one column, each button is min-h-36 (line 46), and onClick only sets selectedName (line 45). The selected article is appended after the entire grid at lines 67\u201371. src/lib/site-content.ts:21\u2013129 supplies 15 organizations; WorkPage renders them before capabilities at src/app/(marketing)/work/page.tsx:37\u201344.",
+      "userImpact": "On a narrow screen, choosing an early organization changes its selected styling but places the detailed answer below many screens of remaining logos. Users seeking difficult engagement information may miss the result or need substantial scrolling to compare organizations. This is a source-derived risk, not an observed participant failure.",
+      "suggestedFix": "Use an inline disclosure immediately after the chosen organization on narrow screens, or a compact selector with its result directly below. Preserve the explicit publication boundary and native keyboard semantics; verify first/middle/last selections with long organization names on mobile."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or deployment evidence exists; Clerk sessions, Supabase authorization/storage and actual email delivery were not exercised by this seat.",
+    "No human study or observed task success; public-journeys.spec.ts:39\u201353 mocks /api/contact and submits a short message. Long-message recovery and comprehension were not demonstrated.",
+    "No supplied Work/Contact capture establishes their rendered long-content craft; the client-grid finding is source-based. No browser or tests were run by this seat.",
+    "Physical devices, Safari, Firefox, assistive technology and formal accessibility conformance remain unverified.",
+    "Client-approved outcomes/artifacts remain absent. Applicant copy accurately discloses original identifying resume access at application-form.tsx:731 and :746; actual privacy enforcement and Board policy resolution were outside this inspection."
+  ]
+}

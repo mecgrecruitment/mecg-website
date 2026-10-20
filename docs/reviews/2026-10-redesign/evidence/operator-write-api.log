@@ -1,0 +1,86 @@
+decision action failed { action: 'RELEASE_ALL', code: '40001' }
+released decision notification lookup failed { code: 'XX000' }
+release decision notification attempt failed { decisionId: 'decision-1', category: 'notification_attempt_failed' }
+(node:1485223) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1485223) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1485223) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ PREVIEW is forbidden when the caller only holds DECIDE in the cycleId they supplied, not the decision's real cycle (32.536564ms)
+✔ PREVIEW succeeds based on the decision's real cycle even when the client omits/misstates cycleId (9.72097ms)
+✔ RELEASE_ALL is accepted as a cycle-scoped release action (7.584737ms)
+✔ SET_DEADLINE rejects an impossible calendar date at the API boundary (7.130697ms)
+✔ SET_DEADLINE is forbidden when the caller only belongs to a client-claimed cycle (7.216886ms)
+✔ SET_DEADLINE resolves the application's real cycle and reaches the audited RPC (6.162064ms)
+✔ SET_DEADLINE rejects a missing application before querying the database (4.730665ms)
+✔ SET_DEADLINE rejects an offset-less wall time at the API boundary (4.423276ms)
+✔ POST /api/admin/decisions rejects payloads over the 1 MiB cap before parsing (4.51205ms)
+✔ POST /api/admin/decisions bounds oversized streamed bodies without Content-Length (6.54327ms)
+✔ RELEASE attempts the durable notification created by the release transaction (5.391398ms)
+✔ RELEASE remains successful and reports queued when provider delivery is deferred (4.969988ms)
+✔ RELEASE_PREFLIGHT uses release permission and does not mutate decisions (4.810653ms)
+✔ reviewed RELEASE_ALL forwards exact snapshot rather than releasing an expanded cohort (4.04732ms)
+✔ reviewed RELEASE_ALL accepts 500 decisions above 16 KiB without truncating the snapshot (8.518304ms)
+✔ snapshot drift is a recoverable conflict and never exposes SQL error details (5.824349ms)
+✔ invalid release snapshots cannot invoke either batch RPC (5.341656ms)
+✔ confirmed RELEASE retains decision-specific receipt when lookup-failure (5.652701ms)
+✔ confirmed RELEASE retains decision-specific receipt when delivery-throws (5.178033ms)
+✔ confirmed RELEASE retains decision-specific receipt when delivery-failed (4.545653ms)
+(node:1485223) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/decisions/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"timestamp":"2026-10-16T22:12:11.323Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"98c98b0c-4cd2-43f0-8aac-637fd42a109a","code":"MEMBERSHIP_GRANT","detail":{"recorded":true,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T22:12:11.330Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"09d7e9d8-d102-4cb6-a539-dba91f00e5b9","code":"MEMBERSHIP_GRANT","detail":{"recorded":false,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T22:12:11.336Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"ba63f757-481a-4eca-a7f9-224de1b4bb21","code":"IDENTITY_LINK","detail":{"recorded":false,"clerkCleanupFailed":true,"profileCleanupFailed":false}}
+{"timestamp":"2026-10-16T22:12:11.436Z","level":"error","service":"mecg-recruitment","event":"provisioning.review_required","requestId":"75f1df50-b7ca-4787-914a-d550b3e7dbd8","code":"MEMBERSHIP_GRANT","detail":{"recorded":true,"clerkCleanupFailed":false,"profileCleanupFailed":false}}
+(node:1485225) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1485225) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1485225) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ admin account creation enforces Clerk's 8-character password boundary (42.685757ms)
+✔ owner can deactivate a cycle membership with an audit reason (28.047887ms)
+✔ board cannot deactivate a membership (7.896474ms)
+✔ board can unassign an untouched evaluator assignment (7.071828ms)
+✔ board can atomically advance a distinct applicant cohort to Speed Dating (7.090933ms)
+✔ board can form Group Case teams of a chosen size (6.293677ms)
+✔ panel cannot form Group Case teams (6.233586ms)
+✔ committee cannot advance applicants (5.769517ms)
+✔ reassignment requires both assignment and replacement evaluator (5.636501ms)
+✔ board can set a validated application window through the audited RPC (5.822165ms)
+✔ application window rejects malformed or reversed dates before the RPC (5.498346ms)
+✔ RSVP slots require offset-aware ordered times and a bounded integer capacity (6.552456ms)
+✔ a rejected membership grant preserves linked access and records restricted recovery (8.792832ms)
+✔ an uncertain membership grant preserves accounts for reconciliation (6.305269ms)
+✔ a failed Clerk rollback after ensure_external_identity uses an incident reference (6.395456ms)
+✔ account provisioning handles create-unknown without unsafe cleanup or identity logs (6.524915ms)
+✔ account provisioning handles create-rejected without unsafe cleanup or identity logs (6.296332ms)
+✔ account provisioning handles identity-unknown without unsafe cleanup or identity logs (5.87324ms)
+✔ account provisioning handles identity-empty without unsafe cleanup or identity logs (6.13338ms)
+✔ account provisioning handles identity-denied-clean without unsafe cleanup or identity logs (6.166141ms)
+✔ account provisioning handles identity-connection without unsafe cleanup or identity logs (6.125326ms)
+✔ account provisioning handles identity-completion-unknown without unsafe cleanup or identity logs (6.752888ms)
+✔ existing account identity-unknown records opaque recovery without destructive compensation (6.336647ms)
+✔ existing account identity-error records opaque recovery without destructive compensation (5.788112ms)
+✔ existing account identity-missing records opaque recovery without destructive compensation (5.974066ms)
+✔ existing account grant-unknown records opaque recovery without destructive compensation (6.234759ms)
+✔ existing account grant-error records opaque recovery without destructive compensation (5.725987ms)
+✔ existing account grant-missing records opaque recovery without destructive compensation (6.01376ms)
+✔ existing account incident-store-failed records opaque recovery without destructive compensation (6.016565ms)
+✔ existing account success records opaque recovery without destructive compensation (6.255197ms)
+✔ new account missing membership receipt preserves partial access and records recovery (6.918183ms)
+✔ rubric save acknowledges the authorized target only with an actual rubric ID: "new-text-rubric-id" (6.693327ms)
+✔ rubric save acknowledges the authorized target only with an actual rubric ID: null (6.129493ms)
+✔ rubric save acknowledges the authorized target only with an actual rubric ID: "" (6.244667ms)
+✔ rubric save acknowledges the authorized target only with an actual rubric ID: {"ok":true} (6.555883ms)
+(node:1485225) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/admin/rush/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 463.383308

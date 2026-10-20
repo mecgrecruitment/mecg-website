@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-076",
+  "lens": "Member evaluator \u2014 long or difficult content (simulated user lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile hero has coherent Precision Instrument hierarchy, readable proposition and clear client/student actions. Public source labels missing case studies honestly; applicant materials disclose original-resume access. I traced the actual member route from assignment selection and calibration into observation entry, readiness, review and receipt handling, plus the screening reading desk and Group Case roster. Native ratings, explicit not-observed guidance, evidence requirements and receipt validation are useful. However, newer long notes can be silently replaced during recovery, and Group Case does not expose whether saved observations satisfy validity. Those gaps prevent agreement for this evaluator task. This is independent frozen-source/capture review, not observed authenticated task success or human endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/member/page.tsx",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/app/api/member/evaluations/[assignmentId]/draft/route.ts",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "src/lib/group-case-roster.ts",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/member/screening/[assignmentId]/screening-reading-desk.tsx",
+    "src/app/apply/application-form.tsx:731-746",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql:1-36,344-356",
+    "evidence/mecg-privacy-final-node.log:1287-1300,1331-1337",
+    "evidence/mecg-privacy-db-final.log (completion summary)"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/evaluation-form.tsx",
+      "evidence": "loadDraft lines 94-100 always chooses a valid serverDraft over localDraft. Lines 121-129 restore it without a conflict choice; lines 166-174 then write that restored content into browser storage. Save failures at lines 195-200 promise the browser backup is current. Thus: save A, type longer B while PUT fails, reopen after GET recovers: A replaces B and its backup.",
+      "userImpact": "A reviewer returning to a difficult evaluation can lose detailed observations despite the recovery reassurance, then unknowingly lock an incomplete account. This is a source-derived failure path, not a browser reproduction.",
+      "suggestedFix": "Preserve divergent local/server copies and offer explicit recovery selection before overwriting either. Add a focused interaction regression for failed PUT followed by successful GET of an older draft."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx",
+      "evidence": "Lines 223 and 332-355 show Started grading, Saved and N of M rated; the roster contract has no minimumObserved or validity field. SQL evaluation_observation_quality at migration 20261016191000 lines 5-33 requires 75% weight, rubric minimum and required observations, while rate_group_case_applicant returns only scores/note/savedAt at lines 344-353.",
+      "userImpact": "The evaluator can verify persistence but cannot determine whether partial observations count as valid independent completion, especially when some dimensions were genuinely unobserved.",
+      "suggestedFix": "Return authoritative per-review quality and show Saved partial observations versus Valid evaluation, with missing requirements and a clear explanation that unknowns may remain partial. Keep partial saving available."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted integration exists; Clerk sessions, actual RPC/RLS, storage and email were not exercised. Local logs record helper/SQL checks, not that integration.",
+    "No live authenticated evaluator capture, long-content interaction test or observed user completion was available; focal private layout was source reviewed.",
+    "Screen-reader navigation, physical devices, Safari/Firefox, fatigue during lengthy scoring and recovery across devices remain unverified.",
+    "Client-approved outcomes/artifacts and Board resolution of original-resume policy remain external dependencies; PDF streaming is not anonymization."
+  ]
+}

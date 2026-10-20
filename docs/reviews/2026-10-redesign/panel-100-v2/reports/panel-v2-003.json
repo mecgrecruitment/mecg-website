@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-v2-003",
+  "lens": "Simulated Apple-inspired clarity; keyboard-oriented use; no human or Apple affiliation",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The frozen revision is coherent and restrained within Precision Instrument: strong typographic hierarchy, hairline structure, clear audience actions and an instrument whose station selection explains a useful handoff. The desktop and 320px public captures show a materially improved first encounter: no-fee and semester facts are immediate, the mobile bench is optional, and partnership evidence precedes complementary working expectations. Rechecking the earlier keyboard inquiry objection against ContactForm confirms disabled pending fields, first-invalid focus after unlocking, validated success receipts, a complete-operation deadline and preserved uncertain inquiries. The keyboard inquiry test exercises Tab and Enter; its intercepted response establishes local interaction rather than delivery. However, a consulting site cannot yet demonstrate the quality of its work: approved project evidence remains absent. That substantive decision-support gap prevents my world-class agreement even though the revised wording is honest. Broad release readiness remains unproven because hosted identity, database, upload and email acceptance are absent; the strong scoped local checks do not establish those integrations.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "docs/policies/recruitment-policy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/join-content.ts",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/applicant/page.tsx:307 (receipt privacy disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (final scoped results)",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/home/page.tsx:67-80; src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:107-108",
+      "evidence": "The homepage fallback now accurately says Past partnerships and Case studies pending client approval; the supplied desktop and mobile captures show this state. PUBLIC_PROJECTS is empty, and organization profiles explicitly withhold scope, methods, deliverables and outcomes. This verifies that the earlier misleading heading is fixed while the underlying proof objection remains.",
+      "userImpact": "A prospective client can understand cost, duration, process and associations but cannot inspect an actual MECG question, analysis or handoff to assess relevance and quality before inquiring.",
+      "suggestedFix": "Have content owners secure client and Board approval for one bounded engagement showing the decision, student contribution, methods, a redacted deliverable and factual limits. Feature it through the existing approved-publication slot. Preserve the honest pending state until approval exists."
+    }
+  ],
+  "notVerified": [
+    "No hosted integrated acceptance or actual provider delivery; no staging exists. I did not exercise a live authenticated account.",
+    "Complete keyboard-only prepare/apply/recover/status and consequential operator journeys remain unproven; focused contact and instrument coverage is narrower.",
+    "No observed human comprehension or task success, assistive-technology session, physical iPhone or macOS Safari evidence.",
+    "Current Board-confirmed weekly workload and mandatory commitments remain unpublished.",
+    "The applicant receipt accurately discloses original identifying resume access; this is not anonymity or Board resolution of blind-review, retention and closed-round remediation policy.",
+    "Private application, grading and operator visual craft was not directly inspected in a live interface; broad agreement cannot be inferred from the sampled public captures."
+  ]
+}

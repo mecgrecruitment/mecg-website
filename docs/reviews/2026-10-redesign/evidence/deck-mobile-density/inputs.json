@@ -1,0 +1,5 @@
+{
+  "src/app/admin/hash/deliberate/deliberation-deck.tsx": "116ff8dfecebcca7c1ee25a815f18cb826eb00f362ea594216ed5eb0abd00679",
+  "tests/e2e/deck-touch-targets.spec.ts": "c9d3f0b286ff8ae62f03c5bb620525a87dfcd839e90188d5bf09122cf222de98",
+  "tests/e2e/deck-accessibility.spec.ts": "882e3302a97446574ea877e9ed7686515b6077a1caba0f19005e20fa8fa6508d"
+}

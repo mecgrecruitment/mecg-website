@@ -1,0 +1,30 @@
+{
+  "seatId": "panel-v2-100",
+  "lens": "Owner and access-sensitive user",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected owner recovery journey is substantially coherent: People preserves account details on lost, stalled or malformed acknowledgements; only a membership receipt clears the form. Both creation and existing-account routes preserve uncertain partial access and record opaque recovery references. The queue explains phase-specific checks, keeps its People handoff in the selected cycle, and explicitly says resolution records remediation rather than repairing accounts. Associated, persistent People panels support Arrow/Home/End navigation. I rechecked the relevant original objections against these implementations and found no current reproduction of those defects. Restricted SQL access and the supplied local permission tests support the intended owner-only identity boundary. Application materials, final review and received-state copy consistently disclose identifying original-resume access, avoiding an anonymity assurance. The public mobile capture has clear type hierarchy, restrained structural rules and a concise no-fee/semester proposition; its partnership disclosure honestly distinguishes affiliation from project proof. However, the broad world-class question includes consequential application, grading and operator journeys. Source, intercepted fixtures and isolated SQL do not establish their complete authenticated behavior, recovery safety or user comprehension. The supplied 40 account browser checks and 31 route checks are useful local evidence, not an actual Clerk/Supabase provisioning-and-reconciliation journey. Missing hosted acceptance, approved portfolio evidence, membership workload facts and privacy-policy decisions prevent an unqualified agreement or a demonstrated release recommendation. This is an independent AI source/artifact assessment, not observed human success.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json identity/header",
+    "docs/PRODUCT.md; docs/DESIGN.md; docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md; account-provisioning-followup.md; cohort-workspace-selection.md (same directory)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md (same directory)",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/admin/rush-controls.tsx:1-255; account-provisioning.tsx; people/page.tsx; people/people-workspace.tsx; provisioning/page.tsx; provisioning/resolve-button.tsx",
+    "src/app/api/admin/rush/route.ts:1-280; route.test.ts:220-470; src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/lib/provisioning-incident.ts; operational-log.ts; workspace-cycle.ts; src/proxy.ts:1-110",
+    "src/app/apply/application-form.tsx materials/review disclosures; src/app/applicant/page.tsx receipt disclosure",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql; supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/account-provisioning.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/account-provisioning-node.log; account-provisioning-browser.log; release-evidence-sql/tests.log provisioning/result lines; release-evidence-final-node.log final summary",
+    "captures/public-home-mobile-390.png; captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [],
+  "notVerified": [
+    "Actual hosted Clerk creation/session expiry, Supabase RPC/RLS and storage, email delivery, delayed provider reconciliation, and a complete authenticated owner recovery journey; no staging exists.",
+    "Full authenticated application/status, evaluator, grading-close and release journeys; source inspection does not demonstrate task completion. No final owner queue capture was supplied.",
+    "Human privacy comprehension, keyboard-only integrated task success, screen-reader use, physical iPhone or macOS Safari behavior; synthetic application capture is not authenticated applicant evidence.",
+    "Client-approved engagement artifacts/results, current Board-confirmed workload, and Board-approved original-resume policy reconciliation, retention operations and closed-round remediation."
+  ]
+}

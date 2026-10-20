@@ -1,0 +1,57 @@
+
+> mecgwebsite@0.1.0 lint
+> eslint
+
+
+/home/rahil/mecg-website/src/app/member/group-case/group-case-roster.tsx
+  134:11  error  Error: Cannot access variable before it is declared
+
+`hasUnconfirmedObservations` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/home/rahil/mecg-website/src/app/member/group-case/group-case-roster.tsx:134:11
+  132 |   useEffect(() => {
+  133 |     function protectObservations(event: BeforeUnloadEvent) {
+> 134 |       if (hasUnconfirmedObservations()) {
+      |           ^^^^^^^^^^^^^^^^^^^^^^^^^^ `hasUnconfirmedObservations` accessed before it is declared
+  135 |         event.preventDefault();
+  136 |         event.returnValue = "";
+  137 |       }
+
+/home/rahil/mecg-website/src/app/member/group-case/group-case-roster.tsx:177:3
+  175 |     return JSON.stringify({ scores: fullScores(row.scores), note: row.note });
+  176 |   }
+> 177 |   function hasUnconfirmedObservations() {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 178 |     return Object.entries(rowsRef.current).some(([id, row]) => signature(row) !== signature(saved.current[id]))
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 179 |       || Object.keys(pendingWrites.current).length > 0 || Object.keys(conflictsRef.current).length > 0;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 180 |   }
+      | ^^^^ `hasUnconfirmedObservations` is declared here
+  181 |   function checkRubricNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
+  182 |     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  183 |     if (hasUnconfirmedObservations() && !window.confirm("Some observations are not yet confirmed. Leaving may lose changes held only on this page. Choose Cancel to wait for confirmation or download your observations first.")) event.preventDefault();  react-hooks/immutability
+  401:26  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+/home/rahil/mecg-website/src/app/member/group-case/group-case-roster.tsx:401:26
+  399 |         </div>
+  400 |       )}
+> 401 |       {visibleGroups.map((group) => (
+      |                          ^^^^^^^^^^^^
+> 402 |         <section key={group.groupId ?? "ungrouped"} className="mt-5" aria-label={group.groupName}>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 403 |           {showGroupHeadings && <h3 className="text-sm font-semibold text-mecg-navy">{group.groupName}</h3>}
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 551 |         </section>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 552 |       ))}
+      | ^^^^^^^^ Cannot access ref value during render
+  553 |     </section>
+  554 |   );
+  555 | }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/refs
+
+✖ 2 problems (2 errors, 0 warnings)
+

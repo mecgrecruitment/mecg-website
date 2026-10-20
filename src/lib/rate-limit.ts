@@ -49,15 +49,18 @@ export function emailBucket(prefix: string, email: string): string {
 export type RateLimitStatus = "allowed" | "limited" | "unavailable";
 
 export async function checkRateLimitStatus(bucket: string): Promise<RateLimitStatus> {
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  const { data, error } = await screeningRpc<boolean>(createAdminClient(), "check_rate_limit", {
-    p_bucket: bucket,
-  });
-  if (error) {
-    console.error("check_rate_limit failed", error);
-    return "unavailable";
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { data, error } = await screeningRpc<boolean>(createAdminClient(), "check_rate_limit", {
+      p_bucket: bucket,
+    });
+    if (!error && typeof data === "boolean") return data ? "allowed" : "limited";
+  } catch {
+    // Client setup, session transport, and RPC execution can reject instead
+    // of returning an RPC error. Preserve the caller's outage policy for both.
   }
-  return data === true ? "allowed" : "limited";
+  console.error("check_rate_limit unavailable");
+  return "unavailable";
 }
 
 // Compatibility wrapper for routes whose existing policy deliberately chooses

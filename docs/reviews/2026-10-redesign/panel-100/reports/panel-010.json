@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-010",
+  "lens": "Apple-inspired clarity \u2014 overall coherence; simulated expertise, not an employee or human participant",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected public experience has a coherent proposition, distinct client/student actions, useful engagement expectations and unusually disciplined visual restraint. Desktop and mobile captures preserve MECG\u2019s Precision Instrument identity through hairlines, numbered sections, restrained orange and readable prose. The engagement bench explains concrete handoffs rather than merely decorating the page; its source exposes selected state, a polite readout and reduced-motion behavior. The client journey from services through inquiry has explicit next-step guidance, sending feedback, confirmation and an email fallback. However, its supplied successful browser journey intercepts the contact API, so it establishes interface behavior rather than board receipt or observed client success. Missing approved project artifacts constrain proof, and there is no hosted integration or human acceptance evidence. These limits prevent an unqualified world-class or release endorsement; they do not establish that the visual direction should change. One small proposition-hierarchy improvement remains.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/app/api/contact/route.ts",
+    "src/lib/email.ts",
+    "src/app/apply/application-form.tsx:729-750",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log:public journey results and summary",
+    "evidence/publication-proof-result.json",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/app/(marketing)/home/page.tsx:41-45,100-108",
+      "evidence": "The hero introduces student-led consulting and asks visitors to Discuss a project without stating pro bono. Cost first appears in the later section 04 facts, supplied by src/lib/site-content.ts:158-163. Both hero captures confirm its absence before the primary action; the mobile capture places the substantial bench and proof sections before those facts.",
+      "userImpact": "An organization cannot immediately distinguish the offer from paid consulting. A decisive qualification fact requires more scrolling than the invitation to inquire.",
+      "suggestedFix": "Include pro-bono consulting in the existing hero supporting sentence, keeping the current typography, two actions and restrained layout. Do not add a badge or another call to action."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted deployment exists; Clerk sessions, actual Supabase/storage permissions, email delivery and authenticated operator journeys were not exercised by this seat.",
+    "The supplied client test mocks POST /api/contact (tests/e2e/public-journeys.spec.ts:46); its confirmation does not prove email arrival or a board reply.",
+    "No human study, comprehension measurement, physical-device, Safari, Firefox or assistive-technology observation supports task-success claims.",
+    "Approved case-study outcomes and project artifacts remain absent. Named organizations and statistics were reviewed as supplied product facts, not independently authenticated.",
+    "Resume disclosure explicitly permits assigned reviewers to see identifying original PDFs (application-form.tsx:731,746); this review does not establish Board resolution of the broader blind-review policy or hosted access enforcement.",
+    "Private grading, decision-release and provisioning workflows were outside this seat\u2019s detailed inspection; broad website acceptance cannot be inferred from this public-surface sample."
+  ]
+}

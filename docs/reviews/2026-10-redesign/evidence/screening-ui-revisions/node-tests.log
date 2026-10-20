@@ -1,0 +1,76 @@
+(node:1751246) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1751246) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1751246) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ screening draft route load (31.453211ms)
+✔ screening draft route old-rubric (3.798795ms)
+✔ screening draft route missing-revision (3.253338ms)
+✔ screening draft route malformed-content (3.421177ms)
+✔ screening draft route wrong-load-target (4.160222ms)
+✔ screening draft route write (5.234476ms)
+✔ screening draft route conflict (4.032957ms)
+✔ screening draft route wrong-write-target (3.876037ms)
+✔ screening draft route wrong-mutation (3.277522ms)
+✔ screening draft route wrong-content (3.215728ms)
+✔ screening draft route wrong-conflict-target (3.223703ms)
+✔ screening draft route legacy-write (3.163722ms)
+✔ screening draft route malformed-receipt (3.734836ms)
+(node:1751246) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/screening/draft/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+member screening RECUSE failed { code: '55000' }
+next_screening_assignment failed { code: 'XX000' }
+(node:1751247) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:1751247) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(node:1751247) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ POST /api/member/screening rejects payloads over the 128 KiB cap before parsing (29.647937ms)
+✔ POST /api/member/screening returns the next private assignment after submit (5.953765ms)
+✔ POST /api/member/screening requires evidence notes for ratings 1 and 5 only (4.520317ms)
+✔ screening final action v2 forward (4.534183ms)
+✔ screening final action v2 no-revision (4.563697ms)
+✔ screening final action v2 conflict (4.096094ms)
+✔ screening final action v2 wrong-conflict-target (3.878562ms)
+✔ screening final action v2 legacy-numeric (3.954783ms)
+✔ screening final action v2 wrong-target (3.213784ms)
+✔ screening final action v2 wrong-kind (3.115283ms)
+✔ screening final action v2 no-review (3.519308ms)
+✔ screening final action v2 recusal (3.826146ms)
+✔ screening final action v2 legacy-recusal (3.243199ms)
+✔ screening final action v2 recusal-wrong-target (3.345989ms)
+✔ screening final action v2 replacement-failed (3.76362ms)
+✔ screening final action v2 next-failed (3.409887ms)
+✔ screening API rejects external evidence, recommendation and recusal types before RPC (4.188665ms)
+(node:1751247) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/screening/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1751248) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ screening backup round trips exactly and excludes another assignment, rubric or expired data (0.967327ms)
+✔ blocked and quota-limited backup storage cannot claim private observations are protected (0.120453ms)
+(node:1751248) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/screening-draft-recovery.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1751254) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ screening draft writes require explicit revision and mutation identity on the first save (0.97475ms)
+✔ screening snapshots distinguish no stored draft from a hidden old-rubric revision (0.127556ms)
+✔ malformed nonempty screening content fails closed instead of becoming an empty draft (0.239903ms)
+✔ screening saved receipts need assignment, revision, mutation, current content and timestamp (0.219575ms)
+✔ screening action receipts are explicit and bound, with a finite score and real review identifier (0.144567ms)
+✔ screening draft confirmation binds exact observations with criterion order independence (0.126804ms)
+(node:1751254) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/screening-draft-write.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 233.854812

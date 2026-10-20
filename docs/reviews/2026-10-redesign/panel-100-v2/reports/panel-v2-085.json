@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-v2-085",
+  "lens": "Recruitment operator",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The operator journey is substantially clearer: cohort-scoped navigation preserves context, staffing and submitted forms are separated from canonical valid evidence, closure explains its irreversible consequence, and ambiguous closure reconciles authoritative status while retaining a same-tab recovery marker. Batch release supports a searchable full-cohort review, keeps filtering separate from the submitted snapshot, and discards stale confirmation after uncertain acknowledgements. The supplied mobile diagnostic capture presents specific round counts, missing criteria and honest closed-round escalation legibly. Public mobile composition follows Precision Instrument coherently, with cost and duration immediately stated and pending project approval disclosed. Nevertheless, the actual single-outcome release path still bypasses the stronger acknowledgement/recovery treatment. That consequential inconsistency prevents agreement with the broad world-class question. Missing approved engagement proof, membership workload facts, hosted provider acceptance and Board-approved closed-round remediation further limit the claim; local test success is useful evidence but does not establish observed operator success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections and historical responses)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/operator-close-ambiguity.md",
+    "docs/reviews/2026-10-redesign/operator-evidence-attention.md",
+    "docs/reviews/2026-10-redesign/operator-review-and-scale.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/components/workspace-nav.tsx",
+    "src/app/admin/rounds/page.tsx",
+    "src/app/admin/round-board.tsx (context, attention and results)",
+    "src/app/admin/group-case-coverage.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/round-close-request.ts",
+    "src/app/admin/decision-form.tsx",
+    "src/app/admin/applications/[id]/release-evidence/page.tsx",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx",
+    "src/lib/use-action.ts",
+    "src/lib/run-action.ts",
+    "src/lib/client-fetch.ts (request helpers)",
+    "src/app/api/admin/decisions/route.ts (release handling)",
+    "src/app/applicant/page.tsx and src/app/apply/application-form.tsx (resume disclosures)",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts (through later-status reconciliation)",
+    "tests/e2e/release-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/operator-review-browser.log (final results)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (cohort results and summary)",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/admin/decision-form.tsx:89-105; src/lib/run-action.ts:7-18; src/lib/use-action.ts:25-35",
+      "evidence": "ReleaseButton uses the generic runAction path, which awaits authorizedFetch and the complete JSON body without a deadline, accepts every HTTP-success response including null/malformed JSON, and turns transport loss into only \u201cCould not release\u201d. ReleaseButton refreshes only on result.ok or released:true. Consequently a committed release with a lost response leaves the stale row and enables retry; a stalled response remains Releasing indefinitely. This actual control is rendered on the dossier and Decisions page (applications/[id]/page.tsx:552; hash/page.tsx:414). The supplied lost/stalled release browser test exercises ReleaseAllButton, not this control.",
+      "userImpact": "An operator releasing one applicant cannot reliably distinguish completed release from failure, recover from a stalled acknowledgement, or trust the success message after malformed acknowledgement. This is a source-established conditional failure, not an observed hosted incident.",
+      "suggestedFix": "Give single release a bounded complete-response operation, validate an action-specific receipt, and show explicit unknown outcome with authoritative outcome reconciliation before another release attempt. Cover committed response loss, stalled bodies and malformed success on the actual single-release control."
+    }
+  ],
+  "notVerified": [
+    "No hosted Clerk/Supabase/RLS/storage/email acceptance or real authenticated operator journey; intercepted fixtures do not prove these integrations.",
+    "No observed human task success, assistive-technology session, physical iPhone or macOS Safari testing.",
+    "Board-approved closed-round remediation, privacy/retention operations and original-resume policy reconciliation remain outstanding.",
+    "Approved actual engagement artifacts and current membership workload commitments remain absent; private visual review is limited to the supplied synthetic diagnostic capture and source."
+  ]
+}

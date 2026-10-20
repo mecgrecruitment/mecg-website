@@ -15,14 +15,20 @@ export default function PillNav({
   matchPathOnly?: boolean;
 }) {
   const selectedLink = useRef<HTMLAnchorElement>(null);
+  const strip = useRef<HTMLElement>(null);
   const selectedValue = matchPathOnly ? current.split(/[?#]/, 1)[0] : current;
 
   useEffect(() => {
-    selectedLink.current?.scrollIntoView({ block: "nearest", inline: "center" });
+    const container = strip.current;
+    const selected = selectedLink.current;
+    if (!container || !selected) return;
+    const containerBox = container.getBoundingClientRect();
+    const selectedBox = selected.getBoundingClientRect();
+    container.scrollLeft += selectedBox.left - containerBox.left - (container.clientWidth - selectedBox.width) / 2;
   }, [current]);
 
   return (
-    <nav aria-label={ariaLabel} className="scroll-cue overflow-x-auto">
+    <nav ref={strip} aria-label={ariaLabel} className="scroll-cue overflow-x-auto">
       <div className="flex min-w-max gap-1">
         {links.map(([href, label]) => {
           const linkValue = matchPathOnly ? href.split(/[?#]/, 1)[0] : href;

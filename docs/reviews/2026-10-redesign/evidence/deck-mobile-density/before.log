@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [chromium] › tests/e2e/deck-touch-targets.spec.ts:4:7 › discussion controls retain 44px targets without overflow at 320px (479ms)
+  ✓  2 [chromium] › tests/e2e/deck-touch-targets.spec.ts:4:7 › discussion controls retain 44px targets without overflow at 390px (384ms)
+
+  2 passed (2.4s)

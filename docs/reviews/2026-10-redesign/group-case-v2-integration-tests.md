@@ -1,0 +1,31 @@
+# Group Case versioned writes: integration verification
+
+2026-10-16. This is scoped implementation evidence, not a panel vote or a claim of real-user acceptance. Tests were updated separately from the implementation owner and SQL owner.
+
+The Group Case API fixtures now send the required expected revision and exact mutation UUID. Successful receipts carry `kind: saved`, revision, submitted mutation ID, application ID, complete scores, note, save time and canonical quality. The helper tests cover strict request/result parsing, malformed and legacy receipt rejection, nullable initial revisions and required UUID revisions on roster applicants. A roster regression also proves rubric criteria require no revision field; this caught an accidental criterion revision guard, which the implementation owner removed.
+
+API tests exercise authentication, malformed requests before opening the database, exact guarded v2 RPC arguments, explicit empty note and note-only null scores, frozen-round errors, conflict snapshots, uncertain malformed acknowledgements and wrong applicant/mutation acknowledgements. A database success result cannot establish success for a different request.
+
+Browser cases use real Group Case controls in the gated synthetic harness with intercepted network writes. New cases cover both stalled headers and stalled JSON body, exact pending mutation retry before newer edits are queued with the acknowledged revision, two-copy conflict comparison and private JSON download, explicit local/server choice, stale mutation rejection, and clearing every local observation while an earlier unknown write still needs exact retry. Existing note-only canonical blocker and stale-inflight-newer-note cases remain in the focused suite. The tests do not invent numeric observations for missing evidence.
+
+Node command:
+
+```sh
+node --experimental-test-module-mocks --import ./scripts/esm-loader.mjs --test src/lib/group-case-write.test.ts src/lib/group-case-roster.test.ts src/app/api/member/group-case/ratings/route.test.ts
+```
+
+Nineteen tests passed, zero failed in `/tmp/mecg-group-case-v2-node.log`. Targeted ESLint and diff whitespace checks passed.
+
+Initial Chromium browser iteration: ten passed, two test locator failures because the local-note text appeared in both its textarea and comparison paragraph. The assertions were scoped to the actual comparison paragraph; no product behavior or timeout changed. Raw output `/tmp/mecg-group-case-v2-first.log`.
+
+Final five-configuration browser result is recorded below after execution. These intercepted browser writes and mocked API tests do not prove database compare-and-swap/idempotency behavior, hosted authentication or production access control. Separate isolated SQL and parent aggregate checks own those scopes.
+
+The first five-configuration browser matrix yielded 64/65. Its Firefox partial-score case exposed a genuine interaction defect: a confirmed note receipt inserted feedback above the stars between pointer-down and pointer-up, moving the target so the intended rating click was lost. A new deterministic test held the star pointer down, completed the note receipt, then released the pointer at the same coordinate. It reproduced the defect before the implementation owner moved variable-height feedback below the rating controls and reserved the compact header status height. The corrected implementation passes this exact Firefox reproduction (1/1, `/tmp/mecg-group-case-pointer-fixed-final.log`). A first geometry-edit iteration also failed because feedback was accidentally placed inside the compact status span; that source placement was corrected and the failed trace retained. These failures were not converted into forced clicks or retried user input.
+
+Combined focused Node/API/continuity verification after the final versioned fixtures: **30 passed, 0 failed**, `/tmp/mecg-group-case-v2-node-complete.log`. This includes the actual My work/Group Case SSR boundary tests using the new `group_case_roster_v2` name. The final browser matrix includes the new pointer interaction regression, totaling fourteen scenarios across five configurations.
+
+A subsequent geometry matrix recorded 45/70. Twenty old assertions matched the same message in both the compact header and the full recovery paragraph; they now target the full paragraph. Five mobile Chromium interaction failures exposed a synthetic harness mismatch: its shrink-to-fit main omitted the actual workspace container's width and flex rules. The implementation owner corrected the gated harness to match the real member workspace and added minimum-width shrink behavior to the component. Before that correction, a trace screenshot showed content clipped to the right and Playwright could not hit off-viewport action buttons. These failures are preserved; earlier mobile passes do not certify the corrected layout. The final matrix repeats the affected states and asserts document scroll width does not exceed the viewport for saved ratings and conflict comparisons. The timeout tests also resume the simulated clock after verifying the full-body deadline, before ordinary interactive recovery.
+
+Current mobile Chromium captures were visually inspected after the corrected container: comparison copy wraps, both explicit choice actions remain visible, and the saved rating shows its selected score and canonical quality. Captures are retained as `evidence/group-case-conflict-mobile.png` and `evidence/group-case-saved-rating-mobile.png`. The development-only Next.js indicator visible in the synthetic harness is not a production feature.
+
+Final corrected-container verification: **90/90 browser checks passed in a single run** (18 scenarios across Chromium, mobile Chromium, Firefox, WebKit and mobile WebKit), `/tmp/mecg-group-case-v2-verified.log`, durable copy `evidence/group-case-v2-browser.log`. This includes seven existing evidence scenarios, seven revision/interaction scenarios and four frozen/finalized/archived/expired read-only continuity scenarios per browser configuration. No source changes occurred during this final run. The thirty focused Node/API/SSR checks are retained in `evidence/group-case-v2-node.log`. Parent aggregate verification and separate isolated SQL evidence remain necessary for wider release claims.

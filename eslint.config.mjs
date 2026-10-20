@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     // Generated reports can contain copied source trees; lint the canonical source only.
+    ".audit/**",
     "coverage/**",
     "test-results/**",
     "next-env.d.ts",

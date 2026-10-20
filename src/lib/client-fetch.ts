@@ -1,3 +1,5 @@
+import { confirmedApplicationSubmission } from "./application-submission";
+
 export class RequestTimeoutError extends Error {
   constructor() {
     super("The request took too long.");
@@ -23,40 +25,57 @@ export async function fetchWithTimeout(
   }
 }
 
+// The deadline covers consuming the response body, not only receiving headers.
+export async function fetchJsonWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number, fetcher: typeof fetch = fetch) {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => { controller.abort(); reject(new RequestTimeoutError()); }, timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      (async () => {
+        const response = await fetcher(input, { ...init, signal: controller.signal });
+        const body: unknown = await response.json().catch(() => null);
+        return { response, body };
+      })(),
+      deadline,
+    ]);
+  } finally { clearTimeout(timer); }
+}
+
 export async function reconcileSubmittedApplication({
+  cycleId,
   fetcher = fetch,
   waits = [0, 300, 900, 1_800],
   requestTimeoutMs = 2_500,
   wait = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds)),
 }: {
+  cycleId: string;
   fetcher?: typeof fetch;
   waits?: number[];
   requestTimeoutMs?: number;
   wait?: (milliseconds: number) => Promise<void>;
-} = {}) {
+}) {
   for (const delay of waits) {
     if (delay > 0) await wait(delay);
     try {
-      const response = await fetchWithTimeout(
-        "/api/apply/status",
+      const { response, body: status } = await fetchJsonWithTimeout(
+        `/api/apply/status?cycleId=${encodeURIComponent(cycleId)}`,
         { method: "GET", cache: "no-store" },
         requestTimeoutMs,
         fetcher,
       );
       if (!response.ok) continue;
-      const status: unknown = await response.json();
-      const application = status && typeof status === "object" && "application" in status
-        ? status.application
-        : undefined;
-      if (application && typeof application === "object" && "submitted" in application && application.submitted === true) {
-        return true;
-      }
+      const application = status && typeof status === "object" && "application" in status ? status.application : null;
+      const id = confirmedApplicationSubmission(application, cycleId);
+      if (id) return id;
     } catch {
       // Reconciliation is best-effort. A negative or failed read is not proof
       // that the timed-out write cannot still commit.
     }
   }
-  return false;
+  return null;
 }
 
 // Clerk's session cookie is a 60-second JWT that clerk-js refreshes only while

@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-v2-055",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client offer is now immediately understandable: student-led, no consulting fee, one academic semester. The supplied desktop and mobile captures show coherent Precision Instrument typography, restrained structure and a compact optional mobile process bench. I traced Home to Work, practical engagement questions, Contact and its acknowledgement/retry branches in actual source and supplied tests. Responsibilities, team size, confidentiality discussion and inquiry prompts are useful. The previous ambiguous-contact finding is substantially addressed: fields lock during sending, only an explicit receipt clears them, a full-operation deadline restores controls, uncertain delivery preserves the inquiry, unchanged retries reuse an in-page provider key, and limiter outages differ from quota. Focused browser logs substantiate those local paths; they do not establish actual delivery. Nevertheless, judging evidence is a core client task, and this revision still supplies no inspectable engagement or deliverable. Honest partnership copy avoids exaggeration but leaves that task incomplete, so I disagree with the unchanged broad world-class claim. Hosted readiness remains unproven independently of this content objection; I did not observe human task success or exercise authenticated application, grading or operator journeys.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts (services, facts, process and FAQs)",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "docs/policies/recruitment-policy.md",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log (tail)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-lint.log",
+    "captures/PROVENANCE.json",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3-5; src/components/client-project-grid.tsx:99-108; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "The approved fallback remains empty. Organization profiles describe the organizations and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work renders Selected work only for nonempty publication data. The supplied homepage captures show the pending-approval state, and UNRESOLVED.md confirms actual approved engagement evidence is absent. The mobile selector adjacency fix does not resolve this separate evidence gap.",
+      "userImpact": "A prospective client can assess proposed fit and responsibilities but cannot judge the rigor, relevance or practical usefulness of an actual MECG handoff before committing time and access.",
+      "suggestedFix": "Have content owners obtain client and Board approval for one bounded engagement showing the actual decision, MECG contribution, methods, constraints and a redacted deliverable or handoff excerpt. Publish through the existing approval boundary; preserve truthful pending disclosures until then."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance/inbox arrival, hosted rate limiting and provider idempotency. Protection is limited to an unchanged in-page intent and provider retention; reloads or edits can create another request.",
+    "Hosted Clerk sessions/expiry, Supabase RPC/RLS, storage, application recovery, grading, consequential operator recovery and migration rollout; no staging acceptance exists.",
+    "Human comprehension/task completion, full sequential keyboard client/applicant/operator journeys, screen-reader use, physical iPhone/macOS Safari and final Work/Contact visual states beyond supplied homepage captures.",
+    "Client publication approval, current membership workload facts and Board decisions on original-resume access, retention and closed-round remediation. Local tests and AI review do not supply these authorities."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "seatId": "panel-066",
+  "lens": "Prospective applicant \u2014 long or difficult content; simulated user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed public proposition is clear: student-led, pro-bono consulting, with an obvious student route and an every-major eligibility statement. Supplied home captures show coherent Precision Instrument typography, restrained structure and readable mobile actions. I traced Home \u2192 Join \u2192 Apply \u2192 recovery/review/submission \u2192 applicant next action through actual source and inspected synthetic journey tests and their passing log. Preparation guidance, response word counts, explicit draft-versus-submit copy, consent reset and schedule-outage messaging support this task. The materials and review steps accurately disclose access to original identifying resumes. However, recovering substantial writing still imposes an avoidable comparison/retention burden, and supplied checks use short responses rather than difficult content. No private-screen capture or hosted integration demonstrates that an applicant can complete this journey successfully. This is independent AI source/evidence review, not observed student success or an unqualified world-class endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/mobile-hero.png",
+    "captures/desktop.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/apply/application-form.tsx:612-625, resolveConflict:549-568, RecoveryComparison",
+      "evidence": "The revision-conflict screen renders every RECOVERY_FIELDS entry and every question, including identical values, followed by the two whole-copy actions. RecoveryComparison prints both complete texts without identifying changes. The instruction at line 622 requires copying wanted text before choosing; resolveConflict replaces the entire answers object and clears browser recovery when selecting the saved copy. In contrast, the earlier browser-recovery screen filters unchanged fields (595-602). The conflict fixture in tests/e2e/application-reliability.spec.ts:231-260 changes only a name; the browser-recovery fixture at 155-201 uses single-sentence answers.",
+      "userImpact": "When useful revisions exist in different essays across devices, a student must find differences among duplicated content and manually preserve text outside the paused form before a destructive whole-copy choice. Long mobile comparisons amplify that burden. This is a source-supported interaction limitation, not an observed data-loss incident.",
+      "suggestedFix": "Show changed fields first, offer per-response selection into a reviewable combined draft, and preserve both originals until the combined draft is acknowledged. Add a focused mobile fixture with long responses changed in different fields and verify retention through recovery."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted Clerk/Supabase/RLS/storage/email integration, or deployment evidence exists; local intercepted APIs and the two-session PostgreSQL race do not prove the complete account/upload/save/submit journey.",
+    "No actual student task study, long-response recovery observation, or authenticated application/status visual capture was supplied. Public home captures cannot establish private-form visual quality.",
+    "Physical devices, Safari, Firefox and assistive-technology navigation remain unverified. No formal accessibility conformance is established.",
+    "Current recruitment dates, actual prompt complexity and semester workload were not established against live operational data. Client-approved outcomes/artifacts and Board resolution of original-resume review policy remain external dependencies."
+  ]
+}

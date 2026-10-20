@@ -1,0 +1,52 @@
+{
+  "seatId": "panel-068",
+  "lens": "Prospective applicant \u2014 factual comprehension (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The reviewed applicant journey has a coherent factual foundation: all-major eligibility, no consulting prerequisite, preparation materials, evaluation traits and the distinction between open mixers and evaluated conversations. The source separates account saves, temporary browser recovery and submission; explicit comparisons explain which copy will replace the other. Supplied synthetic browser tests exercise both recovery choices, interrupted submission and revision conflicts, and the local two-session log demonstrates its specific initial-save race. Dashboard source provides bookings, offer actions and explicit schedule-outage guidance. Materials and review copy accurately disclose original-resume access rather than promising anonymous PDFs. Desktop/mobile hero captures show legible hierarchy and a clear student entry within the established Precision Instrument identity. However, public recruitment failure can be presented as unpublished events. More broadly, this is source, supplied captures and local fixture evidence: it does not establish that students understand these distinctions or complete the connected journey successfully. I cannot give unqualified world-class agreement or establish release readiness from this package.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/lib/application-draft-recovery.ts",
+    "src/app/api/apply/route.ts",
+    "src/app/api/apply/draft/route.ts",
+    "src/app/applicant/page.tsx",
+    "src/app/applicant/next-action.ts",
+    "src/app/applicant/next-action.test.ts",
+    "src/app/applicant/status-refresh.tsx",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/mecg-draft-race-final.log",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/public-recruitment.ts:120-123; src/app/(marketing)/join/page.tsx:48-54,80-81",
+      "evidence": "fetchPublicRecruitment destructures only data from public_recruitment and returns {cycle:null} when data is absent. Join defaults missing events to [] and renders \u201cThe Board has not published events for this cycle yet.\u201d Its inactive action leads to recruitment updates. A returned RPC error therefore shares the successful-empty content path.",
+      "userImpact": "During a recruitment-service failure, a student can infer that dates have not been published and choose to wait for announcements even if recruitment is actually open. The page cannot substantiate that factual assertion from a failed lookup.",
+      "suggestedFix": "Preserve a distinct unavailable result, show a temporary lookup-failure message with retry/contact guidance, and retain a direct application/status entry. Reserve unpublished-event wording for a successful empty response; cover failure versus empty responses locally."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted end-to-end evidence exists for Clerk identity, session expiry, actual Supabase RPC/RLS, storage uploads or email receipt delivery. Synthetic application responses and the race log do not prove these integrations.",
+    "No observed student study establishes comprehension of saved versus submitted, safe copy selection, eligibility or next-step discovery; this seat is an AI source review, not human usability evidence.",
+    "No supplied applicant-form or authenticated dashboard captures establish private-screen visual craft with real data; inspected visual evidence is limited to the public desktop/mobile hero.",
+    "Physical devices, Safari, Firefox, assistive technology, live cycle dates, Board privacy-policy resolution and operational rollout of revision migrations remain unverified in this review."
+  ]
+}

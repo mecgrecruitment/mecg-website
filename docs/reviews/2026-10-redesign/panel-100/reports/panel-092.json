@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-092",
+  "lens": "Owner and access-sensitive user; narrow mobile viewport; simulated AI user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected local design has credible safeguards: opaque provisioning references, owner-only incident identity, preserved partial accounts after uncertain identity or membership writes, and explicit confirmation that resolving an incident does not repair accounts. The 390px public hero capture is coherent and readable, with distinct client/student actions and a carefully structured process figure. Source traces the student journey from Join preparation to Materials and final consent; it accurately discloses that assigned reviewers can read identifying content in the original resume. However, the creation form still gives an ambiguous transport failure no reconciliation guidance. Supplied evidence does not establish a successful end-to-end owner recovery on a narrow viewport or real provider integration, so world-class acceptance and release readiness remain unproven. This is independent AI source/capture review, not observed human success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "captures/mobile-hero.png",
+    "src/app/apply/application-form.tsx:731-750",
+    "src/app/admin/people/page.tsx",
+    "src/app/admin/rush-controls.tsx:59-180",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/admin/provisioning/page.test.ts",
+    "src/app/api/admin/rush/route.ts:63-179",
+    "src/app/api/admin/rush/route.test.ts:350-405",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/operational-log.ts",
+    "src/lib/cycles.ts",
+    "src/app/api/member/screening/[assignmentId]/resume/route.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-final-node.log (relevant provisioning results)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/admin/rush-controls.tsx:64-85",
+      "evidence": "useRushAction catches a lost response with only setError(\"Request failed\") at lines 81-83 and releases pending at 85. Both ADD_USER and ADD_EXISTING_USER use this helper at lines 162-168. In contrast, provisioning/resolve-button.tsx:31-33 explicitly directs reconciliation after a lost response. The supplied provisioning browser cases exercise that resolution button only.",
+      "userImpact": "After a creation or membership request commits but its response is lost, the owner sees a generic failure and an enabled submission button. They cannot tell whether to retry creation, inspect an existing account, or check membership; a successful server operation need not have generated an incident.",
+      "suggestedFix": "Give account provisioning transport failures an explicit unknown-outcome message and a cycle-scoped recovery link. Preserve entered details and instruct the owner to check Clerk and People before retrying. Add a focused mobile test for a committed creation/grant followed by a lost browser response."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration exists in the evidence; actual owner session expiry, revocation and provider outcomes across these services remain unverified.",
+    "No supplied full owner-queue mobile capture or authenticated recovery recording establishes wrapping, navigation, native confirmation readability, or completed remediation. Queue evidence is source/ReactSSR; eight browser checks use an intercepted synthetic resolution harness.",
+    "No real user study, physical-device, assistive-technology, Safari or Firefox acceptance was inspected. Source-level privacy disclosure does not establish applicant comprehension.",
+    "Incident retention governance and Board resolution of original-resume review policy remain external open decisions. No actual account repair, deletion, email delivery or client-approved outcome was verified."
+  ]
+}

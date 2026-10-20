@@ -1,0 +1,35 @@
+{
+  "seatId": "panel-v2-054",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client journey clearly explains student-led, no-fee, semester-long consulting, team size, confidentiality discussions, client responsibilities and the inquiry next step. The supplied homepage captures show a coherent Precision Instrument identity with strong hierarchy and restrained structure; mobile process disclosure brings partnership context forward. I traced Home \u2192 Work \u2192 engagement FAQs \u2192 Contact and checked the corresponding synthetic browser scenario. Current source addresses the relevant earlier service-failure objections: pending fields lock, only an explicit success receipt clears the inquiry, timeout and malformed acknowledgement preserve it, unchanged retries reuse a provider idempotency key, and limiter outage differs from quota. Focused logs support those local assertions, including keyboard form entry and field-error recovery. The compact mobile organization selector also removes the remote-result layout. Nevertheless, this revision cannot satisfy the central client evidence task: no approved engagement demonstrates actual analytical work or handoff quality. Honest partnership headings improve accuracy but do not supply that evidence. That substantive gap determines my disagreement with the broad world-class claim. Release readiness remains unproven because local intercepted responses do not establish actual delivery or the consequential hosted private workflows.",
+  "inspected": [
+    "SNAPSHOT.json; content-manifest.json (identity and sampled source hashes)",
+    "docs/PRODUCT.md; docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md; release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 objections); EVIDENCE-INDEX.md; RESPONSES.md; UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx; src/app/(marketing)/work/page.tsx; src/app/(marketing)/contact/page.tsx; src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx; src/content/projects.public.ts; src/lib/site-content.ts (services, semester facts, engagement steps and FAQs)",
+    "src/app/api/contact/route.ts; src/app/api/contact/route.test.ts; src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts; tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/contact-and-offer-recovery.md; evidence/integrated-followup-browser.log (contact results); evidence/release-evidence-final-node.log (final totals)",
+    "captures/public-home-desktop-1280.png; captures/public-home-mobile-390.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/content/projects.public.ts:3\u20135; src/components/client-project-grid.tsx:99\u2013108; src/app/(marketing)/work/page.tsx:56\u201363",
+      "evidence": "The approved static project list is empty. Selected profiles show organization descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. Work omits Selected work when no public projects exist; the supplied homepage captures display the pending-approval state. DESIGN.md \u00a77 and release-open-items.md confirm the missing real artifacts.",
+      "userImpact": "A prospective client can understand the offer and responsibilities but cannot inspect comparable work to judge analytical rigor, usefulness or fit before investing in an inquiry.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its actual decision, MECG contribution, methods, limitations and a redacted deliverable or factual handoff. Publish through the approved-project boundary. Preserve the truthful pending state until approval; invent no outcomes."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance/inbox delivery and idempotency behavior; in-page retry protection does not survive reload or guarantee exactly-once delivery.",
+    "Hosted Clerk/Supabase/storage integration and authenticated application, grading, release and provisioning recovery; these were not directly exercised by this review.",
+    "Observed human comprehension or task success, assistive-technology sessions, physical iPhone/macOS Safari and complete keyboard navigation across the entire client journey.",
+    "Client publication permission, current membership workload facts and outstanding Board privacy/retention/remediation decisions."
+  ]
+}

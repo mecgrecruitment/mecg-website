@@ -1,0 +1,31 @@
+# Public content and information architecture review
+
+2026-10-16 · Independent AI specialist audit; not a user study.
+Scope: repository source only; no live database, external factual verification, or account writes.
+Baseline: `docs/DESIGN.md` §§1, 4, 7; findings describe the source inspected while implementation proceeds concurrently.
+
+## Confirmed defects and gaps
+
+- **Client answers exist but are not displayed.** `/work` renders services, semester facts, and engagement steps, but never imports `CLIENT_FAQS` (`src/app/(marketing)/work/page.tsx:10`, `:71`). Fit, client responsibilities, meeting cadence, and next steps already have draft answers in `src/lib/site-content.ts:174`. The contact page supplies no response expectation (`src/app/(marketing)/contact/page.tsx:25`).
+- **The deliverable is omitted from the process.** Engagement tuples include outputs, including a decision brief, supporting files, and implementation plan (`src/lib/site-content.ts:167`), but `/work` destructures only title/body (`src/app/(marketing)/work/page.tsx:84`). Clients cannot see the concrete handoff described in the source.
+- **Recruitment guidance points to missing content.** “Read how we evaluate” appears without a link or evaluation section (`src/lib/join-content.ts:85`). The page imports only reasons/FAQs (`src/app/(marketing)/join/page.tsx:9`); existing stages, evaluation traits, expectations, and preparation notes remain unused (`src/lib/join-content.ts:19`, `:37`, `:64`, `:71`). A dated event list does not explain the selection process when no events are published.
+- **Weekly workload remains unanswered.** The FAQ redirects students to recruitment rather than stating expected hours (`src/lib/join-content.ts:86`). Dues, required meeting cadence, eligibility by degree/campus, and accommodation contacts are also absent from the reviewed join content. No approved values were located; obtain them rather than inventing answers.
+- **The attendance answer is too broad.** “Does missing a rush event hurt my application? No” (`src/lib/join-content.ts:81`) sits beside evaluated Speed Dating/Group Case descriptions (`:83–84`). Repo policy says attendance is not a merit score, but an excused missed-round alternative remains unresolved (`docs/policies/recruitment-policy.md:21`, `:38`). Distinguish optional open events from evaluated-round participation; do not promise an unapproved alternate.
+- **Homepage order conflicts with the documented proof-first architecture.** After stats, the page leads through welcome, president, history, pillars, and culture; no work preview or services link is rendered in its body (`src/app/(marketing)/home/page.tsx:75`, `:82`, `:97`, `:117`, `:129`). `docs/DESIGN.md` §1 principles 4–5 and §5 explicitly call for proof before people and reject welcome/president homepage sections.
+- **Published claims have incomplete repo provenance.** “70+” active members and “30+” organizations are hardcoded (`src/lib/site-content.ts:1`); the homepage adds nationwide reach and “lasting impact” (`src/app/(marketing)/home/page.tsx:78`). The intake's source-owner/as-of/approval table is blank (`docs/CREDIBILITY_CONTENT_INTAKE.md:66`). Confirmed issue: missing supporting records in the reviewed material, not proof the figures are false.
+- **Organization profiles are not engagement proof.** `/work` leads with 15 organization profiles (`src/app/(marketing)/work/page.tsx:45`; `src/lib/site-content.ts:21`), whose descriptions explain those organizations rather than MECG's contribution (`src/components/client-project-grid.tsx:93`). The component correctly discloses the approval constraint (`:31`), which should remain.
+
+## Hypotheses and facts requiring verification
+
+- The static case-study release contains no records (`src/content/projects.public.ts:5`), but `public_projects` can supply live cases (`src/lib/projects/public-projects.ts:58`). Do not conclude production has zero cases. If the RPC returns none/fails, `/work` silently removes Selected work (`src/app/(marketing)/work/page.tsx:62`); an honest pending status would explain the gap.
+- Named clients/logos, board roles, and founding history may be accurate and approved elsewhere. The inspected content contains no approval trail; organization website URLs in `src/lib/site-content.ts:21` support organization research, not the MECG relationship or logo permission. Check against `docs/CREDIBILITY_CONTENT_INTAKE.md:3`, `:32–41`, `:80–82`.
+- Pro bono, 6–8 students, NDA support, longer engagements, and a one-week reply are draft operating claims (`src/lib/site-content.ts:158`, `:174`). The one-week promise should be confirmed with an owner before surfacing it. The contact API sends to the configured destination or board email; it does not establish response service levels (`src/app/api/contact/route.ts:39`).
+- A service-first homepage and earlier student process may improve decision clarity; this is an expert hypothesis, not measured conversion evidence.
+
+## Top three fixes
+
+1. **Make `/work` answer the client decision.** Put engagement specification, fit/responsibilities, concrete outputs, and inquiry next steps before the organization directory. Reuse `SEMESTER_FACTS`, tuple outputs, and reviewed `CLIENT_FAQS`; confirm operational promises. Show approved cases from the existing loader, or a truthful pending status. Add a compact route into this content on home.
+2. **Make `/join` answer the student decision.** Render existing recruitment stages, evaluation traits, and preparation guidance beside the live timeline. Correct the optional-event versus evaluated-round distinction. Obtain board-owned workload, dues, eligibility, and accommodation answers; retain explicit unknowns until approved. Internal policy is draft (`docs/policies/recruitment-policy.md:3–7`), not publication authority.
+3. **Create a claim record before adding stronger proof.** Complete the existing intake for metrics, client relationships/logos, and case outputs/results, with dates and owners. Replace unsupported impact language with the actual research/recommendation contribution. Preserve the approved public-project boundary and keep culture photos distinct from project artifacts (`docs/DESIGN.md` §7).
+
+Verification: source reads and symbol searches only; no usability study, production-content inspection, or code changes.

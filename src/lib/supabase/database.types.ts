@@ -1553,6 +1553,55 @@ export type Database = {
           },
         ]
       }
+      provisioning_incidents: {
+        Row: {
+          id: string
+          cycle_id: string
+          requested_by: string
+          email: string
+          clerk_user_id: string | null
+          app_user_id: string | null
+          phase: string
+          clerk_cleanup_failed: boolean
+          profile_cleanup_failed: boolean
+          created_at: string
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          id: string
+          cycle_id: string
+          requested_by: string
+          email: string
+          clerk_user_id?: string | null
+          app_user_id?: string | null
+          phase: string
+          clerk_cleanup_failed: boolean
+          profile_cleanup_failed: boolean
+          created_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          id?: string
+          cycle_id?: string
+          requested_by?: string
+          email?: string
+          clerk_user_id?: string | null
+          app_user_id?: string | null
+          phase?: string
+          clerk_cleanup_failed?: boolean
+          profile_cleanup_failed?: boolean
+          created_at?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "provisioning_incidents_cycle_id_fkey"; columns: ["cycle_id"]; isOneToOne: false; referencedRelation: "rush_cycles"; referencedColumns: ["id"] },
+          { foreignKeyName: "provisioning_incidents_requested_by_fkey"; columns: ["requested_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "provisioning_incidents_resolved_by_fkey"; columns: ["resolved_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] }
+        ]
+      }
       profiles: {
         Row: {
           active: boolean
@@ -2942,6 +2991,54 @@ export type Database = {
         Args: { target_decision_id: string }
         Returns: undefined
       }
+      rate_group_case_applicant_v2: {
+        Args: { target_round_id: string; target_application_id: string; scores: Json; note: string; expected_revision: string | null; mutation_id: string }
+        Returns: Json
+      }
+      group_case_roster_v2: {
+        Args: { target_round_id: string }
+        Returns: Json
+      }
+      submit_evaluation_v2: {
+        Args: { target_assignment_id: string; submitted_ratings: Json; submitted_evidence: string; expected_draft_revision: string | null }
+        Returns: Json
+      }
+      get_screening_review_draft_v2: {
+        Args: { target_assignment_id: string }
+        Returns: Json
+      }
+      save_screening_review_draft_v2: {
+        Args: { target_assignment_id: string; draft_ratings: Json; draft_evidence: string; draft_recommendation: string; expected_revision: string | null; mutation_id: string }
+        Returns: Json
+      }
+      submit_screening_review_v2: {
+        Args: { target_assignment_id: string; ratings: Json; review_evidence: string; review_recommendation: string; expected_draft_revision: string | null }
+        Returns: Json
+      }
+      recuse_screening_assignment_v2: {
+        Args: { target_assignment_id: string; recusal_reason: string }
+        Returns: Json
+      }
+      get_evaluation_draft_v2: {
+        Args: { target_assignment_id: string }
+        Returns: Json
+      }
+      save_evaluation_draft_v2: {
+        Args: { target_assignment_id: string; submitted_ratings: Json; submitted_evidence: string; expected_revision: string | null; mutation_id: string }
+        Returns: Json
+      }
+      decision_evidence_diagnostics: {
+        Args: { target_application_id: string }
+        Returns: Json
+      }
+      decision_release_preflight: {
+        Args: { target_cycle_id: string }
+        Returns: Json
+      }
+      release_decision_batch: {
+        Args: { target_cycle_id: string; expected_decisions: Json }
+        Returns: Json
+      }
       release_ready_decisions: {
         Args: { target_cycle_id: string }
         Returns: Json
@@ -2952,6 +3049,10 @@ export type Database = {
           reminder_kind: string
           subject_id: string
         }
+        Returns: undefined
+      }
+      resolve_provisioning_incident: {
+        Args: { target_incident_id: string }
         Returns: undefined
       }
       respond_to_offer: {
@@ -2973,6 +3074,10 @@ export type Database = {
       rotate_event_token: { Args: { target_event_id: string }; Returns: string }
       rsvp_slot: { Args: { target_slot_id: string }; Returns: string }
       save_application_draft: { Args: { payload: Json }; Returns: string }
+      round_close_summary: {
+        Args: { target_round_id: string }
+        Returns: Json
+      }
       screening_admin_overview: {
         Args: { target_cycle_id: string }
         Returns: Json
@@ -3053,7 +3158,8 @@ export type Database = {
         Returns: string
       }
       set_offer_deadline: {
-        Args: { expires_at: string; target_application_id: string }
+        // The canonical RPC explicitly accepts null to clear the deadline.
+        Args: { expires_at: string | null; target_application_id: string }
         Returns: boolean
       }
       set_project_staffing: {
@@ -3103,6 +3209,27 @@ export type Database = {
       }
       submit_application_reliable: {
         Args: {
+          accessibility_notes?: string
+          answers?: Json
+          applicant_contact: string
+          applicant_name: string
+          class_year?: string
+          college?: string
+          consent?: boolean
+          grad_term?: string
+          linkedin_url?: string
+          major?: string
+          phone?: string
+          preferred_name?: string
+          resume_storage_path?: string
+          uniqname?: string
+        }
+        Returns: Json
+      }
+      submit_application_v2: {
+        Args: {
+          expected_revision: string | null
+          cycle_id: string
           accessibility_notes?: string
           answers?: Json
           applicant_contact: string

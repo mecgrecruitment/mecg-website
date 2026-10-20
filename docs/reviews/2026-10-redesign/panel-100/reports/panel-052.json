@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-052",
+  "lens": "Prospective client \u2014 narrow mobile viewport (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The mobile homepage has coherent Precision Instrument styling, readable hierarchy and a clear project action. Source explains student staffing, pro-bono cost, semester length, confidentiality, client contributions and useful inquiry contents. I traced Work \u2192 contact \u2192 submission and checked the supplied passing Chromium journey, which intercepts delivery. However, clients cannot yet judge actual engagement evidence, and the narrow-screen organization selector separates a selection from its explanation by a long list. These prevent an unqualified world-class judgment. Release readiness remains unproven without hosted delivery evidence; this is an independent AI source/capture assessment, not observed client success.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/email.ts",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "evidence/publication-proof-result.json",
+    "captures/mobile.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:34-71",
+      "evidence": "Below sm, the grid has one column. Work passes all 15 PAST_PROJECTS (work/page.tsx:40; site-content.ts). Each button is min-h-36. Clicking only sets selectedName (line 45); the single selected-client-profile is rendered after the complete grid (lines 67-71), without focus or scroll handling. Selecting the first organization leaves its explanation beyond fourteen further tiles, approximately 2,000px away at default sizing. The same list precedes capabilities and responsibilities.",
+      "userImpact": "A mobile client can perceive selection as only a highlight and miss the explanation, then must traverse a large logo inventory to reach practical fit information. This is a source-derived issue; no Work screenshot or live interaction was available.",
+      "suggestedFix": "Use compact mobile rows with an adjacent disclosure for each organization, or deliberately reveal and move to the selected profile with accessible focus handling. Keep engagement terms easy to reach before the full inventory."
+    },
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:97-103",
+      "evidence": "The profile explicitly withholds scope, methods, deliverables and outcomes pending approval. Work/page.tsx:56-63 omits Selected work when no published projects exist. release-open-items.md confirms approved case studies and actual project artifacts remain absent; captures/mobile.png shows the homepage pending-approval state.",
+      "userImpact": "Named organizations establish breadth but provide no inspectable MECG work with which a prospective client can judge analytical quality or relevance. Honest disclosure is valuable but does not complete the evidence task.",
+      "suggestedFix": "Obtain client and board approval for a concise engagement showing the question, methods, redacted deliverable and limitations or approved result. Preserve pending status until approval; do not invent outcomes."
+    }
+  ],
+  "notVerified": [
+    "No staging, deployed inquiry, actual email receipt or board reply was observed. The client browser test mocks /api/contact; route tests mock email and rate limiting.",
+    "No real client comprehension, inquiry usefulness or conversion was measured. The one-week reply commitment and NDA process were not operationally validated.",
+    "Supplied public captures cover Home, not Work or Contact. Their mobile layout was source-reviewed; physical devices, 320px rendering, Safari, Firefox and assistive technology were not exercised.",
+    "No published engagement content or client approval records were inspected. Publication fixture success proves rendering mechanics, not real project evidence or approval.",
+    "Contact identifies the board as recipient and invites confidentiality discussion, but provider handling, retention practices and real confidentiality arrangements were not independently verified."
+  ]
+}

@@ -1,0 +1,11 @@
+# Operator contract follow-up
+
+The isolated full database suite exposed two historical assertions that no longer described the shipped operator contract.
+
+The earlier assisted check-in test expected a known person with an application in a different cycle to be rejected. The later `20260902194216_festifall_walkup_checkin.sql` deliberately changed both attendance paths to resolve a person without requiring an application, covering events before applications open. Reverting that behavior would remove Festifall walk-up support. The fixture now proves that a known historical applicant and a known person without any application can attend, without fabricating applications. Existing authorization, exact-identifier ambiguity, bounded assistance reasons, event window, current-cycle withdrawal, audit and duplicate checks remain. Assertions inspecting the primary person's attendance now scope that person rather than assuming an event can have only one attendee.
+
+The Speed Dating test searched the literal spelling `between 1 and 3` in PostgreSQL's normalized constraint text. It now exercises real group creation and the actual seat constraint: one and three applicants succeed; duplicate identities, four applicants, invalid tables, and physical seat four fail. Rejected requests leave no partial group, assignment or audit rows.
+
+Source inspection also found an actual backend gap: `start_speed_dating_group` accepted a stale participation row after the application became withdrawn or draft. Migration `20261016193000_operator_contract_fixes.sql` adds current application eligibility to the existing enrollment check. Group size, calibration, independent evaluator claims, repeat-score protection, round/session/table guards, conflict handling, authorization and transactional inserts remain in the same function. No attendance eligibility policy was changed.
+
+Verification: parent isolated PostgreSQL execution passed all 10 SQL files and 642 assertions, including 28 batch release, 25 assisted attendance and 35 Speed Dating checks after fixture corrections and migration 1930. Database lint reported no errors. Group enrollment takes ordered application row locks to coordinate concurrent status changes. No production changes occurred. Authenticated operator browser and hosted integration evidence remain outstanding.

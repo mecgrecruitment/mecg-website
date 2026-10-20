@@ -1,0 +1,18 @@
+            proname             |  owner   | prosecdef |      proconfig       | anon_execute | authenticated_execute | service_execute 
+--------------------------------+----------+-----------+----------------------+--------------+-----------------------+-----------------
+ submit_evaluation              | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ get_evaluation_draft           | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ save_evaluation_draft          | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ assert_evaluation_draft_access | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ get_evaluation_draft_v2        | postgres | t         | {"search_path=\"\""} | f            | t                     | t
+ save_evaluation_draft_v2       | postgres | t         | {"search_path=\"\""} | f            | t                     | t
+ discard_evaluation_draft       | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ submit_evaluation_v2           | postgres | t         | {"search_path=\"\""} | f            | t                     | t
+ evaluation_draft_snapshot      | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+(9 rows)
+
+ relrowsecurity | relforcerowsecurity | authenticated_select | authenticated_update 
+----------------+---------------------+----------------------+----------------------
+ t              | t                   | f                    | f
+(1 row)
+

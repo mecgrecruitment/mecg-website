@@ -1,0 +1,61 @@
+{
+  "seatId": "panel-v2-045",
+  "lens": "Product systems and reliability",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected interfaces show careful distinctions between persistence, valid evidence and verified completion. The mobile recovery capture makes exact answer choices legible; release diagnostics clearly separate missing evidence from permission to release. Source confirms that the earlier application-receipt and irreversible-close objections were substantially addressed: malformed submission receipts reconcile within the submitted cycle, dashboard confirmation checks stored state, and uncertain freezes block repeat confirmation even after same-tab reload. The public proposition now explains cost and duration promptly and labels partnership evidence honestly. However, Group Case saving still has an unbounded transport/body wait that can strand an applicant\u2019s save queue. That remaining core reliability defect, together with absent hosted acceptance and unresolved operating policies, prevents an unqualified world-class assessment. The supplied local passing evidence is valuable but does not establish actual authenticated task success.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/policies/recruitment-policy.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/operator-close-ambiguity.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/apply/application-form.tsx",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/app/applicant/page.tsx",
+    "src/app/api/apply/status/route.ts",
+    "src/lib/application-submission.ts",
+    "src/lib/client-fetch.ts",
+    "src/app/admin/round-status-control.tsx",
+    "src/app/admin/round-close-request.ts",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/app/admin/applications/[id]/release-evidence/evidence-view.tsx",
+    "supabase/migrations/20261016201000_release_evidence_diagnostics.sql",
+    "tests/e2e/operator-close.spec.ts",
+    "tests/e2e/application-reliability.spec.ts",
+    "tests/e2e/group-case-evidence.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (terminal summary)",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (terminal summary)",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (terminal summary)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-sql/tests.log (terminal summary)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png",
+    "captures/synthetic-release-round-diagnostics-mobile-webkit.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:144-179",
+      "evidence": "save() awaits authorizedFetch through retryOnNetworkError at lines 157\u2013162 without a deadline, including response.json(). The helper in src/lib/client-fetch.ts retries rejected requests but does not bound unresolved requests. Every later save for that applicant waits on inflight.current at line 149; its resolver runs only in finally. Consequently, stalled headers or body consumption can keep the row at Saving indefinitely and prevent newer changes from reaching the server. The retry/copy guidance at roster lines 419\u2013424 is rendered only for error/hint states. group-case-evidence.spec.ts covers rejected saves and a delayed receipt that eventually resolves, rather than a never-settling response. This is a source-derived path, not a hosted reproduction.",
+      "userImpact": "A reviewer can continue entering observations while the save queue remains blocked, with no bounded route to recover or explicit copy-before-leaving guidance during the stalled saving state. Reloading can discard those in-memory changes.",
+      "suggestedFix": "Bound the complete acknowledgement lifecycle, expose an unknown-save state with private copy/export recovery, and reconcile safely before permitting replacement writes so delayed commits cannot overwrite newer evidence. Add stalled-header/body cases that verify queued edits remain recoverable and no false saved receipt appears."
+    }
+  ],
+  "notVerified": [
+    "Actual Clerk sessions/expiry, Supabase RPC/RLS and storage, provider delivery, provisioning and consequential operator recovery in a hosted environment; no staging exists.",
+    "Observed human completion, screen-reader use, physical iPhone/macOS Safari, and complete authenticated keyboard journeys. Private captures are synthetic intercepted harnesses.",
+    "Client-approved consulting artifacts/results, current Board-confirmed membership workload, approved retention and closed-round remediation policy.",
+    "The reported stalled Group Case path was inspected in source; no browser session or test suite was run for this vote. Other private visual states lack final captures."
+  ]
+}

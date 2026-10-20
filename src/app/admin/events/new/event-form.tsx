@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { EVENT_KINDS } from "@/lib/workflow";
 import { useAction } from "@/lib/use-action";
 import { detroitDateTimeToIso } from "@/lib/detroit-date-time";
@@ -18,7 +19,7 @@ function Select({ label, name, value, onChange, children }: { label: string; nam
   );
 }
 
-export default function EventForm() {
+export default function EventForm({ cycleId }: { cycleId: string }) {
   const [name, setName] = useState("");
   const [kind, setKind] = useState("MIXER");
   const [visibility, setVisibility] = useState("PUBLIC");
@@ -35,6 +36,7 @@ export default function EventForm() {
     try {
       result = await run(
         {
+          cycleId,
           name,
           date: detroitDateTimeToIso(date),
           endsAt: detroitDateTimeToIso(endsAt),
@@ -56,7 +58,7 @@ export default function EventForm() {
       setError("Could not create event.");
       return;
     }
-    router.push(`/admin/events/${data.id}?token=${encodeURIComponent(data.checkinToken)}`);
+    router.push(withWorkspaceCycle(`/admin/events/${data.id}?token=${encodeURIComponent(data.checkinToken)}`, cycleId));
   }
 
   return (

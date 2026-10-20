@@ -1,0 +1,49 @@
+{
+  "seatId": "panel-051",
+  "lens": "Prospective client \u2014 first encounter (simulated AI lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The offer is understandable: student-led, pro-bono research and recommendations, a semester of work, and a team of 6\u20138. Responsibilities are discoverable in the home process and client FAQs: provide context, information access and a responsive contact; agree scope and meeting cadence together. The supplied desktop/mobile homepage captures show a coherent Precision Instrument hierarchy, clearly separated client/student actions and readable section structure at their intended layouts. I traced the actual source journey from home to services, engagement terms and contact, and inspected its logged synthetic browser test. Inquiry guidance asks for the decision, timing and intended users, names the board as recipient, and provides an email alternative. Publication limits are candid. However, a prospective client still cannot assess an actual engagement artifact or result, and mocked inquiry confirmation does not prove operational delivery. This is a source/capture assessment by an AI seat, not observed client success or a comprehensive website acceptance result.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/lib/site-content.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/public-smoke.spec.ts (relevant navigation assertions)",
+    "evidence/mecg-round-close-full-e2e.log (public journey entries and summary)",
+    "evidence/mecg-privacy-final-node.log (contact entries and summary)",
+    "evidence/publication-proof-result.json",
+    "captures/desktop.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:93\u2013113; src/app/(marketing)/home/page.tsx:69\u201380",
+      "evidence": "The home promises \u201cReal organizations. Specific questions.\u201d but its fallback supplies only industry breadth and a pending-approval status. Selected organization profiles display company descriptions; line 102 explicitly withholds project scope, methods, deliverables and outcomes, and the onward action visits the organization website. release-open-items.md confirms approved case studies and project artifacts are absent.",
+      "userImpact": "A client can understand the service category but cannot judge the quality, depth or relevance of MECG\u2019s completed work before an inquiry. Organization recognition alone does not answer that decision.",
+      "suggestedFix": "Obtain client and board permission for at least one bounded engagement showing its decision, actual method, redacted deliverable and limitations; publish only approved outcomes. Until approval exists, preserve the honest pending status and treat evidence-based client acceptance as unresolved."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or delivered inquiry email exists in this evidence. public-journeys.spec.ts intercepts /api/contact with HTTP 200; route tests mock sendEmail. Board receipt, reply routing and the FAQ one-week response commitment remain unverified.",
+    "No human/client study establishes comprehension, successful discovery of responsibilities or willingness to inquire. No conversion improvement is established.",
+    "No work/contact page captures were supplied; their visual craft was assessed only through source. Homepage captures do not establish every interactive state, physical-device usability, assistive-technology access or Safari/Firefox behavior.",
+    "NDA execution, publication permissions, factual claims about past organizations and real delivery quality require content-owner evidence. Contact source identifies board access and external email processing; I did not verify organizational retention practices or contractual confidentiality."
+  ]
+}

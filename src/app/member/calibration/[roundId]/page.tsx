@@ -1,3 +1,6 @@
+import { requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
+import { hasPermission } from "@/lib/authorization";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,20 +19,25 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
   params: Promise<{ roundId: string }>;
   searchParams: Promise<{ return?: string }>;
 }) {
-  const [, { roundId }, query] = await Promise.all([requireMember(), params, searchParams]);
-  const returnTo = query.return?.startsWith("/member") ? query.return : "/member";
+  const [user, { roundId }, query] = await Promise.all([requireMember(), params, searchParams]);
+  const requestedCycle = await requestedWorkspaceCycleId();
+  if (requestedCycle && !hasPermission(user.memberships, requestedCycle, "WORKSPACE_ACCESS")) notFound();
   const supabase = await createClient();
   const [{ data: detail, error }, { data: round, error: roundError }] = await Promise.all([
     screeningRpc<CalibrationDetail>(supabase, "round_calibration_detail", { target_round_id: roundId }),
-    supabase.from("rounds").select("kind").eq("id", roundId).maybeSingle(),
+    supabase.from("rounds").select("kind,cycle_id").eq("id", roundId).maybeSingle(),
   ]);
   if (error || !detail) notFound();
   if (roundError) throw roundError;
+  const cycleId = round?.cycle_id;
+  if (!cycleId || !hasPermission(user.memberships, cycleId, "WORKSPACE_ACCESS")) notFound();
+  const returnTo = withWorkspaceCycle(query.return?.startsWith("/member") ? query.return : "/member", cycleId);
   const speedDating = round?.kind === "SPEED_DATING";
   const groupCase = round?.kind === "GROUP_CASE";
 
   return (
-    <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
+    <main className="workspace-private workspace-stack mx-auto flex max-w-3xl flex-col">
+      <nav aria-label="Calibration context" className="workspace-focus-context"><Link href={returnTo}>Return to your work</Link><span aria-hidden="true">/</span><span>Rubric version {detail.rubricVersion}</span></nav>
       <WorkspaceHeader
         eyebrow={`Rubric version ${detail.rubricVersion}`}
         title={`${detail.roundName} calibration`}

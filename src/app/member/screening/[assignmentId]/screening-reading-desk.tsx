@@ -1,29 +1,48 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+type ReviewView = "read" | "score";
+const ReviewViewContext = createContext<{ view: ReviewView; revealScore: () => void } | null>(null);
+export function useScreeningScoreView() { return useContext(ReviewViewContext); }
 
 export default function ScreeningReadingDesk({ reader, scorer }: { reader: ReactNode; scorer: ReactNode }) {
-  const [view, setView] = useState<"read" | "score">("read");
+  const [view, setView] = useState<ReviewView>("read");
+  const id = useId();
+  const reviewRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const readingPosition = useRef(0);
+  const revealScore = useCallback(() => {
+    readingPosition.current = window.scrollY;
+    setView("score");
+  }, []);
+  const context = useMemo(() => ({ view, revealScore }), [view, revealScore]);
+  useLayoutEffect(() => {
+    if (view === "score" && window.matchMedia("(max-width: 1023px)").matches) {
+      reviewRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+  }, [view]);
+  function returnToReading() {
+    setView("read");
+    toggleRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: readingPosition.current, behavior: "instant" });
+  }
   return (
-    <>
-      <div className="sticky top-2 z-10 grid grid-cols-2 rounded-xl bg-paper p-1 shadow-[0_8px_24px_rgba(7,13,31,0.08),inset_0_0_0_1px_rgba(7,13,31,0.1)] lg:hidden" role="tablist" aria-label="Application review view">
-        {(["read", "score"] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={view === option}
-            onClick={() => setView(option)}
-            className={`min-h-11 rounded-lg text-sm font-semibold transition-[background-color,color,box-shadow,scale] active:scale-[0.96] ${view === option ? "bg-white text-mecg-navy shadow-[0_1px_5px_rgba(7,13,31,0.12)]" : "text-mecg-navy/60"}`}
-          >
-            {option === "read" ? "Read application" : "Score application"}
-          </button>
-        ))}
+    <ReviewViewContext.Provider value={context}>
+      <div className="reading-mobile-toolbar">
+        <span>Application &amp; private review</span>
+        <button ref={toggleRef} type="button" aria-expanded={view === "score"} aria-controls={`${id}-review`} onClick={() => {
+          if (view === "score") returnToReading();
+          else { revealScore(); requestAnimationFrame(() => reviewRef.current?.focus()); }
+        }}>{view === "score" ? "Return to reading" : "Your review"}</button>
       </div>
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(24rem,0.92fr)]">
-        <div className={`${view === "read" ? "block" : "hidden"} lg:block`}>{reader}</div>
-        <div className={`${view === "score" ? "block" : "hidden"} lg:block lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1`}>{scorer}</div>
+      <div className="application-reading-layout">
+        <div className="min-w-0">{reader}</div>
+        <aside ref={reviewRef} id={`${id}-review`} tabIndex={-1} aria-label="Your private review" className={`application-review-rail ${view === "score" ? "review-is-open" : ""}`}>
+          {scorer}
+          <button type="button" className="button-secondary mt-4 lg:hidden" onClick={returnToReading}>Return to reading</button>
+        </aside>
       </div>
-    </>
+    </ReviewViewContext.Provider>
   );
 }

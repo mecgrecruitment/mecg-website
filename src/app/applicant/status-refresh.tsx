@@ -127,7 +127,7 @@ export default function ApplicantStatusRefresh() {
       <p role="status" aria-live="polite">{statusMessage}</p>
       <button
         type="button"
-        className="min-h-10 rounded-full px-3 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 rounded-lg px-3 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
         disabled={!online || isRefreshing || pendingActions > 0}
         onClick={requestRefresh}
       >

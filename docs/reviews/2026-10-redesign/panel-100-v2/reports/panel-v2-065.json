@@ -1,0 +1,58 @@
+{
+  "seatId": "panel-v2-065",
+  "lens": "Prospective applicant",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The inspected applicant journey has convincing local safeguards and coherent, restrained visual craft. Join explains eligibility, materials and evaluation; recruitment outages retain application access instead of asserting unpublished dates. Application save feedback separates device recovery from account persistence. I independently confirmed that submit() now sends unconfirmed 5xx outcomes through bounded reconciliation and explicitly says receipt is unknown and duplicate-safe retry is available; it retains answers. The previously reported ambiguous-result defect is addressed in current source and the five-configuration log. Recovery now offers exact per-field choices, changed-answer emphasis and a clearly labeled private download; the synthetic mobile capture shows readable long responses and reachable combined/whole-copy actions. Stored submission state gates the dashboard receipt, which consistently discloses identifying original-resume access. These are substantial strengths, but they do not establish the unchanged broad world-class proposition. Schedule-fit facts remain absent, approved engagement proof is unavailable, and the actual authenticated preparation-to-status journey has not been demonstrated across the real identity, database and upload boundaries. Local intercepted journeys and source inspection cannot establish successful receipt or recovery for a real applicant. Consequently both broad acceptance and integrated release readiness remain unproven, rather than an inferred approval from scoped tests.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity/header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings, chunked)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/app/apply/page.tsx (routing/intake)",
+    "src/app/apply/application-form.tsx (save/recovery/submit/materials)",
+    "src/app/apply/application-recovery-review.tsx",
+    "src/lib/application-submission.ts",
+    "src/lib/client-fetch.ts",
+    "src/lib/auth-destination.ts",
+    "src/app/api/apply/route.ts",
+    "src/app/api/apply/status/route.ts",
+    "src/app/applicant/page.tsx (deadline/receipt/next-action)",
+    "supabase/migrations/20261016190000_application_draft_revisions.sql (submit_application_v2)",
+    "tests/e2e/application-combine.spec.ts",
+    "tests/e2e/application-reliability.spec.ts (relevant save/receipt/conflict/503 cases)",
+    "docs/reviews/2026-10-redesign/application-mixed-copy-recovery.md",
+    "docs/reviews/2026-10-redesign/submission-receipts-and-deadlines.md",
+    "docs/reviews/2026-10-redesign/evidence/application-combine-browser.log (503 entries and terminal result)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/synthetic-application-mixed-copies-mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/join-content.ts:86",
+      "evidence": "The weekly-commitment answer explicitly says current weekly hours, mandatory times and peak commitments are not published. Join provides a direct Board email link, but no schedule-fit facts. This remains the factual limitation raised in the prior applicant objections, despite the truthful mitigation.",
+      "userImpact": "A student cannot independently decide whether membership fits a constrained semester before investing in recruitment and an application.",
+      "suggestedFix": "Obtain Board-confirmed current-semester workload range, required times and peak-week expectations, then publish them with an update date. Retain the honest contact fallback until those facts are authorized."
+    }
+  ],
+  "notVerified": [
+    "Real Clerk session/expiry, Supabase RPC/RLS, storage/upload and receipt-email integration; no staging or hosted acceptance is supplied.",
+    "A complete sequential keyboard preparation, file-selection, mixed-copy recovery, submission and actual authenticated status journey; tests inspected use direct fill/click/check and synthetic destination responses.",
+    "Observed human comprehension/task success, screen-reader use and physical iPhone/macOS Safari behavior.",
+    "Live authenticated visual states outside supplied synthetic recovery capture; grading/operator workflows beyond indexed scope were not independently exercised.",
+    "Client-approved engagement artifacts and Board policy decisions on resume review, retention and closed-round remediation remain external dependencies."
+  ]
+}

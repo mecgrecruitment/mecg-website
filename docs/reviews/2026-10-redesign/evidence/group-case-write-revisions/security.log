@@ -1,0 +1,13 @@
+           proname            |  owner   | prosecdef |      proconfig       | anon_execute | authenticated_execute | service_execute 
+------------------------------+----------+-----------+----------------------+--------------+-----------------------+-----------------
+ group_case_rating_snapshot   | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ group_case_roster_v2         | postgres | t         | {"search_path=\"\""} | f            | t                     | t
+ rate_group_case_applicant    | postgres | t         | {"search_path=\"\""} | f            | f                     | t
+ rate_group_case_applicant_v2 | postgres | t         | {"search_path=\"\""} | f            | t                     | t
+(4 rows)
+
+ relrowsecurity | authenticated_select | authenticated_insert 
+----------------+----------------------+----------------------
+ t              | f                    | f
+(1 row)
+

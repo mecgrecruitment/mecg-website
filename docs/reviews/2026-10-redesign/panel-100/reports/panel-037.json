@@ -1,0 +1,62 @@
+{
+  "seatId": "panel-037",
+  "lens": "Information and discoverability \u2014 recovery and retry",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The inspected public proposition and audience routes are clear. The supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy, legible prose and distinct client/student actions. Client scope, cost, confidentiality and inquiry expectations are discoverable; student preparation and evaluation criteria are explicit. Canonical/social metadata and private noindex defaults are deliberate. The synthetic production publication proof supports new case publication and withdrawal without rebuilding, not hosted approval enforcement. However, recruitment lookup failures are converted into an assertion that the Board has not published events, with no direct retry. That undermines truthful information precisely when a student needs recovery. This simulated AI source/capture review does not establish observed user success or world-class quality across private workflows.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/app/(marketing)/join/interest-form.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/lib/seo.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/content/projects.public.ts",
+    "src/lib/supabase/public.ts",
+    "src/app/sitemap.ts",
+    "src/app/robots.ts",
+    "src/app/not-found.tsx",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/work/[slug]/opengraph-image.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/api/interest/route.ts",
+    "src/lib/email.ts",
+    "src/app/apply/application-form.tsx:MaterialsStep and ReviewStep disclosure excerpts",
+    "supabase/migrations/20260901080000_projects_and_staffing.sql:public_projects",
+    "tests/e2e/public-journeys.spec.ts",
+    "scripts/verify-publication.mjs",
+    "evidence/publication-proof-result.json",
+    "evidence/mecg-round-close-full-e2e.log:public journey results",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/public-recruitment.ts:120\u2013123; src/app/(marketing)/join/page.tsx:46\u201350,68\u201381",
+      "evidence": "fetchPublicRecruitment destructures only data from the RPC and maps null data to {cycle:null}, discarding the error. JoinPage consequently defaults events to [] and renders \u201cThe Board has not published events for this cycle yet.\u201d An RPC outage and a successful empty publication receive the same factual claim. The fallback offers check-back/interest-list instructions, not an explicit lookup retry.",
+      "userImpact": "A student during an active application window can mistake a transient lookup failure for an unpublished cycle and leave for the interest list instead of finding the current application or events. ISR can retain this misleading response for the revalidation interval.",
+      "suggestedFix": "Return distinct successful-empty and unavailable states. For unavailable recruitment, say dates could not be loaded, provide a retry and Board contact path, and avoid asserting Board publication status. Add a focused RPC-error recovery test alongside the existing happy-path public journey checks."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted acceptance exists. Clerk, actual RPC/RLS permissions, storage and email delivery were not exercised by this review.",
+    "The client journey was traced in actual source and supplied test/log evidence: /work FAQ \u2192 /contact#message \u2192 confirmation. Its POST was intercepted; no real inquiry delivery or human task completion was observed.",
+    "Actual client approval, project artifacts and results remain absent. The publication fixture proves framework behavior with synthetic content; it does not prove hosted authorization or removal from external social caches/search indexes.",
+    "Authenticated application recovery, grading and operator journeys were not comprehensively inspected. Resume disclosure excerpts accurately acknowledge original identifying PDF access, but Board policy resolution remains open.",
+    "Physical devices, Safari/Firefox, assistive technology and real student/client comprehension or recovery success remain unverified."
+  ]
+}

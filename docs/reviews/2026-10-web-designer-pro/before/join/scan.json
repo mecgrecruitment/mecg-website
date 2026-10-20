@@ -1,0 +1,137 @@
+[
+  {
+    "w": 390,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Students / Every major\"; 11px \"01\"; 11px \"/ Published dates\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\"."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "92%",
+        "ui-monospace": "8%"
+      },
+      "sizes": [
+        36,
+        30,
+        24,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 21,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 768,
+    "fails": [
+      "Control label wraps onto two lines: \"Check application access\". Give it room or shorten it."
+    ],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Students / Every major\"; 11px \"01\"; 11px \"/ Published dates\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\"."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "92%",
+        "ui-monospace": "8%"
+      },
+      "sizes": [
+        60,
+        36,
+        24,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 21,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1280,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Students / Every major\"; 11px \"01\"; 11px \"/ Published dates\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\"."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "92%",
+        "ui-monospace": "8%"
+      },
+      "sizes": [
+        60,
+        36,
+        24,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 20,
+      "cardGrids": 0,
+      "defaultIcons": 0
+    }
+  },
+  {
+    "w": 1440,
+    "fails": [],
+    "warns": [
+      "10 text elements at 11px: 11px \"/ Students / Every major\"; 11px \"01\"; 11px \"/ Published dates\"",
+      "10 small letter-spaced uppercase labels. An eyebrow over every section stops meaning anything.",
+      "5 numbered uppercase labels (\"01 —\"). Numbered mono eyebrows are the anti-slop house style; see slop.md \"The overcorrection\"."
+    ],
+    "facts": {
+      "fonts": {
+        "Avenir Next": "92%",
+        "ui-monospace": "8%"
+      },
+      "sizes": [
+        60,
+        36,
+        24,
+        20,
+        16,
+        14,
+        12,
+        11
+      ],
+      "body": 15.9,
+      "hues": [
+        30,
+        210
+      ],
+      "boxes": 20,
+      "cardGrids": 0,
+      "defaultIcons": 0,
+      "focusStops": 29
+    }
+  }
+]

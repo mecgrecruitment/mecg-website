@@ -1,0 +1,60 @@
+{
+  "seatId": "panel-071",
+  "lens": "Member evaluator \u00b7 first encounter \u00b7 simulated user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition is clear and the supplied desktop/mobile captures show a coherent Precision Instrument identity. Source tracing of My work \u2192 calibrated assignment \u2192 ratings/Not observed \u2192 review \u2192 receipt shows useful safeguards, and tests distinguish an accepted receipt from ambiguous failure. However, the Group Case reviewer cannot tell whether saved observations qualify as valid evidence, and evaluation recovery overstates backup protection. These concrete first-encounter weaknesses prevent agreement. This is an independent AI source/artifact assessment, not observed member success or a hosted acceptance test.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile.png",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "src/app/apply/application-form.tsx:731-746",
+    "src/app/member/page.tsx",
+    "src/app/member/assignment-navigation.ts",
+    "src/app/member/evaluation-form.tsx",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/admin/events/[id]/observation-summary.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql",
+    "supabase/tests/group_case_rating.sql",
+    "evidence/mecg-privacy-final-node.log",
+    "evidence/mecg-privacy-db-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx",
+      "evidence": "Lines 222, 333-348 and 355 report started/rated counts and Saved; criterion rendering at 358-390 does not show required status or validity. GroupCaseRoster has no minimum-observed/quality payload. In contrast, migration 20261016191000 lines 5-33 requires minimum observations, required criteria and 75% weight; group_case_rating.sql:208-227 explicitly proves saved partial observations do not establish a valid mean.",
+      "userImpact": "A new reviewer can verify persistence but cannot verify whether their contribution counts as valid independent evidence. Equal rated counts can hide different weighted coverage or a missing required criterion.",
+      "suggestedFix": "Return canonical per-reviewer quality and show Partial observation versus Valid evaluation, coverage and missing requirements after save. Explain that unobserved dimensions should stay empty; do not encourage guessed scores to complete a checklist."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/evaluation-form.tsx",
+      "evidence": "Lines 166-174 ignore writeEvaluationDraft\u2019s result, while lines 154-158 promise browser retention and 199 says Your browser backup is current. src/lib/evaluation-draft-recovery.ts:177-182 returns false for oversized snapshots or failed storage writes.",
+      "userImpact": "During a server-save outage plus unavailable/full browser storage, the evaluator is told their evidence is protected although it may exist only in component memory and disappear on reload.",
+      "suggestedFix": "Track successful local persistence separately from server persistence. When neither succeeds, explicitly say the draft is only in this tab and provide a copy/export recovery action before retry or reload."
+    }
+  ],
+  "notVerified": [
+    "No live authenticated member screen or member-specific capture was supplied; private layout, keyboard/assistive-technology operation and actual task completion were not observed.",
+    "Clerk session expiry, hosted RPC/RLS authorization, storage and email integration, and coordinated migration rollout remain unverified; local logs and synthetic APIs cannot establish those outcomes.",
+    "No human study, physical-device/Safari/Firefox validation, or production deployment exists in this evidence. Public client inquiry confirmation in the inspected journey uses an intercepted response.",
+    "Client outcomes/artifacts still require approval. Applicant copy accurately discloses original-resume identity exposure; Board resolution of the older blind-review policy conflict remains outstanding."
+  ]
+}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/form-field";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { postMemberAction } from "@/lib/member-action";
 
 export type MemberProfile = {
   displayName: string;
@@ -18,39 +18,27 @@ export type MemberProfile = {
 // show and so the roster stops being a hand-edited content file.
 export default function ProfileForm({ initial }: { initial: MemberProfile }) {
   const router = useRouter();
+  const inFlight = useRef(false);
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   async function save(form: HTMLFormElement) {
+    if (inFlight.current) return;
+    inFlight.current = true;
     const data = new FormData(form);
     setPending(true);
     setError("");
     setNotice("");
-    try {
-      const response = await authorizedFetch("/api/member/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: data.get("displayName"),
-          gradTerm: data.get("gradTerm"),
-          major: data.get("major"),
-          position: data.get("position"),
-          bio: data.get("bio"),
-        }),
-      });
-      if (!response.ok) {
-        const body = await response.json().catch(() => null);
-        setError(body?.error ?? "Could not save your profile");
-        return;
-      }
-      setNotice("Profile saved.");
-      router.refresh();
-    } catch {
-      setError("Could not save your profile");
-    } finally {
-      setPending(false);
-    }
+    const result = await postMemberAction({ path: "/api/member/profile", payload: {
+      displayName: data.get("displayName"), gradTerm: data.get("gradTerm"),
+      major: data.get("major"), position: data.get("position"), bio: data.get("bio"),
+    } });
+    inFlight.current = false;
+    setPending(false);
+    if (result.kind === "saved") { setNotice("Profile saved."); router.refresh(); }
+    else if (result.kind === "rejected") setError(result.message);
+    else setError("Your profile save could not be confirmed. Your changes are still here; retry saving when your connection is available.");
   }
 
   return (
@@ -64,22 +52,24 @@ export default function ProfileForm({ initial }: { initial: MemberProfile }) {
       <p className="text-[13px] font-semibold text-mecg-navy/45">Your profile</p>
       <h3 className="mt-2 text-lg font-semibold">How you appear in the directory</h3>
       <p className="mt-1 text-sm leading-6 text-mecg-navy/55">Only your name is required. Nothing here is shown to applicants.</p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <FormField label="Display name" name="displayName" required defaultValue={initial.displayName} placeholder="Jordan Lee" />
-        <FormField label="Position" name="position" defaultValue={initial.position} placeholder="Engagement lead" />
-        <FormField label="Graduation term" name="gradTerm" defaultValue={initial.gradTerm} placeholder="Winter 2027" />
-        <FormField label="Major" name="major" defaultValue={initial.major} placeholder="Industrial Engineering" />
-      </div>
-      <label className="mt-3 block text-sm font-medium">
-        Short bio
-        <textarea
-          name="bio"
-          rows={3}
-          maxLength={1000}
-          defaultValue={initial.bio}
-          className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
-        />
-      </label>
+      <fieldset disabled={pending} className="mt-4 min-w-0">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <FormField label="Display name" name="displayName" maxLength={120} required defaultValue={initial.displayName} placeholder="Jordan Lee" />
+          <FormField label="Position" name="position" maxLength={120} defaultValue={initial.position} placeholder="Engagement lead" />
+          <FormField label="Graduation term" name="gradTerm" maxLength={40} defaultValue={initial.gradTerm} placeholder="Winter 2027" />
+          <FormField label="Major" name="major" maxLength={120} defaultValue={initial.major} placeholder="Industrial Engineering" />
+        </div>
+        <label className="mt-3 block text-sm font-medium">
+          Short bio
+          <textarea
+            name="bio"
+            rows={3}
+            maxLength={1000}
+            defaultValue={initial.bio}
+            className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+          />
+        </label>
+      </fieldset>
       <button type="submit" disabled={pending} className="button-primary mt-4">
         {pending ? "Saving…" : "Save profile"}
       </button>

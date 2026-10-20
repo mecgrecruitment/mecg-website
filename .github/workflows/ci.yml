@@ -91,7 +91,7 @@ jobs:
           --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       - run: supabase db reset --local --no-seed
       - run: supabase db lint --local --schema rush --level error --fail-on error
-      - run: supabase test db supabase/tests/rush_foundation.sql
+      - run: supabase test db supabase/tests
       - name: Stop isolated database
         if: always()
         run: supabase stop --no-backup

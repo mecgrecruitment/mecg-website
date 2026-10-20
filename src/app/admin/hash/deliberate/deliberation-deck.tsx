@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
+import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel } from "@/lib/labels";
 import { initials } from "@/lib/initials";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
-import { authorizedFetch } from "@/lib/client-fetch";
+import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 import { runAction } from "@/lib/run-action";
-import type { HashStage } from "@/lib/hash-tally";
+import { HASH_STAGE_RULES, type HashStage } from "@/lib/hash-tally";
 import { formatStars } from "@/lib/speed-dating-roster";
 
 export type DeckEntry = {
@@ -35,9 +36,11 @@ type Phase = { kind: "drumroll" } | { kind: "stamped"; status: string };
 type Confetti = { x: string; delay: string; hue: number }[];
 
 const PANEL = "rounded-2xl bg-white/[0.06] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]";
-const SORT_BUTTON = "rounded-full px-3 py-1 text-xs font-semibold text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white aria-pressed:bg-white/[0.12] aria-pressed:text-white";
+const SORT_BUTTON = "min-h-11 min-w-11 rounded-sm px-3 py-1 text-xs font-semibold text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white aria-pressed:bg-white/[0.12] aria-pressed:text-white";
 const ENTRANCES = ["fly", "spin", "swoosh"] as const;
 const RUSH_URL = "/api/admin/rush";
+const APPLY_TIMEOUT_MS = 15_000;
+const MOTION_PREFERENCE_KEY = "mecg:hash-deck:motion";
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
@@ -54,26 +57,6 @@ function entrance(id: string) {
 
 function makeConfetti(): Confetti {
   return Array.from({ length: 60 }, () => ({ x: `${Math.random() * 100}vw`, delay: `${Math.random() * 600}ms`, hue: Math.floor(Math.random() * 360) }));
-}
-
-// Rolls 0 → target with an ease-out over `duration`; remounts with the card, so every slide starts from 0.
-function useCountUp(target: number, duration = 800) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setValue(target); return; }
-    const start = performance.now();
-    let frame = requestAnimationFrame(function tick(now) {
-      const t = Math.min((now - start) / duration, 1);
-      setValue(target * (1 - Math.pow(1 - t, 3)));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [target, duration]);
-  return value;
-}
-
-function CountUp({ value, format }: { value: number; format: (value: number) => string }) {
-  return <>{format(useCountUp(value))}</>;
 }
 
 function NotesList({ title, notes }: { title: string; notes: string[] }) {
@@ -105,6 +88,32 @@ export default function DeliberationDeck({
   initialPresentingId: string | null;
 }) {
   const storageKey = `mecg:hash-deck:${cycleId}`;
+  // Start still until browser preferences are known; this also prevents a
+  // reduced-motion viewer seeing an animated first frame during hydration.
+  const [systemReducedMotion, setSystemReducedMotion] = useState<boolean | null>(null);
+  const [presentationMotion, setPresentationMotion] = useState(false);
+  const motionEnabled = presentationMotion && systemReducedMotion === false;
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const timer = window.setTimeout(() => {
+      setSystemReducedMotion(media.matches);
+      let enabled = true;
+      try { enabled = window.sessionStorage.getItem(MOTION_PREFERENCE_KEY) !== "off"; } catch {}
+      setPresentationMotion(enabled);
+    }, 0);
+    const update = () => setSystemReducedMotion(media.matches);
+    media.addEventListener("change", update);
+    return () => { window.clearTimeout(timer); media.removeEventListener("change", update); };
+  }, []);
+
+  function togglePresentationMotion() {
+    if (systemReducedMotion !== false) return;
+    const enabled = !presentationMotion;
+    setPresentationMotion(enabled);
+    // This non-sensitive display preference lasts only in this browser tab.
+    // Storage may be unavailable; the in-memory control must still work.
+    try { window.sessionStorage.setItem(MOTION_PREFERENCE_KEY, enabled ? "on" : "off"); } catch {}
+  }
   const [sort, setSort] = useState<Sort>("score");
   const [selectedId, setSelectedId] = useState<string | null>(entries[0]?.id ?? null);
   const [query, setQuery] = useState("");
@@ -116,6 +125,13 @@ export default function DeliberationDeck({
   const [phase, setPhase] = useState<Phase | null>(null);
   const [confetti, setConfetti] = useState<Confetti | null>(null);
   const [error, setError] = useState("");
+  const [applyFailure, setApplyFailure] = useState<{ kind: "rejected" | "unknown"; message: string } | null>(null);
+  const applyErrorRef = useRef<HTMLDivElement>(null);
+  const applyingRef = useRef(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const advanceButtonRef = useRef<HTMLButtonElement>(null);
+  const focusNextContext = useRef(false);
+  useEffect(() => { if (applyFailure) applyErrorRef.current?.focus(); }, [applyFailure]);
   const searchRef = useRef<HTMLInputElement>(null);
   // Server order is by score; A to Z re-sorts here so the projector never reloads mid-discussion.
   const sorted = useMemo(() => sort === "score" ? entries : [...entries].sort((a, b) => a.name.localeCompare(b.name)), [entries, sort]);
@@ -125,6 +141,13 @@ export default function DeliberationDeck({
   // A cursor outside the narrowed list lands on its first card.
   const index = Math.max(ordered.findIndex((candidate) => candidate.id === selectedId), 0);
   const entry = ordered[index];
+  useEffect(() => {
+    if (phase?.kind === "stamped") advanceButtonRef.current?.focus();
+    else if (focusNextContext.current) {
+      headingRef.current?.focus();
+      focusNextContext.current = false;
+    }
+  }, [entry?.id, phase?.kind]);
 
   useEffect(() => {
     let stored: string | null = null;
@@ -160,7 +183,7 @@ export default function DeliberationDeck({
     async function tick() {
       if (document.visibilityState !== "visible") return;
       try {
-        const response = await authorizedFetch("/api/admin/hash/live", { cache: "no-store" });
+        const response = await authorizedFetch(`/api/admin/hash/live?cycleId=${encodeURIComponent(cycleId)}`, { cache: "no-store" });
         if (!response.ok) return;
         const body = (await response.json()) as { tally: TallyRow[] };
         if (!cancelled) setTally(new Map(body.tally.map((row) => [row.applicationId, row])));
@@ -170,9 +193,11 @@ export default function DeliberationDeck({
     const timer = window.setInterval(() => void tick(), 3000);
     document.addEventListener("visibilitychange", tick);
     return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
-  }, []);
+  }, [cycleId]);
 
   function select(id: string) {
+    if (id !== entry?.id && headingRef.current?.closest(".deck-card")?.contains(document.activeElement)) focusNextContext.current = true;
+    if (applyFailure?.kind === "rejected") setApplyFailure(null);
     setSelectedId(id);
     try { window.localStorage.setItem(storageKey, id); } catch {}
   }
@@ -202,6 +227,7 @@ export default function DeliberationDeck({
   }
   function advance() {
     if (phase?.kind !== "stamped" || !entry) return;
+    focusNextContext.current = true;
     const nextApplied = leave();
     const at = ordered.findIndex((candidate) => candidate.id === entry.id);
     const next = [...ordered.slice(at + 1), ...ordered.slice(0, at)].find((candidate) => !nextApplied[candidate.id]);
@@ -212,34 +238,56 @@ export default function DeliberationDeck({
   const canReveal = canOperate && stage !== "FINAL" && !!entry && !applied[entry.id] && !!row && row.total >= quorum;
 
   async function reveal() {
-    if (!canReveal || phase || !entry) return;
+    if (!canReveal || phase || !entry || applyingRef.current || applyFailure?.kind === "unknown") return;
     const target = entry;
     setError("");
+    setApplyFailure(null);
+    applyingRef.current = true;
     setPhase({ kind: "drumroll" });
-    await wait(1200);
+    const reducedMotion = !motionEnabled || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reducedMotion) await wait(1200);
     // Unsure is the room's answer when it out-votes both Yes and No: nothing is applied,
     // the card gets a yellow stamp and a revisit flag, and the vote stays open.
     if (row && row.unsure >= row.yes && row.unsure >= row.no) {
       setPhase({ kind: "stamped", status: "UNSURE" });
       toggleRevisit(true);
+      applyingRef.current = false;
       return;
     }
-    const result = await runAction(RUSH_URL, { action: "APPLY_STAGE_HASH", cycleId, applicationId: target.id }, "Could not apply the result");
-    if (!result.ok) { setError(result.error); setPhase(null); return; }
-    const status = String((result.body as { id?: string } | null)?.id ?? "");
-    setPhase({ kind: "stamped", status });
-    if (status !== "REJECTED") { setConfetti(makeConfetti()); window.setTimeout(() => setConfetti(null), 2500); }
+    const unknown = () => {
+      setPhase(null);
+      setApplyFailure({ kind: "unknown", message: "We could not confirm whether the result was applied. It may already be saved. Check the saved result in Hash, then reload saved results before applying again. This card has not advanced." });
+    };
+    try {
+      const { response, body } = await fetchJsonWithTimeout(RUSH_URL, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "APPLY_STAGE_HASH", cycleId, applicationId: target.id }),
+      }, APPLY_TIMEOUT_MS, authorizedFetch);
+      if (!response.ok) {
+        if (response.status >= 500 || response.status === 408) { unknown(); return; }
+        const detail = body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "The request was refused.";
+        setPhase(null);
+        setApplyFailure({ kind: "rejected", message: `${detail} The result was not confirmed and this card has not advanced. Correct the issue, then retry applying this applicant’s result.` });
+        return;
+      }
+      const status = body && typeof body === "object" && "id" in body ? body.id : null;
+      if (status !== "REJECTED" && status !== HASH_STAGE_RULES[stage].pass) { unknown(); return; }
+      setPhase({ kind: "stamped", status });
+      if (status !== "REJECTED" && !reducedMotion) { setConfetti(makeConfetti()); window.setTimeout(() => setConfetti(null), 2500); }
+    } catch { unknown(); }
+    finally { applyingRef.current = false; }
   }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      const typing = event.target instanceof HTMLElement && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName);
-      if (event.key === "/" && !typing) { event.preventDefault(); searchRef.current?.focus(); return; }
-      if (typing) return;
-      if (event.key === "ArrowRight") step(1);
-      if (event.key === "ArrowLeft") step(-1);
-      if (event.key === "Enter") { if (phase?.kind === "stamped") advance(); else void reveal(); }
-      if (event.key.toLowerCase() === "u" && !event.metaKey && !event.ctrlKey && !event.altKey) toggleRevisit();
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest('input, textarea, select, button, a, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="textbox"], [tabindex]:not([data-deck-context])')) return;
+      if (event.key === "/") { event.preventDefault(); searchRef.current?.focus(); return; }
+      if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
+      if (event.key === "Enter") { event.preventDefault(); if (phase?.kind === "stamped") advance(); else void reveal(); }
+      if (event.key.toLowerCase() === "u") { event.preventDefault(); toggleRevisit(); }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -249,6 +297,8 @@ export default function DeliberationDeck({
   function jump(id: string) {
     if (phase?.kind === "drumroll") return;
     leave();
+    if (id === entry?.id) headingRef.current?.focus();
+    else focusNextContext.current = true;
     select(id);
     setQuery("");
     searchRef.current?.blur();
@@ -258,7 +308,7 @@ export default function DeliberationDeck({
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-mecg-navy p-6 text-white/60">
         <p>No applicants to discuss yet.</p>
-        <Link href="/admin/hash" className="text-sm text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">Back to Hash</Link>
+        <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="inline-flex min-h-11 items-center text-sm text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">Back to Hash</Link>
       </main>
     );
   }
@@ -269,19 +319,28 @@ export default function DeliberationDeck({
   const outcome = applied[entry.id];
   const flagged = revisit.has(entry.id);
   const stampStatus = phase && phase.kind !== "drumroll" ? phase.status : null;
+  const allApplied = ordered.length > 0 && ordered.every((candidate) => Boolean(applied[candidate.id]));
   const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : "";
 
   return (
-    <main className={`deck-root flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
-      <header className="flex items-center justify-between gap-4">
+    <main data-motion={motionEnabled ? "on" : "off"} className={`deck-root flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-[13px] font-semibold text-white/50">Discussion mode</p>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button type="button" aria-pressed={sort === "score"} onClick={() => setSort("score")} className={SORT_BUTTON}>By score</button>
           <button type="button" aria-pressed={sort === "name"} onClick={() => setSort("name")} className={SORT_BUTTON}>A to Z</button>
           <button type="button" aria-pressed={onlyRevisits && revisitCount > 0} disabled={revisitCount === 0} onClick={() => setOnlyRevisits((current) => !current)} className={`${SORT_BUTTON} disabled:opacity-30`}>Revisits ({revisitCount})</button>
-          <Link href="/admin/hash" className="ml-2 text-sm text-white/50 underline decoration-white/30 underline-offset-2 hover:text-white hover:decoration-white">Exit</Link>
+          <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-white/50 underline decoration-white/30 underline-offset-2 hover:text-white hover:decoration-white">Exit</Link>
         </div>
       </header>
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <button type="button" aria-pressed={motionEnabled} aria-describedby="deck-motion-help" disabled={systemReducedMotion !== false} onClick={togglePresentationMotion} className={`${SORT_BUTTON} min-h-11 disabled:opacity-60`}>
+          Presentation motion
+        </button>
+        <p id="deck-motion-help" className="text-sm text-white/60" role="status">
+          {systemReducedMotion === null ? "Off while checking your device motion preference." : systemReducedMotion ? "Off — your device requests reduced motion." : motionEnabled ? "On for this browser tab. Turn off for a still shared display." : "Off for this browser tab. Results appear without a reveal delay."}
+        </p>
+      </div>
       <div className="relative mt-4 self-center w-full max-w-sm">
         <input
           ref={searchRef}
@@ -291,13 +350,13 @@ export default function DeliberationDeck({
           onKeyDown={(event) => { if (event.key === "Enter" && matches[0]) { event.preventDefault(); jump(matches[0].id); } if (event.key === "Escape") setQuery(""); }}
           placeholder="Jump to a name"
           aria-label="Jump to a name"
-          className="w-full rounded-full bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-white/40 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)] focus:outline-none focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]"
+          className="min-h-11 w-full rounded-full bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-white/40 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)] focus:outline-none focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]"
         />
         {matches.length > 0 && (
           <ul className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-2xl bg-[#111a36] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]">
             {matches.map((candidate) => (
               <li key={candidate.id}>
-                <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => jump(candidate.id)} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/[0.08] hover:text-white">{candidate.name}</button>
+                <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => jump(candidate.id)} className="min-h-11 w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/[0.08] hover:text-white">{candidate.name}</button>
               </li>
             ))}
           </ul>
@@ -306,31 +365,40 @@ export default function DeliberationDeck({
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {index + 1} of {ordered.length}: {entry.name}
       </p>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {phase?.kind === "drumroll" ? "Applying room result…" : phase?.kind === "stamped" ? `Room result: ${phase.status === "UNSURE" ? "Unsure. No result applied; flagged to revisit." : applicationStatusLabel(phase.status)}` : ""}
+      </p>
       <div className="flex flex-1 items-center justify-center py-6">
         <div
           key={entry.id}
           data-enter={entrance(entry.id)}
-          className={`deck-card relative flex w-full max-w-4xl flex-col items-center gap-8 rounded-3xl bg-white/[0.04] p-8 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:p-12 ${cardMotion}`}
+          className={`deck-card relative flex w-full max-w-4xl flex-col items-center gap-6 rounded-2xl bg-white/[0.04] p-5 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:gap-8 sm:p-12 ${cardMotion}`}
         >
+          <div className="flex w-full items-center gap-4 text-left sm:flex-col sm:gap-8 sm:text-center">
           {failedHeadshots.has(entry.id) ? (
-            <span className="deck-headshot-pop flex size-56 items-center justify-center rounded-full bg-white/[0.08] text-6xl font-semibold text-white/70" aria-hidden="true">{initials(entry.name)}</span>
+            <span className="deck-headshot-pop flex size-16 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-2xl font-semibold text-white/70 sm:size-56 sm:text-6xl" aria-hidden="true">{initials(entry.name)}</span>
           ) : (
             // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
             <img
+              ref={(image) => {
+                // A cached/fast image failure can precede hydration and its onError handler.
+                if (image?.complete && image.naturalWidth === 0) setFailedHeadshots((current) => new Set(current).add(entry.id));
+              }}
               src={`/api/admin/applications/${encodeURIComponent(entry.id)}/headshot`}
               alt=""
-              className="deck-headshot-pop size-56 rounded-full object-cover"
+              className="deck-headshot-pop size-16 shrink-0 rounded-full object-cover sm:size-56"
               onError={() => setFailedHeadshots((current) => new Set(current).add(entry.id))}
             />
           )}
-          <div>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <h1 className="deck-wordart break-words text-5xl font-semibold tracking-[-0.03em] sm:text-6xl">{entry.name}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3 sm:justify-center">
+              <h1 ref={headingRef} tabIndex={-1} data-deck-context className="deck-name break-words text-2xl sm:text-6xl">{entry.name}</h1>
               {outcome && <span className="rounded-full bg-white/[0.12] px-3 py-1 text-sm font-semibold">{applicationStatusLabel(outcome)}</span>}
               {flagged && <span className="rounded-full bg-amber-300/20 px-3 py-1 text-sm font-semibold text-amber-200">Revisit</span>}
             </div>
-            <p className="mt-3 text-2xl font-semibold text-white/85">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
+            <p className="mt-2 text-sm font-semibold text-white/85 sm:mt-3 sm:text-2xl">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
             <p className="mt-1 text-[13px] font-semibold text-white/50">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
+          </div>
           </div>
           {/* Participation only. Which way the room is leaning stays off the wall until the stamp lands. */}
           <div className={`${PANEL} relative w-full`}>
@@ -345,7 +413,16 @@ export default function DeliberationDeck({
                 </div>
               </>
             )}
-            {canReveal && <p className="deck-pulse mt-3 text-sm font-semibold text-mecg-orange">Quorum reached · press Enter to reveal</p>}
+            {canReveal && <button type="button" disabled={!!phase || applyFailure?.kind === "unknown"} aria-describedby="deck-apply-error" onClick={() => void reveal()} className="mt-3 min-h-11 rounded-sm px-4 py-2 text-sm font-semibold text-mecg-orange ring-1 ring-white/30 disabled:opacity-50">{phase?.kind === "drumroll" ? "Applying result…" : "Reveal and apply result"}</button>}
+            <div id="deck-apply-error" ref={applyErrorRef} tabIndex={-1} role="alert" aria-atomic="true" className={applyFailure ? "mt-4 text-left text-sm leading-6 text-rose-200" : ""}>
+              {applyFailure && <><p>{applyFailure.message}</p><div className="mt-3 flex flex-wrap gap-3">
+                {applyFailure.kind === "rejected" ? <button type="button" onClick={() => void reveal()} className="min-h-11 rounded-sm px-4 py-2 font-semibold text-white ring-1 ring-white/30">Retry applying result</button> : <>
+                  <Link href={withWorkspaceCycle("/admin/hash", cycleId)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-4">Check saved result in Hash (new tab)</Link>
+                  <button type="button" onClick={() => window.location.reload()} className="min-h-11 rounded-sm px-4 py-2 font-semibold text-white ring-1 ring-white/30">Reload saved results</button>
+                </>}
+              </div></>}
+            </div>
+            {phase?.kind === "stamped" && <button ref={advanceButtonRef} type="button" onClick={advance} className="mt-3 min-h-11 rounded-sm px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30">Next unapplied applicant</button>}
             {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#111a36] text-6xl font-bold" aria-hidden="true">…</div>}
           </div>
           {!stageHash && (
@@ -369,7 +446,7 @@ export default function DeliberationDeck({
               <p className="text-[13px] font-semibold text-white/50">Group Case</p>
               {groupCase?.mean != null ? (
                 <>
-                  <p className="tabular mt-1 text-6xl font-bold"><CountUp value={groupCase.mean} format={(value) => value.toFixed(1)} /><span className="ml-1 text-base font-normal text-white/50">/ 40</span></p>
+                  <p className="tabular mt-1 text-6xl font-bold">{groupCase.mean.toFixed(1)}<span className="ml-1 text-base font-normal text-white/50">/ 40</span></p>
                   <p className="mt-1 text-lg font-semibold">{groupCase.band}</p>
                   <p className="text-sm text-white/50">{graders(groupCase.count)}</p>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
@@ -387,7 +464,7 @@ export default function DeliberationDeck({
               <p className="text-[13px] font-semibold text-white/50">Speed Dating</p>
               {speedDating && speedDating.count > 0 ? (
                 <>
-                  <p className="tabular mt-1 text-6xl font-bold">{speedDating.adjusted == null ? formatStars(null) : <CountUp value={speedDating.adjusted} format={formatStars} />}</p>
+                  <p className="tabular mt-1 text-6xl font-bold">{speedDating.adjusted == null ? formatStars(null) : formatStars(speedDating.adjusted)}</p>
                   <p className="mt-1 text-sm text-white/50">raw {speedDating.mean == null ? "—" : speedDating.mean.toFixed(1)} · {graders(speedDating.count)}</p>
                 </>
               ) : <p className="mt-3 text-2xl text-white/50">Not graded</p>}
@@ -433,21 +510,22 @@ export default function DeliberationDeck({
           )}
         </div>
       </div>
-      {confetti && (
+      {confetti && motionEnabled && (
         <div className="pointer-events-none fixed inset-0 z-20 overflow-hidden" aria-hidden="true">
           {confetti.map((piece, pieceIndex) => (
             <span key={pieceIndex} className="deck-confetti absolute top-0 size-3 rounded-sm" style={{ "--x": piece.x, "--delay": piece.delay, "--hue": piece.hue } as CSSProperties} />
           ))}
         </div>
       )}
-      <footer className="flex items-center justify-between">
-        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Previous</button>
-        <div className="text-center">
+      {allApplied && <p role="status" className="mb-4 text-center text-sm text-white/70">Applied results are shown for every applicant in this view. Return to Hash to check stage readiness.</p>}
+      <footer className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
+        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Previous</button>
+        <div className="order-first w-full text-center sm:order-none sm:w-auto">
           <p className="tabular text-sm font-semibold text-white/70">{index + 1} of {ordered.length}</p>
-          {error && <p className="mt-1 text-sm text-rose-300">{error}</p>}
+          <p role="alert" aria-atomic="true" className="mt-1 text-sm text-rose-300">{error}</p>
         </div>
         <button type="button" aria-pressed={flagged} onClick={() => toggleRevisit()} disabled={phase?.kind === "drumroll"} className={`${SORT_BUTTON} px-4 py-2 text-sm font-normal disabled:opacity-30`}>Revisit (U)</button>
-        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="rounded-full px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
+        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
       </footer>
     </main>
   );

@@ -1,0 +1,55 @@
+{
+  "seatId": "panel-v2-060",
+  "lens": "Prospective client",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The client journey is coherent and carefully presented: Home states student leadership, no consulting fee and an academic semester before inquiry; Work explains capabilities, team size, confidentiality, client responsibilities and handoff; Contact asks for decision, timing and intended users. The supplied desktop and mobile captures show a consistent Precision Instrument identity, clear hierarchy and restrained contrast. I traced Home → Work → practical FAQ → Contact in source and inspected the corresponding intercepted browser test, not an observed human session. The mobile selector now keeps organization details adjacent, resolving the earlier remote-result problem. Contact now protects pending values, validates receipts, preserves uncertain inquiries, bounds waiting and reuses an unchanged delivery intent. Focused tests and the corrected browser log substantiate those local improvements. Nevertheless, the central client task still stops short of judging actual work: organization descriptions and process explanations provide no inspectable MECG analysis or deliverable. That known content limitation prevents my unqualified world-class agreement. Hosted delivery and the broader authenticated workflows also remain unproven; local engineering evidence alone does not establish release readiness.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "content-manifest.json (identity and inventory header)",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json (all 141 findings)",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/app/api/contact/route.ts",
+    "src/components/client-project-grid.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/lib/site-content.ts:130-182",
+    "src/lib/email.ts:45-106",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/client-profile.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log (contact results and total)",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log (summary)",
+    "captures/PROVENANCE.json",
+    "captures/public-home-mobile-390.png",
+    "captures/public-home-desktop-1280.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:99-119; src/content/projects.public.ts:3-5; src/app/(marketing)/work/page.tsx:56-63",
+      "evidence": "Profiles display organization descriptions and explicitly withhold MECG scope, methods, deliverables and outcomes pending approval. The approved fallback is empty; Work omits Selected work when no projects are returned. Both inspected homepage captures show the pending-approval state. The mandatory unresolved record confirms actual approved engagement evidence remains absent.",
+      "userImpact": "A client can assess proposed fit and responsibilities but cannot inspect comparable reasoning or handoff quality before committing time, information and access. Recognizable partnerships do not complete that evaluation.",
+      "suggestedFix": "Obtain client and Board approval for one bounded engagement showing its real decision, student contribution, methods, constraints and redacted deliverable or handoff. Publish through the existing approval boundary; preserve the honest pending disclosure until permission exists."
+    }
+  ],
+  "notVerified": [
+    "Actual Resend acceptance/delivery, Board response practice and hosted Clerk/Supabase/storage integration; no staging exists.",
+    "Real authenticated application, grading, release and provisioning journeys were outside my direct inspection; the evidence index describes isolated or intercepted proof.",
+    "Human comprehension/task success, screen-reader use, physical iPhone/macOS Safari, field performance and complete sequential keyboard traversal from homepage proof through inquiry.",
+    "Client publication approvals, current membership workload facts and Board policy/retention/remediation decisions remain external dependencies. Captures are local public renders with unavailable-service fixtures."
+  ]
+}

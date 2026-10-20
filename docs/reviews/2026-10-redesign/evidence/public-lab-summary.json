@@ -1,0 +1,177 @@
+[
+  {
+    "name": "home-mobile",
+    "path": ".audit/lighthouse/home-mobile.report.json",
+    "sha256": "eb4b2f611fcae7b111ca6e18bb8a8494d4fbb9196bcbfb892fdc7b66799f8ab6",
+    "fetchTime": "2026-10-16T21:04:20.317Z",
+    "finalUrl": "http://127.0.0.1:3001/home",
+    "version": "13.5.0",
+    "formFactor": "mobile",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "categories": {
+      "performance": 0.98,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "lcpMs": 2496.5088,
+    "cls": 0,
+    "tbtMs": 36,
+    "contrast": 1,
+    "runWarnings": []
+  },
+  {
+    "name": "work-mobile",
+    "path": ".audit/lighthouse/work-mobile.report.json",
+    "sha256": "00388d45432b7d4b533c3173a5206c7662d0daf10174f5144ea42bfca609a478",
+    "fetchTime": "2026-10-16T21:05:05.368Z",
+    "finalUrl": "http://127.0.0.1:3001/work",
+    "version": "13.5.0",
+    "formFactor": "mobile",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "categories": {
+      "performance": 0.99,
+      "accessibility": 0.97,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "lcpMs": 2108.402625,
+    "cls": 0,
+    "tbtMs": 38,
+    "contrast": 0,
+    "runWarnings": []
+  },
+  {
+    "name": "join-mobile",
+    "path": ".audit/lighthouse/join-mobile.report.json",
+    "sha256": "3ed61ab949f9c39e8d4e4302d080b272535f1b17a89f1963828f84808a7acff6",
+    "fetchTime": "2026-10-16T21:05:32.038Z",
+    "finalUrl": "http://127.0.0.1:3001/join",
+    "version": "13.5.0",
+    "formFactor": "mobile",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "categories": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "lcpMs": 2105.5784750000003,
+    "cls": 0,
+    "tbtMs": 38.5,
+    "contrast": 1,
+    "runWarnings": []
+  },
+  {
+    "name": "contact-mobile",
+    "path": ".audit/lighthouse/contact-mobile.report.json",
+    "sha256": "564cfa8069fb540524ccbd0b62aab7913746fd723e290367145bff26a9a4eef5",
+    "fetchTime": "2026-10-16T21:05:42.879Z",
+    "finalUrl": "http://127.0.0.1:3001/contact",
+    "version": "13.5.0",
+    "formFactor": "mobile",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "categories": {
+      "performance": 0.97,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "lcpMs": 2677.5745500000003,
+    "cls": 0,
+    "tbtMs": 36.5,
+    "contrast": 1,
+    "runWarnings": []
+  },
+  {
+    "name": "work-mobile-fixed",
+    "path": ".audit/lighthouse/work-mobile-fixed.report.json",
+    "sha256": "53d31503b54b781c0aa1adf996244ec37b51bde72a56d2674b6cc8f8838a8daf",
+    "fetchTime": "2026-10-16T21:12:21.800Z",
+    "finalUrl": "http://127.0.0.1:3001/work",
+    "version": "13.5.0",
+    "formFactor": "mobile",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "categories": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "lcpMs": 2112.533675,
+    "cls": 0,
+    "tbtMs": 28,
+    "contrast": 1,
+    "runWarnings": []
+  }
+]

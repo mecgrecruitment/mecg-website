@@ -1,0 +1,44 @@
+{
+  "seatId": "panel-005",
+  "lens": "Apple-inspired clarity \u2014 proposition hierarchy, next actions, state feedback and restraint; ambiguous result",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The supplied desktop hero and mobile full-page captures present a coherent Precision Instrument identity: strong headline, readable supporting proposition, two differentiated audience actions, hairline organization and a purposeful process figure. The source makes engagement scope, cost and next steps concrete without inventing client outcomes. I traced the actual client journey from services and engagement FAQs to the contact form and its confirmation, using source and supplied test evidence; I did not operate a browser or observe a person completing it. A material uncertainty-feedback gap remains in that primary conversion path. The mocked happy-path confirmation cannot establish dependable inquiry delivery. Hold this revision for the specific correction below; broader world-class acceptance remains unproven given the integration and user-evidence limits. This is an independent simulated AI lens, not Apple or human endorsement.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/lib/site-content.ts",
+    "src/components/engagement-instrument.tsx",
+    "src/app/api/contact/route.ts",
+    "src/app/api/contact/route.test.ts",
+    "src/lib/email.ts",
+    "src/app/apply/application-form.tsx:731-746 (resume-access disclosure)",
+    "tests/e2e/public-journeys.spec.ts",
+    "evidence/mecg-round-close-full-e2e.log",
+    "captures/desktop-hero.png",
+    "captures/mobile.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/(marketing)/contact/contact-form.tsx:24-35",
+      "evidence": "submit() reports a thrown fetch as \u201cYour message could not be sent\u201d and immediately directs email fallback. src/lib/email.ts:76,92-100 also collapses provider timeout/network uncertainty into false; src/app/api/contact/route.ts:39-52 converts that to definitive failure and supplies no idempotency key. A provider may accept a message before its acknowledgement is lost. Conversely, contact-form.tsx:24-32 resets the form and claims success for any HTTP-success response, even null/malformed JSON. tests/e2e/public-journeys.spec.ts:46-52 covers only intercepted {ok:true}; the supplied passing log does not cover these contact outcomes.",
+      "userImpact": "An organization cannot tell whether MECG received its inquiry. Following the fallback or retrying can duplicate an already accepted message; a malformed successful response can erase the draft without a validated receipt.",
+      "suggestedFix": "Validate the expected success receipt before clearing inputs. Preserve the draft and say \u201cWe could not confirm whether your message was sent\u201d for uncertain outcomes. Distinguish definite rejection from unknown delivery; use a stable inquiry/idempotency identifier for safe retries. Add focused checks for accepted-but-lost acknowledgements and malformed successful responses."
+    }
+  ],
+  "notVerified": [
+    "No staging, hosted integration or human study exists. Actual Clerk/Supabase/storage/email behavior, provider acceptance and inbox arrival remain unverified; source review is not observed task success.",
+    "Public case-study outcomes and project artifacts remain unavailable pending client approval; named organizations are not evidence of a delivered result.",
+    "Resume disclosure explicitly permits original identifying PDFs; I verified the wording, not hosted authorization or Board resolution of the older blind-review policy conflict.",
+    "No live authenticated operator journey, assistive-technology session, physical device, Safari or Firefox was exercised. Supplied images use Linux fallback fonts; contact pending/error states have no supplied visual capture."
+  ]
+}

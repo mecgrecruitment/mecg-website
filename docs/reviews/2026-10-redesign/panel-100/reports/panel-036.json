@@ -1,0 +1,63 @@
+{
+  "seatId": "panel-036",
+  "lens": "Information and discoverability \u2014 long or difficult content (simulated AI review lens)",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "hold",
+  "reason": "The public proposition, audience-specific navigation, engagement terms and student preparation are clear in source. Supplied homepage captures show a coherent Precision Instrument hierarchy, with readable prose separated from compact labels and repeated next steps. I traced the client journey from services through fee/confidentiality FAQs to contact; the recorded desktop/mobile test confirms navigation and a synthetic inquiry receipt, not real delivery or observed user success. Canonical/social metadata, private noindex defaults and request-time case lookup are credible local foundations. However, recruitment failure can be described as a Board publication decision. Correct that factual state before release. World-class acceptance remains unproven without difficult-content and hosted evidence; client-approved case studies are absent rather than fabricated.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/lib/public-recruitment.ts",
+    "src/lib/supabase/public.ts",
+    "src/lib/seo.ts",
+    "src/app/robots.ts",
+    "src/app/sitemap.ts",
+    "src/content/projects.public.ts",
+    "src/lib/projects/public-projects.ts",
+    "src/app/(marketing)/work/[slug]/page.tsx",
+    "src/app/(marketing)/work/[slug]/opengraph-image.tsx",
+    "src/app/(marketing)/work/[slug]/twitter-image.tsx",
+    "src/app/apply/application-form.tsx: MaterialsStep and ReviewStep privacy copy",
+    "supabase/migrations/20260901080000_projects_and_staffing.sql: public release schema/RPC",
+    "tests/e2e/public-journeys.spec.ts",
+    "scripts/verify-publication.mjs",
+    "evidence/publication-proof-result.json",
+    "evidence/mecg-round-close-full-e2e.log: public journey results",
+    "captures/mobile.png",
+    "captures/desktop-hero.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/lib/public-recruitment.ts:120\u2013123; src/app/(marketing)/join/page.tsx:48\u201353,80\u201381",
+      "evidence": "fetchPublicRecruitment discards the RPC error and maps absent data to {cycle:null}. Join defaults missing events to [] and then states \u201cThe Board has not published events for this cycle yet,\u201d while replacing application access with recruitment updates.",
+      "userImpact": "During a returned RPC failure, students can mistake unavailable dates for an unpublished cycle and defer checking an actual recruitment deadline. The page asserts an editorial fact it has not established.",
+      "suggestedFix": "Preserve a distinct unavailable result. Show temporary date-loading failure and a retry/contact or application-status route; reserve the unpublished-events statement for a successful empty response. Add a targeted failed-RPC journey assertion."
+    },
+    {
+      "severity": "low",
+      "file": "src/lib/join-content.ts:75,86; src/app/(marketing)/join/page.tsx:138\u2013143,157\u2013164",
+      "evidence": "Preparation tells students to ask current members about time commitment; the weekly-commitment FAQ repeats that request instead of giving an expected load. The surrounding long page supplies materials and evaluation detail but no workload estimate.",
+      "userImpact": "Students assessing a difficult semester cannot determine whether membership fits their schedule without a separate conversation, even after locating the relevant FAQ.",
+      "suggestedFix": "Obtain an owner-approved current-cycle workload range, recurring obligations and peak-week caveat, and publish them near preparation with an update date. Do not invent hours."
+    }
+  ],
+  "notVerified": [
+    "No hosted deployment, Clerk/Supabase/storage/email integration, human study or observed user success exists in this evidence.",
+    "No Join/work capture or rendered maximum-length case study was supplied; narrow-screen long titles, 4000-character contexts and large method/deliverable lists remain unverified.",
+    "Publication proof uses a short synthetic HTTP fixture. It establishes page publication/withdrawal and generated PNG responses, not hosted approval/RLS, crawler indexing, social-platform cache removal or measured SEO gains.",
+    "Physical devices, Safari/Firefox, assistive technology and live authenticated applicant/operator journeys were not exercised by this seat. Original-resume disclosure was inspected; policy approval and retention remain external decisions."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "seatId": "panel-091",
+  "lens": "Owner and access-sensitive user; first encounter; simulated AI panel seat",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "unproven",
+  "releaseRecommendation": "unproven",
+  "reason": "The public proposition is clear, and the supplied desktop/mobile hero captures show coherent Precision Instrument hierarchy and readable actions. I traced Home \u2192 Join \u2192 Apply materials/review in source, plus owner People \u2192 account setup \u2192 incident queue \u2192 resolution. Applicant copy accurately distinguishes the stripped written packet from the identifying original resume. New-account failures preserve uncertain state, use opaque operational references, and restrict lookup identity to current cycle owners. Resolution explicitly records remediation rather than claiming account repair. However, the existing-account recovery branch lacks equivalent partial-failure handling. Supplied SQL, Node and synthetic browser evidence support bounded local claims, not observed owner recovery or broad world-class acceptance. No hosted integration or human success evidence exists.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/join/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/apply/page.tsx",
+    "src/app/apply/application-form.tsx (MaterialsStep and ReviewStep)",
+    "src/app/admin/people/page.tsx (owner recovery link)",
+    "src/app/admin/rush-controls.tsx (useRushAction and account forms)",
+    "src/app/api/admin/rush/route.ts",
+    "src/app/api/admin/rush/route.test.ts (provisioning cases)",
+    "src/lib/authorization.ts",
+    "src/lib/provisioning-incident.ts",
+    "src/lib/provisioning-incident.test.ts",
+    "src/lib/operational-log.ts",
+    "src/app/admin/provisioning/page.tsx",
+    "src/app/admin/provisioning/page.test.ts",
+    "src/app/admin/provisioning/resolve-button.tsx",
+    "src/app/api/admin/provisioning/[id]/resolve/route.ts",
+    "supabase/migrations/20261016195000_restricted_provisioning_incidents.sql",
+    "supabase/migrations/20260905120000_membership_allowlist.sql (ensure_external_identity)",
+    "supabase/migrations/20260911145058_board_screening_readers.sql (grant_membership)",
+    "supabase/tests/provisioning_incidents.sql",
+    "tests/e2e/provisioning-recovery.spec.ts",
+    "evidence/mecg-privacy-db-final.log",
+    "evidence/mecg-privacy-browser.log",
+    "evidence/mecg-privacy-helper-final.log",
+    "evidence/mecg-privacy-final-node.log (provisioning results and summary)"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/app/api/admin/rush/route.ts:161-167",
+      "evidence": "ADD_EXISTING_USER calls ensure_external_identity, returns a generic 409 on identity error, and then grants membership without the incident handling used by ADD_USER. A returned grant error falls through to generic handling at lines 288-291; a transport exception escapes this branch. The initiating useRushAction shows only \u201cRequest failed\u201d on transport failure (src/app/admin/rush-controls.tsx:81-83). ensure_external_identity can activate a profile and claim allowlisted memberships before this later grant (20260905120000_membership_allowlist.sql, ensure_external_identity).",
+      "userImpact": "An owner using the existing-account path to recover preserved provisioning can encounter another partial or uncertain write without a durable recovery reference or guidance to inspect current access. The incident queue can therefore omit an unresolved recovery attempt; a generic failure does not explain what may already have changed.",
+      "suggestedFix": "Apply opaque incident recording and explicit reconciliation guidance to uncertain identity and failed/uncertain grant outcomes for existing accounts, preserving all access. Add focused tests for committed-but-unacknowledged identity/grant writes and incident-storage failure on this branch."
+    }
+  ],
+  "notVerified": [
+    "No staging or hosted Clerk/Supabase/storage/email integration, session-expiry behavior, or deployed migration/application coordination was exercised.",
+    "No actual owner completed cross-system account reconciliation; the eight browser checks intercept resolution HTTP in a synthetic harness. The owner queue has source/SSR evidence, without a supplied authenticated queue capture.",
+    "The SQL log reports 709 passing local assertions; the Node log reports 673 passing cases. These are supplied execution records, not tests rerun by this seat or proof of all provisioning races.",
+    "No observed first-encounter user comprehension, assistive-technology use, physical-device or non-Chromium behavior. Resume access policy and incident retention remain external Board/privacy-owner decisions."
+  ]
+}

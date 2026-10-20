@@ -1,0 +1,9 @@
+{
+  "join": {
+    "status": 200,
+    "removedExpectationCopyAbsent": true,
+    "preparationPresent": true,
+    "evaluationPresent": true,
+    "faqPresent": true
+  }
+}

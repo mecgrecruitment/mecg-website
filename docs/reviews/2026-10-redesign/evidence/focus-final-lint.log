@@ -1,0 +1,13 @@
+
+> mecgwebsite@0.1.0 lint
+> eslint
+
+
+/home/rahil/mecg-website/src/app/member/hash/page.tsx
+  1:37  warning  'requestedWorkspaceCycleId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/rahil/mecg-website/src/app/member/refer/page.tsx
+  32:9  warning  'cycleId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

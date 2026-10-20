@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests/e2e/evaluation-cas.spec.ts:148:5 › a save error arriving between pointer down and up does not steal a native rating choice (1.4s)
+
+  1 passed (1.9s)

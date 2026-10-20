@@ -1,0 +1,69 @@
+{
+  "seatId": "panel-074",
+  "lens": "Member evaluator \u2014 service failure; simulated intended-user lens",
+  "snapshotId": "9985d3fcce1f0f6d7188f4ef67404feb29bec6e7133b8f4d0ba5ea9601f8c931",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "hold",
+  "reason": "The public desktop/mobile hero captures show a coherent Precision Instrument identity, readable proposition and clear client/student actions. Source respects pending client approval and explicitly discloses original-resume access. I traced My work through evaluation recovery, ratings/not-observed, readiness, review, submission and locked receipt, plus Group Case observation entry. The general evaluation path has useful readiness and conservative submission confirmation, supported by specific passing tests. However, Group Case leaves the evaluator unable to distinguish saved partial evidence from valid completion, and service-failure recovery has concrete preservation gaps. These prevent unqualified world-class agreement. This is independent AI source/artifact review, not observed user success or hosted acceptance.",
+  "inspected": [
+    "docs/reviews/2026-10-redesign/panel-100/BRIEF.md",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/lib/site-content.ts",
+    "src/lib/join-content.ts",
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "captures/desktop-hero.png",
+    "captures/mobile-hero.png",
+    "src/app/apply/application-form.tsx:731,746",
+    "src/app/member/screening/[assignmentId]/page.tsx",
+    "src/app/member/page.tsx:27-85",
+    "src/app/member/error.tsx",
+    "src/app/member/evaluation-form.tsx:60-295",
+    "src/lib/evaluation-draft-recovery.ts",
+    "src/lib/evaluation-readiness.ts",
+    "src/lib/evaluation-readiness.test.ts",
+    "src/lib/evaluation-submission.ts",
+    "src/lib/evaluation-submission.test.ts",
+    "src/app/member/group-case/page.tsx",
+    "src/app/member/group-case/group-case-roster.tsx",
+    "src/lib/group-case-roster.ts",
+    "src/app/member/calibration/[roundId]/page.tsx:75-145",
+    "src/app/api/member/group-case/ratings/route.ts",
+    "supabase/migrations/20261016191000_grading_contract_consistency.sql:1-42,191-310",
+    "supabase/tests/group_case_rating.sql",
+    "evidence/mecg-privacy-final-node.log",
+    "evidence/mecg-privacy-db-final.log"
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/app/member/evaluation-form.tsx:166-174,195-200",
+      "evidence": "The backup effect ignores writeEvaluationDraft\u2019s boolean result. That helper returns false for storage errors/oversized snapshots; a server-save failure nevertheless says \u201cYour browser backup is current\u201d. Load failure also promises browser retention at lines 154-158.",
+      "userImpact": "During a service outage with unavailable browser storage, an evaluator can trust a nonexistent backup and lose observations on reload, including the offered reload-based Retry.",
+      "suggestedFix": "Track actual backup success; describe unsaved memory-only work honestly, preserve it during retry, and verify simultaneous storage and draft-service failure."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:223,332-348",
+      "evidence": "Progress says \u201cStarted grading\u201d; rows show only \u201cSaved\u201d and dimensions rated. The roster type has no minimumObservedCriteria or validity result. SQL evaluation_observation_quality at migration lines 29-33 requires 75% coverage, rubric minimum and required criteria; calibration guidance does not expose those completion requirements.",
+      "userImpact": "A reviewer can verify persistence but cannot tell whether their saved contribution counts as valid independent evidence.",
+      "suggestedFix": "Return authoritative per-review quality and show partial/valid status with missing requirements, while explicitly permitting honest unknowns."
+    },
+    {
+      "severity": "medium",
+      "file": "src/app/member/group-case/group-case-roster.tsx:169-175,195-210",
+      "evidence": "editNote refuses to save with zero scored criteria (\u201cPick a star to save\u201d); flushNote likewise requires a score. Failed saves retain note text only in component state and offer no explicit note retry or backup. SQL rate_group_case_applicant permits a nonblank note without stars (migration lines 268-281).",
+      "userImpact": "An evaluator with factual observations but insufficient evidence for a rating cannot preserve notes honestly; failed note saves are lost on navigation unless another edit/tap succeeds.",
+      "suggestedFix": "Allow note-only persistence, add a retry of the retained payload, and protect unsaved observations across navigation without requiring a fabricated rating."
+    }
+  ],
+  "notVerified": [
+    "No staging/deployment or actual Clerk, RPC/RLS, storage, session-expiry and email integration was exercised; supplied logs establish local fixture checks only.",
+    "No authenticated evaluator screenshot or live evaluator interaction was supplied; private visual craft and real task completion remain unverified.",
+    "No human usability study, assistive-technology session, physical-device, Safari or Firefox validation; client publication approval and Board resolution of original-resume policy remain external."
+  ]
+}

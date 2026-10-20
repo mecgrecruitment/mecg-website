@@ -1,0 +1,54 @@
+{
+  "seatId": "panel-v2-013",
+  "lens": "Editorial and brand craft; keyboard-oriented use",
+  "snapshotId": "5c77b2c0025232d0a0924f0cba0ad9bb09fb1430f1d4d65b0836f09e5f87c611",
+  "worldClassAgreement": "disagree",
+  "releaseRecommendation": "unproven",
+  "reason": "The public presentation has a coherent, recognizable Precision Instrument identity: strong sans hierarchy, quiet mono metadata, hairline organization, restrained accent, and accurately captioned real member photography. Desktop and 320px captures preserve that hierarchy without visible overflow. The hero now states no fee and one semester before the actions. I independently confirmed the mobile bench disclosure, complementary later process copy, and adjacent native organization selector; the earlier composition objections are materially addressed. I traced the client journey from service terms to contact submission in actual source and supplied tests. The keyboard test uses sequential Tab, typing and Enter, and its corrected five-configuration log passes; field locking, validated acknowledgement, bounded waits and associated errors support recovery. Those are useful local observations, not provider delivery or human task success. I disagree with the broad world-class proposition because the central consulting promise still has no inspectable approved engagement evidence. Honest partnership framing fixes overstatement but cannot substitute for the question, method and handoff that let an organization judge this service. Release readiness remains unproven across hosted identity, storage, database authorization and consequential private workflows; this report is a simulated editorial review, not human or Apple endorsement.",
+  "inspected": [
+    "SNAPSHOT.json",
+    "docs/PRODUCT.md",
+    "docs/DESIGN.md",
+    "docs/reviews/2026-10-redesign/implementation-receipt.md",
+    "docs/reviews/2026-10-redesign/release-open-items.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/ORIGINAL-BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/BRIEF.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/prior-findings-and-responses.json",
+    "docs/reviews/2026-10-redesign/panel-100-v2/RESPONSES.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/UNRESOLVED.md",
+    "docs/reviews/2026-10-redesign/panel-100-v2/EVIDENCE-INDEX.md",
+    "docs/reviews/2026-10-redesign/mobile-proof-hierarchy.md",
+    "src/app/(marketing)/home/page.tsx",
+    "src/app/(marketing)/work/page.tsx",
+    "src/app/(marketing)/contact/contact-form.tsx",
+    "src/components/site-header.tsx",
+    "src/components/engagement-instrument.tsx",
+    "src/components/client-project-grid.tsx",
+    "src/content/projects.public.ts",
+    "src/app/applicant/page.tsx:307",
+    "tests/e2e/public-journeys.spec.ts",
+    "tests/e2e/contact-reliability.spec.ts",
+    "docs/reviews/2026-10-redesign/evidence/mobile-hierarchy-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/integrated-followup-browser.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-node.log",
+    "docs/reviews/2026-10-redesign/evidence/release-evidence-final-build.log",
+    "captures/public-home-desktop-1280.png",
+    "captures/public-home-mobile-320.png",
+    "captures/public-home-expanded-mobile-320.png"
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/components/client-project-grid.tsx:103-108; src/content/projects.public.ts:3-5; src/app/(marketing)/home/page.tsx:66-82",
+      "evidence": "The approved local project list remains empty; selected organization profiles explicitly withhold scope, methods, deliverables and outcomes. The current homepage capture shows partnership names and pending-approval status, with the only photograph identified as a PwC member visit. Revised headings truthfully describe partnerships, so the prior misleading-heading defect is resolved; the underlying proof gap remains.",
+      "userImpact": "A prospective client can understand terms and inquire, but cannot assess the quality or relevance of an actual MECG engagement before doing so.",
+      "suggestedFix": "Obtain client and Board approval for at least one bounded engagement question, method, redacted deliverable and result or handoff, then publish through the existing release boundary. Keep the current honest pending state until approval exists."
+    }
+  ],
+  "notVerified": [
+    "Hosted Clerk/Supabase/RLS/storage/email integration, actual delivery and authenticated operator recovery; no staging evidence exists.",
+    "Full keyboard prepare/apply/recover/status/operator journeys, screen-reader sessions, physical iPhone/macOS Safari and observed human comprehension. Focused synthetic keyboard tests do not establish these.",
+    "Approved engagement artifacts, current Board-confirmed membership workload and privacy/retention/remediation policy authority. Applicant receipt source now discloses identifying original-resume access; that disclosure does not resolve policy.",
+    "Private application, grading and operator visual craft beyond the source and evidence scope listed; no live authenticated session or full test suite was run."
+  ]
+}
