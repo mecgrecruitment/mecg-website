@@ -2,75 +2,69 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { NextRequest } from "next/server";
 
-const USER = { id: "member", memberships: [{ role: "MEMBER", cycleId: "cycle", active: true }] };
-const VISIBLE = { id: "presenter", name: "Visible applicant", major: null, class_year: null };
-
+// Ballot visibility, note gating and the membership gate are member_hash_live's
+// (supabase/tests/member_hash_live.sql). The route owns the request contract.
 function importRoute(key: string) {
   return import(`./route.ts?case=${key}`) as Promise<typeof import("./route.ts")>;
 }
 
-// Conflict/stage/decision filtering belongs to hash_ballot. Exercise both an
-// empty ballot and a ballot containing someone other than the selected presenter.
-for (const hasOtherApplicant of [false, true]) {
-  test(`Hash excludes presenter and requested notes absent from caller ballot (other applicant: ${hasOtherApplicant})`, async (t) => {
-    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-    t.mock.module("@/lib/supabase/admin", { namedExports: { createAdminClient: () => { throw new Error("service role bypass"); } } });
-    const client = {
-      from: (table: string) => {
-        assert.equal(table, "rush_cycles");
-        return { select: () => ({ eq: () => ({ single: async () => ({ data: { hash_presenting_application_id: "presenter" }, error: null }) }) }) };
-      },
-      rpc: async (name: string, args: unknown) => {
-        assert.equal(name, "hash_ballot", "must never load notes for an excluded applicant");
-        assert.deepEqual(args, { target_cycle_id: "cycle" });
-        return { data: hasOtherApplicant ? [{ ...VISIBLE, id: "other" }] : [], error: null };
-      },
-    };
-    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
-    const { GET } = await importRoute(`excluded-${hasOtherApplicant}`);
-    const response = await GET(new NextRequest("http://localhost/api/member/hash/live?applicationId=presenter"));
-    assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { presentingId: null, presenting: null, applicationId: null, notes: [] });
-    assert.equal(response.headers.get("cache-control"), "no-store");
-  });
+function mockRpc(t: test.TestContext, result: { data: unknown; error: { code: string; message: string } | null }, calls: unknown[] = []) {
+  t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
+    rpc: async (name: string, args: unknown) => {
+      assert.equal(name, "member_hash_live");
+      calls.push(args);
+      return result;
+    },
+  }) } });
 }
 
-for (const requested of ["", "?applicationId=other", "?applicationId=hidden"]) {
-  test(`Hash uses caller ballot metadata and gates notes for request ${requested || "presenter"}`, async (t) => {
-    const notesFor: string[] = [];
-    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => USER } });
-    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({
-      from: () => ({ select: () => ({ eq: () => ({ single: async () => ({ data: { hash_presenting_application_id: "presenter" }, error: null }) }) }) }),
-      rpc: async (name: string, args: { target_application_id?: string }) => {
-        if (name === "hash_ballot") return { data: [VISIBLE, { ...VISIBLE, id: "other" }], error: null };
-        assert.equal(name, "hash_applicant_notes");
-        notesFor.push(args.target_application_id ?? "");
-        return { data: [{ source: "GROUP_CASE", note: "Evidence" }], error: null };
-      },
-    }) } });
-    const { GET } = await importRoute(`visible-${requested}`);
-    const response = await GET(new NextRequest(`http://localhost/api/member/hash/live${requested}`));
-    const body = await response.json();
-    assert.deepEqual(body.presenting, { id: "presenter", name: "Visible applicant", meta: "", decided: null });
-    assert.equal(body.presentingId, "presenter");
-    assert.deepEqual(notesFor, requested.includes("hidden") ? [] : [requested.includes("other") ? "other" : "presenter"]);
-    assert.equal(body.applicationId, requested.includes("hidden") ? null : requested.includes("other") ? "other" : "presenter");
-  });
-}
+test("a poll is one database call carrying the selected cycle and requested applicant", async (t) => {
+  const calls: unknown[] = [];
+  mockRpc(t, { data: { cycleId: "cycle", presenting: null, applicationId: null, notes: [] }, error: null }, calls);
+  const { GET } = await importRoute("args");
+  await GET(new NextRequest("http://localhost/api/member/hash/live?cycleId=cycle&applicationId=other"));
+  await GET(new NextRequest("http://localhost/api/member/hash/live"));
+  assert.deepEqual(calls, [
+    { target_cycle_id: "cycle", target_application_id: "other" },
+    { target_cycle_id: null, target_application_id: "" },
+  ]);
+});
 
-for (const user of [null, { memberships: [] }, USER]) {
-  test(`Hash rejects missing membership or ballot eligibility: ${JSON.stringify(user)}`, async (t) => {
-    t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user } });
-    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => {
-      assert.equal(user, USER);
-      return {
-        from: () => ({ select: () => ({ eq: () => ({ single: async () => ({ data: { hash_presenting_application_id: "presenter" }, error: null }) }) }) }),
-        rpc: async () => ({ data: null, error: { code: "42501", message: "membership required" } }),
-      };
-    } } });
-    const { GET } = await importRoute(`auth-${JSON.stringify(user)}`);
+test("the presented applicant gets its readable major and year line", async (t) => {
+  mockRpc(t, { data: {
+    cycleId: "cycle",
+    presenting: { id: "presenter", name: "Visible applicant", major: null, class_year: null },
+    applicationId: "presenter",
+    notes: [{ source: "GROUP_CASE", note: "Evidence" }],
+  }, error: null });
+  const { GET } = await importRoute("shape");
+  const response = await GET(new NextRequest("http://localhost/api/member/hash/live"));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await response.json(), {
+    presentingId: "presenter",
+    presenting: { id: "presenter", name: "Visible applicant", meta: "", decided: null },
+    applicationId: "presenter",
+    notes: [{ source: "GROUP_CASE", note: "Evidence" }],
+  });
+});
+
+for (const [code, status] of [["28000", 401], ["42501", 403], ["XX000", 500]] as const) {
+  test(`a database refusal ${code} answers ${status} without applicant data`, async (t) => {
+    mockRpc(t, { data: null, error: { code, message: "refused" } });
+    t.mock.method(console, "error", () => {});
+    const { GET } = await importRoute(`error-${code}`);
     const response = await GET(new NextRequest("http://localhost/api/member/hash/live"));
-    assert.equal(response.status, user === null ? 401 : 403);
+    assert.equal(response.status, status);
     assert.equal(JSON.stringify(await response.json()).includes("presenter"), false);
+  });
+}
+
+for (const url of ["?cycleId=a&cycle=b", `?applicationId=${"x".repeat(201)}`]) {
+  test(`a malformed request is refused before the database: ${url.slice(0, 30)}`, async (t) => {
+    t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => { throw new Error("must not query"); } } });
+    const { GET } = await importRoute(`bad-${url.length}`);
+    const response = await GET(new NextRequest(`http://localhost/api/member/hash/live${url}`));
+    assert.equal(response.status, 400);
   });
 }
