@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { currentDestination, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";

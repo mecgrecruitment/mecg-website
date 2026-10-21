@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRouter } from "next/navigation";
 import StatusPill from "@/components/status-pill";
 import { initials } from "@/lib/initials";

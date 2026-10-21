@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { useRouter } from "next/navigation";
 import OperationNotice from "@/components/operation-notice";

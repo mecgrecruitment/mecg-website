@@ -2895,6 +2895,10 @@ export type Database = {
           name: string
         }[]
       }
+      member_hash_live: {
+        Args: { target_application_id: string; target_cycle_id: string | null }
+        Returns: Json
+      }
       my_grading_events: {
         Args: never
         Returns: {

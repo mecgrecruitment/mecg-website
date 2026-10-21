@@ -1,19 +1,4 @@
-import Link from "next/link";
-
-export function WorkspaceLoading({ label = "Loading workspace" }: { label?: string }) {
-  return (
-    <main className="mx-auto min-h-dvh max-w-7xl px-6 py-10 sm:px-10" aria-busy="true" aria-label={label}>
-      <div className="h-3 w-32 rounded-full bg-wash" />
-      <div className="mt-4 h-10 max-w-md rounded-xl bg-wash" />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div key={index} className="h-32 rounded-xl bg-wash" />
-        ))}
-      </div>
-      <p className="sr-only" role="status">{label}…</p>
-    </main>
-  );
-}
+import Link from "@/components/workspace-link";
 
 export function WorkspaceError({
   title = "This workspace could not be loaded.",

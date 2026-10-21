@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { GROUP_CASE_SCORE_BANDS } from "@/lib/rubrics";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
 import { evaluationPrerequisites, roundPrerequisites, type GroupCaseResults } from "@/lib/group-case-results";

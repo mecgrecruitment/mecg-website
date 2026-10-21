@@ -1352,3 +1352,10 @@ body:has(.workspace-private) { background: var(--workspace-canvas); }
   .group-case-criterion:focus-within .group-case-keys,
   .group-case-row:focus-within:not(:has(.group-case-criterion:focus-within, textarea:focus)) .group-case-criterion[data-next] .group-case-keys { visibility: visible; }
 }
+
+/* A link's page is on its way (see workspace-link.tsx). Prefetched pages arrive before the delay, so nothing shows. */
+html[data-navigating] body::before { content: ""; position: fixed; inset: 0 0 auto; z-index: 100; height: 3px; background: var(--color-mecg-orange); transform-origin: left; animation: navigating 4s var(--ease-out) 150ms both; pointer-events: none; }
+@keyframes navigating { from { transform: scaleX(0); } to { transform: scaleX(0.9); } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-navigating] body::before { animation: none; transform: none; opacity: 0.6; }
+}

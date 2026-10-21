@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";

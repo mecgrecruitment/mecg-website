@@ -1,7 +1,7 @@
 import { selectWorkspaceMembership } from "@/lib/workspace-cycle";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { requireMember } from "@/lib/auth";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";

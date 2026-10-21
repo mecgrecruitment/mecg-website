@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import * as nodeModule from "node:module";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { createElement, type ReactElement, type ReactNode } from "react";
+import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 
@@ -26,9 +26,6 @@ test("configured login renders the Clerk flow with visible provider identity", a
   t.mock.module("next/navigation", { namedExports: { redirect: () => { throw new Error("unexpected redirect"); } } });
   t.mock.module("next/image", {
     defaultExport: (props: Record<string, unknown>) => createElement("img", { alt: props.alt }),
-  });
-  t.mock.module("next/link", {
-    defaultExport: ({ children, href }: { children: ReactNode; href: string }) => createElement("a", { href }, children),
   });
   const seen: { appearance?: ClerkAppearance; forceRedirectUrl?: string | null } = {};
   t.mock.module("@clerk/nextjs", {

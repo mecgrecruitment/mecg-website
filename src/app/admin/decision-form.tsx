@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { releaseEvidenceHref } from "@/lib/release-evidence";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { useEffect, useId, useRef, useState } from "react";

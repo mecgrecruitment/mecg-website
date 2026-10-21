@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import RoundStatusControl from "./round-status-control";
 import { AccountProvisioningRecovery, useAccountProvisioning } from "./account-provisioning";
 import { requestRoundClose } from "./round-close-request";

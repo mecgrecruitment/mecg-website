@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboa
 import { authorizedFetch, retryOnNetworkError } from "@/lib/client-fetch";
 import { initials } from "@/lib/initials";
 import { matchesApplicantName } from "@/lib/speed-dating-roster";
-import { LIVE_SYNC_START, liveSyncNotice, nextLiveSync, pollOutcome, type PollOutcome } from "@/lib/live-sync";
+import { LIVE_SYNC_START, liveSyncNotice, nextLiveSync } from "@/lib/live-sync";
+import { pollHashLive } from "@/lib/hash-live";
+import { useSupabase } from "@/lib/supabase/client";
 import TallyStrip from "@/components/tally-strip";
 import { ballotList, shouldScrollToPresenting, unvotedIds } from "./ballot-list";
 
@@ -34,24 +36,6 @@ function grow(node: HTMLTextAreaElement | null) {
   if (!node) return;
   node.style.height = "auto";
   node.style.height = `${node.scrollHeight}px`;
-}
-
-async function fetchLive(cycleId?: string, applicationId?: string): Promise<{ outcome: PollOutcome; live: Live | null }> {
-  try {
-    const params = new URLSearchParams();
-    if (cycleId) params.set("cycleId", cycleId);
-    if (applicationId) params.set("applicationId", applicationId);
-    const query = params.size ? `?${params.toString()}` : "";
-    const response = await authorizedFetch(`/api/member/hash/live${query}`, { cache: "no-store" });
-    const outcome = pollOutcome(response.status);
-    if (outcome !== "ok") return { outcome, live: null };
-    const body: Partial<Live> | null = await response.json().catch(() => null);
-    if (!body) return { outcome: "failed", live: null };
-    return { outcome, live: { presentingId: body.presentingId ?? null, presenting: body.presenting ?? null, notes: Array.isArray(body.notes) ? body.notes : [] } };
-  } catch {
-    // Stale is fine on a phone; the next tick tries again.
-    return { outcome: "failed", live: null };
-  }
 }
 
 // Grader notes grouped by round. `notes` is undefined while a lazy fetch is in flight.
@@ -156,6 +140,7 @@ function BallotRow({ id, name, meta, row, rowStatus, stamped, dark, rowRef, onCa
 
 export default function HashBallot({ applicants, votes, presentingId, cycleId }: { cycleId?: string; applicants: BallotApplicant[]; votes: BallotVote[]; presentingId: string | null }) {
   const [query, setQuery] = useState("");
+  const supabase = useSupabase();
   const [rows, setRows] = useState<Record<string, Row>>(() => {
     const mine = new Map(votes.map((vote) => [vote.application_id, vote]));
     return Object.fromEntries(applicants.map(({ id }) => {
@@ -227,10 +212,12 @@ export default function HashBallot({ applicants, votes, presentingId, cycleId }:
 
   // Follow the projector: poll while the tab is in front, skip ticks in the background.
   useEffect(() => {
+    if (!supabase) return;
+    const client = supabase;
     let active = true;
     async function tick() {
       if (document.visibilityState !== "visible") return;
-      const { outcome, live: next } = await fetchLive(cycleId);
+      const { outcome, live: next } = await pollHashLive(client, cycleId);
       if (!active) return;
       setSync((current) => nextLiveSync(current, outcome));
       if (!next) return;
@@ -246,7 +233,7 @@ export default function HashBallot({ applicants, votes, presentingId, cycleId }:
     void tick();
     const interval = window.setInterval(tick, LIVE_POLL_MS);
     return () => { active = false; window.clearInterval(interval); };
-  }, [cycleId]);
+  }, [cycleId, supabase]);
 
   useEffect(() => {
     const previous = lastPresented.current;
@@ -339,8 +326,8 @@ export default function HashBallot({ applicants, votes, presentingId, cycleId }:
   function toggleNotes(applicationId: string) {
     const opening = !openNotes[applicationId];
     setOpenNotes((current) => ({ ...current, [applicationId]: opening }));
-    if (!opening || notesById[applicationId]) return;
-    void fetchLive(cycleId, applicationId).then(({ live: result }) => {
+    if (!opening || notesById[applicationId] || !supabase) return;
+    void pollHashLive(supabase, cycleId, applicationId).then(({ live: result }) => {
       if (result) setNotesById((current) => ({ ...current, [applicationId]: result.notes }));
     });
   }

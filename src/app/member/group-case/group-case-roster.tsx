@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import OperationNotice from "@/components/operation-notice";
 import Headshot from "@/components/applicant-headshot";
 import RatingStar from "@/components/rating-star";

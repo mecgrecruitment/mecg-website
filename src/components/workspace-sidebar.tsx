@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -37,6 +37,8 @@ export default function WorkspaceSidebar({ current, groups, cycle, account, swit
     previouslyOpen.current = open;
   }, [open]);
   const currentPath = current.split(/[?#]/, 1)[0];
+  // On a phone the links exist on screen only once the menu opens, and a tap gives
+  // hover prefetch no head start, so an open menu loads its pages in full.
   useEffect(() => {
     if (!open) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpenPath(null); toggle.current?.focus(); } };
@@ -54,7 +56,7 @@ export default function WorkspaceSidebar({ current, groups, cycle, account, swit
       <nav aria-label="Workspace" className="workspace-sidebar-groups">
         {groups.filter(group => group.links.length).map(group => <div key={group.label} className="workspace-sidebar-group"><p>{group.label}</p>{group.links.map(([href, label]) => {
           const selected = href.split(/[?#]/, 1)[0] === currentPath;
-          return <Link key={href} href={href} onClick={() => setOpenPath(null)} aria-current={selected ? "page" : undefined} className="workspace-sidebar-link"><NavigationIcon href={href} /><span>{label}</span>{selected && <span className="workspace-current-mark" aria-hidden="true" />}</Link>;
+          return <Link key={href} href={href} prefetch={open || undefined} onClick={() => setOpenPath(null)} aria-current={selected ? "page" : undefined} className="workspace-sidebar-link"><NavigationIcon href={href} /><span>{label}</span>{selected && <span className="workspace-current-mark" aria-hidden="true" />}</Link>;
         })}</div>)}
       </nav>
       <div className="workspace-sidebar-account"><span className="workspace-account-avatar" aria-hidden="true">{account.trim().charAt(0)}</span><div><p>{account}</p><Link href="/home">Back to public site</Link></div>{signOut}</div>

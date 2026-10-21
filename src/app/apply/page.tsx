@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import ApplicationCountdown from "@/components/application-countdown";
 import LogoutButton from "@/components/logout-button";

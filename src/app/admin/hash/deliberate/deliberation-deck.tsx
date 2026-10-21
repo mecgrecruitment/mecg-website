@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel } from "@/lib/labels";
 import { initials } from "@/lib/initials";

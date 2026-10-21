@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { secondaryDestinationLabel, type WorkspaceNavLink } from "@/lib/workspace-navigation";

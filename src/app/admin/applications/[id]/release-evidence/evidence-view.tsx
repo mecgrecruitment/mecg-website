@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { roundStatusLabel } from "@/lib/labels";
 import type { ReleaseEvidenceReport } from "@/lib/release-evidence";
