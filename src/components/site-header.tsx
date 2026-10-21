@@ -46,7 +46,8 @@ function PrimaryAction({ className, onNavigate }: { className: string; onNavigat
 function ClerkPrimaryAction({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
   const { isSignedIn } = useAuth();
   return isSignedIn
-    ? <Link href="/login" onClick={onNavigate} className={className}>My workspace</Link>
+    // Orange stays reserved for the page's own call to action; a member's way back in is secondary.
+    ? <Link href="/login" onClick={onNavigate} className={className.replace("button-primary", "button-secondary")}>My workspace</Link>
     : <Link href="/join" onClick={onNavigate} className={className}>Join MECG</Link>;
 }
 

@@ -44,7 +44,7 @@ export default function ClientProjectGrid({
               aria-label={`View information about ${project.name}`}
               onClick={() => setSelectedName(project.name)}
               style={{ order: index * 2 }}
-              className={`${projects.length % 2 === 1 && index === projects.length - 1 ? "col-span-2 sm:col-span-1 " : ""}group relative flex min-h-28 cursor-pointer sm:min-h-36 flex-col items-center justify-center overflow-hidden bg-white px-1 py-4 text-center sm:p-5 transition-colors duration-150 hover:bg-mecg-blue/[0.045] ${
+              className={`${projects.length % 2 === 1 && index === projects.length - 1 ? "col-span-2 sm:col-span-1 " : ""}group relative flex min-h-32 cursor-pointer sm:min-h-44 flex-col items-center justify-center overflow-hidden bg-white px-1 py-4 text-center sm:p-5 transition-colors duration-150 hover:bg-mecg-blue/[0.045] ${
                 selected ? "bg-mecg-blue/10 inset-ring-2 inset-ring-mecg-blue/80" : ""
               }`}
             >
@@ -57,9 +57,10 @@ export default function ClientProjectGrid({
                   sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw"
                 />
               </span>
-              <span className={`mt-3 text-[13px] leading-snug font-semibold tracking-[-0.01em] sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-muted"}`}>
-                {project.name}<span aria-hidden="true" className="hidden sm:inline"> →</span>
+              <span className={`mt-4 text-[13px] leading-snug font-semibold tracking-[-0.01em] sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
+                {project.name}
               </span>
+              <span className="mt-0.5 text-[13px] leading-snug text-muted">{project.industry}</span>
             </button>
           );
         })}
