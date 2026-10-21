@@ -63,7 +63,7 @@ function NextActionCard({ action }: { action: NextAction }) {
   return (
     <section className="applicant-next-action rounded-xl bg-white p-5 inset-ring inset-ring-line sm:p-6" aria-labelledby="next-action-heading">
       <p className="text-[13px] font-semibold text-mecg-orange-ink">{action.eyebrow}</p>
-      <h2 id="next-action-heading" className="mt-2 text-xl font-semibold tracking-[-0.02em]">{action.title}</h2>
+      <h2 id="next-action-heading" className="mt-2 text-xl font-semibold tracking-heading">{action.title}</h2>
       <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted">{action.detail}</p>
       {action.href && action.label && (
         <Link href={action.href} className="button-primary mt-4 inline-flex text-sm">

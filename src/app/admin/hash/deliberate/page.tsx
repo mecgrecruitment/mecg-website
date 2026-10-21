@@ -47,7 +47,7 @@ export default async function DeliberationPage() {
   if (stage === null) {
     return (
       <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6 sm:p-10">
-        <h1 className="text-3xl font-semibold tracking-[-0.03em]">Discussion</h1>
+        <h1 className="text-3xl font-semibold tracking-display">Discussion</h1>
         <p className="rounded-xl border-[1.5px] border-dashed border-line p-6 text-muted">Discussion mode opens when the board opens a stage vote or moves the cycle into voting and decisions.</p>
         <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="button-secondary self-start text-sm">Back to Hash</Link>
       </main>

@@ -161,7 +161,7 @@ export default async function ApplyPage() {
         <div className={`flex flex-wrap items-start justify-between gap-5 ${user ? "" : "text-center"}`}>
           <div className={user ? "" : "mx-auto"}>
             <p className="text-[13px] font-semibold text-mecg-blue">Application intake</p>
-            <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
+            <h1 className="mt-3 text-balance text-4xl font-semibold tracking-display sm:text-6xl">Apply to MECG.</h1>
             <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-muted">
               {user
                 ? "Your work saves automatically. Take your time, review everything, then submit once."

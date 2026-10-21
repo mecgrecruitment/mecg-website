@@ -178,7 +178,7 @@ export default function GroupForms({
           return (
             <section key={group.id} className="rounded-xl bg-wash p-4 inset-ring inset-ring-line">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-[17px] font-semibold tracking-[-0.01em]">{group.name}</h3>
+                <h3 className="text-[17px] font-semibold tracking-heading">{group.name}</h3>
                 <div className="flex items-center gap-3">
                   <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
                     {groupMembers.length}

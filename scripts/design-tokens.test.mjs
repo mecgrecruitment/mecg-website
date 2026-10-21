@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rewrite } from './design-tokens.mjs';
+import { checkCss, rewrite } from './design-tokens.mjs';
 
 const classes = (s) => rewrite(`<p className="${s}" />`).out.match(/className="([^"]*)"/)[1];
 
@@ -18,7 +18,7 @@ test('raw navy inset shadows become token inset rings', () => {
 });
 
 test('status shades map to roles and type under 12px is raised', () => {
-  assert.equal(classes('bg-red-50 text-red-800 text-[11px] rounded-2xl'), 'bg-danger-wash text-danger text-xs rounded-xl');
+  assert.equal(classes('bg-red-50 text-red-800 text-[11px] text-[0.65rem] rounded-2xl'), 'bg-danger-wash text-danger text-xs text-xs rounded-xl');
 });
 
 test('raw colours without a token are flagged, not rewritten', () => {
@@ -30,4 +30,21 @@ test('raw colours without a token are flagged, not rewritten', () => {
 test('classes already on the system are left alone', () => {
   const src = '<p className="text-muted inset-ring inset-ring-line bg-wash rounded-xl text-mecg-navy/35" />';
   assert.deepEqual(rewrite(src).changes, []);
+});
+
+test('arbitrary tracking snaps to display, heading or label', () => {
+  assert.equal(classes('tracking-[-0.045em] tracking-[-0.01em] tracking-[0.14em]'), 'tracking-display tracking-heading tracking-label');
+});
+
+test('CSS rules read colours through tokens; definitions, masks and marked lines pass', () => {
+  const css = [
+    ':root { --x: #123456; }',
+    '.a { color: rgb(7 13 31 / 60%); }',
+    '.b { mask-image: radial-gradient(rgb(0 0 0 / 50%), transparent); }',
+    '.c { background: hsl(var(--hue) 90% 60%); /* raw: confetti */ }',
+    '.d { letter-spacing: -0.04em; }',
+  ].join('\n');
+  const { out, flags } = checkCss(css);
+  assert.deepEqual(flags.map((f) => f.line), [2]);
+  assert.match(out, /letter-spacing: var\(--tracking-display\)/);
 });

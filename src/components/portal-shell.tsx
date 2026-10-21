@@ -53,7 +53,7 @@ export default function PortalShell({
       <section className={`flex justify-center ${centered && !compact ? "min-h-[calc(100dvh-5rem)] items-center px-6 py-12 sm:px-10" : "items-start px-5 py-10 sm:px-8 sm:py-14 lg:py-16"}`}>
         <div className={`w-full ${compact ? "max-w-md text-left" : "max-w-xl text-center"}`}>
           <p className="text-[13px] font-semibold text-mecg-blue">{eyebrow}</p>
-          <h1 className={`${compact ? "mt-2.5 text-4xl sm:text-[2.5rem]" : "mt-3 text-[40px] sm:text-[52px]"} text-balance font-semibold leading-[1.05] tracking-[-0.04em]`}>{title}</h1>
+          <h1 className={`${compact ? "mt-2.5 text-4xl sm:text-[2.5rem]" : "mt-3 text-[40px] sm:text-[52px]"} text-balance font-semibold leading-[1.05] tracking-display`}>{title}</h1>
           <p className={`${compact ? "mt-3 max-w-md leading-6" : "mx-auto mt-4 max-w-lg leading-7"} text-pretty text-[17px] text-muted`}>{description}</p>
           <div className={compact ? "mt-7 border-t border-public-rule pt-7 text-left" : "mt-8 rounded-xl border border-public-rule bg-white p-6 text-left shadow-lift sm:p-8"}>
             {children}

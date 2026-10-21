@@ -15,7 +15,7 @@ export default function EngagementInstrument() {
 
   return (
     <figure className="m-0 overflow-hidden border border-line bg-white text-mecg-navy" aria-label="Explore the four steps of a MECG engagement">
-      <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3 font-mono text-xs uppercase tracking-[0.12em]">
+      <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3 font-mono text-xs uppercase tracking-label">
         <span className="text-mecg-orange-ink">Fig. 01</span>
         <span className="text-muted">The engagement bench</span>
       </div>
@@ -44,7 +44,7 @@ export default function EngagementInstrument() {
             <image href="/images/engagement-instrument/head.svg" width="600" height="370" />
           </g>
         </svg>
-        <div className="flex items-center justify-between gap-3 border-y border-line px-5 py-2.5 font-mono text-xs uppercase tracking-[0.1em] text-muted">
+        <div className="flex items-center justify-between gap-3 border-y border-line px-5 py-2.5 font-mono text-xs uppercase tracking-label text-muted">
           <span>Select a station below</span>
           <span className="shrink-0 whitespace-nowrap tabular-nums">{selected[0]} / 04</span>
         </div>

@@ -578,7 +578,7 @@ export default function DeliberationDeck({
           )}
           {stampStatus && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-              <span className={`deck-stamp rounded-xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-warning-edge" : "text-emerald-300 border-emerald-300"}`}>
+              <span className={`deck-stamp rounded-xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-label sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-warning-edge" : "text-emerald-300 border-emerald-300"}`}>
                 {stampStatus === "UNSURE" ? "UNSURE" : applicationStatusLabel(stampStatus).toUpperCase()}
               </span>
             </div>

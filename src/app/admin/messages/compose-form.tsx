@@ -110,7 +110,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
             id="message-review-title"
             ref={reviewHeading}
             tabIndex={-1}
-            className="mt-2 text-2xl font-semibold tracking-[-0.025em] text-mecg-navy focus:outline-2 focus:outline-offset-3 focus:outline-mecg-navy"
+            className="mt-2 text-2xl font-semibold tracking-heading text-mecg-navy focus:outline-2 focus:outline-offset-3 focus:outline-mecg-navy"
           >
             Review before sending
           </h2>

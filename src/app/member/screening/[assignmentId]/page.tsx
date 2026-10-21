@@ -22,7 +22,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
       <nav aria-label="Review context" className="workspace-focus-context"><Link href={withWorkspaceCycle("/member/screening", cycleId)}>Reading queue</Link>{cycleName && <span>{cycleName}</span>}<span aria-hidden="true">/</span><span className="tabular">{detail.candidateCode}</span></nav>
       <header className="workspace-page-header flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em]">Candidate <span className="tabular">{detail.candidateCode}</span></h1>
+          <h1 className="mt-2 text-[28px] font-semibold tracking-display">Candidate <span className="tabular">{detail.candidateCode}</span></h1>
           <p className="mt-1.5 text-[15px] text-muted">Read every response before scoring. Use only the submitted material; do not attempt to identify the applicant. The resume is context only and is not scored.</p>
         </div>
       </header>

@@ -57,7 +57,7 @@ export default async function RoundsPage() {
       <section>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview rounds</h2>
+            <h2 className="text-xl font-semibold tracking-heading text-mecg-navy">Interview rounds</h2>
             <p className="mt-1 text-sm text-muted">Staffing counts usable assignments within each round’s cohort. Submitted forms may contain partial observations; open the round to check qualifying evidence.</p>
           </div>
           <p className="tabular text-xs font-semibold text-muted">{activeApplications.length} active applicants</p>
@@ -110,7 +110,7 @@ export default async function RoundsPage() {
       <section>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview events</h2>
+            <h2 className="text-xl font-semibold tracking-heading text-mecg-navy">Interview events</h2>
             <p className="mt-1 text-sm text-muted">Scheduling, capacity, attendance, and live operations now live with interviews.</p>
           </div>
           <div className="flex flex-wrap gap-2">

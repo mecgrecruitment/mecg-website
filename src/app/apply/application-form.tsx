@@ -691,7 +691,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
 }
 
 function StepHeading({ children }: { children: React.ReactNode }) {
-  return <h2 id="application-step-heading" tabIndex={-1} className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em] outline-none">{children}</h2>;
+  return <h2 id="application-step-heading" tabIndex={-1} className="mt-3 text-balance text-3xl font-semibold tracking-display outline-none">{children}</h2>;
 }
 
 function DetailsStep({ values, setters, email, errors, gradBaseYear }: { values: Record<string, string>; setters: Record<string, (value: string) => void>; email: string; errors: Record<string, string>; gradBaseYear: number }) {

@@ -50,7 +50,7 @@ function Step({ number, title, state, summary, open = state === "active", childr
           : number}
       </span>
       <div className="min-w-0">
-        <h2 className={`text-lg font-semibold tracking-[-0.01em] ${state === "active" ? "text-mecg-navy" : "text-muted"}`}>
+        <h2 className={`text-lg font-semibold tracking-heading ${state === "active" ? "text-mecg-navy" : "text-muted"}`}>
           <span className="sr-only">Step {number}{state === "done" ? ", done" : ""}: </span>{title}
         </h2>
         {summary && <div className="mt-1 text-sm text-muted">{summary}</div>}

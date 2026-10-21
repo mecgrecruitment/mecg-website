@@ -49,6 +49,26 @@
   --color-warning-edge: oklch(87.9% 0.169 91.605);
   --shadow-lift: 0 28px 56px -28px rgb(18 33 62 / 50%);
   --shadow-pop: 0 18px 55px rgb(7 13 31 / 18%);
+  --tracking-display: -0.035em;
+  --tracking-heading: -0.01em;
+  --tracking-label: 0.12em;
+  --tracking-poster: -0.02em;
+}
+
+/* Roles CSS rules read through var(); static so Tailwind emits them even when no class uses them. */
+@theme static {
+  --color-tint: rgb(37 79 159 / 10%);
+  --color-tint-edge: rgb(37 79 159 / 25%);
+  --color-on-dark-muted: rgb(255 255 255 / 70%);
+  --color-on-dark-fill: rgb(255 255 255 / 10%);
+  --color-on-dark-line: rgb(255 255 255 / 20%);
+  --color-on-dark-edge: rgb(255 255 255 / 50%);
+  --color-unsure: #fbbf24;
+  --color-success-on-dark: #6ee7b7;
+  --color-danger-on-dark: #fda4af;
+  --color-public-lit-glow: rgb(66 120 210 / 55%);
+  --color-public-lit-from: #2a58ab;
+  --color-public-lit-to: #1f4690;
 }
 
 @theme inline {
@@ -67,7 +87,7 @@ body {
 }
 
 ::selection {
-  background: rgb(254 144 77 / 42%);
+  background: color-mix(in srgb, var(--color-mecg-orange) 42%, transparent);
   color: var(--color-mecg-navy);
 }
 
@@ -144,14 +164,14 @@ textarea:focus-visible {
 .button-primary { background: var(--color-mecg-orange); color: var(--color-mecg-navy); }
 .button-primary.is-success { background: var(--color-success); color: white; }
 .button-primary:hover { filter: brightness(1.08); }
-.button-secondary { box-shadow: inset 0 0 0 1px rgb(7 13 31 / 18%); color: var(--color-mecg-navy); }
-.button-secondary:hover { background: rgb(37 79 159 / 12%); }
-.button-dark { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 24%); color: white; }
-.button-dark:hover { background: rgb(255 255 255 / 8%); }
+.button-secondary { box-shadow: inset 0 0 0 1px var(--color-line-strong); color: var(--color-mecg-navy); }
+.button-secondary:hover { background: var(--color-tint); }
+.button-dark { box-shadow: inset 0 0 0 1px var(--color-on-dark-line); color: white; }
+.button-dark:hover { background: var(--color-on-dark-fill); }
 .button-light { background: white; color: var(--color-mecg-blue); }
-.button-light:hover { background: rgb(255 255 255 / 90%); }
-.button-ghost-light { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%); color: white; }
-.button-ghost-light:hover { background: rgb(255 255 255 / 10%); }
+.button-light:hover { background: var(--color-paper); }
+.button-ghost-light { box-shadow: inset 0 0 0 1px var(--color-on-dark-edge); color: white; }
+.button-ghost-light:hover { background: var(--color-on-dark-fill); }
 .button-primary:active,
 .button-secondary:active,
 .button-dark:active,
@@ -176,22 +196,22 @@ textarea:focus-visible {
  */
 .surface-card {
   border-radius: 28px;
-  box-shadow: 0 24px 80px rgba(7, 13, 31, 0.09), inset 0 0 0 1px rgba(7, 13, 31, 0.05);
+  box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--color-line);
 }
 
 .field-control {
   min-height: 2.75rem;
   width: 100%;
   border-radius: 0.75rem;
-  background: rgb(7 13 31 / 3.5%);
+  background: var(--color-wash);
   padding-inline: 0.875rem;
-  box-shadow: inset 0 0 0 1px rgb(7 13 31 / 14%);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
   outline: none;
   transition: background-color var(--t-detent) var(--ease-detent), box-shadow var(--t-detent) var(--ease-detent);
 }
 
 .field-control:hover {
-  background: rgb(37 79 159 / 7%);
+  background: var(--color-tint);
 }
 
 .field-control:focus {
@@ -204,7 +224,7 @@ textarea:focus-visible {
 }
 
 .scroll-cue {
-  scrollbar-color: rgb(7 13 31 / 24%) transparent;
+  scrollbar-color: var(--color-line-strong) transparent;
   scrollbar-width: thin;
   overscroll-behavior-inline: contain;
 }
@@ -252,12 +272,12 @@ textarea:focus-visible {
 }
 
 .workspace-stack > section {
-  border-top: 1px solid rgb(7 13 31 / 12%);
+  border-top: 1px solid var(--color-line);
   padding-top: var(--workspace-section-top);
 }
 
 .workspace-stack > section:target {
-  border-top-color: rgb(37 79 159 / 65%);
+  border-top-color: var(--color-mecg-blue);
 }
 
 .task-row {
@@ -268,8 +288,8 @@ textarea:focus-visible {
 
 .task-row:hover,
 .task-row:focus-visible {
-  background: rgb(37 79 159 / 5%);
-  box-shadow: inset 0 0 0 1px rgb(37 79 159 / 24%);
+  background: var(--color-tint);
+  box-shadow: inset 0 0 0 1px var(--color-tint-edge);
 }
 
 .task-row-arrow {
@@ -294,7 +314,7 @@ details[open] > summary .disclosure-chevron {
   overflow: hidden;
   height: 0.25rem;
   border-radius: 999px;
-  background: rgb(7 13 31 / 10%);
+  background: var(--color-line);
 }
 
 .progress-fill {
@@ -306,15 +326,8 @@ details[open] > summary .disclosure-chevron {
 }
 
 .image-outline {
-  outline: 1px solid oklch(0 0 0 / 10%);
+  outline: 1px solid var(--color-line);
   outline-offset: -1px;
-}
-
-/* Small operational copy must clear WCAG's normal-text contrast floor. */
-.text-mecg-navy\/45,
-.text-mecg-navy\/50,
-.text-mecg-navy\/55 {
-  color: rgb(7 13 31 / 65%);
 }
 
 /* Hash deliberation deck. Static looks live here; every keyframe sits in the
@@ -326,7 +339,7 @@ details[open] > summary .disclosure-chevron {
 
 .deck-confetti {
   left: var(--x);
-  background: hsl(var(--hue) 90% 60%);
+  background: hsl(var(--hue) 90% 60%); /* raw: confetti runs the whole hue wheel */
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -553,12 +566,12 @@ details[open] > summary .disclosure-chevron {
     width: 100%;
     border-radius: 0.75rem;
     padding: 0.5rem 2.5rem 0.5rem 0.875rem;
-    background-color: rgb(7 13 31 / 3.5%);
+    background-color: var(--color-wash);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23070d1f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1.15rem;
-    box-shadow: inset 0 0 0 1px rgb(7 13 31 / 14%);
+    box-shadow: inset 0 0 0 1px var(--color-line-strong);
     color: var(--color-mecg-navy);
     font-weight: 500;
     outline: none;
@@ -567,12 +580,12 @@ details[open] > summary .disclosure-chevron {
   }
 
   .select-control:hover {
-    background-color: rgb(37 79 159 / 7%);
+    background-color: var(--color-tint);
   }
 
   .select-control:focus {
     background-color: white;
-    box-shadow: inset 0 0 0 2px var(--color-mecg-navy), 0 0 0 4px rgb(7 13 31 / 10%);
+    box-shadow: inset 0 0 0 2px var(--color-mecg-navy), 0 0 0 4px var(--color-line);
   }
 
   .select-control:disabled {
@@ -595,7 +608,7 @@ details[open] > summary .disclosure-chevron {
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.01em;
-    color: rgb(7 13 31 / 62%);
+    color: var(--color-muted);
   }
 
   .tabular {
@@ -610,7 +623,7 @@ details[open] > summary .disclosure-chevron {
   font-family: var(--font-display), var(--font-ui);
   font-stretch: 88%;
   font-weight: 760;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   word-spacing: 0.1em;
 }
 
@@ -618,7 +631,7 @@ details[open] > summary .disclosure-chevron {
   font-family: var(--font-display), var(--font-ui);
   font-stretch: 88%;
   font-weight: 760;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   word-spacing: 0.1em;
 }
 
@@ -629,7 +642,7 @@ details[open] > summary .disclosure-chevron {
   font-stretch: 70%;
   font-weight: 900;
   line-height: 0.84;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-poster);
   word-spacing: 0.06em;
   overflow-wrap: anywhere;
 }
@@ -652,8 +665,8 @@ details[open] > summary .disclosure-chevron {
 /* Blue question objects are lit from their top-left corner with neighbouring blues. */
 .public-lit {
   background:
-    radial-gradient(120% 90% at 0% 0%, rgb(66 120 210 / 55%) 0%, transparent 60%),
-    linear-gradient(160deg, #2a58ab 0%, #1f4690 100%);
+    radial-gradient(120% 90% at 0% 0%, var(--color-public-lit-glow) 0%, transparent 60%),
+    linear-gradient(160deg, var(--color-public-lit-from) 0%, var(--color-public-lit-to) 100%);
   color: white;
 }
 .public-lit :focus-visible { outline-color: white; }
@@ -663,5 +676,5 @@ details[open] > summary .disclosure-chevron {
   color: var(--color-mecg-blue);
 }
 .section-label[data-tone="dark"] {
-  color: rgb(255 255 255 / 70%);
+  color: var(--color-on-dark-muted);
 }

@@ -84,7 +84,7 @@ export default async function ReferralsPage() {
                   {[referral.year_major, `Referred by ${referrerName.get(referral.referrer_id) ?? "a member"}`].filter(Boolean).join(" · ")}
                 </p>
                 <div className="mt-3 rounded-xl bg-wash px-3 py-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Why they may fit</p>
+                  <p className="text-xs font-semibold uppercase tracking-label text-muted">Why they may fit</p>
                   <p className="mt-1 whitespace-pre-wrap text-[13px] leading-5 text-muted">{referral.reason}</p>
                 </div>
               </div>

@@ -57,7 +57,7 @@ export default function ClientProjectGrid({
                   sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw"
                 />
               </span>
-              <span className={`mt-4 text-[13px] leading-snug font-semibold tracking-[-0.01em] sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
+              <span className={`mt-4 text-[13px] leading-snug font-semibold tracking-heading sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
                 {project.name}
               </span>
               <span className="mt-0.5 text-[13px] leading-snug text-muted">{project.industry}</span>
@@ -88,7 +88,7 @@ export default function ClientProjectGrid({
           <p className="text-[13px] font-semibold text-mecg-blue">
             {selectedProject.industry}
           </p>
-          <h3 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
+          <h3 className="mt-3 text-3xl font-semibold tracking-display sm:text-4xl">
             {selectedProject.name}
           </h3>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">

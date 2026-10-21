@@ -579,7 +579,7 @@ function PipelineBoardInner({
   return (
     <section id="applicants">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="text-base font-semibold tracking-[-0.02em]">Applicants</h2>
+        <h2 className="text-base font-semibold tracking-heading">Applicants</h2>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
           <p className="text-sm text-muted">{boardApplications.length} submitted</p>
           <label>

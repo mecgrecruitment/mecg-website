@@ -80,7 +80,7 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
         <section>
           <div className="sticky top-0 z-20 -mx-6 border-b border-line bg-white/95 px-6 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
             <SectionLabel>Qualitative observations</SectionLabel>
-            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{observedCount} of {rosterRows.length} applicants observed</h2>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-heading">{observedCount} of {rosterRows.length} applicants observed</h2>
             <p className="mt-1 text-sm text-muted">Started {formatStart(selected.starts_at)} · observations never affect applicant scores or attendance decisions.</p>
             <div className="progress-track mt-3 sm:max-w-sm" aria-hidden="true">
               <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? observedCount / rosterRows.length : 0})` }} />

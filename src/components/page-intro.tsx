@@ -41,7 +41,7 @@ export default function PageIntro({
             {posterMedia ? <div className="relative z-10 -mt-[3cqi] ml-auto w-[40cqi] lg:absolute lg:right-0 lg:top-[11cqi] lg:mt-0 lg:w-[23cqi]">{posterMedia}</div> : null}
           </div>
         ) : (
-          <h1 id={titleId} className={`${label ? "mt-3" : ""} max-w-4xl text-balance text-[clamp(40px,6vw,76px)] font-semibold leading-[1.02] tracking-[-0.04em]`}>
+          <h1 id={titleId} className={`${label ? "mt-3" : ""} max-w-4xl text-balance text-[clamp(40px,6vw,76px)] font-semibold leading-[1.02] tracking-display`}>
             {title}
           </h1>
         )}

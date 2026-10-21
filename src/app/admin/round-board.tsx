@@ -284,7 +284,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <SectionLabel>Group Case coverage</SectionLabel>
-              <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Who still needs attention</h2>
+              <h2 className="mt-2 text-[22px] font-semibold tracking-heading">Who still needs attention</h2>
               <p className="mt-1 text-sm text-muted">Staffing counts assigned forms. Evidence status uses valid independent evaluations where results access is permitted; incomplete and unknown evidence appears first.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

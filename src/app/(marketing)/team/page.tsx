@@ -27,7 +27,7 @@ export default function TeamPage() {
                 <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-mecg-blue/10 shadow-lift">
                   <Image src={src} alt="" fill loading={index < 5 ? "eager" : "lazy"} className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none" style={{ objectPosition }} sizes="(min-width:1152px) 202px, (min-width:1024px) calc((100vw - 144px) / 5), (min-width:640px) calc((100vw - 112px) / 3), calc((100vw - 64px) / 2)" />
                 </div>
-                <h2 className="mt-4 text-lg font-semibold tracking-[-0.02em]">{name}</h2>
+                <h2 className="mt-4 text-lg font-semibold tracking-heading">{name}</h2>
                 <p className="mt-1 text-[15px] text-muted">{role}</p>
                 <p className="mt-2 text-[13px] font-semibold text-mecg-blue">LinkedIn <span aria-hidden="true">↗</span></p>
               </a>

@@ -264,7 +264,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <SectionLabel number="02">Your assignments</SectionLabel>
-            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-heading">{assignmentHeading}</h2>
           </div>
         </div>
         <div className="mt-3.5">
