@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import FormField from "@/components/form-field";
 import { CONTACT_FIELDS, contactErrors, parseContactErrors, type ContactErrors } from "@/lib/contact-validation";
 
-const textareaClass = "mt-2 min-h-12 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.16)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-blue)]";
+const textareaClass = "mt-2 min-h-12 w-full rounded-xl bg-wash px-4 py-3 text-mecg-navy inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-blue)]";
 
 export default function ContactForm({ initialSubject = "", initialMessage = "" }: { initialSubject?: string; initialMessage?: string }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -90,13 +90,13 @@ export default function ContactForm({ initialSubject = "", initialMessage = "" }
         <FormField label="Subject" name="subject" defaultValue={initialSubject} error={errors.subject} required maxLength={150} />
       </div>
       <label htmlFor={messageId} className="mt-5 block text-sm font-medium">Message</label><textarea id={messageId} name="message" aria-invalid={!!errors.message} aria-describedby={`${messageId}-help${errors.message ? ` ${messageId}-error` : ""}`} required minLength={10} maxLength={5000} rows={5} defaultValue={initialMessage} className={textareaClass} />
-      <p id={`${messageId}-help`} className="mt-2 text-sm leading-6 text-mecg-navy/70">For a project, describe the decision, your timing, and who will use the work. Mention any confidentiality needs. For recruitment, tell us what you need help with.</p>
-      {errors.message && <p id={`${messageId}-error`} className="mt-2 text-sm text-red-700">{errors.message}</p>}
+      <p id={`${messageId}-help`} className="mt-2 text-sm leading-6 text-muted">For a project, describe the decision, your timing, and who will use the work. Mention any confidentiality needs. For recruitment, tell us what you need help with.</p>
+      {errors.message && <p id={`${messageId}-error`} className="mt-2 text-sm text-danger">{errors.message}</p>}
       <label className="absolute -left-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
       </fieldset>
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <button type="submit" disabled={status === "sending"} className="button-primary">{status === "sending" ? "Sending…" : "Send message"}</button>
-        <p role={status === "error" ? "alert" : "status"} className={`text-sm ${status === "error" ? "text-red-700" : "text-mecg-navy/65"}`}>{message}</p>
+        <p role={status === "error" ? "alert" : "status"} className={`text-sm ${status === "error" ? "text-danger" : "text-muted"}`}>{message}</p>
       </div>
     </form>
   );

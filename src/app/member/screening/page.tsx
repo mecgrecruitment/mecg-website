@@ -1,6 +1,6 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { selectWorkspaceMembership, requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { requireMember } from "@/lib/auth";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -21,7 +21,7 @@ export default async function ScreeningQueuePage() {
   const user = await requireMember();
   const cycle = await selectWorkspaceMembership(user, ["RECRUITMENT_COMMITTEE", "BOARD", "OWNER"]);
   const cycleId = cycle?.cycleId ?? await requestedWorkspaceCycleId();
-  if (!cycle) return <main className="mx-auto max-w-3xl p-8"><p className="text-mecg-navy/55">You are not enrolled as an application reviewer.</p></main>;
+  if (!cycle) return <main className="mx-auto max-w-3xl p-8"><p className="text-muted">You are not enrolled as an application reviewer.</p></main>;
   const supabase = await createClient();
   const [{ data: queue, error }, { data: rawContext, error: contextError }] = await Promise.all([
     screeningRpc<ScreeningQueueItem[]>(supabase, "my_screening_queue", { target_cycle_id: cycle.cycleId }),
@@ -42,9 +42,9 @@ export default async function ScreeningQueuePage() {
         description="Review only the evidence in each application. You cannot see who wrote it, so do not try to identify applicants or discuss assignments with other reviewers."
       />
       <WorkspaceNav user={user} cycleId={cycle.cycleId} current="/member/screening" />
-      <section className="grid gap-3 rounded-2xl bg-mecg-navy p-5 text-white sm:grid-cols-[1fr_auto] sm:items-center">
+      <section className="queue-progress grid gap-3 rounded-xl bg-mecg-navy p-5 text-white sm:grid-cols-[1fr_auto] sm:items-center">
         <div>
-          <p className="text-sm text-white/65">Your private progress</p>
+          <p className="text-sm text-white/70">Your private progress</p>
           <p className="mt-1 text-2xl font-semibold">{context.completed} of {context.total} complete</p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15" aria-hidden="true"><div className="h-full rounded-full bg-mecg-orange" style={{ width: `${completion}%` }} /></div>
         </div>
@@ -52,25 +52,25 @@ export default async function ScreeningQueuePage() {
       </section>
       <section>
         <SectionLabel number="01">Your reading queue</SectionLabel>
-        <p className="mt-2 text-sm text-mecg-navy/60">Open one application at a time. Submitted reviews are locked and removed from this list.</p>
+        <p className="mt-2 text-sm text-muted">Open one application at a time. Submitted reviews are locked and removed from this list.</p>
         <div className="mt-3.5 space-y-4">
           {nextApplication && (
-            <article className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+            <article className="queue-ticket flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white p-5 inset-ring inset-ring-line">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">Up next</p>
-                <p className="mt-1 font-mono text-sm text-mecg-navy/65">{nextApplication.candidate_code}</p>
+                <p className="queue-ticket-code">{nextApplication.candidate_code}</p>
               </div>
               <Link href={withWorkspaceCycle(`/member/screening/${nextApplication.assignment_id}`, cycleId)} className="button-primary">Continue application</Link>
             </article>
           )}
           {laterApplications.length > 0 && (
-            <details className="rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+            <details className="rounded-xl inset-ring inset-ring-line">
               <summary className="min-h-11 cursor-pointer list-none px-5 py-4 font-semibold">View {laterApplications.length} later {laterApplications.length === 1 ? "application" : "applications"}</summary>
-              <div className="divide-y divide-mecg-navy/10 px-5 pb-3">
+              <div className="divide-y divide-line px-5 pb-3">
                 {laterApplications.map((item) => (
                   <article key={item.assignment_id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                     <div className="flex items-center gap-3">
-                      <p className="font-mono text-xs text-mecg-navy/60">{item.candidate_code}</p>
+                      <p className="font-mono text-xs text-muted">{item.candidate_code}</p>
                       <StatusPill tone={statusTone(item.assignment_status)}>{assignmentStatusLabel(item.assignment_status)}</StatusPill>
                     </div>
                     <Link href={withWorkspaceCycle(`/member/screening/${item.assignment_id}`, cycleId)} className="button-secondary text-sm">Open</Link>
@@ -79,7 +79,7 @@ export default async function ScreeningQueuePage() {
               </div>
             </details>
           )}
-          {!remaining.length && <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-mecg-navy/55">You are caught up. No applications are waiting for review.</p>}
+          {!remaining.length && <div className="queue-clear"><p className="queue-clear-title">Queue clear</p><p>You are caught up. No applications are waiting for review.</p></div>}
         </div>
       </section>
     </main>

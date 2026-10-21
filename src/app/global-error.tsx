@@ -7,7 +7,7 @@ const colors = {
   navy: "#070d1f",
   orange: "#fe904d",
   orangeInk: "#a83e0b",
-  paper: "#f5f4ef",
+  paper: "#f5f8fd",
   white: "#ffffff",
 } as const;
 

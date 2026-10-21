@@ -46,7 +46,8 @@ function PrimaryAction({ className, onNavigate }: { className: string; onNavigat
 function ClerkPrimaryAction({ className, onNavigate }: { className: string; onNavigate?: () => void }) {
   const { isSignedIn } = useAuth();
   return isSignedIn
-    ? <Link href="/login" onClick={onNavigate} className={className}>My workspace</Link>
+    // Orange stays reserved for the page's own call to action; a member's way back in is secondary.
+    ? <Link href="/login" onClick={onNavigate} className={className.replace("button-primary", "button-secondary")}>My workspace</Link>
     : <Link href="/join" onClick={onNavigate} className={className}>Join MECG</Link>;
 }
 
@@ -75,12 +76,12 @@ export default function SiteHeader() {
               key={href}
               href={href}
               aria-current={(pathname === href || pathname.startsWith(`${href}/`)) ? "page" : undefined}
-              className={`inline-flex min-h-11 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "border-mecg-orange text-public-ink" : "border-transparent text-public-muted hover:border-public-edge hover:text-mecg-blue"}`}
+              className={`inline-flex min-h-11 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "border-mecg-orange text-public-ink" : "border-transparent text-muted hover:border-public-edge hover:text-mecg-blue"}`}
             >
               {label}
             </Link>
           ))}
-          <AuthControl className="inline-flex min-h-11 items-center border-b border-transparent text-public-muted transition-[border-color,color,transform] duration-150 hover:border-public-edge hover:text-mecg-blue active:scale-96" />
+          <AuthControl className="inline-flex min-h-11 items-center border-b border-transparent text-muted transition-[border-color,color,transform] duration-150 hover:border-public-edge hover:text-mecg-blue active:scale-96" />
           <PrimaryAction className="button-primary" />
         </nav>
         <button

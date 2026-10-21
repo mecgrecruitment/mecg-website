@@ -39,7 +39,7 @@ export default function ResolveButton({ incidentId }: { incidentId: string }) {
         {state === "saving" ? "Recording resolution…" : state === "resolved" ? "Resolution recorded" : "Mark resolved"}
       </button>
       {error && <OperationNotice kind="error">{error}</OperationNotice>}
-      {state === "resolved" && <p role="status" className="text-sm text-mecg-navy/70">Resolution recorded. Refreshing the queue.</p>}
+      {state === "resolved" && <p role="status" className="text-sm text-muted">Resolution recorded. Refreshing the queue.</p>}
     </div>
   );
 }

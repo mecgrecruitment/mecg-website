@@ -1,6 +1,6 @@
 # MECG application and Board system redesign
 
-Status: proposed master plan
+Status: partly shipped. Revision-checked drafts and evaluations, the round-close summary and batch-release diagnostics went to production on October 20, 2026 (`5d763f3`). Items not in the code remain proposals.
 
 Source baseline: commit `3159bb8`
 

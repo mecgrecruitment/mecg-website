@@ -1,7 +1,7 @@
 "use client";
 
 import { useSignUp } from "@clerk/nextjs";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import FormField from "@/components/form-field";
@@ -159,7 +159,7 @@ export default function ApplicantSignupForm() {
   if (stage === "verification") {
     return (
       <form onSubmit={verify} className="mt-7 space-y-5">
-        <FormField label="Verification code" value={code} onChange={(event) => setCode(event.target.value)} required autoComplete="one-time-code" />
+        <FormField label="Verification code" value={code} onChange={(event) => setCode(event.target.value)} required inputMode="numeric" autoComplete="one-time-code" />
         <OperationNotice kind="info">{message}</OperationNotice>
         <OperationNotice kind="error">{error}</OperationNotice>
         <button type="submit" disabled={busy} className="button-primary w-full disabled:opacity-50">
@@ -186,7 +186,7 @@ export default function ApplicantSignupForm() {
         {pending ? "Creating account…" : "Create applicant account"}
       </button>
       <div id="clerk-captcha" />
-      <p className="flex min-h-11 items-center justify-center text-center text-sm text-mecg-navy/65">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
+      <p className="flex min-h-11 items-center justify-center text-center text-sm text-muted">Already have an account? <Link href="/login" className="ml-1 inline-flex min-h-11 items-center font-semibold underline">Sign in</Link></p>
     </form>
   );
 }

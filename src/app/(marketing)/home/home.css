@@ -2,9 +2,13 @@
 .home-page {
   --home-ground: var(--color-public-ground);
   --home-ink: var(--color-public-ink);
-  --home-muted: var(--color-public-muted);
+  --home-muted: var(--color-muted);
   --home-rule: var(--color-public-rule);
   --home-blue: var(--color-mecg-blue);
+  /* Text and rules on the deep-blue process band and closing section. */
+  --home-deep-text: #e1eaff;
+  --home-deep-muted: #c1d3ee;
+  --home-deep-rule: #6d83a6;
   color: var(--home-ink);
   background: white;
   font-size: 17px;
@@ -49,7 +53,7 @@
 .home-facts dl > div { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: baseline; }
 .home-facts dd { grid-area: 1 / 1 / 2 / 2; font-family: var(--font-display), var(--font-ui); font-stretch: 80%; font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .home-facts dt { font-size: 15px; font-weight: 600; }
-.home-facts dt > span { display: block; font-size: 13px; color: #d5e1f7; font-weight: 400; }
+.home-facts dt > span { display: block; font-size: 13px; color: var(--home-deep-text); font-weight: 400; }
 
 /* Partners: a strip of white cards crossing the blue field's lower edge. */
 .home-partners { position: relative; z-index: 1; margin-top: -64px; padding-bottom: 32px; }
@@ -74,42 +78,42 @@
 .home-topic-title { font-size: 15px; font-weight: 600; }
 .home-topic-question { font-family: var(--font-display), var(--font-ui); font-stretch: 88%; font-weight: 700; font-size: 20px; word-spacing: 0.1em; }
 .home-topic-list > button[aria-pressed="true"] { background: var(--home-ink); color: white; }
-.home-topic-list > button[aria-pressed="true"] .home-topic-number { color: #d5e1f7; }
+.home-topic-list > button[aria-pressed="true"] .home-topic-number { color: var(--home-deep-text); }
 .home-question { position: sticky; top: 96px; border-radius: 16px; padding: 28px; box-shadow: 0 28px 56px -28px rgb(18 33 62 / 60%); }
-.home-example-label { font-size: 13px; color: #d5e1f7; }
+.home-example-label { font-size: 13px; color: var(--home-deep-text); }
 .home-question h3 { margin-top: 8px; font-family: var(--font-display), var(--font-ui); font-stretch: 85%; font-weight: 800; font-size: clamp(30px, 3.2vw, 40px); line-height: 1.04; letter-spacing: -0.01em; word-spacing: 0.1em; }
-.home-question-content > p:last-child { margin-top: 14px; font-size: 15px; line-height: 1.6; color: #e1eaff; }
+.home-question-content > p:last-child { margin-top: 14px; font-size: 15px; line-height: 1.6; color: var(--home-deep-text); }
 .home-question-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 24px; }
 .home-question-actions .button-light { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; }
-.home-example-note { font-size: 13px; color: #d5e1f7; }
+.home-example-note { font-size: 13px; color: var(--home-deep-text); }
 .home-question-content { animation: home-choice 180ms ease-out; }
 
 /* Process: the stations sit in a 2×2 grid so every label fits on one line. */
 .home-process { background: var(--color-public-deep); color: white; padding-block: 72px; }
 .home-process-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 64px; }
-.home-process h2 + p { margin-top: 24px; max-width: 42ch; color: #d7e3f6; }
+.home-process h2 + p { margin-top: 24px; max-width: 42ch; color: var(--home-deep-text); }
 .home-semester-facts { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
-.home-semester-facts dt { font-size: 13px; color: #c1d3ee; }
+.home-semester-facts dt { font-size: 13px; color: var(--home-deep-muted); }
 .home-semester-facts dd { font-size: 15px; font-weight: 600; margin-top: 2px; }
 .home-step-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.home-step-buttons button { display: flex; align-items: center; gap: 14px; text-align: left; min-height: 56px; padding: 8px 16px; border-radius: 8px; font-size: 15px; color: #c1d3ee; background: rgb(255 255 255 / 5%); border: 1px solid rgb(255 255 255 / 12%); white-space: nowrap; transition: background-color 150ms, color 150ms, border-color 150ms; }
+.home-step-buttons button { display: flex; align-items: center; gap: 14px; text-align: left; min-height: 56px; padding: 8px 16px; border-radius: 8px; font-size: 15px; color: var(--home-deep-muted); background: rgb(255 255 255 / 5%); border: 1px solid rgb(255 255 255 / 12%); white-space: nowrap; transition: background-color 150ms, color 150ms, border-color 150ms; }
 .home-step-buttons button:hover { color: white; background: rgb(255 255 255 / 9%); }
 .home-step-buttons button[aria-pressed="true"] { color: var(--color-public-deep); border-color: white; background: white; font-weight: 600; }
-.home-step-number { font-variant-numeric: tabular-nums; font-size: 15px; color: #c1d3ee; }
+.home-step-number { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--home-deep-muted); }
 .home-step-buttons button[aria-pressed="true"] .home-step-number { color: var(--home-blue); }
 .home-engagement figcaption { padding-top: 28px; min-height: 248px; }
 .home-step-content h3 { font-size: 24px; line-height: 1.3; letter-spacing: -0.015em; }
-.home-step-content > p { margin-top: 12px; color: #d7e3f6; }
-.home-step-handoff { margin-top: 20px; padding-top: 16px; border-top: 1px solid #6d83a6; }
-.home-step-handoff > span { font-size: 13px; color: #c1d3ee; }
+.home-step-content > p { margin-top: 12px; color: var(--home-deep-text); }
+.home-step-handoff { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--home-deep-rule); }
+.home-step-handoff > span { font-size: 13px; color: var(--home-deep-muted); }
 .home-step-handoff p { margin-top: 4px; font-size: 15px; }
 .home-step-content { animation: home-choice 180ms ease-out; }
-.home-faqs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; border-top: 1px solid #6d83a6; padding-top: 12px; }
+.home-faqs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 40px; border-top: 1px solid var(--home-deep-rule); padding-top: 12px; }
 .home-faqs summary { min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; cursor: pointer; list-style: none; }
 .home-faqs summary::-webkit-details-marker { display: none; }
 .home-faqs summary svg { flex-shrink: 0; transition: transform 150ms; }
 .home-faqs details[open] summary svg { transform: rotate(180deg); }
-.home-faqs details > p { margin-top: 8px; font-size: 15px; color: #d7e3f6; }
+.home-faqs details > p { margin-top: 8px; font-size: 15px; color: var(--home-deep-text); }
 .home-process :focus-visible, .home-next :focus-visible { outline-color: white; }
 
 /* Community: the caption sits on a paper tab that overlaps the photo's lower edge. */
@@ -123,7 +127,7 @@
 .home-community .home-text-link { margin-top: 16px; margin-right: 24px; }
 .home-next { background: var(--home-blue); color: white; padding-block: 64px; }
 .home-next-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 80px; align-items: start; }
-.home-next p { color: #e1eaff; max-width: 44ch; margin-top: 20px; }
+.home-next p { color: var(--home-deep-text); max-width: 44ch; margin-top: 20px; }
 .home-next .button-primary { margin-top: 24px; }
 .home-student-next h3 { font-size: 24px; line-height: 1.3; font-weight: 500; }
 .home-next-student-link { min-height: 44px; display: inline-flex; align-items: center; gap: 12px; margin-top: 20px; font-weight: 600; font-size: 15px; text-decoration: underline; }
@@ -163,12 +167,12 @@
   .home-step-buttons { grid-template-columns: 1fr; }
   .home-engagement figcaption { min-height: 0; padding-top: 24px; }
   .home-faqs { grid-template-columns: 1fr; gap: 0; margin-top: 24px; }
-  .home-faqs details { border-bottom: 1px solid #6d83a6; padding-bottom: 8px; }
+  .home-faqs details { border-bottom: 1px solid var(--home-deep-rule); padding-bottom: 8px; }
   .home-faqs details > p { margin-bottom: 12px; }
   .home-community { grid-template-columns: 1fr; padding-block: 48px; gap: 40px; }
   .home-next { padding-block: 48px; }
   .home-next-grid { grid-template-columns: 1fr; gap: 32px; }
-  .home-student-next { border-top: 1px solid #8faadd; padding-top: 28px; }
+  .home-student-next { border-top: 1px solid var(--home-deep-rule); padding-top: 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .home-question-content, .home-step-content { animation: none; }

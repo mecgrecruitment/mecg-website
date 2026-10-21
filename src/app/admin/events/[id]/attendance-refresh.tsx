@@ -23,7 +23,7 @@ export default function AttendanceRefresh() {
   }, [refresh]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 text-xs text-mecg-navy/55">
+    <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
       <button type="button" onClick={refresh} disabled={pending} className="font-semibold underline underline-offset-2 disabled:opacity-50">
         {pending ? "Refreshing…" : "Refresh now"}
       </button>

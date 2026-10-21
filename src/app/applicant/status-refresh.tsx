@@ -123,11 +123,11 @@ export default function ApplicantStatusRefresh() {
           : "Status updates are paused while this tab is hidden.";
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-mecg-navy/60">
+    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
       <p role="status" aria-live="polite">{statusMessage}</p>
       <button
         type="button"
-        className="min-h-11 rounded-lg px-3 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-h-11 rounded-lg px-3 font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={!online || isRefreshing || pendingActions > 0}
         onClick={requestRefresh}
       >

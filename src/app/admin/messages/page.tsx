@@ -1,6 +1,6 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -97,7 +97,7 @@ export default async function MessagesPage({
         description="Write to applicants, review sent messages, and review provider-send failures."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/messages" />
-      <nav aria-label="Communication sections" className="scroll-cue overflow-x-auto border-b border-mecg-navy/10">
+      <nav aria-label="Communication sections" className="scroll-cue overflow-x-auto border-b border-line">
         <div className="flex min-w-max gap-1">
           {tabs.map(([href, label, tab]) => (
             <Link
@@ -107,7 +107,7 @@ export default async function MessagesPage({
               className={`inline-flex min-h-11 items-center border-b-2 px-3.5 text-sm font-semibold transition-colors duration-150 ${
                 view === tab
                   ? "border-mecg-navy text-mecg-navy"
-                  : "border-transparent text-mecg-navy/55 hover:text-mecg-navy"
+                  : "border-transparent text-muted hover:text-mecg-navy"
               }`}
             >
               {label}
@@ -121,35 +121,35 @@ export default async function MessagesPage({
       {view === "history" && <section>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <p className="text-[13px] font-semibold text-mecg-navy/50">Recent sends</p>
-            <p className="mt-1 text-sm text-mecg-navy/55">Up to {LOG_PAGE_SIZE} recent messages for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
+            <p className="text-[13px] font-semibold text-muted">Recent sends</p>
+            <p className="mt-1 text-sm text-muted">Up to {LOG_PAGE_SIZE} recent messages for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
           </div>
           {failedCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-[13px] font-semibold text-red-800">
+            <span className="inline-flex items-center rounded-full bg-danger-wash px-3 py-1 text-[13px] font-semibold text-danger">
               {failedCount} failed
             </span>
           )}
         </div>
         <div className="mt-3 flex flex-col gap-2">
-          {logResult.error && <p role="alert" className="text-sm text-red-800">Message history is unavailable. Reload to check recent sends before sending again.</p>}
+          {logResult.error && <p role="alert" className="text-sm text-danger">Message history is unavailable. Reload to check recent sends before sending again.</p>}
           {log.map((message) => (
-            <article key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <article key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
               <div className="min-w-0">
                 <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
-                <p className="mt-0.5 truncate text-[11.5px] text-mecg-navy/50">{statusLabel(message.kind)} · {message.recipient}</p>
+                <p className="mt-0.5 truncate text-xs text-muted">{statusLabel(message.kind)} · {message.recipient}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`}>
                   {message.delivered ? "Sent to provider" : "Send failed"}
                 </span>
-                <time dateTime={message.created_at} className="tabular text-[11px] text-mecg-navy/45">
+                <time dateTime={message.created_at} className="tabular text-xs text-muted">
                   {formatEasternDateTime(message.created_at)}
                 </time>
               </div>
             </article>
           ))}
           {!logResult.error && !log.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center text-sm text-mecg-navy/55">
+            <p className="rounded-xl border-[1.5px] border-dashed border-line p-7 text-center text-sm text-muted">
               Nothing has been sent from this system yet.
             </p>
           )}
@@ -162,16 +162,16 @@ export default async function MessagesPage({
             <div className="flex items-baseline justify-between gap-4">
               <div>
                 <h2 id="failed-notifications" className="text-lg font-semibold text-mecg-navy">Needs attention</h2>
-                <p className="mt-1 text-sm text-mecg-navy/65">Terminal failures stay here. Temporary failures retry automatically.</p>
+                <p className="mt-1 text-sm text-muted">Terminal failures stay here. Temporary failures retry automatically.</p>
               </div>
-              <span className="rounded-full bg-red-50 px-3 py-1 tabular text-xs font-semibold text-red-800">{needsAttention.length} failed</span>
+              <span className="rounded-full bg-danger-wash px-3 py-1 tabular text-xs font-semibold text-danger">{needsAttention.length} failed</span>
             </div>
             <div className="mt-3 flex flex-col gap-2">
               {needsAttention.map((item) => (
-                <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                    <p className="mt-0.5 text-xs text-mecg-navy/65">
+                    <p className="mt-0.5 text-xs text-muted">
                       {statusLabel(item.last_error_category ?? "UNKNOWN")} · attempt {item.attempt_count} of {item.max_attempts}
                     </p>
                   </div>
@@ -179,7 +179,7 @@ export default async function MessagesPage({
                 </article>
               ))}
               {!needsAttention.length && (
-                <p className="rounded-xl border border-dashed border-mecg-navy/15 p-6 text-center text-sm text-mecg-navy/65">
+                <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
                   No failed notifications.
                 </p>
               )}
@@ -189,29 +189,29 @@ export default async function MessagesPage({
           <section aria-labelledby="delivery-history">
             <div>
               <h2 id="delivery-history" className="text-lg font-semibold text-mecg-navy">Delivery history</h2>
-              <p className="mt-1 text-sm text-mecg-navy/65">Up to {OUTBOX_PAGE_SIZE} recent automated emails and texts for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
+              <p className="mt-1 text-sm text-muted">Up to {OUTBOX_PAGE_SIZE} recent automated emails and texts for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
             </div>
             <div className="mt-3 flex flex-col gap-2">
               {deliveryLog.map((item) => (
-                <article key={item.id} className="flex flex-wrap items-baseline justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                <article key={item.id} className="flex flex-wrap items-baseline justify-between gap-3 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-mecg-navy">{item.recipient}</p>
-                    <p className="mt-0.5 text-xs text-mecg-navy/65">
+                    <p className="mt-0.5 text-xs text-muted">
                       Attempt {item.attempt_count} of {item.max_attempts}{item.last_error_category ? ` · ${statusLabel(item.last_error_category)}` : ""}
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.status === "SENT" ? "bg-emerald-50 text-emerald-800" : item.status === "FAILED" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${item.status === "SENT" ? "bg-success-wash text-success" : item.status === "FAILED" ? "bg-danger-wash text-danger" : "bg-warning-wash text-warning"}`}>
                       {item.status === "SENT" ? "Sent to provider" : statusLabel(item.status)}
                     </span>
-                    <time className="ml-3 tabular text-xs text-mecg-navy/65" dateTime={item.sent_at ?? item.next_attempt_at}>
+                    <time className="ml-3 tabular text-xs text-muted" dateTime={item.sent_at ?? item.next_attempt_at}>
                       {formatEasternDateTime(item.sent_at ?? item.next_attempt_at)}
                     </time>
                   </div>
                 </article>
               ))}
               {!deliveryLog.length && (
-                <p className="rounded-xl border border-dashed border-mecg-navy/15 p-6 text-center text-sm text-mecg-navy/65">
+                <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
                   No automated deliveries yet.
                 </p>
               )}

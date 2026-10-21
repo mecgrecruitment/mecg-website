@@ -25,7 +25,7 @@ const groupAssignment = { id: "observation", status: "SUBMITTED", updated_at: "2
 const roster = { roundId: "group-case-round", roundName: "Group Case", roundStatus: "ACTIVE", canSeeSpeedDating: false, criteria: [], progress: { scored: 0, total: 0 }, groups: [] };
 
 type RoundFixture = { id: string; status: string; closes_at: string | null };
-function setup(t: test.TestContext, options: { round?: RoundFixture | null; speedDating?: RoundFixture | null; hashStage?: string | null; assignments?: unknown[]; screening?: boolean; committee?: boolean; rpcError?: boolean } = {}) {
+function setup(t: test.TestContext, options: { round?: RoundFixture | null; speedDating?: RoundFixture | null; hashStage?: string | null; assignments?: unknown[]; screening?: boolean; committee?: boolean; rpcError?: boolean; ballot?: { id: string; name: string }[]; votes?: { application_id: string; vote: string }[]; speedRoster?: unknown } = {}) {
   const seenStatuses: unknown[] = [];
   t.mock.module("next/image", { defaultExport: function ImageStub() { return null; } });
   t.mock.module("server-only", { namedExports: {} });
@@ -34,7 +34,7 @@ function setup(t: test.TestContext, options: { round?: RoundFixture | null; spee
   const suppliedRound = options.round === undefined ? round : options.round;
   const client = { from(table: string) {
     let roundKind = "GROUP_CASE";
-    const data = table === "evaluation_assignments" ? options.assignments ?? [groupAssignment] : table === "rounds" ? suppliedRound : table === "profiles" ? {} : [];
+    const data = table === "evaluation_assignments" ? options.assignments ?? [groupAssignment] : table === "rounds" ? suppliedRound : table === "profiles" ? {} : table === "hash_votes" ? options.votes ?? [] : [];
     const result = { data, error: null };
     const query = {
       select() { return query; }, eq(key: string, value: string) { if (key === "kind") roundKind = value; return query; }, order() { return query; }, limit() { return query; },
@@ -43,12 +43,12 @@ function setup(t: test.TestContext, options: { round?: RoundFixture | null; spee
       then: Promise.resolve(result).then.bind(Promise.resolve(result)),
     };
     return query;
-  }, rpc: async () => ({ data: [], error: null }) };
+  }, rpc: async (name: string) => ({ data: name === "hash_ballot" ? options.ballot ?? [] : [], error: null }) };
   t.mock.module("@/lib/auth", { namedExports: { requireMember: async () => options.committee ? { ...user, memberships: [{ ...user.memberships[0], role: "RECRUITMENT_COMMITTEE" }] } : { ...user, memberships: [{ ...user.memberships[0], cycle: { ...user.memberships[0].cycle, hash_stage: options.hashStage ?? null } }] } } });
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => client } });
   t.mock.module("@/lib/workspace-context", { namedExports: { loadWorkspaceContext: async () => ({ data: { isScreeningReviewer: options.screening === true, hasSpeedDatingRound: false }, error: null }) } });
   t.mock.module("./calibration/load", { namedExports: { loadCalibrationStates: async () => [] } });
-  t.mock.module("@/lib/screening-rpc", { namedExports: { screeningRpc: async (_client: unknown, name: string) => name === "group_case_roster_v2" ? { data: { ...roster, roundStatus: suppliedRound?.status }, error: options.rpcError ? { message: "roster unavailable" } : null } : { data: [], error: null } } });
+  t.mock.module("@/lib/screening-rpc", { namedExports: { screeningRpc: async (_client: unknown, name: string) => name === "group_case_roster_v2" ? { data: { ...roster, roundStatus: suppliedRound?.status }, error: options.rpcError ? { message: "roster unavailable" } : null } : name === "my_speed_dating_roster" ? { data: options.speedRoster ?? null, error: null } : { data: [], error: null } } });
   return { seenStatuses };
 }
 
@@ -152,6 +152,28 @@ test("expired Speed Dating never appears as an open task", async (t) => {
 test("Hash appears on My work only when this role is eligible for the open stage", async (t) => {
   setup(t, { round: null, hashStage: "SPEED_DATING" });
   assert.match(await memberMarkup("eligible-hash"), /Review your Hash ballot/);
+});
+
+test("My work shows the member's own ballot progress in their own vote colours", async (t) => {
+  setup(t, { round: null, hashStage: "SPEED_DATING", ballot: [{ id: "a", name: "A" }, { id: "b", name: "B" }, { id: "c", name: "C" }], votes: [{ application_id: "a", vote: "YES" }, { application_id: "c", vote: "NO" }] });
+  const html = await memberMarkup("hash-progress");
+  assert.match(html, /Voted 2 of 3/);
+  assert.match(html, /data-state="YES"[^]*data-state="empty"[^]*data-state="NO"/);
+});
+
+test("a finished ballot says so without hiding the way back in", async (t) => {
+  setup(t, { round: null, hashStage: "SPEED_DATING", ballot: [{ id: "a", name: "A" }], votes: [{ application_id: "a", vote: "UNSURE" }] });
+  const html = await memberMarkup("hash-complete");
+  assert.match(html, /Ballot complete/);
+  assert.match(html, /Review your Hash ballot/);
+});
+
+test("the Speed Dating task counts the member's own ratings", async (t) => {
+  const applicant = (applicationId: string, score: number | null) => ({ applicationId, name: applicationId, score, note: "", session: null, savedAt: null });
+  setup(t, { round: null, speedDating: { id: "speed", status: "ACTIVE", closes_at: null }, speedRoster: { roundId: "speed", roundName: "Speed Dating", roundStatus: "ACTIVE", criterion: null, rubricReady: true, progress: { scored: 1, total: 2 }, applicants: [applicant("x", 4), applicant("y", null)] } });
+  const html = await memberMarkup("speed-progress");
+  assert.match(html, /1 of 2 rated/);
+  assert.match(html, /data-state="done"[^]*data-state="empty"/);
 });
 
 test("members do not receive the committee-only application Hash task", async (t) => {

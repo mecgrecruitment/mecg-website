@@ -32,9 +32,9 @@ export default function SlotForm({ cycleId, eventId }: { cycleId: string; eventI
   }
 
   return (
-    <form className="mt-4 flex flex-col gap-3 rounded-2xl p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" onSubmit={submit}>
+    <form className="mt-4 flex flex-col gap-3 rounded-xl p-4 inset-ring inset-ring-line" onSubmit={submit}>
       <p className="text-sm font-medium">Add RSVP slot</p>
-      <p className="text-xs text-mecg-navy/60">Times are entered in Detroit time.</p>
+      <p className="text-xs text-muted">Times are entered in Detroit time.</p>
       <label className="text-sm">
         Starts at
         <input name="startsAt" type="datetime-local" required disabled={pending} className="field-control mt-1 block text-sm disabled:opacity-60" />

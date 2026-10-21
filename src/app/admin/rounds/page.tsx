@@ -1,7 +1,7 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
 import { roundStaffingSummary } from "./coverage";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -58,12 +58,12 @@ export default async function RoundsPage() {
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview rounds</h2>
-            <p className="mt-1 text-sm text-mecg-navy/55">Staffing counts usable assignments within each round’s cohort. Submitted forms may contain partial observations; open the round to check qualifying evidence.</p>
+            <p className="mt-1 text-sm text-muted">Staffing counts usable assignments within each round’s cohort. Submitted forms may contain partial observations; open the round to check qualifying evidence.</p>
           </div>
-          <p className="tabular text-xs font-semibold text-mecg-navy/55">{activeApplications.length} active applicants</p>
+          <p className="tabular text-xs font-semibold text-muted">{activeApplications.length} active applicants</p>
         </div>
 
-        <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+        <div className="mt-4 divide-y divide-line border-y border-line">
           {(roundsResult.data ?? []).map((round) => {
             const staffing = roundStaffingSummary({
               roundKind: round.kind,
@@ -74,25 +74,25 @@ export default async function RoundsPage() {
               <Link
                 key={round.id}
                 href={withWorkspaceCycle(round.kind === "APPLICATION_SCREEN" ? "/admin/screening" : `/admin/rounds/${round.id}`, cycleId)}
-                className="group grid gap-3 py-4 transition-colors hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
+                className="group grid gap-3 py-4 transition-colors hover:bg-wash sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{round.name}</h3>
                     <StatusPill tone={round.status === "ACTIVE" ? "navy" : "neutral"}>{roundStatusLabel(round.status)}</StatusPill>
                   </div>
-                  <p className="mt-1 text-xs text-mecg-navy/55">{roundKindLabel(round.kind)} · weight {round.weight}</p>
+                  <p className="mt-1 text-xs text-muted">{roundKindLabel(round.kind)} · weight {round.weight}</p>
                 </div>
                 {round.kind === "APPLICATION_SCREEN" ? (
-                  <p className="max-w-xs text-xs leading-5 text-mecg-navy/65">Screening assignments and progress are in the application review workspace.</p>
+                  <p className="max-w-xs text-xs leading-5 text-muted">Screening assignments and progress are in the application review workspace.</p>
                 ) : (
                   <dl className="grid grid-cols-2 gap-x-6 text-xs sm:text-right">
                     <div>
-                      <dt className="text-mecg-navy/65">Staffing</dt>
+                      <dt className="text-muted">Staffing</dt>
                       <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{staffing.staffedTwice}/{staffing.cohortSize} with 2+ assigned</dd>
                     </div>
                     <div>
-                      <dt className="text-mecg-navy/65">Submitted forms</dt>
+                      <dt className="text-muted">Submitted forms</dt>
                       <dd className="mt-0.5 tabular font-semibold text-mecg-navy">{staffing.submittedForms}/{staffing.assignedForms}</dd>
                     </div>
                   </dl>
@@ -102,7 +102,7 @@ export default async function RoundsPage() {
             );
           })}
           {!roundsResult.data?.length && (
-            <p className="py-5 text-sm text-mecg-navy/55">No interview rounds are configured for this cycle.</p>
+            <p className="py-5 text-sm text-muted">No interview rounds are configured for this cycle.</p>
           )}
         </div>
       </section>
@@ -111,32 +111,32 @@ export default async function RoundsPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold tracking-[-0.02em] text-mecg-navy">Interview events</h2>
-            <p className="mt-1 text-sm text-mecg-navy/55">Scheduling, capacity, attendance, and live operations now live with interviews.</p>
+            <p className="mt-1 text-sm text-muted">Scheduling, capacity, attendance, and live operations now live with interviews.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {canExport && <a href={`/api/admin/export?cycleId=${cycleId}`} className="button-secondary text-sm">Export attendance</a>}
             <Link href={withWorkspaceCycle("/admin/events/new", cycleId)} className="button-primary text-sm">New event</Link>
           </div>
         </div>
-        <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+        <div className="mt-4 divide-y divide-line border-y border-line">
           {(eventsResult.data ?? []).map((event) => {
             const capacity = event.event_slots.reduce((sum, slot) => sum + slot.capacity, 0);
             const reservations = event.event_slots.reduce((sum, slot) => sum + slot.slot_rsvps.length, 0);
             return (
-              <Link key={event.id} href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)} className="group grid gap-2 py-4 hover:bg-mecg-navy/[0.025] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6">
+              <Link key={event.id} href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)} className="group grid gap-2 py-4 hover:bg-wash sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{event.name}</h3>
                     <StatusPill tone={event.status === "PUBLISHED" ? "navy" : "neutral"}>{statusLabel(event.status)}</StatusPill>
                   </div>
-                  <p className="mt-1 text-xs text-mecg-navy/55">{formatEasternDateTime(event.starts_at)}{event.location ? ` · ${event.location}` : ""}</p>
+                  <p className="mt-1 text-xs text-muted">{formatEasternDateTime(event.starts_at)}{event.location ? ` · ${event.location}` : ""}</p>
                 </div>
-                <p className="tabular text-xs font-semibold text-mecg-navy/60">{capacity ? `${reservations}/${capacity} booked` : "No slots"}</p>
+                <p className="tabular text-xs font-semibold text-muted">{capacity ? `${reservations}/${capacity} booked` : "No slots"}</p>
                 <span className="text-sm font-semibold text-mecg-blue">Open →</span>
               </Link>
             );
           })}
-          {!eventsResult.data?.length && <p className="py-5 text-sm text-mecg-navy/55">No interview events are scheduled.</p>}
+          {!eventsResult.data?.length && <p className="py-5 text-sm text-muted">No interview events are scheduled.</p>}
         </div>
       </section>
     </main>

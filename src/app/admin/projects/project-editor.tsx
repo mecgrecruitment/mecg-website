@@ -85,7 +85,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
             type="button"
             onClick={() => setSelectedId(project.id)}
             aria-current={project.id === selectedId ? "true" : undefined}
-            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-[12px] font-semibold ${project.id === selectedId ? "bg-mecg-navy text-white" : "text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}
+            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-xs font-semibold ${project.id === selectedId ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}
           >
             {project.title}
             {project.isPublic && <span className="text-[13px] opacity-70">Public</span>}
@@ -94,7 +94,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
         <button
           type="button"
           onClick={() => setSelectedId("")}
-          className={`inline-flex min-h-10 items-center rounded-full px-3.5 text-[12px] font-semibold ${selectedId ? "text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]" : "bg-mecg-navy text-white"}`}
+          className={`inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold ${selectedId ? "text-muted inset-ring inset-ring-line-strong" : "bg-mecg-navy text-white"}`}
         >
           + New project
         </button>
@@ -102,7 +102,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
 
       <form
         key={editing.id || "new"}
-        className="rounded-2xl bg-paper p-5"
+        className="rounded-xl bg-paper p-5"
         onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -127,7 +127,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
           }, "Project saved.");
         }}
       >
-        <p className="text-[13px] font-semibold text-mecg-navy/50">
+        <p className="text-[13px] font-semibold text-muted">
           {editing.id ? "Edit project" : "New project"}
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -145,7 +145,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
                 name={name}
                 required={required}
                 defaultValue={value}
-                className="mt-1.5 min-h-11 w-full rounded-xl bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                className="mt-1.5 min-h-11 w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
               />
             </label>
           ))}
@@ -156,7 +156,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
         ] as const).map(([name, label, value]) => (
           <label key={name} className="mt-3 block text-sm font-medium">
             {label}
-            <textarea name={name} rows={2} defaultValue={value} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none" />
+            <textarea name={name} rows={2} defaultValue={value} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
           </label>
         ))}
         {([
@@ -166,8 +166,8 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
           ["memberWork", "Member work", editing.memberWork],
         ] as const).map(([name, label, value]) => (
           <label key={name} className="mt-3 block text-sm font-medium">
-            {label} <span className="font-normal text-mecg-navy/45">(one per line)</span>
-            <textarea name={name} rows={3} defaultValue={value.join("\n")} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none" />
+            {label} <span className="font-normal text-muted">(one per line)</span>
+            <textarea name={name} rows={3} defaultValue={value.join("\n")} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
           </label>
         ))}
 
@@ -178,24 +178,24 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
           </label>
           <label className="text-sm font-medium">
             Order
-            <input type="number" name="sortOrder" defaultValue={editing.sortOrder} className="ml-2 min-h-11 w-20 rounded-xl bg-white px-3 text-sm tabular-nums shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none" />
+            <input type="number" name="sortOrder" defaultValue={editing.sortOrder} className="ml-2 min-h-11 w-20 rounded-xl bg-white px-3 text-sm tabular-nums inset-ring inset-ring-line-strong outline-none" />
           </label>
           <button type="submit" disabled={pending} className="button-primary">{pending ? "Saving…" : "Save project"}</button>
         </div>
-        <p className="mt-2 text-xs leading-5 text-mecg-navy/45">
+        <p className="mt-2 text-xs leading-5 text-muted">
           Projects are private until this box is ticked. Nothing here reaches the public site otherwise.
         </p>
       </form>
 
       {editing.id && (
-        <div className="rounded-2xl bg-paper p-5">
-          <p className="text-[13px] font-semibold text-mecg-navy/50">Staffing</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Who worked on {editing.title}.</p>
+        <div className="rounded-xl bg-paper p-5">
+          <p className="text-[13px] font-semibold text-muted">Staffing</p>
+          <p className="mt-1 text-sm text-muted">Who worked on {editing.title}.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {staff.map((person) => {
               const checked = staffed.includes(person.id);
               return (
-                <label key={person.id} className={`inline-flex min-h-10 cursor-pointer items-center rounded-full px-3.5 text-[12px] font-semibold ${checked ? "bg-mecg-navy text-white" : "text-mecg-navy/60 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]"}`}>
+                <label key={person.id} className={`inline-flex min-h-10 cursor-pointer items-center rounded-full px-3.5 text-xs font-semibold ${checked ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}>
                   <input
                     type="checkbox"
                     className="sr-only"
@@ -206,7 +206,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
                 </label>
               );
             })}
-            {!staff.length && <p className="text-sm text-mecg-navy/45">No active members to staff yet.</p>}
+            {!staff.length && <p className="text-sm text-muted">No active members to staff yet.</p>}
           </div>
           <button
             type="button"
@@ -219,8 +219,8 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
         </div>
       )}
 
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-      {notice && <p role="status" className="text-sm text-emerald-800">{notice}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+      {notice && <p role="status" className="text-sm text-success">{notice}</p>}
     </section>
   );
 }

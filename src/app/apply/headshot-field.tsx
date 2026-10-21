@@ -66,7 +66,7 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false, 
     || (state.kind === "idle" && initialHasHeadshot);
   return (
     <div>
-      <label htmlFor="headshot" className="group block cursor-pointer rounded-2xl bg-mecg-navy/[0.035] p-6 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] outline-none transition-colors hover:bg-mecg-blue/8 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy">
+      <label htmlFor="headshot" className="group block cursor-pointer rounded-xl bg-wash p-6 text-center inset-ring inset-ring-line outline-none transition-colors hover:bg-mecg-blue/10 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-mecg-navy">
         <input
           id="headshot"
           type="file"
@@ -83,11 +83,11 @@ export default function HeadshotField({ onUploaded, initialHasHeadshot = false, 
           ? <img src={state.url} alt="" className="mx-auto size-20 rounded-full object-cover shadow-sm" />
           : <span className="mx-auto grid size-11 place-items-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">☺</span>}
         <span className="mt-4 block font-semibold">{state.kind === "working" ? "Uploading photo..." : uploaded ? "Replace your photo" : "Upload a photo of yourself (required)"}</span>
-        <span id="headshot-guidance" className="mt-1 block text-sm text-mecg-navy/65">A clear photo of your face. Taken with your phone is fine. Your uploaded photo is not included in the first-pass written-response packet.</span>
-        {state.kind === "done" && <span className="mt-4 block rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">✓ Photo uploaded · {state.note}</span>}
+        <span id="headshot-guidance" className="mt-1 block text-sm text-muted">A clear photo of your face. Taken with your phone is fine. Your uploaded photo is not included in the first-pass written-response packet.</span>
+        {state.kind === "done" && <span className="mt-4 block rounded-xl bg-success-wash px-3 py-2 text-sm font-medium text-success">✓ Photo uploaded · {state.note}</span>}
       </label>
-      {state.kind === "working" && <p className="mt-2 text-sm text-mecg-navy/65" role="status" aria-live="polite">Resizing and uploading your photo...</p>}
-      {state.kind === "error" && <p id="headshot-upload-error" className="mt-2 text-sm text-red-700" role="alert">{state.message}</p>}
+      {state.kind === "working" && <p className="mt-2 text-sm text-muted" role="status" aria-live="polite">Resizing and uploading your photo...</p>}
+      {state.kind === "error" && <p id="headshot-upload-error" className="mt-2 text-sm text-danger" role="alert">{state.message}</p>}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import RotateButton from "./rotate-button";
 import SlotForm from "./slot-form";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import EventControls from "./event-controls";
@@ -98,8 +98,8 @@ export default async function EventDetailPage({ params, searchParams }: { params
       </nav>
       <section className="workspace-panel">
         <h2 className="text-base font-semibold">{statusLabel(event.status)} · Attendance event</h2>
-        <p className="mt-2 text-sm text-mecg-navy/65">Attendance and event observations are operational context. They do not establish round staffing, qualifying evaluations or applicant readiness.</p>
-        <p className="mt-3 text-sm text-mecg-navy/60">
+        <p className="mt-2 text-sm text-muted">Attendance and event observations are operational context. They do not establish round staffing, qualifying evaluations or applicant readiness.</p>
+        <p className="mt-3 text-sm text-muted">
           Check-in window: {formatEasternDateTime(event.checkin_opens_at)} to {formatEasternDateTime(event.checkin_closes_at)}
         </p>
       </section>
@@ -112,7 +112,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
           <AttendanceRefresh />
         </div>
         {(checkinsError || memberCheckinsError || applicationsError) && (
-          <p role="alert" className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-3 text-sm text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.3)]">
+          <p role="alert" className="mt-3 rounded-xl bg-mecg-orange/15 p-3 text-sm text-mecg-orange-ink inset-ring inset-ring-mecg-orange/30">
             Attendance data could not be fully refreshed. The counts below may be stale. Try Refresh now before recording someone again.
           </p>
         )}
@@ -122,21 +122,21 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <p className="mt-1.5 text-sm">
           Member check-ins: <strong className="font-semibold text-mecg-navy">{memberCheckinsError ? "Unavailable" : memberCheckinCount ?? 0}</strong>
         </p>
-        {impressionsError && <p role="alert" className="mt-3 text-sm text-red-800">Observation records could not be loaded. Refresh to check them; missing records do not mean no observations.</p>}
+        {impressionsError && <p role="alert" className="mt-3 text-sm text-danger">Observation records could not be loaded. Refresh to check them; missing records do not mean no observations.</p>}
         <ul className="mt-3 flex flex-col gap-1.5">
           {coverage.map((entry) => (
-            <li key={entry.applicationId} className="border-t border-mecg-navy/[0.08] py-3 text-sm first:border-t-0">
+            <li key={entry.applicationId} className="border-t border-line py-3 text-sm first:border-t-0">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-medium text-mecg-navy">{entry.name}</span>
-                <span className="tabular text-mecg-navy/55">{impressionsError ? "Observations unavailable" : `${entry.observationCount} observation${entry.observationCount === 1 ? "" : "s"}`}</span>
+                <span className="tabular text-muted">{impressionsError ? "Observations unavailable" : `${entry.observationCount} observation${entry.observationCount === 1 ? "" : "s"}`}</span>
               </div>
               {entry.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {entry.tags.map((tag) => <span key={tag} className="rounded-full bg-mecg-navy/[0.05] px-2.5 py-1 text-xs text-mecg-navy/60">{tag}</span>)}
+                  {entry.tags.map((tag) => <span key={tag} className="rounded-full bg-wash px-2.5 py-1 text-xs text-muted">{tag}</span>)}
                 </div>
               )}
               {entry.notes.length > 0 && (
-                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-mecg-navy/60">
+                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-muted">
                   {entry.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
                 </ul>
               )}
@@ -144,7 +144,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
           ))}
         </ul>
         {!checkinsError && !coverage.length && (
-          <p className="mt-3 text-sm text-mecg-navy/60">
+          <p className="mt-3 text-sm text-muted">
             {checkins?.length ? "Check-ins are recorded, but applicant details are not available yet." : "No applicant check-ins yet."}
           </p>
         )}
@@ -154,11 +154,11 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <h2 className="text-base font-semibold">Check-in QR code</h2>
         {qrDataUrl ? (
           <div className="mt-3 flex flex-col items-start gap-2">
-            <Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} className="rounded-xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]" />
-            <p className="break-all text-xs text-mecg-navy/55">{checkinUrl}</p>
+            <Image unoptimized src={qrDataUrl} alt="Check-in QR code" width={256} height={256} className="rounded-xl inset-ring inset-ring-line" />
+            <p className="break-all text-xs text-muted">{checkinUrl}</p>
           </div>
         ) : (
-          <p className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-3 text-sm text-mecg-orange-ink shadow-[inset_0_0_0_1px_rgba(254,144,77,0.3)]">
+          <p className="mt-3 rounded-xl bg-mecg-orange/15 p-3 text-sm text-mecg-orange-ink inset-ring inset-ring-mecg-orange/30">
             For security, the raw check-in token is shown only when created or rotated. Rotate it to display a new QR code.
           </p>
         )}
@@ -169,7 +169,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
 
       <section id="event-observations" className="workspace-panel">
         <h2 className="text-base font-semibold">Member observations</h2>
-        <p className="mt-2 text-sm leading-6 text-mecg-navy/55">Tags and anonymous notes provide event context. They do not affect applicant scores, readiness, or rank.</p>
+        <p className="mt-2 text-sm leading-6 text-muted">Tags and anonymous notes provide event context. They do not affect applicant scores, readiness, or rank.</p>
         <p className="mt-3 text-sm">
           Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
         </p>
@@ -182,14 +182,14 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <h2 className="text-base font-semibold">RSVP slots</h2>
         <ul className="mt-3 flex flex-col gap-1.5">
           {(slots ?? []).map((slot) => (
-            <li key={slot.id} className="text-sm text-mecg-navy/70">
+            <li key={slot.id} className="text-sm text-muted">
               {formatEasternDateTime(slot.starts_at)} · cap {slot.capacity}
             </li>
           ))}
         </ul>
         {slotsError
           ? <p className="text-sm text-mecg-orange-ink">Slots could not be loaded. Reload before adding one, this list may be incomplete.</p>
-          : !slots?.length && <p className="text-sm text-mecg-navy/60">No slots yet.</p>}
+          : !slots?.length && <p className="text-sm text-muted">No slots yet.</p>}
         {event.cycle_id && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Add an RSVP slot</summary><SlotForm cycleId={event.cycle_id} eventId={event.id} /></details>}
       </section>
       <details id="event-settings" className="workspace-panel">

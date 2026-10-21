@@ -13,8 +13,6 @@
   --font-ui: "Avenir Next", Avenir, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-numeric: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --paper: #f5f8fd;
-  --line: rgb(7 13 31 / 12%);
-  --shadow-card: 0 18px 55px rgb(7 13 31 / 9%);
   --t-control: 150ms;
   --t-panel: 200ms;
   --t-detent: var(--t-control);
@@ -23,9 +21,7 @@
   --workspace-gutter: clamp(1rem, 3vw, 2.5rem);
   --workspace-page-block: clamp(1rem, 3vw, 2.5rem);
   --workspace-major-gap: clamp(1.5rem, 3vw, 2.5rem);
-  --workspace-shell-gap: clamp(1rem, 2vw, 1.5rem);
   --workspace-section-top: clamp(1.25rem, 2.5vw, 1.75rem);
-  --workspace-panel-inset: clamp(1.25rem, 2vw, 1.5rem);
 }
 
 @theme {
@@ -33,13 +29,26 @@
   --color-mecg-orange: #fe904d;
   --color-mecg-orange-ink: #a83e0b;
   --color-mecg-navy: #070d1f;
-  --color-mecg-paper-workspace: #f5f4ef;
   --color-public-ground: #f5f8fd;
   --color-public-ink: #12213e;
-  --color-public-muted: #52627c;
   --color-public-rule: #d8e1ed;
   --color-public-edge: #b1bfd5;
   --color-public-deep: #142c57;
+
+  /* Roles. docs/DESIGN.md §0 lists the whole palette; scripts/design-tokens.mjs keeps classes on it. */
+  --color-muted: #52627c;
+  --color-line: rgb(7 13 31 / 12%);
+  --color-line-strong: rgb(7 13 31 / 22%);
+  --color-wash: rgb(7 13 31 / 4%);
+  --color-danger: oklch(50.5% 0.213 27.518);
+  --color-danger-wash: oklch(97.1% 0.013 17.38);
+  --color-success: oklch(43.2% 0.095 166.913);
+  --color-success-wash: oklch(97.9% 0.021 166.113);
+  --color-warning: oklch(41.4% 0.112 45.904);
+  --color-warning-wash: oklch(98.7% 0.022 95.277);
+  --color-warning-edge: oklch(87.9% 0.169 91.605);
+  --shadow-lift: 0 28px 56px -28px rgb(18 33 62 / 50%);
+  --shadow-pop: 0 18px 55px rgb(7 13 31 / 18%);
 }
 
 @theme inline {
@@ -133,21 +142,16 @@ textarea:focus-visible {
 }
 
 .button-primary { background: var(--color-mecg-orange); color: var(--color-mecg-navy); }
-.button-primary.is-success { background: oklch(0.527 0.154 150.069); color: white; }
+.button-primary.is-success { background: var(--color-success); color: white; }
 .button-primary:hover { filter: brightness(1.08); }
 .button-secondary { box-shadow: inset 0 0 0 1px rgb(7 13 31 / 18%); color: var(--color-mecg-navy); }
-.button-secondary:hover { background: rgb(63 99 175 / 12%); }
+.button-secondary:hover { background: rgb(37 79 159 / 12%); }
 .button-dark { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 24%); color: white; }
 .button-dark:hover { background: rgb(255 255 255 / 8%); }
 .button-light { background: white; color: var(--color-mecg-blue); }
 .button-light:hover { background: rgb(255 255 255 / 90%); }
 .button-ghost-light { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%); color: white; }
 .button-ghost-light:hover { background: rgb(255 255 255 / 10%); }
-.workspace-hero-actions .button-secondary {
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 28%);
-  color: white;
-}
-.workspace-hero-actions .button-secondary:hover { background: rgb(255 255 255 / 10%); }
 .button-primary:active,
 .button-secondary:active,
 .button-dark:active,
@@ -164,12 +168,6 @@ textarea:focus-visible {
   transform: none;
 }
 
-.section-shell {
-  margin-inline: auto;
-  max-width: 72rem;
-  padding-inline: 1.5rem;
-}
-
 /*
  * Portal auth/workspace outer card: the single outermost card of a
  * full-bleed auth/workspace screen (login, apply, workspace loading/error).
@@ -179,12 +177,6 @@ textarea:focus-visible {
 .surface-card {
   border-radius: 28px;
   box-shadow: 0 24px 80px rgba(7, 13, 31, 0.09), inset 0 0 0 1px rgba(7, 13, 31, 0.05);
-}
-
-.surface-inset {
-  border-radius: 1rem;
-  background: rgb(7 13 31 / 3.5%);
-  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .field-control {
@@ -199,7 +191,7 @@ textarea:focus-visible {
 }
 
 .field-control:hover {
-  background: rgb(63 99 175 / 7%);
+  background: rgb(37 79 159 / 7%);
 }
 
 .field-control:focus {
@@ -255,20 +247,8 @@ textarea:focus-visible {
   position: fixed;
   z-index: -1;
   inset: 0;
-  background: var(--color-mecg-paper-workspace);
+  background: var(--color-paper);
   content: "";
-}
-
-.workspace-hero {
-  gap: var(--workspace-panel-inset);
-  padding: var(--workspace-panel-inset);
-  box-shadow:
-    0 18px 44px rgb(7 13 31 / 12%),
-    inset 0 0 0 1px rgb(255 255 255 / 10%);
-}
-
-.workspace-hero + .workspace-nav-shell {
-  margin-top: calc(var(--workspace-shell-gap) - var(--workspace-major-gap));
 }
 
 .workspace-stack > section {
@@ -277,7 +257,7 @@ textarea:focus-visible {
 }
 
 .workspace-stack > section:target {
-  border-top-color: rgb(63 99 175 / 65%);
+  border-top-color: rgb(37 79 159 / 65%);
 }
 
 .task-row {
@@ -288,8 +268,8 @@ textarea:focus-visible {
 
 .task-row:hover,
 .task-row:focus-visible {
-  background: rgb(63 99 175 / 5%);
-  box-shadow: inset 0 0 0 1px rgb(63 99 175 / 24%);
+  background: rgb(37 79 159 / 5%);
+  box-shadow: inset 0 0 0 1px rgb(37 79 159 / 24%);
 }
 
 .task-row-arrow {
@@ -325,14 +305,6 @@ details[open] > summary .disclosure-chevron {
   transform-origin: left;
 }
 
-.hero-grid {
-  background-image:
-    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(to right, black, transparent 60%);
-}
-
 .image-outline {
   outline: 1px solid oklch(0 0 0 / 10%);
   outline-offset: -1px;
@@ -345,32 +317,8 @@ details[open] > summary .disclosure-chevron {
   color: rgb(7 13 31 / 65%);
 }
 
-.paper-band {
-  background: var(--color-paper);
-}
-
-.splash-grid {
-  background-image: linear-gradient(rgb(63 99 175 / 5%) 1px, transparent 1px), linear-gradient(90deg, rgb(63 99 175 / 5%) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(circle at center, black, transparent 72%);
-}
-
-.project-blueprint {
-  background-color: var(--color-mecg-navy);
-  background-image: linear-gradient(rgb(63 99 175 / 10%) 1px, transparent 1px), linear-gradient(90deg, rgb(63 99 175 / 10%) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
 /* Hash deliberation deck. Static looks live here; every keyframe sits in the
    no-preference block below so the global reduce-motion kill covers them. */
-.deck-wordart {
-  background: linear-gradient(90deg, #ffd166, #ff6b6b, #c77dff, #4cc9f0);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(2px 2px 0 rgb(0 0 0 / 55%)) drop-shadow(4px 4px 0 rgb(0 0 0 / 35%)) drop-shadow(0 0 18px rgb(255 209 102 / 35%));
-}
 
 .deck-stamp {
   transform: rotate(-12deg);
@@ -410,12 +358,6 @@ details[open] > summary .disclosure-chevron {
 
   .step-seat[data-direction="back"] {
     animation: step-back var(--t-panel) var(--ease-out) both;
-  }
-}
-
-@media (min-width: 640px) {
-  .section-shell {
-    padding-inline: 2.5rem;
   }
 }
 
@@ -459,15 +401,6 @@ details[open] > summary .disclosure-chevron {
   }
   100% {
     transform: translateX(0) skewX(0);
-  }
-}
-
-@keyframes deck-wordart-shimmer {
-  from {
-    background-position: 0% 50%;
-  }
-  to {
-    background-position: 200% 50%;
   }
 }
 
@@ -549,10 +482,6 @@ details[open] > summary .disclosure-chevron {
   animation: deck-drumroll 150ms linear infinite;
 }
 
-.deck-wordart {
-  animation: deck-wordart-shimmer 4s linear infinite;
-}
-
 .deck-headshot-pop {
   animation: deck-headshot-pop 500ms 150ms var(--ease-out) both;
 }
@@ -567,16 +496,6 @@ details[open] > summary .disclosure-chevron {
 
 .deck-confetti {
   animation: deck-confetti 2.2s ease-in var(--delay) both;
-}
-
-@keyframes deck-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-.deck-pulse {
-  animation: deck-pulse 1.2s ease-in-out infinite;
 }
 
 /* Presentation controls can reduce motion for a shared display even when the
@@ -648,7 +567,7 @@ details[open] > summary .disclosure-chevron {
   }
 
   .select-control:hover {
-    background-color: rgb(63 99 175 / 7%);
+    background-color: rgb(37 79 159 / 7%);
   }
 
   .select-control:focus {

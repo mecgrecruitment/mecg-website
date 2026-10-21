@@ -54,7 +54,7 @@ export function SlotButton({ id }: { id: string }) {
   }
 
   if (confirmed) {
-    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-emerald-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">RSVP confirmed.</p>;
+    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-success outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">RSVP confirmed.</p>;
   }
 
   return (
@@ -62,7 +62,7 @@ export function SlotButton({ id }: { id: string }) {
       <button type="button" className="button-secondary text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled={pending} onClick={() => void rsvp()}>
         {pending ? "Saving…" : "RSVP"}
       </button>
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }
@@ -104,7 +104,7 @@ export function BuddyButton({ id }: { id: string }) {
   }
 
   if (confirmed) {
-    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-emerald-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">Member chat booked.</p>;
+    return <p ref={confirmationRef} tabIndex={-1} role="status" className="text-sm font-semibold text-success outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">Member chat booked.</p>;
   }
 
   return (
@@ -112,7 +112,7 @@ export function BuddyButton({ id }: { id: string }) {
       <button type="button" className="button-secondary text-sm disabled:cursor-not-allowed disabled:opacity-50" disabled={pending} onClick={() => void book()}>
         {pending ? "Saving…" : "Book 20 min"}
       </button>
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }
@@ -177,16 +177,16 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
 
   if (responded === "accept") {
     return (
-      <div className="mt-4 rounded-xl bg-mecg-orange/10 p-4 shadow-[inset_0_0_0_1px_rgba(254,144,77,0.35)]">
+      <div className="mt-4 rounded-xl bg-mecg-orange/15 p-4 inset-ring inset-ring-mecg-orange/30">
         <p className="text-sm font-semibold text-mecg-navy">You&rsquo;re in.</p>
-        <p className="mt-1 text-sm leading-6 text-mecg-navy/75">{"We've recorded your acceptance. Onboarding details will follow from the Board."}</p>
+        <p className="mt-1 text-sm leading-6 text-muted">{"We've recorded your acceptance. Onboarding details will follow from the Board."}</p>
       </div>
     );
   }
   if (responded === "decline") {
     return (
-      <div className="mt-4 rounded-xl bg-mecg-navy/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-        <p className="text-sm leading-6 text-mecg-navy/75">{"We've recorded your decision to decline. Thank you for considering MECG."}</p>
+      <div className="mt-4 rounded-xl bg-wash p-4 inset-ring inset-ring-line">
+        <p className="text-sm leading-6 text-muted">{"We've recorded your decision to decline. Thank you for considering MECG."}</p>
       </div>
     );
   }
@@ -194,11 +194,11 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
   return (
     <div className="mt-3">
       {selected ? (
-        <div className="rounded-xl bg-mecg-navy/[0.035] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)]">
+        <div className="rounded-xl bg-wash p-4 inset-ring inset-ring-line-strong">
           <h3 ref={headingRef} tabIndex={-1} className="text-base font-semibold outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">
             Confirm {selected === "accept" ? "acceptance" : "decline"}
           </h3>
-          <p className="mt-2 text-sm leading-6 text-mecg-navy/75">
+          <p className="mt-2 text-sm leading-6 text-muted">
             You selected <strong>{selected === "accept" ? "Accept offer" : "Decline offer"}</strong>. This response cannot be changed in the portal.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -214,7 +214,7 @@ export function OfferButtons({ applicationId, initialResponse }: { applicationId
           <button ref={declineRef} type="button" className="button-secondary" onClick={() => choose("decline")}>Decline</button>
         </div>
       )}
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }
@@ -262,7 +262,7 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
   }
 
   if (sent) {
-    return <p className="mt-4 text-sm text-mecg-navy/70">{"Thanks for the feedback. It's anonymous and goes straight to the Board."}</p>;
+    return <p className="mt-4 text-sm text-muted">{"Thanks for the feedback. It's anonymous and goes straight to the Board."}</p>;
   }
 
   return (
@@ -291,14 +291,14 @@ export function SurveyForm({ applicationId }: { applicationId: string }) {
           placeholder="Optional"
           maxLength={2000}
           aria-describedby="survey-note-counter"
-          className="mt-2 min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-4 text-sm font-normal shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+          className="mt-2 min-h-24 w-full rounded-xl bg-wash p-4 text-sm font-normal inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         />
-        <span id="survey-note-counter" className="mt-1 block text-xs font-normal text-mecg-navy/60" aria-live="polite">{note.length}/2000 characters</span>
+        <span id="survey-note-counter" className="mt-1 block text-xs font-normal text-muted" aria-live="polite">{note.length}/2000 characters</span>
       </label>
       <button type="submit" className="button-secondary w-fit disabled:cursor-not-allowed disabled:opacity-50" disabled={pending}>
         {pending ? "Sending…" : "Send feedback"}
       </button>
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </form>
   );
 }
@@ -353,21 +353,21 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
           ref={openRef}
           type="button"
           onClick={() => setConfirming(true)}
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-mecg-navy/55 underline underline-offset-4 hover:text-mecg-navy"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-muted underline underline-offset-4 hover:text-mecg-navy"
         >
           Withdraw my application
         </button>
-        {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div className="mt-5 rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+    <div className="mt-5 rounded-xl bg-white p-4 inset-ring inset-ring-line">
       <p ref={confirmRef} tabIndex={-1} className="text-sm font-semibold text-mecg-navy outline-none">
         Withdraw your application?
       </p>
-      <p className="mt-1 text-sm leading-6 text-mecg-navy/60">
+      <p className="mt-1 text-sm leading-6 text-muted">
         This removes you from the rest of this cycle and cannot be undone. You can apply again in a future cycle.
       </p>
       <div className="mt-3 flex flex-wrap gap-3">
@@ -375,7 +375,7 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
           type="button"
           disabled={pending}
           onClick={() => void withdraw()}
-          className="inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white disabled:opacity-55"
+          className="inline-flex min-h-11 items-center rounded-full bg-danger px-4 text-sm font-semibold text-white disabled:opacity-55"
         >
           {pending ? "Withdrawing…" : "Yes, withdraw"}
         </button>
@@ -392,7 +392,7 @@ export function WithdrawButton({ applicationId }: { applicationId: string }) {
           Keep my application
         </button>
       </div>
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }

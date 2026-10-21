@@ -4,12 +4,14 @@ import { authorizedFetch } from "./client-fetch";
 
 export type ActionResult = { ok: true; body: unknown } | { ok: false; body: unknown; error: string };
 
-export async function runAction(url: string, payload: unknown, fallbackError: string): Promise<ActionResult> {
+// Pass `timeoutMs` to give up on a request that never answers; it then fails like a network error.
+export async function runAction(url: string, payload: unknown, fallbackError: string, { timeoutMs }: { timeoutMs?: number } = {}): Promise<ActionResult> {
   try {
     const response = await authorizedFetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: timeoutMs === undefined ? undefined : AbortSignal.timeout(timeoutMs),
     });
     const body = await response.json().catch(() => null);
     if (!response.ok) return { ok: false, body, error: (body as { error?: string } | null)?.error ?? fallbackError };

@@ -1,0 +1,4 @@
+applications_with_pnm|select a.id, a.status, a.cycle_id, row_to_json(p.*) as pnms from rush.applications a left join lateral (select name from rush.pnms where id = a.pnm_id) p on true where a.cycle_id = 'c_open'
+memberships_self_cycles|select m.id, m.cycle_id, m.role, m.active, row_to_json(c.*) as rush_cycles from rush.memberships m join lateral (select id, name, status, hash_stage, created_at from rush.rush_cycles where id = m.cycle_id) c on true where m.user_id = '00000000-0000-4000-a000-000000000002' and m.active
+pnms_list|select id, name, contact from rush.pnms
+evaluation_assignments_round|select id, application_id, evaluator_id, status from rush.evaluation_assignments where round_id = 'r_open_1'

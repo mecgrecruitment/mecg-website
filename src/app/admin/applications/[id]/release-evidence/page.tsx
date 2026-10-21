@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -37,6 +37,6 @@ export default async function ReleaseEvidencePage({ params }: { params: Promise<
       <Link href={withWorkspaceCycle(`/admin/applications/${encodeURIComponent(id)}`, cycleId)} className="inline-flex min-h-11 items-center underline underline-offset-4">Open applicant dossier</Link>
       <a href={releaseEvidenceHref(id, cycleId)} className="inline-flex min-h-11 items-center underline underline-offset-4">Reload evidence</a>
     </nav>
-    {usable ? <ReleaseEvidenceView report={usable} cycleId={cycleId} /> : <section role="status" className="border-y border-mecg-navy/15 py-5"><h2 className="text-xl font-semibold">Evidence could not be checked</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-mecg-navy/70">Current round details are unavailable. No readiness or release result is confirmed. Reload this page to try again, or ask the recruitment owner to check the underlying issue. Keep the outcome blocked until a new release review confirms it is eligible.</p></section>}
+    {usable ? <ReleaseEvidenceView report={usable} cycleId={cycleId} /> : <section role="status" className="border-y border-line py-5"><h2 className="text-xl font-semibold">Evidence could not be checked</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-muted">Current round details are unavailable. No readiness or release result is confirmed. Reload this page to try again, or ask the recruitment owner to check the underlying issue. Keep the outcome blocked until a new release review confirms it is eligible.</p></section>}
   </main>;
 }

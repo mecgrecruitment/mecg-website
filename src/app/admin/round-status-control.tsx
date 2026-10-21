@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { roundCloseJsonRequest, type RoundCloseOutcome } from "./round-close-request";
 import { roundStatusLabel } from "@/lib/labels";
 import { canTransitionRound } from "@/lib/workflow";
@@ -142,7 +142,7 @@ export default function RoundStatusControl({ round, act, closeRound, pending, er
     setAttempt((value) => value + 1);
   }
 
-  return <div className="rounded-xl bg-white px-3.5 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+  return <div className="rounded-xl bg-white px-3.5 py-2 inset-ring inset-ring-line">
     <form className="flex flex-wrap items-center justify-between gap-3" onSubmit={(event) => {
       event.preventDefault();
       if (pending || status === round.status || closeState === "closed") return;
@@ -158,12 +158,12 @@ export default function RoundStatusControl({ round, act, closeRound, pending, er
       </div>
     </form>
     {closeState === "closed" && <Link href={`/admin/rounds/${encodeURIComponent(round.id)}`} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-mecg-blue underline underline-offset-4">Review round results</Link>}
-    {!confirming && error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+    {!confirming && error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
     {confirming && <dialog ref={dialogRef} aria-labelledby={`close-grading-${round.id}`} aria-describedby={`close-grading-description-${round.id}`}
       onCancel={(event) => { event.preventDefault(); if (!pending && !submitLock.current && closeState !== "checking") setConfirming(false); }}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-2xl bg-white p-5 text-mecg-navy shadow-2xl backdrop:bg-mecg-navy/50 sm:p-6">
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-xl bg-white p-5 text-mecg-navy shadow-2xl backdrop:bg-mecg-navy/50 sm:p-6">
       <h3 id={`close-grading-${round.id}`} className="text-xl font-semibold">{closeState === "closed" ? `Grading closed for ${round.label}` : closeState === "unknown" || closeState === "checking" ? `Verify grading status for ${round.label}` : `Close grading for ${round.label}?`}</h3>
-      <div id={`close-grading-description-${round.id}`} className="mt-3 space-y-3 text-sm leading-6 text-mecg-navy/65">
+      <div id={`close-grading-description-${round.id}`} className="mt-3 space-y-3 text-sm leading-6 text-muted">
         <p>Submitted evaluations and assignments will lock. Unfinished evaluations cannot be completed while the round is closed.</p>
         <p className="font-semibold text-mecg-navy">The current workflow has no transition back to open grading.</p>
       </div>
@@ -174,19 +174,19 @@ export default function RoundStatusControl({ round, act, closeRound, pending, er
         {closeState === "unknown" && <button type="button" onClick={() => void reconcileClose()} className="button-secondary mt-3 min-h-11">Check round status</button>}
       </div>
       {closeState === "idle" && <div className="mt-5" aria-live="polite" aria-busy={review.kind === "loading"}>
-        {review.kind === "loading" && <p className="text-sm text-mecg-navy/65">Loading current coverage…</p>}
-        {review.kind === "error" && <div><p role="alert" className="text-sm text-red-700">{review.message}</p><button type="button" onClick={refreshCoverage} className="button-secondary mt-3 min-h-11 text-sm">Retry coverage</button></div>}
+        {review.kind === "loading" && <p className="text-sm text-muted">Loading current coverage…</p>}
+        {review.kind === "error" && <div><p role="alert" className="text-sm text-danger">{review.message}</p><button type="button" onClick={refreshCoverage} className="button-secondary mt-3 min-h-11 text-sm">Retry coverage</button></div>}
         {review.kind === "ready" && <>
           <table className="w-full text-sm"><caption className="pb-2 text-left font-semibold">Current round coverage</caption><tbody>
-            {[["Applicants in this round", review.summary.applicants], ["With two valid independent evaluations", review.summary.applicantsReady], ["Still need valid evaluations", review.summary.applicantsIncomplete], ["Submitted evaluations", review.summary.submittedEvaluations], ["Valid independent evaluations", review.summary.validEvaluations], ["Open assignments", review.summary.openAssignments]].map(([label, value]) => <tr key={label} className="border-t border-mecg-navy/10"><th scope="row" className="py-2 pr-3 text-left font-normal text-mecg-navy/65">{label}</th><td className="tabular py-2 text-right font-semibold">{value}</td></tr>)}
+            {[["Applicants in this round", review.summary.applicants], ["With two valid independent evaluations", review.summary.applicantsReady], ["Still need valid evaluations", review.summary.applicantsIncomplete], ["Submitted evaluations", review.summary.submittedEvaluations], ["Valid independent evaluations", review.summary.validEvaluations], ["Open assignments", review.summary.openAssignments]].map(([label, value]) => <tr key={label} className="border-t border-line"><th scope="row" className="py-2 pr-3 text-left font-normal text-muted">{label}</th><td className="tabular py-2 text-right font-semibold">{value}</td></tr>)}
           </tbody></table>
-          <p className="mt-3 text-xs leading-5 text-mecg-navy/65">Counts cover enrolled or assigned applicants, excluding drafts and withdrawals. Submitted work may be partial; valid work must meet the current rubric and conflict rules. Open assignments count actual records, including unfinished work.</p>
+          <p className="mt-3 text-xs leading-5 text-muted">Counts cover enrolled or assigned applicants, excluding drafts and withdrawals. Submitted work may be partial; valid work must meet the current rubric and conflict rules. Open assignments count actual records, including unfinished work.</p>
           {review.summary.applicants === 0 ? <p className="mt-3 text-sm font-semibold">No applicants are enrolled or assigned to this round.</p> : (review.summary.applicantsIncomplete > 0 || review.summary.openAssignments > 0) && <p className="mt-3 text-sm font-semibold">Unfinished work remains. Closing is still allowed and will prevent further grading.</p>}
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-mecg-navy/65"><span>Loaded {new Date(review.summary.checkedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. Counts can change until grading closes.</span><button type="button" disabled={pending} onClick={refreshCoverage} className="min-h-11 underline underline-offset-4">Refresh coverage</button></div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted"><span>Loaded {new Date(review.summary.checkedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. Counts can change until grading closes.</span><button type="button" disabled={pending} onClick={refreshCoverage} className="min-h-11 underline underline-offset-4">Refresh coverage</button></div>
         </>}
       </div>}
       <Link href={`/admin/rounds/${encodeURIComponent(round.id)}`} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Review round coverage and results</Link>
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
       <div className="mt-5 flex flex-wrap justify-end gap-2">
         <button ref={cancelRef} type="button" disabled={pending || closeState === "writing" || closeState === "checking"} onClick={() => setConfirming(false)} className="button-secondary min-h-11">{closeState === "idle" ? "Keep grading open" : "Dismiss"}</button>
         <button type="button" disabled={pending || closeState !== "idle" || review.kind !== "ready"} onClick={() => void saveStatus("FROZEN")} className="button-primary min-h-11">{pending ? "Closing grading…" : "Close grading and lock submissions"}</button>

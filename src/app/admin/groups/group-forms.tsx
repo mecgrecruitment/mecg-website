@@ -42,7 +42,7 @@ function AssignForm({ cycleId, group, applications, memberIds }: { cycleId: stri
           {pending ? "Assigning…" : "Assign"}
         </button>
       </div>
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     </form>
   );
 }
@@ -71,11 +71,11 @@ function GroupActionButton({
         type="button"
         disabled={pending}
         onClick={handleClick}
-        className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-red-700" : "text-mecg-navy/60 hover:text-mecg-orange-ink"}`}
+        className={`text-xs font-semibold disabled:opacity-50 ${danger ? "text-danger" : "text-muted hover:text-mecg-orange-ink"}`}
       >
         {pending ? "Working…" : children}
       </button>
-      {error && <span role="alert" className="mt-1 text-right text-[11px] text-red-700">{error}</span>}
+      {error && <span role="alert" className="mt-1 text-right text-xs text-danger">{error}</span>}
     </span>
   );
 }
@@ -116,7 +116,7 @@ export default function GroupForms({
     <div className="grid gap-6">
       {unassigned > 0 && (
         <form
-          className="rounded-2xl p-[18px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]"
+          className="rounded-xl p-[18px] inset-ring inset-ring-line"
           onSubmit={formTeams}
         >
           <h2 className="text-base font-semibold">Form teams</h2>
@@ -135,7 +135,7 @@ export default function GroupForms({
             <button type="submit" disabled={forming.pending} className="button-primary mt-1 w-full disabled:opacity-50">
               {forming.pending ? "Forming…" : `Form teams of ${groupSize} from ${unassigned} unplaced`}
             </button>
-            {forming.error && <p role="alert" className="text-sm text-red-700">{forming.error}</p>}
+            {forming.error && <p role="alert" className="text-sm text-danger">{forming.error}</p>}
           </div>
         </form>
       )}
@@ -145,13 +145,13 @@ export default function GroupForms({
           [String(members.length), "assigned applicants"],
           [String(unassigned), "unassigned applicants"],
         ].map(([value, label]) => (
-          <div key={label} className="rounded-2xl bg-mecg-navy px-4 py-3">
+          <div key={label} className="rounded-xl bg-mecg-navy px-4 py-3">
             <StatTile value={value} label={label} tone="dark" />
           </div>
         ))}
       </div>
-      <details className="rounded-2xl p-[18px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-        <summary className="cursor-pointer text-sm font-semibold text-mecg-navy/70">Add a team by hand</summary>
+      <details className="rounded-xl p-[18px] inset-ring inset-ring-line">
+        <summary className="cursor-pointer text-sm font-semibold text-muted">Add a team by hand</summary>
         <form onSubmit={submit}>
           <div className="mt-3 flex flex-col gap-2.5">
             <FormField label="Team name" name="name" required placeholder="Team A" />
@@ -161,13 +161,13 @@ export default function GroupForms({
                 name="prompt"
                 placeholder="Engineering-flavored prompt"
                 rows={3}
-                className="mt-2 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                className="mt-2 w-full rounded-xl bg-wash px-4 py-3 text-sm inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
               />
             </label>
             <button type="submit" disabled={pending} className="button-primary mt-1 w-full disabled:opacity-50">
               {pending ? "Creating…" : "Create"}
             </button>
-            {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+            {error && <p role="alert" className="text-sm text-danger">{error}</p>}
           </div>
         </form>
       </details>
@@ -176,20 +176,20 @@ export default function GroupForms({
           const groupMembers = members.filter((member) => member.group_id === group.id);
           const graders = gradersByGroup?.[group.id] ?? 0;
           return (
-            <section key={group.id} className="rounded-2xl bg-mecg-navy/[0.025] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+            <section key={group.id} className="rounded-xl bg-wash p-4 inset-ring inset-ring-line">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-[17px] font-semibold tracking-[-0.01em]">{group.name}</h3>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
+                  <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
                     {groupMembers.length}
                   </span>
                   {gradersByGroup && graders > 0 && (
-                    <span className="inline-flex items-center justify-center rounded-full bg-mecg-navy/[0.06] px-2 py-0.5 tabular text-[11px] font-bold text-mecg-navy/70">
+                    <span className="inline-flex items-center justify-center rounded-full bg-wash px-2 py-0.5 tabular text-xs font-bold text-muted">
                       {graders} grading
                     </span>
                   )}
                   {gradersByGroup && graders === 0 && groupMembers.length > 0 && (
-                    <span className="inline-flex items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 text-[11px] font-bold text-mecg-orange-ink">
+                    <span className="inline-flex items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 text-xs font-bold text-mecg-orange-ink">
                       No grader yet
                     </span>
                   )}
@@ -198,17 +198,17 @@ export default function GroupForms({
                   )}
                 </div>
               </div>
-              {group.prompt && <p className="mt-1.5 text-sm text-mecg-navy/55">{group.prompt}</p>}
+              {group.prompt && <p className="mt-1.5 text-sm text-muted">{group.prompt}</p>}
               <div className="mt-3 flex flex-col gap-1.5">
                 {groupMembers.length === 0 ? (
-                  <p className="text-[12.5px] text-mecg-navy/60">No members yet</p>
+                  <p className="text-[13px] text-muted">No members yet</p>
                 ) : (
                   groupMembers.map((member) => {
                     const applicant = applications.find((application) => application.id === member.application_id);
                     return (
                       <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
+                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">
                             {initials(applicant?.name ?? member.application_id)}
                           </span>
                           <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapRpcError, readJsonBody } from "@/lib/api-route";
+import { mapRpcErrorVerbose, readJsonBody } from "@/lib/api-route";
 import { currentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,8 +17,12 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.rpc("apply_hash_result", { target_application_id: applicationId });
   if (error) {
     console.error("apply_hash_result failed", error);
-    const { body: errorBody, status } = mapRpcError(error, "Result could not be applied");
+    const { body: errorBody, status } = mapRpcErrorVerbose(error, "Result could not be applied");
     return NextResponse.json(errorBody, { status });
   }
-  return NextResponse.json({ id: data }, { status: 201 });
+  // The RPC recomputes the outcome under a lock, so the caller may get a different
+  // one than its page showed. Read it back through the caller's own row access.
+  const { data: decision, error: decisionError } = await supabase.from("decisions").select("outcome").eq("id", data).maybeSingle();
+  if (decisionError) console.error("apply_hash_result outcome read failed", decisionError);
+  return NextResponse.json({ id: data, outcome: decision?.outcome ?? null }, { status: 201 });
 }

@@ -54,7 +54,7 @@ export default function ImpressionForm({
 
   return (
     <form onSubmit={submit} className="mt-4 flex flex-col gap-4" noValidate>
-      <p className="text-sm leading-6 text-mecg-navy/65">
+      <p className="text-sm leading-6 text-muted">
         Capture factual context only. Formal rubric evaluations are the only scores used in recruitment decisions.
       </p>
       <div className="text-sm font-medium" id={`impression-tags-label-${applicationId}`}>Observation tags</div>
@@ -72,7 +72,7 @@ export default function ImpressionForm({
               className={`min-h-11 rounded-xl px-3.5 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                 selected
                   ? "bg-mecg-navy text-white"
-                  : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
+                  : "text-mecg-navy inset-ring inset-ring-line-strong hover:inset-ring-mecg-navy/40"
               }`}
             >
               {tag}
@@ -83,16 +83,16 @@ export default function ImpressionForm({
       <label className="text-sm font-medium" htmlFor={`impression-note-${applicationId}`}>Factual note (optional when a tag is selected)</label>
       <textarea
         id={`impression-note-${applicationId}`}
-        className="min-h-20 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+        className="min-h-20 rounded-xl bg-wash px-4 py-3 inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
         value={note}
         maxLength={1000}
         disabled={pending}
         onChange={(event) => { setSaved(false); setNote(event.target.value); }}
         aria-describedby={`impression-note-count-${applicationId}`}
       />
-      <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / 1000</p>
+      <p id={`impression-note-count-${applicationId}`} className="-mt-3 text-right text-xs tabular-nums text-muted">{note.length} / 1000</p>
       <OperationNotice kind="error">{error}</OperationNotice>
-      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Observation saved.</p>}
+      {saved && <p className="submission-confirmed rounded-xl bg-success-wash px-4 py-3 text-sm font-semibold text-success" role="status">Observation saved.</p>}
       <button type="submit" disabled={pending} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
         {saved ? "✓ Saved" : pending ? "Saving…" : "Save observation"}
       </button>

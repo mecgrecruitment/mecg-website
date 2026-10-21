@@ -90,19 +90,19 @@ export default function QuestionEditor({
   }
 
   return (
-    <section className="workspace-panel rounded-2xl bg-paper p-5">
+    <section className="workspace-panel rounded-xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-mecg-navy/65">Application questions</p>
-          <p className="mt-1 max-w-2xl text-sm text-mecg-navy/65">
+          <p className="text-[13px] font-semibold text-muted">Application questions</p>
+          <p className="mt-1 max-w-2xl text-sm text-muted">
             These are the written prompts on the public application, in order.
           </p>
         </div>
-        <span className="tabular text-xs text-mecg-navy/65">{questions.length} of 25</span>
+        <span className="tabular text-xs text-muted">{questions.length} of 25</span>
       </div>
 
       {locked ? (
-        <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-mecg-navy/65 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-muted inset-ring inset-ring-line">
           Applications have already been submitted in this cycle, so the prompts are frozen. Answers already given keep
           the wording they were shown, but changing the questions under a cohort that is partway through is not allowed.
         </p>
@@ -110,13 +110,13 @@ export default function QuestionEditor({
         <>
           <ol className="mt-4 flex flex-col gap-3">
             {questions.map((question, index) => (
-              <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <li key={index} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="tabular text-xs font-semibold text-mecg-navy/65">{index + 1}</span>
+                  <span className="tabular text-xs font-semibold text-muted">{index + 1}</span>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move question ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
-                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === questions.length - 1} aria-label={`Move question ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
-                    <button type="button" onClick={() => setQuestions((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove question ${index + 1}`} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
+                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move question ${index + 1} up`} className="inline-flex size-10 items-center justify-center rounded-full text-muted hover:bg-mecg-blue/10 disabled:opacity-35">&uarr;</button>
+                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === questions.length - 1} aria-label={`Move question ${index + 1} down`} className="inline-flex size-10 items-center justify-center rounded-full text-muted hover:bg-mecg-blue/10 disabled:opacity-35">&darr;</button>
+                    <button type="button" onClick={() => setQuestions((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove question ${index + 1}`} className="inline-flex min-h-10 items-center rounded-full px-3 text-xs font-semibold text-danger hover:bg-danger-wash disabled:opacity-45">Remove</button>
                   </div>
                 </div>
 
@@ -127,7 +127,7 @@ export default function QuestionEditor({
                     onChange={(event) => update(index, { prompt: event.target.value })}
                     rows={2}
                     maxLength={2000}
-                    className="mt-1.5 w-full rounded-xl bg-mecg-navy/[0.035] p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                    className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
                   />
                 </label>
 
@@ -138,7 +138,7 @@ export default function QuestionEditor({
                       value={question.key}
                       onChange={(event) => update(index, { key: event.target.value })}
                       aria-invalid={!KEY_PATTERN.test(question.key)}
-                      className="mt-1.5 min-h-11 w-48 rounded-xl bg-mecg-navy/[0.035] px-3 tabular text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="mt-1.5 min-h-11 w-48 rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -160,21 +160,21 @@ export default function QuestionEditor({
                   </label>
                   {question.inputType === "long_text" && (
                     <label className="block text-sm font-medium">
-                      Word limit <span className="font-normal text-mecg-navy/60">Optional</span>
+                      Word limit <span className="font-normal text-muted">Optional</span>
                       <input
                         type="number"
                         min={1}
                         max={2000}
                         value={question.maxWords ?? ""}
                         onChange={(event) => update(index, { maxWords: event.target.value ? Number(event.target.value) : null })}
-                        className="mt-1.5 min-h-11 w-32 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                        className="mt-1.5 min-h-11 w-32 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none"
                       />
                     </label>
                   )}
                 </div>
                 {question.inputType === "select" && (
                   <label className="mt-3 block text-sm font-medium">
-                    Choices <span className="font-normal text-mecg-navy/60">One per line</span>
+                    Choices <span className="font-normal text-muted">One per line</span>
                     <textarea
                       value={question.options.join("\n")}
                       onChange={(event) => update(index, {
@@ -182,19 +182,19 @@ export default function QuestionEditor({
                       })}
                       rows={4}
                       aria-invalid={question.options.length === 0}
-                      className="mt-1.5 w-full rounded-xl bg-mecg-navy/[0.035] p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                      className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
                     />
                   </label>
                 )}
                 {!KEY_PATTERN.test(question.key) && (
-                  <p className="mt-2 text-xs text-red-700">Keys are lowercase letters, digits and underscores, starting with a letter.</p>
+                  <p className="mt-2 text-xs text-danger">Keys are lowercase letters, digits and underscores, starting with a letter.</p>
                 )}
               </li>
             ))}
           </ol>
 
           {!questions.length && (
-            <p className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/55">
+            <p className="mt-4 rounded-xl border-[1.5px] border-dashed border-line p-6 text-center text-sm text-muted">
               No written questions. Applicants would submit a resume and nothing else.
             </p>
           )}
@@ -211,13 +211,13 @@ export default function QuestionEditor({
             <button type="button" disabled={pending || invalid} onClick={() => void save()} className="button-primary">
               {pending ? "Saving…" : "Save questions"}
             </button>
-            {duplicateKeys.length > 0 && <p className="text-sm text-red-700">Duplicate key: {duplicateKeys[0]}</p>}
+            {duplicateKeys.length > 0 && <p className="text-sm text-danger">Duplicate key: {duplicateKeys[0]}</p>}
           </div>
         </>
       )}
 
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
-      {notice && <p role="status" className="mt-3 text-sm text-emerald-800">{notice}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
+      {notice && <p role="status" className="mt-3 text-sm text-success">{notice}</p>}
     </section>
   );
 }

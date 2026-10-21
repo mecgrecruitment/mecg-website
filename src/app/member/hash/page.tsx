@@ -43,7 +43,7 @@ export default async function MemberHashPage() {
       <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
         {header}
         <section>
-          <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55">
+          <p className="rounded-xl border-[1.5px] border-dashed border-line p-6 text-sm text-muted">
             {stage
               ? `The ${hashStageLabel(stage)} hash is a board and recruitment committee vote.`
               : "Voting is not open yet. It opens when the board opens a stage vote or moves the cycle into voting and decisions."}
@@ -73,7 +73,7 @@ export default async function MemberHashPage() {
     <main className="workspace-stack mx-auto flex max-w-4xl flex-col">
       {header}
       <section>
-        <p className="max-w-2xl text-[14px] leading-6 text-mecg-navy/70">
+        <p className="max-w-2xl text-sm leading-6 text-muted">
           {quorum
             ? `An applicant's vote counts once at least ${quorum} members have voted on them: ${outcomeCopy}, and Unsure counts toward ${quorum} but not as a Yes.`
             : `An applicant's vote counts once enough members have voted on them: ${outcomeCopy}, and Unsure counts toward that number but not as a Yes.`}

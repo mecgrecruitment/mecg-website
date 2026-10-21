@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run lint
@@ -21,7 +21,7 @@ jobs:
       # check-sql.py parses every migration with libpg_query and exits 2 without it.
       # Keep libpg_query behavior deterministic. Newer pglast releases can
       # reject valid legacy PL/pgSQL bodies that PostgreSQL itself accepts.
-      - run: pip3 install --quiet pglast==7.18
+      - run: pip3 install --quiet pglast==7.21
       - run: npm run check:sql
       - run: npm run build
         env:
@@ -111,7 +111,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium

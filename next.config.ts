@@ -66,6 +66,12 @@ const nextConfig: NextConfig = {
     // Next 16 routes unmatched URLs outside the normal layout tree. A global
     // boundary guarantees the branded, accessible 404 is used there too.
     globalNotFound: true,
+    // A workspace link fetches its whole page on hover (workspace-link.tsx). Reuse
+    // that copy for 30 seconds, not the default five minutes, so a click never
+    // shows grading data much older than the hover that loaded it.
+    staleTimes: { static: 30 },
+    // Lets a Link opt into a full prefetch on hover or touch (unstable_dynamicOnHover).
+    dynamicOnHover: true,
   },
   allowedDevOrigins: ["127.0.0.1"],
   // pdfjs-dist loads its worker as a real file at runtime. Bundled into a server

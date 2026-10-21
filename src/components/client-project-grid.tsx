@@ -31,7 +31,7 @@ export default function ClientProjectGrid({
   return (
     <div className="mt-6">
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-mecg-navy/10 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-mecg-navy/10 sm:grid-cols-3 lg:grid-cols-5">
         {projects.map((project, index) => {
           const selected = project.name === selectedName;
 
@@ -44,8 +44,8 @@ export default function ClientProjectGrid({
               aria-label={`View information about ${project.name}`}
               onClick={() => setSelectedName(project.name)}
               style={{ order: index * 2 }}
-              className={`${projects.length % 2 === 1 && index === projects.length - 1 ? "col-span-2 sm:col-span-1 " : ""}group relative flex min-h-28 cursor-pointer sm:min-h-36 flex-col items-center justify-center overflow-hidden bg-white px-1 py-4 text-center sm:p-5 transition-colors duration-150 hover:bg-mecg-blue/[0.045] ${
-                selected ? "bg-mecg-blue/[0.07] shadow-[inset_0_0_0_2px_rgba(63,99,175,0.8)]" : ""
+              className={`${projects.length % 2 === 1 && index === projects.length - 1 ? "col-span-2 sm:col-span-1 " : ""}group relative flex min-h-32 cursor-pointer sm:min-h-44 flex-col items-center justify-center overflow-hidden bg-white px-1 py-4 text-center sm:p-5 transition-colors duration-150 hover:bg-mecg-blue/[0.045] ${
+                selected ? "bg-mecg-blue/10 inset-ring-2 inset-ring-mecg-blue/80" : ""
               }`}
             >
               <span className="relative h-12 w-full max-w-40 shrink-0 transition-transform sm:h-16 duration-150 group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
@@ -57,9 +57,10 @@ export default function ClientProjectGrid({
                   sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw"
                 />
               </span>
-              <span className={`mt-3 text-[13px] leading-snug font-semibold tracking-[-0.01em] sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy/65"}`}>
-                {project.name}<span aria-hidden="true" className="hidden sm:inline"> →</span>
+              <span className={`mt-4 text-[13px] leading-snug font-semibold tracking-[-0.01em] sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
+                {project.name}
               </span>
+              <span className="mt-0.5 text-[13px] leading-snug text-muted">{project.industry}</span>
             </button>
           );
         })}
@@ -90,15 +91,15 @@ export default function ClientProjectGrid({
           <h3 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
             {selectedProject.name}
           </h3>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-mecg-navy/70">
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
             {selectedProject.description}
           </p>
 
-          <div className="mt-7 border-t border-mecg-navy/10 pt-5">
-            <p className="text-[13px] font-semibold text-mecg-navy/70">
+          <div className="mt-7 border-t border-line pt-5">
+            <p className="text-[13px] font-semibold text-muted">
               MECG engagement
             </p>
-            <p className="mt-2 leading-7 text-mecg-navy/60">
+            <p className="mt-2 leading-7 text-muted">
               MECG has worked with {selectedProject.name}. The project scope, methods, deliverables, and outcomes are pending approval for public release.
             </p>
           </div>
@@ -116,7 +117,7 @@ export default function ClientProjectGrid({
         </article>
       ) : null}
       </div>
-      <p className="mt-4 max-w-3xl text-[15px] leading-6 text-mecg-navy/70">
+      <p className="mt-4 max-w-3xl text-[15px] leading-6 text-muted">
         Select an organization to learn more about its work. MECG publishes engagement details only after the client and our board approve them.
       </p>
     </div>

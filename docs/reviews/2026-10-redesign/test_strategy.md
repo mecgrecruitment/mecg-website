@@ -24,7 +24,7 @@ Scope: independent AI code review, not a user study. Read-only inspection except
 | Gate | Minimum action | Evidence / limit |
 | --- | --- | --- |
 | Deterministic regression | `npm test`; `npm run lint`; `npx --no-install tsc --noEmit` | Covers application/grading helpers and mocked route boundaries; no real Clerk/RLS/storage integration. |
-| SQL contract | `npm run check:sql` with CI-pinned `pglast==7.18` | Parser/name checks; supplement with database row below when migrations/RPCs change. |
+| SQL contract | `npm run check:sql` with CI-pinned `pglast==7.21` | Parser/name checks; supplement with database row below when migrations/RPCs change. |
 | Production rendering | `npm run build` with the placeholder build env in `.github/workflows/ci.yml:27–44` | Match Node 22 CI; `E2E_LOCAL_HTTP=1` is a disposable local-browser build only. |
 | Browser smoke + application recovery | `CI=1 npm run test:e2e` with CI runtime env at `.github/workflows/ci.yml:47–65` | Both default Chromium projects; fresh `next start`, not a potentially stale reused dev server. Do not enable Clerk E2E. |
 | Public redesign acceptance | Visit all marketing routes plus a valid/invalid work slug at desktop and 390px; keyboard-test mobile nav, links, forms; check 200% zoom, overflow, focus, reduced motion, image loading, console errors | Compare against `docs/DESIGN.md`; intercept contact/interest submissions locally and exercise success/validation/503 without sending email or recording interest. |

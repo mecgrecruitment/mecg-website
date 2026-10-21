@@ -86,6 +86,18 @@ test("retryOnNetworkError retries thrown errors with the given delays and then g
   await assert.rejects(retryOnNetworkError(async () => { throw new TypeError("down"); }, { delays: [0], wait: async () => {} }), TypeError);
 });
 
+test("retryOnNetworkError reports each retry before it waits", async () => {
+  const events: string[] = [];
+  let calls = 0;
+  await retryOnNetworkError(async () => {
+    calls += 1;
+    events.push(`attempt ${calls}`);
+    if (calls < 3) throw new TypeError("Failed to fetch");
+    return "ok";
+  }, { delays: [1, 2], wait: async (ms) => { events.push(`wait ${ms}`); }, onRetry: () => events.push("retry") });
+  assert.deepEqual(events, ["attempt 1", "retry", "wait 1", "attempt 2", "retry", "wait 2", "attempt 3"]);
+});
+
 test("retryOnNetworkError stops when the action is superseded", async () => {
   let wanted = true;
   let calls = 0;

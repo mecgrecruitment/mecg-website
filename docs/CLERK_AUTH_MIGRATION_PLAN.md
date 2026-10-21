@@ -1,6 +1,6 @@
 # Clerk authentication migration plan
 
-Status: proposed plan only. No application, database, dependency, dashboard, or production change has been made.
+Status: historical. The migration shipped in September 2026; production signs in through Clerk. The body below is the original proposal, kept as the design record. See [CLERK_CUTOVER_RUNBOOK.md](./CLERK_CUTOVER_RUNBOOK.md) for the cutover.
 
 - Branch: `codex/clerk-auth-plan`
 - Base commit: `992ec75`

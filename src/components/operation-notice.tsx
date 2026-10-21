@@ -10,9 +10,9 @@ export default function OperationNotice({
   if (!children) return null;
 
   const appearance = {
-    error: "bg-red-50 text-red-800 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.16)]",
-    success: "bg-emerald-50 text-emerald-900 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]",
-    info: "bg-mecg-blue/[0.08] text-mecg-navy shadow-[inset_0_0_0_1px_rgba(63,99,175,0.14)]",
+    error: "bg-danger-wash text-danger inset-ring inset-ring-danger/15",
+    success: "bg-success-wash text-success inset-ring inset-ring-success/15",
+    info: "bg-mecg-blue/10 text-mecg-navy inset-ring inset-ring-mecg-blue/15",
   }[kind];
 
   return (

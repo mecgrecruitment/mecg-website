@@ -2,7 +2,7 @@ import { requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { hasPermission } from "@/lib/authorization";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { notFound } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -48,10 +48,10 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
         <SectionLabel number="01">Score anchors</SectionLabel>
         <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
           {Object.entries(speedDating ? SPEED_DATING_SCORE_ANCHORS : SCORE_ANCHORS).map(([score, meaning]) => (
-            <div key={score} className="rounded-2xl bg-paper p-4">
+            <div key={score} className="rounded-xl bg-paper p-4">
               <p className="tabular text-xl font-semibold text-mecg-navy">{score}</p>
               {speedDating && <p className="mt-1 text-sm font-semibold text-mecg-navy">{SPEED_DATING_SCORE_LABELS[Number(score)]}</p>}
-              <p className="mt-1 text-xs leading-5 text-mecg-navy/60">{meaning}</p>
+              <p className="mt-1 text-xs leading-5 text-muted">{meaning}</p>
             </div>
           ))}
         </div>
@@ -61,23 +61,23 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
         <SectionLabel number="02">Active rubric guidance</SectionLabel>
         <div className="mt-3.5 flex flex-col gap-3">
           {detail.criteria.map((criterion) => (
-            <article key={criterion.id} className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <article key={criterion.id} className="rounded-xl p-5 inset-ring inset-ring-line">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold text-mecg-navy">{criterion.name}</h2>
-                <span className="text-xs font-semibold text-mecg-navy/45">{criterion.weight}%{criterion.required ? " · required" : ""}</span>
+                <span className="text-xs font-semibold text-muted">{criterion.weight}%{criterion.required ? " · required" : ""}</span>
               </div>
-              <p className="mt-2 text-sm leading-6 text-mecg-navy/65">{criterion.description}</p>
+              <p className="mt-2 text-sm leading-6 text-muted">{criterion.description}</p>
               {groupCase && (
                 <ol className="mt-3 space-y-1.5">
                   {Object.entries(groupCaseAnchors(criterion.name)).map(([score, text]) => (
-                    <li key={score} className="flex gap-3 text-sm leading-6 text-mecg-navy/70">
+                    <li key={score} className="flex gap-3 text-sm leading-6 text-muted">
                       <span className="tabular w-4 shrink-0 font-semibold text-mecg-navy">{score}</span>
                       <span>{text}</span>
                     </li>
                   ))}
                 </ol>
               )}
-              <p className="mt-2 text-xs leading-5 text-mecg-navy/50">Record what the applicant said or did. Do not infer traits from attendance, identity, or another evaluator’s opinion.</p>
+              <p className="mt-2 text-xs leading-5 text-muted">Record what the applicant said or did. Do not infer traits from attendance, identity, or another evaluator’s opinion.</p>
             </article>
           ))}
         </div>
@@ -86,25 +86,25 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
       {groupCase && (
         <section>
           <SectionLabel number="03">Scoring and the final call</SectionLabel>
-          <p className="mt-3.5 text-sm leading-6 text-mecg-navy/65">Weighted score = Collaboration ×2 + Problem-Solving + Leadership + Creativity + Composure ×2 + Presentation, out of 40. The number is a guide, not the decision.</p>
+          <p className="mt-3.5 text-sm leading-6 text-muted">Weighted score = Collaboration ×2 + Problem-Solving + Leadership + Creativity + Composure ×2 + Presentation, out of 40. The number is a guide, not the decision.</p>
           <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
             {GROUP_CASE_SCORE_BANDS.map(({ min, max, label }) => (
-              <div key={min} className="rounded-2xl bg-paper p-4">
+              <div key={min} className="rounded-xl bg-paper p-4">
                 <p className="tabular text-xl font-semibold text-mecg-navy">{min}–{max}</p>
-                <p className="mt-1 text-xs leading-5 text-mecg-navy/60">{label}</p>
+                <p className="mt-1 text-xs leading-5 text-muted">{label}</p>
               </div>
             ))}
           </div>
           <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="rounded-xl p-5 inset-ring inset-ring-line">
               <h3 className="font-semibold text-mecg-navy">Red flags, note regardless of score</h3>
-              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-red-800">
+              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-danger">
                 {GROUP_CASE_RED_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
               </ul>
             </div>
-            <div className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="rounded-xl p-5 inset-ring inset-ring-line">
               <h3 className="font-semibold text-mecg-navy">Green flags, note regardless of score</h3>
-              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-emerald-800">
+              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-success">
                 {GROUP_CASE_GREEN_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
               </ul>
             </div>
@@ -114,7 +114,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
 
       <section>
         <SectionLabel number={groupCase ? "04" : "03"}>Evidence standard</SectionLabel>
-        <ul className="mt-3.5 space-y-2 rounded-2xl bg-mecg-navy p-5 text-sm leading-6 text-white/75 sm:p-6">
+        <ul className="mt-3.5 space-y-2 rounded-xl bg-mecg-navy p-5 text-sm leading-6 text-white/70 sm:p-6">
           {speedDating ? (
             <>
               <li>Score the whole conversation with one star rating.</li>
@@ -138,7 +138,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
           )}
         </ul>
         {detail.acknowledgedAt ? (
-          <div className="mt-6 rounded-2xl bg-emerald-50 p-5 text-sm text-emerald-900">
+          <div className="mt-6 rounded-xl bg-success-wash p-5 text-sm text-success">
             <p className="font-semibold">Calibration already acknowledged</p>
             <Link href={returnTo} className="button-secondary mt-4 inline-flex">Return to My Work</Link>
           </div>

@@ -18,7 +18,7 @@ export default function NotFoundContent() {
         </Link>
       </div>
       <nav aria-label="Main pages" className="mt-6 border-t border-public-rule pt-5">
-        <p className="text-[13px] text-public-muted">Or go straight to</p>
+        <p className="text-[13px] text-muted">Or go straight to</p>
         <ul className="mt-2 grid grid-cols-2 gap-x-6">
           {[["Client services", "/work"], ["Our team", "/team"], ["Join MECG", "/join"], ["Contact us", "/contact"]].map(([label, href]) => (
             <li key={href}><Link href={href} className="flex min-h-11 items-center gap-2 text-[15px] font-semibold text-mecg-blue hover:underline">{label} <span aria-hidden="true">→</span></Link></li>

@@ -41,7 +41,7 @@ export default function PeopleWorkspace({
 
   return (
     <section id="workspace-content" aria-label="People workspace" className="min-w-0">
-      <div className="scroll-cue flex gap-2 overflow-x-auto rounded-2xl bg-white p-1.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.09)]" role="tablist" aria-label="People views">
+      <div className="scroll-cue flex gap-2 overflow-x-auto rounded-xl bg-white p-1.5 inset-ring inset-ring-line" role="tablist" aria-label="People views">
         {options.map((option) => (
           <button
             key={option.value}
@@ -54,11 +54,11 @@ export default function PeopleWorkspace({
             aria-selected={view === option.value}
             aria-controls={`${id}-panel-${option.value}`}
             onClick={() => setView(option.value)}
-            className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${view === option.value ? "bg-mecg-navy text-white" : "text-mecg-navy/65 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"}`}
+            className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${view === option.value ? "bg-mecg-navy text-white" : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy"}`}
           >
             {option.label}
-            {option.count !== undefined && <span className={`tabular-nums rounded-full px-2 py-0.5 text-[11px] ${view === option.value ? "bg-white/15 text-white" : "bg-mecg-navy/[0.06] text-mecg-navy/60"}`}>{option.count}</span>}
-            {Boolean(option.warning) && <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-mecg-orange px-1 text-[10px] font-semibold text-mecg-navy" aria-label={`${option.warning} possible duplicate accounts`}>{option.warning}</span>}
+            {option.count !== undefined && <span className={`tabular-nums rounded-full px-2 py-0.5 text-xs ${view === option.value ? "bg-white/15 text-white" : "bg-wash text-muted"}`}>{option.count}</span>}
+            {Boolean(option.warning) && <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-mecg-orange px-1 text-xs font-semibold text-mecg-navy" aria-label={`${option.warning} possible duplicate accounts`}>{option.warning}</span>}
           </button>
         ))}
       </div>

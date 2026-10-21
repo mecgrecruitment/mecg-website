@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { currentDestination, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -61,10 +61,10 @@ function LocationLink({ location }: { location: string | null | undefined }) {
 
 function NextActionCard({ action }: { action: NextAction }) {
   return (
-    <section className="applicant-next-action rounded-2xl bg-white p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] sm:p-6" aria-labelledby="next-action-heading">
+    <section className="applicant-next-action rounded-xl bg-white p-5 inset-ring inset-ring-line sm:p-6" aria-labelledby="next-action-heading">
       <p className="text-[13px] font-semibold text-mecg-orange-ink">{action.eyebrow}</p>
       <h2 id="next-action-heading" className="mt-2 text-xl font-semibold tracking-[-0.02em]">{action.title}</h2>
-      <p className="mt-1.5 max-w-2xl text-sm leading-6 text-mecg-navy/65">{action.detail}</p>
+      <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted">{action.detail}</p>
       {action.href && action.label && (
         <Link href={action.href} className="button-primary mt-4 inline-flex text-sm">
           {action.label}
@@ -92,18 +92,18 @@ function StatusStepper({ stage, dark = false }: { stage: number; dark?: boolean 
                     ? "bg-mecg-orange font-semibold text-mecg-navy"
                     : state === "done"
                       ? dark ? "bg-white text-mecg-navy" : "bg-mecg-navy text-white"
-                      : dark ? "bg-white/[0.08] text-white/60" : "bg-mecg-navy/[0.08] text-mecg-navy/60"
+                      : dark ? "bg-white/10 text-white/70" : "bg-mecg-navy/10 text-muted"
                 }`}
               >
                 {state === "done" ? "✓" : index + 1}
               </span>
               <span
-                className={`text-center text-[11px] font-medium ${
+                className={`text-center text-xs font-medium ${
                   state === "current"
                     ? dark ? "text-white" : "text-mecg-navy"
                     : state === "done"
-                      ? dark ? "text-white/80" : "text-mecg-navy/65"
-                      : dark ? "text-white/60" : "text-mecg-navy/60"
+                      ? dark ? "text-white" : "text-muted"
+                      : dark ? "text-white/70" : "text-muted"
                 }`}
               >
                 {label}{state === "current" && <span className="block font-semibold">Current</span>}
@@ -123,31 +123,31 @@ function OutcomeCard({ outcome }: { outcome: string }) {
       <div className="mt-1">
         <p className="text-[13px] text-mecg-orange-ink">Decision released</p>
         <h2 className="mt-2 text-2xl font-semibold">You have an offer to join MECG.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">The Board reviewed your full file and would like to bring you into the group. Accept below to lock in your spot, or decline if it&rsquo;s not the right fit right now.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">The Board reviewed your full file and would like to bring you into the group. Accept below to lock in your spot, or decline if it&rsquo;s not the right fit right now.</p>
       </div>
     );
   }
   if (outcome === "WAITLIST") {
     return (
-      <div className="mt-1 rounded-xl bg-mecg-blue/[0.06] p-4 shadow-[inset_0_0_0_1px_rgba(63,99,175,0.18)]">
+      <div className="mt-1 rounded-xl bg-mecg-blue/10 p-4 inset-ring inset-ring-mecg-blue/20">
         <p className="text-[13px] text-mecg-blue">Waitlisted</p>
         <h2 className="mt-2 text-xl font-semibold">You&rsquo;re on the waitlist.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">We don&rsquo;t have a spot to offer right now, but your file stays active. If room opens up in this cohort, we&rsquo;ll come back to it, no action needed from you. Anything that changes will show up here first.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">We don&rsquo;t have a spot to offer right now, but your file stays active. If room opens up in this cohort, we&rsquo;ll come back to it, no action needed from you. Anything that changes will show up here first.</p>
       </div>
     );
   }
   if (outcome === "REJECT") {
     return (
-      <div className="mt-1 rounded-xl bg-mecg-navy/[0.03] p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-        <p className="text-[13px] text-mecg-navy/65">Decision released</p>
+      <div className="mt-1 rounded-xl bg-wash p-4 inset-ring inset-ring-line">
+        <p className="text-[13px] text-muted">Decision released</p>
         <h2 className="mt-2 text-xl font-semibold">We won&rsquo;t be extending an offer this cycle.</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">Thank you for the time you put into your application. There is nothing further you need to submit for this cycle.</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">Thank you for the time you put into your application. There is nothing further you need to submit for this cycle.</p>
       </div>
     );
   }
   return (
     <div className="mt-1">
-      <p className="text-[13px] text-mecg-navy/65">Decision released</p>
+      <p className="text-[13px] text-muted">Decision released</p>
       <h2 className="mt-2 text-xl font-semibold">{decisionOutcomeLabel(outcome)}</h2>
     </div>
   );
@@ -320,14 +320,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
     >
       <div className="applicant-dashboard-layout">
         {submissionConfirmed && (
-          <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-6 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
-            <p className="text-[13px] text-emerald-700">Application received</p>
+          <section role="status" className="panel-seat rounded-xl bg-success-wash p-6 text-success inset-ring inset-ring-success/15">
+            <p className="text-[13px] text-success">Application received</p>
             <h2 className="mt-3 text-2xl font-semibold">You are all set.</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-emerald-900/70">MECG received your application. Your written packet omits profile identifiers. Assigned reviewers may view your original resume, which can identify you. Released updates will appear on this page.</p>
           </section>
         )}
         {(action === "rsvp" || action === "buddy" || action === "schedule") && (
-          <section role="status" className="panel-seat rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)]">
+          <section role="status" className="panel-seat rounded-xl bg-success-wash p-4 text-sm text-success inset-ring inset-ring-success/15">
             {action === "rsvp" ? "Your RSVP is confirmed." : action === "buddy" ? "Your member chat is booked." : "Your schedule was updated."}
           </section>
         )}
@@ -340,11 +340,11 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           const withdrawn = application.display_status === "WITHDRAWN" && !application.released_outcome;
           const isCurrentApplication = application.application_id === heroApplication.application_id;
           return (
-            <details id={isCurrentApplication ? "current-application" : undefined} key={application.application_id} open={isCurrentApplication} className="scroll-mt-6 rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+            <details id={isCurrentApplication ? "current-application" : undefined} key={application.application_id} open={isCurrentApplication} className="scroll-mt-6 rounded-xl bg-wash p-6 inset-ring inset-ring-line">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 marker:content-none">
                 <span>
-                  <span className="block text-[13px] font-semibold text-mecg-navy/65">{application.cycle_name}</span>
-                  <span className="mt-1 block text-sm text-mecg-navy/65">{isCurrentApplication ? "Current application" : "Earlier application"}{editable ? ` · ${editable.label}` : ""}</span>
+                  <span className="block text-[13px] font-semibold text-muted">{application.cycle_name}</span>
+                  <span className="mt-1 block text-sm text-muted">{isCurrentApplication ? "Current application" : "Earlier application"}{editable ? ` · ${editable.label}` : ""}</span>
                 </span>
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
                   <path d="M5 8l5 5 5-5" />
@@ -354,14 +354,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
               {editable ? (
                 <>
                   <p className="mt-3 text-2xl font-semibold">{editable.headline}</p>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">{editable.detail}</p>
-                  {!isCurrentApplication && <p className="mt-2 text-sm text-mecg-navy/65">{editAccess === "available" ? "You can continue this application in the application workspace." : editAccess === "unavailable" ? "Editing and submission are not available for this application right now." : "We could not verify editing and submission access for this application."}</p>}
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{editable.detail}</p>
+                  {!isCurrentApplication && <p className="mt-2 text-sm text-muted">{editAccess === "available" ? "You can continue this application in the application workspace." : editAccess === "unavailable" ? "Editing and submission are not available for this application right now." : "We could not verify editing and submission access for this application."}</p>}
                   {editAccess === "available" && <Link href="/apply" className="button-secondary mt-4 inline-flex text-sm">{editable.actionLabel}</Link>}
                 </>
               ) : withdrawn ? (
                 <>
                   <p className="mt-3 text-2xl font-semibold">Application withdrawn</p>
-                  <p className="mt-2 text-sm leading-6 text-mecg-navy/60">This application is no longer in the running.</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">This application is no longer in the running.</p>
                 </>
               ) : application.released_outcome ? (
                 <>
@@ -370,12 +370,12 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                 </>
               ) : (
                 <>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/60">No final outcome has been released yet. Check for updates here.</p>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">No final outcome has been released yet. Check for updates here.</p>
                   {application.application_id !== heroApplication.application_id && <StatusStepper stage={pipelineStage(application.display_status, false)} />}
                   <ApplicantStatusRefresh />
                 </>
               )}
-              <p className="mt-4 text-sm text-mecg-navy/65">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
+              <p className="mt-4 text-sm text-muted">{application.has_resume ? "Resume on file." : "No resume on file."}</p>
               {/* The RPCs refuse a replacement once a screening packet exists or
                   the window closes; this only hides the control for files that
                   are already finished either way. */}
@@ -391,7 +391,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                     const deadline = deadlines[application.application_id];
                     if (application.offer_response) return null;
                     if (!deadlinesAvailable) return (
-                      <div role="alert" className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                      <div role="alert" className="mt-4 rounded-xl bg-warning-wash px-4 py-3 text-sm text-warning">
                         <p>We could not verify your offer deadline. Your response window may have closed.</p>
                         <form action="/applicant#current-application" method="get" className="mt-3"><button type="submit" className="button-secondary">Retry offer deadline lookup</button></form>
                         <a href="mailto:mecg-board@umich.edu" className="mt-3 inline-flex min-h-11 items-center underline">Contact the Board</a>
@@ -400,7 +400,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                     if (!deadline) return null;
                     const expired = new Date(deadline).getTime() <= Date.now();
                     return (
-                      <p className={`mt-4 rounded-xl px-4 py-3 text-sm font-medium ${expired ? "bg-red-50 text-red-800" : "bg-mecg-orange/[0.14] text-mecg-orange-ink"}`}>
+                      <p className={`mt-4 rounded-xl px-4 py-3 text-sm font-medium ${expired ? "bg-danger-wash text-danger" : "bg-mecg-orange/15 text-mecg-orange-ink"}`}>
                         {expired ? "This offer expired on " : "Respond by "}
                         <time dateTime={deadline}>
                           {formatEasternDateTime(deadline, "full")}
@@ -425,15 +425,15 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   <summary className="min-h-11 cursor-pointer font-semibold">Message history</summary>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {(messagesByApplication.get(application.application_id) ?? []).map((message) => (
-                      <li key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+                      <li key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 rounded-xl bg-white px-3.5 py-2.5 inset-ring inset-ring-line">
                         <span className="text-[13px] font-medium text-mecg-navy">{message.subject}</span>
-                        <time dateTime={message.created_at} className="tabular text-xs text-mecg-navy/65">
+                        <time dateTime={message.created_at} className="tabular text-xs text-muted">
                           {formatEasternDateTime(message.created_at)}
                         </time>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-2 text-xs text-mecg-navy/65">These are message records, not confirmation of inbox delivery. Check spam if a message is missing.</p>
+                  <p className="mt-2 text-xs text-muted">These are message records, not confirmation of inbox delivery. Check spam if a message is missing.</p>
                 </details>
               )}
               {responses.length > 0 && (
@@ -443,7 +443,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                   {responses.map((response) => (
                     <div key={response.key}>
                       <dt className="text-sm font-medium">{response.prompt}</dt>
-                      <dd className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{response.answer}</dd>
+                      <dd className="mt-1 whitespace-pre-wrap text-sm leading-6 text-muted">{response.answer}</dd>
                     </div>
                   ))}
                   </dl>
@@ -453,13 +453,13 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             </details>
           );
         })}
-        <section id="applicant-schedule" className="scroll-mt-6 rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+        <section id="applicant-schedule" className="scroll-mt-6 rounded-xl p-6 inset-ring inset-ring-line">
           <h2 className="text-lg font-semibold">Your schedule</h2>
-          <p className="mt-1 text-xs text-mecg-navy/65">All times are Eastern. Calendar downloads are a snapshot of the event.</p>
+          <p className="mt-1 text-xs text-muted">All times are Eastern. Calendar downloads are a snapshot of the event.</p>
           {scheduleState.kind === "unavailable" ? (
             <div role="alert" className="mt-4">
               <p className="font-semibold">Your schedule could not be loaded</p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/65">We could not check your bookings or available times. Retry the lookup, or contact the recruitment team if this continues.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">We could not check your bookings or available times. Retry the lookup, or contact the recruitment team if this continues.</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <form action="/applicant#applicant-schedule" method="get">
                   <button type="submit" className="button-primary text-sm">Retry schedule lookup</button>
@@ -469,25 +469,25 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
             </div>
           ) : (
             <>
-              <p className="mt-1 text-[13px] text-mecg-navy/65">Confirmed</p>
+              <p className="mt-1 text-[13px] text-muted">Confirmed</p>
               <ul className="mt-2 space-y-2">
                 {(plan.rsvps ?? []).map((item) => (
-                  <li key={item.slotId} className="flex flex-col gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center sm:justify-between">
-                    <div><span className="font-medium">{item.eventName}</span><span className="text-mecg-navy/70"> · <DateTimeRange startsAt={item.startsAt} endsAt={item.endsAt} /></span><div className="mt-1 flex flex-wrap gap-3"><LocationLink location={item.location} /><a href={`/api/events/${item.eventId}/ics`} className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">Add to calendar</a></div></div>
+                  <li key={item.slotId} className="flex flex-col gap-3 rounded-xl bg-wash px-4 py-3 text-sm inset-ring inset-ring-line sm:flex-row sm:items-center sm:justify-between">
+                    <div><span className="font-medium">{item.eventName}</span><span className="text-muted"> · <DateTimeRange startsAt={item.startsAt} endsAt={item.endsAt} /></span><div className="mt-1 flex flex-wrap gap-3"><LocationLink location={item.location} /><a href={`/api/events/${item.eventId}/ics`} className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">Add to calendar</a></div></div>
                     {new Date(item.startsAt).getTime() > now && <ScheduleActionButton action="CANCEL_RSVP" currentSlotId={item.slotId} label="Cancel RSVP" confirmationText={`${item.eventName} · ${formatEasternDateTime(item.startsAt)}. This removes your booking.`} />}
                   </li>
                 ))}
-                {!plan.rsvps?.length && <li className="text-sm text-mecg-navy/65">No RSVPs yet.</li>}
+                {!plan.rsvps?.length && <li className="text-sm text-muted">No RSVPs yet.</li>}
               </ul>
               {plan.group && <p className="mt-4 text-sm"><span className="font-medium">{plan.group.name}.</span> {plan.group.prompt}</p>}
-              {confirmedBuddies.map((buddy) => <div key={buddy.slotId} className="mt-2 flex flex-col gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"><span>Member chat: <DateTimeRange startsAt={buddy.startsAt} endsAt={buddy.endsAt} /></span>{new Date(buddy.startsAt).getTime() > now && <ScheduleActionButton action="CANCEL_BUDDY" currentSlotId={buddy.slotId} label="Cancel chat" confirmationText={`Member chat · ${formatEasternDateTime(buddy.startsAt)}. This removes your booking.`} />}</div>)}
+              {confirmedBuddies.map((buddy) => <div key={buddy.slotId} className="mt-2 flex flex-col gap-3 rounded-xl bg-wash px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"><span>Member chat: <DateTimeRange startsAt={buddy.startsAt} endsAt={buddy.endsAt} /></span>{new Date(buddy.startsAt).getTime() > now && <ScheduleActionButton action="CANCEL_BUDDY" currentSlotId={buddy.slotId} label="Cancel chat" confirmationText={`Member chat · ${formatEasternDateTime(buddy.startsAt)}. This removes your booking.`} />}</div>)}
               {(Boolean(plan.openSlots?.some((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id))) || Boolean(plan.openBuddy?.length)) && (
                 <>
-                  <p className="mt-5 text-[13px] text-mecg-navy/65">Open slots</p>
+                  <p className="mt-5 text-[13px] text-muted">Open slots</p>
                   <div className="mt-2 space-y-2">
                     {(plan.openSlots ?? []).filter((slot) => slot.remaining > 0 && !confirmedSlotIds.has(slot.id)).map((slot) => {
                       const booked = confirmedBookingsByEvent.get(slot.eventId);
-                      return <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">
+                      return <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-wash px-4 py-3 text-sm inset-ring inset-ring-line sm:flex-row sm:items-center">
                         <span>{slot.eventName} · <DateTimeRange startsAt={slot.startsAt} endsAt={slot.endsAt} /></span>
                         {booked
                           ? <ScheduleActionButton action="RESCHEDULE_RSVP" currentSlotId={booked.slotId} nextSlotId={slot.id} label="Change to this time" confirmationText={`${slot.eventName}: ${formatEasternDateTime(booked.startsAt)} → ${formatEasternDateTime(slot.startsAt)}. Your current booking is replaced only if this change succeeds.`} />
@@ -496,7 +496,7 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                     })}
                     {(plan.openBuddy ?? []).map((slot) => {
                       const booked = buddyByCycle.get(slot.cycleId);
-                      return <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] sm:flex-row sm:items-center">
+                      return <div key={slot.id} className="flex flex-col items-start justify-between gap-3 rounded-xl bg-wash px-4 py-3 text-sm inset-ring inset-ring-line sm:flex-row sm:items-center">
                         <span>Member chat · <DateTimeRange startsAt={slot.startsAt} endsAt={slot.endsAt} /></span>
                         {booked
                           ? <ScheduleActionButton action="RESCHEDULE_BUDDY" currentSlotId={booked.slotId} nextSlotId={slot.id} label="Change to this time" confirmationText={`Member chat: ${formatEasternDateTime(booked.startsAt)} → ${formatEasternDateTime(slot.startsAt)}. Your current booking is replaced only if this change succeeds.`} />
@@ -510,15 +510,15 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
           )}
         </section>
         {timeline.length > 0 && (
-          <details className="applicant-timeline rounded-2xl bg-mecg-navy/[0.035] p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+          <details className="applicant-timeline rounded-xl bg-wash p-6 inset-ring inset-ring-line">
             <summary className="min-h-11 cursor-pointer font-semibold">Recruitment dates</summary>
             <ol className="mt-4 flex flex-col gap-2">
               {timeline.map((event) => {
                 const past = new Date(event.startsAt).getTime() < now;
                 return (
-                  <li key={event.id} className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] ${past ? "opacity-50" : ""}`}>
-                    <span className="text-[14px] font-semibold text-mecg-navy">{event.name}</span>
-                    <span className="text-right text-xs text-mecg-navy/65">
+                  <li key={event.id} className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line ${past ? "opacity-50" : ""}`}>
+                    <span className="text-sm font-semibold text-mecg-navy">{event.name}</span>
+                    <span className="text-right text-xs text-muted">
                       <time dateTime={event.startsAt}>
                         {formatEasternDateTime(event.startsAt)}
                       </time>
@@ -529,14 +529,14 @@ export default async function ApplicantDashboard({ searchParams }: { searchParam
                 );
               })}
             </ol>
-            <p className="mt-3 text-xs text-mecg-navy/65">Published recruitment dates. Your confirmed bookings and available times are in Your schedule.</p>
+            <p className="mt-3 text-xs text-muted">Published recruitment dates. Your confirmed bookings and available times are in Your schedule.</p>
           </details>
         )}
         {releasedSurveyApplication && (
-          <section className="rounded-2xl p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+          <section className="rounded-xl p-6 inset-ring inset-ring-line">
             <h2 className="text-lg font-semibold">How was this cycle?</h2>
             {releasedSurveyApplication.survey_submitted ? (
-              <p className="mt-4 text-sm text-mecg-navy/70">{"Thanks for the feedback. It's anonymous and goes straight to the Board."}</p>
+              <p className="mt-4 text-sm text-muted">{"Thanks for the feedback. It's anonymous and goes straight to the Board."}</p>
             ) : (
               <SurveyForm applicationId={releasedSurveyApplication.application_id} />
             )}

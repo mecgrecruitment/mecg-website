@@ -54,7 +54,7 @@ export default function RoundAssignmentForm({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl bg-paper p-4 sm:p-5">
+    <form onSubmit={submit} className="rounded-xl bg-paper p-4 sm:p-5">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end lg:gap-3">
         <label className="min-w-0 text-sm font-medium">
           Applicant
@@ -74,8 +74,8 @@ export default function RoundAssignmentForm({
           {pending ? "Assigning…" : "Add assignment"}
         </button>
       </div>
-      <p className="mt-3 text-pretty text-xs leading-5 text-mecg-navy/60">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      <p className="mt-3 text-pretty text-xs leading-5 text-muted">Aim for two independent evaluations per applicant. Conflicts are blocked when the assignment is saved.</p>
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </form>
   );
 }

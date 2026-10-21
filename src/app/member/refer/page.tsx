@@ -60,24 +60,24 @@ export default async function ReferPage() {
         <SectionLabel number="02">Your referrals</SectionLabel>
         <div className="mt-3.5 flex flex-col gap-3">
           {(referrals ?? []).map((referral) => (
-            <article key={referral.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <article key={referral.id} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[15px] font-semibold text-mecg-navy">{referral.name}</p>
-                  <p className="mt-0.5 break-words text-[13px] text-mecg-navy/65">{referral.email}</p>
-                  {referral.year_major && <p className="mt-0.5 text-[12px] text-mecg-navy/55">{referral.year_major}</p>}
+                  <p className="mt-0.5 break-words text-[13px] text-muted">{referral.email}</p>
+                  {referral.year_major && <p className="mt-0.5 text-xs text-muted">{referral.year_major}</p>}
                 </div>
                 <StatusPill tone={statusTone(referral.status)}>{referralStatusLabel(referral.status)}</StatusPill>
               </div>
-              <div className="mt-3 rounded-xl bg-mecg-navy/[0.035] px-3 py-2.5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-mecg-navy/45">Next</p>
-                <p className="mt-1 text-[13px] leading-5 text-mecg-navy/70">{nextAction(referral.status)}</p>
+              <div className="mt-3 rounded-xl bg-wash px-3 py-2.5">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Next</p>
+                <p className="mt-1 text-[13px] leading-5 text-muted">{nextAction(referral.status)}</p>
               </div>
-              <p className="mt-2 text-[12px] text-mecg-navy/55">Submitted {formatEasternDateTime(referral.created_at)}</p>
+              <p className="mt-2 text-xs text-muted">Submitted {formatEasternDateTime(referral.created_at)}</p>
             </article>
           ))}
           {!referrals?.length && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-sm text-mecg-navy/55">
+            <p className="rounded-xl border-[1.5px] border-dashed border-line p-6 text-sm text-muted">
               No referrals yet. Submit one above and its Board-review status will appear here.
             </p>
           )}

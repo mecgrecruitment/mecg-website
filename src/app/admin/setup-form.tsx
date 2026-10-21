@@ -38,7 +38,7 @@ export default function SetupForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex max-w-md flex-col gap-3 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+    <form onSubmit={submit} className="flex max-w-md flex-col gap-3 rounded-xl p-5 inset-ring inset-ring-line">
       <h2 className="font-semibold">Create the first rush cycle</h2>
       <p className="text-sm text-gray-600">
         This also creates the approved scoring guides for quick chats and group interviews.

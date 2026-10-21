@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRouter } from "next/navigation";
 import StatusPill from "@/components/status-pill";
 import { initials } from "@/lib/initials";
@@ -81,8 +81,8 @@ export function useLiveRefresh() {
   return secondsAgo;
 }
 
-const HEAD = "px-4 py-3 text-[13px] font-semibold text-mecg-navy/55";
-const CELL = "px-4 py-3 text-[13px] text-mecg-navy/70";
+const HEAD = "px-4 py-3 text-[13px] font-semibold text-muted";
+const CELL = "px-4 py-3 text-[13px] text-muted";
 const CHIP = "inline-flex min-h-8 items-center rounded-full px-3 text-xs font-semibold transition";
 
 function SortHeader<Key extends string>({ label, sortKey, active, direction, onSort }: { label: string; sortKey: Key; active: boolean; direction: Direction; onSort: (key: Key) => void }) {
@@ -148,18 +148,18 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
   return (
     <section>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <p className="tabular text-sm text-mecg-navy/55">
+        <p className="tabular text-sm text-muted">
           {summary.graded}/{summary.applicants} graded · {summary.graders} grader{summary.graders === 1 ? "" : "s"} · {summary.scores} score{summary.scores === 1 ? "" : "s"}
         </p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" aria-pressed={flag === "thin"} onClick={() => setFlag(flag === "thin" ? null : "thin")} className={`${CHIP} ${flag === "thin" ? "bg-mecg-navy text-white" : "bg-mecg-orange/[0.14] text-mecg-orange-ink hover:bg-mecg-orange/[0.24]"}`}>
+          <button type="button" aria-pressed={flag === "thin"} onClick={() => setFlag(flag === "thin" ? null : "thin")} className={`${CHIP} ${flag === "thin" ? "bg-mecg-navy text-white" : "bg-mecg-orange/15 text-mecg-orange-ink hover:bg-mecg-orange/[0.24]"}`}>
             {summary.thin} thin
           </button>
-          <button type="button" aria-pressed={flag === "split"} onClick={() => setFlag(flag === "split" ? null : "split")} className={`${CHIP} ${flag === "split" ? "bg-mecg-navy text-white" : "bg-mecg-orange/[0.14] text-mecg-orange-ink hover:bg-mecg-orange/[0.24]"}`}>
+          <button type="button" aria-pressed={flag === "split"} onClick={() => setFlag(flag === "split" ? null : "split")} className={`${CHIP} ${flag === "split" ? "bg-mecg-navy text-white" : "bg-mecg-orange/15 text-mecg-orange-ink hover:bg-mecg-orange/[0.24]"}`}>
             {summary.split} split room
           </button>
         </div>
-        <p className="text-xs text-mecg-navy/45">Live · updated {secondsAgo}s ago</p>
+        <p className="text-xs text-muted">Live · updated {secondsAgo}s ago</p>
         {canExport && (
           <div className="flex flex-wrap gap-2 sm:ml-auto">
             <a href={exportHref("speed-dating-summary")} className="button-secondary text-sm" download>Summary CSV</a>
@@ -174,14 +174,14 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
         placeholder={canViewNotes ? "Search a name or a note" : "Search a name"}
         aria-label="Search applicants"
         autoComplete="off"
-        className="mt-3 min-h-11 w-full max-w-md rounded-xl border border-mecg-navy/15 bg-white px-4 py-2 text-sm text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
+        className="mt-3 min-h-11 w-full max-w-md rounded-xl border border-line bg-white px-4 py-2 text-sm text-mecg-navy outline-none transition focus:border-mecg-blue focus:ring-4 focus:ring-mecg-blue/10"
       />
 
       <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${results.roundName} results`}>
-        <div className="min-w-[56rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <div className="min-w-[56rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-mecg-navy/10">
+              <tr className="border-b border-line">
                 <th className={HEAD}>#</th>
                 <th className={HEAD}>Applicant</th>
                 <SortHeader label="Adjusted" sortKey="adjusted" active={sort.key === "adjusted"} direction={sort.direction} onSort={sortBy} />
@@ -199,12 +199,12 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                 const open = noteHit || expanded.has(applicant.applicationId);
                 const scores = [...applicant.scores].sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
                 return (
-                  <tr key={applicant.applicationId} className={`border-b border-mecg-navy/10 bg-white align-top ${ungraded ? "opacity-60" : ""}`}>
+                  <tr key={applicant.applicationId} className={`border-b border-line bg-white align-top ${ungraded ? "opacity-60" : ""}`}>
                     <td className={`${CELL} tabular`}>{ungraded ? "—" : rank}</td>
                     <td className="px-4 py-3">
                       <Link href={`/admin/applications/${applicant.applicationId}`} className="flex items-center gap-2.5 text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">
                         {failedHeadshots.has(applicant.applicationId)
-                          ? <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy/[0.06] text-[11px] text-mecg-navy/60" aria-hidden="true">{initials(applicant.name)}</span>
+                          ? <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-wash text-xs text-muted" aria-hidden="true">{initials(applicant.name)}</span>
                           // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
                           : <img
                               src={`/api/admin/applications/${encodeURIComponent(applicant.applicationId)}/headshot`}
@@ -217,7 +217,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                             />}
                         {applicant.name}
                       </Link>
-                      {ungraded && <p className="mt-1 text-xs text-mecg-navy/55">Not graded yet</p>}
+                      {ungraded && <p className="mt-1 text-xs text-muted">Not graded yet</p>}
                     </td>
                     <td className={`${CELL} tabular font-bold text-mecg-navy`}>{fixed(applicant.adjusted)}</td>
                     <td className={`${CELL} tabular`}>{formatStars(applicant.mean)}</td>
@@ -241,9 +241,9 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                               {scores.map((score, index) => {
                                 const hit = canViewNotes && matchesNote(score.note, query);
                                 return (
-                                  <li key={`${score.evaluatorId}-${score.session}-${index}`} className="text-xs text-mecg-navy/70">
+                                  <li key={`${score.evaluatorId}-${score.session}-${index}`} className="text-xs text-muted">
                                     <p>{score.evaluatorName} · {score.score} ★{score.session == null ? "" : ` · Session ${score.session}`} · {timeFormatter.format(new Date(score.submittedAt)).toLowerCase()}</p>
-                                    {canViewNotes && score.note.trim() && <p className={`mt-0.5 whitespace-pre-line text-mecg-navy/60 ${hit ? "rounded bg-amber-100 px-1 text-mecg-navy" : ""}`}>{score.note}</p>}
+                                    {canViewNotes && score.note.trim() && <p className={`mt-0.5 whitespace-pre-line text-muted ${hit ? "rounded bg-warning-wash px-1 text-mecg-navy" : ""}`}>{score.note}</p>}
                                   </li>
                                 );
                               })}
@@ -256,7 +256,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                 );
               })}
               {!visible.length && (
-                <tr><td colSpan={9} className="bg-white p-6 text-center text-sm text-mecg-navy/55">{results.applicants.length ? "No applicant matches." : "No Speed Dating applicants yet."}</td></tr>
+                <tr><td colSpan={9} className="bg-white p-6 text-center text-sm text-muted">{results.applicants.length ? "No applicant matches." : "No Speed Dating applicants yet."}</td></tr>
               )}
             </tbody>
           </table>
@@ -265,10 +265,10 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
 
       <h3 className="mt-8 text-[15px] font-semibold text-mecg-navy">Graders</h3>
       <div className="scroll-cue -mx-4 mt-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${results.roundName} graders`}>
-        <div className="min-w-[36rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <div className="min-w-[36rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-mecg-navy/10">
+              <tr className="border-b border-line">
                 <th className={HEAD}>Grader</th>
                 <SortHeader label="Graded" sortKey="count" active={graderSort.key === "count"} direction={graderSort.direction} onSort={sortGradersBy} />
                 <SortHeader label="Mean ★" sortKey="mean" active={graderSort.key === "mean"} direction={graderSort.direction} onSort={sortGradersBy} />
@@ -279,7 +279,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
             </thead>
             <tbody>
               {graders.map((grader) => (
-                <tr key={grader.evaluatorId} className="border-b border-mecg-navy/10 bg-white">
+                <tr key={grader.evaluatorId} className="border-b border-line bg-white">
                   <td className={`${CELL} font-semibold text-mecg-navy`}>{grader.evaluatorName}</td>
                   <td className={`${CELL} tabular`}>{grader.count}</td>
                   <td className={`${CELL} tabular`}>{formatStars(grader.mean)}</td>
@@ -295,7 +295,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                 </tr>
               ))}
               {!graders.length && (
-                <tr><td colSpan={6} className="bg-white p-6 text-center text-sm text-mecg-navy/55">No one has graded yet.</td></tr>
+                <tr><td colSpan={6} className="bg-white p-6 text-center text-sm text-muted">No one has graded yet.</td></tr>
               )}
             </tbody>
           </table>

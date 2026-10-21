@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import DossierTabs from "@/app/admin/applications/[id]/tabs";
 import HarnessReady from "../harness-ready";
 
+export const dynamic = "force-dynamic";
+
 export default function ReadingHarness() {
   if (process.env.PLAYWRIGHT_APPLICATION_HARNESS !== "1" || process.env.E2E_LOCAL_HTTP !== "1") notFound();
   return <main className="workspace-private workspace-stack mx-auto max-w-7xl">

@@ -53,11 +53,11 @@ export default function ScheduleActionButton({ action, currentSlotId, nextSlotId
 
   if (!confirming) return <button ref={triggerRef} type="button" onClick={() => setConfirming(true)} className="button-secondary min-h-11 text-sm">{label}</button>;
   return (
-    <div className="rounded-xl bg-white p-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
+    <div className="rounded-xl bg-white p-3 inset-ring inset-ring-line">
       <p ref={headingRef} tabIndex={-1} className="text-sm font-semibold text-mecg-navy">{action.startsWith("CANCEL") ? "Cancel this booking?" : "Change to this time?"}</p>
-      {confirmationText && <p className="mt-2 text-sm leading-6 text-mecg-navy/65">{confirmationText}</p>}
+      {confirmationText && <p className="mt-2 text-sm leading-6 text-muted">{confirmationText}</p>}
       <div className="mt-2 flex flex-wrap gap-2"><button type="button" disabled={pending} onClick={() => void submit()} className="button-primary min-h-11 text-xs">{pending ? "Saving…" : action.startsWith("CANCEL") ? "Confirm cancellation" : "Confirm new time"}</button><button type="button" disabled={pending} onClick={keepCurrent} className="button-secondary min-h-11 text-xs">Keep current</button></div>
-      {error && <p role="alert" className="mt-2 text-xs text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-xs text-danger">{error}</p>}
     </div>
   );
 }

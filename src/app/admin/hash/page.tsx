@@ -1,7 +1,7 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { roundEvidence } from "@/lib/round-evidence";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -16,7 +16,8 @@ import StatusPill from "@/components/status-pill";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import DecisionForm, { ApprovalButton, PreviewForm, ReleaseAllButton, ReleaseButton } from "../decision-form";
-import ApplyResultForm from "./apply-result-form";
+import ApplyResultForm, { ApplyAllFinalButton } from "./apply-result-form";
+import { finalApplyPlan } from "./final-apply";
 import { MemberNotes, MemberVote, type HashTallyRow } from "./member-vote";
 import StageHashPanel from "./stage-hash-panel";
 import { applicantReadinessIssues, cycleReadinessIssues } from "./decision-readiness";
@@ -54,26 +55,26 @@ function PendingDecisionPanel({
   notes: string[];
   canDecide: boolean;
 }) {
-  if (!canDecide) return <p className="text-[12px] text-mecg-navy/55">Only decision-panel members can record outcomes.</p>;
+  if (!canDecide) return <p className="text-xs text-muted">Only decision-panel members can record outcomes.</p>;
   const outcome = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) : "PENDING";
   return (
     <div className="flex flex-col gap-3">
       {outcome !== "PENDING" && (
         <div className="flex flex-col gap-2">
-          <p className="text-[12px] leading-5 text-mecg-navy/60">The members&apos; vote decides this. Applying it records the outcome and locks it.</p>
+          <p className="text-xs leading-5 text-muted">The members&apos; vote decides this. Applying it records the outcome and locks it.</p>
           <ApplyResultForm applicationId={applicationId} />
         </div>
       )}
       <MemberNotes notes={notes} />
       <details className="group">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 text-[13px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)] marker:content-none">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 text-[13px] font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
           <span>Record a different outcome</span>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-mecg-navy/60 transition-transform group-open:rotate-180">
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-muted transition-transform group-open:rotate-180">
             <path d="M5 8l5 5 5-5" />
           </svg>
         </summary>
         <div className="mt-2.5 flex flex-col gap-2 px-1">
-          <p className="text-[12px] leading-5 text-mecg-navy/55">For a waitlist or a procedural review, which the vote cannot produce.</p>
+          <p className="text-xs leading-5 text-muted">For a waitlist or a procedural review, which the vote cannot produce.</p>
           <DecisionForm cycleId={cycleId} applicationId={applicationId} />
         </div>
       </details>
@@ -171,6 +172,14 @@ export default async function HashBoard() {
       conflictCountsByApplication.set(conflict.application_id, (conflictCountsByApplication.get(conflict.application_id) ?? 0) + 1);
     }
   }
+  // apply_hash_result refuses an applicant the caller recused from, so the bulk
+  // plan leaves those out instead of sending requests that are sure to fail.
+  const ownConflicts = new Set<string>();
+  if (canDecide) {
+    const { data: declared, error: declaredError } = await supabase.from("conflict_declarations").select("application_id").eq("declarer_id", user.id);
+    if (declaredError) throw declaredError;
+    for (const conflict of declared ?? []) ownConflicts.add(conflict.application_id);
+  }
   const allDecisions = decisionsResult.data ?? [];
   const decisionByApplication = new Map<string, (typeof allDecisions)[number]>();
   for (const decision of allDecisions) {
@@ -246,6 +255,14 @@ export default async function HashBoard() {
   });
   const decisions = [...decisionByApplication.values()];
   const lockedDecisionCount = decisions.filter((decision) => decision.status === "LOCKED").length;
+  const finalPlan = finalApplyPlan(rankings.map(({ application, readiness }) => ({
+    id: application.id,
+    displayName: application.displayName,
+    tally: tallyByApplication.get(application.id),
+    ready: readiness.ready,
+    hasDecision: decisionByApplication.has(application.id),
+    declaredConflict: ownConflicts.has(application.id),
+  })));
   const exceptionRows = rankings.flatMap(({ application, readiness }) => {
     const decision = decisionByApplication.get(application.id);
     const tally = tallyByApplication.get(application.id);
@@ -284,7 +301,7 @@ export default async function HashBoard() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 id="readiness-heading" className="text-xl font-semibold text-mecg-navy">Decision readiness</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">Every weighted round must be frozen and every applicant needs two locked evaluations in each round.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">Every weighted round must be frozen and every applicant needs two locked evaluations in each round.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={hashOpen ? "navy" : "neutral"}>{hashOpen ? "Queue open" : `${cycleIssues.length} blocker${cycleIssues.length === 1 ? "" : "s"}`}</StatusPill>
@@ -292,19 +309,19 @@ export default async function HashBoard() {
         </div>
         {canRelease && <div className="mt-4"><ReleaseAllButton cycleId={cycleId} lockedCount={lockedDecisionCount} /></div>}
         {cycleIssues.length > 0 && (
-          <ul className="mt-4 border-l-2 border-mecg-orange pl-4 text-sm text-mecg-navy/70">
+          <ul className="mt-4 border-l-2 border-mecg-orange pl-4 text-sm text-muted">
             {cycleIssues.map((issue) => <li key={issue.key}>{issue.label}</li>)}
           </ul>
         )}
-        <div className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
+        <div className="mt-4 divide-y divide-line border-y border-line">
           {roundReadiness.map((round) => (
             <div key={round.id} className="grid gap-2 py-3 sm:grid-cols-[minmax(12rem,1fr)_auto_auto] sm:items-center sm:gap-6">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-mecg-navy">{round.name}</h3>
                 <StatusPill tone="neutral">{roundStatusLabel(round.status)}</StatusPill>
               </div>
-              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{round.locked}/{round.assignmentCount}</span> forms locked</p>
-              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{round.covered}/{applications.length}</span> applicants decision-ready</p>
+              <p className="text-sm text-muted"><span className="tabular font-semibold text-mecg-navy">{round.locked}/{round.assignmentCount}</span> forms locked</p>
+              <p className="text-sm text-muted"><span className="tabular font-semibold text-mecg-navy">{round.covered}/{applications.length}</span> applicants decision-ready</p>
             </div>
           ))}
         </div>
@@ -316,56 +333,60 @@ export default async function HashBoard() {
             <div className="flex items-end justify-between gap-3">
               <div>
                 <h2 id="exceptions-heading" className="text-xl font-semibold text-mecg-navy">Exception inbox</h2>
-                <p className="mt-1 text-sm text-mecg-navy/55">Only evidence gaps, vote holds, recusal signals, and decisions needing action.</p>
+                <p className="mt-1 text-sm text-muted">Only evidence gaps, vote holds, recusal signals, and decisions needing action.</p>
               </div>
-              <span className="tabular text-sm font-semibold text-mecg-navy/60">{exceptionRows.length} open</span>
+              <span className="tabular text-sm font-semibold text-muted">{exceptionRows.length} open</span>
             </div>
             {exceptionRows.length ? (
-              <ul className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
+              <ul className="mt-4 divide-y divide-line border-y border-line">
                 {exceptionRows.map(({ application, labels, blocked }) => (
                   <li key={application.id} className="grid gap-1 py-3 sm:grid-cols-[minmax(10rem,0.35fr)_1fr_auto] sm:items-start sm:gap-4">
                     <Link href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
-                    <p className="text-sm leading-6 text-mecg-navy/60">{labels.join(" ")}</p>
+                    <p className="text-sm leading-6 text-muted">{labels.join(" ")}</p>
                     <StatusPill tone={blocked ? "neutral" : "navy"}>{blocked ? "Blocked" : "Action"}</StatusPill>
                   </li>
                 ))}
               </ul>
-            ) : <p className="mt-3 text-sm text-mecg-navy/55">No exceptions. Every outcome has been released.</p>}
+            ) : <p className="mt-3 text-sm text-muted">No exceptions. Every outcome has been released.</p>}
           </section>
 
           <section aria-labelledby="queue-heading">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 id="queue-heading" className="text-xl font-semibold text-mecg-navy">Ranked decision queue</h2>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">The vote binds: {quorum ? `${quorum} votes` : "quorum"} and 60% Yes produces an offer. Expand one applicant to inspect the evidence and act.</p>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">The vote binds: {quorum ? `${quorum} votes` : "quorum"} and 60% Yes produces an offer. Apply every decided vote at once, or expand one applicant to inspect the evidence and act.</p>
               </div>
-              <p className="text-sm text-mecg-navy/55"><span className="tabular font-semibold text-mecg-navy">{decisions.length}</span> decisions · <span className="tabular font-semibold text-mecg-navy">{lockedDecisionCount}</span> ready to release</p>
+              <div className="flex flex-col items-end gap-2">
+                <p className="text-sm text-muted"><span className="tabular font-semibold text-mecg-navy">{decisions.length}</span> decisions · <span className="tabular font-semibold text-mecg-navy">{lockedDecisionCount}</span> ready to release</p>
+                {canDecide && <ApplyAllFinalButton plan={finalPlan} />}
+              </div>
             </div>
-            <div className="mt-4 divide-y divide-mecg-navy/[0.1] border-y border-mecg-navy/[0.12]">
+            <div className="mt-4 divide-y divide-line border-y border-line">
               {rankings.map(({ application, rounds: results, finalScore, readiness }, index) => {
                 const decision = decisionByApplication.get(application.id);
                 const impressions = impressionsByApplication.get(application.id);
                 const tally = tallyByApplication.get(application.id);
                 const notes = notesByApplication.get(application.id) ?? [];
-                const voteDecided = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) !== "PENDING" : false;
+                const voteOutcome = tally ? hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes) : "PENDING";
+                const voteDecided = voteOutcome !== "PENDING";
                 return (
                   <article key={application.id} className="py-4">
                     <div className="grid gap-3 md:grid-cols-[2rem_minmax(10rem,1.2fr)_minmax(10rem,1fr)_7rem_minmax(10rem,0.8fr)] md:items-start">
-                      <span className="tabular text-sm font-semibold text-mecg-navy/45">{index + 1}</span>
+                      <span className="tabular text-sm font-semibold text-muted">{index + 1}</span>
                       <div>
                         <Link href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{application.displayName}</Link>
-                        <p className="mt-0.5 text-xs text-mecg-navy/55">{applicationStatusLabel(application.status)}</p>
+                        <p className="mt-0.5 text-xs text-muted">{applicationStatusLabel(application.status)}</p>
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1">
                         {results.map(({ round, aggregate }) => (
-                          <p key={round.id} className="text-xs text-mecg-navy/55"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id))}</p>
+                          <p key={round.id} className="text-xs text-muted"><span className="font-medium text-mecg-navy">{round.name}</span> {aggregate.score == null ? "Pending" : roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id))}</p>
                         ))}
                       </div>
-                      <p className="tabular text-lg font-bold text-mecg-navy">{finalScore == null ? <span className="text-sm font-normal text-mecg-navy/55">Pending</span> : finalScore.toFixed(1)}</p>
+                      <p className="tabular text-lg font-bold text-mecg-navy">{finalScore == null ? <span className="text-sm font-normal text-muted">Pending</span> : finalScore.toFixed(1)}</p>
                       <div>
                         {decision
                           ? <StatusPill tone={decision.status === "RELEASED" ? "navy" : "neutral"}>{decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}</StatusPill>
-                          : <StatusPill tone={voteDecided && readiness.ready ? "navy" : "neutral"}>{voteDecided ? "Vote decided" : "Vote pending"}</StatusPill>}
+                          : <StatusPill tone={voteDecided && readiness.ready ? "navy" : "neutral"}>{voteDecided ? `Vote: ${voteOutcome === "OFFER" ? "offer" : "no offer"}` : "Vote pending"}</StatusPill>}
                       </div>
                     </div>
                     <details className="group mt-3">
@@ -373,20 +394,20 @@ export default async function HashBoard() {
                         <span>Evidence and decision</span>
                         <span className="transition-transform group-open:rotate-180" aria-hidden="true">⌄</span>
                       </summary>
-                      <div className="grid gap-5 border-l-2 border-mecg-navy/[0.1] pl-4 lg:grid-cols-[1fr_minmax(17rem,0.65fr)]">
+                      <div className="grid gap-5 border-l-2 border-line pl-4 lg:grid-cols-[1fr_minmax(17rem,0.65fr)]">
                         <div>
                           <dl className="grid gap-3 sm:grid-cols-2">
                             {results.map(({ round, aggregate, lockedEvaluations }) => (
                               <div key={round.id}>
                                 <dt className="text-xs font-semibold text-mecg-navy">{round.name}</dt>
-                                <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{aggregate.score == null ? "Pending" : round.kind === "SPEED_DATING" ? roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id)) : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
+                                <dd className="mt-1 text-xs leading-5 text-muted">{aggregate.score == null ? "Pending" : round.kind === "SPEED_DATING" ? roundScoreLabel(round.kind, aggregate.score, speedDatingByApplication.get(application.id)) : `${aggregate.score.toFixed(1)} score`} · {aggregate.count} ratings · {lockedEvaluations} locked{aggregate.spread == null ? "" : ` · spread ${aggregate.spread.toFixed(0)}`}</dd>
                               </div>
                             ))}
                             <div>
                               <dt className="text-xs font-semibold text-mecg-navy">Event observations</dt>
-                              <dd className="mt-1 text-xs leading-5 text-mecg-navy/60">{impressions ? `${impressions.count} observation${impressions.count === 1 ? "" : "s"}${impressions.topTags.length ? ` · ${impressions.topTags.join(", ")}` : ""}` : "No observations"}</dd>
+                              <dd className="mt-1 text-xs leading-5 text-muted">{impressions ? `${impressions.count} observation${impressions.count === 1 ? "" : "s"}${impressions.topTags.length ? ` · ${impressions.topTags.join(", ")}` : ""}` : "No observations"}</dd>
                               {impressions?.notes.length ? (
-                                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-mecg-navy/60">
+                                <ul className="mt-2 flex flex-col gap-1 text-xs leading-5 text-muted">
                                   {impressions.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
                                 </ul>
                               ) : null}
@@ -407,8 +428,8 @@ export default async function HashBoard() {
                             <>
                               <div>
                                 <p className="text-sm font-semibold text-mecg-navy">{decisionOutcomeLabel(decision.outcome)} · {decisionStatusLabel(decision.status)}</p>
-                                <p className="mt-1 text-xs leading-5 text-mecg-navy/60">{decision.reason}</p>
-                                <p className="mt-1 text-xs text-mecg-navy/55">{decision.decision_approvals.length}/2 approvals</p>
+                                <p className="mt-1 text-xs leading-5 text-muted">{decision.reason}</p>
+                                <p className="mt-1 text-xs text-muted">{decision.decision_approvals.length}/2 approvals</p>
                               </div>
                               {readiness.ready && !["LOCKED", "RELEASED"].includes(decision.status) && canDecide && <ApprovalButton decisionId={decision.id} />}
                               {readiness.ready && decision.status === "LOCKED" && canRelease && <ReleaseButton decisionId={decision.id} />}
@@ -419,7 +440,7 @@ export default async function HashBoard() {
                             <PendingDecisionPanel cycleId={cycle.id} applicationId={application.id} tally={tally} notes={notes} canDecide={canDecide} />
                           ) : (
                             <>
-                              <p className="text-sm text-mecg-navy/55">Decision controls unlock when the blockers above are cleared.</p>
+                              <p className="text-sm text-muted">Decision controls unlock when the blockers above are cleared.</p>
                               <MemberNotes notes={notes} />
                             </>
                           )}
@@ -433,7 +454,7 @@ export default async function HashBoard() {
           </section>
         </>
       ) : (
-        <p className="border-l-2 border-mecg-navy/[0.14] pl-4 text-sm leading-6 text-mecg-navy/55">Scores and decision controls stay hidden until the cycle-level blockers above are cleared.</p>
+        <p className="border-l-2 border-line pl-4 text-sm leading-6 text-muted">Scores and decision controls stay hidden until the cycle-level blockers above are cleared.</p>
       )}
     </main>
   );

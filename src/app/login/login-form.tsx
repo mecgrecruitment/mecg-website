@@ -65,16 +65,16 @@ export default function LoginForm({ callbackError }: { callbackError?: string })
       <form onSubmit={submit} className="space-y-5">
         <FormField label="Email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? "login-error" : undefined} />
         <FormField label="Password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? "login-error" : undefined} />
-        {error && <p ref={errorRef} id="login-error" tabIndex={-1} role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800 outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">{error}</p>}
+        {error && <p ref={errorRef} id="login-error" tabIndex={-1} role="alert" className="rounded-xl bg-danger-wash p-4 text-sm text-danger outline-none focus-visible:ring-2 focus-visible:ring-mecg-orange focus-visible:ring-offset-2">{error}</p>}
         <button type="submit" disabled={submitting} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-50">
           {submitting ? "Signing in…" : "Sign in"}
         </button>
       </form>
       <div className="mt-5 flex flex-col text-center text-sm">
         <Link href="/forgot-password" className="flex min-h-11 items-center justify-center underline">Forgot your password?</Link>
-        <Link href="/apply" className="flex min-h-11 items-center justify-center text-mecg-navy/60 underline">New applicant? Create an account</Link>
+        <Link href="/apply" className="flex min-h-11 items-center justify-center text-muted underline">New applicant? Create an account</Link>
       </div>
-      <p className="mt-4 text-center text-xs leading-5 text-mecg-navy/60">
+      <p className="mt-4 text-center text-xs leading-5 text-muted">
         Internal access is assigned by the MECG Board. Contact <a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 items-center underline">mecg-board@umich.edu</a> for help.
       </p>
     </>

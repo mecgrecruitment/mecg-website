@@ -1,6 +1,6 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { isInRoundCohort } from "@/lib/round-cohort";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -217,11 +217,11 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       </nav>
       <section id="round-overview" className="flex flex-col gap-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-          <p className="text-pretty text-sm leading-6 text-mecg-navy/55">
+          <p className="text-pretty text-sm leading-6 text-muted">
             Round status: {roundStatusLabel(round.status)}.
           </p>
           {canOperate ? (
-            <p className="tabular text-xs text-mecg-navy/60">
+            <p className="tabular text-xs text-muted">
               {assignments.length} assignment{assignments.length === 1 ? "" : "s"} in this round
             </p>
           ) : null}
@@ -241,18 +241,18 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                   <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
                 ))}
             </dl>
-            <p className="text-sm text-mecg-navy/65">Assigned coverage measures staffing. Submitted forms can contain partial observations; qualifying evidence is checked separately in results.</p>
+            <p className="text-sm text-muted">Assigned coverage measures staffing. Submitted forms can contain partial observations; qualifying evidence is checked separately in results.</p>
             {(undercoveredApplicants.length > 0 || evaluatorLoadList.length > 0) && !speedDating && (
               <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {undercoveredApplicants.length > 0 && (
-                    <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
-                      <p className="text-[13px] font-semibold text-mecg-navy/60">Needs coverage · {undercoveredApplicants.length}</p>
+                    <div className="rounded-xl bg-paper p-3.5 sm:p-4">
+                      <p className="text-[13px] font-semibold text-muted">Needs coverage · {undercoveredApplicants.length}</p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {undercoveredApplicants.map((application) => (
                           <Link
                             key={application.id}
                             href={withWorkspaceCycle(`/admin/applications/${application.id}`, cycleId)}
-                            className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]"
+                            className="inline-flex min-h-8 items-center rounded-[2px] bg-white px-2.5 py-1 text-xs font-medium text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10"
                           >
                             {application.label} · {coverageByApplication.get(application.id)?.assigned ?? 0}/2
                           </Link>
@@ -261,13 +261,13 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                     </div>
                   )}
                   {evaluatorLoadList.length > 0 && (
-                    <div className="rounded-2xl bg-paper p-3.5 sm:p-4">
-                      <p className="text-[13px] font-semibold text-mecg-navy/60">Evaluator load</p>
+                    <div className="rounded-xl bg-paper p-3.5 sm:p-4">
+                      <p className="text-[13px] font-semibold text-muted">Evaluator load</p>
                       <div className="mt-2 flex flex-col gap-1.5">
                         {evaluatorLoadList.map(([evaluatorId, evaluator]) => (
-                          <div key={evaluatorId} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                          <div key={evaluatorId} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2 text-sm inset-ring inset-ring-line">
                             <span className="font-medium text-mecg-navy">{evaluator.name}</span>
-                            <span className="tabular text-xs text-mecg-navy/60">{evaluator.open} open · {evaluator.total} total</span>
+                            <span className="tabular text-xs text-muted">{evaluator.open} open · {evaluator.total} total</span>
                           </div>
                         ))}
                       </div>
@@ -285,10 +285,10 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
             <div>
               <SectionLabel>Group Case coverage</SectionLabel>
               <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">Who still needs attention</h2>
-              <p className="mt-1 text-sm text-mecg-navy/55">Staffing counts assigned forms. Evidence status uses valid independent evaluations where results access is permitted; incomplete and unknown evidence appears first.</p>
+              <p className="mt-1 text-sm text-muted">Staffing counts assigned forms. Evidence status uses valid independent evaluations where results access is permitted; incomplete and unknown evidence appears first.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-mecg-orange/[0.14] px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
+              <span className="rounded-full bg-mecg-orange/15 px-3 py-1 text-xs font-semibold text-mecg-orange-ink">
                 {groupCaseCoverageRows.filter((row) => row.evidence.needsAttention).length} need evidence review
               </span>
               {canExport && ["PUBLISHED", "ACTIVE"].includes(round.status) && (
@@ -311,46 +311,46 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
               )}
             </div>
           </div>
-          <div className="mt-4 overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
-            <div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(12rem,1fr)_minmax(12rem,1fr)] gap-3 border-b border-mecg-navy/10 bg-paper px-4 py-3 text-[13px] font-semibold text-mecg-navy/55 md:grid">
+          <div className="mt-4 overflow-hidden rounded-xl inset-ring inset-ring-line">
+            <div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(12rem,1fr)_minmax(12rem,1fr)] gap-3 border-b border-line bg-paper px-4 py-3 text-[13px] font-semibold text-muted md:grid">
               <span>Applicant</span>
               <span>Group</span>
               <span>Judges</span>
               <span>Evidence and staffing</span>
             </div>
-            <div className="divide-y divide-mecg-navy/10">
+            <div className="divide-y divide-line">
               {groupCaseCoverageRows.map((row) => {
                 const stateLabel = row.evidence.label;
                 return (
                   <article key={row.id} className="grid gap-3 bg-white px-4 py-4 md:grid-cols-[minmax(10rem,1fr)_minmax(8rem,0.8fr)_minmax(12rem,1fr)_minmax(12rem,1fr)] md:items-center md:py-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">{initials(row.label)}</span>
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">{initials(row.label)}</span>
                       <Link href={withWorkspaceCycle(`/admin/applications/${row.id}`, cycleId)} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{row.label}</Link>
                     </div>
-                    <p className="text-xs text-mecg-navy/60"><span className="mr-1 font-semibold md:hidden">Group:</span>{row.groupName}</p>
+                    <p className="text-xs text-muted"><span className="mr-1 font-semibold md:hidden">Group:</span>{row.groupName}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {row.assignments.map((assignment) => {
                         const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
                         return (
-                          <span key={assignment.id} className="inline-flex items-center gap-1.5 rounded-full bg-mecg-navy/[0.055] px-2.5 py-1 text-xs text-mecg-navy/70">
+                          <span key={assignment.id} className="inline-flex items-center gap-1.5 rounded-full bg-wash px-2.5 py-1 text-xs text-muted">
                             <span className="font-semibold">{evaluator ?? "Unknown judge"}</span>
                             <span aria-hidden="true">·</span>
                             {assignmentStatusLabel(assignment.status)}
                           </span>
                         );
                       })}
-                      {!row.assignments.length && <span className="text-xs font-semibold text-red-700">No grader yet</span>}
+                      {!row.assignments.length && <span className="text-xs font-semibold text-danger">No grader yet</span>}
                     </div>
                     <div className="min-w-0 text-xs leading-5">
                       <StatusPill tone={row.evidence.state === "complete" ? "navy" : "orange"}>{stateLabel}</StatusPill>
-                      <p className="mt-2 text-mecg-navy/70">{row.evidence.detail}</p>
-                      <p className="mt-2 text-mecg-navy/60">Staffing: {groupCaseStaffingLabel(row.coverage)}</p>
+                      <p className="mt-2 text-muted">{row.evidence.detail}</p>
+                      <p className="mt-2 text-muted">Staffing: {groupCaseStaffingLabel(row.coverage)}</p>
                     </div>
                   </article>
                 );
               })}
               {!groupCaseCoverageRows.length && (
-                <p className="bg-white p-6 text-center text-sm text-mecg-navy/55">No active Group Case applicants yet.</p>
+                <p className="bg-white p-6 text-center text-sm text-muted">No active Group Case applicants yet.</p>
               )}
             </div>
           </div>
@@ -374,7 +374,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       {canManageGroups && (
         <section id="round-groups">
           <SectionLabel>Group setup</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Create the case teams, set their prompt, and place applicants before the interview begins.</p>
+          <p className="mt-1 text-sm text-muted">Create the case teams, set their prompt, and place applicants before the interview begins.</p>
           <div className="mt-4">
             <GroupForms
               cycleId={cycleId}
@@ -392,7 +392,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       {round.kind === "GROUP_CASE" && canManage && groupCaseResults && (
         <section id="round-results">
           <SectionLabel>Results</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Valid mean out of 40: two independent evaluations must each meet required criteria, the rubric minimum and 75% weighted coverage. Partial observations remain evidence.</p>
+          <p className="mt-1 text-sm text-muted">Valid mean out of 40: two independent evaluations must each meet required criteria, the rubric minimum and 75% weighted coverage. Partial observations remain evidence.</p>
           <div className="mt-4">
             <GroupCaseResultsTable
               results={groupCaseResults}
@@ -407,7 +407,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       {speedDating && canManage && speedDatingResults && (
         <section id="round-results">
           <SectionLabel>Results</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Every member present grades every applicant they meet. Adjusted corrects for lenient and harsh graders; stars are the raw mean.</p>
+          <p className="mt-1 text-sm text-muted">Every member present grades every applicant they meet. Adjusted corrects for lenient and harsh graders; stars are the raw mean.</p>
           <div className="mt-4">
             <SpeedDatingResultsTable results={speedDatingResults} canViewNotes={canOperate || canManage} canExport={canExport} />
           </div>
@@ -418,10 +418,10 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
       {canOperate && (
         <section id="round-assignments">
           <SectionLabel>Assignment records</SectionLabel>
-          <p className="mt-1 text-sm text-mecg-navy/55">Track who is assigned and whether each evaluation is still open or submitted.</p>
+          <p className="mt-1 text-sm text-muted">Track who is assigned and whether each evaluation is still open or submitted.</p>
           {assignments.length === 0 ? (
-            <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center">
-              <p className="text-[13px] text-mecg-navy/60">No assignments yet</p>
+            <div className="mt-4 rounded-xl border-[1.5px] border-dashed border-line p-6 text-center">
+              <p className="text-[13px] text-muted">No assignments yet</p>
             </div>
           ) : (
             <>
@@ -438,27 +438,27 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                       : "Open";
                   const evaluator = Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name;
                   return (
-                    <article key={assignment.id} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+                    <article key={assignment.id} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">{initials(applicantName)}</span>
+                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">{initials(applicantName)}</span>
                           <p className="font-semibold text-mecg-navy">{applicantName}</p>
                         </div>
                         <StatusPill tone={submitted ? "navy" : "neutral"}>{evaluationState}</StatusPill>
                       </div>
                       <dl className="mt-3 grid grid-cols-2 gap-3 text-xs">
                         <div>
-                          <dt className="text-[13px] text-mecg-navy/60">Evaluator</dt>
-                          <dd className="mt-1 text-mecg-navy/70">{evaluator ?? "Unassigned"}</dd>
+                          <dt className="text-[13px] text-muted">Evaluator</dt>
+                          <dd className="mt-1 text-muted">{evaluator ?? "Unassigned"}</dd>
                         </div>
                         <div>
-                          <dt className="text-[13px] text-mecg-navy/60">Assignment</dt>
-                          <dd className="mt-1 text-mecg-navy/70">{assignmentStatusLabel(assignment.status)}</dd>
+                          <dt className="text-[13px] text-muted">Assignment</dt>
+                          <dd className="mt-1 text-muted">{assignmentStatusLabel(assignment.status)}</dd>
                         </div>
                         {round.kind === "GROUP_CASE" && (
                           <div className="col-span-2">
-                            <dt className="text-[13px] text-mecg-navy/60">Group interview</dt>
-                            <dd className="mt-1 text-mecg-navy/70">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</dd>
+                            <dt className="text-[13px] text-muted">Group interview</dt>
+                            <dd className="mt-1 text-muted">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</dd>
                           </div>
                         )}
                       </dl>
@@ -467,15 +467,15 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                 })}
               </div>
             <div className="scroll-cue -mx-4 mt-4 hidden overflow-x-auto px-4 pb-1 md:block sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${round.name} assignments`}>
-              <div className="min-w-[42rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <div className="min-w-[42rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
               <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-mecg-navy/10">
-                  <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Applicant</th>
-                  {round.kind === "GROUP_CASE" && <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Group interview</th>}
-                  <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Evaluator</th>
-                  <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Assignment</th>
-                  <th className="px-4 py-3 text-[13px] font-semibold text-mecg-navy/55">Evaluation</th>
+                <tr className="border-b border-line">
+                  <th className="px-4 py-3 text-[13px] font-semibold text-muted">Applicant</th>
+                  {round.kind === "GROUP_CASE" && <th className="px-4 py-3 text-[13px] font-semibold text-muted">Group interview</th>}
+                  <th className="px-4 py-3 text-[13px] font-semibold text-muted">Evaluator</th>
+                  <th className="px-4 py-3 text-[13px] font-semibold text-muted">Assignment</th>
+                  <th className="px-4 py-3 text-[13px] font-semibold text-muted">Evaluation</th>
                 </tr>
               </thead>
               <tbody>
@@ -490,18 +490,18 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
                       ? assignmentStatusLabel(assignment.status)
                       : "Open";
                   return (
-                    <tr key={assignment.id} className="border-b border-mecg-navy/10">
+                    <tr key={assignment.id} className="border-b border-line">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
+                          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">
                             {initials(applicantName)}
                           </span>
                           <span className="text-[13px] font-semibold text-mecg-navy">{applicantName}</span>
                         </div>
                       </td>
-                      {round.kind === "GROUP_CASE" && <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
-                      <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
-                      <td className="px-4 py-3 text-[13px] text-mecg-navy/55">{assignmentStatusLabel(assignment.status)}</td>
+                      {round.kind === "GROUP_CASE" && <td className="px-4 py-3 text-[13px] text-muted">{groupByApplication.get(application?.id ?? "") ?? "Unassigned"}</td>}
+                      <td className="px-4 py-3 text-[13px] text-muted">{Array.isArray(assignment.evaluator) ? assignment.evaluator[0]?.display_name : assignment.evaluator?.display_name}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted">{assignmentStatusLabel(assignment.status)}</td>
                       <td className="px-4 py-3">
                         <StatusPill tone={submitted ? "navy" : "neutral"}>{evaluationState}</StatusPill>
                       </td>
@@ -517,7 +517,7 @@ export default async function RoundBoardPage({ roundId }: { roundId: string }) {
         </section>
       )}
 
-      {canOperate && rubric && <details id="round-settings" className="workspace-panel"><summary className="min-h-11 cursor-pointer text-base font-semibold">Scoring guide and rubric settings</summary><p className="my-3 text-sm text-mecg-navy/65">Review the current criteria here. Editing remains limited by the round’s existing lifecycle rules.</p><RubricEditor round={rubric} /></details>}
+      {canOperate && rubric && <details id="round-settings" className="workspace-panel"><summary className="min-h-11 cursor-pointer text-base font-semibold">Scoring guide and rubric settings</summary><p className="my-3 text-sm text-muted">Review the current criteria here. Editing remains limited by the round’s existing lifecycle rules.</p><RubricEditor round={rubric} /></details>}
     </main>
   );
 }

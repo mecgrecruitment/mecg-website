@@ -400,13 +400,13 @@ function EvaluationEditor({
   return (
     <form onSubmit={submit} className="mt-4 flex flex-col gap-4" noValidate>
       {draftConflict && (
-        <section aria-labelledby={`conflict-${assignmentId}`} className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+        <section aria-labelledby={`conflict-${assignmentId}`} className="rounded-xl border border-warning-edge bg-warning-wash p-4 text-warning">
           <h2 ref={conflictHeadingRef} tabIndex={-1} id={`conflict-${assignmentId}`} className="text-lg font-semibold">Choose which evaluation draft to keep</h2>
           <p className="mt-2 text-sm leading-6">The browser and server copies differ. Neither has been overwritten. Compare them and download either copy before choosing. Using the server replaces the browser backup; recovering the browser copy syncs it to the server.</p>
           <div className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2">
             {(["local", "server"] as const).map((source) => {
               const draft = draftConflict[source];
-              return <article key={source} className="min-w-0 rounded-xl border border-amber-300 p-3">
+              return <article key={source} className="min-w-0 rounded-xl border border-warning-edge p-3">
                 <h3 className="font-semibold">{source === "local" ? "Browser copy" : "Server copy"}</h3>
                 <dl className="mt-3 space-y-3 text-sm">{criteria.map((criterion) => <div key={criterion.id}><dt className="font-medium">{criterion.name}: {draft.scores[criterion.id] || "Unrated"}</dt><dd className="whitespace-pre-wrap break-words">{draft.notes[criterion.id] || "No note"}</dd></div>)}</dl>
                 <p className="mt-3 whitespace-pre-wrap break-words text-sm">{draft.evidence || "No overall evidence"}</p>
@@ -417,11 +417,11 @@ function EvaluationEditor({
           </div>
         </section>
       )}
-      <p aria-hidden="true" className="min-h-6 text-sm text-mecg-navy/70">{draftSaveState.kind === "loading" ? "Loading saved draft…" : draftSaveState.kind === "saving" ? "Saving…" : draftSaveState.kind === "error" ? "Draft save needs attention." : draftSaveState.kind === "saved" ? "Draft up to date." : "Draft workspace ready."}</p>
+      <p aria-hidden="true" className="min-h-6 text-sm text-muted">{draftSaveState.kind === "loading" ? "Loading saved draft…" : draftSaveState.kind === "saving" ? "Saving…" : draftSaveState.kind === "error" ? "Draft save needs attention." : draftSaveState.kind === "saved" ? "Draft up to date." : "Draft workspace ready."}</p>
       {!draftConflict && <fieldset disabled={pending || saved || !draftReady} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-      <div className="rounded-xl border border-mecg-navy/10 px-4 py-3 text-sm text-mecg-navy">
+      <div className="rounded-xl border border-line px-4 py-3 text-sm text-mecg-navy">
         <p className="font-semibold" role="status">{readiness.ready ? "Ready to review" : `${readiness.observedCount} of ${criteria.length} criteria observed`}</p>
-        <ul className="mt-2 space-y-1 text-mecg-navy/65">
+        <ul className="mt-2 space-y-1 text-muted">
           {readiness.checks.map((check) => (
             <li key={check.label}><span className="font-medium text-mecg-navy">{check.met ? "Met" : "Needed"}:</span> {check.label}</li>
           ))}
@@ -435,12 +435,12 @@ function EvaluationEditor({
             key={criterion.id}
             ref={(node) => { criterionRefs.current[criterion.id] = node; }}
             tabIndex={-1}
-            className="rounded-2xl border border-mecg-navy/10 p-4"
+            className="rounded-xl border border-line p-4"
           >
             <legend className="px-1 font-semibold">
               {criterion.name} · {criterion.weight}%{criterion.required ? " · required" : ""}
             </legend>
-            <p className="mb-3 text-sm text-mecg-navy/65">{criterion.description}</p>
+            <p className="mb-3 text-sm text-muted">{criterion.description}</p>
             <div className="text-sm font-medium" id={`rating-label-${assignmentId}-${criterion.id}`}>Rating</div>
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6" role="radiogroup" aria-labelledby={`rating-label-${assignmentId}-${criterion.id}`} aria-describedby={`rating-anchor-${assignmentId}-${criterion.id}`}>
               {RATING_OPTIONS.map((option) => {
@@ -460,7 +460,7 @@ function EvaluationEditor({
                       className="peer sr-only"
                     />
                     <span className={`flex min-h-11 items-center justify-center rounded-sm border text-sm font-semibold transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-mecg-navy peer-disabled:cursor-not-allowed peer-disabled:opacity-50 ${
-                      selected ? "border-mecg-navy bg-mecg-navy text-white underline underline-offset-4" : "border-mecg-navy/20 text-mecg-navy hover:bg-mecg-navy/[0.045]"
+                      selected ? "border-mecg-navy bg-mecg-navy text-white underline underline-offset-4" : "border-line-strong text-mecg-navy hover:bg-wash"
                     }`} title={label}>
                       {value === "NO" ? "N/O" : value}
                     </span>
@@ -468,18 +468,18 @@ function EvaluationEditor({
                 );
               })}
             </div>
-            <p id={`rating-anchor-${assignmentId}-${criterion.id}`} className="mt-2 text-xs text-mecg-navy/65" aria-live="polite">
+            <p id={`rating-anchor-${assignmentId}-${criterion.id}`} className="mt-2 text-xs text-muted" aria-live="polite">
               {scores[criterion.id] === "NO"
                 ? criterion.required ? "This criterion is required. An observed rating is needed to submit." : "Not observed is excluded from the score. At least 75% of rubric weight must be observed."
                 : SCORE_ANCHORS[Number(scores[criterion.id])] ?? "Choose the rating that matches the behavior you observed."}
             </p>
             <label className="mt-3 block text-sm font-medium" htmlFor={`note-${assignmentId}-${criterion.id}`}>
-              Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/[0.16] px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Required</span>}
+              Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/15 px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Required</span>}
             </label>
             <textarea
               id={`note-${assignmentId}-${criterion.id}`}
               ref={(node) => { noteRefs.current[criterion.id] = node; }}
-              className="mt-2 min-h-20 w-full rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+              className="mt-2 min-h-20 w-full rounded-xl bg-wash px-4 py-3 inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
               value={note}
               onChange={(event) => {
                 setNotes((current) => ({ ...current, [criterion.id]: event.target.value }));
@@ -490,14 +490,14 @@ function EvaluationEditor({
               disabled={pending || saved || !draftReady}
               aria-describedby={`note-count-${assignmentId}-${criterion.id}`}
             />
-            <p id={`note-count-${assignmentId}-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / {MAX_NOTE_LENGTH}</p>
+            <p id={`note-count-${assignmentId}-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-muted">{note.length} / {MAX_NOTE_LENGTH}</p>
           </fieldset>
         );
       })}
       <label className="font-medium" htmlFor={`evidence-${assignmentId}`}>Overall observable evidence (optional)</label>
       <textarea
         id={`evidence-${assignmentId}`}
-        className="min-h-24 rounded-xl bg-mecg-navy/[0.035] px-4 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+        className="min-h-24 rounded-xl bg-wash px-4 py-3 inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
         value={evidence}
         onChange={(event) => {
           setEvidence(event.target.value);
@@ -507,34 +507,34 @@ function EvaluationEditor({
         disabled={pending || saved || !draftReady}
         aria-describedby={`evidence-count-${assignmentId}`}
       />
-      <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
+      <p id={`evidence-count-${assignmentId}`} className="-mt-3 text-right text-xs tabular-nums text-muted">{evidence.length} / {MAX_EVIDENCE_LENGTH}</p>
       <OperationNotice kind="error">{error}</OperationNotice>
       {reviewing && !saved && (
-        <section className="rounded-2xl bg-mecg-navy/[0.045] p-4" aria-labelledby={`review-${assignmentId}`}>
+        <section className="rounded-xl bg-wash p-4" aria-labelledby={`review-${assignmentId}`}>
           <h3 ref={reviewHeadingRef} tabIndex={-1} id={`review-${assignmentId}`} className="font-semibold text-mecg-navy">Review before locking</h3>
-          <p className="mt-1 text-sm text-mecg-navy/65">Confirm every rating and evidence note. Submission is final.</p>
-          <dl className="mt-3 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+          <p className="mt-1 text-sm text-muted">Confirm every rating and evidence note. Submission is final.</p>
+          <dl className="mt-3 divide-y divide-line border-y border-line">
             {criteria.map((criterion) => (
               <div key={criterion.id} className="flex items-start justify-between gap-4 py-2.5 text-sm">
                 <div>
                   <dt className="font-medium text-mecg-navy">{criterion.name}</dt>
-                  {notes[criterion.id]?.trim() && <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-mecg-navy/65">{notes[criterion.id]}</dd>}
+                  {notes[criterion.id]?.trim() && <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-muted">{notes[criterion.id]}</dd>}
                 </div>
                 <dd className="shrink-0 font-semibold text-mecg-navy">{scores[criterion.id] === "NO" ? "Not observed" : `${scores[criterion.id]} / 5`}</dd>
               </div>
             ))}
           </dl>
-          {evidence.trim() && <div className="mt-3 text-sm text-mecg-navy"><p className="font-medium">Overall evidence</p><p className="mt-1 whitespace-pre-wrap break-words text-mecg-navy/65">{evidence}</p></div>}
+          {evidence.trim() && <div className="mt-3 text-sm text-mecg-navy"><p className="font-medium">Overall evidence</p><p className="mt-1 whitespace-pre-wrap break-words text-muted">{evidence}</p></div>}
           <button type="button" className="button-secondary mt-3 text-sm" onClick={() => { setReviewing(false); window.requestAnimationFrame(() => reviewButtonRef.current?.focus()); }}>Keep editing</button>
         </section>
       )}
-      {saved && <p className="submission-confirmed rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900" role="status">Evaluation submitted and locked.</p>}
+      {saved && <p className="submission-confirmed rounded-xl bg-success-wash px-4 py-3 text-sm font-semibold text-success" role="status">Evaluation submitted and locked.</p>}
       <button ref={reviewButtonRef} type="submit" disabled={pending || saved || !draftReady} className={`button-primary disabled:opacity-50 ${saved ? "is-success" : ""}`}>
         {saved ? "✓ Submitted" : pending ? "Submitting…" : reviewing ? "Confirm and lock evaluation" : "Review evaluation"}
       </button>
       </fieldset>}
       <div
-        className={`rounded-xl px-4 py-3 text-sm ${draftSaveState.kind === "error" ? "bg-red-50 text-red-900" : "bg-mecg-navy/[0.045] text-mecg-navy/70"}`}
+        className={`rounded-xl px-4 py-3 text-sm ${draftSaveState.kind === "error" ? "bg-danger-wash text-danger" : "bg-wash text-muted"}`}
         role={draftSaveState.kind === "error" ? "alert" : "status"}
         aria-live="polite"
       >
@@ -555,7 +555,7 @@ function EvaluationEditor({
         )}
       </div>
       {draftReady && !saved && backupChecked && (
-        <div className={`rounded-xl px-4 py-3 text-sm ${localBackupSignature === draftSignature ? "bg-mecg-navy/[0.045] text-mecg-navy/70" : "bg-amber-50 text-amber-950"}`} role={localBackupSignature === draftSignature ? "status" : "alert"}>
+        <div className={`rounded-xl px-4 py-3 text-sm ${localBackupSignature === draftSignature ? "bg-wash text-muted" : "bg-warning-wash text-warning"}`} role={localBackupSignature === draftSignature ? "status" : "alert"}>
           <p>{localBackupSignature === draftSignature
             ? "Browser backup is current in this tab, for up to 24 hours."
             : serverSavedSignature === draftSignature && !draftLoadFailed

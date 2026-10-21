@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
@@ -43,6 +43,6 @@ export function AccountProvisioningRecovery({ cycleId }: { cycleId: string }) {
     <a href="https://dashboard.clerk.com" target="_blank" rel="noreferrer" className="button-secondary">Check Clerk account <span className="sr-only">in a new tab</span></a>
     <Link href={`/admin/people${query}`} target="_blank" rel="noreferrer" className="button-secondary">Check cycle access <span className="sr-only">in a new tab</span></Link>
     <Link href={`/admin/provisioning${query}`} target="_blank" rel="noreferrer" className="button-secondary">Open account recovery <span className="sr-only">in a new tab</span></Link>
-    <p className="w-full leading-6 text-mecg-navy/70">These links preserve this form. Check the existing account and membership before retrying; a successful request may have no recovery incident.</p>
+    <p className="w-full leading-6 text-muted">These links preserve this form. Check the existing account and membership before retrying; a successful request may have no recovery incident.</p>
   </div>;
 }

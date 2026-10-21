@@ -1,6 +1,6 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
@@ -140,17 +140,17 @@ export default async function AdminDashboard() {
         <aside className="recruitment-rail lg:col-start-2 lg:row-start-1" aria-label="Cycle priorities">
           <section>
             <h2>Needs your attention</h2>
-            {attentionItems.length ? attentionItems.map(item => <Link data-roster-queue key={item.label} href={withWorkspaceCycle(`/admin?filter=${item.filter}#applicants`, cycleId)} className="recruitment-queue"><span>{item.count}</span><div><strong>{item.label}</strong><p>{item.detail}</p></div><span aria-hidden="true">→</span></Link>) : <p className="text-sm text-mecg-navy/65">No missing resumes, new submissions or applicants in final review. Evidence and release checks remain in each applicant file.</p>}
+            {attentionItems.length ? attentionItems.map(item => <Link data-roster-queue key={item.label} href={withWorkspaceCycle(`/admin?filter=${item.filter}#applicants`, cycleId)} className="recruitment-queue"><span>{item.count}</span><div><strong>{item.label}</strong><p>{item.detail}</p></div><span aria-hidden="true">→</span></Link>) : <p className="text-sm text-muted">No missing resumes, new submissions or applicants in final review. Evidence and release checks remain in each applicant file.</p>}
           </section>
           <section>
             <h2>Next on the calendar</h2>
-            {upcomingEvents.length ? upcomingEvents.slice(0, 1).map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)}</p><p>{event.checkins[0]?.count ?? 0} checked in{event.id === nextEvent?.id && nextEventCapacity > 0 && <> · {nextEventRsvps}/{nextEventCapacity} RSVPs</>}</p></article>) : <p className="text-sm text-mecg-navy/65">No upcoming events scheduled.</p>}
+            {upcomingEvents.length ? upcomingEvents.slice(0, 1).map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)}</p><p>{event.checkins[0]?.count ?? 0} checked in{event.id === nextEvent?.id && nextEventCapacity > 0 && <> · {nextEventRsvps}/{nextEventCapacity} RSVPs</>}</p></article>) : <p className="text-sm text-muted">No upcoming events scheduled.</p>}
             {upcomingEvents.length > 1 && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Later events · {upcomingEvents.length - 1}</summary>{upcomingEvents.slice(1).map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)}</p></article>)}</details>}
             {pastEvents.length > 0 && <details className="mt-4"><summary className="min-h-11 cursor-pointer text-sm font-semibold">Past events · {pastEvents.length}</summary>{pastEvents.slice().reverse().map(event => <article key={event.id} className="recruitment-event"><Link href={withWorkspaceCycle(`/admin/events/${event.id}`, cycleId)}>{event.name}</Link><p>{eventDate(event.starts_at)} · {event.checkins[0]?.count ?? 0} checked in</p></article>)}</details>}
           </section>
           <section>
             <h2>Evaluation progress</h2>
-            <p className="text-sm leading-6 text-mecg-navy/65">{submittedAssignments} of {totalAssignments} assigned evaluations submitted.</p>
+            <p className="text-sm leading-6 text-muted">{submittedAssignments} of {totalAssignments} assigned evaluations submitted.</p>
             {canOperate && <Link href={withWorkspaceCycle("/admin/rounds", cycleId)} className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-mecg-navy">Review interview progress →</Link>}
           </section>
         </aside>
@@ -168,7 +168,7 @@ export default async function AdminDashboard() {
             cycleId={cycle.id}
             referralCount={referralsResult.count ?? 0}
           />
-          {canOperate && <details className="recruitment-manual"><summary>Add an applicant manually</summary><p className="mb-4 text-sm text-mecg-navy/65">Use this when someone cannot submit the standard application.</p><AddApplicantForm cycleId={cycle.id} /></details>}
+          {canOperate && <details className="recruitment-manual"><summary>Add an applicant manually</summary><p className="mb-4 text-sm text-muted">Use this when someone cannot submit the standard application.</p><AddApplicantForm cycleId={cycle.id} /></details>}
         </div>
 
       </div>

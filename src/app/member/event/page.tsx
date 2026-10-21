@@ -1,7 +1,7 @@
 import { selectWorkspaceMembership } from "@/lib/workspace-cycle";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { requireMember } from "@/lib/auth";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
@@ -65,23 +65,23 @@ export default async function EventGradingPage({ searchParams }: { searchParams:
       <PillNav ariaLabel="Observation events" current={currentWorkspace} links={navLinks} />
 
       {!selected ? (
-        <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
+        <div className="rounded-xl border-[1.5px] border-dashed border-line p-7 text-center">
           <p className="font-semibold text-mecg-navy">No event observations yet</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Assigned events appear here when they are available. Check with the event organizer if you expected an event.</p>
+          <p className="mt-1 text-sm text-muted">Assigned events appear here when they are available. Check with the event organizer if you expected an event.</p>
           <Link href={withWorkspaceCycle("/member", cycleId)} className="button-secondary mt-4 inline-flex text-sm">Back to my work</Link>
         </div>
       ) : failure ? (
-        <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
+        <div className="rounded-xl border-[1.5px] border-dashed border-line p-7 text-center">
           <p className="font-semibold text-mecg-navy">{failure.title}</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">{failure.detail}</p>
+          <p className="mt-1 text-sm text-muted">{failure.detail}</p>
           <Link href={currentWorkspace} className="button-secondary mt-4 inline-flex text-sm">Reload event</Link>
         </div>
       ) : (
         <section>
-          <div className="sticky top-0 z-20 -mx-6 border-b border-mecg-navy/8 bg-white/95 px-6 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+          <div className="sticky top-0 z-20 -mx-6 border-b border-line bg-white/95 px-6 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
             <SectionLabel>Qualitative observations</SectionLabel>
             <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{observedCount} of {rosterRows.length} applicants observed</h2>
-            <p className="mt-1 text-sm text-mecg-navy/65">Started {formatStart(selected.starts_at)} · observations never affect applicant scores or attendance decisions.</p>
+            <p className="mt-1 text-sm text-muted">Started {formatStart(selected.starts_at)} · observations never affect applicant scores or attendance decisions.</p>
             <div className="progress-track mt-3 sm:max-w-sm" aria-hidden="true">
               <div className="progress-fill" style={{ transform: `scaleX(${rosterRows.length ? observedCount / rosterRows.length : 0})` }} />
             </div>

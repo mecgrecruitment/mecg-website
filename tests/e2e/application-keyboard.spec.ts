@@ -92,8 +92,12 @@ test("native keyboard traverses validation, revision recovery, materials and con
   await enter(page, next);
   await expect(page.getByRole("heading", { name: "Review before you submit." })).toBeFocused();
   const consent = page.getByRole("checkbox");
-  await tabTo(page, consent);
+  await enter(page, page.getByRole("button", { name: "Submit application", exact: true }));
+  await expect(consent).toBeFocused();
+  await expect(consent).toHaveAccessibleDescription("Check this box to confirm you reviewed your application before submitting.");
+  expect(submission).toBeNull();
   await page.keyboard.press("Space");
+  await expect(consent).not.toHaveAttribute("aria-invalid", "true");
   await expect(consent).toBeChecked();
   await enter(page, page.getByRole("button", { name: "Submit application", exact: true }));
   await expect(page).toHaveURL(/\/applicant\?submitted=e2e$/);

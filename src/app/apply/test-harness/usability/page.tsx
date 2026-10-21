@@ -7,6 +7,7 @@ import WorkspaceCycleSwitcher from "@/components/workspace-cycle-switcher";
 import PillNav from "@/components/pill-nav";
 import ApplicantStatusRefresh from "@/app/applicant/status-refresh";
 import HarnessReady from "../harness-ready";
+import { gradTermBaseYear } from "@/lib/grad-term";
 
 export const dynamic = "force-dynamic";
 export default async function UsabilityHarness({ searchParams }: { searchParams: Promise<{ cycleId?: string }> }) {
@@ -19,7 +20,7 @@ export default async function UsabilityHarness({ searchParams }: { searchParams:
     <ConflictForm applications={[{ id: "sample-app", name: "Sample Applicant" }]} />
     <BuddySlotForm cycleId={cycleId} />
     <ApplicantStatusRefresh />
-    <ProfileForm initial={{ displayName: "Sample Member", major: "Engineering", gradTerm: "Winter 2028", position: "Member", bio: "" }} />
+    <ProfileForm initial={{ displayName: "Sample Member", major: "Engineering", gradTerm: "Winter 2028", position: "Member", bio: "" }} gradBaseYear={gradTermBaseYear(new Date())} />
     <div style={{ paddingTop: 600 }}>
       <PillNav ariaLabel="Sample section navigation" current="#section-12" links={Array.from({ length: 12 }, (_, index) => [`#section-${index + 1}`, `Section ${index + 1}`] as const)} />
     </div>

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -79,26 +80,28 @@ export async function currentDestination(): Promise<AuthDestination | null> {
   return destinationForUser(supabase, identity.appUserId);
 }
 
-export async function currentUser(): Promise<CurrentUser | null> {
+// Memoized per server render, so a layout, page and component share one lookup.
+export const currentUser = cache(async (): Promise<CurrentUser | null> => {
   const identity = await resolveCurrentIdentity();
   if (!identity) return null;
   const supabase = await createClient();
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("id, display_name, primary_email, active")
-    .eq("id", identity.appUserId)
-    .maybeSingle();
+  const [{ data: profile, error: profileError }, { data: membershipRows, error: membershipError }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, display_name, primary_email, active")
+      .eq("id", identity.appUserId)
+      .maybeSingle(),
+    supabase
+      .from("memberships")
+      .select("id, cycle_id, role, active, rush_cycles!inner(id, name, status, hash_stage, created_at)")
+      .eq("user_id", identity.appUserId)
+      .eq("active", true),
+  ]);
   // A failed profile lookup is a dependency failure, not evidence that the
   // session is invalid. API routes can now distinguish it from a real 401.
   if (profileError) throw profileError;
   if (!profile?.active) return null;
-
-  const { data: membershipRows, error: membershipError } = await supabase
-    .from("memberships")
-    .select("id, cycle_id, role, active, rush_cycles!inner(id, name, status, hash_stage, created_at)")
-    .eq("user_id", identity.appUserId)
-    .eq("active", true);
   if (membershipError) throw membershipError;
 
   return {
@@ -120,7 +123,7 @@ export async function currentUser(): Promise<CurrentUser | null> {
       },
     })),
   };
-}
+});
 
 export async function requireUser() {
   const user = await currentUser();

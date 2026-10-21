@@ -84,7 +84,7 @@ export default function PipelineStatusForm({
           defaultValue={destinations.length === 1 ? destinations[0] : ""}
           required
           disabled={busy}
-          className="select-control min-w-0 w-full text-[10px]"
+          className="select-control min-w-0 w-full text-xs"
         >
           {destinations.length > 1 && <option value="" disabled>Move to…</option>}
           {destinations.map((item) => (
@@ -94,7 +94,7 @@ export default function PipelineStatusForm({
         <button
           type="submit"
           disabled={busy}
-          className="operation-control rounded-md px-2.5 text-[10px] font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:cursor-not-allowed disabled:opacity-50"
+          className="operation-control rounded-md px-2.5 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? "Moving…" : "Move"}
         </button>

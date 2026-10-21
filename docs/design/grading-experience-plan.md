@@ -1,6 +1,6 @@
 # Grading experience plan
 
-Status: proposed
+Status: largely shipped (September 13 to 14, 2026, and the October 20 live-room pass). Speed Dating and Group Case grade by tapping stars that save, the Board sees every score, and Hash runs from phones and the projector. Treat the body as the design record; DESIGN.md holds the current rules.
 
 Scope: application review, Speed Dating, Group Case, and the Board's review of submitted evidence
 

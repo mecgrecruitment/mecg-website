@@ -1,6 +1,6 @@
 # Applicant submission reliability plan
 
-Status: implemented; database migration and staging release checks pending
+Status: implemented and deployed; `20260907120000_applicant_submission_reliability` is in the production ledger. No staging environment exists, so the staging checks were not run.
 
 Date: 2026-09-10
 
