@@ -50,3 +50,16 @@ test("runAction falls back to the caller's message when a non-2xx response has n
     globalThis.fetch = originalFetch;
   }
 });
+
+test("runAction gives up on a request that never answers", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = ((_input: RequestInfo | URL, init?: RequestInit) => new Promise((_, reject) => {
+    init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+  })) as typeof fetch;
+  try {
+    const result = await runAction("/api/x", {}, "fallback message", { timeoutMs: 10 });
+    assert.deepEqual(result, { ok: false, body: null, error: "fallback message" });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

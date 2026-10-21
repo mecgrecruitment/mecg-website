@@ -98,7 +98,6 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   ]);
   if (ballot?.error) throw ballot.error;
   if (ownVotes?.error) throw ownVotes.error;
-  if (speedRoster?.error) throw new Error(speedRoster.error.message);
   // Same order as the ballot page, so the strip reads like the list it summarises.
   const voteByApplicant = new Map((ownVotes?.data ?? []).map((row) => [row.application_id, row.vote]));
   const ballotProgress: TallyItem[] = [...(ballot?.data ?? [])]
@@ -108,7 +107,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       return { id, state: vote === "YES" || vote === "UNSURE" || vote === "NO" ? vote : "empty" };
     });
   const ballotVoted = ballotProgress.filter((item) => item.state !== "empty").length;
-  const speedApplicants = speedRoster?.data?.applicants ?? [];
+  // The roster only feeds the progress strip; if it fails, the task shows without counts.
+  const speedApplicants = speedRoster?.error ? [] : speedRoster?.data?.applicants ?? [];
   const speedProgress: TallyItem[] = speedApplicants.map((applicant) => ({ id: applicant.applicationId, state: applicant.score === null ? "empty" : "done" }));
   const speedRated = speedProgress.filter((item) => item.state === "done").length;
   // Speed Dating assignments are created in groups and must only be submitted

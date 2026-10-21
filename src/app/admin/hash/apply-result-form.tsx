@@ -9,6 +9,7 @@ import { applyFinalPlan, finalApplyChangeMessage, finalApplyConfirmMessage, type
 
 const ENDPOINT = "/api/admin/hash-results";
 const FALLBACK = "Could not apply the result. Check your connection and try again.";
+const APPLY_TIMEOUT_MS = 15_000;
 
 // The board applies the members' vote, it does not author the outcome. The RPC
 // recomputes the tally, so a stale page cannot apply the wrong result.
@@ -37,7 +38,11 @@ export function ApplyAllFinalButton({ plan }: { plan: FinalApplyPlan }) {
     setReport(null);
     setDone(0);
     const result = await applyFinalPlan(plan.items, async (applicationId) => {
-      const response = await runAction(ENDPOINT, { applicationId }, FALLBACK);
+      const attempt = () => runAction(ENDPOINT, { applicationId }, FALLBACK, { timeoutMs: APPLY_TIMEOUT_MS });
+      let response = await attempt();
+      // No answer, or no JSON, may mean the apply landed and the reply was lost.
+      // Applying again is safe: the server returns the decision already recorded.
+      if (!response.ok && response.body === null) response = await attempt();
       if (!response.ok) return { ok: false, error: response.error };
       const outcome = (response.body as { outcome?: unknown } | null)?.outcome;
       return { ok: true, outcome: typeof outcome === "string" ? outcome : null };
