@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useAction } from "@/lib/use-action";
 import { HASH_STAGES, HASH_STAGE_RULES, hashOutcome, type HashStage } from "@/lib/hash-tally";
 import { applicationStatusLabel, hashStageLabel } from "@/lib/labels";

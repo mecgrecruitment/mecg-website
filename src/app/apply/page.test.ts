@@ -57,7 +57,6 @@ async function mockPage(t: TestContext, options: { timelineUnavailable?: boolean
     },
   });
   t.mock.module("next/image", { defaultExport: () => null });
-  t.mock.module("next/link", { defaultExport: () => null });
   t.mock.module("@/lib/auth", {
     namedExports: { currentDestination: async () => "/apply", currentUser: async () => SIGNED_IN_USER },
   });

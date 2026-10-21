@@ -1,6 +1,6 @@
 import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { requireMember } from "@/lib/auth";
 import { screeningRpc, type ScreeningDetail } from "@/lib/screening-rpc";
 import { createClient } from "@/lib/supabase/server";

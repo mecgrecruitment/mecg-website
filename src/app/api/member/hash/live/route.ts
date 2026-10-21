@@ -22,15 +22,17 @@ export async function GET(request: NextRequest) {
   const requestedId = request.nextUrl.searchParams.get("applicationId") ?? "";
   if (requestedId.length > 200) return NextResponse.json({ error: "Invalid applicant" }, { status: 400 });
   const supabase = await createClient();
-  const { data: cycleRow, error: cycleError } = await supabase.from("rush_cycles").select("hash_presenting_application_id").eq("id", cycleMembership.cycleId).single();
+  const [{ data: cycleRow, error: cycleError }, { data: ballot, error: ballotError }] = await Promise.all([
+    supabase.from("rush_cycles").select("hash_presenting_application_id").eq("id", cycleMembership.cycleId).single(),
+    // The ballot is the visibility boundary: it excludes conflicts, closed stages,
+    // ineligible voters/statuses, and applicants with recorded decisions.
+    supabase.rpc("hash_ballot", { target_cycle_id: cycleMembership.cycleId }),
+  ]);
   if (cycleError) {
     console.error("member hash live failed", cycleError);
     const mapped = mapRpcError(cycleError, "Could not load the hash");
     return NextResponse.json(mapped.body, { status: mapped.status });
   }
-  // The ballot is the visibility boundary: it excludes conflicts, closed stages,
-  // ineligible voters/statuses, and applicants with recorded decisions.
-  const { data: ballot, error: ballotError } = await supabase.rpc("hash_ballot", { target_cycle_id: cycleMembership.cycleId });
   if (ballotError) {
     const mapped = mapRpcError(ballotError, "Could not load the hash");
     return NextResponse.json(mapped.body, { status: mapped.status });

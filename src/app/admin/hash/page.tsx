@@ -1,7 +1,7 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { roundEvidence } from "@/lib/round-evidence";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";

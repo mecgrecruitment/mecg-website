@@ -2,7 +2,7 @@ import { requestedWorkspaceCycleId } from "@/lib/workspace-cycle";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { hasPermission } from "@/lib/authorization";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { notFound } from "next/navigation";
 import { requireMember } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";

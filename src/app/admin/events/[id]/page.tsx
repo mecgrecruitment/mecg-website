@@ -9,7 +9,7 @@ import RotateButton from "./rotate-button";
 import SlotForm from "./slot-form";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
 import EventControls from "./event-controls";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { roundCloseJsonRequest, type RoundCloseOutcome } from "./round-close-request";
 import { roundStatusLabel } from "@/lib/labels";
 import { canTransitionRound } from "@/lib/workflow";

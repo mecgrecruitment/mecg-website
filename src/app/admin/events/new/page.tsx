@@ -1,5 +1,5 @@
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { hasPermission } from "@/lib/authorization";

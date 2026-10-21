@@ -75,7 +75,7 @@ test("dashboard next action and schedule recover from an isolated schedule RPC f
     assert.match(html, /Applicant response stays visible/);
     assert.match(html, /Resume on file/);
     assert.doesNotMatch(html, /caught up|No action needed|No RSVPs yet|>Confirmed</);
-    assert.equal(logs.mock.callCount(), 1);
+    assert.equal(logs.mock.calls.filter((call) => call.arguments[0] === "applicant schedule lookup failed").length, 1);
   });
 
   await t.test("an offer keeps priority while schedule failure remains recoverable", async () => {

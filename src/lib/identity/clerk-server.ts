@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { auth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 import { hasClerkConfiguration, requireClerkIssuer } from "@/lib/env";
 import { withClerkTimeout } from "@/lib/clerk-retry";
@@ -18,7 +19,7 @@ function displayName(user: NonNullable<Awaited<ReturnType<typeof clerkCurrentUse
   return fullName || user.username || email.split("@", 1)[0] || "MECG user";
 }
 
-export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null> {
+export const resolveCurrentIdentity = cache(async (): Promise<ResolvedIdentity | null> => {
   if (!hasClerkConfiguration()) return null;
   const session = await auth();
   if (!session.userId) return null;
@@ -69,4 +70,4 @@ export async function resolveCurrentIdentity(): Promise<ResolvedIdentity | null>
   });
   if (provisionError) throw provisionError;
   return { appUserId, issuer, subject: session.userId };
-}
+});

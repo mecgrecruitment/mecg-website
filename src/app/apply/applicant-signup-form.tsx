@@ -1,7 +1,7 @@
 "use client";
 
 import { useSignUp } from "@clerk/nextjs";
-import Link from "next/link";
+import Link from "@/components/workspace-link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import FormField from "@/components/form-field";
