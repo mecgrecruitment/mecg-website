@@ -39,7 +39,7 @@ export default function DecisionForm({ cycleId, applicationId }: { cycleId: stri
         ))}
       </select>
       <label className="sr-only" htmlFor={`reason-${applicationId}`}>Evidence-based reason</label>
-      <input id={`reason-${applicationId}`} name="reason" required disabled={pending} placeholder="Evidence-based reason" className="operation-control min-h-11 w-full rounded-xl bg-mecg-navy/[0.035] px-3 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
+      <input id={`reason-${applicationId}`} name="reason" required disabled={pending} placeholder="Evidence-based reason" className="operation-control min-h-11 w-full rounded-xl bg-wash px-3 text-xs inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
       <button type="submit" disabled={pending} className="button-primary self-start text-xs">{pending ? "Creating…" : "Recommend"}</button>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>
@@ -77,7 +77,7 @@ export function PreviewForm({ decisionId, cycleId, current }: { decisionId: stri
   return (
     <form className="flex flex-col gap-1.5" onSubmit={submit}>
       <label className="sr-only" htmlFor={`preview-${decisionId}`}>Applicant email preview</label>
-      <textarea id={`preview-${decisionId}`} name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-mecg-navy/[0.035] p-2.5 text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
+      <textarea id={`preview-${decisionId}`} name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-wash p-2.5 text-xs inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
       <button type="submit" disabled={pending} className="button-secondary self-start text-xs">
         {pending ? "Saving…" : "Save preview"}
       </button>
@@ -213,7 +213,7 @@ export function ReleaseAllButton({ cycleId, lockedCount }: { cycleId: string; lo
   }
 
   function itemList(items: LabeledReleaseItem[]) {
-    return <ul className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+    return <ul className="divide-y divide-line border-y border-line">
       {items.map((item) => <li key={item.decisionId} className="py-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link href={withWorkspaceCycle(`/admin/applications/${encodeURIComponent(item.applicationId)}`, cycleId)} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-2">
@@ -222,7 +222,7 @@ export function ReleaseAllButton({ cycleId, lockedCount }: { cycleId: string; lo
           <span>{decisionOutcomeLabel(item.outcome)}</span>
           <span className="font-semibold">{item.reasonCode ? "Blocked" : "Eligible"}</span>
         </div>
-        {item.reasonCode && <p className="max-w-2xl leading-6 text-mecg-navy/70">{RELEASE_REASONS[item.reasonCode]}</p>}
+        {item.reasonCode && <p className="max-w-2xl leading-6 text-muted">{RELEASE_REASONS[item.reasonCode]}</p>}
         {item.reasonCode === "EVIDENCE_NOT_READY" && <Link href={releaseEvidenceHref(item.applicationId, cycleId)} className="mt-2 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Inspect missing evidence for {item.applicantLabel}</Link>}
       </li>)}
     </ul>;
@@ -247,17 +247,17 @@ export function ReleaseAllButton({ cycleId, lockedCount }: { cycleId: string; lo
       {pending ? "Checking release…" : report ? "Review remaining outcomes" : `Review ${lockedCount} locked outcome${lockedCount === 1 ? "" : "s"}`}
     </button>
     <OperationNotice kind="error">{error}</OperationNotice>
-    {review && <section ref={reviewRef} tabIndex={-1} aria-label="Confirm release cohort" className="w-full border border-mecg-navy/15 p-4 sm:p-5">
+    {review && <section ref={reviewRef} tabIndex={-1} aria-label="Confirm release cohort" className="w-full border border-line p-4 sm:p-5">
       <h3 className="text-base font-semibold">Review outcomes before release</h3>
       <p className="mt-2 leading-6">{review.length} locked outcomes: {eligible.length} eligible, {blocked.length} blocked. Only the eligible outcomes below will be released. Applicant-visible release cannot be undone.</p>
-      <p className="my-3 leading-6 text-mecg-navy/70">Each row identifies the applicant code and outcome. The server checks this cohort again before releasing; queued emails are tracked separately in the delivery log.</p>
+      <p className="my-3 leading-6 text-muted">Each row identifies the applicant code and outcome. The server checks this cohort again before releasing; queued emails are tracked separately in the delivery log.</p>
       <dl className="my-4 flex flex-wrap gap-x-6 gap-y-2" aria-label="Full cohort outcomes">
-        {DECISION_OUTCOMES.map((outcome) => <div key={outcome}><dt className="text-mecg-navy/65">{decisionOutcomeLabel(outcome)}</dt><dd className="font-semibold tabular-nums">{review.filter((item) => item.outcome === outcome).length}</dd></div>)}
+        {DECISION_OUTCOMES.map((outcome) => <div key={outcome}><dt className="text-muted">{decisionOutcomeLabel(outcome)}</dt><dd className="font-semibold tabular-nums">{review.filter((item) => item.outcome === outcome).length}</dd></div>)}
       </dl>
       <div className="my-4 grid gap-3 sm:grid-cols-3">
-        <label className="text-sm font-medium">Applicant code<input type="search" value={filters.query} maxLength={100} disabled={pending} onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy" /></label>
-        <div><label htmlFor={`${filterId}-eligibility`} className="text-sm font-medium">Release eligibility</label><select id={`${filterId}-eligibility`} value={filters.eligibility} disabled={pending} onChange={(event) => { const eligibility = event.target.value; if (eligibility === "ALL" || eligibility === "ELIGIBLE" || eligibility === "BLOCKED") setFilters((current) => ({ ...current, eligibility })); }} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All eligibility</option><option value="ELIGIBLE">Eligible</option><option value="BLOCKED">Blocked</option></select></div>
-        <div><label htmlFor={`${filterId}-outcome`} className="text-sm font-medium">Outcome</label><select id={`${filterId}-outcome`} value={filters.outcome} disabled={pending} onChange={(event) => { const outcome = event.target.value; if (outcome === "ALL" || outcome === "OFFER" || outcome === "WAITLIST" || outcome === "REJECT" || outcome === "PROCEDURAL_REVIEW") setFilters((current) => ({ ...current, outcome })); }} className="mt-2 min-h-11 w-full rounded-xl border border-mecg-navy/25 bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All outcomes</option>{DECISION_OUTCOMES.map((outcome) => <option key={outcome} value={outcome}>{decisionOutcomeLabel(outcome)}</option>)}</select></div>
+        <label className="text-sm font-medium">Applicant code<input type="search" value={filters.query} maxLength={100} disabled={pending} onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))} className="mt-2 min-h-11 w-full rounded-xl border border-line-strong bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy" /></label>
+        <div><label htmlFor={`${filterId}-eligibility`} className="text-sm font-medium">Release eligibility</label><select id={`${filterId}-eligibility`} value={filters.eligibility} disabled={pending} onChange={(event) => { const eligibility = event.target.value; if (eligibility === "ALL" || eligibility === "ELIGIBLE" || eligibility === "BLOCKED") setFilters((current) => ({ ...current, eligibility })); }} className="mt-2 min-h-11 w-full rounded-xl border border-line-strong bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All eligibility</option><option value="ELIGIBLE">Eligible</option><option value="BLOCKED">Blocked</option></select></div>
+        <div><label htmlFor={`${filterId}-outcome`} className="text-sm font-medium">Outcome</label><select id={`${filterId}-outcome`} value={filters.outcome} disabled={pending} onChange={(event) => { const outcome = event.target.value; if (outcome === "ALL" || outcome === "OFFER" || outcome === "WAITLIST" || outcome === "REJECT" || outcome === "PROCEDURAL_REVIEW") setFilters((current) => ({ ...current, outcome })); }} className="mt-2 min-h-11 w-full rounded-xl border border-line-strong bg-white px-3 text-mecg-navy focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy"><option value="ALL">All outcomes</option>{DECISION_OUTCOMES.map((outcome) => <option key={outcome} value={outcome}>{decisionOutcomeLabel(outcome)}</option>)}</select></div>
       </div>
       <p role="status" className="leading-6">Showing {visibleItems.length} of {review.length} reviewed outcomes. Filters change this view only; release includes all {eligible.length} eligible outcomes in the full reviewed cohort.</p>
       <div className="my-4 flex flex-wrap gap-3">
@@ -266,9 +266,9 @@ export function ReleaseAllButton({ cycleId, lockedCount }: { cycleId: string; lo
       </div>
       <div tabIndex={0} role="region" aria-label="Filtered reviewed outcomes" className="max-h-[28rem] overflow-y-auto overscroll-contain focus:outline-2 focus:outline-offset-2 focus:outline-mecg-navy">{visibleItems.length ? itemList(visibleItems) : <p className="py-4">No outcomes match these filters. The full reviewed cohort is unchanged.</p>}</div>
     </section>}
-    {report && <section ref={resultRef} tabIndex={-1} aria-label="Batch release result" className="w-full border border-mecg-navy/15 p-4 sm:p-5">
+    {report && <section ref={resultRef} tabIndex={-1} aria-label="Batch release result" className="w-full border border-line p-4 sm:p-5">
       <p role="status" className="font-semibold">{report.released} released · {report.skipped} skipped</p>
-      <p className="mt-2 leading-6 text-mecg-navy/70">Released outcomes are visible to applicants. Their emails are queued; delivery is not yet confirmed. <Link href={withWorkspaceCycle("/admin/messages", cycleId)} className="inline-flex min-h-11 items-center underline underline-offset-2">Open delivery log</Link></p>
+      <p className="mt-2 leading-6 text-muted">Released outcomes are visible to applicants. Their emails are queued; delivery is not yet confirmed. <Link href={withWorkspaceCycle("/admin/messages", cycleId)} className="inline-flex min-h-11 items-center underline underline-offset-2">Open delivery log</Link></p>
       {report.skipped > 0 && <><h3 className="mt-3 font-semibold">Resolve skipped outcomes, then review remaining outcomes to retry</h3>{itemList(report.items.filter((item) => item.reasonCode !== null))}</>}
     </section>}
   </div>;
@@ -345,7 +345,7 @@ function OfferDeadlineEditor({ applicationId, current }: { applicationId: string
         void save(String(new FormData(event.currentTarget).get("expiresAt") ?? ""));
       }}
     >
-      <label className="text-xs font-semibold text-mecg-navy/60">
+      <label className="text-xs font-semibold text-muted">
         Offer deadline (Detroit time)
         <input
           type="datetime-local"
@@ -354,7 +354,7 @@ function OfferDeadlineEditor({ applicationId, current }: { applicationId: string
           value={value}
           aria-describedby={`${fieldId}-result`}
           onChange={(event) => { setValue(event.target.value); setSuccess(""); setError(""); setEdited(true); }}
-          className="mt-1.5 block min-h-11 rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
+          className="mt-1.5 block min-h-11 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
         />
       </label>
       <div className="flex flex-wrap gap-2">
@@ -366,7 +366,7 @@ function OfferDeadlineEditor({ applicationId, current }: { applicationId: string
       <div id={`${fieldId}-result`} ref={resultRef} tabIndex={-1} aria-label="Offer deadline save result">
         <OperationNotice kind="error">{error}</OperationNotice>
         <OperationNotice kind="success">{success}</OperationNotice>
-        {edited && !pending && !uncertain && !success && <p role="status" className="text-sm text-mecg-navy/65">Changes not saved.</p>}
+        {edited && !pending && !uncertain && !success && <p role="status" className="text-sm text-muted">Changes not saved.</p>}
         {uncertain && <>
           <OperationNotice kind="info">The deadline save could not be confirmed. It may already be applied. Proposed value: {proposed ? formatEasternDateTime(proposed) : "no deadline"}. Keep a copy of this value, then reload the current offer to check its saved deadline before another change.</OperationNotice>
           <button type="button" className="button-secondary mt-2" onClick={() => window.location.reload()}>Reload current offer deadline</button>

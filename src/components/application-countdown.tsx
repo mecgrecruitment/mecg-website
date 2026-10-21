@@ -70,7 +70,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
 
   if (remaining?.done) {
     return (
-      <p className="mt-4 text-sm font-semibold text-emerald-800" role="status">
+      <p className="mt-4 text-sm font-semibold text-success" role="status">
         Applications are open now.
       </p>
     );
@@ -85,12 +85,12 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
         {UNITS.map(({ key, label }) => (
           <div
             key={key}
-            className="rounded-2xl bg-mecg-navy/[0.04] px-3 py-4 text-center shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]"
+            className="rounded-xl bg-wash px-3 py-4 text-center inset-ring inset-ring-line"
           >
             <p className="tabular text-3xl font-semibold tracking-tight text-mecg-navy">
               {remaining ? pad(remaining[key]) : "--"}
             </p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-mecg-navy/65">{label}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">{label}</p>
           </div>
         ))}
       </div>

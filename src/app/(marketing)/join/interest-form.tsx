@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { CLASS_YEAR_LABELS, CLASS_YEARS } from "@/lib/workflow";
 
 const FIELD_CLASS =
-  "mt-2 min-h-12 w-full rounded-sm border border-white/15 bg-white px-4 text-mecg-navy placeholder:text-mecg-navy/45 disabled:cursor-not-allowed disabled:opacity-60";
+  "mt-2 min-h-12 w-full rounded-sm border border-white/15 bg-white px-4 text-mecg-navy placeholder:text-muted disabled:cursor-not-allowed disabled:opacity-60";
 // The form sits on the navy section, so the select takes a solid white fill and
 // the same square corners and hairline as its sibling inputs above.
 const SELECT_CLASS = "select-control mt-2 rounded-sm border border-white/15 bg-white";
@@ -62,7 +62,7 @@ export default function InterestForm() {
 
   return (
     <form onSubmit={submit} aria-busy={pending} className="mt-7 grid gap-4 sm:grid-cols-2">
-      <label className="block text-sm font-medium text-white/80">
+      <label className="block text-sm font-medium text-white">
         Full name
         <input
           maxLength={120}
@@ -74,7 +74,7 @@ export default function InterestForm() {
           className={FIELD_CLASS}
         />
       </label>
-      <label className="block text-sm font-medium text-white/80">
+      <label className="block text-sm font-medium text-white">
         Email
         <input
           maxLength={254}
@@ -87,7 +87,7 @@ export default function InterestForm() {
           className={FIELD_CLASS}
         />
       </label>
-      <label className="block text-sm font-medium text-white/80">
+      <label className="block text-sm font-medium text-white">
         Uniqname <span className="font-normal text-white/70">optional</span>
         <input
           maxLength={200}
@@ -98,7 +98,7 @@ export default function InterestForm() {
           className={FIELD_CLASS}
         />
       </label>
-      <label className="block text-sm font-medium text-white/80">
+      <label className="block text-sm font-medium text-white">
         Class year <span className="font-normal text-white/70">optional</span>
         <select name="classYear" defaultValue="" disabled={pending} className={SELECT_CLASS}>
           <option value="">Prefer not to say</option>
@@ -107,7 +107,7 @@ export default function InterestForm() {
           ))}
         </select>
       </label>
-      <label className="block text-sm font-medium text-white/80 sm:col-span-2">
+      <label className="block text-sm font-medium text-white sm:col-span-2">
         How did you hear about MECG? <span className="font-normal text-white/70">optional</span>
         <input
           maxLength={200}

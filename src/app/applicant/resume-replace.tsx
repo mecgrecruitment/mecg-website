@@ -45,7 +45,7 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
 
   return (
     <div className="mt-3">
-      <label className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-4 text-sm font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.08]">
+      <label className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-4 text-sm font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10">
         <input
           ref={inputRef}
           type="file"
@@ -58,12 +58,12 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
         />
         {hasResume ? "Replace resume" : "Upload a resume"}
       </label>
-      <p className="mt-1.5 text-xs text-mecg-navy/45">
+      <p className="mt-1.5 text-xs text-muted">
         PDF, up to 10 MB. You can change this until applications close, or until review starts on your file.
       </p>
-      {state.kind === "working" && <p role="status" className="mt-2 text-sm text-mecg-navy/60">Uploading {state.label}…</p>}
-      {state.kind === "done" && <p role="status" className="mt-2 text-sm text-emerald-800">{state.label} is now on file.</p>}
-      {state.kind === "error" && <p role="alert" className="mt-2 text-sm text-red-700">{state.message}</p>}
+      {state.kind === "working" && <p role="status" className="mt-2 text-sm text-muted">Uploading {state.label}…</p>}
+      {state.kind === "done" && <p role="status" className="mt-2 text-sm text-success">{state.label} is now on file.</p>}
+      {state.kind === "error" && <p role="alert" className="mt-2 text-sm text-danger">{state.message}</p>}
     </div>
   );
 }

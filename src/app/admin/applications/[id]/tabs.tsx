@@ -19,7 +19,7 @@ export default function DossierTabs({ panels }: { panels: Record<PanelKey, React
       <div id="board-application" className="min-w-0 scroll-mt-20">{panels.evidence}</div>
       <aside id="board-review-tools" className="application-review-rail board-review-rail" aria-label="Application review tools">
         <h2 className="text-lg font-semibold">Review &amp; decision</h2>
-        <p className="mt-1 text-sm text-mecg-navy/65">Consult the evidence while keeping the application in view.</p>
+        <p className="mt-1 text-sm text-muted">Consult the evidence while keeping the application in view.</p>
         {REVIEW_SECTIONS.map(([key, label]) => (
           <details key={key} className="reading-tool-section" open={key === "interviews" || key === "decision"}>
             <summary>{label}</summary>

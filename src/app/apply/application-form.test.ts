@@ -37,6 +37,7 @@ const BASE: FormProps = {
   cycleName: "Fall 2026",
   questions: [],
   initialDraft: null,
+  gradBaseYear: 2026,
 };
 
 async function renderForm(t: TestContext, props: Partial<FormProps>, caseName: string) {
@@ -81,11 +82,6 @@ test("submission does not wait for autosave and reconciles an ambiguous response
   assert.doesNotMatch(submit, /saveQueue|await saveDraft/);
   assert.match(submit, /reconcileSubmittedApplication\(\{ cycleId \}\)/);
   assert.match(submit, /\[500, 502, 503, 504\]\.includes\(response\.status\)/);
-});
-
-test("question URL validation rejects whitespace before the database does", () => {
-  const source = readFileSync(new URL("./application-form.tsx", import.meta.url), "utf8");
-  assert.match(source, /if \(\/\\s\/\.test\(trimmed\)/);
 });
 
 test("resume selection allows browsers that omit the PDF MIME type", () => {

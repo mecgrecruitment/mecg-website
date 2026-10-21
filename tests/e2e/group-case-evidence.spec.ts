@@ -28,6 +28,21 @@ test("observation-only notes autosave and blur-save without invented scores and 
   await page.screenshot({ path: testInfo.outputPath("note-only-blockers.png"), fullPage: true });
 });
 
+test("a flag added just before leaving the page is still saved", async ({ page }) => {
+  const bodies: Array<{ note: string }> = [];
+  await page.route("**/api/member/group-case/ratings", async (route) => {
+    const body = route.request().postDataJSON(); bodies.push(body);
+    await route.fulfill({ json: { ...body, kind: "saved", revision, savedAt, quality } });
+  });
+  await page.goto("/apply/test-harness/group-case");
+  await page.getByRole("button", { name: /Synthetic Applicant/ }).click();
+  await page.getByText("Add a flag").click();
+  await page.getByTitle("Explicitly pulled a quieter teammate into the conversation.").click();
+  await page.getByRole("link", { name: "Leave Group Case" }).click();
+  await expect.poll(() => bodies.length).toBe(1);
+  expect(bodies[0].note).toBe("Green flag: Explicitly pulled a quieter teammate into the conversation.");
+});
+
 test("failed note save keeps text and retry uses the same null scores", async ({ page }) => {
   let calls = 0;
   await page.route("**/api/member/group-case/ratings", async (route) => {

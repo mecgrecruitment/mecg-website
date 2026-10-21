@@ -55,7 +55,7 @@ export default function WorkspaceMoreMenu({
             className={`flex min-h-11 items-center justify-between rounded-xl px-3 text-sm font-semibold transition-colors duration-150 ${
               selected
                 ? "bg-mecg-navy text-white"
-                : "text-mecg-navy/65 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"
+                : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy"
             }`}
           >
             {label}
@@ -76,7 +76,7 @@ export default function WorkspaceMoreMenu({
         className={`flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           currentSecondary
             ? "bg-mecg-navy text-white focus-visible:outline-mecg-orange"
-            : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy focus-visible:outline-mecg-navy"
+            : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy focus-visible:outline-mecg-navy"
         }`}
       >
         {currentSecondary ?? "More"}
@@ -97,14 +97,14 @@ export default function WorkspaceMoreMenu({
         <nav
           id="workspace-more-destinations"
           aria-label="More workspace destinations"
-          className="absolute right-0 top-[calc(100%+0.5rem)] max-h-[min(70vh,36rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl bg-white p-2 shadow-[0_18px_55px_rgba(7,13,31,0.18),inset_0_0_0_1px_rgba(7,13,31,0.1)]"
+          className="absolute right-0 top-[calc(100%+0.5rem)] max-h-[min(70vh,36rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-xl bg-white p-2 shadow-pop inset-ring inset-ring-line"
         >
-          <p className="px-3 pb-1 pt-2 text-xs font-semibold text-mecg-navy/60">My workspace</p>
+          <p className="px-3 pb-1 pt-2 text-xs font-semibold text-muted">My workspace</p>
           {linkList(myTools)}
           {adminTools.length > 0 && (
             <>
-              <div className="mx-3 my-2 border-t border-mecg-navy/[0.08]" />
-              <p className="px-3 pb-1 pt-1 text-xs font-semibold text-mecg-navy/60">Admin tools</p>
+              <div className="mx-3 my-2 border-t border-line" />
+              <p className="px-3 pb-1 pt-1 text-xs font-semibold text-muted">Admin tools</p>
               {linkList(adminTools)}
             </>
           )}

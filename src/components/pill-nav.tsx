@@ -42,7 +42,7 @@ export default function PillNav({
               className={`inline-flex min-h-11 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 ${
                 isSelected
                   ? "bg-mecg-navy text-white"
-                  : "text-mecg-navy/60 hover:bg-mecg-blue/[0.08] hover:text-mecg-navy"
+                  : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy"
               }`}
             >
               {label}

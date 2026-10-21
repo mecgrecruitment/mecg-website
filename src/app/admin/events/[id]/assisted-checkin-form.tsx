@@ -47,13 +47,13 @@ export default function AssistedCheckinForm({ eventId, locked }: { eventId: stri
   }
 
   return (
-    <section className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]">
-      <p className="text-[13px] font-semibold text-mecg-navy/60">Staff-assisted applicant check-in</p>
-      <p className="mt-2 text-sm text-mecg-navy/60">
+    <section className="rounded-xl p-5 inset-ring inset-ring-line">
+      <p className="text-[13px] font-semibold text-muted">Staff-assisted applicant check-in</p>
+      <p className="mt-2 text-sm text-muted">
         Verify the applicant in person, then enter their exact applicant code, uniqname, or email. This records attendance only and never changes a score.
       </p>
       {locked ? (
-        <p className="mt-3 text-sm text-mecg-navy/60">Assisted check-in is unavailable for a closed or cancelled event.</p>
+        <p className="mt-3 text-sm text-muted">Assisted check-in is unavailable for a closed or cancelled event.</p>
       ) : (
         <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={(submission) => { submission.preventDefault(); void checkIn(submission.currentTarget); }}>
           <FormField label="Exact applicant identifier" name="identifier" required maxLength={254} />

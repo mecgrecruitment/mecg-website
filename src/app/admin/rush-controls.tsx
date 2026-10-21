@@ -113,10 +113,10 @@ function useRushAction(cycleId: string) {
 }
 
 function ErrorNotice({ error }: { error: string }) {
-  return error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null;
+  return error ? <p role="alert" className="text-sm text-danger">{error}</p> : null;
 }
 
-const CARD = "rounded-2xl p-[18px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]";
+const CARD = "rounded-xl p-[18px] inset-ring inset-ring-line";
 
 function JsonActionForm({ className, onSubmitData, children }: {
   className?: string;
@@ -140,7 +140,7 @@ export function AddApplicantForm({ cycleId }: ControlProps) {
         onSubmitData={(data, form) => void act({ action: "ADD_APPLICANT", name: data.get("name"), contact: data.get("contact") }, form)}
       >
         <h2 className="text-base font-semibold">Add applicant</h2>
-        <p className="mt-1 text-xs leading-5 text-mecg-navy/60">For someone who could not use the public application.</p>
+        <p className="mt-1 text-xs leading-5 text-muted">For someone who could not use the public application.</p>
         <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-end">
           <div className="flex-1"><FormField label="Full name" name="name" required placeholder="Jordan Lee" /></div>
           <div className="flex-1"><FormField label="Email or phone" name="contact" required placeholder="jlee@umich.edu" /></div>
@@ -175,20 +175,20 @@ export function PeopleControls({
   return (
     <section aria-labelledby="access-heading">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className="text-[13px] font-semibold text-mecg-navy/55">Owner controls</p><h2 id="access-heading" className="mt-1 text-xl font-semibold">Membership access</h2><p className="mt-1 text-sm text-mecg-navy/60">Roles are exclusive for this cycle. Every change is recorded in Activity.</p></div>
+        <div><p className="text-[13px] font-semibold text-muted">Owner controls</p><h2 id="access-heading" className="mt-1 text-xl font-semibold">Membership access</h2><p className="mt-1 text-sm text-muted">Roles are exclusive for this cycle. Every change is recorded in Activity.</p></div>
         <div className="flex gap-2"><Link href={withWorkspaceCycle("/admin/audit", cycleId)} className="button-secondary">View activity</Link><button type="button" disabled={provisioning.pending} onClick={() => setShowAdd((value) => !value)} aria-expanded={showAdd} className="button-primary">{showAdd ? "Close" : "Add person"}</button></div>
       </div>
 
-      {duplicateAccountIds.length > 0 && <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-950 shadow-[inset_0_0_0_1px_rgba(180,83,9,0.18)]"><p className="font-semibold">Possible duplicate accounts need review</p><p className="mt-1 leading-6">{duplicateAccountIds.length} account records share an exact verified email with another profile. They remain separate so no history or permissions are silently merged.</p></div>}
+      {duplicateAccountIds.length > 0 && <div className="mt-4 rounded-xl bg-warning-wash p-4 text-sm text-warning inset-ring inset-ring-warning/20"><p className="font-semibold">Possible duplicate accounts need review</p><p className="mt-1 leading-6">{duplicateAccountIds.length} account records share an exact verified email with another profile. They remain separate so no history or permissions are silently merged.</p></div>}
 
       {showAdd && <div className="mt-4 grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
         <JsonActionForm className={CARD} onSubmitData={(data, form) => void provisioning.act({ action: "ADD_USER", name: data.get("name"), email: data.get("email"), password: data.get("password"), role: data.get("role") }, form)}>
-          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Create a new account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Use this only when the person does not already have a Clerk account.</p>
+          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Create a new account</h3><p className="mt-1 text-xs leading-5 text-muted">Use this only when the person does not already have a Clerk account.</p>
           <div className="mt-3 flex flex-col gap-2.5"><FormField label="Full name" name="name" required placeholder="Full name" /><FormField label="Email" name="email" type="email" required placeholder="Email" /><FormField label="Temporary password" name="password" type="password" minLength={CLERK_PASSWORD_MIN_LENGTH} required placeholder={`At least ${CLERK_PASSWORD_MIN_LENGTH} characters`} /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={provisioning.pending} className="button-primary mt-1 w-full">Create account</button></div>
           </fieldset>
         </JsonActionForm>
         <JsonActionForm className={CARD} onSubmitData={(data, form) => void provisioning.act({ action: "ADD_EXISTING_USER", email: data.get("email"), role: data.get("role") }, form)}>
-          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Add an existing account</h3><p className="mt-1 text-xs leading-5 text-mecg-navy/60">Give an existing account access to this recruitment cycle.</p>
+          <fieldset disabled={provisioning.pending} className="m-0 min-w-0 border-0 p-0"><h3 className="text-base font-semibold">Add an existing account</h3><p className="mt-1 text-xs leading-5 text-muted">Give an existing account access to this recruitment cycle.</p>
           <div className="mt-3 flex flex-col gap-2.5"><FormField label="Email" name="email" type="email" required placeholder="name@umich.edu" /><Select label="Role" name="role" defaultValue="MEMBER">{MEMBER_ROLES.filter((role) => role.value !== "OWNER").map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</Select><button type="submit" disabled={provisioning.pending} className="button-primary mt-1 w-full">Add to cycle</button></div>
           </fieldset>
         </JsonActionForm>
@@ -197,16 +197,16 @@ export function PeopleControls({
         {provisioning.needsRecovery && <AccountProvisioningRecovery cycleId={cycleId} />}
       </div>}
 
-      <div className="mt-5 workspace-panel rounded-2xl bg-paper p-4 sm:p-5">
+      <div className="mt-5 workspace-panel rounded-xl bg-paper p-4 sm:p-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(15rem,1fr)_13rem_11rem]">
           <label><span className="sr-only">Search accounts</span><input value={query} onChange={(event) => setQuery(event.target.value)} className="field-control text-base sm:text-sm" placeholder="Search member name" /></label>
           <label><span className="sr-only">Filter accounts by role</span><select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "ALL" | MemberRole)} className="select-control text-base sm:text-sm"><option value="ALL">Every role</option>{MEMBER_ROLES.map((role) => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label>
           <label><span className="sr-only">Filter accounts by status</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "ALL" | "ACTIVE" | "INACTIVE")} className="select-control text-base sm:text-sm"><option value="ALL">Every status</option><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></label>
         </div>
-        <p className="mt-3 text-xs text-mecg-navy/60" aria-live="polite">Showing <span className="tabular-nums">{visibleAccounts.length}</span> of <span className="tabular-nums">{memberAccounts.length}</span> accounts</p>
+        <p className="mt-3 text-xs text-muted" aria-live="polite">Showing <span className="tabular-nums">{visibleAccounts.length}</span> of <span className="tabular-nums">{memberAccounts.length}</span> accounts</p>
         <div className="mt-3 grid gap-2">
           {visibleAccounts.map((member) => <MemberAccessRow key={`${member.id}:${member.role}:${member.active}`} cycleId={cycleId} member={member} isCurrentUser={member.id === currentUserId} possibleDuplicate={duplicateIds.has(member.id)} />)}
-          {!visibleAccounts.length && <div className="rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/60">{memberAccounts.length ? "No accounts match these filters." : "Nobody has access to this cycle yet."}</div>}
+          {!visibleAccounts.length && <div className="rounded-xl border-[1.5px] border-dashed border-line p-6 text-center text-sm text-muted">{memberAccounts.length ? "No accounts match these filters." : "Nobody has access to this cycle yet."}</div>}
         </div>
       </div>
     </section>
@@ -218,17 +218,17 @@ function DeactivateMembershipDialog({ member, pending, onCancel, onConfirm }: { 
   const [reason, setReason] = useState("");
   useEffect(() => { const dialog = dialogRef.current; dialog?.showModal(); return () => { if (dialog?.open) dialog.close(); }; }, []);
   return (
-    <dialog ref={dialogRef} aria-labelledby="deactivate-membership-title" onClose={onCancel} onCancel={onCancel} className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white p-0 text-mecg-navy shadow-2xl backdrop:bg-mecg-navy/50">
+    <dialog ref={dialogRef} aria-labelledby="deactivate-membership-title" onClose={onCancel} onCancel={onCancel} className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl bg-white p-0 text-mecg-navy shadow-2xl backdrop:bg-mecg-navy/50">
       <div className="p-5 sm:p-6">
-        <p className="text-[13px] font-semibold text-red-700">Remove cycle access</p>
+        <p className="text-[13px] font-semibold text-danger">Remove cycle access</p>
         <h3 id="deactivate-membership-title" className="mt-1 text-xl font-semibold">Deactivate {member.name}?</h3>
-        <p className="mt-2 text-sm leading-6 text-mecg-navy/65">This removes every active role for this cycle. Their saved work and audit history remain intact.</p>
+        <p className="mt-2 text-sm leading-6 text-muted">This removes every active role for this cycle. Their saved work and audit history remain intact.</p>
         <label className="mt-4 block text-sm font-semibold">Reason
           <textarea autoFocus value={reason} onChange={(event) => setReason(event.target.value)} rows={3} maxLength={500} className="field-control mt-2 min-h-24 py-3 text-sm" placeholder="Why is access being removed?" />
         </label>
         <div className="mt-5 flex justify-end gap-2">
           <button type="button" disabled={pending} onClick={() => dialogRef.current?.close()} className="button-secondary">Cancel</button>
-          <button type="button" disabled={pending || !reason.trim()} onClick={() => onConfirm(reason.trim())} className="inline-flex min-h-11 items-center rounded-full bg-red-700 px-4 text-sm font-semibold text-white transition-[background-color,scale] hover:bg-red-800 active:scale-[0.96] disabled:opacity-45">{pending ? "Deactivating…" : "Deactivate access"}</button>
+          <button type="button" disabled={pending || !reason.trim()} onClick={() => onConfirm(reason.trim())} className="inline-flex min-h-11 items-center rounded-full bg-danger px-4 text-sm font-semibold text-white transition-[background-color,scale] hover:bg-danger active:scale-[0.96] disabled:opacity-45">{pending ? "Deactivating…" : "Deactivate access"}</button>
         </div>
       </div>
     </dialog>
@@ -245,11 +245,11 @@ function MemberAccessSummary({ member, isCurrentUser, possibleDuplicate, isActiv
     <div>
       <p className="text-[13px] font-semibold text-mecg-navy">{member.name}{isCurrentUser ? " · You" : ""}</p>
       <div className="mt-1 flex flex-wrap items-center gap-2">
-        <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${isActive ? "bg-emerald-50 text-emerald-800" : "bg-mecg-navy/[0.06] text-mecg-navy/60"}`}>{isActive ? "Active" : "Inactive"}</span>
-        {possibleDuplicate && <span className="text-[11px] font-semibold text-amber-800">Possible duplicate</span>}
-        {member.roles.length > 1 && <span className="text-[11px] text-mecg-navy/55">Currently has {member.roles.length} role records</span>}
+        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${isActive ? "bg-success-wash text-success" : "bg-wash text-muted"}`}>{isActive ? "Active" : "Inactive"}</span>
+        {possibleDuplicate && <span className="text-xs font-semibold text-warning">Possible duplicate</span>}
+        {member.roles.length > 1 && <span className="text-xs text-muted">Currently has {member.roles.length} role records</span>}
       </div>
-      {isCurrentUser && <p className="mt-1 text-[11px] text-mecg-navy/60">Ask another owner to change your role.</p>}
+      {isCurrentUser && <p className="mt-1 text-xs text-muted">Ask another owner to change your role.</p>}
     </div>
   );
 }
@@ -265,10 +265,10 @@ function MemberAccessActions({ pending, isCurrentUser, isActive, roleChanged, on
 }) {
   return (
     <div className="flex gap-2 md:justify-end">
-      <button type="button" disabled={pending || isCurrentUser || !isActive || !roleChanged} onClick={onSave} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12] disabled:opacity-40">{pending ? "Saving…" : "Save"}</button>
+      <button type="button" disabled={pending || isCurrentUser || !isActive || !roleChanged} onClick={onSave} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10 disabled:opacity-40">{pending ? "Saving…" : "Save"}</button>
       {isActive
-        ? <button type="button" disabled={pending || isCurrentUser} onClick={onDeactivate} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.25)] disabled:opacity-40">Deactivate</button>
-        : <button type="button" disabled={pending || isCurrentUser} onClick={onRestore} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] disabled:opacity-40">Restore</button>}
+        ? <button type="button" disabled={pending || isCurrentUser} onClick={onDeactivate} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-danger inset-ring inset-ring-danger/20 disabled:opacity-40">Deactivate</button>
+        : <button type="button" disabled={pending || isCurrentUser} onClick={onRestore} className="inline-flex min-h-11 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong disabled:opacity-40">Restore</button>}
     </div>
   );
 }
@@ -287,7 +287,7 @@ function MemberAccessRow({ cycleId, member, isCurrentUser, possibleDuplicate }: 
   }
 
   return (
-    <div className={`rounded-xl bg-white px-3.5 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] ${possibleDuplicate ? "ring-1 ring-amber-500/35" : ""}`}>
+    <div className={`rounded-xl bg-white px-3.5 py-3 inset-ring inset-ring-line ${possibleDuplicate ? "ring-1 ring-amber-500/35" : ""}`}>
       <div className="grid gap-3 md:grid-cols-[minmax(12rem,1fr)_11rem_auto] md:items-center">
         <MemberAccessSummary member={member} isCurrentUser={isCurrentUser} possibleDuplicate={possibleDuplicate} isActive={isActive} />
         <select ref={roleRef} defaultValue={member.role} onChange={(event) => setRoleChanged(event.target.value !== member.role)} disabled={pending || isCurrentUser || !isActive} aria-label={`Role for ${member.name}`} className="select-control w-full text-base sm:text-sm">{MEMBER_ROLES.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
@@ -352,32 +352,32 @@ export function RoundControls({
           </div>
         </JsonActionForm>}
 
-        {canManageStatus && <div className="workspace-panel rounded-2xl bg-paper p-5">
-          <p className="text-[13px] font-semibold text-mecg-navy/50">Round status</p>
-          <p className="mt-1 text-sm text-mecg-navy/55">Evaluation forms open when a round is open and lock when it is closed to edits.</p>
+        {canManageStatus && <div className="workspace-panel rounded-xl bg-paper p-5">
+          <p className="text-[13px] font-semibold text-muted">Round status</p>
+          <p className="mt-1 text-sm text-muted">Evaluation forms open when a round is open and lock when it is closed to edits.</p>
           <div className="mt-3 flex flex-col gap-2">
             {rounds.map((round) => (
               <RoundStatusControl key={`${round.id}:${round.status}`} round={round} act={act} closeRound={closeRound} pending={pending} error={error} />
             ))}
-            {!rounds.length && <p className="text-sm text-mecg-navy/45">No rounds configured yet.</p>}
+            {!rounds.length && <p className="text-sm text-muted">No rounds configured yet.</p>}
           </div>
         </div>}
       </div>
-      {assignable && <div className="workspace-panel rounded-2xl bg-paper p-5">
-        <p className="text-[13px] font-semibold text-mecg-navy/50">Open assignments</p>
-        <p className="mt-1 text-sm text-mecg-navy/55">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
+      {assignable && <div className="workspace-panel rounded-xl bg-paper p-5">
+        <p className="text-[13px] font-semibold text-muted">Open assignments</p>
+        <p className="mt-1 text-sm text-muted">Only untouched assignments appear here. Submitted or draft evaluation evidence cannot be removed or transferred.</p>
         <div className="mt-3 grid gap-2">
           {assignments.map((assignment) => (
-            <JsonActionForm key={assignment.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-white px-3.5 py-3 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]" onSubmitData={(data) => void act({ action: "REASSIGN", assignmentId: assignment.id, evaluatorId: data.get("evaluatorId") })}>
-              <div className="min-w-48 flex-1"><p className="text-[13px] font-semibold">{assignment.applicationName}</p><p className="text-xs text-mecg-navy/55">{assignment.label} · {assignment.evaluatorName}</p></div>
+            <JsonActionForm key={assignment.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-white px-3.5 py-3 inset-ring inset-ring-line" onSubmitData={(data) => void act({ action: "REASSIGN", assignmentId: assignment.id, evaluatorId: data.get("evaluatorId") })}>
+              <div className="min-w-48 flex-1"><p className="text-[13px] font-semibold">{assignment.applicationName}</p><p className="text-xs text-muted">{assignment.label} · {assignment.evaluatorName}</p></div>
               <select name="evaluatorId" defaultValue={assignment.evaluatorId} aria-label={`Evaluator for ${assignment.applicationName}`} className="select-control w-48 text-xs">
                 {activeMemberAccounts.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
               </select>
-              <button type="submit" disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)]">Reassign</button>
-              <button type="button" disabled={pending} onClick={() => { if (window.confirm(`Remove the assignment for ${assignment.applicationName}?`)) void act({ action: "UNASSIGN", assignmentId: assignment.id }); }} className="min-h-10 rounded-full px-3 text-xs font-semibold text-red-700 shadow-[inset_0_0_0_1px_rgba(185,28,28,0.25)]">Unassign</button>
+              <button type="submit" disabled={pending} className="min-h-10 rounded-full px-3 text-xs font-semibold inset-ring inset-ring-line-strong">Reassign</button>
+              <button type="button" disabled={pending} onClick={() => { if (window.confirm(`Remove the assignment for ${assignment.applicationName}?`)) void act({ action: "UNASSIGN", assignmentId: assignment.id }); }} className="min-h-10 rounded-full px-3 text-xs font-semibold text-danger inset-ring inset-ring-danger/20">Unassign</button>
             </JsonActionForm>
           ))}
-          {!assignments.length && <p className="text-sm text-mecg-navy/55">No untouched assignments are available to change.</p>}
+          {!assignments.length && <p className="text-sm text-muted">No untouched assignments are available to change.</p>}
         </div>
       </div>}
       <ErrorNotice error={error} />
@@ -390,9 +390,9 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
   const nextStatuses = CYCLE_STATUSES.filter((status) => canTransitionCycle(cycleStatus, status));
   return (
     <section className="flex flex-col gap-3">
-      <div className="workspace-panel rounded-2xl bg-paper p-5">
-        <p className="text-[13px] font-semibold text-mecg-navy/50">Cycle status</p>
-        <p className="mt-1 text-sm text-mecg-navy/55">
+      <div className="workspace-panel rounded-xl bg-paper p-5">
+        <p className="text-[13px] font-semibold text-muted">Cycle status</p>
+        <p className="mt-1 text-sm text-muted">
           Currently {cycleStatusLabel(cycleStatus)}. Only the transitions the workflow allows are listed.
         </p>
         <JsonActionForm
@@ -407,7 +407,7 @@ export function CycleControls({ cycleId, cycleStatus }: ControlProps & { cycleSt
           >
             {nextStatuses.map((status) => <option key={status} value={status}>{cycleStatusLabel(status)}</option>)}
           </select>
-          <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.18)] hover:bg-mecg-blue/[0.12]">Save</button>
+          <button type="submit" disabled={pending} className="inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10">Save</button>
         </JsonActionForm>
       </div>
       <ErrorNotice error={error} />
@@ -423,11 +423,11 @@ export function CloneCycleForm({ cycleId, cycleName }: ControlProps & { cycleNam
   return (
     <section className="flex flex-col gap-3">
       <JsonActionForm
-        className="workspace-panel rounded-2xl bg-paper p-5"
+        className="workspace-panel rounded-xl bg-paper p-5"
         onSubmitData={(data, form) => void act({ action: "CLONE_CYCLE", name: data.get("name") }, form)}
       >
-        <p className="text-[13px] font-semibold text-mecg-navy/50">Start the next cycle</p>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">
+        <p className="text-[13px] font-semibold text-muted">Start the next cycle</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
           Copies the rounds, each round&rsquo;s current scoring guide, the application questions and everyone&rsquo;s access from
           {" "}{cycleName}. No applicants, evaluations, decisions or events come across. The new cycle starts as a draft. Only one unfinished cycle is allowed; close the current cycle before starting the next.
         </p>

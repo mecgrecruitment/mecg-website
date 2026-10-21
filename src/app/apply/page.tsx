@@ -18,6 +18,7 @@ import ApplicantSignupForm from "./applicant-signup-form";
 import ApplicationForm from "./application-form";
 import { parseApplicationDraftSnapshot } from "./application-server-draft";
 import { isMissingSchemaObject } from "@/lib/schema-availability";
+import { gradTermBaseYear } from "@/lib/grad-term";
 
 export const metadata: Metadata = { title: "Apply" };
 
@@ -120,8 +121,8 @@ export default async function ApplyPage() {
   const preOpenLabel = upcomingCycle?.opensAt ? `Applications open at ${formatRecruitmentTime(upcomingCycle.opensAt)}` : null;
 
   return (
-    <main className="application-intake min-h-dvh bg-mecg-paper-workspace text-mecg-navy">
-      <header className="border-b border-mecg-navy/8 bg-white px-6 py-3 sm:px-10">
+    <main className="application-intake min-h-dvh bg-paper text-mecg-navy">
+      <header className="border-b border-line bg-white px-6 py-3 sm:px-10">
         <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-4">
           <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
             <Image
@@ -135,7 +136,7 @@ export default async function ApplyPage() {
             />
           </Link>
           <div className="flex min-h-11 items-center gap-4 text-sm">
-            <span className="hidden text-mecg-navy/60 sm:inline">{user ? user.email : "Applicant portal"}</span>
+            <span className="hidden text-muted sm:inline">{user ? user.email : "Applicant portal"}</span>
             {user && hasPastApplication === true && (
               <Link href="/applicant" className="flex min-h-11 items-center font-semibold underline underline-offset-4">
                 Past applications
@@ -161,7 +162,7 @@ export default async function ApplyPage() {
           <div className={user ? "" : "mx-auto"}>
             <p className="text-[13px] font-semibold text-mecg-blue">Application intake</p>
             <h1 className="mt-3 text-balance text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">Apply to MECG.</h1>
-            <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-mecg-navy/65">
+            <p className="mt-4 max-w-2xl text-pretty text-lg leading-8 text-muted">
               {user
                 ? "Your work saves automatically. Take your time, review everything, then submit once."
                 : cycleStatus && !cycleStatus.isOpen
@@ -171,16 +172,16 @@ export default async function ApplyPage() {
             {upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
           {user && !schemaUnavailable && (typeof schema?.open === "boolean" || preOpenLabel) && (
-            <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema?.open ? "bg-emerald-50 text-emerald-800" : preOpenLabel ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800"}`}>
+            <div className={`rounded-sm px-4 py-2 text-sm font-semibold ${schema?.open ? "bg-success-wash text-success" : preOpenLabel ? "bg-warning-wash text-warning" : "bg-danger-wash text-danger"}`}>
               {schema?.open ? "Applications open · About 15 minutes" : preOpenLabel ?? (openingTimelineUnavailable ? "Not accepting submissions" : "Applications closed")}
             </div>
           )}
         </div>
 
         {!user && (
-          <section aria-labelledby="application-materials" className="mt-7 border-y border-mecg-navy/15 py-5 text-left">
+          <section aria-labelledby="application-materials" className="mt-7 border-y border-line py-5 text-left">
             <h2 id="application-materials" className="font-semibold">Before you create an account</h2>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-mecg-navy/70">
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted">
               <li>Have a resume ready as a PDF, up to 10 MB.</li>
               <li>Prepare your written responses and a photo if requested by the application.</li>
               <li>You can save a draft, return to it, and review before submitting.</li>
@@ -231,6 +232,7 @@ export default async function ApplyPage() {
             initialRevision={snapshot?.revision ?? null}
             initialHasHeadshot={hasHeadshot === true}
             headshotSupported={!isMissingSchemaObject(headshotError)}
+            gradBaseYear={gradTermBaseYear(new Date())}
           />
         ) : clerkConfigured ? (
           <div className="surface-card mx-auto mt-8 max-w-xl bg-white p-7 text-left sm:p-9">

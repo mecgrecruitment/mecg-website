@@ -24,7 +24,7 @@ export default async function OperationsPage() {
         eyebrow="Owner tools"
         title="Operations readiness"
         description="Check required configuration and the live database without exposing secret values."
-        action={<Link href={withWorkspaceCycle("/admin", cycleId)} className="button-secondary">Board dashboard</Link>}
+        action={<Link href={withWorkspaceCycle("/admin", cycleId)} className="button-secondary">Recruitment</Link>}
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/operations" />
       <ReadinessPanel />

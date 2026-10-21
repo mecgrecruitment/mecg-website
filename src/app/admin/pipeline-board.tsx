@@ -101,7 +101,7 @@ function ApplicantCard({
   // initials stay as the fallback for a missing or unreadable photo.
   const [photoFailed, setPhotoFailed] = useState(false);
   return (
-    <div className={`flex flex-col gap-2 rounded-xl bg-white p-3 transition-[box-shadow,opacity] ${isDragging ? "shadow-[0_14px_32px_rgba(7,13,31,0.2)]" : "shadow-[0_1px_2px_rgba(7,13,31,0.06)]"} ${isMoving ? "opacity-60" : ""}`}>
+    <div className={`flex flex-col gap-2 rounded-xl bg-white p-3 transition-[box-shadow,opacity] ${isDragging ? "shadow-pop" : "shadow-xs"} ${isMoving ? "opacity-60" : ""}`}>
       <div className="flex items-center gap-2">
         {dragHandleProps && (
           <button
@@ -110,7 +110,7 @@ function ApplicantCard({
             {...dragHandleProps}
             data-drag-handle-id={application.id}
             aria-label={`Move ${application.name}`}
-            className="hidden h-10 w-10 shrink-0 touch-none items-center justify-center rounded-lg text-mecg-navy/45 transition-[background-color,transform] hover:bg-mecg-blue/[0.08] hover:text-mecg-navy active:scale-[0.96] sm:inline-flex"
+            className="hidden h-10 w-10 shrink-0 touch-none items-center justify-center rounded-lg text-muted transition-[background-color,transform] hover:bg-mecg-blue/10 hover:text-mecg-navy active:scale-[0.96] sm:inline-flex"
           >
             <svg width="16" height="18" viewBox="0 0 16 18" fill="currentColor" aria-hidden="true">
               <circle cx="5" cy="4" r="1.25" />
@@ -131,7 +131,7 @@ function ApplicantCard({
             className="h-[26px] w-[26px] shrink-0 rounded-full object-cover"
           />
         ) : (
-          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[10px] font-semibold text-white">
+          <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">
             {initials(application.name)}
           </span>
         )}
@@ -139,13 +139,13 @@ function ApplicantCard({
           {application.name}
         </Link>
       </div>
-      <p className="flex items-center gap-1 text-[11.5px] text-mecg-navy/60">
+      <p className="flex items-center gap-1 text-xs text-muted">
         {application.hasResume ? (
           <>
-            <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" className="shrink-0 text-mecg-navy/55" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" className="shrink-0 text-muted" aria-hidden="true">
               <path d="M4 10.5l4 4 8-9" />
             </svg>
-            <span className="text-mecg-navy/55">Resume on file</span>
+            <span className="text-muted">Resume on file</span>
           </>
         ) : (
           "No resume"
@@ -199,9 +199,9 @@ function ApplicantRoster({
 }) {
   return (
     <div className="mt-4">
-      <div className="applicant-roster-toolbar flex flex-wrap items-end justify-between gap-3 rounded-2xl bg-mecg-navy/[0.025] p-3.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+      <div className="applicant-roster-toolbar flex flex-wrap items-end justify-between gap-3 rounded-xl bg-wash p-3.5 inset-ring inset-ring-line">
         <div className="flex flex-wrap gap-3">
-          <label className="text-xs font-medium text-mecg-navy/65">
+          <label className="text-xs font-medium text-muted">
             <span className="mb-1 block">Status</span>
             <select
               value={statusFilter}
@@ -217,7 +217,7 @@ function ApplicantRoster({
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-mecg-navy/65">
+          <label className="text-xs font-medium text-muted">
             <span className="mb-1 block">Resume</span>
             <select
               value={resumeFilter}
@@ -232,7 +232,7 @@ function ApplicantRoster({
               <option value="MISSING">Missing resume</option>
             </select>
           </label>
-          <label className="text-xs font-medium text-mecg-navy/65">
+          <label className="text-xs font-medium text-muted">
             <span className="mb-1 block">Sort</span>
             <select
               value={sort}
@@ -249,15 +249,15 @@ function ApplicantRoster({
             </select>
           </label>
         </div>
-        <p className="text-sm text-mecg-navy/60" aria-live="polite">Showing {applications.length} of {total}</p>
+        <p className="text-sm text-muted" aria-live="polite">Showing {applications.length} of {total}</p>
       </div>
 
       {applications.length ? (
         <ul className="applicant-roster mt-3 flex flex-col gap-2" aria-label="All applicants">
           {applications.map((application) => (
-            <li key={application.id} className={`applicant-roster-row grid gap-3 rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] md:items-center ${canAdvance ? "md:grid-cols-[auto_minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]" : "md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]"}`}>
+            <li key={application.id} className={`applicant-roster-row grid gap-3 rounded-xl bg-white p-4 inset-ring inset-ring-line md:items-center ${canAdvance ? "md:grid-cols-[auto_minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]" : "md:grid-cols-[minmax(0,1.5fr)_minmax(140px,0.75fr)_minmax(130px,0.65fr)_auto]"}`}>
               {canAdvance && (canSelectForAdvancement(application.status) ? (
-                  <label className="inline-flex min-h-11 items-center gap-2 text-xs font-medium text-mecg-navy/65">
+                  <label className="inline-flex min-h-11 items-center gap-2 text-xs font-medium text-muted">
                     <input
                       type="checkbox"
                       disabled={selectionPending}
@@ -269,21 +269,21 @@ function ApplicantRoster({
                   </label>
                 ) : <span aria-hidden="true" />)}
               <div className="flex min-w-0 items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-[11px] font-semibold text-white">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">
                   {initials(application.name)}
                 </span>
                 <div className="min-w-0">
                   <p className="font-semibold text-mecg-navy">{application.name}</p>
-                  <p className="mt-0.5 truncate text-xs text-mecg-navy/60">{[application.contact, canonicalMajor(application.major)].filter(Boolean).join(" · ")}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted">{[application.contact, canonicalMajor(application.major)].filter(Boolean).join(" · ")}</p>
                 </div>
               </div>
               <div>
                 <StatusPill tone="orange">{applicationStatusLabel(application.status)}</StatusPill>
-                <p className="mt-1 text-[11px] text-mecg-navy/60">
+                <p className="mt-1 text-xs text-muted">
                   Submitted <time dateTime={application.submittedAt}>{application.submittedLabel}</time>
                 </p>
               </div>
-              <p className={`text-xs font-medium ${application.hasResume ? "text-mecg-navy/60" : "text-mecg-orange-ink"}`}>
+              <p className={`text-xs font-medium ${application.hasResume ? "text-muted" : "text-mecg-orange-ink"}`}>
                 {application.hasResume ? "Resume on file" : "Missing resume"}
               </p>
               <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} aria-label={`Open file for ${application.name}`} className="inline-flex min-h-11 items-center justify-end gap-2 text-xs font-semibold text-mecg-navy hover:underline">
@@ -293,7 +293,7 @@ function ApplicantRoster({
           ))}
         </ul>
       ) : (
-        <p className="mt-3 rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-8 text-center text-sm text-mecg-navy/60">
+        <p className="mt-3 rounded-xl border-[1.5px] border-dashed border-line p-8 text-center text-sm text-muted">
           {total === 0 ? "No submitted applicants in this cycle yet." : "No applicants match these filters. Change the search, status or resume filter to see more."}
         </p>
       )}
@@ -581,7 +581,7 @@ function PipelineBoardInner({
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-base font-semibold tracking-[-0.02em]">Applicants</h2>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-start">
-          <p className="text-sm text-mecg-navy/60">{boardApplications.length} submitted</p>
+          <p className="text-sm text-muted">{boardApplications.length} submitted</p>
           <label>
             <span className="sr-only">Search applicants by name or contact</span>
             <input
@@ -608,15 +608,15 @@ function PipelineBoardInner({
           />
         </div>
         {canOperate && (
-          <Link href={withWorkspaceCycle("/admin/referrals", cycleId)} className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-mecg-blue shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:bg-mecg-blue/[0.08]">
+          <Link href={withWorkspaceCycle("/admin/referrals", cycleId)} className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-mecg-blue inset-ring inset-ring-line-strong hover:bg-mecg-blue/10">
             Referrals · {referralCount}
           </Link>
         )}
-        {canAdvance && selectedApplications.length === 0 && <button type="button" disabled={advancePending || !eligibleShown.length} className="ml-auto inline-flex min-h-11 items-center text-xs font-medium text-mecg-navy/65 hover:text-mecg-navy" onClick={() => { setSelectedIds(new Set(eligibleShown.map(application => application.id))); setAdvanceReview(null); }}>Select eligible shown</button>}
+        {canAdvance && selectedApplications.length === 0 && <button type="button" disabled={advancePending || !eligibleShown.length} className="ml-auto inline-flex min-h-11 items-center text-xs font-medium text-muted hover:text-mecg-navy" onClick={() => { setSelectedIds(new Set(eligibleShown.map(application => application.id))); setAdvanceReview(null); }}>Select eligible shown</button>}
       </div>
 
       {canAdvance && (selectedApplications.length > 0 || advanceNotice?.kind === "error") && (
-        <div className="applicant-bulk-actions mt-3 rounded-2xl bg-mecg-navy p-3.5 text-white">
+        <div className="applicant-bulk-actions mt-3 rounded-xl bg-mecg-navy p-3.5 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm" aria-live="polite"><span className="font-semibold">{selectedApplications.length} selected</span> · {hiddenSelectedCount} hidden</p>
             <div className="flex flex-wrap gap-2">
@@ -629,14 +629,14 @@ function PipelineBoardInner({
               <button ref={advanceTriggerRef} type="button" disabled={advancePending || !selectedApplications.length} className="button-light text-sm" onClick={() => reviewAdvancement(selectedIds)}>Review advancement</button>
             </div>
           </div>
-          {showSelected && view === "ALL" && <p className="mt-2 text-sm text-white/65">Showing the selected cohort across all search, status and resume filters.</p>}
+          {showSelected && view === "ALL" && <p className="mt-2 text-sm text-white/70">Showing the selected cohort across all search, status and resume filters.</p>}
           {advanceReview && (
-            <div ref={advanceReviewRef} tabIndex={-1} className="mt-4 border-t border-white/20 pt-4" role="region" aria-label="Review advancement to Speed Dating">
+            <div ref={advanceReviewRef} tabIndex={-1} className="mt-4 border-t border-white/15 pt-4" role="region" aria-label="Review advancement to Speed Dating">
               <h3 className="text-base font-semibold">Advance {advanceReview.length} applicants to Speed Dating</h3>
-              <p className="mt-2 text-sm text-white/65">{advanceReview.length * 2} evaluator assignments required. The whole cohort stops if any applicant cannot be staffed. No partial changes are saved.</p>
-              <p className="mt-2 text-sm text-white/65">This review keeps the applicants listed below fixed. Hidden labels reflect the view when review opened.</p>
+              <p className="mt-2 text-sm text-white/70">{advanceReview.length * 2} evaluator assignments required. The whole cohort stops if any applicant cannot be staffed. No partial changes are saved.</p>
+              <p className="mt-2 text-sm text-white/70">This review keeps the applicants listed below fixed. Hidden labels reflect the view when review opened.</p>
               <ul className="mt-3 max-h-64 overflow-y-auto text-sm" aria-label="Applicants in this advancement">
-                {advanceReview.map((application) => <li key={application.id} className="flex flex-wrap justify-between gap-2 border-t border-white/12 py-2"><Link className="inline-flex min-h-11 items-center underline" href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)}>{application.name}</Link>{application.hidden && <span className="self-center text-white/65">Hidden by current view at review</span>}</li>)}
+                {advanceReview.map((application) => <li key={application.id} className="flex flex-wrap justify-between gap-2 border-t border-white/12 py-2"><Link className="inline-flex min-h-11 items-center underline" href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)}>{application.name}</Link>{application.hidden && <span className="self-center text-white/70">Hidden by current view at review</span>}</li>)}
               </ul>
               <div className="mt-3 flex flex-wrap justify-end gap-2">
                 <button type="button" className="button-ghost-light text-sm" disabled={advancePending} onClick={() => { setAdvanceReview(null); window.requestAnimationFrame(() => advanceTriggerRef.current?.focus()); }}>Cancel</button>
@@ -647,7 +647,7 @@ function PipelineBoardInner({
         </div>
       )}
       {advanceNotice && (
-        <p ref={advanceResultRef} tabIndex={-1} role={advanceNotice.kind === "error" ? "alert" : "status"} className={`mt-3 rounded-xl px-4 py-3 text-sm ${advanceNotice.kind === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-900"}`}>
+        <p ref={advanceResultRef} tabIndex={-1} role={advanceNotice.kind === "error" ? "alert" : "status"} className={`mt-3 rounded-xl px-4 py-3 text-sm ${advanceNotice.kind === "error" ? "bg-danger-wash text-danger" : "bg-success-wash text-success"}`}>
           {advanceNotice.message}
         </p>
       )}
@@ -677,7 +677,7 @@ function PipelineBoardInner({
             <p
               role={moveNotice.kind === "error" ? "alert" : "status"}
               aria-live={moveNotice.kind === "error" ? "assertive" : "polite"}
-              className={`mt-3 rounded-xl px-4 py-3 text-sm ${moveNotice.kind === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-900"}`}
+              className={`mt-3 rounded-xl px-4 py-3 text-sm ${moveNotice.kind === "error" ? "bg-danger-wash text-danger" : "bg-success-wash text-success"}`}
             >
               {moveNotice.message}
             </p>
@@ -692,11 +692,11 @@ function PipelineBoardInner({
                 return (
                   <article
                     key={status}
-                    className={`flex min-h-40 flex-col rounded-2xl bg-mecg-navy/[0.025] p-2.5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)] transition-opacity ${draggingApplication && !acceptsDraggedCard ? "opacity-45" : ""}`}
+                    className={`flex min-h-40 flex-col rounded-xl bg-wash p-2.5 inset-ring inset-ring-line transition-opacity ${draggingApplication && !acceptsDraggedCard ? "opacity-45" : ""}`}
                   >
                     <div className="mb-1.5 flex items-center justify-between gap-2 px-0.5">
-                      <p className="text-[13px] font-semibold text-mecg-navy/55">{applicationStatusLabel(status)}</p>
-                      <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-[11px] font-bold text-mecg-orange-ink">
+                      <p className="text-[13px] font-semibold text-muted">{applicationStatusLabel(status)}</p>
+                      <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
                         {columnTerm ? `${column.length}/${stageApplications.length}` : stageApplications.length}
                       </span>
                     </div>
@@ -727,11 +727,11 @@ function PipelineBoardInner({
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`flex min-h-28 max-h-[68vh] flex-1 flex-col gap-1.5 overflow-y-auto rounded-xl transition-[background-color,box-shadow] ${snapshot.isDraggingOver ? "bg-mecg-blue/[0.08] shadow-[inset_0_0_0_2px_rgba(38,91,174,0.35)]" : ""}`}
+                          className={`flex min-h-28 max-h-[68vh] flex-1 flex-col gap-1.5 overflow-y-auto rounded-xl transition-[background-color,box-shadow] ${snapshot.isDraggingOver ? "bg-mecg-blue/10 inset-ring-2 inset-ring-mecg-blue/30" : ""}`}
                         >
                           {column.length === 0 && (
-                            <div className={`flex min-h-28 flex-1 items-center justify-center rounded-xl border-[1.5px] border-dashed p-3 text-center ${snapshot.isDraggingOver ? "border-mecg-blue/45" : "border-mecg-navy/[0.14]"}`}>
-                              <p className="text-[11.5px] text-mecg-navy/60">
+                            <div className={`flex min-h-28 flex-1 items-center justify-center rounded-xl border-[1.5px] border-dashed p-3 text-center ${snapshot.isDraggingOver ? "border-mecg-blue/45" : "border-line"}`}>
+                              <p className="text-xs text-muted">
                                 {snapshot.isDraggingOver ? "Drop here" : draggingApplication && !acceptsDraggedCard ? "Not a legal next stage" : query || columnTerm ? "No matches" : "No applicants yet"}
                               </p>
                             </div>
@@ -780,9 +780,9 @@ function PipelineBoardInner({
               })}
             </div>
           </DragDropContext>
-          <div className="mt-4 rounded-2xl bg-mecg-navy/[0.025] p-4">
+          <div className="mt-4 rounded-xl bg-wash p-4">
             <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between gap-4 text-left">
-              <span className="text-[13px] font-semibold text-mecg-navy/55">Decided · {decidedCount}</span>
+              <span className="text-[13px] font-semibold text-muted">Decided · {decidedCount}</span>
               <span className="inline-flex items-center gap-2 text-xs font-semibold text-mecg-blue">
                 {showDecided ? "Hide" : "Show"}
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className={`disclosure-chevron ${showDecided ? "rotate-180" : ""}`} aria-hidden="true">
@@ -804,12 +804,12 @@ function PipelineBoardInner({
                   const column = searchResults.filter((application) => application.status === status);
                   return (
                     <div key={status}>
-                      <p className="text-[13px] font-semibold text-mecg-navy/60">
+                      <p className="text-[13px] font-semibold text-muted">
                         {applicationStatusLabel(status)} · {column.length}
                       </p>
                       <div className="mt-1.5 flex flex-col gap-1.5">
                         {column.map((application) => (
-                          <div key={application.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2.5 py-1.5 text-[12px] shadow-[inset_0_0_0_1px_rgba(7,13,31,0.08)]">
+                          <div key={application.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2.5 py-1.5 text-xs inset-ring inset-ring-line">
                             <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy hover:underline">
                               {application.name}
                             </Link>
@@ -824,7 +824,7 @@ function PipelineBoardInner({
                             )}
                           </div>
                         ))}
-                        {!column.length && <p className="text-[11px] text-mecg-navy/60">None</p>}
+                        {!column.length && <p className="text-xs text-muted">None</p>}
                       </div>
                     </div>
                   );

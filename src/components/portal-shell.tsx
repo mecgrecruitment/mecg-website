@@ -44,7 +44,7 @@ export default function PortalShell({
           <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">
             <Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={45} priority className={`${compact ? "h-9" : "h-10"} w-auto`} style={{ width: "auto" }} />
           </Link>
-          <Link href="/home" className="flex min-h-11 items-center text-[15px] text-public-muted transition-colors duration-150 hover:text-mecg-blue">
+          <Link href="/home" className="flex min-h-11 items-center text-[15px] text-muted transition-colors duration-150 hover:text-mecg-blue">
             Back to site
           </Link>
         </div>
@@ -54,8 +54,8 @@ export default function PortalShell({
         <div className={`w-full ${compact ? "max-w-md text-left" : "max-w-xl text-center"}`}>
           <p className="text-[13px] font-semibold text-mecg-blue">{eyebrow}</p>
           <h1 className={`${compact ? "mt-2.5 text-4xl sm:text-[2.5rem]" : "mt-3 text-[40px] sm:text-[52px]"} text-balance font-semibold leading-[1.05] tracking-[-0.04em]`}>{title}</h1>
-          <p className={`${compact ? "mt-3 max-w-md leading-6" : "mx-auto mt-4 max-w-lg leading-7"} text-pretty text-[17px] text-public-muted`}>{description}</p>
-          <div className={compact ? "mt-7 border-t border-public-rule pt-7 text-left" : "mt-8 rounded-2xl border border-public-rule bg-white p-6 text-left shadow-[0_28px_56px_-32px_rgb(18_33_62/0.45)] sm:p-8"}>
+          <p className={`${compact ? "mt-3 max-w-md leading-6" : "mx-auto mt-4 max-w-lg leading-7"} text-pretty text-[17px] text-muted`}>{description}</p>
+          <div className={compact ? "mt-7 border-t border-public-rule pt-7 text-left" : "mt-8 rounded-xl border border-public-rule bg-white p-6 text-left shadow-lift sm:p-8"}>
             {children}
           </div>
         </div>

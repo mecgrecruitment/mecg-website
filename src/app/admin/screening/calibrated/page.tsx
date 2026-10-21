@@ -10,8 +10,8 @@ import { statusLabel } from "@/lib/labels";
 import { calibrateScreeningResults } from "../reader-calibration";
 import { CLASS_YEAR_LABELS, type ClassYear } from "@/lib/workflow";
 
-const TH = "px-4 py-3 text-[13px] font-semibold text-mecg-navy/55";
-const TD = "px-4 py-3 text-[13px] text-mecg-navy/55";
+const TH = "px-4 py-3 text-[13px] font-semibold text-muted";
+const TD = "px-4 py-3 text-[13px] text-muted";
 const signed = (value: number, digits: number) => `${value < 0 ? "-" : "+"}${Math.abs(value).toFixed(digits)}`;
 
 export default async function CalibratedScreeningPage() {
@@ -33,16 +33,16 @@ export default async function CalibratedScreeningPage() {
         description="Every reader grades a little harder or softer than the group. This ranking removes each reader's average lean, measured only against co-readers on the same applications, so an applicant is not helped or hurt by who happened to read them."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/screening" />
-      {!frozen && <p className="text-sm text-mecg-navy/55">The ranking appears once the batch is closed.</p>}
+      {!frozen && <p className="text-sm text-muted">The ranking appears once the batch is closed.</p>}
       {frozen && (
         <section>
           <h2 className="text-xl font-semibold">Readers</h2>
-          <p className="mt-1 text-sm text-mecg-navy/55">Lean is the points a reader sits above or below a neutral reader. Spread is how widely they use the scale.</p>
+          <p className="mt-1 text-sm text-muted">Lean is the points a reader sits above or below a neutral reader. Spread is how widely they use the scale.</p>
           <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="Readers">
-            <div className="min-w-[30rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="min-w-[30rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-mecg-navy/10">
+                  <tr className="border-b border-line">
                     <th className={TH}>Reader</th>
                     <th className={TH}>Reads</th>
                     <th className={TH}>Lean</th>
@@ -51,7 +51,7 @@ export default async function CalibratedScreeningPage() {
                 </thead>
                 <tbody>
                   {readers.map((reader) => (
-                    <tr key={reader.id} className="border-b border-mecg-navy/10">
+                    <tr key={reader.id} className="border-b border-line">
                       <td className="px-4 py-3 text-[13px] font-semibold text-mecg-navy">{reader.name}</td>
                       <td className={`${TD} tabular-nums`}>{reader.reads}</td>
                       <td className={`${TD} tabular-nums`}>{signed(reader.effect, 1)}</td>
@@ -67,12 +67,12 @@ export default async function CalibratedScreeningPage() {
       {frozen && (
         <section>
           <h2 className="text-xl font-semibold">Ranking</h2>
-          <p className="mt-1 text-sm text-mecg-navy/55">{applicants.length} applicants · ranked on adjusted average · tied averages share a rank</p>
+          <p className="mt-1 text-sm text-muted">{applicants.length} applicants · ranked on adjusted average · tied averages share a rank</p>
           <div className="scroll-cue -mx-4 mt-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label="Reader-adjusted ranking">
-            <div className="min-w-[80rem] overflow-hidden rounded-2xl shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+            <div className="min-w-[80rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-mecg-navy/10">
+                  <tr className="border-b border-line">
                     <th className={TH}>Rank</th>
                     <th className={TH}>Raw rank</th>
                     <th className={TH}>Move</th>
@@ -90,13 +90,13 @@ export default async function CalibratedScreeningPage() {
                     const move = applicant.rawRank - applicant.adjustedRank;
                     return (
                       <Fragment key={applicant.code}>
-                        <tr className="border-b border-mecg-navy/10">
+                        <tr className="border-b border-line">
                           <td className="px-4 py-3 text-[13px] font-semibold tabular-nums text-mecg-navy">{applicant.adjustedRank}</td>
                           <td className={`${TD} tabular-nums`}>{applicant.rawRank}</td>
-                          <td className={`px-4 py-3 text-[13px] font-semibold tabular-nums ${move > 0 ? "text-emerald-700" : move < 0 ? "text-red-700" : "text-mecg-navy/55"}`}>{move === 0 ? "·" : signed(move, 0)}</td>
+                          <td className={`px-4 py-3 text-[13px] font-semibold tabular-nums ${move > 0 ? "text-success" : move < 0 ? "text-danger" : "text-muted"}`}>{move === 0 ? "·" : signed(move, 0)}</td>
                           <td className="px-4 py-3">
                             {applicant.applicantName
-                              ? <><span className="text-[13px] font-semibold text-mecg-navy">{applicant.applicantName}</span><span className="block font-mono text-xs text-mecg-navy/60">{applicant.code}</span></>
+                              ? <><span className="text-[13px] font-semibold text-mecg-navy">{applicant.applicantName}</span><span className="block font-mono text-xs text-muted">{applicant.code}</span></>
                               : <span className="font-mono text-[13px] text-mecg-navy">{applicant.code}</span>}
                           </td>
                           <td className={TD}>{applicant.classYear ? CLASS_YEAR_LABELS[applicant.classYear as ClassYear] ?? applicant.classYear : ""}</td>
@@ -113,16 +113,16 @@ export default async function CalibratedScreeningPage() {
                           <td className="px-4 py-3 text-[13px] font-semibold tabular-nums text-mecg-navy">{applicant.adjustedScore.toFixed(1)}</td>
                           <td className={`${TD} tabular-nums`}>{Object.entries(applicant.recommendationCounts).map(([recommendation, count]) => `${count}${recommendation[0]}`).join(" ")}</td>
                         </tr>
-                        <tr className="border-b border-mecg-navy/10">
+                        <tr className="border-b border-line">
                           <td colSpan={9 + reviewerSlots} className="px-4 py-2">
                             <details>
-                              <summary className="cursor-pointer text-[13px] font-semibold text-mecg-navy/70">Notes</summary>
+                              <summary className="cursor-pointer text-[13px] font-semibold text-muted">Notes</summary>
                               <div className="mt-3 space-y-4">
                                 {applicant.reviews.map((review, index) => (
                                   <div key={review.reviewerId ?? index}>
                                     <p className="text-[13px] font-semibold text-mecg-navy">{review.reviewerName ?? `Reviewer ${index + 1}`} · {statusLabel(review.recommendation)}</p>
-                                    {review.evidence && <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-mecg-navy/65">{review.evidence}</p>}
-                                    <p className="mt-1 text-[13px] text-mecg-navy/55">
+                                    {review.evidence && <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-muted">{review.evidence}</p>}
+                                    <p className="mt-1 text-[13px] text-muted">
                                       {review.ratings.map((rating) => `${rating.name} ${rating.score}${rating.note ? ` (${rating.note})` : ""}`).join(" · ")}
                                     </p>
                                   </div>

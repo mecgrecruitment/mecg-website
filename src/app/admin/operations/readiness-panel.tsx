@@ -61,10 +61,10 @@ export default function ReadinessPanel() {
     return () => { cancelled = true; };
   }, []);
 
-  if (!result && !error) return <p role="status" className="text-sm text-mecg-navy/65">Checking database access and required configuration…</p>;
+  if (!result && !error) return <p role="status" className="text-sm text-muted">Checking database access and required configuration…</p>;
   if (error && !result) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-900" role="alert">
+      <div className="rounded-xl border border-red-200 bg-danger-wash p-5 text-danger" role="alert">
         <p>{error}</p>
         <button type="button" onClick={() => void load()} disabled={pending} aria-busy={pending} className="button-secondary mt-4">{pending ? "Checking…" : "Try again"}</button>
       </div>
@@ -79,20 +79,20 @@ export default function ReadinessPanel() {
 
   return (
     <div className="space-y-5">
-      <div className={`rounded-2xl p-5 ${result.ready ? "bg-emerald-50 text-emerald-950" : "bg-red-50 text-red-950"}`} role="status">
+      <div className={`rounded-xl p-5 ${result.ready ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`} role="status">
         <p className="font-semibold">{result.ready ? "Required configuration checks passed." : "Required configuration checks need attention."}</p>
         <p className="mt-1 text-sm opacity-75">Checked {formatEasternDateTime(result.checkedAt)}</p>
       </div>
-      <p className="text-sm text-mecg-navy/65">These checks cover database access and required configuration. Email provider acceptance, inbox delivery and recruitment readiness require separate verification.</p>
-      {error && <p role="alert" className="text-sm text-red-800">Could not refresh checks: {error} The previous result above has not been updated.</p>}
+      <p className="text-sm text-muted">These checks cover database access and required configuration. Email provider acceptance, inbox delivery and recruitment readiness require separate verification.</p>
+      {error && <p role="alert" className="text-sm text-danger">Could not refresh checks: {error} The previous result above has not been updated.</p>}
       <ul className="grid gap-3 sm:grid-cols-2">
         {checks.map(([label, ok, detail]) => (
-          <li key={label} className="rounded-2xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+          <li key={label} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
             <div className="flex items-center justify-between gap-4">
               <span className="font-medium text-mecg-navy">{label}</span>
-              <span className={`text-[13px] font-semibold ${ok ? "text-emerald-800" : "text-red-700"}`}>{ok ? "Passed" : "Needs attention"}</span>
+              <span className={`text-[13px] font-semibold ${ok ? "text-success" : "text-danger"}`}>{ok ? "Passed" : "Needs attention"}</span>
             </div>
-            <p className="mt-2 text-sm text-mecg-navy/65">{detail}</p>
+            <p className="mt-2 text-sm text-muted">{detail}</p>
           </li>
         ))}
       </ul>

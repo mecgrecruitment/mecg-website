@@ -42,7 +42,7 @@ export default function ReferralStatusForm({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[12px] font-semibold text-mecg-navy/60" htmlFor={`referral-status-${referralId}`}>
+      <label className="text-xs font-semibold text-muted" htmlFor={`referral-status-${referralId}`}>
         Current status
         <span className="sr-only"> for {referralName}</span>
       </label>
@@ -58,8 +58,8 @@ export default function ReferralStatusForm({
           <option key={value} value={value}>{referralStatusLabel(value)}</option>
         ))}
       </select>
-      <p id={`referral-next-${referralId}`} className="text-[12px] leading-5 text-mecg-navy/60">
-        <span className="font-semibold text-mecg-navy/70">Next: </span>{nextAction}
+      <p id={`referral-next-${referralId}`} className="text-xs leading-5 text-muted">
+        <span className="font-semibold text-muted">Next: </span>{nextAction}
       </p>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>

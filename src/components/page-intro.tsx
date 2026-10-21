@@ -32,7 +32,7 @@ export default function PageIntro({
     <section className={`px-6 sm:px-10 ${blue ? "bg-mecg-blue text-white" : "bg-public-ground text-public-ink"}`}>
       <div className={`mx-auto max-w-6xl pt-12 sm:pt-16 ${overlap ? "pb-20 sm:pb-24" : "pb-10 sm:pb-14"} ${aside ? "grid gap-y-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-x-12" : ""}`}>
         <div>
-        {label ? <p className={`text-[13px] font-semibold ${blue ? "text-white/80" : "text-mecg-blue"}`}>{label}</p> : null}
+        {label ? <p className={`text-[13px] font-semibold ${blue ? "text-white" : "text-mecg-blue"}`}>{label}</p> : null}
         {poster ? (
           <div className={`relative ${label ? "mt-4" : ""} [container-type:inline-size]`}>
             <h1 id={titleId}>
@@ -45,7 +45,7 @@ export default function PageIntro({
             {title}
           </h1>
         )}
-        {copy ? <p className={`mt-5 max-w-2xl text-pretty text-[17px] leading-7 ${blue ? "text-white/85" : "text-public-muted"}`}>{copy}</p> : null}
+        {copy ? <p className={`mt-5 max-w-2xl text-pretty text-[17px] leading-7 ${blue ? "text-white" : "text-muted"}`}>{copy}</p> : null}
         {children ? <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">{children}</div> : null}
         </div>
         {aside ? <div className="relative z-10 -mb-20 self-end lg:-mb-32">{aside}</div> : null}

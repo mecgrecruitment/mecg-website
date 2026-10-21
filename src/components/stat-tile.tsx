@@ -8,11 +8,11 @@ export default function StatTile({
   tone?: "light" | "dark";
 }) {
   const valueClass = tone === "dark" ? "text-white" : "text-mecg-navy";
-  const labelClass = tone === "dark" ? "text-white/70" : "text-mecg-navy/65";
+  const labelClass = tone === "dark" ? "text-white/70" : "text-muted";
   return (
     <div>
       <p className={`tabular text-2xl font-semibold ${valueClass}`}>{value}</p>
-      <p className={`mt-1 text-[12px] ${labelClass}`}>{label}</p>
+      <p className={`mt-1 text-xs ${labelClass}`}>{label}</p>
     </div>
   );
 }

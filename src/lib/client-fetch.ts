@@ -139,13 +139,15 @@ export async function retryOnNetworkError<T>(
     delays = [1_000, 3_000, 9_000],
     stillWanted = () => true,
     wait = waitForNetwork,
-  }: { delays?: number[]; stillWanted?: () => boolean; wait?: (milliseconds: number) => Promise<void> } = {},
+    onRetry,
+  }: { delays?: number[]; stillWanted?: () => boolean; wait?: (milliseconds: number) => Promise<void>; onRetry?: () => void } = {},
 ): Promise<T> {
   for (let index = 0; ; index += 1) {
     try {
       return await attempt();
     } catch (error) {
       if (index >= delays.length || !stillWanted()) throw error;
+      onRetry?.();
       await wait(delays[index]);
       if (!stillWanted()) throw error;
     }

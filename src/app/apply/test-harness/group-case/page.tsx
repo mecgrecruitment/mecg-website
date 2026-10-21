@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import GroupCaseRoster from "@/app/member/group-case/group-case-roster";
 import { groupCaseWorkspaceState } from "@/app/member/group-case/workspace-state";
@@ -17,5 +18,5 @@ export default async function GroupCaseTestHarness({ searchParams }: { searchPar
     ],
     progress: { scored: 0, total: 1 },
     groups: [{ groupId: null, groupName: "Applicants", applicants: [{ revision: null, applicationId: "synthetic-applicant", name: "Synthetic Applicant", scores: { collaboration: null, presentation: null }, note: "", savedAt: null, quality: null, speedDating: null }] }],
-  }} readOnlyReason={availability.kind === "read-only" ? availability.detail : undefined} /><HarnessReady /></main>;
+  }} readOnlyReason={availability.kind === "read-only" ? availability.detail : undefined} /><Link href="/apply/test-harness">Leave Group Case</Link><HarnessReady /></main>;
 }

@@ -1,9 +1,13 @@
+import type { TallyItem } from "@/components/tally-strip";
+
 export type MemberWorkTask = {
   href: string;
   label: string;
   detail: string;
   dueAt: number;
   action?: "Start" | "Continue" | "Open ballot";
+  // The member's own progress only; never anyone else's votes or scores.
+  progress?: readonly TallyItem[];
 };
 
 // Missing deadlines stay last; availability is not an invented due date.

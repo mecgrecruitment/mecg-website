@@ -42,7 +42,7 @@ export default function StageHashPanel({
     return (
       <section aria-labelledby="stage-hash-heading">
         <h2 id="stage-hash-heading" className="text-xl font-semibold text-mecg-navy">Stage vote</h2>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">Open a hash on one pipeline stage. 60% YES moves the applicant forward; anything less rejects them.</p>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">Open a hash on one pipeline stage. 60% YES moves the applicant forward; anything less rejects them.</p>
         <form onSubmit={open} className="mt-3 flex flex-wrap items-end gap-3">
           <label className="text-sm font-medium">Stage
             <select name="stage" required disabled={pending} className="select-control mt-2 text-sm">
@@ -78,7 +78,7 @@ export default function StageHashPanel({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 id="stage-hash-heading" className="text-xl font-semibold text-mecg-navy">{hashStageLabel(stage)} hash · <span className="tabular">{rows.length}</span> on the ballot · quorum <span className="tabular">{quorum}</span> · <span className="tabular">{eligibleVoters}</span> eligible voters</h2>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-mecg-navy/55">YES sends them to {applicationStatusLabel(rule.pass)}, NO rejects.</p>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">YES sends them to {applicationStatusLabel(rule.pass)}, NO rejects.</p>
         </div>
         {canManageCycle && (
           <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +89,7 @@ export default function StageHashPanel({
       </div>
       <OperationNotice kind="error">{error}</OperationNotice>
       <OperationNotice kind="success">{success}</OperationNotice>
-      <div className="mt-4 divide-y divide-mecg-navy/[0.08] border-y border-mecg-navy/[0.1]">
+      <div className="mt-4 divide-y divide-line border-y border-line">
         {rows.map((row) => {
           const outcome = row.tally ? hashOutcome(row.tally.quorum, row.tally.yes_count, row.tally.no_count, row.tally.total_votes) : "PENDING";
           return (
@@ -97,7 +97,7 @@ export default function StageHashPanel({
               <div>
                 <Link href={`/admin/applications/${row.id}`} className="font-semibold text-mecg-navy underline decoration-mecg-navy/25 underline-offset-2">{row.displayName}</Link>
                 {row.scores && (
-                  <p className="mt-0.5 text-xs text-mecg-navy/60">
+                  <p className="mt-0.5 text-xs text-muted">
                     <span className="font-medium">Group Case</span> {row.scores.groupCase}
                     <span className="ml-3 font-medium">Speed Dating</span> {row.scores.speedDating}
                   </p>
@@ -109,7 +109,7 @@ export default function StageHashPanel({
             </article>
           );
         })}
-        {!rows.length && <p className="py-3 text-sm text-mecg-navy/55">Nobody is on this ballot.</p>}
+        {!rows.length && <p className="py-3 text-sm text-muted">Nobody is on this ballot.</p>}
       </div>
     </section>
   );

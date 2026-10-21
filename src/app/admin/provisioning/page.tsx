@@ -59,9 +59,9 @@ export default async function ProvisioningPage({ searchParams }: {
         description="Review incomplete account setup and record resolution after checking the account and membership." />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/people" />
       <Link href={withWorkspaceCycle("/admin/people", cycleId)} className="text-sm font-semibold text-mecg-navy underline underline-offset-4">Back to People</Link>
-      <section aria-labelledby="remediation-heading" className="border-y border-mecg-navy/10 py-5">
+      <section aria-labelledby="remediation-heading" className="border-y border-line py-5">
         <h2 id="remediation-heading" className="text-lg font-semibold text-mecg-navy">Check before retrying account setup</h2>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-mecg-navy/70">
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-muted">
           <li>Find the account in Clerk using the email and any recorded Clerk user ID. An unavailable ID means the provider outcome needs checking.</li>
           <li>Check the MECG identity and this cycle&apos;s membership in People. Confirm whether access exists before retrying or changing an account.</li>
           <li>Complete any needed remediation through the appropriate account controls, then mark the incident resolved. This page records resolution; it does not repair accounts or send emails.</li>
@@ -72,20 +72,20 @@ export default async function ProvisioningPage({ searchParams }: {
       ) : (
         <section aria-labelledby="incident-heading">
           <h2 id="incident-heading" className="text-xl font-semibold text-mecg-navy">Unresolved incidents</h2>
-          <p className="mt-2 text-sm text-mecg-navy/70">{total === 0 ? "No unresolved incidents in this cycle." : `${total} unresolved · oldest first · up to ${PAGE_SIZE} per page`}</p>
-          <div className="mt-4 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
+          <p className="mt-2 text-sm text-muted">{total === 0 ? "No unresolved incidents in this cycle." : `${total} unresolved · oldest first · up to ${PAGE_SIZE} per page`}</p>
+          <div className="mt-4 divide-y divide-line border-y border-line">
             {incidents.map((incident) => (
               <article key={incident.id} className="grid gap-5 py-6 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
                   <h3 className="break-all text-base font-semibold text-mecg-navy">{incident.email}</h3>
-                  <p className="mt-1 text-sm text-mecg-navy/70">Stopped while {PHASE_LABELS[incident.phase] ?? "setting up the account"}.</p>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-mecg-navy/70">{PHASE_GUIDANCE[incident.phase] ?? "Inspect the account, identity and cycle membership before retrying."}</p>
+                  <p className="mt-1 text-sm text-muted">Stopped while {PHASE_LABELS[incident.phase] ?? "setting up the account"}.</p>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{PHASE_GUIDANCE[incident.phase] ?? "Inspect the account, identity and cycle membership before retrying."}</p>
                   <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm leading-6 sm:grid-cols-[8rem_minmax(0,1fr)]">
-                    <dt className="text-mecg-navy/70">Incident reference</dt><dd className="break-all font-mono text-xs text-mecg-navy">{incident.id}</dd>
-                    <dt className="text-mecg-navy/70">Recorded</dt><dd className="text-mecg-navy"><time dateTime={incident.created_at}>{dateTime(incident.created_at)} Eastern</time></dd>
-                    <dt className="text-mecg-navy/70">Clerk user ID</dt><dd className="break-all text-mecg-navy">{incident.clerk_user_id ? <span className="font-mono text-xs">{incident.clerk_user_id}</span> : "Not available — check Clerk"}</dd>
-                    <dt className="text-mecg-navy/70">MECG user ID</dt><dd className="break-all text-mecg-navy">{incident.app_user_id ? <span className="font-mono text-xs">{incident.app_user_id}</span> : "Not recorded"}</dd>
-                    <dt className="text-mecg-navy/70">Cleanup checks</dt><dd className="text-mecg-navy">{[
+                    <dt className="text-muted">Incident reference</dt><dd className="break-all font-mono text-xs text-mecg-navy">{incident.id}</dd>
+                    <dt className="text-muted">Recorded</dt><dd className="text-mecg-navy"><time dateTime={incident.created_at}>{dateTime(incident.created_at)} Eastern</time></dd>
+                    <dt className="text-muted">Clerk user ID</dt><dd className="break-all text-mecg-navy">{incident.clerk_user_id ? <span className="font-mono text-xs">{incident.clerk_user_id}</span> : "Not available — check Clerk"}</dd>
+                    <dt className="text-muted">MECG user ID</dt><dd className="break-all text-mecg-navy">{incident.app_user_id ? <span className="font-mono text-xs">{incident.app_user_id}</span> : "Not recorded"}</dd>
+                    <dt className="text-muted">Cleanup checks</dt><dd className="text-mecg-navy">{[
                       ...(incident.clerk_cleanup_failed ? ["Clerk cleanup needs review"] : []),
                       ...(incident.profile_cleanup_failed ? ["MECG profile cleanup needs review"] : []),
                     ].join(" · ") || "No failed cleanup recorded. Cleanup may not have been attempted; inspect the account and membership."}</dd>
@@ -95,7 +95,7 @@ export default async function ProvisioningPage({ searchParams }: {
               </article>
             ))}
           </div>
-          {incidents.length === 0 && total > 0 && <p className="mt-4 text-sm text-mecg-navy/70">No incidents on this page. Return to the first page to review the current queue.</p>}
+          {incidents.length === 0 && total > 0 && <p className="mt-4 text-sm text-muted">No incidents on this page. Return to the first page to review the current queue.</p>}
           {(page > 1 || offset + incidents.length < total) && (
             <nav aria-label="Incident pages" className="mt-5 flex flex-wrap items-center gap-4 text-sm font-semibold text-mecg-navy">
               {page > 1 && <Link href={pageHref(page - 1)} className="button-secondary">Previous page</Link>}

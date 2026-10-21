@@ -13,7 +13,7 @@ export default function Headshot({ applicant, failed, onFail }: { applicant: { a
     if (retried) { onFail(); return; }
     void refreshSessionToken().finally(() => setRetried(true));
   };
-  if (failed) return <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-mecg-navy/[0.06] text-xs font-semibold text-mecg-navy/60" aria-hidden="true">{initials(applicant.name)}</span>;
+  if (failed) return <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-wash text-xs font-semibold text-muted" aria-hidden="true">{initials(applicant.name)}</span>;
   return (
     // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
     <img

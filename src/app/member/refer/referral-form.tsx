@@ -34,7 +34,7 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
 
   if (sentName) {
     return (
-      <div role="status" aria-live="polite" className="rounded-2xl bg-emerald-50 p-5 text-emerald-950 shadow-[inset_0_0_0_1px_rgba(4,120,87,0.14)] sm:p-6">
+      <div role="status" aria-live="polite" className="rounded-xl bg-success-wash p-5 text-success inset-ring inset-ring-success/15 sm:p-6">
         <p className="text-[15px] font-semibold">Referral received</p>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-emerald-950/75">
           {sentName} is now waiting for Board review. You do not need to do anything else; their status appears below.
@@ -47,7 +47,7 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
   }
 
   return (
-    <form ref={formRef} onSubmit={submit} className="flex flex-col gap-4 rounded-2xl bg-paper p-5 sm:p-6">
+    <form ref={formRef} onSubmit={submit} className="flex flex-col gap-4 rounded-xl bg-paper p-5 sm:p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField id="referral-name" name="name" label="Name" required maxLength={120} disabled={pending} placeholder="Who should we know about?" />
         <FormField id="referral-email" name="email" type="email" label="Email" required maxLength={255} disabled={pending} placeholder="them@umich.edu" />
@@ -56,7 +56,7 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
       <div className="text-sm font-semibold text-mecg-navy">
         <span className="flex items-baseline justify-between gap-3">
           <label htmlFor="referral-reason">Why they&rsquo;d be a good fit</label>
-          <span className="tabular text-[12px] font-medium text-mecg-navy/60">{reason.length}/{REASON_LIMIT}</span>
+          <span className="tabular text-xs font-medium text-muted">{reason.length}/{REASON_LIMIT}</span>
         </span>
         <textarea
           id="referral-reason"
@@ -67,7 +67,7 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
           onChange={(event) => setReason(event.target.value)}
           disabled={pending}
           placeholder="What have you seen them do? A specific example beats adjectives."
-          className="field-control mt-2 min-h-28 py-3 text-[14px] font-normal leading-6 text-mecg-navy placeholder:text-mecg-navy/35 disabled:opacity-60"
+          className="field-control mt-2 min-h-28 py-3 text-sm font-normal leading-6 text-mecg-navy placeholder:text-mecg-navy/35 disabled:opacity-60"
         />
       </div>
       <button type="submit" disabled={pending} className="button-primary self-start">{pending ? "Sending…" : "Send referral"}</button>

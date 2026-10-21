@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 const TONES = {
   white: "bg-white text-mecg-navy",
   paper: "bg-paper text-mecg-navy",
-  softBlue: "bg-mecg-blue/[0.07] text-mecg-navy",
+  softBlue: "bg-mecg-blue/10 text-mecg-navy",
   blue: "bg-mecg-blue text-white",
   navy: "bg-public-deep text-white",
 } as const;

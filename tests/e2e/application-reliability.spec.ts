@@ -192,7 +192,7 @@ test("a newly uploaded photo stays ready when returning from review", async ({ p
   await page.getByRole("button", { name: "Edit materials and access" }).click();
   await expect(page.getByText("Replace your photo", { exact: true })).toBeVisible();
   await expect(page.locator("#headshot")).not.toHaveAttribute("required");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Save and return to review", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Review before you submit." })).toBeVisible();
 });
 

@@ -300,12 +300,12 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
 
   return (
     <div className="space-y-8">
-      {draftConflict && <section aria-labelledby={`screening-conflict-${assignmentId}`} className="min-w-0 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+      {draftConflict && <section aria-labelledby={`screening-conflict-${assignmentId}`} className="min-w-0 rounded-xl border border-warning-edge bg-warning-wash p-4 text-warning">
         <h2 ref={conflictHeadingRef} tabIndex={-1} id={`screening-conflict-${assignmentId}`} className="text-lg font-semibold">Choose which private review to keep</h2>
         <p className="mt-2 text-sm leading-6">Neither copy has been overwritten. Compare them and download either before choosing. Choosing the server copy replaces the browser backup; keeping this page writes against the current server revision.</p>
         <div className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2">{(["local", "server"] as const).map((source) => {
           const copy = draftConflict[source];
-          return <article key={source} className="min-w-0 rounded-xl border border-amber-300 p-3">
+          return <article key={source} className="min-w-0 rounded-xl border border-warning-edge p-3">
             <h3 className="font-semibold">{source === "local" ? "This page" : "Current server copy"}</h3>
             <dl className="mt-3 space-y-3 text-sm">{criteria.map((criterion) => { const rating = copy.ratings.find(({ criterionId }) => criterionId === criterion.id); return <div key={criterion.id}><dt className="font-medium">{criterion.name}: {rating?.score || "Unrated"}</dt><dd className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{rating?.note || "No criterion note"}</dd></div>; })}</dl>
             <p className="mt-3 whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm">{copy.evidence || "No overall evidence"}</p><p className="mt-2 text-sm">Recommendation: {copy.recommendation || "Not chosen"}</p>
@@ -314,9 +314,9 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
           </article>;
         })}</div><p role="status" className="mt-2 text-sm">{downloadStatus}</p>
       </section>}
-      <details className="review-recusal rounded-2xl bg-mecg-orange/[0.08] p-4" onToggle={(event) => { if (!(event.currentTarget as HTMLDetailsElement).open) setConfirmingRecusal(false); }}>
+      <details className="review-recusal rounded-xl bg-mecg-orange/[0.08] p-4" onToggle={(event) => { if (!(event.currentTarget as HTMLDetailsElement).open) setConfirmingRecusal(false); }}>
         <summary className="min-h-11 cursor-pointer list-none content-center font-semibold text-mecg-orange-ink">Recognize this applicant? Step back</summary>
-        <p className="mt-2 text-sm text-mecg-navy/70">Do not name the applicant. A confirmed recusal removes this application from your queue and deletes its private draft only when replacement coverage is available.</p>
+        <p className="mt-2 text-sm text-muted">Do not name the applicant. A confirmed recusal removes this application from your queue and deletes its private draft only when replacement coverage is available.</p>
         <label className="mt-3 block text-sm font-medium text-mecg-orange-ink" htmlFor="screening-recusal-reason">Reason for recusal</label>
         <textarea
           id="screening-recusal-reason"
@@ -325,9 +325,9 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
           disabled={recusalBlocked}
           onChange={(event) => { setRecusalReason(event.target.value); setConfirmingRecusal(false); }}
           placeholder="Brief reason, such as a prior close relationship or an identity revealed in the response"
-          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+          className="mt-2 min-h-20 w-full rounded-xl bg-white px-3 py-2 inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
         />
-        <p className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{recusalReason.length} / 1000</p>
+        <p className="mt-1 text-right text-xs tabular-nums text-muted">{recusalReason.length} / 1000</p>
         {confirmingRecusal ? (
           <div className="mt-3 rounded-xl bg-white p-3">
             <p className="text-sm font-medium">This permanently removes the application and its draft from your queue.</p>
@@ -341,8 +341,8 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
         )}
       </details>
       <form onSubmit={submit} className="space-y-5" noValidate>
-        <p className="text-sm text-mecg-navy/65" role="status">{draftSaveState === "loading" ? "Loading private draft…" : draftSaveState === "saving" ? "Saving private draft…" : draftSaveState === "saved" ? "Private draft saved across devices." : draftSaveState === "error" ? "Private draft save unconfirmed" : "Private draft changes"}</p>
-        <p className="text-sm text-mecg-navy/65" aria-live="polite">
+        <p className="text-sm text-muted" role="status">{draftSaveState === "loading" ? "Loading private draft…" : draftSaveState === "saving" ? "Saving private draft…" : draftSaveState === "saved" ? "Private draft saved across devices." : draftSaveState === "error" ? "Private draft save unconfirmed" : "Private draft changes"}</p>
+        <p className="text-sm text-muted" aria-live="polite">
           {scoredCount} of {criteria.length} criteria scored.
         </p>
         {criteria.map((criterion, index) => {
@@ -355,10 +355,10 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
             <fieldset
               ref={(node) => { criterionRefs.current[criterion.id] = node; }}
               tabIndex={-1}
-              className="rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.12)]"
+              className="rounded-xl p-5 inset-ring inset-ring-line"
             >
               <legend className="px-2 font-semibold">{criterion.name} · {totalWeight ? Math.round((criterion.weight / totalWeight) * 100) : 0}%</legend>
-              <details><summary>Rubric guidance</summary><p className="text-sm text-mecg-navy/65">{criterion.description}</p><ol className="mt-2 space-y-2 text-xs text-mecg-navy/65">{SCORE_OPTIONS.map((score) => <li key={score}><strong>{score}</strong> · {SCORE_ANCHORS[score]}</li>)}</ol></details>
+              <details><summary>Rubric guidance</summary><p className="text-sm text-muted">{criterion.description}</p><ol className="mt-2 space-y-2 text-xs text-muted">{SCORE_OPTIONS.map((score) => <li key={score}><strong>{score}</strong> · {SCORE_ANCHORS[score]}</li>)}</ol></details>
               <div className="mt-4 text-sm font-medium" id={`screening-rating-label-${criterion.id}`}>Rating</div>
               <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5" role="radiogroup" aria-labelledby={`screening-rating-label-${criterion.id}`}>
                 {SCORE_OPTIONS.map((score) => {
@@ -368,7 +368,7 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
                     <label key={score} title={label} className={`relative min-h-11 cursor-pointer rounded-xl text-center text-sm font-semibold transition-[background-color,color,box-shadow] duration-150 ease-out ${
                         selected
                           ? "bg-mecg-navy text-white"
-                          : "text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] hover:shadow-[inset_0_0_0_1px_rgba(7,13,31,0.28)]"
+                          : "text-mecg-navy inset-ring inset-ring-line-strong hover:inset-ring-mecg-navy/40"
                       }`}>
                       <input
                         type="radio"
@@ -385,7 +385,7 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
                   );
                 })}
               </div>
-              {scores[criterion.id] && <p className="mt-2 text-xs text-mecg-navy/65">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>}
+              {scores[criterion.id] && <p className="mt-2 text-xs text-muted">{SCORE_ANCHORS[Number(scores[criterion.id])]}</p>}
               <label className="mt-4 block text-sm font-medium" htmlFor={`screening-note-${criterion.id}`}>Evidence note {(["1", "5"].includes(scores[criterion.id])) ? "(required for this rating)" : "(optional)"}</label>
               <textarea
                 id={`screening-note-${criterion.id}`}
@@ -395,9 +395,9 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
                 disabled={editingBlocked}
                 onChange={(event) => { setNotes((current) => ({ ...current, [criterion.id]: event.target.value })); markDraftChanged(); }}
                 aria-describedby={`screening-note-count-${criterion.id}`}
-                className="mt-2 min-h-20 w-full rounded-xl bg-mecg-navy/[0.035] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+                className="mt-2 min-h-20 w-full rounded-xl bg-wash px-3 py-2 inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
               />
-              <p id={`screening-note-count-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-mecg-navy/60">{note.length} / {MAX_NOTE_LENGTH}</p>
+              <p id={`screening-note-count-${criterion.id}`} className="mt-1 text-right text-xs tabular-nums text-muted">{note.length} / {MAX_NOTE_LENGTH}</p>
             </fieldset>
             </Fragment>
           );
@@ -413,10 +413,10 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
             disabled={editingBlocked}
             onChange={(event) => { setEvidence(event.target.value); markDraftChanged(); }}
             aria-describedby="screening-evidence-help"
-            className="mt-2 min-h-28 w-full rounded-xl bg-mecg-navy/[0.035] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+            className="mt-2 min-h-28 w-full rounded-xl bg-wash px-3 py-2 inset-ring inset-ring-line-strong outline-none transition-shadow focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
           />
         </label>
-        <p id="screening-evidence-help" className="-mt-3 text-right text-xs tabular-nums text-mecg-navy/60">{evidence.length} / {MAX_EVIDENCE_LENGTH} characters · at least {MIN_EVIDENCE_LENGTH} required</p>
+        <p id="screening-evidence-help" className="-mt-3 text-right text-xs tabular-nums text-muted">{evidence.length} / {MAX_EVIDENCE_LENGTH} characters · at least {MIN_EVIDENCE_LENGTH} required</p>
         <label className="block font-medium" htmlFor="screening-recommendation">
           Recommendation
           <select id="screening-recommendation" ref={recommendationRef} required value={recommendation} disabled={editingBlocked} onChange={(event) => { setRecommendation(event.target.value); markDraftChanged(); setError(""); }} className="select-control mt-2">
@@ -426,14 +426,14 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
             <option value="DECLINE">Do not advance</option>
           </select>
         </label>
-        {(draftSaveState === "error" || draftConflict) && <div className={`rounded-xl px-4 py-3 text-sm ${draftSaveState === "error" ? "bg-red-50 text-red-900" : "bg-mecg-navy/[0.045] text-mecg-navy/70"}`} role={draftSaveState === "error" ? "alert" : "status"} aria-live="polite">
+        {(draftSaveState === "error" || draftConflict) && <div className={`rounded-xl px-4 py-3 text-sm ${draftSaveState === "error" ? "bg-danger-wash text-danger" : "bg-wash text-muted"}`} role={draftSaveState === "error" ? "alert" : "status"} aria-live="polite">
           {draftSaveState === "idle" && (draftConflict ? "Two saved copies differ. Compare them before continuing." : "Unsaved changes save automatically after the current draft is verified.")}
           {draftSaveState === "error" && <><span>{draftSaveError}</span>{!actionUnknown && <button type="button" disabled={pending || actionUnknown} className="ml-2 min-h-11 font-semibold underline underline-offset-2" onClick={() => {
             if (draftLoadFailed) { recoveryLocal.current = latestPayload.current; setLoadNonce((value) => value + 1); }
             else void saveCurrentDraft(true);
           }}>Retry draft save</button>}</>}
         </div>}
-        {(backupChecked || actionUnknown) && !draftConflict && <details open={localBackupSignature !== draftSignature || actionUnknown} className={`rounded-xl px-4 py-3 text-sm ${localBackupSignature === draftSignature ? "bg-mecg-navy/[0.045] text-mecg-navy/70" : "bg-amber-50 text-amber-950"}`} role={localBackupSignature === draftSignature ? "status" : "alert"}>
+        {(backupChecked || actionUnknown) && !draftConflict && <details open={localBackupSignature !== draftSignature || actionUnknown} className={`rounded-xl px-4 py-3 text-sm ${localBackupSignature === draftSignature ? "bg-wash text-muted" : "bg-warning-wash text-warning"}`} role={localBackupSignature === draftSignature ? "status" : "alert"}>
           <summary className="min-h-11 cursor-pointer content-center font-semibold">Backup &amp; download</summary>
           <p>{localBackupSignature === draftSignature ? "Browser backup is current in this tab, for up to 24 hours." : actionUnknown ? "Browser backup is unavailable. Keep this page open and download your observations before checking the action’s current status." : serverSavedSignature === draftSignature && !draftLoadFailed ? "Browser backup is unavailable. This version is saved on the server." : "Browser backup is unavailable. These changes are only in this open page until a server save is confirmed. Download a copy before retrying or leaving."}</p>
           <button type="button" onClick={() => exportDraft(draftPayload)} className="mt-2 min-h-11 font-semibold underline">Download private review copy</button>
@@ -442,7 +442,7 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
         </details>}
         {recommendationWarning && <OperationNotice kind="info">Consistency check: {recommendationWarning}</OperationNotice>}
         {reviewing && (
-          <section className="rounded-2xl bg-mecg-navy p-5 text-white" aria-labelledby="screening-review-summary">
+          <section className="rounded-xl bg-mecg-navy p-5 text-white" aria-labelledby="screening-review-summary">
             <h2 ref={reviewHeadingRef} tabIndex={-1} id="screening-review-summary" className="font-semibold">Review before locking</h2>
             <dl className="mt-3 space-y-3 text-sm">
               {criteria.map((criterion) => <div key={criterion.id}><dt className="font-semibold">{criterion.name}: {scores[criterion.id]} — {SCORE_ANCHORS[Number(scores[criterion.id])]}</dt><dd className="mt-1 text-white/70">{notes[criterion.id]?.trim() || "No criterion note"}</dd></div>)}
@@ -451,12 +451,12 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
             </dl>
           </section>
         )}
-        {actionUnknown ? <div ref={actionErrorRef} tabIndex={-1} role="alert" aria-atomic="true" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+        {actionUnknown ? <div ref={actionErrorRef} tabIndex={-1} role="alert" aria-atomic="true" className="rounded-xl border border-warning-edge bg-warning-wash p-4 text-sm text-warning">
           <p>{error}</p>
           <div className="mt-3 flex flex-wrap gap-3"><Link href={withWorkspaceCycle("/member/screening", cycleId ?? null)} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-semibold underline">Check screening queue (new tab)</Link><button type="button" onClick={() => window.location.reload()} className="button-secondary">Reload current assignment</button></div>
           <p className="mt-2">Download your private copy before reloading. A reload checks the current assignment; it does not repeat the uncertain action.</p>
         </div> : <OperationNotice kind="error">{error}</OperationNotice>}
-        <p className="text-sm leading-6 text-mecg-navy/60">The final submit locks this review permanently, then opens your next unread application when one remains.</p>
+        <p className="text-sm leading-6 text-muted">The final submit locks this review permanently, then opens your next unread application when one remains.</p>
         <div className="flex flex-wrap gap-2">
           <button type="submit" disabled={editingBlocked} className="button-primary">{pending ? "Submitting…" : reviewing ? "Submit locked review" : "Review before submitting"}</button>
           {reviewing && <button type="button" disabled={pending} className="button-secondary" onClick={() => setReviewing(false)}>Keep editing</button>}

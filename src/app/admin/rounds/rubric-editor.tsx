@@ -91,21 +91,21 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
   }
 
   return (
-    <section className="rounded-2xl bg-paper p-5">
+    <section className="rounded-xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-mecg-navy/65">
+          <p className="text-[13px] font-semibold text-muted">
             {round.roundName} scoring guide
           </p>
-          <p className="mt-1 text-sm text-mecg-navy/65">
+          <p className="mt-1 text-sm text-muted">
             {round.rubricVersion ? `Version ${round.rubricVersion}` : "No scoring guide yet"} · round is {roundStatusLabel(round.roundStatus)}
           </p>
         </div>
-        <span className="tabular text-xs text-mecg-navy/65">{criteria.length} criteria · {totalWeight} weight</span>
+        <span className="tabular text-xs text-muted">{criteria.length} criteria · {totalWeight} weight</span>
       </div>
 
       {!editable ? (
-        <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-mecg-navy/65 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <p className="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-muted inset-ring inset-ring-line">
           This round is already under way, so its scoring guide is fixed. Evaluators who have scored against it keep the
           wording they saw.
         </p>
@@ -118,13 +118,13 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
               const keyError = !KEY_PATTERN.test(item.key) || item.key.length > 80 ? "Use up to 80 lowercase letters, digits and underscores, starting with a letter." : duplicates.includes(item.key) ? "Each criterion needs a different key." : null;
               const weightError = !Number.isInteger(item.weight) || item.weight < 1 || item.weight > 100 ? "Enter a whole-number weight from 1 to 100." : null;
               return (
-              <li key={index} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+              <li key={index} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="tabular text-xs font-semibold text-mecg-navy/65">{index + 1}</span>
+                  <span className="tabular text-xs font-semibold text-muted">{index + 1}</span>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move criterion ${index + 1} up`} className="inline-flex size-11 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&uarr;</button>
-                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === criteria.length - 1} aria-label={`Move criterion ${index + 1} down`} className="inline-flex size-11 items-center justify-center rounded-full text-mecg-navy/60 hover:bg-mecg-blue/[0.1] disabled:opacity-35">&darr;</button>
-                    <button type="button" onClick={() => setCriteria((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove criterion ${index + 1}`} className="inline-flex min-h-11 items-center rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-45">Remove</button>
+                    <button type="button" onClick={() => move(index, -1)} disabled={pending || index === 0} aria-label={`Move criterion ${index + 1} up`} className="inline-flex size-11 items-center justify-center rounded-full text-muted hover:bg-mecg-blue/10 disabled:opacity-35">&uarr;</button>
+                    <button type="button" onClick={() => move(index, 1)} disabled={pending || index === criteria.length - 1} aria-label={`Move criterion ${index + 1} down`} className="inline-flex size-11 items-center justify-center rounded-full text-muted hover:bg-mecg-blue/10 disabled:opacity-35">&darr;</button>
+                    <button type="button" onClick={() => setCriteria((current) => current.filter((_, at) => at !== index))} disabled={pending} aria-label={`Remove criterion ${index + 1}`} className="inline-flex min-h-11 items-center rounded-full px-3 text-xs font-semibold text-danger hover:bg-danger-wash disabled:opacity-45">Remove</button>
                   </div>
                 </div>
 
@@ -137,10 +137,10 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                     value={item.name}
                     onChange={(event) => update(index, { name: event.target.value })}
                     maxLength={120}
-                    className="mt-1.5 min-h-11 w-full aria-invalid:bg-red-50 aria-invalid:shadow-[inset_0_0_0_1px_rgb(185,28,28)] rounded-xl bg-mecg-navy/[0.035] px-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+                    className="mt-1.5 min-h-11 w-full aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
                   />
                 </label>
-                {nameError && <p id={`${id}-name-error`} className="mt-2 text-sm text-red-700">{nameError}</p>}
+                {nameError && <p id={`${id}-name-error`} className="mt-2 text-sm text-danger">{nameError}</p>}
                 <label className="mt-2 block text-sm font-medium">
                   What an evaluator is looking for
                   <textarea
@@ -148,7 +148,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                     onChange={(event) => update(index, { description: event.target.value })}
                     rows={2}
                     maxLength={2000}
-                    className="mt-1.5 w-full rounded-xl bg-mecg-navy/[0.035] p-3 text-sm shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+                    className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
                   />
                 </label>
 
@@ -162,7 +162,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       id={`${id}-key`}
                       aria-invalid={!!keyError}
                       aria-describedby={keyError ? `${id}-key-error` : undefined}
-                      className="mt-1.5 block min-h-11 w-44 aria-invalid:bg-red-50 aria-invalid:shadow-[inset_0_0_0_1px_rgb(185,28,28)] rounded-xl bg-mecg-navy/[0.035] px-3 tabular text-xs shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="mt-1.5 block min-h-11 w-44 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -176,10 +176,10 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       aria-describedby={weightError ? `${id}-weight-error` : undefined}
                       value={item.weight}
                       onChange={(event) => update(index, { weight: Number(event.target.value) })}
-                      className="mt-1.5 block min-h-11 w-24 aria-invalid:bg-red-50 aria-invalid:shadow-[inset_0_0_0_1px_rgb(185,28,28)] rounded-xl bg-mecg-navy/[0.035] px-3 text-sm tabular-nums shadow-[inset_0_0_0_1px_rgba(7,13,31,0.14)] outline-none"
+                      className="mt-1.5 block min-h-11 w-24 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm tabular-nums inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
-                  <span className="pb-3 tabular text-[11px] text-mecg-navy/65">
+                  <span className="pb-3 tabular text-xs text-muted">
                     {totalWeight > 0 ? `${Math.round((item.weight / totalWeight) * 100)}% of the round` : ""}
                   </span>
                   <label className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">
@@ -187,19 +187,19 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                     Required
                   </label>
                 </div>
-                {keyError && <p id={`${id}-key-error`} className="mt-2 text-sm text-red-700">{keyError}</p>}
-                {weightError && <p id={`${id}-weight-error`} className="mt-2 text-sm text-red-700">{weightError}</p>}
+                {keyError && <p id={`${id}-key-error`} className="mt-2 text-sm text-danger">{keyError}</p>}
+                {weightError && <p id={`${id}-weight-error`} className="mt-2 text-sm text-danger">{weightError}</p>}
               </li>
             ); })}
           </ol>
 
           {!criteria.length && (
-            <p className="mt-4 rounded-xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-6 text-center text-sm text-mecg-navy/65">
+            <p className="mt-4 rounded-xl border-[1.5px] border-dashed border-line p-6 text-center text-sm text-muted">
               A scoring guide needs at least one criterion before evaluators can score.
             </p>
           )}
 
-          {invalid && <p id={`${fieldPrefix}-validation`} className="mt-4 text-sm text-red-700">{criteria.length ? "Fix the highlighted fields before saving the scoring guide." : "Add at least one named criterion before saving the scoring guide."}</p>}
+          {invalid && <p id={`${fieldPrefix}-validation`} className="mt-4 text-sm text-danger">{criteria.length ? "Fix the highlighted fields before saving the scoring guide." : "Add at least one named criterion before saving the scoring guide."}</p>}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               type="button"

@@ -80,7 +80,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         }}
         fallback={<ClerkLoadingFallback />}
       />
-      <p className="mt-5 text-center text-xs text-mecg-navy/60">Secure authentication powered by Clerk.</p>
+      <p className="mt-5 text-center text-xs text-muted">Secure authentication powered by Clerk.</p>
     </PortalShell>
   );
 }

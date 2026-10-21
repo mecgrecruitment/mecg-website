@@ -8,7 +8,7 @@ for (const width of [320, 390]) {
     await page.route("**/api/admin/rush", (route) => route.fulfill({ json: { id: "synthetic-deck-0" } }));
     await page.goto("/apply/test-harness/deck");
     await expect(page.locator('[data-application-harness-ready="true"]')).toBeAttached();
-    for (const name of ["By score", "A to Z", "Revisits (0)", "Presentation motion", "Previous", "Revisit (U)", "Next"]) {
+    for (const name of ["By score", "A to Z", "Revisits (0)", "Present to members", "Presentation motion", "Previous", "Revisit (U)", "Next"]) {
       const box = await page.getByRole("button", { name, exact: true }).boundingBox();
       expect.soft(box?.height, `${name} height`).toBeGreaterThanOrEqual(44);
       expect.soft(box?.width, `${name} width`).toBeGreaterThanOrEqual(44);

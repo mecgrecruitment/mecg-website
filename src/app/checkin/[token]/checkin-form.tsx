@@ -46,9 +46,9 @@ export default function CheckinForm({ token, eventName, signedIn, identityUnavai
 
   if (status === "success") {
     return (
-      <div className="rounded-xl bg-green-50 p-5 text-green-900" role="status">
+      <div className="rounded-xl bg-success-wash p-5 text-success" role="status">
         <p className="font-semibold">You&apos;re checked in for {eventName}.</p>
-        <p className="mt-1 text-sm text-green-800">You are all set. Your schedule and application updates stay in the applicant portal.</p>
+        <p className="mt-1 text-sm text-success">You are all set. Your schedule and application updates stay in the applicant portal.</p>
         <Link href="/applicant" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
           View your schedule
         </Link>
@@ -71,7 +71,7 @@ export default function CheckinForm({ token, eventName, signedIn, identityUnavai
   if (!signedIn) {
     return (
       <div className="space-y-4">
-        <p className="text-sm leading-6 text-mecg-navy/65">Check-in uses your MECG account. Create one or sign in and you will come straight back here.</p>
+        <p className="text-sm leading-6 text-muted">Check-in uses your MECG account. Create one or sign in and you will come straight back here.</p>
         <Link href={`/apply?redirect_url=${returnTo}`} className="button-primary flex w-full items-center justify-center">Create an account</Link>
         <Link href={`/login?redirect_url=${returnTo}`} className="button-secondary flex w-full items-center justify-center">I already have an account</Link>
       </div>
@@ -80,7 +80,7 @@ export default function CheckinForm({ token, eventName, signedIn, identityUnavai
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm leading-6 text-mecg-navy/65">Check-in uses your signed-in applicant account.</p>
+      <p className="text-sm leading-6 text-muted">Check-in uses your signed-in applicant account.</p>
       {status === "error" && (
         <OperationNotice kind="error">
           {errorMessage}

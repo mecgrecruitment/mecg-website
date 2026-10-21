@@ -44,8 +44,8 @@ export default function CalibrationForm({ roundId, rubricId, returnTo }: {
   }
 
   return (
-    <form onSubmit={submit} className="mt-6 rounded-2xl bg-paper p-5 sm:p-6">
-      <label className="flex items-start gap-3 text-sm leading-6 text-mecg-navy/75">
+    <form onSubmit={submit} className="mt-6 rounded-xl bg-paper p-5 sm:p-6">
+      <label className="flex items-start gap-3 text-sm leading-6 text-muted">
         <input
           type="checkbox"
           checked={confirmed}
@@ -54,7 +54,7 @@ export default function CalibrationForm({ roundId, rubricId, returnTo }: {
         />
         <span>I reviewed this rubric version and will score only observable evidence using these anchors.</span>
       </label>
-      <p className="mt-3 text-xs leading-5 text-mecg-navy/55">
+      <p className="mt-3 text-xs leading-5 text-muted">
         Calibration is advisory. It never changes, normalizes, or automatically adjusts your scores.
       </p>
       <OperationNotice kind="error">{error}</OperationNotice>

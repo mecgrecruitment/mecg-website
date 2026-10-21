@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
 import { applicationStatusLabel, decisionOutcomeLabel, decisionStatusLabel } from "@/lib/labels";
@@ -10,6 +10,7 @@ import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 import { runAction } from "@/lib/run-action";
 import { HASH_STAGE_RULES, type HashStage } from "@/lib/hash-tally";
 import { formatStars } from "@/lib/speed-dating-roster";
+import { LIVE_SYNC_START, liveSyncNotice, nextLiveSync, pollOutcome, type PollOutcome } from "@/lib/live-sync";
 
 export type DeckEntry = {
   id: string;
@@ -35,12 +36,17 @@ type TallyRow = { applicationId: string; yes: number; no: number; unsure: number
 type Phase = { kind: "drumroll" } | { kind: "stamped"; status: string };
 type Confetti = { x: string; delay: string; hue: number }[];
 
-const PANEL = "rounded-2xl bg-white/[0.06] p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]";
-const SORT_BUTTON = "min-h-11 min-w-11 rounded-sm px-3 py-1 text-xs font-semibold text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white aria-pressed:bg-white/[0.12] aria-pressed:text-white";
+const PANEL = "rounded-xl bg-white/10 p-5 inset-ring inset-ring-white/10";
+const SORT_BUTTON = "min-h-11 min-w-11 rounded-sm px-3 py-1 text-xs font-semibold text-white/70 inset-ring inset-ring-white/20 hover:text-white aria-pressed:bg-white/[0.12] aria-pressed:text-white";
 const ENTRANCES = ["fly", "spin", "swoosh"] as const;
 const RUSH_URL = "/api/admin/rush";
 const APPLY_TIMEOUT_MS = 15_000;
 const MOTION_PREFERENCE_KEY = "mecg:hash-deck:motion";
+const PRESENT_RETRY_MS = 2_000;
+// Arrows still page the deck from a focused button; Enter and Space stay native there.
+const TEXT_ENTRY = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]';
+const OWNS_ARROWS = `${TEXT_ENTRY}, a, summary, [role="link"], [tabindex]:not([data-deck-context])`;
+const OWNS_KEYS = `${OWNS_ARROWS}, button, [role="button"]`;
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
@@ -62,12 +68,12 @@ function makeConfetti(): Confetti {
 function NotesList({ title, notes }: { title: string; notes: string[] }) {
   return (
     <div className="min-w-0 text-left">
-      <p className="text-[13px] font-semibold text-white/50">{title}</p>
+      <p className="text-[13px] font-semibold text-white/70">{title}</p>
       {notes.length ? (
-        <ul className="mt-2 max-h-64 space-y-2 overflow-y-auto text-sm leading-6 text-white/75">
+        <ul className="mt-2 max-h-64 space-y-2 overflow-y-auto text-sm leading-6 text-white/70">
           {notes.map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>&ldquo;{note}&rdquo;</li>)}
         </ul>
-      ) : <p className="mt-2 text-sm text-white/50">No notes</p>}
+      ) : <p className="mt-2 text-sm text-white/70">No notes</p>}
     </div>
   );
 }
@@ -92,6 +98,10 @@ export default function DeliberationDeck({
   // reduced-motion viewer seeing an animated first frame during hydration.
   const [systemReducedMotion, setSystemReducedMotion] = useState<boolean | null>(null);
   const [presentationMotion, setPresentationMotion] = useState(false);
+  // Only the tab that opts in moves members' phones, so a second laptop can browse freely.
+  // It starts off on every load: Duplicate Tab copies sessionStorage and would make two presenters.
+  const [presentingHere, setPresentingHere] = useState(false);
+  const [phonesShowId, setPhonesShowId] = useState(initialPresentingId);
   const motionEnabled = presentationMotion && systemReducedMotion === false;
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -125,6 +135,8 @@ export default function DeliberationDeck({
   const [phase, setPhase] = useState<Phase | null>(null);
   const [confetti, setConfetti] = useState<Confetti | null>(null);
   const [error, setError] = useState("");
+  const [sync, setSync] = useState(LIVE_SYNC_START);
+  const [presentError, setPresentError] = useState("");
   const [applyFailure, setApplyFailure] = useState<{ kind: "rejected" | "unknown"; message: string } | null>(null);
   const applyErrorRef = useRef<HTMLDivElement>(null);
   const applyingRef = useRef(false);
@@ -170,30 +182,73 @@ export default function DeliberationDeck({
 
   // Presenting pointer for the phones. The cleanup is the debounce: arrow-key spam sends one POST.
   const entryId = entry?.id;
+  const lastBroadcast = useRef<string | null>(null);
+  // The applicant whose broadcast failed and is still wanted; the poll and one timer retry it.
+  const failedBroadcast = useRef<string | null>(null);
+  const retryBroadcastTimer = useRef<number | undefined>(undefined);
+  const broadcast = useCallback(function send(applicationId: string, retryLater = true) {
+    lastBroadcast.current = applicationId;
+    window.clearTimeout(retryBroadcastTimer.current);
+    void runAction(RUSH_URL, { action: "SET_HASH_PRESENTING", cycleId, applicationId }, "Could not point the phones at this applicant").then((result) => {
+      if (lastBroadcast.current !== applicationId) return;
+      if (result.ok) {
+        failedBroadcast.current = null;
+        setPresentError("");
+        setPhonesShowId(applicationId);
+        return;
+      }
+      setPresentError(result.error);
+      failedBroadcast.current = applicationId;
+      if (retryLater) retryBroadcastTimer.current = window.setTimeout(() => {
+        if (failedBroadcast.current === applicationId && lastBroadcast.current === applicationId) send(applicationId, false);
+      }, PRESENT_RETRY_MS);
+    });
+  }, [cycleId]);
+  useEffect(() => () => window.clearTimeout(retryBroadcastTimer.current), []);
   useEffect(() => {
-    if (!canOperate || !entryId) return;
-    const timer = window.setTimeout(() => {
-      void runAction(RUSH_URL, { action: "SET_HASH_PRESENTING", cycleId, applicationId: entryId }, "Could not point the phones at this applicant").then((result) => { if (!result.ok) setError(result.error); });
-    }, 300);
+    if (!canOperate || !presentingHere || !entryId || lastBroadcast.current === entryId) return;
+    const timer = window.setTimeout(() => broadcast(entryId), 300);
     return () => window.clearTimeout(timer);
-  }, [canOperate, cycleId, entryId]);
+  }, [broadcast, canOperate, presentingHere, entryId]);
+
+  function togglePresenting() {
+    const enabled = !presentingHere;
+    setPresentingHere(enabled);
+    if (enabled && entry) broadcast(entry.id);
+    else {
+      lastBroadcast.current = null;
+      failedBroadcast.current = null;
+      window.clearTimeout(retryBroadcastTimer.current);
+      setPresentError("");
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
     async function tick() {
       if (document.visibilityState !== "visible") return;
+      let outcome: PollOutcome = "failed";
       try {
         const response = await authorizedFetch(`/api/admin/hash/live?cycleId=${encodeURIComponent(cycleId)}`, { cache: "no-store" });
-        if (!response.ok) return;
-        const body = (await response.json()) as { tally: TallyRow[] };
-        if (!cancelled) setTally(new Map(body.tally.map((row) => [row.applicationId, row])));
-      } catch {}
+        outcome = pollOutcome(response.status);
+        if (outcome === "ok") {
+          const body = (await response.json()) as { tally: TallyRow[]; presentingId?: string | null };
+          if (!cancelled) {
+            setTally(new Map(body.tally.map((row) => [row.applicationId, row])));
+            setPhonesShowId(body.presentingId ?? null);
+          }
+        }
+      } catch { outcome = "failed"; }
+      if (cancelled) return;
+      setSync((current) => nextLiveSync(current, outcome));
+      const failed = failedBroadcast.current;
+      if (outcome === "ok" && failed && failed === lastBroadcast.current) broadcast(failed, false);
     }
     void tick();
     const timer = window.setInterval(() => void tick(), 3000);
     document.addEventListener("visibilitychange", tick);
     return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
-  }, [cycleId]);
+  }, [broadcast, cycleId]);
 
   function select(id: string) {
     if (id !== entry?.id && headingRef.current?.closest(".deck-card")?.contains(document.activeElement)) focusNextContext.current = true;
@@ -282,7 +337,8 @@ export default function DeliberationDeck({
     function onKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat || event.isComposing || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
       const target = event.target;
-      if (target instanceof Element && target.closest('input, textarea, select, button, a, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="textbox"], [tabindex]:not([data-deck-context])')) return;
+      const arrow = event.key === "ArrowLeft" || event.key === "ArrowRight";
+      if (target instanceof Element && target.closest(arrow ? OWNS_ARROWS : OWNS_KEYS)) return;
       if (event.key === "/") { event.preventDefault(); searchRef.current?.focus(); return; }
       if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
       if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
@@ -306,7 +362,7 @@ export default function DeliberationDeck({
 
   if (!entry) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-mecg-navy p-6 text-white/60">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-mecg-navy p-6 text-white/70">
         <p>No applicants to discuss yet.</p>
         <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="inline-flex min-h-11 items-center text-sm text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">Back to Hash</Link>
       </main>
@@ -318,6 +374,7 @@ export default function DeliberationDeck({
   const speedDating = entry.speedDating;
   const outcome = applied[entry.id];
   const flagged = revisit.has(entry.id);
+  const phonesShowName = entries.find((candidate) => candidate.id === phonesShowId)?.name;
   const stampStatus = phase && phase.kind !== "drumroll" ? phase.status : null;
   const allApplied = ordered.length > 0 && ordered.every((candidate) => Boolean(applied[candidate.id]));
   const cardMotion = phase?.kind === "drumroll" ? "deck-drumroll" : "";
@@ -325,21 +382,39 @@ export default function DeliberationDeck({
   return (
     <main data-motion={motionEnabled ? "on" : "off"} className={`deck-root flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[13px] font-semibold text-white/50">Discussion mode</p>
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <p className="text-[13px] font-semibold text-white/70">Discussion mode</p>
+          <p role="status" className="live-sync-status" data-dark>
+            {liveSyncNotice(sync) === "reconnecting" && "Reconnecting…"}
+            {liveSyncNotice(sync) === "session-ended" && <>Your session ended. <button type="button" onClick={() => window.location.reload()} className="min-h-11 underline underline-offset-2 hover:text-white">Reload</button> to keep the live tally.</>}
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" aria-pressed={sort === "score"} onClick={() => setSort("score")} className={SORT_BUTTON}>By score</button>
           <button type="button" aria-pressed={sort === "name"} onClick={() => setSort("name")} className={SORT_BUTTON}>A to Z</button>
           <button type="button" aria-pressed={onlyRevisits && revisitCount > 0} disabled={revisitCount === 0} onClick={() => setOnlyRevisits((current) => !current)} className={`${SORT_BUTTON} disabled:opacity-30`}>Revisits ({revisitCount})</button>
-          <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-white/50 underline decoration-white/30 underline-offset-2 hover:text-white hover:decoration-white">Exit</Link>
+          <Link href={withWorkspaceCycle("/admin/hash", cycleId)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-white/70 underline decoration-white/30 underline-offset-2 hover:text-white hover:decoration-white">Exit</Link>
         </div>
       </header>
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-3">
+      {canOperate && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button type="button" aria-pressed={presentingHere} aria-describedby="deck-present-help" onClick={togglePresenting} className={`${SORT_BUTTON} deck-present min-h-11`}>
+            Present to members
+          </button>
+          <p id="deck-present-help" className="text-sm text-white/70" role="status">
+            {presentingHere ? "On for this browser tab. Members' phones follow the card shown here." : `Off for this browser tab. Browsing here does not move members' phones.${phonesShowName ? ` Members' phones show ${phonesShowName}.` : ""}`}
+          </p>
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <button type="button" aria-pressed={motionEnabled} aria-describedby="deck-motion-help" disabled={systemReducedMotion !== false} onClick={togglePresentationMotion} className={`${SORT_BUTTON} min-h-11 disabled:opacity-60`}>
           Presentation motion
         </button>
-        <p id="deck-motion-help" className="text-sm text-white/60" role="status">
+        <p id="deck-motion-help" className="text-sm text-white/70" role="status">
           {systemReducedMotion === null ? "Off while checking your device motion preference." : systemReducedMotion ? "Off — your device requests reduced motion." : motionEnabled ? "On for this browser tab. Turn off for a still shared display." : "Off for this browser tab. Results appear without a reveal delay."}
         </p>
+      </div>
       </div>
       <div className="relative mt-4 self-center w-full max-w-sm">
         <input
@@ -350,13 +425,13 @@ export default function DeliberationDeck({
           onKeyDown={(event) => { if (event.key === "Enter" && matches[0]) { event.preventDefault(); jump(matches[0].id); } if (event.key === "Escape") setQuery(""); }}
           placeholder="Jump to a name"
           aria-label="Jump to a name"
-          className="min-h-11 w-full rounded-full bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-white/40 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)] focus:outline-none focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5)]"
+          className="min-h-11 w-full rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 inset-ring inset-ring-white/15 focus:outline-none focus:inset-ring-white/40"
         />
         {matches.length > 0 && (
-          <ul className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-2xl bg-[#111a36] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]">
+          <ul className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-xl bg-public-ink inset-ring inset-ring-white/15">
             {matches.map((candidate) => (
               <li key={candidate.id}>
-                <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => jump(candidate.id)} className="min-h-11 w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/[0.08] hover:text-white">{candidate.name}</button>
+                <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => jump(candidate.id)} className="min-h-11 w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 hover:text-white">{candidate.name}</button>
               </li>
             ))}
           </ul>
@@ -372,11 +447,11 @@ export default function DeliberationDeck({
         <div
           key={entry.id}
           data-enter={entrance(entry.id)}
-          className={`deck-card relative flex w-full max-w-4xl flex-col items-center gap-6 rounded-2xl bg-white/[0.04] p-5 text-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] sm:gap-8 sm:p-12 ${cardMotion}`}
+          className={`deck-card relative flex w-full max-w-4xl flex-col items-center gap-6 rounded-xl bg-white/[0.04] p-5 text-center inset-ring inset-ring-white/10 sm:gap-8 sm:p-12 ${cardMotion}`}
         >
           <div className="flex w-full items-center gap-4 text-left sm:flex-col sm:gap-8 sm:text-center">
           {failedHeadshots.has(entry.id) ? (
-            <span className="deck-headshot-pop flex size-16 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-2xl font-semibold text-white/70 sm:size-56 sm:text-6xl" aria-hidden="true">{initials(entry.name)}</span>
+            <span className="deck-headshot-pop flex size-16 shrink-0 items-center justify-center rounded-full bg-white/10 text-2xl font-semibold text-white/70 sm:size-56 sm:text-6xl" aria-hidden="true">{initials(entry.name)}</span>
           ) : (
             // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
             <img
@@ -396,19 +471,19 @@ export default function DeliberationDeck({
               {outcome && <span className="rounded-full bg-white/[0.12] px-3 py-1 text-sm font-semibold">{applicationStatusLabel(outcome)}</span>}
               {flagged && <span className="rounded-full bg-amber-300/20 px-3 py-1 text-sm font-semibold text-amber-200">Revisit</span>}
             </div>
-            <p className="mt-2 text-sm font-semibold text-white/85 sm:mt-3 sm:text-2xl">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
-            <p className="mt-1 text-[13px] font-semibold text-white/50">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
+            <p className="mt-2 text-sm font-semibold text-white sm:mt-3 sm:text-2xl">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
+            <p className="mt-1 text-[13px] font-semibold text-white/70">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
           </div>
           </div>
           {/* Participation only. Which way the room is leaning stays off the wall until the stamp lands. */}
           <div className={`${PANEL} relative w-full`}>
-            <p className="text-[13px] font-semibold text-white/50">Room vote</p>
+            <p className="text-[13px] font-semibold text-white/70">Room vote</p>
             {outcome ? (
               <p className={`mt-1 text-4xl font-bold ${outcome === "REJECTED" ? "text-rose-300" : "text-emerald-300"}`}>{applicationStatusLabel(outcome)}</p>
             ) : (
               <>
-                <p className="tabular mt-1 text-4xl font-bold">{row?.total ?? 0}<span className="ml-2 text-base font-normal text-white/50">of {quorum} voted</span></p>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+                <p className="tabular mt-1 text-4xl font-bold">{row?.total ?? 0}<span className="ml-2 text-base font-normal text-white/70">of {quorum} voted</span></p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full rounded-full bg-white/70" style={{ width: `${Math.min((row?.total ?? 0) / Math.max(quorum, 1), 1) * 100}%`, transition: "width 600ms" }} />
                 </div>
               </>
@@ -423,19 +498,19 @@ export default function DeliberationDeck({
               </div></>}
             </div>
             {phase?.kind === "stamped" && <button ref={advanceButtonRef} type="button" onClick={advance} className="mt-3 min-h-11 rounded-sm px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30">Next unapplied applicant</button>}
-            {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#111a36] text-6xl font-bold" aria-hidden="true">…</div>}
+            {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-public-ink text-6xl font-bold" aria-hidden="true">…</div>}
           </div>
           {!stageHash && (
             <>
               <p className="tabular text-7xl font-bold sm:text-8xl">
-                {entry.finalScore === null ? <span className="text-3xl font-normal text-white/50">Pending</span> : entry.finalScore.toFixed(1)}
+                {entry.finalScore === null ? <span className="text-3xl font-normal text-white/70">Pending</span> : entry.finalScore.toFixed(1)}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 {entry.rounds.map((round) => (
-                  <span key={round.name} className="rounded-full bg-white/[0.06] px-4 py-2 text-sm text-white/80 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]">
-                    <span className="text-white/50">{round.name}</span>{" "}
+                  <span key={round.name} className="rounded-full bg-white/10 px-4 py-2 text-sm text-white inset-ring inset-ring-white/10">
+                    <span className="text-white/70">{round.name}</span>{" "}
                     <span className="tabular font-semibold">{round.score === null ? (round.status === "PENDING" ? "Pending" : "—") : round.score.toFixed(1)}</span>
-                    <span className="ml-2 text-xs text-white/50">{round.count} ratings{round.spread != null ? ` · spread ${round.spread.toFixed(0)}` : ""}{round.status === "REVIEW" ? " · review" : ""}</span>
+                    <span className="ml-2 text-xs text-white/70">{round.count} ratings{round.spread != null ? ` · spread ${round.spread.toFixed(0)}` : ""}{round.status === "REVIEW" ? " · review" : ""}</span>
                   </span>
                 ))}
               </div>
@@ -443,31 +518,31 @@ export default function DeliberationDeck({
           )}
           <div className="grid w-full gap-4 sm:grid-cols-2">
             <div className={PANEL}>
-              <p className="text-[13px] font-semibold text-white/50">Group Case</p>
+              <p className="text-[13px] font-semibold text-white/70">Group Case</p>
               {groupCase?.mean != null ? (
                 <>
-                  <p className="tabular mt-1 text-6xl font-bold">{groupCase.mean.toFixed(1)}<span className="ml-1 text-base font-normal text-white/50">/ 40</span></p>
+                  <p className="tabular mt-1 text-6xl font-bold">{groupCase.mean.toFixed(1)}<span className="ml-1 text-base font-normal text-white/70">/ 40</span></p>
                   <p className="mt-1 text-lg font-semibold">{groupCase.band}</p>
-                  <p className="text-sm text-white/50">{graders(groupCase.count)}</p>
+                  <p className="text-sm text-white/70">{graders(groupCase.count)}</p>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
                     {groupCase.criteria.map((criterion) => (
-                      <div key={criterion.name} title={criterion.name} className="rounded-lg bg-white/[0.05] px-2 py-1.5">
-                        <p className="truncate text-white/50">{criterion.name.split(/\s+/)[0]}</p>
+                      <div key={criterion.name} title={criterion.name} className="rounded-lg bg-white/10 px-2 py-1.5">
+                        <p className="truncate text-white/70">{criterion.name.split(/\s+/)[0]}</p>
                         <p className="tabular font-semibold">{criterion.mean == null ? "—" : criterion.mean.toFixed(1)}</p>
                       </div>
                     ))}
                   </div>
                 </>
-              ) : <p className="mt-3 text-2xl text-white/50">Not graded</p>}
+              ) : <p className="mt-3 text-2xl text-white/70">Not graded</p>}
             </div>
             <div className={PANEL}>
-              <p className="text-[13px] font-semibold text-white/50">Speed Dating</p>
+              <p className="text-[13px] font-semibold text-white/70">Speed Dating</p>
               {speedDating && speedDating.count > 0 ? (
                 <>
                   <p className="tabular mt-1 text-6xl font-bold">{speedDating.adjusted == null ? formatStars(null) : formatStars(speedDating.adjusted)}</p>
-                  <p className="mt-1 text-sm text-white/50">raw {speedDating.mean == null ? "—" : speedDating.mean.toFixed(1)} · {graders(speedDating.count)}</p>
+                  <p className="mt-1 text-sm text-white/70">raw {speedDating.mean == null ? "—" : speedDating.mean.toFixed(1)} · {graders(speedDating.count)}</p>
                 </>
-              ) : <p className="mt-3 text-2xl text-white/50">Not graded</p>}
+              ) : <p className="mt-3 text-2xl text-white/70">Not graded</p>}
             </div>
           </div>
           <div className="grid w-full gap-6 sm:grid-cols-2">
@@ -475,25 +550,25 @@ export default function DeliberationDeck({
             <NotesList title="Speed Dating notes" notes={speedDating?.notes ?? []} />
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-[13px] font-semibold text-white/50">Event observations</p>
+            <p className="text-[13px] font-semibold text-white/70">Event observations</p>
             {entry.impressions ? (
               <>
                 <p className="text-sm text-white/70">{entry.impressions.count} observation{entry.impressions.count === 1 ? "" : "s"}</p>
                 {entry.impressions.topTags.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2">
                     {entry.impressions.topTags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-white/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]">{tag}</span>
+                      <span key={tag} className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-white/70 inset-ring inset-ring-white/10">{tag}</span>
                     ))}
                   </div>
                 )}
                 {entry.impressions.notes.length > 0 && (
-                  <ul className="mt-2 max-w-xl space-y-1 text-sm leading-6 text-white/60">
+                  <ul className="mt-2 max-w-xl space-y-1 text-sm leading-6 text-white/70">
                     {entry.impressions.notes.slice(0, 5).map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>{note}</li>)}
                   </ul>
                 )}
               </>
             ) : (
-              <p className="text-sm text-white/50">None recorded</p>
+              <p className="text-sm text-white/70">None recorded</p>
             )}
           </div>
           {entry.decision && (
@@ -503,7 +578,7 @@ export default function DeliberationDeck({
           )}
           {stampStatus && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-              <span className={`deck-stamp rounded-2xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-amber-300" : "text-emerald-300 border-emerald-300"}`}>
+              <span className={`deck-stamp rounded-xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-warning-edge" : "text-emerald-300 border-emerald-300"}`}>
                 {stampStatus === "UNSURE" ? "UNSURE" : applicationStatusLabel(stampStatus).toUpperCase()}
               </span>
             </div>
@@ -519,13 +594,13 @@ export default function DeliberationDeck({
       )}
       {allApplied && <p role="status" className="mb-4 text-center text-sm text-white/70">Applied results are shown for every applicant in this view. Return to Hash to check stage readiness.</p>}
       <footer className="flex flex-wrap items-center justify-center gap-3 sm:justify-between">
-        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Previous</button>
+        <button type="button" onClick={() => step(-1)} disabled={index <= 0 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 inset-ring inset-ring-white/20 hover:text-white disabled:opacity-30">Previous</button>
         <div className="order-first w-full text-center sm:order-none sm:w-auto">
           <p className="tabular text-sm font-semibold text-white/70">{index + 1} of {ordered.length}</p>
-          <p role="alert" aria-atomic="true" className="mt-1 text-sm text-rose-300">{error}</p>
+          <p role="alert" aria-atomic="true" className="mt-1 text-sm text-rose-300">{error || presentError}</p>
         </div>
         <button type="button" aria-pressed={flagged} onClick={() => toggleRevisit()} disabled={phase?.kind === "drumroll"} className={`${SORT_BUTTON} px-4 py-2 text-sm font-normal disabled:opacity-30`}>Revisit (U)</button>
-        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:text-white disabled:opacity-30">Next</button>
+        <button type="button" onClick={() => step(1)} disabled={index >= ordered.length - 1 || phase?.kind === "drumroll"} className="min-h-11 min-w-11 rounded-sm px-4 py-2 text-sm text-white/70 inset-ring inset-ring-white/20 hover:text-white disabled:opacity-30">Next</button>
       </footer>
     </main>
   );

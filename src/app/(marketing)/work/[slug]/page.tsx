@@ -51,8 +51,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         title={project.title}
         copy={`For ${project.clientLabel}`}
         aside={
-          <div className="public-lit rounded-2xl p-6 shadow-[0_28px_56px_-28px_rgb(18_33_62/0.6)] sm:p-7">
-            <p className="text-[13px] text-white/80">The question we started from</p>
+          <div className="public-lit rounded-xl p-6 shadow-lift sm:p-7">
+            <p className="text-[13px] text-white">The question we started from</p>
             <p className="display-face mt-2 text-balance text-[26px] leading-[1.05] sm:text-[36px]">{project.decision}</p>
           </div>
         }
@@ -66,10 +66,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <SectionHeading id="context-title" className="mt-4">The decision came first.</SectionHeading>
           </div>
           <div>
-            <p className="text-xl leading-8 text-mecg-navy/72">{project.context}</p>
+            <p className="text-xl leading-8 text-muted">{project.context}</p>
             {project.constraints.length > 0 ? (
-              <ul className="mt-7 divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
-                {project.constraints.map((constraint) => <li key={constraint} className="py-4 leading-7 text-mecg-navy/60">{constraint}</li>)}
+              <ul className="mt-7 divide-y divide-line border-y border-line">
+                {project.constraints.map((constraint) => <li key={constraint} className="py-4 leading-7 text-muted">{constraint}</li>)}
               </ul>
             ) : null}
           </div>
@@ -80,9 +80,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <SectionHeading id="work-title" className="mt-4 max-w-2xl">What the team did to answer it.</SectionHeading>
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {project.methods.map((method, index) => (
-              <li key={method} className="rounded-2xl bg-white p-6 shadow-[0_12px_30px_rgba(7,13,31,0.06)]">
+              <li key={method} className="rounded-xl bg-white p-6 shadow-lift">
                 <span className="text-[15px] font-semibold tabular-nums text-mecg-blue">0{index + 1}</span>
-                <p className="mt-5 leading-7 text-mecg-navy/70">{method}</p>
+                <p className="mt-5 leading-7 text-muted">{method}</p>
               </li>
             ))}
           </ol>
@@ -94,10 +94,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <SectionHeading id="deliverables-title" className="mt-4">What MECG delivered.</SectionHeading>
           </div>
           <div>
-            <ul className="divide-y divide-mecg-navy/10 border-y border-mecg-navy/10">
-              {project.deliverables.map((deliverable) => <li key={deliverable} className="flex gap-3 py-5 leading-7 text-mecg-navy/65"><span className="text-mecg-blue" aria-hidden="true">→</span><span>{deliverable}</span></li>)}
+            <ul className="divide-y divide-line border-y border-line">
+              {project.deliverables.map((deliverable) => <li key={deliverable} className="flex gap-3 py-5 leading-7 text-muted"><span className="text-mecg-blue" aria-hidden="true">→</span><span>{deliverable}</span></li>)}
             </ul>
-            {project.handoff ? <p className="mt-7 text-lg leading-8 text-mecg-navy/72">{project.handoff}</p> : null}
+            {project.handoff ? <p className="mt-7 text-lg leading-8 text-muted">{project.handoff}</p> : null}
           </div>
       </MarketingSection>
 
@@ -107,7 +107,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <SectionHeading id="member-work-title" className="mt-4">The work students owned.</SectionHeading>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2">
-            {project.memberWork.map((item) => <li key={item} className="rounded-2xl bg-white/[0.06] p-5 leading-7 text-white/68">{item}</li>)}
+            {project.memberWork.map((item) => <li key={item} className="rounded-xl bg-white/10 p-5 leading-7 text-white/70">{item}</li>)}
           </ul>
       </MarketingSection>
 

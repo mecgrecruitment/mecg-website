@@ -55,6 +55,35 @@ test("jumping focuses applicant context while keeping deliberate arrow navigatio
   expect(writes).toEqual([]);
 });
 
+test("only a tab presenting to members moves the phones", async ({ page }) => {
+  await openDeck(page);
+  const presented: string[] = [];
+  await page.route("**/api/admin/rush", (route) => {
+    const body = route.request().postDataJSON();
+    if (body.action === "SET_HASH_PRESENTING") presented.push(body.applicationId);
+    return route.fulfill({ json: { id: true } });
+  });
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.waitForTimeout(600);
+  expect(presented).toEqual([]);
+  const present = page.getByRole("button", { name: "Present to members", exact: true });
+  await expect(present).toHaveAttribute("aria-pressed", "false");
+  await present.click();
+  await expect(present).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => presented).toEqual(["synthetic-deck-1"]);
+  await page.getByRole("button", { name: "Previous", exact: true }).click();
+  await expect.poll(() => presented).toEqual(["synthetic-deck-1", "synthetic-deck-0"]);
+});
+
+test("arrow keys keep paging after a deck button is clicked", async ({ page }) => {
+  await openDeck(page);
+  const next = page.getByRole("button", { name: "Next", exact: true });
+  await next.click();
+  await expect(page.getByRole("heading", { name: "Ada Example", exact: true })).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.getByRole("heading", { name: "Zoe Example", exact: true })).toBeVisible();
+});
+
 test("native sorting and revisit Enter never apply a result or advance the card", async ({ page }) => {
   const writes = await openDeck(page);
   for (const name of ["A to Z", "By score", "Revisit (U)"]) {

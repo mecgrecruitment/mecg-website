@@ -41,15 +41,15 @@ export default function ConflictForm({ applications }: { applications: { id: str
     const applicant = applications.find(application => application.id === id);
     if (!applicant) return;
     setError(""); setMessage(""); setState({ kind: "confirming", applicantName: applicant.name });
-  }} className="rounded-2xl bg-paper p-5 sm:p-6">
+  }} className="rounded-xl bg-paper p-5 sm:p-6">
     <h3 className="text-lg font-semibold text-mecg-navy">Declare a conflict</h3>
-    <p className="mt-1 text-sm leading-6 text-mecg-navy/65">This removes you from the applicant’s evaluations and decision approvals. Existing evaluation work is voided, and you cannot score this applicant afterward.</p>
+    <p className="mt-1 text-sm leading-6 text-muted">This removes you from the applicant’s evaluations and decision approvals. Existing evaluation work is voided, and you cannot score this applicant afterward.</p>
     {!applications.length ? <p className="mt-4 text-sm">No applicants are available to select.</p> : <>
       <fieldset onChange={() => { if (state.kind === "confirming") setState({ kind: "editing" }); }} disabled={blocked} className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium" htmlFor="conflict-applicationId">Applicant<select id="conflict-applicationId" name="applicationId" required className="select-control mt-2"><option value="">Choose an applicant</option>{applications.map(application => <option key={application.id} value={application.id}>{application.name}</option>)}</select></label>
         <label className="text-sm font-medium" htmlFor="conflict-reason">Relationship or conflict reason<input id="conflict-reason" name="reason" required maxLength={1000} className="field-control mt-2 min-w-0 w-full" /></label>
       </fieldset>
-      {state.kind === "confirming" ? <section className="mt-4 border-t border-mecg-navy/15 pt-4" aria-label="Confirm conflict">
+      {state.kind === "confirming" ? <section className="mt-4 border-t border-line pt-4" aria-label="Confirm conflict">
         <p ref={headingRef} tabIndex={-1} className="font-semibold">Declare a conflict for {state.applicantName}?</p>
         <p className="mt-2 text-sm leading-6">This cannot be undone. Your existing evaluation work for this applicant will be voided.</p>
         <div className="mt-3 flex flex-wrap gap-2"><button type="button" className="button-primary" onClick={() => void submit()}>Confirm conflict</button><button type="button" className="button-secondary" onClick={cancel}>Keep editing</button></div>

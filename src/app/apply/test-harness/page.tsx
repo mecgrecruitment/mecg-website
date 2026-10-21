@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import ApplicationForm from "../application-form";
+import { gradTermBaseYear } from "@/lib/grad-term";
 import HarnessReady from "./harness-ready";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ export default async function ApplicationTestHarnessPage({ searchParams }: { sea
   if (process.env.PLAYWRIGHT_APPLICATION_HARNESS !== "1" || process.env.E2E_LOCAL_HTTP !== "1") notFound();
   const { headshot, draft } = await searchParams;
   return (
-    <main className="min-h-dvh bg-mecg-paper-workspace p-6 text-mecg-navy">
+    <main className="min-h-dvh bg-paper p-6 text-mecg-navy">
       <ApplicationForm
         initialName="Ada Applicant"
         email="ada@example.com"
@@ -43,6 +44,7 @@ export default async function ApplicationTestHarnessPage({ searchParams }: { sea
         initialRevision="10000000-0000-4000-8000-000000000001"
         initialHasHeadshot={false}
         headshotSupported={headshot === "required"}
+        gradBaseYear={gradTermBaseYear(new Date())}
       />
       <HarnessReady />
     </main>

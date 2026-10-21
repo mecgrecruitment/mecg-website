@@ -23,9 +23,9 @@ export default async function GroupCasePage() {
   if (!membership) {
     return (
       <main className="workspace-stack mx-auto flex max-w-3xl flex-col">
-        <section className="rounded-2xl bg-white p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <section className="rounded-xl bg-white p-6 inset-ring inset-ring-line">
           <h1 className="text-xl font-semibold text-mecg-navy">Group Case grading is for members</h1>
-          <p className="mt-2 text-sm leading-6 text-mecg-navy/65">Your account has the Recruitment Committee role only. Ask an owner to add the Member role if you are grading tonight.</p>
+          <p className="mt-2 text-sm leading-6 text-muted">Your account has the Recruitment Committee role only. Ask an owner to add the Member role if you are grading tonight.</p>
           <Link href={withWorkspaceCycle("/member", cycleId)} className="button-secondary mt-5 inline-flex">Return to My work</Link>
         </section>
       </main>
@@ -65,9 +65,9 @@ export default async function GroupCasePage() {
       {roster ? (
         <GroupCaseRoster initial={roster} readOnlyReason={workspaceState?.kind === "read-only" ? workspaceState.detail : undefined} />
       ) : (
-        <section className="rounded-2xl bg-white p-6 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)]">
+        <section className="rounded-xl bg-white p-6 inset-ring inset-ring-line">
           <h2 className="text-xl font-semibold text-mecg-navy">No Group Case round is ready</h2>
-          <p className="mt-2 text-sm leading-6 text-mecg-navy/65">This workspace appears after the Board publishes the round.</p>
+          <p className="mt-2 text-sm leading-6 text-muted">This workspace appears after the Board publishes the round.</p>
           <Link href={withWorkspaceCycle("/member", cycleId)} className="button-secondary mt-5 inline-flex">Return to My work</Link>
         </section>
       )}

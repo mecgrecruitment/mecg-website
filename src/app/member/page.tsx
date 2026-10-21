@@ -23,7 +23,10 @@ import { GROUP_CASE_VISIBLE_STATUSES, groupCaseWorkspaceState } from "./group-ca
 import { evaluationTaskHref, selectedEvaluationAssignment } from "./assignment-navigation";
 import { canVoteInStage, currentHashStage } from "@/lib/hash-tally";
 import { parseScreeningProgress, screeningDeadlineLabel } from "./screening/screening-draft";
+import type { SpeedDatingRoster } from "@/lib/speed-dating-roster";
+import { TallySegments, type TallyItem } from "@/components/tally-strip";
 import { orderedWorkTasks, roundWorkOpen, taskDeadline, type MemberWorkTask } from "./work-tasks";
+import { gradTermBaseYear } from "@/lib/grad-term";
 
 export const metadata: Metadata = { title: "My work" };
 
@@ -88,6 +91,26 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   const speedDating = speedDatingRound?.kind === "SPEED_DATING" ? speedDatingRound : null;
   const speedDatingOpen = speedDating && roundWorkOpen(speedDating);
   const activeRoundFilter = roundFilter === "SPEED_DATING" ? roundFilter : null;
+  const [ballot, ownVotes, speedRoster] = await Promise.all([
+    canVote ? supabase.rpc("hash_ballot", { target_cycle_id: cycleMembership.cycleId }) : null,
+    canVote ? supabase.from("hash_votes").select("application_id,vote").eq("cycle_id", cycleMembership.cycleId).eq("voter_id", user.id).eq("stage", hashStage) : null,
+    speedDatingOpen && canGradeRoundWork ? screeningRpc<SpeedDatingRoster>(supabase, "my_speed_dating_roster", { target_round_id: speedDating.id }) : null,
+  ]);
+  if (ballot?.error) throw ballot.error;
+  if (ownVotes?.error) throw ownVotes.error;
+  if (speedRoster?.error) throw new Error(speedRoster.error.message);
+  // Same order as the ballot page, so the strip reads like the list it summarises.
+  const voteByApplicant = new Map((ownVotes?.data ?? []).map((row) => [row.application_id, row.vote]));
+  const ballotProgress: TallyItem[] = [...(ballot?.data ?? [])]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(({ id }) => {
+      const vote = voteByApplicant.get(id);
+      return { id, state: vote === "YES" || vote === "UNSURE" || vote === "NO" ? vote : "empty" };
+    });
+  const ballotVoted = ballotProgress.filter((item) => item.state !== "empty").length;
+  const speedApplicants = speedRoster?.data?.applicants ?? [];
+  const speedProgress: TallyItem[] = speedApplicants.map((applicant) => ({ id: applicant.applicationId, state: applicant.score === null ? "empty" : "done" }));
+  const speedRated = speedProgress.filter((item) => item.state === "done").length;
   // Speed Dating assignments are created in groups and must only be submitted
   // through the atomic group workspace. Never expose a member to this legacy
   // one-applicant evaluation form.
@@ -163,8 +186,12 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       ? [{
           href: "/member/speed-dating",
           label: "Grade Speed Dating",
-          detail: speedDating.closes_at ? `Closes ${formatDeadline(speedDating.closes_at)} · each rating saves separately` : "Search the applicants in front of you. Each rating saves separately.",
+          detail: [
+            speedProgress.length ? `${speedRated} of ${speedProgress.length} rated` : null,
+            speedDating.closes_at ? `Closes ${formatDeadline(speedDating.closes_at)} · each rating saves separately` : "Search the applicants in front of you. Each rating saves separately.",
+          ].filter(Boolean).join(" · "),
           dueAt: taskDeadline(speedDating.closes_at),
+          progress: speedProgress.length ? speedProgress : undefined,
         }]
       : []),
     ...(groupCaseState?.kind === "active" && canGradeRoundWork
@@ -179,7 +206,18 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
   // Eligibility does not reveal whether the member has finished their ballot.
   // Keep voting discoverable without counting it as an unfinished assignment.
   const availableWork: MemberWorkTask[] = canVote
-    ? [{ href: "/member/hash", label: "Review your Hash ballot", detail: "Voting is open. Your choices are private; each vote saves separately.", dueAt: Number.POSITIVE_INFINITY, action: "Open ballot" }]
+    ? [{
+        href: "/member/hash",
+        label: "Review your Hash ballot",
+        detail: !ballotProgress.length
+          ? "Voting is open. Your choices are private; each vote saves separately."
+          : ballotVoted === ballotProgress.length
+            ? `Ballot complete · ${ballotVoted} of ${ballotVoted} voted. You can change a vote until the board applies the result.`
+            : `Voted ${ballotVoted} of ${ballotProgress.length}. Your choices are private; each vote saves separately.`,
+        dueAt: Number.POSITIVE_INFINITY,
+        action: "Open ballot",
+        progress: ballotProgress.length ? ballotProgress : undefined,
+      }]
     : [];
   const preparation: MemberWorkTask[] = speedDating?.status === "PUBLISHED" && canGradeRoundWork
     ? [{ href: "/member/speed-dating", label: "Prepare for Speed Dating", detail: "The round is published. Ratings open when the Board starts it.", dueAt: Number.POSITIVE_INFINITY }]
@@ -204,20 +242,24 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
           <section aria-labelledby="member-next-task">
             <div className="flex items-center justify-between gap-4">
               <h2 id="member-next-task" className="member-work-title">{tasks.length ? "Needs you" : "You're up to date"}</h2>
-              <span className="text-xs text-mecg-navy/65">{tasks.length} open {tasks.length === 1 ? "task" : "tasks"}</span>
+              <span className="text-xs text-muted">{tasks.length} open {tasks.length === 1 ? "task" : "tasks"}</span>
             </div>
             <div className="member-task-list">
               {tasks.map((task, index) => <Link key={`${task.href}-${task.label}`} href={withWorkspaceCycle(task.href, cycleId)} className="member-task">
                 <span className="member-task-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                <div className="member-task-copy"><strong>{task.label}</strong><p>{task.detail}</p></div>
+                <div className="member-task-copy"><strong>{task.label}</strong><p>{task.detail}</p>{task.progress && <TallySegments items={task.progress} />}</div>
                 <span className="member-task-action">{task.action ?? "Open"}<span aria-hidden="true">→</span></span>
               </Link>)}
-              {!tasks.length && <p className="py-6 text-sm leading-6 text-mecg-navy/65">No assigned reviews are waiting. Available voting and preparation appear below when they open.</p>}
+              {!tasks.length && <p className="py-6 text-sm leading-6 text-muted">No assigned reviews are waiting. Available voting and preparation appear below when they open.</p>}
             </div>
           </section>
-          {availableWork.length > 0 && <section className="mt-6 border-t border-mecg-navy/10 pt-5" aria-labelledby="member-available"><h2 id="member-available" className="member-work-title">Voting open</h2>{availableWork.map((task) => <div key={task.href} className="py-3"><Link href={withWorkspaceCycle(task.href, cycleId)} className="inline-flex min-h-11 items-center text-sm font-semibold">{task.label} →</Link><p className="text-sm text-mecg-navy/65">{task.detail}</p></div>)}</section>}
-          {preparation.length > 0 && <section className="mt-6 border-t border-mecg-navy/10 pt-5" aria-labelledby="member-prepare"><h2 id="member-prepare" className="member-work-title">Prepare</h2>{preparation.map((task) => <div key={task.href} className="py-3"><Link href={withWorkspaceCycle(task.href, cycleId)} className="inline-flex min-h-11 items-center text-sm font-semibold">{task.label} →</Link><p className="text-sm text-mecg-navy/65">{task.detail}</p></div>)}</section>}
-          {groupCaseState && groupCaseState.kind !== "active" && canGradeRoundWork && <section className="mt-6 border-t border-mecg-navy/10 pt-5"><h2 className="text-sm font-semibold">Group Case · {groupCaseState.label}</h2><p className="mt-2 text-xs leading-6 text-mecg-navy/65">{groupCaseState.detail}</p><Link href={withWorkspaceCycle("/member/group-case", cycleId)} className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold">{groupCaseState.action} →</Link></section>}
+          {availableWork.length > 0 && <section className="mt-6 border-t border-line pt-5" aria-labelledby="member-available"><h2 id="member-available" className="member-work-title">Voting open</h2><div className="member-task-list">{availableWork.map((task) => <Link key={task.href} href={withWorkspaceCycle(task.href, cycleId)} className="member-task" data-kind="ballot">
+                <span className="member-task-index" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 9h12v8H4zM7 9V4h6v5M8.5 6.5l1.2 1.2L12 5.4" /></svg></span>
+                <div className="member-task-copy"><strong>{task.label}</strong><p>{task.detail}</p>{task.progress && <TallySegments items={task.progress} />}</div>
+                <span className="member-task-action">{task.action ?? "Open"}<span aria-hidden="true">→</span></span>
+              </Link>)}</div></section>}
+          {preparation.length > 0 && <section className="mt-6 border-t border-line pt-5" aria-labelledby="member-prepare"><h2 id="member-prepare" className="member-work-title">Prepare</h2>{preparation.map((task) => <div key={task.href} className="py-3"><Link href={withWorkspaceCycle(task.href, cycleId)} className="inline-flex min-h-11 items-center text-sm font-semibold">{task.label} →</Link><p className="text-sm text-muted">{task.detail}</p></div>)}</section>}
+          {groupCaseState && groupCaseState.kind !== "active" && canGradeRoundWork && <section className="mt-6 border-t border-line pt-5"><h2 className="text-sm font-semibold">Group Case · {groupCaseState.label}</h2><p className="mt-2 text-xs leading-6 text-muted">{groupCaseState.detail}</p><Link href={withWorkspaceCycle("/member/group-case", cycleId)} className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold">{groupCaseState.action} →</Link></section>}
       {unfinishedAssignments.length > 0 && <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -259,26 +301,26 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 key={assignment.id}
                 tabIndex={selected ? -1 : undefined}
                 aria-labelledby={`assignment-heading-${assignment.id}`}
-                className="scroll-mt-24 rounded-2xl p-5 shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] focus:outline-2 focus:outline-offset-3 focus:outline-mecg-navy sm:p-6"
+                className="scroll-mt-24 rounded-xl p-5 inset-ring inset-ring-line focus:outline-2 focus:outline-offset-3 focus:outline-mecg-navy sm:p-6"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-[13px] font-semibold text-mecg-orange-ink">{assignment.rounds.name}</p>
                     <h3 id={`assignment-heading-${assignment.id}`} className="mt-1.5 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
                   </div>
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ${ready ? "bg-mecg-orange/[0.16] text-mecg-orange-ink" : "bg-mecg-navy/[0.06] text-mecg-navy/55"}`}>
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ${ready ? "bg-mecg-orange/15 text-mecg-orange-ink" : "bg-wash text-muted"}`}>
                     {statusLabel}
                   </span>
                 </div>
-                {assignment.rounds.closes_at && <p className="mt-2 text-xs text-mecg-navy/60">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
+                {assignment.rounds.closes_at && <p className="mt-2 text-xs text-muted">Closes {formatDeadline(assignment.rounds.closes_at)}</p>}
                 {ready && roundPosition > 0 && (
-                  <p className="mt-2 text-xs font-semibold text-mecg-navy/55">Applicant {roundPosition} of {readyInRound.length} in this round</p>
+                  <p className="mt-2 text-xs font-semibold text-muted">Applicant {roundPosition} of {readyInRound.length} in this round</p>
                 )}
                 {submitted ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
+                  <p className="mt-3 text-sm text-muted">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
                 ) : ready && rubric && calibrated && selected ? (
                   <details className="mt-3" open={selected}>
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-mecg-navy/[0.035] px-4 py-2.5 font-semibold text-mecg-navy shadow-[inset_0_0_0_1px_rgba(7,13,31,0.1)] marker:content-none">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-wash px-4 py-2.5 font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
                       <span>{selected ? "Continue evaluation" : "Open evaluation"}</span>
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
                         <path d="M5 8l5 5 5-5" />
@@ -286,7 +328,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                     </summary>
                     <div className="disclosure-panel">
                       <EvaluationForm key={assignment.id} assignmentId={assignment.id} criteria={criteria} minimumObservedCriteria={rubric.minimum_observed_criteria} />
-                      <p className="mt-3 text-xs leading-5 text-mecg-navy/50">Saving keeps your draft. Review and lock this evaluation when it is complete; the next ready applicant then moves to the top of My Work.</p>
+                      <p className="mt-3 text-xs leading-5 text-muted">Saving keeps your draft. Review and lock this evaluation when it is complete; the next ready applicant then moves to the top of My Work.</p>
                     </div>
                   </details>
                 ) : ready && rubric && calibrated ? (
@@ -297,29 +339,29 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                     Grade this applicant
                   </Link>
                 ) : ready && rubric ? (
-                  <div className="mt-3 rounded-xl bg-mecg-orange/[0.1] p-4">
+                  <div className="mt-3 rounded-xl bg-mecg-orange/15 p-4">
                     <p className="text-sm font-semibold text-mecg-navy">Calibration required before evaluation</p>
-                    <p className="mt-1 text-xs leading-5 text-mecg-navy/60">Review the active rubric anchors once for this round. Calibration is advisory and never adjusts your score.</p>
+                    <p className="mt-1 text-xs leading-5 text-muted">Review the active rubric anchors once for this round. Calibration is advisory and never adjusts your score.</p>
                     <Link href={withWorkspaceCycle(`/member/calibration/${assignment.rounds.id}?return=${encodeURIComponent(currentWorkspace)}`, cycleId)} className="button-primary mt-3 inline-flex text-sm">Review calibration</Link>
                   </div>
                 ) : ready ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">This round is active, but its scoring guide is unavailable. Contact the Board before evaluating.</p>
+                  <p className="mt-3 text-sm text-muted">This round is active, but its scoring guide is unavailable. Contact the Board before evaluating.</p>
                 ) : assignment.status === "RECUSED" ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">You are recused from this applicant. No evaluation is required.</p>
+                  <p className="mt-3 text-sm text-muted">You are recused from this applicant. No evaluation is required.</p>
                 ) : assignment.status === "MISSED" ? (
-                  <p className="mt-3 text-sm text-mecg-navy/55">This assignment is closed and marked missed.</p>
+                  <p className="mt-3 text-sm text-muted">This assignment is closed and marked missed.</p>
                 ) : assignment.rounds.status === "ACTIVE" && !roundWorkOpen(assignment.rounds) ? (
-                  <p className="mt-3 text-sm text-mecg-navy/65">The grading deadline has passed or is unavailable. This evaluation cannot be edited.</p>
+                  <p className="mt-3 text-sm text-muted">The grading deadline has passed or is unavailable. This evaluation cannot be edited.</p>
                 ) : (
-                  <p className="mt-3 text-sm text-mecg-navy/55">This form opens when the Board activates the round.</p>
+                  <p className="mt-3 text-sm text-muted">This form opens when the Board activates the round.</p>
                 )}
               </article>
             );
           })}
           {!visible.length && (
-            <div className="rounded-2xl border-[1.5px] border-dashed border-mecg-navy/[0.14] p-7 text-center">
+            <div className="rounded-xl border-[1.5px] border-dashed border-line p-7 text-center">
               <p className="font-semibold text-mecg-navy">No assignments in this view</p>
-              <p className="mt-1 text-sm text-mecg-navy/55">New work will appear here when the Board assigns and opens a round.</p>
+              <p className="mt-1 text-sm text-muted">New work will appear here when the Board assigns and opens a round.</p>
             </div>
           )}
         </div>
@@ -327,30 +369,30 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         </div>
       <aside className="member-work-secondary" aria-label="Activity and account">
         <h2>Submitted and locked</h2>
-        {recentCompletions.length > 0 && <p className="mt-2 text-xs leading-5 text-mecg-navy/65">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>}
+        {recentCompletions.length > 0 && <p className="mt-2 text-xs leading-5 text-muted">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>}
         <div className="mt-3.5 flex flex-col gap-2">
           {recentCompletions.map((assignment) => (
             <div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-paper px-4 py-3">
               <div>
                 <p className="text-sm font-semibold text-mecg-navy">{assignment.applications.pnms.name}</p>
-                <p className="mt-0.5 text-xs text-mecg-navy/55">{assignment.rounds.name}</p>
+                <p className="mt-0.5 text-xs text-muted">{assignment.rounds.name}</p>
               </div>
-              <span className="text-xs font-semibold text-emerald-800">Submitted</span>
+              <span className="text-xs font-semibold text-success">Submitted</span>
             </div>
           ))}
-          {!recentCompletions.length && <p className="text-xs leading-6 text-mecg-navy/65">Your submitted evaluations will appear here.</p>}
+          {!recentCompletions.length && <p className="text-xs leading-6 text-muted">Your submitted evaluations will appear here.</p>}
         </div>
         {!isScreeningReviewer && (
-          <details className="mt-6 border-t border-mecg-navy/10 pt-4">
+          <details className="mt-6 border-t border-line pt-4">
             <summary className="min-h-11 cursor-pointer text-xs font-semibold text-mecg-navy">Report a conflict</summary>
             <div className="mt-4">
               <ConflictForm applications={(applications ?? []).map((application) => ({ id: application.id, name: application.name }))} />
             </div>
           </details>
         )}
-        <details className="mt-4 border-t border-mecg-navy/10 pt-4">
+        <details className="mt-4 border-t border-line pt-4">
           <summary className="min-h-11 cursor-pointer text-xs font-semibold text-mecg-navy">Profile and availability</summary>
-          <p className="mt-2 text-sm text-mecg-navy/65">Update your profile or add available times for buddy meetings.</p>
+          <p className="mt-2 text-sm text-muted">Update your profile or add available times for buddy meetings.</p>
           <div className="mt-4 flex flex-col gap-4">
             <BuddySlotForm cycleId={cycleMembership.cycleId} slots={(buddySlots ?? []).map((slot) => ({ id: slot.id, startsAt: slot.starts_at, endsAt: slot.ends_at }))} />
             <ProfileForm
@@ -361,6 +403,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                 position: profile?.position_title ?? "",
                 bio: profile?.bio ?? "",
               }}
+              gradBaseYear={gradTermBaseYear(new Date())}
             />
           </div>
         </details>
