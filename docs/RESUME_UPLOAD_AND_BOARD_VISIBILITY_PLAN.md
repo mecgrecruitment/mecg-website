@@ -1,6 +1,6 @@
 # Resume upload and Board visibility plan
 
-Status: Implemented locally; deployment verification pending
+Status: implemented and deployed; its migrations are in the production ledger. A signed-in hosted upload check is still outstanding (see [releases/2026-10-17-upload.md](./releases/2026-10-17-upload.md)).
 
 ## Outcome
 

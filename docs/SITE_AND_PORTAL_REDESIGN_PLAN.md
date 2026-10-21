@@ -1,6 +1,6 @@
 # Site and portal redesign plan
 
-Status: In progress on `codex/site-portal-redesign`
+Status: historical. The `codex/site-portal-redesign` branch no longer exists; the October 2026 redesigns in [DESIGN.md](./DESIGN.md) replaced this plan.
 Date: 2026-09-01
 Primary owner: Engineering owner
 Content owners: VP External, VP Marketing, and VP Recruitment
