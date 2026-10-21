@@ -9,7 +9,7 @@ import ProjectCard from "@/components/project-card";
 import SectionHeading from "@/components/section-heading";
 import { listPublicProjectCards } from "@/lib/projects/public-projects";
 import { serializeJsonLd } from "@/lib/json-ld";
-import { CLIENT_FAQS, ENGAGEMENT_STEPS, PAST_PROJECTS, SERVICES } from "@/lib/site-content";
+import { CLIENT_FAQS, ENGAGEMENT_STEPS, PAST_PROJECTS, SERVICES, STATS } from "@/lib/site-content";
 
 export const revalidate = 60;
 
@@ -20,12 +20,14 @@ const BREADCRUMB_JSON_LD = marketingBreadcrumbs([
   { name: "Client Services", path: "/work" },
 ]);
 
-// Each figure restates a CLIENT_FAQS answer; change both together.
+const ORGANIZATIONS = STATS.find((stat) => stat.label === "Organizations")!;
+
+// Each figure restates a CLIENT_FAQS answer, except the organization count, which home's STATS owns.
 const FIGURES = [
   ["$0", "consulting fee"],
   ["1", "academic semester"],
   ["6–8", "Michigan students"],
-  ["30+", "organizations since 2023"],
+  [ORGANIZATIONS.value, "organizations since 2023"],
   ["1 week", "to hear back"],
 ] as const;
 
@@ -54,11 +56,11 @@ export default async function WorkPage() {
             <Image src="/mecg/chapter-presentation-2026.jpeg" alt="MECG members presenting together at a formal chapter event" fill preload sizes="(min-width:1152px) 1152px, 100vw" className="object-cover object-[50%_35%]" />
           </div>
           <figcaption className="mt-3 text-[13px] text-muted sm:absolute sm:right-4 sm:top-4 sm:mt-0 sm:rounded-md sm:bg-white/90 sm:px-2.5 sm:py-1">Members at a chapter presentation, 2026</figcaption>
-          <dl className="public-lit relative mt-4 grid grid-cols-2 gap-x-6 gap-y-6 rounded-xl p-6 shadow-lift sm:mx-8 sm:-mt-16 sm:grid-cols-5 sm:p-8">
+          <dl className="public-lit relative mt-4 grid grid-cols-2 gap-x-6 gap-y-6 rounded-xl p-6 shadow-lift sm:mx-8 sm:-mt-16 sm:grid-cols-3 sm:p-8 lg:grid-cols-5">
             {FIGURES.map(([figure, label]) => (
               <div key={label} className="flex flex-col-reverse justify-end last:col-span-2 sm:last:col-span-1">
                 <dt className="mt-2 text-[13px] text-white">{label}</dt>
-                <dd className="display-face text-[40px] leading-none sm:text-[clamp(36px,4.4vw,56px)]">{figure}</dd>
+                <dd className="display-face whitespace-nowrap text-[40px] leading-none sm:text-[clamp(36px,4.4vw,56px)]">{figure}</dd>
               </div>
             ))}
           </dl>
@@ -116,11 +118,11 @@ export default async function WorkPage() {
         <SectionHeading id="engagement-title">How an engagement works</SectionHeading>
         <ol className="mt-10 grid border-t border-mecg-navy sm:grid-cols-2 lg:grid-cols-4">
           {ENGAGEMENT_STEPS.map(([number, title, body, result]) => (
-            <li key={title} className="flex flex-col border-b border-public-rule py-6 sm:pr-8 lg:border-b-0">
+            <li key={title} className="flex flex-col border-b border-public-rule py-6 sm:row-span-4 sm:grid sm:grid-rows-subgrid sm:pr-8 lg:border-b-0">
               <span className="display-face text-[40px] leading-none text-mecg-blue">{number}</span>
               <h3 className="mt-4 text-xl font-semibold">{title}</h3>
               <p className="mt-3 leading-7 text-muted">{body}</p>
-              <p className="mt-auto pt-5 text-[15px] leading-6"><span className="text-muted">You get: </span><span className="font-semibold">{result}</span></p>
+              <p className="pt-5 text-[15px] leading-6"><span className="text-muted">You get: </span><span className="font-semibold">{result}</span></p>
             </li>
           ))}
         </ol>
