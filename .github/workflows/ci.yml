@@ -21,7 +21,7 @@ jobs:
       # check-sql.py parses every migration with libpg_query and exits 2 without it.
       # Keep libpg_query behavior deterministic. Newer pglast releases can
       # reject valid legacy PL/pgSQL bodies that PostgreSQL itself accepts.
-      - run: pip3 install --quiet pglast==7.18
+      - run: pip3 install --quiet pglast==7.21
       - run: npm run check:sql
       - run: npm run build
         env:
