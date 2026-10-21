@@ -7,7 +7,7 @@ import { selectAuthorizedCycleId } from "@/lib/cycles";
 import { createClient } from "@/lib/supabase/server";
 
 // The deck polls this while the board presents. Counts stay board-side: the
-// member phone reads /api/member/hash/live, which never carries a tally.
+// member phone calls rush.member_hash_live, which never carries a tally.
 export async function GET(request: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
