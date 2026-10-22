@@ -48,3 +48,20 @@ test('CSS rules read colours through tokens; definitions, masks and marked lines
   assert.deepEqual(flags.map((f) => f.line), [2]);
   assert.match(out, /letter-spacing: var\(--tracking-display\)/);
 });
+
+test('odd type steps round up onto 12, 14, 16, 18', () => {
+  assert.equal(classes('text-[12.5px] text-[13px] text-[15px] text-[17px]'), 'text-sm text-sm text-base text-lg');
+});
+
+test('public ink is navy', () => {
+  assert.equal(classes('text-public-ink hover:text-public-ink/80'), 'text-mecg-navy hover:text-mecg-navy/80');
+});
+
+test('spacing half steps round up to the 4px rhythm; 0.5 and sizes stay', () => {
+  assert.equal(classes('px-2.5 -mt-1.5 gap-x-3.5 p-[18px] mt-0.5 h-1.5 size-3.5'), 'px-3 -mt-2 gap-x-4 p-5 mt-0.5 h-1.5 size-3.5');
+});
+
+test('CSS font sizes read the type scale and spacing rounds up to 4px', () => {
+  const { out } = checkCss('.a { font-size: 13px; padding: 2px 10px; gap: 6px; margin: 0 auto; color: var(--color-public-ink); }\n.b { font-size: 0.8125rem; font-size: 24px; }');
+  assert.equal(out, '.a { font-size: var(--text-sm); padding: 2px 12px; gap: 8px; margin: 0 auto; color: var(--color-mecg-navy); }\n.b { font-size: var(--text-sm); font-size: 24px; }');
+});

@@ -18,7 +18,7 @@ export function MemberVote({ tally, labels = { pass: "Offer", fail: "No offer" }
   if (!tally) return <span className="text-xs text-muted">—</span>;
   const outcome = hashOutcome(tally.quorum, tally.yes_count, tally.no_count, tally.total_votes);
   return (
-    <div className="flex flex-col items-start gap-1.5">
+    <div className="flex flex-col items-start gap-2">
       <p className="text-xs text-muted">
         <span className="tabular">{tally.yes_count}</span> yes · <span className="tabular">{tally.no_count}</span> no · <span className="tabular">{tally.unsure_count}</span> unsure
       </p>
@@ -50,14 +50,14 @@ export function MemberNotes({ notes }: { notes: string[] }) {
   if (!notes.length) return null;
   return (
     <div>
-      <h3 className="text-[13px] font-semibold text-mecg-navy">What members wrote</h3>
+      <h3 className="text-sm font-semibold text-mecg-navy">What members wrote</h3>
       <p className="mt-0.5 text-xs text-muted">Notes are shown without names.</p>
-      <ul className="mt-2 flex flex-col gap-1.5">
+      <ul className="mt-2 flex flex-col gap-2">
         {notes.slice(0, 10).map((note, index) => (
           <li key={`${index}-${note}`} className="text-xs leading-5 text-muted">{note}</li>
         ))}
       </ul>
-      {notes.length > 10 && <p className="mt-1.5 text-xs text-muted">and {notes.length - 10} more</p>}
+      {notes.length > 10 && <p className="mt-2 text-xs text-muted">and {notes.length - 10} more</p>}
     </div>
   );
 }

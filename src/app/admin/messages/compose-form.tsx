@@ -105,7 +105,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
     >
       {reviewing ? (
         <section aria-labelledby="message-review-title">
-          <p className="text-[13px] font-semibold text-mecg-orange-ink">Final review</p>
+          <p className="text-sm font-semibold text-mecg-orange-ink">Final review</p>
           <h2
             id="message-review-title"
             ref={reviewHeading}
@@ -148,7 +148,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
         </section>
       ) : (
         <>
-          <p className="text-[13px] font-semibold text-muted">Send to a segment</p>
+          <p className="text-sm font-semibold text-muted">Send to a segment</p>
           <p className="mt-1 text-sm text-muted">Send attempts are recorded on the applicant&rsquo;s dossier. Provider acceptance does not confirm inbox delivery.</p>
 
           <fieldset className="mt-4">
@@ -160,7 +160,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
                 return (
                   <label
                     key={status}
-                    className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold ${checked ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"} ${count ? "" : "opacity-45"}`}
+                    className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-semibold ${checked ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"} ${count ? "" : "opacity-45"}`}
                   >
                     <input
                       type="checkbox"
@@ -194,7 +194,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
               aria-invalid={errorField === "subject"}
               aria-describedby={errorField === "subject" ? "message-compose-error" : undefined}
               placeholder="Your group interview time is confirmed"
-              className="mt-1.5 min-h-11 w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+              className="mt-2 min-h-11 w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
             />
           </label>
           <label className="mt-3 block text-sm font-medium">
@@ -216,7 +216,7 @@ export default function ComposeForm({ cycleId, counts }: { cycleId: string; coun
               aria-invalid={errorField === "body"}
               aria-describedby={errorField === "body" ? "message-compose-error" : undefined}
               placeholder={"Each applicant is greeted by name automatically.\n\nBlank lines start a new paragraph."}
-              className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+              className="mt-2 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
             />
           </label>
 

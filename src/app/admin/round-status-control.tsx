@@ -142,16 +142,16 @@ export default function RoundStatusControl({ round, act, closeRound, pending, er
     setAttempt((value) => value + 1);
   }
 
-  return <div className="rounded-xl bg-white px-3.5 py-2 inset-ring inset-ring-line">
+  return <div className="rounded-xl bg-white px-4 py-2 inset-ring inset-ring-line">
     <form className="flex flex-wrap items-center justify-between gap-3" onSubmit={(event) => {
       event.preventDefault();
       if (pending || status === round.status || closeState === "closed") return;
       if (closesGrading) { if (closeState === "idle") setReview({ kind: "loading" }); setConfirming(true); }
       else void saveStatus(status);
     }}>
-      <h3 ref={statusHeadingRef} tabIndex={-1} className="text-[13px] font-semibold">{round.label}{closeState === "closed" ? " · Grading closed" : ""}</h3>
+      <h3 ref={statusHeadingRef} tabIndex={-1} className="text-sm font-semibold">{round.label}{closeState === "closed" ? " · Grading closed" : ""}</h3>
       <div className="flex flex-wrap items-center gap-2">
-        <select name="status" aria-label={`Status for ${round.label}`} value={status} disabled={pending || closeState !== "idle"} onChange={(event) => setStatus(event.target.value)} className="select-control min-h-11 w-44 text-[13px]">
+        <select name="status" aria-label={`Status for ${round.label}`} value={status} disabled={pending || closeState !== "idle"} onChange={(event) => setStatus(event.target.value)} className="select-control min-h-11 w-44 text-sm">
           {STATUSES.filter((candidate) => canTransitionRound(round.status, candidate)).map((candidate) => <option key={candidate} value={candidate}>{roundStatusLabel(candidate)}</option>)}
         </select>
         <button ref={triggerRef} type="submit" disabled={pending || status === round.status || closeState === "closed"} className="button-secondary min-h-11 text-xs">{closeState === "closed" ? "Grading closed" : closeState === "unknown" ? "Check grading status…" : pending ? "Saving…" : closesGrading ? "Close grading…" : "Save status"}</button>

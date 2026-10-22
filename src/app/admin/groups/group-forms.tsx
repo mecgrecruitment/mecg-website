@@ -33,7 +33,7 @@ function AssignForm({ cycleId, group, applications, memberIds }: { cycleId: stri
   }
 
   return (
-    <form className="mt-3.5 flex flex-col gap-2" onSubmit={submit}>
+    <form className="mt-4 flex flex-col gap-2" onSubmit={submit}>
       <div className="flex gap-2">
         <ChevronSelect id={`application-${group.id}`} name="applicationId" label={`Assign applicant to ${group.name}`}>
           {applications.filter((application) => !memberIds.includes(application.id)).map((application) => <option key={application.id} value={application.id}>{application.name}</option>)}
@@ -116,11 +116,11 @@ export default function GroupForms({
     <div className="grid gap-6">
       {unassigned > 0 && (
         <form
-          className="rounded-xl p-[18px] inset-ring inset-ring-line"
+          className="rounded-xl p-5 inset-ring inset-ring-line"
           onSubmit={formTeams}
         >
           <h2 className="text-base font-semibold">Form teams</h2>
-          <div className="mt-3 flex flex-col gap-2.5">
+          <div className="mt-3 flex flex-col gap-3">
             <FormField
               label="Team size"
               name="groupSize"
@@ -150,10 +150,10 @@ export default function GroupForms({
           </div>
         ))}
       </div>
-      <details className="rounded-xl p-[18px] inset-ring inset-ring-line">
+      <details className="rounded-xl p-5 inset-ring inset-ring-line">
         <summary className="cursor-pointer text-sm font-semibold text-muted">Add a team by hand</summary>
         <form onSubmit={submit}>
-          <div className="mt-3 flex flex-col gap-2.5">
+          <div className="mt-3 flex flex-col gap-3">
             <FormField label="Team name" name="name" required placeholder="Team A" />
             <label className="block text-sm font-medium">
               Prompt
@@ -178,7 +178,7 @@ export default function GroupForms({
           return (
             <section key={group.id} className="rounded-xl bg-wash p-4 inset-ring inset-ring-line">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-[17px] font-semibold tracking-heading">{group.name}</h3>
+                <h3 className="text-lg font-semibold tracking-heading">{group.name}</h3>
                 <div className="flex items-center gap-3">
                   <span className="inline-flex min-w-[26px] items-center justify-center rounded-full bg-mecg-orange/15 px-2 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
                     {groupMembers.length}
@@ -198,20 +198,20 @@ export default function GroupForms({
                   )}
                 </div>
               </div>
-              {group.prompt && <p className="mt-1.5 text-sm text-muted">{group.prompt}</p>}
-              <div className="mt-3 flex flex-col gap-1.5">
+              {group.prompt && <p className="mt-2 text-sm text-muted">{group.prompt}</p>}
+              <div className="mt-3 flex flex-col gap-2">
                 {groupMembers.length === 0 ? (
-                  <p className="text-[13px] text-muted">No members yet</p>
+                  <p className="text-sm text-muted">No members yet</p>
                 ) : (
                   groupMembers.map((member) => {
                     const applicant = applications.find((application) => application.id === member.application_id);
                     return (
-                      <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-1.5">
+                      <div key={member.application_id} className="flex items-center justify-between gap-3 rounded-lg bg-white/70 px-2 py-2">
                         <div className="flex items-center gap-2">
                           <span className="inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-mecg-navy text-xs font-semibold text-white">
                             {initials(applicant?.name ?? member.application_id)}
                           </span>
-                          <span className="text-[13px] font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>
+                          <span className="text-sm font-medium text-mecg-navy">{applicant?.name ?? member.application_id}</span>
                         </div>
                         <GroupActionButton cycleId={cycleId} payload={{ action: "UNASSIGN_GROUP", groupId: group.id, applicationId: member.application_id }}>Remove</GroupActionButton>
                       </div>

@@ -559,7 +559,7 @@ export default function GroupCaseRoster({ initial, readOnlyReason }: { initial: 
                     </span>
                     {row.speedDating && (
                       <span
-                        className="inline-flex shrink-0 items-center rounded-full bg-warning-wash px-2.5 py-0.5 text-xs font-semibold text-warning"
+                        className="inline-flex shrink-0 items-center rounded-full bg-warning-wash px-3 py-0.5 text-xs font-semibold text-warning"
                         title={`${row.speedDating.count} Speed Dating ${row.speedDating.count === 1 ? "grader" : "graders"}`}
                       >
                         {formatStars(row.speedDating.adjusted)}
@@ -628,7 +628,7 @@ export default function GroupCaseRoster({ initial, readOnlyReason }: { initial: 
                         onInput={(event) => grow(event.currentTarget)}
                         onChange={(event) => editNote(applicationId, event.target.value)}
                         onBlur={() => flushNote(applicationId)}
-                        className="mt-3 min-h-11 w-full resize-none rounded-xl bg-wash px-4 py-2.5 text-sm text-mecg-navy inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
+                        className="mt-3 min-h-11 w-full resize-none rounded-xl bg-wash px-4 py-3 text-sm text-mecg-navy inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
                       />
                       <p className="my-2 text-sm leading-6 text-muted" aria-live="polite">
                         {rowStatus?.kind === "saving" || rowStatus?.kind === "hint" || rowStatus?.kind === "error" || rowStatus?.kind === "unknown" || rowStatus?.kind === "conflict"
@@ -656,7 +656,7 @@ export default function GroupCaseRoster({ initial, readOnlyReason }: { initial: 
                       )}
                       <details className="mt-2">
                         <summary className="cursor-pointer text-xs font-semibold text-muted">Add a flag</summary>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
+                        <div className="mt-2 flex flex-wrap gap-2">
                           {FLAGS.map((flag) => (
                             <button
                               key={flag.text}
@@ -664,7 +664,7 @@ export default function GroupCaseRoster({ initial, readOnlyReason }: { initial: 
                               disabled={rowReadOnly}
                               title={flag.text}
                               onClick={() => addFlag(applicationId, flag.prefix, flag.text)}
-                              className={`min-h-10 rounded-full px-2.5 py-1 text-xs font-semibold disabled:opacity-60 ${flag.className}`}
+                              className={`min-h-10 rounded-full px-3 py-1 text-xs font-semibold disabled:opacity-60 ${flag.className}`}
                             >
                               {chipLabel(flag.text)}
                             </button>

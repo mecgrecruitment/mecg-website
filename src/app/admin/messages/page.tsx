@@ -104,7 +104,7 @@ export default async function MessagesPage({
               key={tab}
               href={withWorkspaceCycle(href, cycleId)}
               aria-current={view === tab ? "page" : undefined}
-              className={`inline-flex min-h-11 items-center border-b-2 px-3.5 text-sm font-semibold transition-colors duration-150 ${
+              className={`inline-flex min-h-11 items-center border-b-2 px-4 text-sm font-semibold transition-colors duration-150 ${
                 view === tab
                   ? "border-mecg-navy text-mecg-navy"
                   : "border-transparent text-muted hover:text-mecg-navy"
@@ -121,11 +121,11 @@ export default async function MessagesPage({
       {view === "history" && <section>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <p className="text-[13px] font-semibold text-muted">Recent sends</p>
+            <p className="text-sm font-semibold text-muted">Recent sends</p>
             <p className="mt-1 text-sm text-muted">Up to {LOG_PAGE_SIZE} recent messages for this cycle. Sent to provider confirms provider acceptance, not inbox delivery.</p>
           </div>
           {failedCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-danger-wash px-3 py-1 text-[13px] font-semibold text-danger">
+            <span className="inline-flex items-center rounded-full bg-danger-wash px-3 py-1 text-sm font-semibold text-danger">
               {failedCount} failed
             </span>
           )}
@@ -135,11 +135,11 @@ export default async function MessagesPage({
           {log.map((message) => (
             <article key={message.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
               <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-mecg-navy">{message.subject}</p>
+                <p className="truncate text-sm font-semibold text-mecg-navy">{message.subject}</p>
                 <p className="mt-0.5 truncate text-xs text-muted">{statusLabel(message.kind)} · {message.recipient}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`}>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold ${message.delivered ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`}>
                   {message.delivered ? "Sent to provider" : "Send failed"}
                 </span>
                 <time dateTime={message.created_at} className="tabular text-xs text-muted">

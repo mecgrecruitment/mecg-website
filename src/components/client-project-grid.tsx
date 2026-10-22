@@ -57,10 +57,10 @@ export default function ClientProjectGrid({
                   sizes="(min-width: 1024px) 12vw, (min-width: 640px) 24vw, 60vw"
                 />
               </span>
-              <span className={`mt-4 text-[13px] leading-snug font-semibold tracking-heading sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
+              <span className={`mt-4 text-sm leading-snug font-semibold tracking-heading sm:tracking-normal transition-opacity duration-150 ${selected ? "text-mecg-blue" : "text-mecg-navy"}`}>
                 {project.name}
               </span>
-              <span className="mt-0.5 text-[13px] leading-snug text-muted">{project.industry}</span>
+              <span className="mt-0.5 text-sm leading-snug text-muted">{project.industry}</span>
             </button>
           );
         })}
@@ -85,7 +85,7 @@ export default function ClientProjectGrid({
         </div>
 
         <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
-          <p className="text-[13px] font-semibold text-mecg-blue">
+          <p className="text-sm font-semibold text-mecg-blue">
             {selectedProject.industry}
           </p>
           <h3 className="mt-3 text-3xl font-semibold tracking-display sm:text-4xl">
@@ -96,7 +96,7 @@ export default function ClientProjectGrid({
           </p>
 
           <div className="mt-7 border-t border-line pt-5">
-            <p className="text-[13px] font-semibold text-muted">
+            <p className="text-sm font-semibold text-muted">
               MECG engagement
             </p>
             <p className="mt-2 leading-7 text-muted">
@@ -117,7 +117,7 @@ export default function ClientProjectGrid({
         </article>
       ) : null}
       </div>
-      <p className="mt-4 max-w-3xl text-[15px] leading-6 text-muted">
+      <p className="mt-4 max-w-3xl text-base leading-6 text-muted">
         Select an organization to learn more about its work. MECG publishes engagement details only after the client and our board approve them.
       </p>
     </div>

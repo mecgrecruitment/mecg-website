@@ -474,7 +474,7 @@ function EvaluationEditor({
                 : SCORE_ANCHORS[Number(scores[criterion.id])] ?? "Choose the rating that matches the behavior you observed."}
             </p>
             <label className="mt-3 block text-sm font-medium" htmlFor={`note-${assignmentId}-${criterion.id}`}>
-              Evidence note{noteRequired && <span className="ml-1.5 rounded-full bg-mecg-orange/15 px-2 py-0.5 text-[13px] font-semibold text-mecg-orange-ink">Required</span>}
+              Evidence note{noteRequired && <span className="ml-2 rounded-full bg-mecg-orange/15 px-2 py-0.5 text-sm font-semibold text-mecg-orange-ink">Required</span>}
             </label>
             <textarea
               id={`note-${assignmentId}-${criterion.id}`}
@@ -515,7 +515,7 @@ function EvaluationEditor({
           <p className="mt-1 text-sm text-muted">Confirm every rating and evidence note. Submission is final.</p>
           <dl className="mt-3 divide-y divide-line border-y border-line">
             {criteria.map((criterion) => (
-              <div key={criterion.id} className="flex items-start justify-between gap-4 py-2.5 text-sm">
+              <div key={criterion.id} className="flex items-start justify-between gap-4 py-3 text-sm">
                 <div>
                   <dt className="font-medium text-mecg-navy">{criterion.name}</dt>
                   {notes[criterion.id]?.trim() && <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-muted">{notes[criterion.id]}</dd>}

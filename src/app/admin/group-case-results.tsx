@@ -12,8 +12,8 @@ type SortKey = "mean" | "count";
 type Direction = "desc" | "asc";
 type Row = GroupCaseResults["applicants"][number];
 
-const HEAD = "px-4 py-3 text-[13px] font-semibold text-muted";
-const CELL = "px-4 py-3 text-[13px] text-muted";
+const HEAD = "px-4 py-3 text-sm font-semibold text-muted";
+const CELL = "px-4 py-3 text-sm text-muted";
 const CRITERION_COLUMN = "hidden md:table-cell";
 
 // Weighted scores land in 8..40, which the bands fully cover.
@@ -111,7 +111,7 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
                 return (
                   <tr key={applicant.applicationId} className={`border-b border-line bg-white align-top ${ungraded ? "opacity-60" : ""}`}>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/applications/${applicant.applicationId}`} className="text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">{applicant.name}</Link>
+                      <Link href={`/admin/applications/${applicant.applicationId}`} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">{applicant.name}</Link>
                       <p className="mt-1 max-w-xs text-xs leading-5 text-muted">{roundPrerequisites(applicant)}</p>
                     </td>
                     <td className={CELL}>{applicant.groupName ?? "—"}</td>
@@ -125,7 +125,7 @@ export default function GroupCaseResultsTable({ results, canViewNotes, canExport
                       <td className="px-4 py-3">
                         {applicant.evaluations.length > 0 && (
                           <>
-                            <button type="button" aria-expanded={open} onClick={() => toggleExpanded(applicant.applicationId)} className="text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">
+                            <button type="button" aria-expanded={open} onClick={() => toggleExpanded(applicant.applicationId)} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">
                               {open ? "Hide evidence" : "Evidence"}
                             </button>
                             {open && (

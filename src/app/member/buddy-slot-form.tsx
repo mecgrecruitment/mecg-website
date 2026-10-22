@@ -60,7 +60,7 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
 
   return (
     <section className="rounded-xl p-5 inset-ring inset-ring-line sm:p-6">
-      <p className="text-[13px] font-semibold text-muted">Applicant conversations</p>
+      <p className="text-sm font-semibold text-muted">Applicant conversations</p>
       <h3 className="mt-2 text-lg font-semibold">Offer a member chat</h3>
       <p className="mt-1 text-sm leading-6 text-muted">Choose a local start time. The hub publishes a 20-minute slot for applicants to book.</p>
       <form className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end" onSubmit={submit}>
@@ -78,10 +78,10 @@ export default function BuddySlotForm({ cycleId, slots = [] }: { cycleId: string
       {unknown && <button type="button" className="button-secondary mt-3" onClick={() => window.location.reload()}>Reload to check published slots</button>}
       {slots.length > 0 && (
         <div className="mt-5 border-t border-line pt-4">
-          <p className="text-[13px] font-semibold text-muted">Published slots</p>
+          <p className="text-sm font-semibold text-muted">Published slots</p>
           <ul className="mt-2 space-y-2 text-sm text-muted">
             {slots.map((slot) => (
-              <li key={slot.id} className="flex items-center gap-3 rounded-xl bg-wash px-3.5 py-2.5">
+              <li key={slot.id} className="flex items-center gap-3 rounded-xl bg-wash px-4 py-3">
                 <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white tabular text-xs font-bold text-mecg-navy inset-ring inset-ring-line">
                   {new Date(slot.startsAt).toLocaleDateString([], { day: "2-digit" })}
                 </span>

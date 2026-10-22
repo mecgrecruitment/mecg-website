@@ -52,7 +52,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         copy={`For ${project.clientLabel}`}
         aside={
           <div className="public-lit rounded-xl p-6 shadow-lift sm:p-7">
-            <p className="text-[13px] text-white">The question we started from</p>
+            <p className="text-sm text-white">The question we started from</p>
             <p className="display-face mt-2 text-balance text-[26px] leading-[1.05] sm:text-[36px]">{project.decision}</p>
           </div>
         }
@@ -81,7 +81,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <ol className="mt-8 grid gap-4 md:grid-cols-2">
             {project.methods.map((method, index) => (
               <li key={method} className="rounded-xl bg-white p-6 shadow-lift">
-                <span className="text-[15px] font-semibold tabular-nums text-mecg-blue">0{index + 1}</span>
+                <span className="text-base font-semibold tabular-nums text-mecg-blue">0{index + 1}</span>
                 <p className="mt-5 leading-7 text-muted">{method}</p>
               </li>
             ))}

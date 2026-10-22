@@ -11,10 +11,10 @@ const MEMBERS = STATS.find((stat) => stat.label === "Members")?.value;
 
 export default function TeamPage() {
   return (
-    <main id="main-content" className="bg-white text-public-ink">
-      <section className="bg-mecg-blue px-6 pb-[124px] pt-6 text-white sm:px-10 sm:pb-16" aria-labelledby="team-title">
+    <main id="main-content" className="bg-white text-mecg-navy">
+      <section className="bg-mecg-blue px-6 pb-31 pt-6 text-white sm:px-10 sm:pb-16" aria-labelledby="team-title">
         <div className="mx-auto max-w-6xl [container-type:inline-size]">
-          <p className="flex items-center justify-between gap-4 border-b border-white/15 pb-3 text-[13px] text-white"><span>Executive Board, 2026</span><span className="flex items-center gap-4"><span className="hidden sm:inline">{MEMBERS} members · every major</span><Link href="/join" className="button-primary">Join MECG <span aria-hidden="true">→</span></Link></span></p>
+          <p className="flex items-center justify-between gap-4 border-b border-white/15 pb-3 text-sm text-white"><span>Executive Board, 2026</span><span className="flex items-center gap-4"><span className="hidden sm:inline">{MEMBERS} members · every major</span><Link href="/join" className="button-primary">Join MECG <span aria-hidden="true">→</span></Link></span></p>
           <h1 id="team-title" className="mt-10 sm:mt-14"><span className="poster-word text-mecg-orange" style={{ fontSize: "27cqi" }}>Our Team</span></h1>
         </div>
       </section>
@@ -28,17 +28,17 @@ export default function TeamPage() {
                   <Image src={src} alt="" fill loading={index < 5 ? "eager" : "lazy"} className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none" style={{ objectPosition }} sizes="(min-width:1152px) 202px, (min-width:1024px) calc((100vw - 144px) / 5), (min-width:640px) calc((100vw - 112px) / 3), calc((100vw - 64px) / 2)" />
                 </div>
                 <h2 className="mt-4 text-lg font-semibold tracking-heading">{name}</h2>
-                <p className="mt-1 text-[15px] text-muted">{role}</p>
-                <p className="mt-2 text-[13px] font-semibold text-mecg-blue">LinkedIn <span aria-hidden="true">↗</span></p>
+                <p className="mt-1 text-base text-muted">{role}</p>
+                <p className="mt-2 text-sm font-semibold text-mecg-blue">LinkedIn <span aria-hidden="true">↗</span></p>
               </a>
             </article>
           ))}
         </div>
         <div className="mx-auto mt-14 grid max-w-6xl gap-6 border-t border-public-rule pt-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <p className="max-w-2xl text-[17px] leading-7 text-muted">{BOARD.length} students run MECG’s board. Behind them are {MEMBERS} members from every major, working on client teams each semester.</p>
+          <p className="max-w-2xl text-lg leading-7 text-muted">{BOARD.length} students run MECG’s board. Behind them are {MEMBERS} members from every major, working on client teams each semester.</p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link href="/join" className="button-primary">Join MECG <span aria-hidden="true">→</span></Link>
-            <Link href="/contact#message" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-mecg-blue underline-offset-4 hover:underline">Discuss a project <span aria-hidden="true">→</span></Link>
+            <Link href="/contact#message" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-mecg-blue underline-offset-4 hover:underline">Discuss a project <span aria-hidden="true">→</span></Link>
           </div>
         </div>
       </section>
@@ -49,11 +49,11 @@ export default function TeamPage() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
               <Image src="/mecg/formal-group-2026.jpeg" alt="MECG members together at a formal chapter event" fill sizes="(min-width:1024px) 600px, 100vw" className="object-cover" />
             </div>
-            <figcaption className="mt-3 text-[13px] text-muted">At a chapter formal, 2026.</figcaption>
+            <figcaption className="mt-3 text-sm text-muted">At a chapter formal, 2026.</figcaption>
           </figure>
           <div>
             <SectionHeading id="chapter-title">The rest of the chapter.</SectionHeading>
-            <p className="mt-5 text-[17px] leading-7 text-muted">Members build consulting skills through education sessions, mentorship and client work. There’s also a chapter to be part of, from professional trips to time together around Ann Arbor.</p>
+            <p className="mt-5 text-lg leading-7 text-muted">Members build consulting skills through education sessions, mentorship and client work. There’s also a chapter to be part of, from professional trips to time together around Ann Arbor.</p>
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link href="/join" className="button-primary">See how to join <span aria-hidden="true">→</span></Link>
             </div>

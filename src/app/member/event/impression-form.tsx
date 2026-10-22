@@ -69,7 +69,7 @@ export default function ImpressionForm({
               aria-label={`${selected ? "Remove" : "Add"} tag: ${tag}`}
               disabled={pending}
               onClick={() => { setSaved(false); setTags((current) => selected ? current.filter((existing) => existing !== tag) : [...current, tag]); }}
-              className={`min-h-11 rounded-xl px-3.5 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
+              className={`min-h-11 rounded-xl px-4 text-xs font-semibold transition-[background-color,color,box-shadow,scale] duration-150 ease-out active:scale-[0.96] ${
                 selected
                   ? "bg-mecg-navy text-white"
                   : "text-mecg-navy inset-ring inset-ring-line-strong hover:inset-ring-mecg-navy/40"

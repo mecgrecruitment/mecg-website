@@ -119,11 +119,11 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <p className="mt-3 text-sm">
           Applicant check-ins: <strong className="font-semibold text-mecg-navy">{checkinsError ? "Unavailable" : checkins?.length ?? 0}</strong>
         </p>
-        <p className="mt-1.5 text-sm">
+        <p className="mt-2 text-sm">
           Member check-ins: <strong className="font-semibold text-mecg-navy">{memberCheckinsError ? "Unavailable" : memberCheckinCount ?? 0}</strong>
         </p>
         {impressionsError && <p role="alert" className="mt-3 text-sm text-danger">Observation records could not be loaded. Refresh to check them; missing records do not mean no observations.</p>}
-        <ul className="mt-3 flex flex-col gap-1.5">
+        <ul className="mt-3 flex flex-col gap-2">
           {coverage.map((entry) => (
             <li key={entry.applicationId} className="border-t border-line py-3 text-sm first:border-t-0">
               <div className="flex items-center justify-between gap-3">
@@ -131,8 +131,8 @@ export default async function EventDetailPage({ params, searchParams }: { params
                 <span className="tabular text-muted">{impressionsError ? "Observations unavailable" : `${entry.observationCount} observation${entry.observationCount === 1 ? "" : "s"}`}</span>
               </div>
               {entry.tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {entry.tags.map((tag) => <span key={tag} className="rounded-full bg-wash px-2.5 py-1 text-xs text-muted">{tag}</span>)}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {entry.tags.map((tag) => <span key={tag} className="rounded-full bg-wash px-3 py-1 text-xs text-muted">{tag}</span>)}
                 </div>
               )}
               {entry.notes.length > 0 && (
@@ -162,7 +162,7 @@ export default async function EventDetailPage({ params, searchParams }: { params
             For security, the raw check-in token is shown only when created or rotated. Rotate it to display a new QR code.
           </p>
         )}
-        <div className="mt-3.5">
+        <div className="mt-4">
           <RotateButton eventId={event.id} cycleId={cycleId} />
         </div>
       </section>
@@ -173,14 +173,14 @@ export default async function EventDetailPage({ params, searchParams }: { params
         <p className="mt-3 text-sm">
           Currently: <strong className="font-semibold text-mecg-navy">{event.member_grading ? "Enabled" : "Disabled"}</strong>
         </p>
-        <div className="mt-3.5">
+        <div className="mt-4">
           <GradingToggle eventId={event.id} cycleId={event.cycle_id} enabled={event.member_grading} />
         </div>
       </section>
 
       <section id="event-slots">
         <h2 className="text-base font-semibold">RSVP slots</h2>
-        <ul className="mt-3 flex flex-col gap-1.5">
+        <ul className="mt-3 flex flex-col gap-2">
           {(slots ?? []).map((slot) => (
             <li key={slot.id} className="text-sm text-muted">
               {formatEasternDateTime(slot.starts_at)} · cap {slot.capacity}

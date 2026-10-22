@@ -13,7 +13,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   return (
     <main id="main-content" className="bg-white text-mecg-navy">
       <PageIntro title="Contact Us" copy="Tell us the question you’re working on, or ask about joining. The board replies by email." overlap>
-        <a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-mecg-blue underline-offset-4 hover:underline">Or email mecg-board@umich.edu</a>
+        <a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-mecg-blue underline-offset-4 hover:underline">Or email mecg-board@umich.edu</a>
       </PageIntro>
       <section id="message" className="scroll-mt-24 px-6 pb-16 sm:px-10 sm:pb-20">
         <div className="mx-auto -mt-16 grid max-w-6xl items-start gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:gap-14">
@@ -21,7 +21,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             <h2 className="sr-only">Send us a message</h2>
             {exampleQuestion ? (
               <div className="public-lit mb-6 rounded-xl p-5">
-                <p className="text-[13px] text-white">Your question{initialSubject ? ` · ${initialSubject.replace(/ project inquiry$/, "")}` : ""}</p>
+                <p className="text-sm text-white">Your question{initialSubject ? ` · ${initialSubject.replace(/ project inquiry$/, "")}` : ""}</p>
                 <p className="display-face mt-1 text-balance text-[26px] leading-[1.05] sm:text-[32px]">{exampleQuestion}</p>
               </div>
             ) : null}
@@ -32,7 +32,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             <div className="border-y border-line py-6">
               <h2 className="text-lg font-semibold">What happens next</h2>
               <p className="mt-3 leading-7 text-muted">The board reviews your message and replies by email. For a project inquiry, the first conversation covers fit, timing, and what a useful answer would look like.</p>
-              <p className="mt-3 text-[15px] leading-6 text-muted">No consulting fee. A semester of collaboration. Confidentiality needs can be discussed before scoping.</p>
+              <p className="mt-3 text-base leading-6 text-muted">No consulting fee. A semester of collaboration. Confidentiality needs can be discussed before scoping.</p>
             </div>
             <div className="border-y border-line py-6">
               <h2 className="text-lg font-semibold">Email</h2>

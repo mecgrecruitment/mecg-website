@@ -44,7 +44,7 @@ export default function EngagementInstrument() {
             <image href="/images/engagement-instrument/head.svg" width="600" height="370" />
           </g>
         </svg>
-        <div className="flex items-center justify-between gap-3 border-y border-line px-5 py-2.5 font-mono text-xs uppercase tracking-label text-muted">
+        <div className="flex items-center justify-between gap-3 border-y border-line px-5 py-3 font-mono text-xs uppercase tracking-label text-muted">
           <span>Select a station below</span>
           <span className="shrink-0 whitespace-nowrap tabular-nums">{selected[0]} / 04</span>
         </div>

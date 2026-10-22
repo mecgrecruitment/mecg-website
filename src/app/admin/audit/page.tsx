@@ -77,7 +77,7 @@ export default async function AuditPage({
         <Link
           href={withWorkspaceCycle("/admin/audit", cycleId)}
           aria-current={resource ? undefined : "page"}
-          className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource ? "text-muted inset-ring inset-ring-line-strong" : "bg-mecg-navy text-white"}`}
+          className={`inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold ${resource ? "text-muted inset-ring inset-ring-line-strong" : "bg-mecg-navy text-white"}`}
         >
           All
         </Link>
@@ -86,7 +86,7 @@ export default async function AuditPage({
             key={name}
             href={withWorkspaceCycle(`/admin/audit?resource=${encodeURIComponent(name)}`, cycleId)}
             aria-current={resource === name ? "page" : undefined}
-            className={`inline-flex min-h-10 items-center rounded-full px-4 text-[13px] font-semibold ${resource === name ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}
+            className={`inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold ${resource === name ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}
           >
             {statusLabel(name)}
           </Link>
@@ -97,9 +97,9 @@ export default async function AuditPage({
         {events.map((event) => (
           <article key={event.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-mecg-navy">
+              <p className="text-sm font-semibold text-mecg-navy">
                 {statusLabel(event.action)}
-                <span className="ml-2 text-[13px] font-semibold text-muted">{event.resource}</span>
+                <span className="ml-2 text-sm font-semibold text-muted">{event.resource}</span>
               </p>
               <p className="mt-0.5 truncate text-xs text-muted">
                 {event.actor_id ? actorNames.get(event.actor_id) ?? "Account removed" : "System"}

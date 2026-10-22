@@ -39,7 +39,7 @@ export default function PillNav({
               ref={isSelected ? selectedLink : undefined}
               href={href}
               aria-current={isSelected ? "page" : undefined}
-              className={`inline-flex min-h-11 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 ${
+              className={`inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-semibold transition-colors duration-150 ${
                 isSelected
                   ? "bg-mecg-navy text-white"
                   : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy"

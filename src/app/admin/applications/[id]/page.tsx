@@ -112,7 +112,7 @@ function ResumePanel({
 
   return (
     <div>
-      <p className="text-[13px] font-semibold text-muted">Resume</p>
+      <p className="text-sm font-semibold text-muted">Resume</p>
       {hidden ? (
         <p className="mt-2 text-sm text-muted">Contact details and the resume are hidden for Hash review.</p>
       ) : document ? (
@@ -128,7 +128,7 @@ function ResumePanel({
             />
             <div className="border-t border-line bg-wash p-2 text-center">
               <a
-                className="text-[13px] font-semibold text-mecg-orange-ink"
+                className="text-sm font-semibold text-mecg-orange-ink"
                 href={`/api/admin/applications/${applicationId}/resume`}
                 target="_blank"
                 rel="noreferrer"
@@ -200,7 +200,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
             ? "Your conflict-of-interest status for this applicant could not be verified, so their file is withheld. Try again in a moment."
             : "You have declared a conflict of interest on this applicant and are recused from viewing their file."}
         </p>
-        <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+        <Link href={returnTo} className="text-sm font-semibold text-mecg-orange-ink underline underline-offset-4">
           Back to Recruitment
         </Link>
       </main>
@@ -246,8 +246,8 @@ export default async function ApplicantDossier({ params, searchParams }: { param
       <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6 sm:p-10">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[13px] font-semibold text-mecg-orange-ink">Applicant operations</p>
-            <h1 className="workspace-title mt-2.5">{person.name}</h1>
+            <p className="text-sm font-semibold text-mecg-orange-ink">Applicant operations</p>
+            <h1 className="workspace-title mt-3">{person.name}</h1>
           </div>
           <LogoutButton />
         </header>
@@ -256,13 +256,13 @@ export default async function ApplicantDossier({ params, searchParams }: { param
         <section className="flex flex-col gap-4 rounded-xl bg-wash p-5 inset-ring inset-ring-line-strong">
 
           <dl className="grid gap-3 text-sm leading-6 text-mecg-navy sm:grid-cols-2">
-            {person.preferred_name && <div><dt className="text-[13px] font-semibold text-muted">Preferred name</dt><dd>{person.preferred_name}</dd></div>}
-            <div><dt className="text-[13px] font-semibold text-muted">Contact</dt><dd>{person.contact}</dd></div>
-            {person.phone && <div><dt className="text-[13px] font-semibold text-muted">Phone</dt><dd>{person.phone}</dd></div>}
-            {year && <div><dt className="text-[13px] font-semibold text-muted">Class year</dt><dd>{year}</dd></div>}
-            {person.major && <div><dt className="text-[13px] font-semibold text-muted">Major</dt><dd>{person.major}</dd></div>}
-            <div><dt className="text-[13px] font-semibold text-muted">Events attended</dt><dd>{eventsAttended.length ? eventsAttended.join(", ") : "None"}</dd></div>
-            {person.linkedin_url && <div><dt className="text-[13px] font-semibold text-muted">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
+            {person.preferred_name && <div><dt className="text-sm font-semibold text-muted">Preferred name</dt><dd>{person.preferred_name}</dd></div>}
+            <div><dt className="text-sm font-semibold text-muted">Contact</dt><dd>{person.contact}</dd></div>
+            {person.phone && <div><dt className="text-sm font-semibold text-muted">Phone</dt><dd>{person.phone}</dd></div>}
+            {year && <div><dt className="text-sm font-semibold text-muted">Class year</dt><dd>{year}</dd></div>}
+            {person.major && <div><dt className="text-sm font-semibold text-muted">Major</dt><dd>{person.major}</dd></div>}
+            <div><dt className="text-sm font-semibold text-muted">Events attended</dt><dd>{eventsAttended.length ? eventsAttended.join(", ") : "None"}</dd></div>
+            {person.linkedin_url && <div><dt className="text-sm font-semibold text-muted">LinkedIn</dt><dd>{linkedinHref ? <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">{person.linkedin_url}</a> : person.linkedin_url}</dd></div>}
           </dl>
           <ResumePanel
             applicationId={application.id}
@@ -273,7 +273,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
             heightClass="h-[560px]"
           />
         </section>
-        <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">Back to Recruitment</Link>
+        <Link href={returnTo} className="text-sm font-semibold text-mecg-orange-ink underline underline-offset-4">Back to Recruitment</Link>
       </main>
     );
   }
@@ -365,7 +365,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
           )}
           <div>
 
-            <h1 className="workspace-title mt-2.5">{displayName}</h1>
+            <h1 className="workspace-title mt-3">{displayName}</h1>
             <div className="mt-2"><StatusPill tone={isTerminal ? "navy" : "orange"}>{applicationStatusLabel(application.status)}</StatusPill></div>
           </div>
         </div>
@@ -381,7 +381,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
 
           {application.offer_response && (
             <div className="rounded-xl bg-white/70 p-3 text-sm inset-ring inset-ring-line">
-              <p className="text-[13px] font-semibold text-muted">Offer response</p>
+              <p className="text-sm font-semibold text-muted">Offer response</p>
               <p className="mt-1 font-semibold text-mecg-navy">{statusLabel(application.offer_response)}</p>
               {application.offer_responded_at && (
                 <time dateTime={application.offer_responded_at} className="mt-1 block text-xs text-muted">
@@ -390,50 +390,50 @@ export default async function ApplicantDossier({ params, searchParams }: { param
               )}
             </div>
           )}
-          <dl className="flex flex-col gap-2.5 text-sm leading-6 text-mecg-navy">
+          <dl className="flex flex-col gap-3 text-sm leading-6 text-mecg-navy">
             {!panelOnly && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Applicant code</dt>
+                <dt className="text-sm font-semibold text-muted">Applicant code</dt>
                 <dd className="font-mono">{applicantCode(application.id)}</dd>
               </div>
             )}
             {!panelOnly && person.preferred_name && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Preferred name</dt>
+                <dt className="text-sm font-semibold text-muted">Preferred name</dt>
                 <dd>{person.preferred_name}</dd>
               </div>
             )}
             {!panelOnly && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Contact</dt>
+                <dt className="text-sm font-semibold text-muted">Contact</dt>
                 <dd>{person.contact}</dd>
               </div>
             )}
             {!panelOnly && person.phone && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Phone</dt>
+                <dt className="text-sm font-semibold text-muted">Phone</dt>
                 <dd>{person.phone}</dd>
               </div>
             )}
             {year && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Class year</dt>
+                <dt className="text-sm font-semibold text-muted">Class year</dt>
                 <dd>{year}</dd>
               </div>
             )}
             {person.major && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">Major</dt>
+                <dt className="text-sm font-semibold text-muted">Major</dt>
                 <dd>{person.major}</dd>
               </div>
             )}
             <div>
-              <dt className="text-[13px] font-semibold text-muted">Events attended</dt>
+              <dt className="text-sm font-semibold text-muted">Events attended</dt>
               <dd>{eventsAttended.length ? eventsAttended.join(", ") : "None"}</dd>
             </div>
             {!panelOnly && person.linkedin_url && (
               <div>
-                <dt className="text-[13px] font-semibold text-muted">LinkedIn</dt>
+                <dt className="text-sm font-semibold text-muted">LinkedIn</dt>
                 <dd>
                   {linkedinHref ? (
                     <a className="underline decoration-mecg-navy/30 underline-offset-2 hover:decoration-mecg-navy" href={linkedinHref} target="_blank" rel="noreferrer">
@@ -450,8 +450,8 @@ export default async function ApplicantDossier({ params, searchParams }: { param
               is an accessibility failure, not a missing feature. */}
           {person.accessibility_notes && (
             <div className="rounded-xl bg-mecg-blue/10 p-4 inset-ring inset-ring-mecg-blue/20">
-              <p className="text-[13px] font-semibold text-mecg-blue">Accessibility request</p>
-              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-muted">{person.accessibility_notes}</p>
+              <p className="text-sm font-semibold text-mecg-blue">Accessibility request</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">{person.accessibility_notes}</p>
               <p className="mt-2 text-xs text-muted">Arrange this before scheduling them for anything timed or in person.</p>
             </div>
           )}
@@ -474,7 +474,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
                     <article key={response.question_key} id={`board-response-${index + 1}`} className="reading-response">
                       <h2 className="font-medium text-mecg-navy">{response.question_text}</h2>
                       <p className="reading-answer whitespace-pre-wrap">{response.response_text}</p>
-                      <p className="mt-2 text-[13px] text-muted">
+                      <p className="mt-2 text-sm text-muted">
                         {countWords(response.response_text)} words{response.question_word_limit ? ` · ${response.question_word_limit}-word limit` : ""}
                       </p>
                     </article>
@@ -499,7 +499,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
               ) : (
                 <div className="flex flex-col gap-5">
                   {finalScore !== null && (
-                    <p className="text-[13px] font-semibold text-muted">
+                    <p className="text-sm font-semibold text-muted">
                       Combined score <span className="text-mecg-navy">{finalScore.toFixed(1)}</span>
                     </p>
                   )}
@@ -518,10 +518,10 @@ export default async function ApplicantDossier({ params, searchParams }: { param
                       <div className="mt-4 flex flex-col gap-3">
                         {evaluations.length === 0 && <p className="text-sm text-muted">No evaluations submitted yet.</p>}
                         {evaluations.map((evaluation) => (
-                          <div key={evaluation.id} className="rounded-xl bg-white p-3.5 inset-ring inset-ring-line">
+                          <div key={evaluation.id} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <p className="text-sm font-medium text-mecg-navy">{panelOnly ? "Evaluator" : (evaluation.evaluator?.display_name ?? "Evaluator")}</p>
-                              <span className="text-[13px] font-semibold text-muted">{evaluationStatusLabel(evaluation.status)}</span>
+                              <span className="text-sm font-semibold text-muted">{evaluationStatusLabel(evaluation.status)}</span>
                             </div>
                             <ul className="mt-2 flex flex-col gap-1 text-xs text-muted">
                               {evaluation.criterion_ratings.map((rating) => (
@@ -584,7 +584,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
                           <h2 className="break-words text-sm font-semibold text-mecg-navy">{message.subject}</h2>
                           <p className="mt-1 text-xs text-muted">{statusLabel(message.kind)} · {message.recipient}</p>
                         </div>
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[13px] font-semibold ${message.delivered ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`}>
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold ${message.delivered ? "bg-success-wash text-success" : "bg-danger-wash text-danger"}`}>
                           {message.delivered ? "Delivered" : "Failed"}
                         </span>
                       </div>
@@ -600,15 +600,15 @@ export default async function ApplicantDossier({ params, searchParams }: { param
                   {!auditUnavailable && auditEvents.length === 0 && <p className="text-sm text-muted">No activity recorded, or you do not have permission to view activity for this cycle.</p>}
                   {priorCycles.length > 0 && (
                     <div className="mt-6">
-                      <p className="text-[13px] font-semibold text-muted">Earlier applications</p>
+                      <p className="text-sm font-semibold text-muted">Earlier applications</p>
                       <p className="mt-1 text-sm text-muted">
                         Applying again is not held against anyone. Screening reviewers and evaluators never see this.
                       </p>
                       <div className="mt-3 flex flex-col gap-2">
                         {priorCycles.map((prior) => (
-                          <div key={`${prior.cycleName}-${prior.status}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-3.5 py-2.5 inset-ring inset-ring-line">
-                            <span className="text-[13px] font-semibold text-mecg-navy">{prior.cycleName}</span>
-                            <span className="text-[13px] text-muted">{applicationStatusLabel(prior.status)}</span>
+                          <div key={`${prior.cycleName}-${prior.status}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-white px-4 py-3 inset-ring inset-ring-line">
+                            <span className="text-sm font-semibold text-mecg-navy">{prior.cycleName}</span>
+                            <span className="text-sm text-muted">{applicationStatusLabel(prior.status)}</span>
                           </div>
                         ))}
                       </div>
@@ -630,7 +630,7 @@ export default async function ApplicantDossier({ params, searchParams }: { param
         </div>
       </div>
 
-      <Link href={returnTo} className="text-[13px] font-semibold text-mecg-orange-ink underline underline-offset-4">
+      <Link href={returnTo} className="text-sm font-semibold text-mecg-orange-ink underline underline-offset-4">
         Back to Recruitment
       </Link>
     </main>

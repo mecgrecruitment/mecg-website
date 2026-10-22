@@ -40,7 +40,7 @@ function OnboardingTask({ cycleId, applicantName, item, owners, onSaved }: {
   }
 
   return (
-    <div className={`rounded-xl p-3.5 inset-ring inset-ring-line ${complete ? "bg-success-wash" : "bg-white"}`}>
+    <div className={`rounded-xl p-4 inset-ring inset-ring-line ${complete ? "bg-success-wash" : "bg-white"}`}>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-center">
         <div>
           <p className="flex items-center gap-2 text-sm font-semibold text-mecg-navy"><span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${complete ? "bg-success text-white" : "bg-mecg-navy/10 text-muted"}`} aria-hidden="true">{complete ? "✓" : ""}</span>{copy.title}</p>
@@ -74,7 +74,7 @@ export default function BoardOnboarding({ cycleId, initialItems, owners, loadErr
   return (
     <section aria-labelledby="accepted-onboarding-heading">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className="text-[13px] font-semibold text-muted">Accepted applicants</p><h2 id="accepted-onboarding-heading" className="mt-1 text-xl font-semibold">Onboarding handoff</h2></div>
+        <div><p className="text-sm font-semibold text-muted">Accepted applicants</p><h2 id="accepted-onboarding-heading" className="mt-1 text-xl font-semibold">Onboarding handoff</h2></div>
         <p className="max-w-md text-pretty text-sm text-muted">This checklist prepares the applicant. Membership access is managed separately in Access.</p>
       </div>
 
@@ -88,7 +88,7 @@ export default function BoardOnboarding({ cycleId, initialItems, owners, loadErr
             {[[groups.length, "awaiting onboarding"], [needsOwnerCount, "need an owner"], [completeCount, "completed"]].map(([value, label]) => <div key={String(label)} className="rounded-xl bg-paper px-4 py-3"><p className="tabular-nums text-xl font-semibold">{value}</p><p className="mt-0.5 text-xs text-muted">{label}</p></div>)}
           </div>
           <div className="scroll-cue mt-4 flex gap-2 overflow-x-auto pb-1" aria-label="Filter onboarding">
-            {(["ALL", "NEEDS_OWNER", "IN_PROGRESS", "COMPLETE"] as const).map((value) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`min-h-10 shrink-0 rounded-full px-3.5 text-xs font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${filter === value ? "bg-mecg-navy text-white" : "bg-wash text-muted hover:bg-mecg-blue/10"}`}>{value === "ALL" ? "Everyone" : STATE_COPY[value]}</button>)}
+            {(["ALL", "NEEDS_OWNER", "IN_PROGRESS", "COMPLETE"] as const).map((value) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`min-h-10 shrink-0 rounded-full px-4 text-xs font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${filter === value ? "bg-mecg-navy text-white" : "bg-wash text-muted hover:bg-mecg-blue/10"}`}>{value === "ALL" ? "Everyone" : STATE_COPY[value]}</button>)}
           </div>
           <div className="mt-3 grid gap-3">
             {filteredGroups.map((group) => {

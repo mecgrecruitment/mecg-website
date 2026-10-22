@@ -51,27 +51,27 @@ export default async function ReferPage() {
 
       <section>
         <SectionLabel number="01">New referral</SectionLabel>
-        <div className="mt-3.5">
+        <div className="mt-4">
           <ReferralForm cycleId={cycleMembership.cycleId} />
         </div>
       </section>
 
       <section>
         <SectionLabel number="02">Your referrals</SectionLabel>
-        <div className="mt-3.5 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-3">
           {(referrals ?? []).map((referral) => (
             <article key={referral.id} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[15px] font-semibold text-mecg-navy">{referral.name}</p>
-                  <p className="mt-0.5 break-words text-[13px] text-muted">{referral.email}</p>
+                  <p className="text-base font-semibold text-mecg-navy">{referral.name}</p>
+                  <p className="mt-0.5 break-words text-sm text-muted">{referral.email}</p>
                   {referral.year_major && <p className="mt-0.5 text-xs text-muted">{referral.year_major}</p>}
                 </div>
                 <StatusPill tone={statusTone(referral.status)}>{referralStatusLabel(referral.status)}</StatusPill>
               </div>
-              <div className="mt-3 rounded-xl bg-wash px-3 py-2.5">
+              <div className="mt-3 rounded-xl bg-wash px-3 py-3">
                 <p className="text-xs font-semibold uppercase tracking-label text-muted">Next</p>
-                <p className="mt-1 text-[13px] leading-5 text-muted">{nextAction(referral.status)}</p>
+                <p className="mt-1 text-sm leading-5 text-muted">{nextAction(referral.status)}</p>
               </div>
               <p className="mt-2 text-xs text-muted">Submitted {formatEasternDateTime(referral.created_at)}</p>
             </article>

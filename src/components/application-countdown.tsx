@@ -78,7 +78,7 @@ export default function ApplicationCountdown({ opensAt }: { opensAt: string }) {
 
   return (
     <div className="mt-6" aria-live="polite">
-      <p className="text-[13px] font-semibold text-mecg-orange-ink">
+      <p className="text-sm font-semibold text-mecg-orange-ink">
         Applications open in
       </p>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">

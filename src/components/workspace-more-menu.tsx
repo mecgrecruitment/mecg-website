@@ -73,7 +73,7 @@ export default function WorkspaceMoreMenu({
         aria-expanded={open}
         aria-controls="workspace-more-destinations"
         onClick={() => setOpenPath(open ? null : pathname)}
-        className={`flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+        className={`flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
           currentSecondary
             ? "bg-mecg-navy text-white focus-visible:outline-mecg-orange"
             : "text-muted hover:bg-mecg-blue/10 hover:text-mecg-navy focus-visible:outline-mecg-navy"

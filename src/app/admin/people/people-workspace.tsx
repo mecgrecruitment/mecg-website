@@ -41,7 +41,7 @@ export default function PeopleWorkspace({
 
   return (
     <section id="workspace-content" aria-label="People workspace" className="min-w-0">
-      <div className="scroll-cue flex gap-2 overflow-x-auto rounded-xl bg-white p-1.5 inset-ring inset-ring-line" role="tablist" aria-label="People views">
+      <div className="scroll-cue flex gap-2 overflow-x-auto rounded-xl bg-white p-2 inset-ring inset-ring-line" role="tablist" aria-label="People views">
         {options.map((option) => (
           <button
             key={option.value}

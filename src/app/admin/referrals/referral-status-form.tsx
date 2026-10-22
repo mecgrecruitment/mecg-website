@@ -52,7 +52,7 @@ export default function ReferralStatusForm({
         disabled={pending}
         onChange={(event) => void change(event.target.value)}
         aria-describedby={`referral-next-${referralId}`}
-        className="select-control min-h-11 text-[13px]"
+        className="select-control min-h-11 text-sm"
       >
         {REFERRAL_STATUSES.map((value) => (
           <option key={value} value={value}>{referralStatusLabel(value)}</option>

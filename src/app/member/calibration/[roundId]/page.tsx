@@ -46,7 +46,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
 
       {!groupCase && <section>
         <SectionLabel number="01">Score anchors</SectionLabel>
-        <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
+        <div className="mt-4 grid gap-2 sm:grid-cols-5">
           {Object.entries(speedDating ? SPEED_DATING_SCORE_ANCHORS : SCORE_ANCHORS).map(([score, meaning]) => (
             <div key={score} className="rounded-xl bg-paper p-4">
               <p className="tabular text-xl font-semibold text-mecg-navy">{score}</p>
@@ -59,7 +59,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
 
       <section>
         <SectionLabel number="02">Active rubric guidance</SectionLabel>
-        <div className="mt-3.5 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-3">
           {detail.criteria.map((criterion) => (
             <article key={criterion.id} className="rounded-xl p-5 inset-ring inset-ring-line">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -68,7 +68,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
               </div>
               <p className="mt-2 text-sm leading-6 text-muted">{criterion.description}</p>
               {groupCase && (
-                <ol className="mt-3 space-y-1.5">
+                <ol className="mt-3 space-y-2">
                   {Object.entries(groupCaseAnchors(criterion.name)).map(([score, text]) => (
                     <li key={score} className="flex gap-3 text-sm leading-6 text-muted">
                       <span className="tabular w-4 shrink-0 font-semibold text-mecg-navy">{score}</span>
@@ -86,8 +86,8 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
       {groupCase && (
         <section>
           <SectionLabel number="03">Scoring and the final call</SectionLabel>
-          <p className="mt-3.5 text-sm leading-6 text-muted">Weighted score = Collaboration ×2 + Problem-Solving + Leadership + Creativity + Composure ×2 + Presentation, out of 40. The number is a guide, not the decision.</p>
-          <div className="mt-3.5 grid gap-2 sm:grid-cols-5">
+          <p className="mt-4 text-sm leading-6 text-muted">Weighted score = Collaboration ×2 + Problem-Solving + Leadership + Creativity + Composure ×2 + Presentation, out of 40. The number is a guide, not the decision.</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-5">
             {GROUP_CASE_SCORE_BANDS.map(({ min, max, label }) => (
               <div key={min} className="rounded-xl bg-paper p-4">
                 <p className="tabular text-xl font-semibold text-mecg-navy">{min}–{max}</p>
@@ -95,16 +95,16 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
               </div>
             ))}
           </div>
-          <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl p-5 inset-ring inset-ring-line">
               <h3 className="font-semibold text-mecg-navy">Red flags, note regardless of score</h3>
-              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-danger">
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-danger">
                 {GROUP_CASE_RED_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
               </ul>
             </div>
             <div className="rounded-xl p-5 inset-ring inset-ring-line">
               <h3 className="font-semibold text-mecg-navy">Green flags, note regardless of score</h3>
-              <ul className="mt-2 space-y-1.5 text-sm leading-6 text-success">
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-success">
                 {GROUP_CASE_GREEN_FLAGS.map((flag) => <li key={flag}>{flag}</li>)}
               </ul>
             </div>
@@ -114,7 +114,7 @@ export default async function RoundCalibrationPage({ params, searchParams }: {
 
       <section>
         <SectionLabel number={groupCase ? "04" : "03"}>Evidence standard</SectionLabel>
-        <ul className="mt-3.5 space-y-2 rounded-xl bg-mecg-navy p-5 text-sm leading-6 text-white/70 sm:p-6">
+        <ul className="mt-4 space-y-2 rounded-xl bg-mecg-navy p-5 text-sm leading-6 text-white/70 sm:p-6">
           {speedDating ? (
             <>
               <li>Score the whole conversation with one star rating.</li>

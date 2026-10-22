@@ -135,7 +135,7 @@ function ApplicantCard({
             {initials(application.name)}
           </span>
         )}
-        <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center text-[13px] font-semibold text-mecg-navy hover:underline">
+        <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center text-sm font-semibold text-mecg-navy hover:underline">
           {application.name}
         </Link>
       </div>
@@ -199,7 +199,7 @@ function ApplicantRoster({
 }) {
   return (
     <div className="mt-4">
-      <div className="applicant-roster-toolbar flex flex-wrap items-end justify-between gap-3 rounded-xl bg-wash p-3.5 inset-ring inset-ring-line">
+      <div className="applicant-roster-toolbar flex flex-wrap items-end justify-between gap-3 rounded-xl bg-wash p-4 inset-ring inset-ring-line">
         <div className="flex flex-wrap gap-3">
           <label className="text-xs font-medium text-muted">
             <span className="mb-1 block">Status</span>
@@ -608,7 +608,7 @@ function PipelineBoardInner({
           />
         </div>
         {canOperate && (
-          <Link href={withWorkspaceCycle("/admin/referrals", cycleId)} className="inline-flex min-h-11 items-center rounded-full px-4 text-[13px] font-semibold text-mecg-blue inset-ring inset-ring-line-strong hover:bg-mecg-blue/10">
+          <Link href={withWorkspaceCycle("/admin/referrals", cycleId)} className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold text-mecg-blue inset-ring inset-ring-line-strong hover:bg-mecg-blue/10">
             Referrals · {referralCount}
           </Link>
         )}
@@ -616,7 +616,7 @@ function PipelineBoardInner({
       </div>
 
       {canAdvance && (selectedApplications.length > 0 || advanceNotice?.kind === "error") && (
-        <div className="applicant-bulk-actions mt-3 rounded-xl bg-mecg-navy p-3.5 text-white">
+        <div className="applicant-bulk-actions mt-3 rounded-xl bg-mecg-navy p-4 text-white">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm" aria-live="polite"><span className="font-semibold">{selectedApplications.length} selected</span> · {hiddenSelectedCount} hidden</p>
             <div className="flex flex-wrap gap-2">
@@ -692,30 +692,30 @@ function PipelineBoardInner({
                 return (
                   <article
                     key={status}
-                    className={`flex min-h-40 flex-col rounded-xl bg-wash p-2.5 inset-ring inset-ring-line transition-opacity ${draggingApplication && !acceptsDraggedCard ? "opacity-45" : ""}`}
+                    className={`flex min-h-40 flex-col rounded-xl bg-wash p-3 inset-ring inset-ring-line transition-opacity ${draggingApplication && !acceptsDraggedCard ? "opacity-45" : ""}`}
                   >
-                    <div className="mb-1.5 flex items-center justify-between gap-2 px-0.5">
-                      <p className="text-[13px] font-semibold text-muted">{applicationStatusLabel(status)}</p>
-                      <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-1.5 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
+                    <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
+                      <p className="text-sm font-semibold text-muted">{applicationStatusLabel(status)}</p>
+                      <span className="inline-flex min-w-[22px] items-center justify-center rounded-full bg-mecg-orange/[0.18] px-2 py-0.5 tabular text-xs font-bold text-mecg-orange-ink">
                         {columnTerm ? `${column.length}/${stageApplications.length}` : stageApplications.length}
                       </span>
                     </div>
                     {status === "ELIGIBLE" && canAdvance && column.length > 0 && (
-                      <div className="mb-1.5 flex flex-wrap items-center gap-1.5 px-0.5">
+                      <div className="mb-2 flex flex-wrap items-center gap-2 px-0.5">
                         <button type="button" disabled={advancePending} className="button-secondary text-xs" onClick={() => reviewAdvancement(new Set(column.map((application) => application.id)))}>
                           {columnTerm ? `Review ${column.length} shown` : `Review all ${column.length} for Speed Dating`}
                         </button>
                       </div>
                     )}
                     {(stageApplications.length > COLUMN_SEARCH_THRESHOLD || columnTerm) && (
-                      <label className="mb-1.5 block">
+                      <label className="mb-2 block">
                         <span className="sr-only">Search {applicationStatusLabel(status)}</span>
                         <input
                           type="search"
                           value={columnQueries[status] ?? ""}
                           onChange={(event) => setColumnQueries((current) => ({ ...current, [status]: event.target.value }))}
                           placeholder="Search this stage…"
-                          className="field-control min-h-9 w-full rounded-lg bg-white text-[13px]"
+                          className="field-control min-h-9 w-full rounded-lg bg-white text-sm"
                         />
                       </label>
                     )}
@@ -727,7 +727,7 @@ function PipelineBoardInner({
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`flex min-h-28 max-h-[68vh] flex-1 flex-col gap-1.5 overflow-y-auto rounded-xl transition-[background-color,box-shadow] ${snapshot.isDraggingOver ? "bg-mecg-blue/10 inset-ring-2 inset-ring-mecg-blue/30" : ""}`}
+                          className={`flex min-h-28 max-h-[68vh] flex-1 flex-col gap-2 overflow-y-auto rounded-xl transition-[background-color,box-shadow] ${snapshot.isDraggingOver ? "bg-mecg-blue/10 inset-ring-2 inset-ring-mecg-blue/30" : ""}`}
                         >
                           {column.length === 0 && (
                             <div className={`flex min-h-28 flex-1 items-center justify-center rounded-xl border-[1.5px] border-dashed p-3 text-center ${snapshot.isDraggingOver ? "border-mecg-blue/45" : "border-line"}`}>
@@ -782,7 +782,7 @@ function PipelineBoardInner({
           </DragDropContext>
           <div className="mt-4 rounded-xl bg-wash p-4">
             <button type="button" onClick={() => setShowDecided((value) => !value)} aria-expanded={showDecided} aria-controls="decided-pipeline" className="flex min-h-11 w-full items-center justify-between gap-4 text-left">
-              <span className="text-[13px] font-semibold text-muted">Decided · {decidedCount}</span>
+              <span className="text-sm font-semibold text-muted">Decided · {decidedCount}</span>
               <span className="inline-flex items-center gap-2 text-xs font-semibold text-mecg-blue">
                 {showDecided ? "Hide" : "Show"}
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className={`disclosure-chevron ${showDecided ? "rotate-180" : ""}`} aria-hidden="true">
@@ -791,7 +791,7 @@ function PipelineBoardInner({
               </span>
             </button>
             {!showDecided ? (
-              <div className="mt-2.5 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {DECIDED_STATUSES.map((status) => (
                   <StatusPill key={status} tone="neutral">
                     {applicationStatusLabel(status)} · {boardApplications.filter((application) => application.status === status).length}
@@ -804,12 +804,12 @@ function PipelineBoardInner({
                   const column = searchResults.filter((application) => application.status === status);
                   return (
                     <div key={status}>
-                      <p className="text-[13px] font-semibold text-muted">
+                      <p className="text-sm font-semibold text-muted">
                         {applicationStatusLabel(status)} · {column.length}
                       </p>
-                      <div className="mt-1.5 flex flex-col gap-1.5">
+                      <div className="mt-2 flex flex-col gap-2">
                         {column.map((application) => (
-                          <div key={application.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2.5 py-1.5 text-xs inset-ring inset-ring-line">
+                          <div key={application.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-xs inset-ring inset-ring-line">
                             <Link href={withWorkspaceCycle(`/admin/applications/${application.id}?${new URLSearchParams({ returnTo })}`, cycleId)} className="inline-flex min-h-10 items-center font-semibold text-mecg-navy hover:underline">
                               {application.name}
                             </Link>

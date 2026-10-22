@@ -53,7 +53,7 @@ export default async function ScreeningQueuePage() {
       <section>
         <SectionLabel number="01">Your reading queue</SectionLabel>
         <p className="mt-2 text-sm text-muted">Open one application at a time. Submitted reviews are locked and removed from this list.</p>
-        <div className="mt-3.5 space-y-4">
+        <div className="mt-4 space-y-4">
           {nextApplication && (
             <article className="queue-ticket flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white p-5 inset-ring inset-ring-line">
               <div>

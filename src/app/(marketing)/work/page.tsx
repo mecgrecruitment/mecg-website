@@ -47,7 +47,7 @@ export default async function WorkPage() {
         copy="A team of six to eight University of Michigan students researches your question, checks its thinking with your people and hands over a recommendation you can act on."
       >
         <Link href="/contact#message" className="button-primary">Discuss a project <span aria-hidden="true">→</span></Link>
-        <Link href="#capabilities" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-mecg-blue">See example questions <span aria-hidden="true">↓</span></Link>
+        <Link href="#capabilities" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-mecg-blue">See example questions <span aria-hidden="true">↓</span></Link>
       </PageIntro>
 
       <section aria-label="MECG at a glance" className="bg-linear-to-b from-public-ground from-30% to-white to-30% px-6 sm:px-10">
@@ -55,11 +55,11 @@ export default async function WorkPage() {
           <div className="relative aspect-[4/3] overflow-hidden rounded-xl sm:aspect-[2/1]">
             <Image src="/mecg/chapter-presentation-2026.jpeg" alt="MECG members presenting together at a formal chapter event" fill preload sizes="(min-width:1152px) 1152px, 100vw" className="object-cover object-[50%_35%]" />
           </div>
-          <figcaption className="mt-3 text-[13px] text-muted sm:absolute sm:right-4 sm:top-4 sm:mt-0 sm:rounded-md sm:bg-white/90 sm:px-2.5 sm:py-1">Members at a chapter presentation, 2026</figcaption>
+          <figcaption className="mt-3 text-sm text-muted sm:absolute sm:right-4 sm:top-4 sm:mt-0 sm:rounded-md sm:bg-white/90 sm:px-3 sm:py-1">Members at a chapter presentation, 2026</figcaption>
           <dl className="public-lit relative mt-4 grid grid-cols-2 gap-x-6 gap-y-6 rounded-xl p-6 shadow-lift sm:mx-8 sm:-mt-16 sm:grid-cols-3 sm:p-8 lg:grid-cols-5">
             {FIGURES.map(([figure, label]) => (
               <div key={label} className="flex flex-col-reverse justify-end last:col-span-2 sm:last:col-span-1">
-                <dt className="mt-2 text-[13px] text-white">{label}</dt>
+                <dt className="mt-2 text-sm text-white">{label}</dt>
                 <dd className="display-face whitespace-nowrap text-[40px] leading-none sm:text-[clamp(36px,4.4vw,56px)]">{figure}</dd>
               </div>
             ))}
@@ -70,7 +70,7 @@ export default async function WorkPage() {
       <MarketingSection aria-labelledby="clients-title" className="pt-24! sm:pt-32!">
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end lg:gap-16">
           <h2 id="clients-title" className="display-face text-balance text-[clamp(40px,6vw,76px)] leading-[1.02]">From General Motors to a Midland medical spa.</h2>
-          <p className="max-w-sm text-[17px] leading-7 text-muted">An automaker, a distillery, a school, a nonprofit, a law practice and more have brought us their questions.</p>
+          <p className="max-w-sm text-lg leading-7 text-muted">An automaker, a distillery, a school, a nonprofit, a law practice and more have brought us their questions.</p>
         </div>
         {publicProjects.length > 0 ? (
           <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -85,15 +85,15 @@ export default async function WorkPage() {
       <MarketingSection id="capabilities" tone="paper" className="scroll-mt-24" aria-labelledby="capabilities-title">
         <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr] lg:items-end lg:gap-16">
           <SectionHeading id="capabilities-title">Questions clients bring us</SectionHeading>
-          <p className="max-w-sm text-[15px] leading-6 text-muted">Examples, not past client work. Pick the closest and we’ll start the conversation there.</p>
+          <p className="max-w-sm text-base leading-6 text-muted">Examples, not past client work. Pick the closest and we’ll start the conversation there.</p>
         </div>
         <ol className="mt-10 border-t border-public-rule">
           {SERVICES.map((service) => (
             <li key={service.title} className="border-b border-public-rule">
               <Link href={questionHref(service)} className="group grid gap-2 py-7 md:grid-cols-[0.55fr_1.45fr] md:gap-10">
                 <span>
-                  <span className="block text-[15px] font-semibold text-mecg-blue">{service.title}</span>
-                  <span className="mt-2 block max-w-xs text-[15px] leading-6 text-muted">{service.body}</span>
+                  <span className="block text-base font-semibold text-mecg-blue">{service.title}</span>
+                  <span className="mt-2 block max-w-xs text-base leading-6 text-muted">{service.body}</span>
                 </span>
                 <span className="display-face flex items-start justify-between gap-6 text-balance text-[28px] leading-[1.05] sm:text-[44px]">
                   {service.question}
@@ -104,7 +104,7 @@ export default async function WorkPage() {
           ))}
           <li className="border-b border-public-rule">
             <Link href="/contact#message" className="group grid gap-2 py-7 md:grid-cols-[0.55fr_1.45fr] md:gap-10">
-              <span className="text-[15px] font-semibold text-mecg-blue">Something else</span>
+              <span className="text-base font-semibold text-mecg-blue">Something else</span>
               <span className="display-face flex items-start justify-between gap-6 text-balance text-[28px] leading-[1.05] text-mecg-blue sm:text-[44px]">
                 Tell us your question anyway
                 <span aria-hidden="true" className="mt-1 shrink-0 transition-transform duration-150 group-hover:translate-x-1.5">→</span>
@@ -122,7 +122,7 @@ export default async function WorkPage() {
               <span className="display-face text-[40px] leading-none text-mecg-blue">{number}</span>
               <h3 className="mt-4 text-xl font-semibold">{title}</h3>
               <p className="mt-3 leading-7 text-muted">{body}</p>
-              <p className="pt-5 text-[15px] leading-6"><span className="text-muted">You get: </span><span className="font-semibold">{result}</span></p>
+              <p className="pt-5 text-base leading-6"><span className="text-muted">You get: </span><span className="font-semibold">{result}</span></p>
             </li>
           ))}
         </ol>
@@ -144,7 +144,7 @@ export default async function WorkPage() {
         <div className="public-lit mx-auto grid max-w-6xl gap-8 rounded-xl p-8 shadow-lift sm:p-12 lg:grid-cols-[1.4fr_0.6fr] lg:items-end">
           <div>
             <h2 id="closing-title" className="display-face text-balance text-[clamp(36px,5vw,64px)] leading-[1.02]">Have a decision coming up next semester?</h2>
-            <p className="mt-4 max-w-xl text-[17px] leading-7 text-white">Tell us what you’re deciding and by when. The board replies within one week.</p>
+            <p className="mt-4 max-w-xl text-lg leading-7 text-white">Tell us what you’re deciding and by when. The board replies within one week.</p>
           </div>
           <Link href="/contact#message" className="button-primary justify-self-start lg:justify-self-end">Discuss a project <span aria-hidden="true">→</span></Link>
         </div>

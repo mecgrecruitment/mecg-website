@@ -246,7 +246,7 @@ export default function ScreeningControls({
             <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label="Reader workload">
             <table className="mt-3 w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-line text-[13px] text-muted">
+                <tr className="border-b border-line text-sm text-muted">
                   <th className="py-2 pr-4 font-semibold">Reader</th>
                   <th className="py-2 pr-4 font-semibold">Submitted</th>
                   <th className="w-1/2 py-2 pr-4 font-semibold"><span className="sr-only">Progress</span></th>

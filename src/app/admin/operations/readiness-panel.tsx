@@ -90,7 +90,7 @@ export default function ReadinessPanel() {
           <li key={label} className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
             <div className="flex items-center justify-between gap-4">
               <span className="font-medium text-mecg-navy">{label}</span>
-              <span className={`text-[13px] font-semibold ${ok ? "text-success" : "text-danger"}`}>{ok ? "Passed" : "Needs attention"}</span>
+              <span className={`text-sm font-semibold ${ok ? "text-success" : "text-danger"}`}>{ok ? "Passed" : "Needs attention"}</span>
             </div>
             <p className="mt-2 text-sm text-muted">{detail}</p>
           </li>

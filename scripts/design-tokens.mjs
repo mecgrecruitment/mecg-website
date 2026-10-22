@@ -15,6 +15,14 @@ const INSET_COLOURS = {
 };
 const between = (lo, hi) => (s) => { const a = alpha(s); return a >= lo && a <= hi; };
 
+const SPACING_HALF_STEP = /^(-?)(p[xytrblse]?|m[xytrblse]?|gap(?:-[xy])?|space-[xy]|inset(?:-[xy])?|top|right|bottom|left|start|end|scroll-m[xytrbl]?|scroll-p[xytrbl]?)-([123])\.5$/;
+const SPACING_PX = new RegExp(SPACING_HALF_STEP.source.replace('-([123])\\.5$', '-\\[(\\d+)px\\]$'));
+// Off-rhythm spacing rounds up to the next 4px, so touch targets never shrink. 1px and 2px are hairline nudges.
+const onRhythm = (px) => (px <= 2 ? px : Math.ceil(px / 4) * 4);
+const TYPE_STEPS = { 12: 'xs', 14: 'sm', 16: 'base', 18: 'lg' };
+// Odd steps round up, so public text never drops below its 13px floor.
+const typeToken = (px) => `text-${TYPE_STEPS[Math.ceil(px / 2) * 2]}`;
+
 // Each rule: a utility pattern (variants excluded) and the token it becomes.
 // `to` receives the regex match and the variant prefix; returning null keeps the class.
 export const RULES = [
@@ -57,8 +65,10 @@ export const RULES = [
   { why: 'panels are 12px; 16px was off the scale', re: /^rounded(-[trblse]{1,2})?-2xl$/, to: (m) => `rounded${m[1] ?? ''}-xl` },
   { why: 'nothing below 12px', re: /^text-\[(10|11|11\.5|12)px\]$/, to: () => 'text-xs' },
   { why: 'nothing below 12px', re: /^text-\[0?\.(\d+)rem\]$/, to: (m) => (Number(`0.${m[1]}`) <= 0.75 ? 'text-xs' : null) },
-  { why: 'half-pixel type steps', re: /^text-\[12\.5px\]$/, to: () => 'text-[13px]' },
-  { why: 'text-[14px] is text-sm', re: /^text-\[14px\]$/, to: () => 'text-sm' },
+  { why: 'one type scale: 12, 14, 16, 18', re: /^text-\[(12\.5|13|14|15|16|17|18)px\]$/, to: (m) => typeToken(Number(m[1])) },
+  { why: 'one public ink', re: /^(text|bg|border|fill|stroke|decoration|from|to|via)-public-ink(\/[\d.[\]]+)?$/, to: (m) => `${m[1]}-mecg-navy${m[2] ?? ''}` },
+  { why: 'a 4px spacing rhythm; 0.5 is the one optical nudge', re: SPACING_HALF_STEP, to: (m) => `${m[1]}${m[2]}-${Number(m[3]) + 1}` },
+  { why: 'a 4px spacing rhythm; 0.5 is the one optical nudge', re: SPACING_PX, to: (m) => `${m[1]}${m[2]}-${onRhythm(Number(m[3])) / 4}` },
   { why: 'three tracking steps', re: /^tracking-\[(-?[\d.]+)em\]$/, to: (m) => trackingToken(Number(m[1])) && `tracking-${trackingToken(Number(m[1]))}` },
 ];
 
@@ -84,10 +94,18 @@ const CSS_EXEMPT = /^\s*--[\w-]+\s*:|^\s*(?:-webkit-)?mask(?:-image)?\s*:/;
 
 export function checkCss(source) {
   const flags = [];
-  const out = source.replace(/letter-spacing:\s*(-?[\d.]+)em/g, (whole, em) => {
-    const token = trackingToken(Number(em));
-    return token ? `letter-spacing: var(--tracking-${token})` : whole;
-  });
+  const out = source
+    .replace(/letter-spacing:\s*(-?[\d.]+)em/g, (whole, em) => {
+      const token = trackingToken(Number(em));
+      return token ? `letter-spacing: var(--tracking-${token})` : whole;
+    })
+    .replace(/font-size:\s*([\d.]+)(px|rem)(?=\s*[;}])/g, (whole, n, unit) => {
+      const px = unit === 'rem' ? Number(n) * 16 : Number(n);
+      return px >= 12 && px <= 18 ? `font-size: var(--${typeToken(px)})` : whole;
+    })
+    .replace(/((?:^|[\s;{])(?:padding|margin|gap|row-gap|column-gap)(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?:)([^;}]+)/g,
+      (whole, prop, value) => prop + value.replace(/(^|\s)(\d+)px\b/g, (_, sp, px) => `${sp}${onRhythm(Number(px))}px`))
+    .replace(/--color-public-ink\b/g, '--color-mecg-navy');
   const changed = out !== source;
   out.split('\n').forEach((line, i) => {
     if (/\/\*\s*raw:/.test(line)) return;

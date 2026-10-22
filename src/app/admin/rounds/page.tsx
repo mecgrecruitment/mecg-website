@@ -77,7 +77,7 @@ export default async function RoundsPage() {
                 className="group grid gap-3 py-4 transition-colors hover:bg-wash sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-6"
               >
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-3">
                     <h3 className="font-semibold text-mecg-navy group-hover:text-mecg-blue">{round.name}</h3>
                     <StatusPill tone={round.status === "ACTIVE" ? "navy" : "neutral"}>{roundStatusLabel(round.status)}</StatusPill>
                   </div>

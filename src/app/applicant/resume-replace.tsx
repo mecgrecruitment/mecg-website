@@ -58,7 +58,7 @@ export default function ResumeReplace({ hasResume }: { hasResume: boolean }) {
         />
         {hasResume ? "Replace resume" : "Upload a resume"}
       </label>
-      <p className="mt-1.5 text-xs text-muted">
+      <p className="mt-2 text-xs text-muted">
         PDF, up to 10 MB. You can change this until applications close, or until review starts on your file.
       </p>
       {state.kind === "working" && <p role="status" className="mt-2 text-sm text-muted">Uploading {state.label}…</p>}

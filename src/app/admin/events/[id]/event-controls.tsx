@@ -54,7 +54,7 @@ export default function EventControls({ event }: { event: EventData }) {
 
   return (
     <section className="rounded-xl p-5 inset-ring inset-ring-line">
-      <p className="text-[13px] font-semibold text-muted">Event settings</p>
+      <p className="text-sm font-semibold text-muted">Event settings</p>
       <p className="mt-2 text-sm text-muted">Status: {eventStatusLabel(event.status)}</p>
       {!locked && <form className="mt-4 grid gap-3 sm:grid-cols-2" onSubmit={(submission) => { submission.preventDefault(); void update(submission.currentTarget); }}>
         <FormField label="Name" name="name" required defaultValue={event.name} />

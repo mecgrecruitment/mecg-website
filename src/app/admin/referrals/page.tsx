@@ -75,17 +75,17 @@ export default async function ReferralsPage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                   <div>
-                    <p className="text-[15px] font-semibold text-mecg-navy">{referral.name}</p>
-                    <p className="mt-0.5 break-words text-[13px] text-muted">{referral.email}</p>
+                    <p className="text-base font-semibold text-mecg-navy">{referral.name}</p>
+                    <p className="mt-0.5 break-words text-sm text-muted">{referral.email}</p>
                   </div>
                   <p className="text-xs text-muted">Submitted {formatEasternDateTime(referral.created_at)}</p>
                 </div>
                 <p className="mt-2 text-xs text-muted">
                   {[referral.year_major, `Referred by ${referrerName.get(referral.referrer_id) ?? "a member"}`].filter(Boolean).join(" · ")}
                 </p>
-                <div className="mt-3 rounded-xl bg-wash px-3 py-2.5">
+                <div className="mt-3 rounded-xl bg-wash px-3 py-3">
                   <p className="text-xs font-semibold uppercase tracking-label text-muted">Why they may fit</p>
-                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-5 text-muted">{referral.reason}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-5 text-muted">{referral.reason}</p>
                 </div>
               </div>
               <div className="border-t border-line pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">

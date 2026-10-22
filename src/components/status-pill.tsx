@@ -11,7 +11,7 @@ export default function StatusPill({
     neutral: "bg-mecg-navy/10 text-muted",
   }[tone];
   return (
-    <span className={`status-pill inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-semibold ${toneClass}`}>
+    <span className={`status-pill inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold ${toneClass}`}>
       {children}
     </span>
   );

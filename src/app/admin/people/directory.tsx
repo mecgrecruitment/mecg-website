@@ -36,9 +36,9 @@ function RolePills({ roles }: { roles: string[] }) {
     return priority.indexOf(a) - priority.indexOf(b);
   });
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {ordered.map((role) => (
-        <span key={role} className={`inline-flex min-h-7 items-center rounded-full px-2.5 text-xs font-semibold ${ROLE_STYLE[role] ?? ROLE_STYLE.MEMBER}`}>
+        <span key={role} className={`inline-flex min-h-7 items-center rounded-full px-3 text-xs font-semibold ${ROLE_STYLE[role] ?? ROLE_STYLE.MEMBER}`}>
           {memberRoleLabel(role)}
         </span>
       ))}
@@ -101,20 +101,20 @@ export default function PeopleDirectory({ directory, currentUserId, canManage, d
   return (
     <section aria-labelledby="directory-heading">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div><p className="text-[13px] font-semibold text-muted">Team directory</p><h2 id="directory-heading" className="mt-1 text-xl font-semibold">Find the right person</h2></div>
+        <div><p className="text-sm font-semibold text-muted">Team directory</p><h2 id="directory-heading" className="mt-1 text-xl font-semibold">Find the right person</h2></div>
         <p className="text-sm text-muted"><span className="tabular-nums">{directory.length}</span> people · <span className="tabular-nums">{boardCount}</span> Board{canManage ? ` · ${incompleteCount} profiles incomplete` : ""}</p>
       </div>
 
-      <div className="mt-4 rounded-xl bg-white p-3.5 inset-ring inset-ring-line sm:p-4">
+      <div className="mt-4 rounded-xl bg-white p-4 inset-ring inset-ring-line sm:p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_11rem_auto]">
-          <label className="relative block"><span className="sr-only">Search people</span><span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-mecg-navy/40" aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} className="field-control pl-10 text-base sm:text-sm" placeholder="Search name, major, position, or role" /></label>
+          <label className="relative block"><span className="sr-only">Search people</span><span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-mecg-navy/40" aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} className="field-control pl-10 text-base sm:text-sm" placeholder="Search name, major, position, or role" /></label>
           <label><span className="sr-only">Sort directory</span><select value={sort} onChange={(event) => setSort(event.target.value as DirectorySort)} className="select-control text-base sm:text-sm"><option value="NAME">Sort: Name</option><option value="ROLE">Sort: Role</option><option value="GRADUATION">Sort: Graduation</option></select></label>
           <div className="hidden gap-1 rounded-xl bg-wash p-1 sm:flex" aria-label="Directory layout">
             {(["CARDS", "LIST"] as const).map((value) => <button key={value} type="button" aria-pressed={layout === value} onClick={() => setLayout(value)} className={`min-h-9 rounded-lg px-3 text-xs font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${layout === value ? "bg-mecg-navy text-white" : "text-muted hover:bg-white"}`}>{value === "CARDS" ? "Cards" : "List"}</button>)}
           </div>
         </div>
         <div className="scroll-cue mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Filter directory by role">
-          {ROLE_FILTERS.map((option) => <button key={option.value} type="button" aria-pressed={role === option.value} onClick={() => setRole(option.value)} className={`min-h-10 shrink-0 rounded-full px-3.5 text-xs font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${role === option.value ? "bg-mecg-navy text-white" : "bg-wash text-muted hover:bg-mecg-blue/10"}`}>{option.label}</button>)}
+          {ROLE_FILTERS.map((option) => <button key={option.value} type="button" aria-pressed={role === option.value} onClick={() => setRole(option.value)} className={`min-h-10 shrink-0 rounded-full px-4 text-xs font-semibold transition-[background-color,color,scale] active:scale-[0.96] ${role === option.value ? "bg-mecg-navy text-white" : "bg-wash text-muted hover:bg-mecg-blue/10"}`}>{option.label}</button>)}
         </div>
       </div>
 
@@ -127,9 +127,9 @@ export default function PeopleDirectory({ directory, currentUserId, canManage, d
             return (
               <button key={person.id} type="button" onClick={() => setSelected(person)} className={`task-row relative min-h-44 overflow-hidden rounded-xl bg-white p-4 text-left inset-ring inset-ring-line ${board ? "before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-mecg-orange" : ""}`}>
                 <div className="flex items-start justify-between gap-3"><PersonAvatar person={person} /><span className="task-row-arrow mt-1 text-lg text-mecg-navy/35" aria-hidden="true">→</span></div>
-                <p className="mt-4 text-balance text-[15px] font-semibold text-mecg-navy">{person.name}{person.id === currentUserId && <span className="ml-1.5 text-xs font-medium text-mecg-orange-ink">You</span>}</p>
-                {person.position && <p className="mt-1 text-[13px] text-muted">{person.position}</p>}
-                {(person.major || person.gradTerm) && <p className="mt-1.5 text-xs text-muted">{[person.major, person.gradTerm].filter(Boolean).join(" · ")}</p>}
+                <p className="mt-4 text-balance text-base font-semibold text-mecg-navy">{person.name}{person.id === currentUserId && <span className="ml-2 text-xs font-medium text-mecg-orange-ink">You</span>}</p>
+                {person.position && <p className="mt-1 text-sm text-muted">{person.position}</p>}
+                {(person.major || person.gradTerm) && <p className="mt-2 text-xs text-muted">{[person.major, person.gradTerm].filter(Boolean).join(" · ")}</p>}
                 <div className="mt-3"><RolePills roles={person.roles} /></div>
                 {canManage && (isProfileIncomplete(person) || duplicateIds.has(person.id)) && <div className="mt-3 flex flex-wrap gap-2">{isProfileIncomplete(person) && <span className="text-xs font-semibold text-mecg-orange-ink">Profile incomplete</span>}{duplicateIds.has(person.id) && <span className="text-xs font-semibold text-warning">Possible duplicate account</span>}</div>}
               </button>

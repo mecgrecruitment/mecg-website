@@ -67,13 +67,13 @@ function PendingDecisionPanel({
       )}
       <MemberNotes notes={notes} />
       <details className="group">
-        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 text-[13px] font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 text-sm font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
           <span>Record a different outcome</span>
           <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-muted transition-transform group-open:rotate-180">
             <path d="M5 8l5 5 5-5" />
           </svg>
         </summary>
-        <div className="mt-2.5 flex flex-col gap-2 px-1">
+        <div className="mt-3 flex flex-col gap-2 px-1">
           <p className="text-xs leading-5 text-muted">For a waitlist or a procedural review, which the vote cannot produce.</p>
           <DecisionForm cycleId={cycleId} applicationId={applicationId} />
         </div>

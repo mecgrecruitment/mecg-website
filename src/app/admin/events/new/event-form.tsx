@@ -63,7 +63,7 @@ export default function EventForm({ cycleId }: { cycleId: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl p-5 inset-ring inset-ring-line">
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3">
         <FormField label="Name" name="name" type="text" required value={name} onChange={(event) => setName(event.target.value)} />
         <Select label="Kind" name="kind" value={kind} onChange={setKind}>{EVENT_KINDS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select>
         <Select label="Visibility" name="visibility" value={visibility} onChange={setVisibility}><option value="PUBLIC">Public (shows on /join)</option><option value="INVITE">Invite only</option><option value="INTERNAL">Internal / check-in only</option></Select>
