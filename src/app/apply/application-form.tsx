@@ -645,7 +645,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
     <div className="application-editor mt-6 grid gap-6 lg:grid-cols-[200px_minmax(0,720px)] lg:items-start lg:gap-8">
       <aside className="order-2 hidden lg:order-1 lg:sticky lg:top-8 lg:block">
         <div className="application-step-guide">
-          <p className="text-[13px] text-muted">{cycleName ?? "Current cycle"}</p>
+          <p className="text-sm text-muted">{cycleName ?? "Current cycle"}</p>
           <ol className={`mt-6 ${stepListClass}`} aria-label="Application progress">{stepItems}</ol>
           <div className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
             {saveState.kind === "saving" && <p aria-hidden="true">Saving changes...</p>}
@@ -660,7 +660,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
       <section onChangeCapture={handleApplicationChange} onBlurCapture={handleApplicationBlur} className="surface-card order-1 min-w-0 bg-white p-6 sm:p-8 lg:order-2">
         <div ref={mobileStepsRef} className="sticky top-0 z-10 -mx-6 -mt-6 mb-6 rounded-t-[28px] border-b border-line bg-white/95 px-6 pb-4 pt-5 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-4">
-            <button ref={mobileStepsToggleRef} type="button" onClick={() => setMobileStepsOpen((open) => !open)} aria-expanded={mobileStepsOpen} aria-controls="mobile-application-steps" className="-ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-[13px] font-semibold text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}<span className={`text-xs transition-transform ${mobileStepsOpen ? "rotate-180" : ""}`} aria-hidden="true">▾</span><span className="sr-only">, show all steps</span></button>
+            <button ref={mobileStepsToggleRef} type="button" onClick={() => setMobileStepsOpen((open) => !open)} aria-expanded={mobileStepsOpen} aria-controls="mobile-application-steps" className="-ml-2 inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-mecg-orange-ink">Step {currentIndex + 1} of {STEPS.length}<span className={`text-xs transition-transform ${mobileStepsOpen ? "rotate-180" : ""}`} aria-hidden="true">▾</span><span className="sr-only">, show all steps</span></button>
             <p className="text-xs font-semibold text-muted" aria-live="polite">
               {saveState.kind === "saving" ? "Saving…" : saveState.kind === "saved" ? "Saved" : saveState.kind === "error" ? "Could not sync" : draftDirty && localRecovery === "saved" ? "Saved in this tab" : STEPS[currentIndex].label}
             </p>
@@ -676,7 +676,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
         {draftDirty && localRecovery === "unavailable" && <p role="status" className="mb-5 rounded-xl bg-warning-wash p-4 text-sm leading-6 text-warning">Tab recovery is unavailable. Keep this page open until your changes are saved to your account.</p>}
         <fieldset disabled={submitting} className="m-0 min-w-0 border-0 p-0">
         <div key={step} className="step-seat" data-direction={stepDirection}>
-          <p className="hidden text-[13px] text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
+          <p className="hidden text-sm text-mecg-orange-ink lg:block">Step {currentIndex + 1} of {STEPS.length}</p>
           {step === "details" && <DetailsStep values={{ name, preferredName, phone, classYear, major, college, uniqname, gradTerm }} setters={{ setName, setPreferredName, setPhone, setClassYear, setMajor, setCollege, setUniqname, setGradTerm }} email={email} errors={errors} gradBaseYear={gradBaseYear} />}
           {step === "responses" && <ResponsesStep questions={questions} answers={answers} setAnswers={setAnswers} errors={errors} />}
           {step === "materials" && <MaterialsStep linkedinUrl={linkedinUrl} setLinkedinUrl={setLinkedinUrl} accessibilityNotes={accessibilityNotes} setAccessibilityNotes={setAccessibilityNotes} uploadState={uploadState} resumePath={resumePath} uploadResume={uploadResume} error={errors.resume} initialHasHeadshot={headshotReady} setHeadshotReady={setHeadshotReady} headshotError={errors.headshot} headshotSupported={headshotSupported} setHeadshotUploading={setHeadshotUploading} linkedinError={errors.linkedinUrl} accessibilityNotesError={errors.accessibilityNotes} />}
@@ -691,7 +691,7 @@ export default function ApplicationForm({ initialName, email, userId, cycleOpen,
 }
 
 function StepHeading({ children }: { children: React.ReactNode }) {
-  return <h2 id="application-step-heading" tabIndex={-1} className="mt-3 text-balance text-3xl font-semibold tracking-[-0.035em] outline-none">{children}</h2>;
+  return <h2 id="application-step-heading" tabIndex={-1} className="mt-3 text-balance text-3xl font-semibold tracking-display outline-none">{children}</h2>;
 }
 
 function DetailsStep({ values, setters, email, errors, gradBaseYear }: { values: Record<string, string>; setters: Record<string, (value: string) => void>; email: string; errors: Record<string, string>; gradBaseYear: number }) {
@@ -723,7 +723,7 @@ function ResponsesStep({ questions, answers, setAnswers, errors }: { questions: 
     else if (question.inputType === "select") control = <select {...common} className={selectClass}><option value="">Select an option</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select>;
     else control = <textarea {...common} maxLength={APPLICATION_FIELD_LIMITS.answer} rows={5} className={`${fieldClass} min-h-32 py-3 leading-6`} />;
     const words = countWords(value);
-    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="tabular text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-1.5 flex flex-wrap justify-between gap-2 text-xs text-muted"><span>{guidanceFor(question)}</span><span className={`tabular-nums ${question.maxWords && words > question.maxWords ? "font-semibold text-danger" : ""}`}>{question.maxWords ? `${words} / ${question.maxWords} words` : `${words} words`} · {APPLICATION_FIELD_LIMITS.answer - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
+    return <div key={question.key}><label htmlFor={id} className="flex gap-3"><span className="tabular text-xs text-mecg-orange-ink">{String(index + 1).padStart(2, "0")}</span><span className="text-lg font-semibold leading-6">{question.prompt}{question.required && <span className="ml-2 text-sm text-mecg-orange-ink">(required)</span>}</span></label>{control}<span id={guidanceId} className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted"><span>{guidanceFor(question)}</span><span className={`tabular-nums ${question.maxWords && words > question.maxWords ? "font-semibold text-danger" : ""}`}>{question.maxWords ? `${words} / ${question.maxWords} words` : `${words} words`} · {APPLICATION_FIELD_LIMITS.answer - value.length} characters remaining</span></span><FieldError id={errorId}>{errors[question.key]}</FieldError></div>;
   })}</div></>;
 }
 

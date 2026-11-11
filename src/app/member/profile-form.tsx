@@ -51,7 +51,7 @@ export default function ProfileForm({ initial, gradBaseYear }: { initial: Member
         void save(event.currentTarget);
       }}
     >
-      <p className="text-[13px] font-semibold text-muted">Your profile</p>
+      <p className="text-sm font-semibold text-muted">Your profile</p>
       <h3 className="mt-2 text-lg font-semibold">How you appear in the directory</h3>
       <p className="mt-1 text-sm leading-6 text-muted">Only your name is required. Nothing here is shown to applicants.</p>
       <fieldset disabled={pending} className="mt-4 min-w-0">
@@ -68,7 +68,7 @@ export default function ProfileForm({ initial, gradBaseYear }: { initial: Member
             rows={3}
             maxLength={1000}
             defaultValue={initial.bio}
-            className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+            className="mt-2 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
           />
         </label>
       </fieldset>

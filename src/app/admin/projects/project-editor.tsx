@@ -85,16 +85,16 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
             type="button"
             onClick={() => setSelectedId(project.id)}
             aria-current={project.id === selectedId ? "true" : undefined}
-            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-xs font-semibold ${project.id === selectedId ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}
+            className={`inline-flex min-h-10 items-center gap-2 rounded-full px-4 text-xs font-semibold ${project.id === selectedId ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}
           >
             {project.title}
-            {project.isPublic && <span className="text-[13px] opacity-70">Public</span>}
+            {project.isPublic && <span className="text-sm opacity-70">Public</span>}
           </button>
         ))}
         <button
           type="button"
           onClick={() => setSelectedId("")}
-          className={`inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold ${selectedId ? "text-muted inset-ring inset-ring-line-strong" : "bg-mecg-navy text-white"}`}
+          className={`inline-flex min-h-10 items-center rounded-full px-4 text-xs font-semibold ${selectedId ? "text-muted inset-ring inset-ring-line-strong" : "bg-mecg-navy text-white"}`}
         >
           + New project
         </button>
@@ -127,7 +127,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
           }, "Project saved.");
         }}
       >
-        <p className="text-[13px] font-semibold text-muted">
+        <p className="text-sm font-semibold text-muted">
           {editing.id ? "Edit project" : "New project"}
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -145,7 +145,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
                 name={name}
                 required={required}
                 defaultValue={value}
-                className="mt-1.5 min-h-11 w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                className="mt-2 min-h-11 w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
               />
             </label>
           ))}
@@ -156,7 +156,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
         ] as const).map(([name, label, value]) => (
           <label key={name} className="mt-3 block text-sm font-medium">
             {label}
-            <textarea name={name} rows={2} defaultValue={value} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
+            <textarea name={name} rows={2} defaultValue={value} className="mt-2 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
           </label>
         ))}
         {([
@@ -167,7 +167,7 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
         ] as const).map(([name, label, value]) => (
           <label key={name} className="mt-3 block text-sm font-medium">
             {label} <span className="font-normal text-muted">(one per line)</span>
-            <textarea name={name} rows={3} defaultValue={value.join("\n")} className="mt-1.5 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
+            <textarea name={name} rows={3} defaultValue={value.join("\n")} className="mt-2 w-full rounded-xl bg-white p-3 text-sm inset-ring inset-ring-line-strong outline-none" />
           </label>
         ))}
 
@@ -189,13 +189,13 @@ export default function ProjectEditor({ projects, staff }: { projects: ProjectRo
 
       {editing.id && (
         <div className="rounded-xl bg-paper p-5">
-          <p className="text-[13px] font-semibold text-muted">Staffing</p>
+          <p className="text-sm font-semibold text-muted">Staffing</p>
           <p className="mt-1 text-sm text-muted">Who worked on {editing.title}.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {staff.map((person) => {
               const checked = staffed.includes(person.id);
               return (
-                <label key={person.id} className={`inline-flex min-h-10 cursor-pointer items-center rounded-full px-3.5 text-xs font-semibold ${checked ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}>
+                <label key={person.id} className={`inline-flex min-h-10 cursor-pointer items-center rounded-full px-4 text-xs font-semibold ${checked ? "bg-mecg-navy text-white" : "text-muted inset-ring inset-ring-line-strong"}`}>
                   <input
                     type="checkbox"
                     className="sr-only"

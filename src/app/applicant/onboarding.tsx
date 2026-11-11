@@ -29,7 +29,7 @@ export default function ApplicantOnboarding({ items }: { items: ApplicantOnboard
     <section id="member-onboarding" className="scroll-mt-6 rounded-xl bg-white p-5 inset-ring inset-ring-line sm:p-6" aria-labelledby="onboarding-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-mecg-orange-ink">Accepted · Member onboarding</p>
+          <p className="text-sm font-semibold text-mecg-orange-ink">Accepted · Member onboarding</p>
           <h2 id="onboarding-title" className="mt-2 text-xl font-semibold">{done} of {items.length} steps complete</h2>
         </div>
         <span className="tabular text-sm font-semibold text-muted">{Math.round((done / items.length) * 100)}%</span>

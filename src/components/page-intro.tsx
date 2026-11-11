@@ -29,23 +29,23 @@ export default function PageIntro({
 }) {
   const blue = tone === "blue";
   return (
-    <section className={`px-6 sm:px-10 ${blue ? "bg-mecg-blue text-white" : "bg-public-ground text-public-ink"}`}>
+    <section className={`px-6 sm:px-10 ${blue ? "bg-mecg-blue text-white" : "bg-public-ground text-mecg-navy"}`}>
       <div className={`mx-auto max-w-6xl pt-12 sm:pt-16 ${overlap ? "pb-20 sm:pb-24" : "pb-10 sm:pb-14"} ${aside ? "grid gap-y-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-x-12" : ""}`}>
         <div>
-        {label ? <p className={`text-[13px] font-semibold ${blue ? "text-white" : "text-mecg-blue"}`}>{label}</p> : null}
+        {label ? <p className={`text-sm font-semibold ${blue ? "text-white" : "text-mecg-blue"}`}>{label}</p> : null}
         {poster ? (
           <div className={`relative ${label ? "mt-4" : ""} [container-type:inline-size]`}>
             <h1 id={titleId}>
-              <span className={`poster-word ${blue ? "text-mecg-orange" : "text-public-ink"}`} style={{ fontSize: `${Math.min(30, 235 / title.length)}cqi` }}>{title}</span>
+              <span className={`poster-word ${blue ? "text-mecg-orange" : "text-mecg-navy"}`} style={{ fontSize: `${Math.min(30, 235 / title.length)}cqi` }}>{title}</span>
             </h1>
             {posterMedia ? <div className="relative z-10 -mt-[3cqi] ml-auto w-[40cqi] lg:absolute lg:right-0 lg:top-[11cqi] lg:mt-0 lg:w-[23cqi]">{posterMedia}</div> : null}
           </div>
         ) : (
-          <h1 id={titleId} className={`${label ? "mt-3" : ""} max-w-4xl text-balance text-[clamp(40px,6vw,76px)] font-semibold leading-[1.02] tracking-[-0.04em]`}>
+          <h1 id={titleId} className={`${label ? "mt-3" : ""} max-w-4xl text-balance text-[clamp(40px,6vw,76px)] font-semibold leading-[1.02] tracking-display`}>
             {title}
           </h1>
         )}
-        {copy ? <p className={`mt-5 max-w-2xl text-pretty text-[17px] leading-7 ${blue ? "text-white" : "text-muted"}`}>{copy}</p> : null}
+        {copy ? <p className={`mt-5 max-w-2xl text-pretty text-lg leading-7 ${blue ? "text-white" : "text-muted"}`}>{copy}</p> : null}
         {children ? <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">{children}</div> : null}
         </div>
         {aside ? <div className="relative z-10 -mb-20 self-end lg:-mb-32">{aside}</div> : null}

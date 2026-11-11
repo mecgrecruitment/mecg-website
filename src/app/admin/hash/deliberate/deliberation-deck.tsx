@@ -68,7 +68,7 @@ function makeConfetti(): Confetti {
 function NotesList({ title, notes }: { title: string; notes: string[] }) {
   return (
     <div className="min-w-0 text-left">
-      <p className="text-[13px] font-semibold text-white/70">{title}</p>
+      <p className="text-sm font-semibold text-white/70">{title}</p>
       {notes.length ? (
         <ul className="mt-2 max-h-64 space-y-2 overflow-y-auto text-sm leading-6 text-white/70">
           {notes.map((note, noteIndex) => <li key={`${noteIndex}-${note}`}>&ldquo;{note}&rdquo;</li>)}
@@ -383,7 +383,7 @@ export default function DeliberationDeck({
     <main data-motion={motionEnabled ? "on" : "off"} className={`deck-root flex min-h-screen flex-col bg-mecg-navy p-6 text-white sm:p-10 ${phase?.kind === "stamped" ? "deck-screen-shake" : ""}`}>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-baseline gap-x-3">
-          <p className="text-[13px] font-semibold text-white/70">Discussion mode</p>
+          <p className="text-sm font-semibold text-white/70">Discussion mode</p>
           <p role="status" className="live-sync-status" data-dark>
             {liveSyncNotice(sync) === "reconnecting" && "Reconnecting…"}
             {liveSyncNotice(sync) === "session-ended" && <>Your session ended. <button type="button" onClick={() => window.location.reload()} className="min-h-11 underline underline-offset-2 hover:text-white">Reload</button> to keep the live tally.</>}
@@ -428,7 +428,7 @@ export default function DeliberationDeck({
           className="min-h-11 w-full rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 inset-ring inset-ring-white/15 focus:outline-none focus:inset-ring-white/40"
         />
         {matches.length > 0 && (
-          <ul className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-xl bg-public-ink inset-ring inset-ring-white/15">
+          <ul className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-xl bg-mecg-navy inset-ring inset-ring-white/15">
             {matches.map((candidate) => (
               <li key={candidate.id}>
                 <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => jump(candidate.id)} className="min-h-11 w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 hover:text-white">{candidate.name}</button>
@@ -472,12 +472,12 @@ export default function DeliberationDeck({
               {flagged && <span className="rounded-full bg-amber-300/20 px-3 py-1 text-sm font-semibold text-amber-200">Revisit</span>}
             </div>
             <p className="mt-2 text-sm font-semibold text-white sm:mt-3 sm:text-2xl">{[entry.classYear, entry.major].filter(Boolean).join(" · ")}</p>
-            <p className="mt-1 text-[13px] font-semibold text-white/70">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
+            <p className="mt-1 text-sm font-semibold text-white/70">{[entry.groupName, applicationStatusLabel(entry.status)].filter(Boolean).join(" · ")}</p>
           </div>
           </div>
           {/* Participation only. Which way the room is leaning stays off the wall until the stamp lands. */}
           <div className={`${PANEL} relative w-full`}>
-            <p className="text-[13px] font-semibold text-white/70">Room vote</p>
+            <p className="text-sm font-semibold text-white/70">Room vote</p>
             {outcome ? (
               <p className={`mt-1 text-4xl font-bold ${outcome === "REJECTED" ? "text-rose-300" : "text-emerald-300"}`}>{applicationStatusLabel(outcome)}</p>
             ) : (
@@ -498,7 +498,7 @@ export default function DeliberationDeck({
               </div></>}
             </div>
             {phase?.kind === "stamped" && <button ref={advanceButtonRef} type="button" onClick={advance} className="mt-3 min-h-11 rounded-sm px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30">Next unapplied applicant</button>}
-            {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-public-ink text-6xl font-bold" aria-hidden="true">…</div>}
+            {phase?.kind === "drumroll" && <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-mecg-navy text-6xl font-bold" aria-hidden="true">…</div>}
           </div>
           {!stageHash && (
             <>
@@ -518,7 +518,7 @@ export default function DeliberationDeck({
           )}
           <div className="grid w-full gap-4 sm:grid-cols-2">
             <div className={PANEL}>
-              <p className="text-[13px] font-semibold text-white/70">Group Case</p>
+              <p className="text-sm font-semibold text-white/70">Group Case</p>
               {groupCase?.mean != null ? (
                 <>
                   <p className="tabular mt-1 text-6xl font-bold">{groupCase.mean.toFixed(1)}<span className="ml-1 text-base font-normal text-white/70">/ 40</span></p>
@@ -526,7 +526,7 @@ export default function DeliberationDeck({
                   <p className="text-sm text-white/70">{graders(groupCase.count)}</p>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
                     {groupCase.criteria.map((criterion) => (
-                      <div key={criterion.name} title={criterion.name} className="rounded-lg bg-white/10 px-2 py-1.5">
+                      <div key={criterion.name} title={criterion.name} className="rounded-lg bg-white/10 px-2 py-2">
                         <p className="truncate text-white/70">{criterion.name.split(/\s+/)[0]}</p>
                         <p className="tabular font-semibold">{criterion.mean == null ? "—" : criterion.mean.toFixed(1)}</p>
                       </div>
@@ -536,7 +536,7 @@ export default function DeliberationDeck({
               ) : <p className="mt-3 text-2xl text-white/70">Not graded</p>}
             </div>
             <div className={PANEL}>
-              <p className="text-[13px] font-semibold text-white/70">Speed Dating</p>
+              <p className="text-sm font-semibold text-white/70">Speed Dating</p>
               {speedDating && speedDating.count > 0 ? (
                 <>
                   <p className="tabular mt-1 text-6xl font-bold">{speedDating.adjusted == null ? formatStars(null) : formatStars(speedDating.adjusted)}</p>
@@ -550,14 +550,14 @@ export default function DeliberationDeck({
             <NotesList title="Speed Dating notes" notes={speedDating?.notes ?? []} />
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-[13px] font-semibold text-white/70">Event observations</p>
+            <p className="text-sm font-semibold text-white/70">Event observations</p>
             {entry.impressions ? (
               <>
                 <p className="text-sm text-white/70">{entry.impressions.count} observation{entry.impressions.count === 1 ? "" : "s"}</p>
                 {entry.impressions.topTags.length > 0 && (
                   <div className="flex flex-wrap justify-center gap-2">
                     {entry.impressions.topTags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-white/70 inset-ring inset-ring-white/10">{tag}</span>
+                      <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 inset-ring inset-ring-white/10">{tag}</span>
                     ))}
                   </div>
                 )}
@@ -572,13 +572,13 @@ export default function DeliberationDeck({
             )}
           </div>
           {entry.decision && (
-            <span className="rounded-full bg-mecg-orange px-4 py-1.5 text-[13px] font-semibold text-mecg-navy">
+            <span className="rounded-full bg-mecg-orange px-4 py-2 text-sm font-semibold text-mecg-navy">
               {decisionOutcomeLabel(entry.decision.outcome)} · {decisionStatusLabel(entry.decision.status)}
             </span>
           )}
           {stampStatus && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-              <span className={`deck-stamp rounded-xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-[0.2em] sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-warning-edge" : "text-emerald-300 border-emerald-300"}`}>
+              <span className={`deck-stamp rounded-xl border-8 bg-mecg-navy/60 px-10 py-4 text-6xl font-black uppercase tracking-label sm:text-8xl ${stampStatus === "REJECTED" ? "text-rose-300 border-rose-300" : stampStatus === "UNSURE" ? "text-amber-300 border-warning-edge" : "text-emerald-300 border-emerald-300"}`}>
                 {stampStatus === "UNSURE" ? "UNSURE" : applicationStatusLabel(stampStatus).toUpperCase()}
               </span>
             </div>

@@ -50,7 +50,7 @@ function Step({ number, title, state, summary, open = state === "active", childr
           : number}
       </span>
       <div className="min-w-0">
-        <h2 className={`text-lg font-semibold tracking-[-0.01em] ${state === "active" ? "text-mecg-navy" : "text-muted"}`}>
+        <h2 className={`text-lg font-semibold tracking-heading ${state === "active" ? "text-mecg-navy" : "text-muted"}`}>
           <span className="sr-only">Step {number}{state === "done" ? ", done" : ""}: </span>{title}
         </h2>
         {summary && <div className="mt-1 text-sm text-muted">{summary}</div>}
@@ -246,7 +246,7 @@ export default function ScreeningControls({
             <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label="Reader workload">
             <table className="mt-3 w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-line text-[13px] text-muted">
+                <tr className="border-b border-line text-sm text-muted">
                   <th className="py-2 pr-4 font-semibold">Reader</th>
                   <th className="py-2 pr-4 font-semibold">Submitted</th>
                   <th className="w-1/2 py-2 pr-4 font-semibold"><span className="sr-only">Progress</span></th>

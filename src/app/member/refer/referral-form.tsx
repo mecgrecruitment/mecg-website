@@ -35,7 +35,7 @@ export default function ReferralForm({ cycleId }: { cycleId: string }) {
   if (sentName) {
     return (
       <div role="status" aria-live="polite" className="rounded-xl bg-success-wash p-5 text-success inset-ring inset-ring-success/15 sm:p-6">
-        <p className="text-[15px] font-semibold">Referral received</p>
+        <p className="text-base font-semibold">Referral received</p>
         <p className="mt-1 max-w-2xl text-sm leading-6 text-emerald-950/75">
           {sentName} is now waiting for Board review. You do not need to do anything else; their status appears below.
         </p>

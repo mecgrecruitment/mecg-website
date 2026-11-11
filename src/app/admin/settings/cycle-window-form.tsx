@@ -55,12 +55,12 @@ export default function CycleWindowForm({
 
   return (
     <section className="workspace-panel rounded-xl bg-paper p-5">
-      <p className="text-[13px] font-semibold text-muted">Application window</p>
+      <p className="text-sm font-semibold text-muted">Application window</p>
       <p className="mt-1 text-sm leading-6 text-muted">
         Times are entered and displayed in Detroit time. The public form also opens only once the cycle status is Applications open.
       </p>
       {locked ? (
-        <p className="mt-3 rounded-xl bg-white p-3.5 text-sm text-muted inset-ring inset-ring-line">
+        <p className="mt-3 rounded-xl bg-white p-4 text-sm text-muted inset-ring inset-ring-line">
           The application window is locked once the cycle moves into process. Current status: {cycleStatusLabel(cycleStatus)}.
         </p>
       ) : (

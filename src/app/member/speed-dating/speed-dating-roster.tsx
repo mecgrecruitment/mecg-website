@@ -297,7 +297,7 @@ export default function SpeedDatingRoster({ initial }: { initial: SpeedDatingRos
                 onInput={(event) => grow(event.currentTarget)}
                 onChange={(event) => editNote(applicationId, event.target.value)}
                 onBlur={() => flushNote(applicationId)}
-                className="min-h-11 w-full basis-full resize-none rounded-xl bg-wash px-4 py-2.5 text-sm text-mecg-navy inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60 sm:basis-auto sm:flex-1 lg:basis-64"
+                className="min-h-11 w-full basis-full resize-none rounded-xl bg-wash px-4 py-3 text-sm text-mecg-navy inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60 sm:basis-auto sm:flex-1 lg:basis-64"
               />
             </li>
           );

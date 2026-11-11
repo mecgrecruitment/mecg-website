@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Enforces the colour, radius and type tokens in docs/DESIGN.md §0.
-// `node scripts/design-tokens.mjs` lists off-system classes and exits 1 when any remain.
-// `node scripts/design-tokens.mjs --fix` rewrites every class that has a token equivalent.
+// Enforces the colour, radius, type and tracking tokens in docs/DESIGN.md §0, in TSX classes and CSS.
+// `node scripts/design-tokens.mjs` lists off-system values and exits 1 when any remain.
+// `node scripts/design-tokens.mjs --fix` rewrites every value that has a token equivalent.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +14,14 @@ const INSET_COLOURS = {
   '63,99,175': 'mecg-blue', '38,91,174': 'mecg-blue', '254,144,77': 'mecg-orange', '168,62,11': 'mecg-orange-ink',
 };
 const between = (lo, hi) => (s) => { const a = alpha(s); return a >= lo && a <= hi; };
+
+const SPACING_HALF_STEP = /^(-?)(p[xytrblse]?|m[xytrblse]?|gap(?:-[xy])?|space-[xy]|inset(?:-[xy])?|top|right|bottom|left|start|end|scroll-m[xytrbl]?|scroll-p[xytrbl]?)-([123])\.5$/;
+const SPACING_PX = new RegExp(SPACING_HALF_STEP.source.replace('-([123])\\.5$', '-\\[(\\d+)px\\]$'));
+// Off-rhythm spacing rounds up to the next 4px, so touch targets never shrink. 1px and 2px are hairline nudges.
+const onRhythm = (px) => (px <= 2 ? px : Math.ceil(px / 4) * 4);
+const TYPE_STEPS = { 12: 'xs', 14: 'sm', 16: 'base', 18: 'lg' };
+// Odd steps round up, so public text never drops below its 13px floor.
+const typeToken = (px) => `text-${TYPE_STEPS[Math.ceil(px / 2) * 2]}`;
 
 // Each rule: a utility pattern (variants excluded) and the token it becomes.
 // `to` receives the regex match and the variant prefix; returning null keeps the class.
@@ -56,15 +64,62 @@ export const RULES = [
   { why: 'status roles, not Tailwind shades', re: /^border-amber-300$/, to: () => 'border-warning-edge' },
   { why: 'panels are 12px; 16px was off the scale', re: /^rounded(-[trblse]{1,2})?-2xl$/, to: (m) => `rounded${m[1] ?? ''}-xl` },
   { why: 'nothing below 12px', re: /^text-\[(10|11|11\.5|12)px\]$/, to: () => 'text-xs' },
-  { why: 'half-pixel type steps', re: /^text-\[12\.5px\]$/, to: () => 'text-[13px]' },
-  { why: 'text-[14px] is text-sm', re: /^text-\[14px\]$/, to: () => 'text-sm' },
+  { why: 'nothing below 12px', re: /^text-\[0?\.(\d+)rem\]$/, to: (m) => (Number(`0.${m[1]}`) <= 0.75 ? 'text-xs' : null) },
+  { why: 'one type scale: 12, 14, 16, 18', re: /^text-\[(12\.5|13|14|15|16|17|18)px\]$/, to: (m) => typeToken(Number(m[1])) },
+  { why: 'one public ink', re: /^(text|bg|border|fill|stroke|decoration|from|to|via)-public-ink(\/[\d.[\]]+)?$/, to: (m) => `${m[1]}-mecg-navy${m[2] ?? ''}` },
+  { why: 'a 4px spacing rhythm; 0.5 is the one optical nudge', re: SPACING_HALF_STEP, to: (m) => `${m[1]}${m[2]}-${Number(m[3]) + 1}` },
+  { why: 'a 4px spacing rhythm; 0.5 is the one optical nudge', re: SPACING_PX, to: (m) => `${m[1]}${m[2]}-${onRhythm(Number(m[3])) / 4}` },
+  { why: 'three tracking steps', re: /^tracking-\[(-?[\d.]+)em\]$/, to: (m) => trackingToken(Number(m[1])) && `tracking-${trackingToken(Number(m[1]))}` },
 ];
+
+// Display headings tighten most, smaller headings a little, uppercase labels open up.
+function trackingToken(em) {
+  if (em <= -0.03) return 'display';
+  if (em < 0) return 'heading';
+  if (em >= 0.08) return 'label';
+  return null;
+}
 
 // Classes that have no token equivalent yet and should not grow. Reported, never rewritten.
 export const FLAGS = [
   { why: 'raw colour in an arbitrary value; add a token in globals.css', re: /^(?:bg|text|border|ring|fill|stroke|outline)-\[(?:#|rgb|hsl|oklch)/ },
   { why: 'raw rgba box-shadow; use inset-ring-line, inset-ring-line-strong or shadow-lift/pop', re: /^shadow-\[[^\]]*rgba?\(/ },
+  { why: 'off-scale tracking; use tracking-display, tracking-heading or tracking-label', re: /^tracking-\[/ },
 ];
+
+const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch)\(/;
+// Raw values are fine where a token is defined (`--name: value`). Alpha masks paint no colour.
+// Anything else needs `/* raw: why */` on the line.
+const CSS_EXEMPT = /^\s*--[\w-]+\s*:|^\s*(?:-webkit-)?mask(?:-image)?\s*:/;
+
+export function checkCss(source) {
+  const flags = [];
+  const out = source
+    .replace(/letter-spacing:\s*(-?[\d.]+)em/g, (whole, em) => {
+      const token = trackingToken(Number(em));
+      return token ? `letter-spacing: var(--tracking-${token})` : whole;
+    })
+    .replace(/font-size:\s*([\d.]+)(px|rem)(?=\s*[;}])/g, (whole, n, unit) => {
+      const px = unit === 'rem' ? Number(n) * 16 : Number(n);
+      return px >= 12 && px <= 18 ? `font-size: var(--${typeToken(px)})` : whole;
+    })
+    .replace(/((?:^|[\s;{])(?:padding|margin|gap|row-gap|column-gap)(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?:)([^;}]+)/g,
+      (whole, prop, value) => prop + value.replace(/(^|\s)(\d+)px\b/g, (_, sp, px) => `${sp}${onRhythm(Number(px))}px`))
+    .replace(/--color-public-ink\b/g, '--color-mecg-navy');
+  const changed = out !== source;
+  out.split('\n').forEach((line, i) => {
+    if (/\/\*\s*raw:/.test(line)) return;
+    const code = line.replace(/\/\*.*?\*\//g, '');
+    for (const decl of code.split(/[;{}]/)) {
+      if (CSS_EXEMPT.test(decl) || !RAW_COLOUR.test(decl)) continue;
+      flags.push({ line: i + 1, decl: decl.trim(), why: 'raw colour in a CSS rule; read a token with var() or add one in globals.css' });
+    }
+    if (/letter-spacing:\s*-?[\d.]+em/.test(code) && !/letter-spacing:\s*0?\.0[01]?em|letter-spacing:\s*0em/.test(code)) {
+      flags.push({ line: i + 1, decl: code.trim(), why: 'off-scale letter-spacing; use var(--tracking-*)' });
+    }
+  });
+  return { out, changed, flags };
+}
 
 const CLASS = /(?<=^|[\s"'`{])((?:[a-z0-9\-@[\]&_=.\/]+:)*)(-?[a-z][\w\-./[\]%(),#]*)(?=$|[\s"'`}])/gm;
 
@@ -89,7 +144,7 @@ function* walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) yield* walk(p);
-    else if (/\.tsx$/.test(e.name) && !/\.test\./.test(e.name)) yield p;
+    else if (/\.(tsx|css)$/.test(e.name) && !/\.test\./.test(e.name)) yield p;
   }
 }
 
@@ -101,8 +156,16 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const byWhy = new Map();
   for (const file of walk(path.join(root, 'src'))) {
     const source = fs.readFileSync(file, 'utf8');
-    const { out, changes, flags } = rewrite(source);
     const rel = path.relative(root, file);
+    if (file.endsWith('.css')) {
+      const { out, changed, flags } = checkCss(source);
+      if (fix && changed) fs.writeFileSync(file, out);
+      if (!fix && changed) { console.log(`${rel}: letter-spacing has a token equivalent`); pending++; }
+      for (const f of flags) console.log(`${rel}:${f.line}: ${f.decl.slice(0, 100)} (${f.why})`);
+      flagged += flags.length;
+      continue;
+    }
+    const { out, changes, flags } = rewrite(source);
     for (const c of changes) byWhy.set(c.why, (byWhy.get(c.why) ?? 0) + 1);
     if (fix && out !== source) fs.writeFileSync(file, out);
     if (!fix) for (const c of changes) console.log(`${rel}: ${c.from} → ${c.to} (${c.why})`);

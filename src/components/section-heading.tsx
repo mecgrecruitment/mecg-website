@@ -7,7 +7,7 @@ export default function SectionHeading({
 }: ComponentPropsWithoutRef<"h2">) {
   return (
     <h2
-      className={`text-balance text-3xl font-semibold tracking-[-0.035em] sm:text-4xl ${className}`}
+      className={`text-balance text-3xl font-semibold tracking-display sm:text-4xl ${className}`}
       {...props}
     >
       {children}

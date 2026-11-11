@@ -75,9 +75,9 @@ export function PreviewForm({ decisionId, cycleId, current }: { decisionId: stri
   }
 
   return (
-    <form className="flex flex-col gap-1.5" onSubmit={submit}>
+    <form className="flex flex-col gap-2" onSubmit={submit}>
       <label className="sr-only" htmlFor={`preview-${decisionId}`}>Applicant email preview</label>
-      <textarea id={`preview-${decisionId}`} name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-wash p-2.5 text-xs inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
+      <textarea id={`preview-${decisionId}`} name="preview" disabled={pending} defaultValue={current ?? ""} placeholder="Email preview. Release still requires two approvals." className="min-h-24 w-full rounded-xl bg-wash p-3 text-xs inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)] disabled:opacity-60" />
       <button type="submit" disabled={pending} className="button-secondary self-start text-xs">
         {pending ? "Saving…" : "Save preview"}
       </button>
@@ -354,7 +354,7 @@ function OfferDeadlineEditor({ applicationId, current }: { applicationId: string
           value={value}
           aria-describedby={`${fieldId}-result`}
           onChange={(event) => { setValue(event.target.value); setSuccess(""); setError(""); setEdited(true); }}
-          className="mt-1.5 block min-h-11 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
+          className="mt-2 block min-h-11 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)] disabled:opacity-60"
         />
       </label>
       <div className="flex flex-wrap gap-2">

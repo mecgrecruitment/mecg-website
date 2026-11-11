@@ -48,7 +48,7 @@ export default function AssistedCheckinForm({ eventId, locked }: { eventId: stri
 
   return (
     <section className="rounded-xl p-5 inset-ring inset-ring-line">
-      <p className="text-[13px] font-semibold text-muted">Staff-assisted applicant check-in</p>
+      <p className="text-sm font-semibold text-muted">Staff-assisted applicant check-in</p>
       <p className="mt-2 text-sm text-muted">
         Verify the applicant in person, then enter their exact applicant code, uniqname, or email. This records attendance only and never changes a score.
       </p>

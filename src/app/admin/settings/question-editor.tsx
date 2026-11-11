@@ -93,7 +93,7 @@ export default function QuestionEditor({
     <section className="workspace-panel rounded-xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-muted">Application questions</p>
+          <p className="text-sm font-semibold text-muted">Application questions</p>
           <p className="mt-1 max-w-2xl text-sm text-muted">
             These are the written prompts on the public application, in order.
           </p>
@@ -127,18 +127,18 @@ export default function QuestionEditor({
                     onChange={(event) => update(index, { prompt: event.target.value })}
                     rows={2}
                     maxLength={2000}
-                    className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                    className="mt-2 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
                   />
                 </label>
 
-                <div className="mt-2.5 flex flex-wrap items-end gap-3">
+                <div className="mt-3 flex flex-wrap items-end gap-3">
                   <label className="block text-sm font-medium">
                     Key
                     <input
                       value={question.key}
                       onChange={(event) => update(index, { key: event.target.value })}
                       aria-invalid={!KEY_PATTERN.test(question.key)}
-                      className="mt-1.5 min-h-11 w-48 rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
+                      className="mt-2 min-h-11 w-48 rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -149,7 +149,7 @@ export default function QuestionEditor({
                         const inputType = event.target.value as IntakeQuestion["inputType"];
                         update(index, { inputType, maxWords: inputType === "long_text" ? question.maxWords : null });
                       }}
-                      className="select-control mt-1.5 w-48 text-sm"
+                      className="select-control mt-2 w-48 text-sm"
                     >
                       {INPUT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                     </select>
@@ -167,7 +167,7 @@ export default function QuestionEditor({
                         max={2000}
                         value={question.maxWords ?? ""}
                         onChange={(event) => update(index, { maxWords: event.target.value ? Number(event.target.value) : null })}
-                        className="mt-1.5 min-h-11 w-32 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none"
+                        className="mt-2 min-h-11 w-32 rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none"
                       />
                     </label>
                   )}
@@ -182,7 +182,7 @@ export default function QuestionEditor({
                       })}
                       rows={4}
                       aria-invalid={question.options.length === 0}
-                      className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+                      className="mt-2 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
                     />
                   </label>
                 )}

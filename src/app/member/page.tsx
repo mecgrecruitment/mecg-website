@@ -264,10 +264,10 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <SectionLabel number="02">Your assignments</SectionLabel>
-            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.02em]">{assignmentHeading}</h2>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-heading">{assignmentHeading}</h2>
           </div>
         </div>
-        <div className="mt-3.5">
+        <div className="mt-4">
           <PillNav
             ariaLabel="Filter assignments by round"
             current={currentWorkspace}
@@ -278,7 +278,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
             ]}
           />
         </div>
-        <div className="mt-3.5 flex flex-col gap-4">
+        <div className="mt-4 flex flex-col gap-4">
           {unfinishedAssignments.map((assignment) => {
             const rubric = [...assignment.rounds.rubrics].sort((a, b) => b.version - a.version)[0];
             const submitted = isSubmitted(assignment);
@@ -305,10 +305,10 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-[13px] font-semibold text-mecg-orange-ink">{assignment.rounds.name}</p>
-                    <h3 id={`assignment-heading-${assignment.id}`} className="mt-1.5 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
+                    <p className="text-sm font-semibold text-mecg-orange-ink">{assignment.rounds.name}</p>
+                    <h3 id={`assignment-heading-${assignment.id}`} className="mt-2 text-lg font-semibold text-mecg-navy">{assignment.applications.pnms.name}</h3>
                   </div>
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ${ready ? "bg-mecg-orange/15 text-mecg-orange-ink" : "bg-wash text-muted"}`}>
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${ready ? "bg-mecg-orange/15 text-mecg-orange-ink" : "bg-wash text-muted"}`}>
                     {statusLabel}
                   </span>
                 </div>
@@ -320,7 +320,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
                   <p className="mt-3 text-sm text-muted">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>
                 ) : ready && rubric && calibrated && selected ? (
                   <details className="mt-3" open={selected}>
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-wash px-4 py-2.5 font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl bg-wash px-4 py-3 font-semibold text-mecg-navy inset-ring inset-ring-line marker:content-none">
                       <span>{selected ? "Continue evaluation" : "Open evaluation"}</span>
                       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="disclosure-chevron shrink-0 text-mecg-blue" aria-hidden="true">
                         <path d="M5 8l5 5 5-5" />
@@ -370,7 +370,7 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
       <aside className="member-work-secondary" aria-label="Activity and account">
         <h2>Submitted and locked</h2>
         {recentCompletions.length > 0 && <p className="mt-2 text-xs leading-5 text-muted">Your evaluation is locked. Contact the Board if you discover an error; submitted work must not be edited directly.</p>}
-        <div className="mt-3.5 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col gap-2">
           {recentCompletions.map((assignment) => (
             <div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-paper px-4 py-3">
               <div>

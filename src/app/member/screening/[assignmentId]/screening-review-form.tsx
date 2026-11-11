@@ -351,7 +351,7 @@ function ScreeningEditor({ assignmentId, criteria, cycleId }: Props) {
           const startsGroup = index === 0 || criteria[index - 1].key.startsWith("resume_") !== isResume;
           return (
             <Fragment key={criterion.id}>
-            {startsGroup && <p className="text-xs font-semibold uppercase tracking-[0.1em] text-mecg-orange-ink">{isResume ? "Resume" : "Essays"}</p>}
+            {startsGroup && <p className="text-xs font-semibold uppercase tracking-label text-mecg-orange-ink">{isResume ? "Resume" : "Essays"}</p>}
             <fieldset
               ref={(node) => { criterionRefs.current[criterion.id] = node; }}
               tabIndex={-1}

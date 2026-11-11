@@ -16,8 +16,8 @@ import { rankScreeningResults } from "./screening-result-groups";
 import { CLASS_YEAR_LABELS, type ClassYear } from "@/lib/workflow";
 
 const REVIEWER_ROLES = ["RECRUITMENT_COMMITTEE", "BOARD", "OWNER"];
-const TH = "px-4 py-3 text-[13px] font-semibold text-muted";
-const TD = "px-4 py-3 text-[13px] text-muted";
+const TH = "px-4 py-3 text-sm font-semibold text-muted";
+const TD = "px-4 py-3 text-sm text-muted";
 
 export default async function ScreeningAdminPage() {
   const user = await requireAdmin();
@@ -113,10 +113,10 @@ export default async function ScreeningAdminPage() {
                     <Fragment key={packet.id}>
                       <tr>
                         <td className="px-4 pt-3 font-mono text-xs text-mecg-navy">{packet.code}</td>
-                        <td className="px-4 pt-3 text-[13px] font-semibold text-mecg-navy">{packet.applicantName}</td>
+                        <td className="px-4 pt-3 text-sm font-semibold text-mecg-navy">{packet.applicantName}</td>
                         <td className="px-4 pt-3"><StatusPill tone={packet.status === "APPROVED" ? "neutral" : "orange"}>{statusLabel(packet.status)}</StatusPill></td>
                         <td className="px-4 pt-3">
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-2">
                             {(packet.assignments ?? []).map((assignment) => (
                               <StatusPill key={assignment.reviewerId} tone={["SUBMITTED", "LOCKED"].includes(assignment.status) ? "navy" : assignment.status === "RECUSED" ? "orange" : "neutral"}>
                                 {assignment.reviewerName} · {statusLabel(assignment.status)}
@@ -129,7 +129,7 @@ export default async function ScreeningAdminPage() {
                         <tr className="border-b border-line">
                           <td colSpan={4} className="px-4 pb-3 pt-1">
                             <details>
-                              <summary className="cursor-pointer text-[13px] font-semibold text-muted">Responses</summary>
+                              <summary className="cursor-pointer text-sm font-semibold text-muted">Responses</summary>
                               <div className="mt-3 space-y-4">{(packet.content?.responses ?? []).map((response, index) => <div key={`${packet.id}-${index}`}><h3 className="text-sm font-medium">{response.question}</h3><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-muted">{response.answer}</p></div>)}</div>
                             </details>
                           </td>
@@ -167,11 +167,11 @@ export default async function ScreeningAdminPage() {
                   {ranked.map((applicant) => (
                     <Fragment key={applicant.code}>
                       <tr className="border-b border-line">
-                        <td className="px-4 py-3 text-[13px] font-semibold tabular-nums text-mecg-navy">{applicant.rank}</td>
+                        <td className="px-4 py-3 text-sm font-semibold tabular-nums text-mecg-navy">{applicant.rank}</td>
                         <td className="px-4 py-3">
                           {applicant.applicantName
-                            ? <><span className="text-[13px] font-semibold text-mecg-navy">{applicant.applicantName}</span><span className="block font-mono text-xs text-muted">{applicant.code}</span></>
-                            : <span className="font-mono text-[13px] text-mecg-navy">{applicant.code}</span>}
+                            ? <><span className="text-sm font-semibold text-mecg-navy">{applicant.applicantName}</span><span className="block font-mono text-xs text-muted">{applicant.code}</span></>
+                            : <span className="font-mono text-sm text-mecg-navy">{applicant.code}</span>}
                         </td>
                         <td className={TD}>{applicant.classYear ? CLASS_YEAR_LABELS[applicant.classYear as ClassYear] ?? applicant.classYear : ""}</td>
                         <td className={TD}>{applicant.major ?? ""}</td>
@@ -184,20 +184,20 @@ export default async function ScreeningAdminPage() {
                             </td>
                           );
                         })}
-                        <td className="px-4 py-3 text-[13px] font-semibold tabular-nums text-mecg-navy">{applicant.averageScore.toFixed(1)}</td>
+                        <td className="px-4 py-3 text-sm font-semibold tabular-nums text-mecg-navy">{applicant.averageScore.toFixed(1)}</td>
                         <td className={`${TD} tabular-nums`}>{applicant.zScore === null ? "\u2013" : applicant.zScore.toFixed(2)}</td>
                         <td className={`${TD} tabular-nums`}>{Object.entries(applicant.recommendationCounts).map(([recommendation, count]) => `${count}${recommendation[0]}`).join(" ")}</td>
                       </tr>
                       <tr className="border-b border-line">
                         <td colSpan={8 + reviewerSlots} className="px-4 py-2">
                           <details>
-                            <summary className="cursor-pointer text-[13px] font-semibold text-muted">Notes</summary>
+                            <summary className="cursor-pointer text-sm font-semibold text-muted">Notes</summary>
                             <div className="mt-3 space-y-4">
                               {applicant.reviews.map((review, index) => (
                                 <div key={review.reviewerId ?? index}>
-                                  <p className="text-[13px] font-semibold text-mecg-navy">{review.reviewerName ?? `Reviewer ${index + 1}`} · {statusLabel(review.recommendation)}</p>
+                                  <p className="text-sm font-semibold text-mecg-navy">{review.reviewerName ?? `Reviewer ${index + 1}`} · {statusLabel(review.recommendation)}</p>
                                   {review.evidence && <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-muted">{review.evidence}</p>}
-                                  <p className="mt-1 text-[13px] text-muted">
+                                  <p className="mt-1 text-sm text-muted">
                                     {review.ratings.map((rating) => `${rating.name} ${rating.score}${rating.note ? ` (${rating.note})` : ""}`).join(" \u00b7 ")}
                                   </p>
                                 </div>

@@ -22,8 +22,8 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
       <nav aria-label="Review context" className="workspace-focus-context"><Link href={withWorkspaceCycle("/member/screening", cycleId)}>Reading queue</Link>{cycleName && <span>{cycleName}</span>}<span aria-hidden="true">/</span><span className="tabular">{detail.candidateCode}</span></nav>
       <header className="workspace-page-header flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em]">Candidate <span className="tabular">{detail.candidateCode}</span></h1>
-          <p className="mt-1.5 text-[15px] text-muted">Read every response before scoring. Use only the submitted material; do not attempt to identify the applicant. The resume is context only and is not scored.</p>
+          <h1 className="mt-2 text-[28px] font-semibold tracking-display">Candidate <span className="tabular">{detail.candidateCode}</span></h1>
+          <p className="mt-2 text-base text-muted">Read every response before scoring. Use only the submitted material; do not attempt to identify the applicant. The resume is context only and is not scored.</p>
         </div>
       </header>
       {progress && (
@@ -60,7 +60,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
                     />
                     <div className="border-t border-line bg-wash p-2 text-center">
                       <a
-                        className="text-[13px] font-semibold text-mecg-orange-ink"
+                        className="text-sm font-semibold text-mecg-orange-ink"
                         href={`/api/member/screening/${assignmentId}/resume`}
                         target="_blank"
                         rel="noreferrer"
@@ -81,7 +81,7 @@ export default async function ScreeningAssignmentPage({ params }: { params: Prom
           <section>
             <h2 className="text-lg font-semibold">Your review</h2>
             <p className="mt-1 text-sm text-muted">Private to you. Apply the same rubric to every application.</p>
-            <div className="mt-3.5"><ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} cycleId={cycleId ?? undefined} /></div>
+            <div className="mt-4"><ScreeningReviewForm assignmentId={assignmentId} criteria={detail.criteria} cycleId={cycleId ?? undefined} /></div>
           </section>
         )}
       />

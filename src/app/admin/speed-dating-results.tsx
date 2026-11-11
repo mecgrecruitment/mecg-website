@@ -81,8 +81,8 @@ export function useLiveRefresh() {
   return secondsAgo;
 }
 
-const HEAD = "px-4 py-3 text-[13px] font-semibold text-muted";
-const CELL = "px-4 py-3 text-[13px] text-muted";
+const HEAD = "px-4 py-3 text-sm font-semibold text-muted";
+const CELL = "px-4 py-3 text-sm text-muted";
 const CHIP = "inline-flex min-h-8 items-center rounded-full px-3 text-xs font-semibold transition";
 
 function SortHeader<Key extends string>({ label, sortKey, active, direction, onSort }: { label: string; sortKey: Key; active: boolean; direction: Direction; onSort: (key: Key) => void }) {
@@ -202,7 +202,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                   <tr key={applicant.applicationId} className={`border-b border-line bg-white align-top ${ungraded ? "opacity-60" : ""}`}>
                     <td className={`${CELL} tabular`}>{ungraded ? "—" : rank}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/applications/${applicant.applicationId}`} className="flex items-center gap-2.5 text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">
+                      <Link href={`/admin/applications/${applicant.applicationId}`} className="flex items-center gap-3 text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">
                         {failedHeadshots.has(applicant.applicationId)
                           ? <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-wash text-xs text-muted" aria-hidden="true">{initials(applicant.name)}</span>
                           // eslint-disable-next-line @next/next/no-img-element -- authorized same-origin route
@@ -233,7 +233,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
                     <td className="px-4 py-3">
                       {scores.length > 0 && (
                         <>
-                          <button type="button" aria-expanded={open} onClick={() => toggleExpanded(applicant.applicationId)} className="text-[13px] font-semibold text-mecg-navy hover:text-mecg-orange-ink">
+                          <button type="button" aria-expanded={open} onClick={() => toggleExpanded(applicant.applicationId)} className="text-sm font-semibold text-mecg-navy hover:text-mecg-orange-ink">
                             {open ? "Hide" : "Scores"}
                           </button>
                           {open && (
@@ -263,7 +263,7 @@ export default function SpeedDatingResultsTable({ results, canViewNotes, canExpo
         </div>
       </div>
 
-      <h3 className="mt-8 text-[15px] font-semibold text-mecg-navy">Graders</h3>
+      <h3 className="mt-8 text-base font-semibold text-mecg-navy">Graders</h3>
       <div className="scroll-cue -mx-4 mt-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={`${results.roundName} graders`}>
         <div className="min-w-[36rem] overflow-hidden rounded-xl inset-ring inset-ring-line">
           <table className="w-full text-left text-sm">

@@ -121,7 +121,7 @@ export default function InterestForm() {
         <button type="submit" disabled={pending} className="button-primary disabled:cursor-wait disabled:opacity-60">
           {pending ? "Saving…" : "Join the interest list"}
         </button>
-        <p className="text-xs leading-5 text-white/70">Updates only. Joining this list is not an application.</p>
+        <p className="text-sm leading-5 text-white/70">Updates only. Joining this list is not an application.</p>
       </div>
       <p role={isError ? "alert" : "status"} className={`min-h-5 text-sm sm:col-span-2 ${isError ? "text-mecg-orange" : "text-white/70"}`}>{message}</p>
     </form>

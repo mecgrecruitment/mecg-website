@@ -53,7 +53,7 @@ export default function HeadshotUpload() {
         />
         Add or replace your photo
       </label>
-      <p className="mt-1.5 text-xs text-muted">
+      <p className="mt-2 text-xs text-muted">
         A clear photo of your face, taken with your phone is fine. It is resized in your browser and is never shown in anonymous review.
       </p>
       {state.kind === "working" && <p role="status" className="mt-2 text-sm text-muted">Uploading your photo…</p>}

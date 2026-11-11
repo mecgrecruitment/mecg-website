@@ -57,7 +57,7 @@ export default async function JoinPage() {
         <div className="relative aspect-square overflow-hidden rounded-xl shadow-lift"><Image src={JOIN_PHOTOS[4].src} alt={JOIN_PHOTOS[4].alt} fill sizes="280px" className="object-cover object-[60%_50%]" /></div>
       }>
         <Link href={action.href} className="button-primary">{action.label} <span aria-hidden="true">→</span></Link>
-        <Link href="#how-we-evaluate" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-white underline-offset-4 hover:underline">How we evaluate <span aria-hidden="true">↓</span></Link>
+        <Link href="#how-we-evaluate" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-white underline-offset-4 hover:underline">How we evaluate <span aria-hidden="true">↓</span></Link>
       </PageIntro>
 
       <section className="px-6 sm:px-10" aria-label="Recruitment status">
@@ -65,17 +65,17 @@ export default async function JoinPage() {
           <div>
             <h2 className={unavailable ? "text-xl font-semibold" : "text-2xl font-semibold"}>{unavailable ? "This cycle’s dates" : status?.label ?? "Recruitment dates are not available"}</h2>
             <p className="mt-2 leading-7 text-muted">{unavailable ? "We couldn’t load this cycle’s dates." : status?.detail ?? "Email the Board about the next recruitment cycle, or check back for published dates."}</p>
-            {unavailable && <div className="mt-3 flex flex-wrap items-center gap-x-4"><a href="/join" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Reload dates</a><a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 flex-wrap items-center gap-x-1.5 font-semibold"><span className="underline underline-offset-4">Email the Board</span> <span className="whitespace-nowrap font-normal text-muted">(mecg-board@umich.edu)</span></a></div>}
+            {unavailable && <div className="mt-3 flex flex-wrap items-center gap-x-4"><a href="/join" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Reload dates</a><a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 flex-wrap items-center gap-x-2 font-semibold"><span className="underline underline-offset-4">Email the Board</span> <span className="whitespace-nowrap font-normal text-muted">(mecg-board@umich.edu)</span></a></div>}
             {upcomingCycle?.opensAt ? <ApplicationCountdown opensAt={upcomingCycle.opensAt} /> : null}
           </div>
-          {recruitment.cycle?.name ? <p className="shrink-0 text-[15px] font-semibold text-mecg-blue">{recruitment.cycle.name}</p> : null}
+          {recruitment.cycle?.name ? <p className="shrink-0 text-base font-semibold text-mecg-blue">{recruitment.cycle.name}</p> : null}
         </div></div>
       </section>
 
       {unavailable ? null : (
       <MarketingSection aria-labelledby="timeline-title">
           <SectionHeading id="timeline-title">Recruitment timeline</SectionHeading>
-          <div className="relative mt-8 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-px before:bg-mecg-navy/12">
+          <div className="relative mt-8 before:absolute before:bottom-6 before:left-4 before:top-6 before:w-px before:bg-mecg-navy/12">
             {events.length === 0 ? (
               <p className="border-y border-line py-6 pl-12 leading-7 text-muted">{recruitment.cycle ? "No event dates are published for this cycle yet. " : "No recruitment cycle is currently published. "}{showInterestForm ? "Join the interest list for date announcements." : "Email mecg-board@umich.edu for recruitment questions."}</p>
             ) : events.map((event, index) => (
@@ -84,13 +84,13 @@ export default async function JoinPage() {
                 className="recruitment-event relative grid gap-3 border-t border-line py-6 pl-12 last:border-b md:grid-cols-[15rem_1fr_auto] md:items-center"
                 style={{ "--event-index": index } as CSSProperties}
               >
-                <span className="absolute left-0 top-6 grid size-8 place-items-center rounded-full bg-mecg-navy text-[13px] font-semibold tabular-nums text-white ring-4 ring-white" aria-hidden="true">
+                <span className="absolute left-0 top-6 grid size-8 place-items-center rounded-full bg-mecg-navy text-sm font-semibold tabular-nums text-white ring-4 ring-white" aria-hidden="true">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <p className="text-[15px] font-semibold leading-6 text-mecg-blue">{formatRecruitmentEventTime(event.startsAt, event.endsAt)}</p>
+                <p className="text-base font-semibold leading-6 text-mecg-blue">{formatRecruitmentEventTime(event.startsAt, event.endsAt)}</p>
                 <div>
                   <h3 className="text-lg font-semibold">{event.name}</h3>
-                  <p className="mt-1 text-[15px] text-muted">{event.location ?? "Location shared closer to the event"}</p>
+                  <p className="mt-1 text-base text-muted">{event.location ?? "Location shared closer to the event"}</p>
                 </div>
                 <a href={`/api/events/${event.id}/ics`} className="inline-flex min-h-11 items-center font-semibold text-mecg-blue">Add to calendar <span className="ml-2" aria-hidden="true">↓</span></a>
               </article>
@@ -121,20 +121,20 @@ export default async function JoinPage() {
           <ol className="border-t border-line">
             {RECRUITMENT_STEPS.map((step) => (
               <li key={step.number} className="grid grid-cols-[2rem_1fr] gap-4 border-b border-line py-5">
-                <span className="pt-1 text-[15px] font-semibold tabular-nums text-mecg-blue">{step.number}</span>
-                <div><h3 className="text-xl font-semibold">{step.title}</h3><p className="mt-1 text-[15px] font-medium text-mecg-blue">{step.eyebrow}</p><p className="mt-3 leading-7 text-muted">{step.copy}</p></div>
+                <span className="pt-1 text-base font-semibold tabular-nums text-mecg-blue">{step.number}</span>
+                <div><h3 className="text-xl font-semibold">{step.title}</h3><p className="mt-1 text-base font-medium text-mecg-blue">{step.eyebrow}</p><p className="mt-3 leading-7 text-muted">{step.copy}</p></div>
               </li>
             ))}
           </ol>
         </div>
         <figure className="relative mt-14">
           <div className="relative aspect-[16/9] overflow-hidden rounded-xl sm:aspect-[21/9]"><Image src={JOIN_PHOTOS[3].src} alt={JOIN_PHOTOS[3].alt} fill sizes="(min-width:1152px) 1152px, 100vw" className="object-cover object-[50%_35%]" /></div>
-          <figcaption className="absolute right-3 top-3 rounded-md bg-public-ink/75 px-2.5 py-1 text-[13px] text-white">Dressed up for a chapter formal.</figcaption>
+          <figcaption className="absolute right-3 top-3 rounded-md bg-mecg-navy/75 px-3 py-1 text-sm text-white">Dressed up for a chapter formal.</figcaption>
         </figure>
         <div className="public-lit relative mx-3 -mt-24 rounded-xl p-6 shadow-lift sm:mx-8 sm:-mt-32 sm:p-8 lg:max-w-3xl">
           <h3 className="display-face text-[28px]">What we look for</h3>
           <dl className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            {EVALUATION_TRAITS.map(([title, copy]) => <div key={title}><dt className="font-semibold">{title}</dt><dd className="mt-1 text-[15px] leading-6 text-white">{copy}</dd></div>)}
+            {EVALUATION_TRAITS.map(([title, copy]) => <div key={title}><dt className="font-semibold">{title}</dt><dd className="mt-1 text-base leading-6 text-white">{copy}</dd></div>)}
           </dl>
         </div>
       </MarketingSection>

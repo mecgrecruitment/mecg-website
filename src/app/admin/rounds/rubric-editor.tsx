@@ -94,7 +94,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
     <section className="rounded-xl bg-paper p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold text-muted">
+          <p className="text-sm font-semibold text-muted">
             {round.roundName} scoring guide
           </p>
           <p className="mt-1 text-sm text-muted">
@@ -137,7 +137,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                     value={item.name}
                     onChange={(event) => update(index, { name: event.target.value })}
                     maxLength={120}
-                    className="mt-1.5 min-h-11 w-full aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+                    className="mt-2 min-h-11 w-full aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
                   />
                 </label>
                 {nameError && <p id={`${id}-name-error`} className="mt-2 text-sm text-danger">{nameError}</p>}
@@ -148,11 +148,11 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                     onChange={(event) => update(index, { description: event.target.value })}
                     rows={2}
                     maxLength={2000}
-                    className="mt-1.5 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
+                    className="mt-2 w-full rounded-xl bg-wash p-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
                   />
                 </label>
 
-                <div className="mt-2.5 flex flex-wrap items-end gap-3">
+                <div className="mt-3 flex flex-wrap items-end gap-3">
                   <label className="block text-sm font-medium">
                     Key
                     <input
@@ -162,7 +162,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       id={`${id}-key`}
                       aria-invalid={!!keyError}
                       aria-describedby={keyError ? `${id}-key-error` : undefined}
-                      className="mt-1.5 block min-h-11 w-44 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
+                      className="mt-2 block min-h-11 w-44 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 tabular text-xs inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
                   <label className="block text-sm font-medium">
@@ -176,7 +176,7 @@ export default function RubricEditor({ round }: { round: RoundRubric }) {
                       aria-describedby={weightError ? `${id}-weight-error` : undefined}
                       value={item.weight}
                       onChange={(event) => update(index, { weight: Number(event.target.value) })}
-                      className="mt-1.5 block min-h-11 w-24 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm tabular-nums inset-ring inset-ring-line-strong outline-none"
+                      className="mt-2 block min-h-11 w-24 aria-invalid:bg-danger-wash aria-invalid:inset-ring-danger rounded-xl bg-wash px-3 text-sm tabular-nums inset-ring inset-ring-line-strong outline-none"
                     />
                   </label>
                   <span className="pb-3 tabular text-xs text-muted">

@@ -49,7 +49,7 @@ function ApplicantNotes({ notes, dark }: { notes: Note[] | undefined; dark?: boo
         const matching = notes.filter((note) => note.source === source);
         return (
           <div key={source} className="min-w-0">
-            <p className={`text-[13px] font-semibold ${heading}`}>{label}</p>
+            <p className={`text-sm font-semibold ${heading}`}>{label}</p>
             {matching.length ? (
               <ul className={`mt-1 space-y-1 text-sm leading-6 ${body}`}>
                 {matching.map((note, noteIndex) => <li key={`${noteIndex}-${note.note}`}>&ldquo;{note.note}&rdquo;</li>)}
@@ -128,7 +128,7 @@ function BallotRow({ id, name, meta, row, rowStatus, stamped, dark, rowRef, onCa
         onInput={(event) => grow(event.currentTarget)}
         onChange={(event) => onEditNote(id, event.target.value)}
         onBlur={() => onFlushNote(id)}
-        className={`min-h-11 w-full basis-full resize-none rounded-xl px-4 py-2.5 text-sm outline-none ${
+        className={`min-h-11 w-full basis-full resize-none rounded-xl px-4 py-3 text-sm outline-none ${
           dark
             ? "bg-white/10 text-white placeholder:text-white/40 inset-ring inset-ring-white/20 focus:inset-ring-2 focus:inset-ring-white/40"
             : "bg-wash text-mecg-navy inset-ring inset-ring-line-strong focus:shadow-[inset_0_0_0_2px_var(--color-mecg-navy)]"
@@ -363,7 +363,7 @@ export default function HashBallot({ applicants, votes, presentingId, cycleId }:
                 onError={() => setFailedHeadshots((current) => new Set(current).add(presenting.id))}
               />
             )}
-            <p className="text-[13px] font-semibold text-white/70">Now presenting</p>
+            <p className="text-sm font-semibold text-white/70">Now presenting</p>
           </div>
           <div className="mt-4">
             {onBallot ? (
@@ -372,7 +372,7 @@ export default function HashBallot({ applicants, votes, presentingId, cycleId }:
               <div>
                 <p className="font-semibold text-white">{presenting.name}</p>
                 {presenting.meta && <p className="text-xs text-white/70">{presenting.meta}</p>}
-                <p className="mt-2 inline-block rounded-full bg-mecg-orange px-3 py-1 text-[13px] font-semibold text-mecg-navy">{"decided" in presenting && presenting.decided ? `Board decided: ${presenting.decided}` : "Not on your ballot"}</p>
+                <p className="mt-2 inline-block rounded-full bg-mecg-orange px-3 py-1 text-sm font-semibold text-mecg-navy">{"decided" in presenting && presenting.decided ? `Board decided: ${presenting.decided}` : "Not on your ballot"}</p>
               </div>
             )}
           </div>

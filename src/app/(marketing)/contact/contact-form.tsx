@@ -92,7 +92,7 @@ export default function ContactForm({ initialSubject = "", initialMessage = "" }
       <label htmlFor={messageId} className="mt-5 block text-sm font-medium">Message</label><textarea id={messageId} name="message" aria-invalid={!!errors.message} aria-describedby={`${messageId}-help${errors.message ? ` ${messageId}-error` : ""}`} required minLength={10} maxLength={5000} rows={5} defaultValue={initialMessage} className={textareaClass} />
       <p id={`${messageId}-help`} className="mt-2 text-sm leading-6 text-muted">For a project, describe the decision, your timing, and who will use the work. Mention any confidentiality needs. For recruitment, tell us what you need help with.</p>
       {errors.message && <p id={`${messageId}-error`} className="mt-2 text-sm text-danger">{errors.message}</p>}
-      <label className="absolute -left-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+      <label className="absolute -left-2500 top-auto size-px overflow-hidden" aria-hidden="true">Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
       </fieldset>
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <button type="submit" disabled={status === "sending"} className="button-primary">{status === "sending" ? "Sending…" : "Send message"}</button>

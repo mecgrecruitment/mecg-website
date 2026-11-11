@@ -58,7 +58,7 @@ export default function SiteHeader() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-public-rule bg-public-ground/95 px-6 text-public-ink backdrop-blur-sm sm:px-10"
+      className="sticky top-0 z-50 border-b border-public-rule bg-public-ground/95 px-6 text-mecg-navy backdrop-blur-sm sm:px-10"
       onKeyDown={(event) => {
         if (event.key === "Escape" && open) {
           setOpen(false);
@@ -76,7 +76,7 @@ export default function SiteHeader() {
               key={href}
               href={href}
               aria-current={(pathname === href || pathname.startsWith(`${href}/`)) ? "page" : undefined}
-              className={`inline-flex min-h-11 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "border-mecg-orange text-public-ink" : "border-transparent text-muted hover:border-public-edge hover:text-mecg-blue"}`}
+              className={`inline-flex min-h-11 items-center border-b transition-[border-color,color,transform] duration-150 active:scale-96 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "border-mecg-orange text-mecg-navy" : "border-transparent text-muted hover:border-public-edge hover:text-mecg-blue"}`}
             >
               {label}
             </Link>
@@ -104,12 +104,12 @@ export default function SiteHeader() {
                 href={href}
                 aria-current={(pathname === href || pathname.startsWith(`${href}/`)) ? "page" : undefined}
                 onClick={() => setOpen(false)}
-                className={`border-b border-public-rule py-4 text-lg transition-[color,transform] duration-150 active:translate-x-0.5 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "font-semibold text-mecg-blue" : "text-public-ink"}`}
+                className={`border-b border-public-rule py-4 text-lg transition-[color,transform] duration-150 active:translate-x-0.5 ${(pathname === href || pathname.startsWith(`${href}/`)) ? "font-semibold text-mecg-blue" : "text-mecg-navy"}`}
               >
                 {label}
               </Link>
             ))}
-            <AuthControl className="border-b border-public-rule py-4 text-left text-lg text-public-ink" onNavigate={() => setOpen(false)} />
+            <AuthControl className="border-b border-public-rule py-4 text-left text-lg text-mecg-navy" onNavigate={() => setOpen(false)} />
             <PrimaryAction className="button-primary mt-5 text-center" onNavigate={() => setOpen(false)} />
           </div>
         </nav>

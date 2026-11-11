@@ -72,7 +72,7 @@ export default function PipelineStatusForm({
 
   return (
     <form className="mt-1 flex w-full flex-col items-start gap-2" onSubmit={submit}>
-      <div className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 ${compact ? "" : "sm:w-auto sm:grid-cols-[10rem_auto]"}`}>
+      <div className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 ${compact ? "" : "sm:w-auto sm:grid-cols-[10rem_auto]"}`}>
         <label className="sr-only" htmlFor={`status-${controlId ?? applicationId}`}>
           Application status
         </label>
@@ -94,7 +94,7 @@ export default function PipelineStatusForm({
         <button
           type="submit"
           disabled={busy}
-          className="operation-control rounded-md px-2.5 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="operation-control rounded-md px-3 text-xs font-semibold text-mecg-navy inset-ring inset-ring-line-strong hover:bg-mecg-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? "Moving…" : "Move"}
         </button>
