@@ -39,6 +39,10 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   assert.equal(pageResponse.status, 307);
   assert.equal(pageResponse.headers.get("location"), "http://localhost/login");
 
+  const benefitsResponse = await handleProxy(signedOut, request("/member/benefits"));
+  assert.equal(benefitsResponse.status, 307);
+  assert.equal(benefitsResponse.headers.get("location"), "http://localhost/login");
+
   for (const pathname of ["/api/member/profile", "/api/applicant/buddy", "/api/apply/resume/start"]) {
     const response = await handleProxy(signedOut, request(pathname));
     assert.equal(response.status, 401, pathname);

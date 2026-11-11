@@ -98,9 +98,9 @@ export default async function WorkspaceNav({
         cycle={user.memberships.find((membership) => membership.cycleId === cycleId)?.cycle.name ?? "Current cycle"}
         account={user.name}
         groups={[
-          { label: "My work", links: scoped([...primary.filter(([href]) => href === "/member"), ...myTools.filter(([href]) => href !== "/admin/people" && href !== "/member/refer")]) },
+          { label: "My work", links: scoped([...primary.filter(([href]) => href === "/member"), ...myTools.filter(([href]) => href !== "/admin/people" && href !== "/member/refer" && href !== "/member/benefits")]) },
           { label: "Recruitment", links: scoped(primary.filter(([href]) => href !== "/member")) },
-          { label: "Community", links: scoped(myTools.filter(([href]) => href === "/admin/people" || href === "/member/refer")) },
+          { label: "Community", links: scoped(myTools.filter(([href]) => href === "/admin/people" || href === "/member/refer" || href === "/member/benefits")) },
           { label: "Administration", links: scoped(adminTools) },
         ]}
         switcher={cycles.length > 1 ? <WorkspaceCycleSwitcher cycleId={cycleId} cycles={cycles} /> : undefined}
