@@ -1,0 +1,11 @@
+create role anon;
+create role authenticated;
+create schema rush;
+create type rush.member_role as enum ('MEMBER','BOARD','PANEL','OWNER','RECRUITMENT_COMMITTEE');
+create table rush.rush_cycles(id text primary key);
+create table rush.profiles(id uuid primary key, active boolean default true, display_name text default 'Synthetic member');
+create table rush.memberships(cycle_id text, user_id uuid, role rush.member_role, active boolean default true);
+create table rush.audit_events(actor_id uuid,cycle_id text,action text,resource text,resource_id text,metadata jsonb);
+create function rush.actor_id() returns uuid language sql stable as $$select nullif(current_setting('test.actor',true),'')::uuid$$;
+create function rush.has_cycle_role(c text,roles rush.member_role[]) returns boolean language sql stable security definer as $$select exists(select 1 from rush.memberships m join rush.profiles p on p.id=m.user_id where m.cycle_id=c and m.user_id=rush.actor_id() and m.active and p.active and m.role=any(roles))$$;
+grant usage on schema rush to authenticated,anon;

@@ -2498,6 +2498,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      member_tool_workspace: { Args: { c: string; k: string }; Returns: Json }
+      save_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
+      review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
+      set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
+
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }
         Returns: boolean

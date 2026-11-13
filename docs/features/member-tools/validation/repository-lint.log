@@ -1,0 +1,23 @@
+
+> mecgwebsite@0.1.0 lint
+> eslint && node scripts/design-tokens.mjs
+
+
+/home/rahil/mecg-website/output/brand-kit-v2/source/build-deck.mjs
+   2:8   warning  'path' is defined but never used   @typescript-eslint/no-unused-vars
+  16:22  warning  'label' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/rahil/mecg-website/output/brand-kit-v2/source/verify-editor.cjs
+  1:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  1:87  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/home/rahil/mecg-website/output/brand-kit/source/build-deck.mjs
+   2:8   warning  'path' is defined but never used   @typescript-eslint/no-unused-vars
+  15:22  warning  'label' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/rahil/mecg-website/output/brand-kit/source/verify-editor.cjs
+  1:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:10  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 8 problems (4 errors, 4 warnings)
+

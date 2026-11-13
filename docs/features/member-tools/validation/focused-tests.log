@@ -1,0 +1,36 @@
+(node:3275177) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3275177) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ signed-out callers cannot reach persistence (57.449009ms)
+✔ non-member cycle cannot be selected to access records (7.132404ms)
+✔ valid saves carry actor-independent content and stable ID to RPC (5.023787ms)
+✔ database stale-write rejection becomes a conflict, not a success (5.35507ms)
+(node:3275177) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/tools/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pipeline separates tracks, requires evidence for advancement and rejects injected review fields (1.278263ms)
+✔ links cannot execute scripts or include embedded credentials (0.123798ms)
+✔ sharing clearance needs independent verification, source and exact scope (0.169894ms)
+✔ persisted records are parsed and malformed records fail closed (0.301798ms)
+(node:3275178) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/member-tools/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ live member tools expose screening, voting, and event tasks with the open count (1.051755ms)
+✔ Speed Dating appears for an eligible member without screening access (0.126554ms)
+✔ recruitment operators can discover activity without receiving Board tools (0.11918ms)
+✔ owners receive every administrative destination (0.087352ms)
+✔ the secondary navigation trigger names the current destination (0.267655ms)
+(node:3275179) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/workspace-navigation.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 217.970883

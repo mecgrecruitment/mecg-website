@@ -137,3 +137,7 @@ copy; application source and production authentication are untouched. External
 service credentials are removed from the child process. Never deploy the generated
 preview app. Set `WORKSPACE_PREVIEW_PORT` to change the local port. Restart the
 command after source changes to refresh the copied pages.
+
+## Member project tools
+
+See [member tools](docs/features/member-tools/README.md) for private pipeline, evidence and AI lab workflows, access boundaries and validation.

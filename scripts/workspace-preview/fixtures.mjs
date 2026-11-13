@@ -19,6 +19,7 @@ const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCo
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
     case 'is_decision_ready': case 'can_start_application': return false;

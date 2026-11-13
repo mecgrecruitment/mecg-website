@@ -1,0 +1,51 @@
+    
+--------------------------------------
+ 00000000-0000-4000-8000-000000000003
+(1 row)
+
+ set_member_tool_reviewer 
+--------------------------
+ t
+(1 row)
+
+              set_config              
+--------------------------------------
+ 00000000-0000-4000-8000-000000000002
+(1 row)
+
+DO
+RESET
+UPDATE 1
+SET
+ expect_error 
+--------------
+ 
+(1 row)
+
+RESET
+UPDATE 1
+SET
+              set_config              
+--------------------------------------
+ 00000000-0000-4000-8000-000000000001
+(1 row)
+
+ expect_error 
+--------------
+ 
+(1 row)
+
+RESET
+SET
+ expect_error 
+--------------
+ 
+(1 row)
+
+RESET
+                                                                result                                                                
+--------------------------------------------------------------------------------------------------------------------------------------
+ PASS: persistence, retry, isolation, stale writes, stage validation, review clearance, edit invalidation, revocation and offboarding
+(1 row)
+
+

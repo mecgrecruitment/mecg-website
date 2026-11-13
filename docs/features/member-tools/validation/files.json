@@ -1,0 +1,16 @@
+{
+  "src/lib/member-tools/model.ts": "85623fd6cd0ba81294cecc551f2422fb6f624115d083306ae3dc482911751712",
+  "src/lib/member-tools/lab-case.ts": "90816e7c1e86bf4431484a517a8bc756f427f4aaa0a49bef74e76b78ef7ec83d",
+  "src/lib/member-tools/server.ts": "c31fd92bba9c1cbcecf89ee56e44b80fb1d89db559fed9bc53b0f1dcc0216b84",
+  "src/lib/member-tools/model.test.ts": "bac7161c6d4a7836a0792d9cb7dd4d157175128680811fe0cfa9e95a99f5d0be",
+  "src/app/member/tools/lab-case.tsx": "c8debf8894ec754d6f61a1ea24dc9a0fa797bcb51bbd2caf408ef2c6971eac83",
+  "src/app/member/tools/tool-workspace.tsx": "1d8a2d0893af0013f73abec0f9894fd2636210fbc0578a3326b48e55a0774f2c",
+  "src/app/member/tools/[tool]/page.tsx": "c3416ce7b374fdd1126f1ef96b8d9181a86a937d3ad05c29e2f363fc7ad5f6c9",
+  "src/app/api/member/tools/route.ts": "949aa336c5deb920d147d07b8c9464e7577e822ac8299525d2147bff28b13aeb",
+  "src/app/api/member/tools/route.test.ts": "6e42f349afd772eb045dc306f4fa1a48a71fe7c3483d71b7aa9ae38562797c9c",
+  "scripts/member-tools/bootstrap.sql": "1751b909086c620069f63cff1e49a37caa3df3c41fc851f8ccad33e9d1e56881",
+  "scripts/member-tools/assertions.sql": "ea86f1877704a07d261ddb8ee3a6f69e5ba7ea5d6819a92ebc64b60bb4ee2566",
+  "supabase/migrations/20261112120000_member_operations_tools.sql": "795a5844cd15f856037dc7973ed47ba526d46beeefbdcf837cd6e8ee6974be4d",
+  "scripts/verify-member-tools.mjs": "38ac7aea185bc37fcc9d73c0f5d818270b3cba171ed3116f0013a49626c1348b",
+  "scripts/verify-member-tools-ui.mjs": "2e773cb419a7d5000ed4e00b32331a41f498607afc53579d97dfd455d4608fdc"
+}
