@@ -39,3 +39,17 @@ test("configured adapter sends no tools, disables response storage and strips mo
   assert.equal(response.status, 200); const data = await response.json(); assert.equal(data.suggestions.tables[0].rows[0].state, "proposed"); assert.equal(sent.store, false); assert.equal(sent.tools, undefined);
   assert.equal((await POST(request(input()))).status, 429);
 });
+
+test("native Vercel request identity activates the gateway without new static credentials", async t => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user } });
+  const old = process.env.VERCEL; process.env.VERCEL = "1";
+  t.after(() => { if (old === undefined) delete process.env.VERCEL; else process.env.VERCEL = old; });
+  let target = ""; let authorization = "";
+  t.mock.method(globalThis, "fetch", async (url: unknown, options: RequestInit) => {
+    target = String(url); authorization = new Headers(options.headers).get("Authorization") || "";
+    return Response.json({ status: "completed", output: [{ content: [{ type: "output_text", text: JSON.stringify({ summary: "Synthetic gateway response", tables: [] }) }] }] });
+  });
+  const { POST } = await route("native"); const req = request(input()); req.headers.set("x-vercel-oidc-token", "synthetic-rotating-oidc");
+  const response = await POST(req); assert.equal(response.status, 200); assert.equal(target, "https://ai-gateway.vercel.sh/v1/responses"); assert.equal(authorization, "Bearer synthetic-rotating-oidc");
+  const data = await response.json(); assert.equal(data.provider, "gateway"); assert.ok(!JSON.stringify(data).includes("synthetic-rotating-oidc"));
+});

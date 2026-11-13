@@ -12,5 +12,6 @@
       "path": "/api/maintenance/notifications",
       "schedule": "5 14 * * *"
     }
-  ]
+  ],
+  "buildCommand": "node --import ./scripts/esm-loader.mjs scripts/verify-consulting-provider.mjs && npm run build"
 }
