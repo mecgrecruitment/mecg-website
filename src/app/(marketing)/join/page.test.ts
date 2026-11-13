@@ -30,7 +30,7 @@ for (const scenario of ["outage", "no-cycle", "empty-events"]) {
       assert.match(html, /We couldn’t load this cycle’s dates/);
       assert.match(html, /Reload dates/);
       assert.match(html, /Email the Board/);
-      assert.match(html, /Go to the application/);
+      assert.match(html, /Check application availability/);
       assert.doesNotMatch(html, /The Board has not published events/);
       assert.doesNotMatch(html, /Applications are closed/);
     } else if (scenario === "no-cycle") {
