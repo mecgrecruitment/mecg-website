@@ -43,6 +43,18 @@ jobs:
           CLERK_SECRET_KEY: sk_test_ci-placeholder
           CLERK_ISSUER: https://clerk.ci.invalid
       - run: npx playwright install --with-deps chromium
+      - name: Exercise consulting workbench at desktop and phone widths
+        run: node scripts/verify-consulting-workbench.mjs
+      - name: Retain consulting browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consulting-workbench-ui
+          path: |
+            docs/features/consulting-workbench/desktop.png
+            docs/features/consulting-workbench/mobile.png
+            docs/features/consulting-workbench/ui-failure.txt
+          if-no-files-found: ignore
       - run: npm run test:e2e
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid

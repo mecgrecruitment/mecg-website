@@ -1,0 +1,37 @@
+(node:3364157) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3364157) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+✔ cross-origin and signed-out requests cannot invoke a model (63.169576ms)
+✔ wrong cycle, invalid data class and oversized bodies fail closed (7.366449ms)
+✔ unconfigured provider is an explicit unavailable state, not simulated AI success (6.939324ms)
+✔ configured adapter sends no tools, disables response storage and strips model confirmations (5.898432ms)
+(node:3364157) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/app/api/member/consulting/route.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ all nine workflows execute on the same importable synthetic project (3.841371ms)
+✔ research separates exact-span, semantic, authority, freshness and possible conflict findings (0.247786ms)
+✔ removing a source invalidates downstream evidence and retrieval excludes revoked versions (0.257554ms)
+✔ feedback counts exact duplicates once with segment denominators and severe minority visibility (0.257614ms)
+✔ reporting computes instead of trusting control, binds metric ID and rejects zero ratio denominator (0.252714ms)
+✔ scope confirmation needs independent authority and confirmation, proposal catches missing coverage (0.379237ms)
+✔ process maps preserve edges and warn about shared resources rather than invent throughput (0.268293ms)
+✔ handoff cannot pass without recipient and observed fresh-operator evidence (0.314207ms)
+✔ untrusted imports reject confidential labels, malformed numbers, bad dates, extra fields and duplicate IDs (0.49549ms)
+✔ model suggestions cannot import confirmations, approval, semantic support or passed handoffs (0.529213ms)
+✔ evaluation reports counts and uncertainty, never an invented pass (0.459124ms)
+✔ possible secrets and causal language are visible blockers/warnings (0.334184ms)
+✔ evaluation effort includes allocated build/upkeep and keeps defect classes separate (0.217219ms)
+✔ duplicate feedback does not hide a severe record (0.210787ms)
+(node:3364159) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/rahil/mecg-website/src/lib/consulting-workbench/engine.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/rahil/mecg-website/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 239.529567
