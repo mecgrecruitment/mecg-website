@@ -1,6 +1,6 @@
 # Consulting workbench
 
-Implementation owner: Codex for Rahil, November 12, 2026. Local implementation; not deployed. Route: `/member/consulting?cycleId=…`, linked from the three existing project-tool pages. Member page uses existing `requireMember` and selected-cycle authorization. No recruitment permissions, outcomes, database policies or public capability claims changed. Existing pipeline/evidence/lab work is preserved.
+Implementation owner: Codex for Rahil, November 12, 2026. Deployed to https://mecgmichigan.com/member/consulting at release 0feaa9888cf0f91ee92f967109e0349b7d3e4d81; release and production CI passed. The earlier local-only verification receipt is historical. Route: `/member/consulting?cycleId=…`, linked from the three existing project-tool pages. Member page uses existing `requireMember` and selected-cycle authorization. No recruitment permissions, outcomes, database policies or public capability claims changed. Existing pipeline/evidence/lab work is preserved.
 
 ## What is implemented
 
@@ -71,3 +71,21 @@ Fresh-operator exercise: load the sample, identify and correct the reporting con
 ## Remaining council proof
 
 No comparative time saving, larger delivery scope, national exclusivity, client result, trained member or sponsor is evidenced by this build. Actual client use needs a named operational owner, evaluator, successor, approved data/processing/storage route and representative task. [Pilot protocol](pilot-protocol.md) addresses the outstanding sample-size/capacity questions as proposed future measurement, not invented acceptance. The council's single revision allowance governed the planning review; this explicitly requested implementation is separate work, not a claim to reopen that review to obtain unanimity.
+
+## Completed release verification
+
+Hosted release run [43353214677](https://github.com/mecgrecruitment/mecg-website/actions/runs/43353214677) and production CI [43354122305](https://github.com/mecgrecruitment/mecg-website/actions/runs/43354122305) passed. Release results: 991 unit tests, 463 E2E passed with eight existing skips, 891 database tests, lint, TypeScript, SQL parser, production build and the nine-workflow desktop/phone exercise. Live health returned 200/ok; anonymous member routes redirect to login and the consulting API rejects anonymous POST. Authenticated Clerk integration remains skipped under its existing configured condition; no live member acceptance or paid-model invocation was performed. Deployment authority and exact receipts are retained in the MECG operations release record at operations/releases/consulting-workbench-2026-11-12/.
+
+Production-branch final E2E result: 464 passed, eight existing skips. The earlier release run reported 463 passed and one pre-existing evaluation-CAS timing test passing on configured retry; the same-SHA production rerun passed all 464 without a flaky summary. No test was removed or weakened.
+
+## Workflow improvements
+
+The refinement adds entity-aware research comparison; feedback coding coverage, keyword candidates and theme-overlap counts; ranked exact-passage retrieval with required quoted phrases and approved/permitted-source filtering; process entry/exit and rework-cycle checks with explicit sensitivity scenarios; source-linked period comparisons and reconciliation differences; a readable acceptance-based proposal draft; actionable discovery follow-ups and confirmed/rejected conflict checks; `[[claim:ID]]` rendering with source/support validation and unfinished-copy detection; and fresh-builder/operator independence plus support-date checks for handoff.
+
+Each register supports search, paging, a downloadable CSV header template and all-or-nothing CSV append. Commas, escaped quotes, multiline values and CRLF are supported. Unique IDs are generated for blank IDs. Unknown/duplicate columns, repeated IDs, invalid numbers or an oversized register reject the whole append. No formula is evaluated. Filtering changes the displayed rows, never the dataset used by checks. CSV intake does not establish permission to process client data; public/synthetic restriction remains.
+
+Undo restores up to twenty previous in-memory edits and invalidates stale checks/suggestions. Unsaved working changes trigger the browser's leave-page warning; saving a browser draft resets that warning until the next edit. Existing exported version-one files remain accepted: additive fields receive blank defaults. No field or prior record is silently deleted during upgrade.
+
+AI requests now use per-workflow strict JSON Schemas derived from the same field catalogue as forms/imports, with a small draft-output allowance. Runtime validation and approval-state stripping remain in force. The model must support Responses structured outputs; configuring an unsupported model will not silently fall back to unvalidated prose. Live provider access remains blocked because the requested OpenAI and Vercel credentials were declined; no paid calls or provider settings were changed.
+
+For a provider already available to the user, export the task/schema and import its JSON response through Import model suggestions JSON. Imported suggestions are marked as unverified provenance, cannot overwrite rows or import confirmations, and require individual acceptance. This is a manual option, not a claim that a model was connected or run.

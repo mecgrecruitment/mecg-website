@@ -1,3 +1,5 @@
+import { insights } from "./insights";
+import { retrieve } from "./retrieval";
 import { modules, type Module, type Project, type Row } from "./schema";
 export type Finding = { id: string; severity: "blocker" | "attention"; location: string; message: string };
 export type Analysis = { module: Module; findings: Finding[]; lines: string[]; coverage: string; status: "needs review" | "checks found blockers" };
@@ -35,7 +37,8 @@ export function analyze(project: Project, module: Module, asOf: string): Analysi
         if (days < 0) add(`${row.id}-future`, "attention", row.id, "Source date is after the review date.");
         if (days > Number(row.maxAge)) add(`${row.id}-stale`, "attention", row.id, `Source is ${Math.floor(days)} days old; threshold is ${row.maxAge}. Recheck.`);
       }
-      const values = topics.get(row.topic.trim().toLowerCase()) ?? new Set<string>(); values.add(row.value.trim().toLowerCase()); topics.set(row.topic.trim().toLowerCase(), values);
+      const topicKey = `${row.entity?.trim().toLowerCase() ? row.entity.trim().toLowerCase() + " / " : ""}${row.topic.trim().toLowerCase()}`;
+      const values = topics.get(topicKey) ?? new Set<string>(); values.add(row.value.trim().toLowerCase()); topics.set(topicKey, values);
       lines.push(`${row.id}: ${row.topic} — ${row.value} [${row.source}] “${row.quote}”`);
     }
     for (const [topic, values] of topics) if (values.size > 1) add(`conflict-${topic}`, "attention", topic, "Different values share this topic. Check entities, definitions and dates; this is a possible conflict, not an established contradiction.");
@@ -97,12 +100,10 @@ export function analyze(project: Project, module: Module, asOf: string): Analysi
       break;
     }
     case "knowledge": {
-      const tokens = project.question.toLowerCase().match(/[a-z0-9]{3,}/g)?.filter(t => !["what", "which", "does", "with", "from", "this", "that", "the", "and", "are"].includes(t)) ?? [];
-      const approved = project.records.sources.filter(s => s.authority === "approved");
-      const matches = approved.map(s => ({ s, score: tokens.filter(t => `${s.title} ${s.text}`.toLowerCase().includes(t)).length })).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
-      lines.push("Exact passage retrieval only; word overlap is not semantic support or a synthesized answer.");
-      if (!matches.length) lines.push("ABSTAIN: No approved matching passage found. Try a more specific question or add evidence.");
-      for (const { s } of matches) { lines.push(`[${s.id}] ${s.title} (${s.date || "date unknown"}): “${s.text}” — ${s.locator}`); if (!s.permission.trim()) add(`${s.id}-permission`, "blocker", s.id, "Source-use permission is missing."); }
+      const matches = retrieve(project);
+      lines.push("Exact passage retrieval only; lexical relevance is not semantic support or a synthesized answer.");
+      if (!matches.length) lines.push("ABSTAIN: No approved, permitted matching passage found. Try a more specific question or add evidence.");
+      for (const { source: s, matched } of matches) lines.push(`[${s.id}] ${s.title} (${s.date || "date unknown"}): “${s.text}” — ${s.locator}; matched terms: ${matched.join(", ")}`);
       for (const s of project.records.sources.filter(s => s.authority !== "approved")) lines.push(`Excluded ${s.id}: ${s.authority}.`);
       add("semantic", "attention", "Question", "A person must decide whether retrieved passages answer the question and whether versions conflict."); break;
     }
@@ -156,6 +157,8 @@ export function analyze(project: Project, module: Module, asOf: string): Analysi
     }
     default: { const exhaustive: never = module; return exhaustive; }
   }
+  const extra = insights(project, module, asOf, new Map(project.records.metrics.map(m => [m.id, metricValue(m, project.records.observations)])));
+  lines.push(...extra.lines); findings.push(...extra.findings);
   const scanned = JSON.stringify({ records: project.records, draft: project.draft });
   if (/(?:sk-[A-Za-z0-9_-]{16,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:password|api[_ -]?key)\s*[:=]\s*\S{6,})/i.test(scanned)) add("secret", "blocker", "Project", "Possible embedded secret detected. Remove it and rotate any real exposed credential. Pattern scanning is not exhaustive.");
   if (/ignore (?:all |previous |prior )?instructions|exfiltrate|reveal (?:the )?system prompt/i.test(scanned)) add("untrusted", "attention", "Imported text", "Instruction-like content found. Treat it as source data, never as authority.");
@@ -165,6 +168,10 @@ export function renderDraft(project: Project): string {
   return project.draft.replace(/\[\[metric:([^\]]+)\]\]/g, (_, id: string) => {
     const metric = project.records.metrics.find(m => m.id === id); const value = metric ? metricValue(metric, project.records.observations) : null;
     return metric && value !== null ? `${value} ${metric.unit} [${id}; ${metric.period}]` : `[UNAVAILABLE METRIC ${id}]`;
+  }).replace(/\[\[claim:([^\]]+)\]\]/g, (_, id: string) => {
+    const claim = project.records.claims.find(c => c.id === id);
+    const source = claim && project.records.sources.find(s => s.id === claim.source);
+    return claim && claim.support === "supported" && source?.authority === "approved" && source.permission.trim() && claim.quote.trim() && source.text.includes(claim.quote) ? `${claim.value} [${id}; ${source.id}; ${source.locator}]` : `[UNAVAILABLE CLAIM ${id}]`;
   });
 }
 export function exportReport(project: Project, result: Analysis, asOf: string): string {

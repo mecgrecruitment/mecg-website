@@ -4,7 +4,7 @@ import { hasPermission } from "@/lib/authorization";
 import { readJsonBody } from "@/lib/api-route";
 import { analyze } from "@/lib/consulting-workbench/engine";
 import { object, parseProject } from "@/lib/consulting-workbench/schema";
-import { assistantInput, assistantInstructions, parseAssistantRequest, parseSuggestions } from "@/lib/consulting-workbench/assistant";
+import { assistantInput, assistantInstructions, parseAssistantRequest, parseSuggestions, suggestionFormat } from "@/lib/consulting-workbench/assistant";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 const active = new Set<string>();
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (active.has(user.id) || recent.has(user.id) || active.size >= 4) return NextResponse.json({ error: "Please wait a minute before another model request." }, { status: 429 });
   active.add(user.id); recent.set(user.id, now);
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, signal: AbortSignal.timeout(45_000), body: JSON.stringify({ model, store: false, max_output_tokens: 6000, instructions: assistantInstructions, input: assistantInput(parsed.value, input.module), text: { format: { type: "json_object" } } }) });
+    const response = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, signal: AbortSignal.timeout(45_000), body: JSON.stringify({ model, store: false, max_output_tokens: 6000, instructions: assistantInstructions, input: assistantInput(parsed.value, input.module), text: { format: suggestionFormat(input.module) } }) });
     if (!response.ok) return NextResponse.json({ error: "The model service could not complete this request. No project changes were applied." }, { status: 502 });
     const output: unknown = await response.json();
     if (!object(output) || output.status !== "completed" || !Array.isArray(output.output)) return NextResponse.json({ error: "The model response was incomplete. No changes were applied." }, { status: 502 });

@@ -2,7 +2,7 @@ name: Consulting workbench release validation
 
 on:
   push:
-    branches: [release/consulting-workbench-20261112]
+    branches: [release/consulting-improvements-20261112]
 
 jobs:
   application:

@@ -60,6 +60,27 @@ try {
   // Title uses the catalogue's ampersand.
   const suggestion=page.locator('details').filter({has:page.locator('summary').filter({hasText:'MODEL-R1'})}).last();await suggestion.locator('summary').click();await suggestion.getByRole('button',{name:'Add draft row',exact:true}).click();
   const lastDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Export project JSON',exact:true}).click();const latest=JSON.parse(await readFile(await (await lastDownload).path(),'utf8'));const draft=latest.records.requirements.find(r=>r.id==='MODEL-R1');if(draft?.state!=='proposed'||draft.confirmation!=='')throw new Error('Model forged confirmation');
+  await page.getByRole('button',{name:'Customer feedback',exact:false}).click();
+  const feedback=page.getByRole('region',{name:'Feedback records',exact:true});
+  await feedback.getByLabel('Import feedback records CSV',{exact:true}).setInputFiles({name:'bulk.csv',mimeType:'text/csv',buffer:Buffer.from('text,segment\n"Bulk wait, needs help",new\n')});
+  await feedback.getByRole('status').filter({hasText:'Imported 1 rows'}).waitFor();
+  await feedback.getByLabel('Search feedback records',{exact:true}).fill('Bulk wait');
+  await feedback.getByText('1 matching rows.',{exact:false}).waitFor();
+  await page.getByRole('button',{name:'Run evidence checks',exact:true}).click();
+  await page.getByText('Deduplicated English denominator: 3.',{exact:false}).waitFor();
+  await feedback.getByLabel('Import feedback records CSV',{exact:true}).setInputFiles({name:'duplicate.csv',mimeType:'text/csv',buffer:Buffer.from('id,text\nF1,do not overwrite\n')});
+  await feedback.getByRole('status').filter({hasText:'unique ID'}).waitFor();
+  await page.getByRole('button',{name:'Undo last edit',exact:true}).click();
+  await feedback.getByLabel('Search feedback records',{exact:true}).fill('');
+  const undoDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Export project JSON',exact:true}).click();
+  const afterUndo=JSON.parse(await readFile(await (await undoDownload).path(),'utf8'));
+  if(afterUndo.records.feedback.length!==3)throw new Error('Undo failed to restore pre-import feedback');
+  await page.getByRole('button',{name:'Deliverable review',exact:false}).click();
+  await page.getByLabel('Report text',{exact:false}).fill('[[claim:C1]] TODO: finish');
+  await page.getByRole('button',{name:'Run evidence checks',exact:true}).click();
+  await page.getByText('Unfinished placeholder text remains in the deliverable.',{exact:true}).first().waitFor();
+  await page.getByText('24 hours [C1; S1;', {exact:false}).first().waitFor();
+  console.log('PASS: bulk CSV, atomic duplicate rejection, filtered rows included in checks, undo, source-bound claims and unfinished-draft detection');
   await page.evaluate(()=>window.scrollTo(0,0));await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(root,'docs/features/consulting-workbench/mobile.png'),fullPage:false});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(root,'docs/features/consulting-workbench/desktop.png'),fullPage:false});
   if(errors.length)throw new Error(errors.join('\n'));
   console.log('PASS: nine workflows, desktop/phone overflow, reconciliation correction, browser restart/restore, JSON roundtrip, invalid import recovery, unavailable-provider UX, reviewed model-row acceptance with confirmation stripped. No live auth, model, client data or hosted persistence tested.');
