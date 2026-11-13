@@ -97,3 +97,7 @@ test("all nine AI schemas require exact catalogue fields and restrict table vari
   }
   const r = blankRow("reviewLog"); assert.equal(r.state, "open");
 });
+test("structured claim IDs are not mistaken for free numerical assertions", () => {
+  const p = sampleProject(); p.draft = "[[claim:C1]]";
+  assert.ok(!analyze(p, "review", date).findings.some(f => f.id.endsWith("free-numbers")));
+});

@@ -141,7 +141,7 @@ export function analyze(project: Project, module: Module, asOf: string): Analysi
       claims(); reporting(); discovery();
       for (const row of project.records.requirements.filter(r => r.state === "confirmed")) if (!row.coverage.trim()) add(`${row.id}-coverage`, "blocker", row.id, "Confirmed requirement has no deliverable evidence. A text match is not proof of completion.");
       for (const token of project.draft.matchAll(/\[\[metric:([^\]]+)\]\]/g)) if (!project.records.metrics.some(m => m.id === token[1])) add(`unknown-${token[1]}`, "blocker", "Draft", `Unknown metric reference ${token[1]}.`);
-      const withoutTokens = project.draft.replace(/\[\[metric:[^\]]+\]\]/g, "");
+      const withoutTokens = project.draft.replace(/\[\[(?:metric|claim):[^\]]+\]\]/g, "");
       if (/\d/.test(withoutTokens)) add("free-numbers", "attention", "Draft", "Unbound numbers present. Bind quantitative values with [[metric:ID]] or inspect dates and other non-metric numerals manually.");
       if (/\b(doubled|tripled|driven by|caused|because|guarantee|no other club|best in the country)\b/i.test(project.draft)) add("causal", "attention", "Draft", "Causal, quantitative or superiority wording needs explicit evidence; this heuristic is not exhaustive.");
       if (!project.draft.trim()) add("empty-draft", "attention", "Draft", "No report text supplied; only structured records were inspected.");
