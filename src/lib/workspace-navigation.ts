@@ -25,6 +25,7 @@ export function workspaceMemberTools({
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
     ["/member/refer", "Refer someone"],
     ["/member/benefits", "Benefits"],
+    ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ];
 }

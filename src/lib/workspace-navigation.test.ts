@@ -17,6 +17,7 @@ test("live member tools expose screening, voting, and event tasks with the open 
     ["/member/event", "Live event"],
     ["/member/refer", "Refer someone"],
     ["/member/benefits", "Benefits"],
+    ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ]);
 });
@@ -33,6 +34,7 @@ test("Speed Dating appears for an eligible member without screening access", () 
     ["/member/speed-dating", "Speed Dating"],
     ["/member/refer", "Refer someone"],
     ["/member/benefits", "Benefits"],
+    ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ]);
 });

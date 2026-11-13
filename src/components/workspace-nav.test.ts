@@ -32,7 +32,7 @@ test("shared workspace primary/member/admin navigation carries the actual select
   const { default: Nav } = await import("./workspace-nav");
   const user = { ...workspaceCycleFixture, memberships: workspaceCycleFixture.memberships.map((membership) => membership.cycleId === "draft-cycle" ? { ...membership, role: "MEMBER" as const } : membership) };
   const html = renderToStaticMarkup(await Nav({ user, cycleId: "old-cycle", current: "/admin/settings" }));
-  for (const path of ["/member", "/admin", "/admin/rounds", "/member/group-case", "/member/speed-dating", "/admin/settings", "/admin/people", "/admin/messages", "/member/benefits"]) assert.ok(html.includes(`href="${path}?cycleId=old-cycle"`), path);
+  for (const path of ["/member", "/admin", "/admin/rounds", "/member/group-case", "/member/speed-dating", "/admin/settings", "/admin/people", "/admin/messages", "/member/benefits", "/member/resources"]) assert.ok(html.includes(`href="${path}?cycleId=old-cycle"`), path);
   assert.match(html, /value="old-cycle" selected/);
   assert.match(html, /value="live-cycle"/);
   assert.doesNotMatch(html, /value="draft-cycle"/, "settings switcher excludes cohorts without manage-cycle capability");
