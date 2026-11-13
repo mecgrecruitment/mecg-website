@@ -1,6 +1,6 @@
 # Private member project tools
 
-Implementation: November 12, 2026. Routes: `/member/tools/pipeline`, `/member/tools/evidence`, `/member/tools/lab`. Uses existing workspace identity, cycle selection, navigation, design tokens and Clerk-backed Supabase client. No recruitment capabilities or release logic are changed.
+Implementation: November 12, 2026. [Release validation and rollout](validation/release-2026-11-12.md). Routes: `/member/tools/pipeline`, `/member/tools/evidence`, `/member/tools/lab`. Uses existing workspace identity, cycle selection, navigation, design tokens and Clerk-backed Supabase client. No recruitment capabilities or release logic are changed.
 
 ## What works
 
@@ -21,7 +21,7 @@ Records remain private even when a reviewer records a cleared use; public publis
 
 ## Rollout
 
-1. Apply `20261112120000_member_operations_tools.sql` to a designated staging database through the normal migration process. No hosted migration has been performed by this build.
+1. Apply `20261112120000_member_operations_tools.sql` to a designated staging database through the normal migration process. The production migration was applied on November 12, 2026 after the release validation gates passed.
 2. Run the real authenticated acceptance below. Confirm canonical records, audiences, participating officers and record retention before collecting actual sensitive material.
 3. Have an actual cycle Owner grant tool reviewers after those people accept responsibility; test revocation. No automatic recruitment-role conversion.
 4. Coordinate production migration before app deployment. Until the RPC exists or when a read fails, the page displays an unavailable state and exposes no records. The synthetic lab guide can still be read by an authorized workspace member.

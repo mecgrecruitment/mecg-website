@@ -1,4 +1,6 @@
-# Implementation receipt — November 12, 2026
+# Initial implementation receipt — November 12, 2026
+
+Historical pre-deployment record. Superseded by [release validation](release-2026-11-12.md).
 
 Status: initial implementation saved; broader validation and hosted rollout pending. Working-tree delivery, not a deployed release. Existing unrelated website/brand/resource work was preserved.
 
