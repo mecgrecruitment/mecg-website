@@ -41,6 +41,7 @@ test("configured adapter sends no tools, disables response storage and strips mo
 });
 
 test("native Vercel request identity activates the gateway without new static credentials", async t => {
+  t.mock.module("@/lib/consulting-workbench/provider-verification", { namedExports: { providerVerification: { ready: true, code: "verified" } } });
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user } });
   const old = process.env.VERCEL; process.env.VERCEL = "1";
   t.after(() => { if (old === undefined) delete process.env.VERCEL; else process.env.VERCEL = old; });
@@ -52,4 +53,14 @@ test("native Vercel request identity activates the gateway without new static cr
   const { POST } = await route("native"); const req = request(input()); req.headers.set("x-vercel-oidc-token", "synthetic-rotating-oidc");
   const response = await POST(req); assert.equal(response.status, 200); assert.equal(target, "https://ai-gateway.vercel.sh/v1/responses"); assert.equal(authorization, "Bearer synthetic-rotating-oidc");
   const data = await response.json(); assert.equal(data.provider, "gateway"); assert.ok(!JSON.stringify(data).includes("synthetic-rotating-oidc"));
+});
+
+test("unverified gateway fails closed without invoking the provider", async t => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user } });
+  t.mock.module("@/lib/consulting-workbench/provider-verification", { namedExports: { providerVerification: { ready: false, code: "provider_check_failed" } } });
+  const old = process.env.VERCEL; process.env.VERCEL = "1";
+  t.after(() => { if (old === undefined) delete process.env.VERCEL; else process.env.VERCEL = old; });
+  t.mock.method(globalThis,"fetch",async () => { throw new Error("Must not call unverified provider"); });
+  const { POST } = await route("not-verified"); const req = request(input()); req.headers.set("x-vercel-oidc-token","synthetic-platform-token");
+  const response = await POST(req); assert.equal(response.status,503); assert.equal((await response.json()).code,"provider_check_failed");
 });

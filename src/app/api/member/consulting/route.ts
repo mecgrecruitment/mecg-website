@@ -5,6 +5,7 @@ import { readJsonBody } from "@/lib/api-route";
 import { analyze } from "@/lib/consulting-workbench/engine";
 import { parseProject } from "@/lib/consulting-workbench/schema";
 import { parseAssistantRequest } from "@/lib/consulting-workbench/assistant";
+import { providerVerification } from "@/lib/consulting-workbench/provider-verification";
 import { selectProvider, requestSuggestions } from "@/lib/consulting-workbench/provider";
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
   // VERCEL_OIDC_TOKEN in a deployed function after it expires.
   const provider = selectProvider({ enabled: process.env.CONSULTING_AI_ENABLED, vercel: process.env.VERCEL, gatewayKey: process.env.AI_GATEWAY_API_KEY, gatewayModel: process.env.CONSULTING_GATEWAY_MODEL, directKey: process.env.CONSULTING_OPENAI_API_KEY, directModel: process.env.CONSULTING_OPENAI_MODEL }, request.headers.get("x-vercel-oidc-token"));
   if (!provider) return NextResponse.json({ error: "Model assistance is not configured. On Vercel, enable the project's OIDC/Gateway access. Local checks and exports remain available." }, { status: 503 });
+  if (provider.kind === "gateway" && !providerVerification.ready) return NextResponse.json({ error: "AI Gateway verification has not passed for this deployment. Local checks and exports remain available.", code: providerVerification.code }, { status: 503 });
   // Best-effort per-instance throttling, not a distributed/team spend budget.
   // Gateway also enforces the account's credits and any configured provider budgets.
   const now = Date.now(); for (const [key, time] of recent) if (now - time > 60_000) recent.delete(key);
