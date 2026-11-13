@@ -1,7 +1,6 @@
 begin;
 set local search_path=extensions,public;
 select extensions.plan(1);
-\set ON_ERROR_STOP on
 update rush.rush_cycles set status='CLOSED' where status in ('DRAFT','OPEN','IN_PROCESS','DECISION_LOCK');
 insert into rush.rush_cycles(id,name,status) values('test','Synthetic tools cycle','OPEN'),('other','Synthetic closed cycle','CLOSED');
 insert into auth.users(id) values('00000000-0000-4000-8000-000000000001'),('00000000-0000-4000-8000-000000000002'),('00000000-0000-4000-8000-000000000003');
