@@ -13,7 +13,8 @@ if (process.env.VERCEL==='1' && provider) {
     // validation below exercises the same schema and privilege stripping as runtime.
     project.question=`For the synthetic example, propose one useful NEW ${workflow} work item. Use evidence IDs from the input where relevant; do not repeat existing rows.`;
     const result=await requestSuggestions(provider,project,workflow);
-    checks.push(result.ok ? {workflow,ok:true,draftRows:result.suggestions.tables.reduce((n,t)=>n+t.rows.length,0),inputTokens:result.inputTokens,outputTokens:result.outputTokens} : {workflow,ok:false,code:result.code,message:result.error});
+    const draftRows=result.ok?result.suggestions.tables.reduce((n,t)=>n+t.rows.length,0):0;
+    checks.push(result.ok && draftRows>0 ? {workflow,ok:true,draftRows,inputTokens:result.inputTokens,outputTokens:result.outputTokens} : {workflow,ok:false,code:result.ok?'empty_suggestions':result.code,message:result.ok?'No usable draft work item returned.':result.error});
     console.log('Consulting provider check',workflow,checks.at(-1).ok?'passed':checks.at(-1).code);
     // Authentication/billing failure applies to every module; do not burn eight retries.
     if(!result.ok && ['provider_http_401','provider_http_402','provider_http_403','provider_http_429'].includes(result.code))break;
