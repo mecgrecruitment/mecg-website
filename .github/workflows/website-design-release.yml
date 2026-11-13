@@ -1,0 +1,177 @@
+name: Website design release validation
+
+on:
+  push:
+    branches: [release/website-design-20261112]
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npx tsc --noEmit
+      # check-sql.py parses every migration with libpg_query and exits 2 without it.
+      # Keep libpg_query behavior deterministic. Newer pglast releases can
+      # reject valid legacy PL/pgSQL bodies that PostgreSQL itself accepts.
+      - run: pip3 install --quiet pglast==7.21
+      - run: npm run check:sql
+      - run: npm run build
+        env:
+          # next.config.ts computes the CSP at build time, so this has to be set
+          # for the build and not just for the server playwright starts. That
+          # server is plain http on 127.0.0.1, and upgrade-insecure-requests
+          # rewrites every asset URL to https and fails the run. This artifact is
+          # only ever served to playwright; Vercel builds separately and never
+          # sets this, so deployments keep the header.
+          E2E_LOCAL_HTTP: "1"
+          # /join is prerendered, so the build reads these browser-visible
+          # values. The artifact is discarded and never receives a secret.
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          # Clerk-backed client components must render under ClerkProvider.
+          # These format-valid placeholders exercise that path without granting
+          # CI access to a real Clerk instance.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY2kuaW52YWxpZCQ
+          CLERK_SECRET_KEY: sk_test_ci-placeholder
+          CLERK_ISSUER: https://clerk.ci.invalid
+      - run: npx playwright install --with-deps chromium
+      - name: Exercise consulting workbench at desktop and phone widths
+        run: node scripts/verify-consulting-workbench.mjs
+      - name: Retain consulting browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consulting-workbench-ui
+          path: |
+            docs/features/consulting-workbench/desktop.png
+            docs/features/consulting-workbench/mobile.png
+            docs/features/consulting-workbench/ui-failure.txt
+          if-no-files-found: ignore
+      - run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          # CLERK_SECRET_KEY is deliberately absent, which is what makes
+          # hasClerkConfiguration() false and runs handleUnconfiguredProxy
+          # instead of clerkMiddleware. With it set, the middleware issues a
+          # handshake redirect to clerk.ci.invalid, which resolves nowhere: the
+          # browser reports ERR_NAME_NOT_RESOLVED and every Clerk-covered route
+          # fails. There is no reachable Clerk instance in this job, so the only
+          # honest thing to exercise here is the unconfigured path. The
+          # configured proxy is covered by src/proxy.test.ts against a mocked
+          # clerkMiddleware, and end to end by authenticated-clerk on main.
+          #
+          # The other two stay: next start re-evaluates next.config.ts, which
+          # throws when CLERK_ISSUER is missing while the publishable key is
+          # set, and the key itself is baked into the client bundle at build
+          # time regardless of what this step sets.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2xlcmsuY2kuaW52YWxpZCQ
+          CLERK_ISSUER: https://clerk.ci.invalid
+
+  database:
+    runs-on: ubuntu-latest
+    env:
+      # The local database job excludes GoTrue, but the Supabase CLI still
+      # validates every configured third-party issuer before starting.
+      SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN: ci-placeholder.clerk.accounts.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.116.0
+      - name: Disable remote Clerk discovery for isolated database
+        run: |
+          node --input-type=module -e '
+            import { readFileSync, writeFileSync } from "node:fs";
+            const path = "supabase/config.toml";
+            const config = readFileSync(path, "utf8");
+            const clerk = /\[auth\.third_party\.clerk\]\nenabled = true\ndomain = "env\(SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN\)"/;
+            if (!clerk.test(config)) throw new Error("Expected Clerk configuration was not found");
+            writeFileSync(path, config.replace(clerk, `[auth.third_party.clerk]\nenabled = false\ndomain = "env(SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN)"`));
+          '
+      - name: Start isolated database and apply every migration
+        run: >-
+          supabase start
+          --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - run: supabase db reset --local --no-seed
+      - run: supabase db lint --local --schema rush --level error --fail-on error
+      - run: supabase test db supabase/tests
+      - name: Stop isolated database
+        if: always()
+        run: supabase stop --no-backup
+
+  authenticated-clerk:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CLERK_E2E_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      CLERK_E2E_ENABLED: "1"
+      CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_E2E_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_E2E_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_E2E_SECRET_KEY }}
+      CLERK_ISSUER: ${{ vars.CLERK_E2E_ISSUER }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Require development-only Clerk E2E configuration
+        run: |
+          case "$CLERK_PUBLISHABLE_KEY" in pk_test_*) ;; *) echo "CLERK_E2E_PUBLISHABLE_KEY must be a development key"; exit 1;; esac
+          case "$CLERK_SECRET_KEY" in sk_test_*) ;; *) echo "CLERK_E2E_SECRET_KEY must be a development key"; exit 1;; esac
+          test -n "$CLERK_ISSUER" || { echo "CLERK_E2E_ISSUER is required"; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo "STAGING_SUPABASE_URL is required"; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || { echo "STAGING_SUPABASE_ANON_KEY is required"; exit 1; }
+      - run: npm run build
+      - run: npm run test:e2e:clerk
+
+  live-migration-parity:
+    # The isolated database above is required for every PR and main build.
+    # The protected main branch additionally proves its migration ledger still
+    # matches the live project. Missing credentials are a failure, not a skip.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      # Migration commands parse config.toml even though they do not contact
+      # Clerk. Use a format-valid, non-secret placeholder for that parse.
+      SUPABASE_AUTH_THIRD_PARTY_CLERK_DOMAIN: ci-placeholder.clerk.accounts.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.116.0
+      - name: Require protected project credentials
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || { echo "SUPABASE_ACCESS_TOKEN is required on main"; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "SUPABASE_DB_PASSWORD is required on main"; exit 1; }
+      - name: Link live project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase link --project-ref chrxtsohxazngabdcpzb
+      - name: Verify live migration ledger
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node --input-type=module -e '
+            import { execFileSync } from "node:child_process";
+            const { migrations = [] } = JSON.parse(execFileSync("supabase", ["migration", "list", "--linked", "--output-format", "json"], { encoding: "utf8" }));
+            const drift = migrations.some((migration) => migration.local !== migration.remote);
+            if (drift) { console.error("Local and remote migration ledgers differ"); process.exit(1); }
+            console.log("Migration ledger parity OK");
+          '

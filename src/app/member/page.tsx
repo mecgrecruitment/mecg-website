@@ -241,8 +241,8 @@ export default async function MemberPage({ searchParams }: { searchParams: Promi
         <div className="member-work-primary">
           <section aria-labelledby="member-next-task">
             <div className="flex items-center justify-between gap-4">
-              <h2 id="member-next-task" className="member-work-title">{tasks.length ? "Needs you" : "You're up to date"}</h2>
-              <span className="text-xs text-muted">{tasks.length} open {tasks.length === 1 ? "task" : "tasks"}</span>
+              <h2 id="member-next-task" className="member-work-title">{tasks.length ? "Needs you" : "No assigned work waiting"}</h2>
+              <span className="text-xs text-muted">{tasks.length} assigned {tasks.length === 1 ? "task" : "tasks"}</span>
             </div>
             <div className="member-task-list">
               {tasks.map((task, index) => <Link key={`${task.href}-${task.label}`} href={withWorkspaceCycle(task.href, cycleId)} className="member-task">

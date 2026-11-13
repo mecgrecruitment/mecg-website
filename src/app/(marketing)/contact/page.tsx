@@ -11,8 +11,8 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   const exampleQuestion = typeof question === "string" ? question.trim().slice(0, 200) : "";
   const initialMessage = exampleQuestion ? `Example question we started from: ${exampleQuestion}\n\n` : "";
   return (
-    <main id="main-content" className="bg-white text-mecg-navy">
-      <PageIntro title="Contact Us" copy="Tell us the question you’re working on, or ask about joining. The board replies by email." overlap>
+    <main id="main-content" className="identity-contact bg-white text-mecg-navy">
+      <PageIntro label="Start a conversation" title="Contact MECG." copy="Tell us the question you’re working on, or ask about joining. The board replies by email." overlap>
         <a href="mailto:mecg-board@umich.edu" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-mecg-blue underline-offset-4 hover:underline">Or email mecg-board@umich.edu</a>
       </PageIntro>
       <section id="message" className="scroll-mt-24 px-6 pb-16 sm:px-10 sm:pb-20">

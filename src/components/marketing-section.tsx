@@ -29,7 +29,7 @@ export default function MarketingSection({
 }: MarketingSectionProps) {
   return (
     <section
-      className={`${TONES[tone]} px-6 sm:px-10 ${SPACING[spacing]} ${className}`}
+      className={`identity-section ${TONES[tone]} px-6 sm:px-10 ${SPACING[spacing]} ${className}`}
       {...props}
     >
       <div className={`mx-auto max-w-6xl ${innerClassName}`}>{children}</div>

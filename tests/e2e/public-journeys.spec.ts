@@ -90,9 +90,9 @@ test("a chosen project question carries its area into the contact form", async (
   await expect(page.getByLabel("Subject", { exact: true })).toHaveValue("A more specific question");
 });
 
-test("the homepage leads with the PwC photo, then client evidence, then the project questions", async ({ page }) => {
+test("the editorial homepage keeps the chapter photo, client evidence and project questions", async ({ page }) => {
   await page.goto("/home");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("MECG Pro bono consulting, led by Michigan students.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pro bono consulting, from Michigan.");
   await expect(page.locator(".home-hero").getByRole("img", { name: "MECG members visiting PwC in Chicago" })).toBeVisible();
   await expect(page.getByRole("group", { name: "Chapter photographs" })).toHaveCount(0);
   await expect(page.locator(".home-community").getByRole("img", { name: "MECG members together by the Chicago River" })).toBeVisible();

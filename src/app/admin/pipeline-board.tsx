@@ -595,7 +595,7 @@ function PipelineBoardInner({
         </div>
       </div>
 
-      <div className="applicant-list-actions mt-4 flex flex-wrap items-center gap-2">
+      <div className="applicant-list-actions mt-4 flex flex-wrap items-center gap-4">
         <div className="applicant-view-switch w-full max-w-xs">
           <SegmentedControl
             name="Applicant view"
@@ -612,7 +612,7 @@ function PipelineBoardInner({
             Referrals · {referralCount}
           </Link>
         )}
-        {canAdvance && selectedApplications.length === 0 && <button type="button" disabled={advancePending || !eligibleShown.length} className="ml-auto inline-flex min-h-11 items-center text-xs font-medium text-muted hover:text-mecg-navy" onClick={() => { setSelectedIds(new Set(eligibleShown.map(application => application.id))); setAdvanceReview(null); }}>Select eligible shown</button>}
+        {canAdvance && selectedApplications.length === 0 && <button type="button" disabled={advancePending || !eligibleShown.length} className="ml-auto inline-flex min-h-11 shrink-0 items-center px-3 text-sm font-medium text-muted hover:text-mecg-navy" onClick={() => { setSelectedIds(new Set(eligibleShown.map(application => application.id))); setAdvanceReview(null); }}>Select eligible shown</button>}
       </div>
 
       {canAdvance && (selectedApplications.length > 0 || advanceNotice?.kind === "error") && (

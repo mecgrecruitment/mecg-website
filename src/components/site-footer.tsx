@@ -10,12 +10,13 @@ const FOOTER_LINKS = [
 
 export default function SiteFooter() {
   return (
-    <footer className="bg-public-deep px-6 text-white sm:px-10">
+    <footer className="identity-footer bg-public-deep px-6 text-white sm:px-10">
       <div className="mx-auto max-w-6xl pb-6 pt-12 sm:pt-16">
+        <div className="identity-footer-invitation"><div><p className="home-kicker">Michigan Engineering Consulting Group</p><p className="identity-footer-title">Let’s talk about<br />your project.</p></div><Link href="/contact#message" className="button-primary">Discuss a project <span aria-hidden="true">↗</span></Link></div>
         <div className="grid gap-10 pb-10 md:grid-cols-[1.3fr_1fr_1fr]">
           <div>
             <Link href="/home" aria-label="MECG home" className="inline-flex min-h-11 items-center">
-              <Image src="/logos/mecg-white.svg" alt="MECG" width={168} height={44} className="h-10 w-auto" />
+              <Image src="/logos/mecg-white.svg" loading="eager" alt="MECG" width={168} height={40} className="h-10 w-auto" />
             </Link>
             <p className="mt-5 max-w-xs text-base leading-7 text-white/70">Pro bono consulting by University of Michigan students. Open to every major.</p>
           </div>

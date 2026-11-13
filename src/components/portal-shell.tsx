@@ -26,7 +26,7 @@ export default function PortalShell({
     return (
       <main className="applicant-shell">
         <header className="applicant-topbar">
-          <Link href="/home" className="workspace-wordmark" aria-label="MECG home">MECG<span aria-hidden="true">.</span></Link>
+          <Link href="/home" className="workspace-wordmark" aria-label="MECG home"><Image src="/logos/mecg-color.svg" alt="MECG" width={150} height={36} /></Link>
           <nav aria-label="Applicant navigation"><a href="#current-application">My application</a><a href="#applicant-schedule">Schedule</a><Link href="/home">Public site</Link>{headerAction}</nav>
         </header>
         <div className="applicant-page-heading">
@@ -38,7 +38,7 @@ export default function PortalShell({
   }
 
   return (
-    <main className="min-h-dvh bg-public-ground text-mecg-navy">
+    <main className="identity-portal min-h-dvh bg-public-ground text-mecg-navy">
       <header className={`border-b border-public-rule bg-public-ground/95 ${compact ? "px-5 py-3 sm:px-8" : "px-6 py-3 sm:px-10"}`}>
         <div className={`mx-auto flex max-w-6xl items-center justify-between gap-4 ${compact ? "min-h-12" : "min-h-14"}`}>
           <Link href="/home" className="flex min-h-11 items-center rounded-sm" aria-label="MECG home">

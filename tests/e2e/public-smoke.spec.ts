@@ -11,9 +11,9 @@ test("the public entry point redirects to a usable home page", async ({ page }) 
   await page.goto("/");
 
   await expect(page).toHaveURL(/\/home$/);
-  await expect(page.getByRole("heading", { level: 1, name: /MECG: pro bono consulting,\s*led by Michigan students\./ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Pro bono consulting, from Michigan\./ })).toBeVisible();
   await expect(page.getByRole("banner").getByRole("link", { name: "MECG home" })).toBeVisible();
-  await expect(page.getByRole("region", { name: /MECG: pro bono consulting,\s*led by Michigan students\./ }).getByRole("link", { name: "Discuss a project" })).toBeVisible();
+  await expect(page.getByRole("region", { name: /Pro bono consulting, from Michigan\./ }).getByRole("link", { name: "Discuss a project" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "MECG at a glance" })).toBeAttached();
   await expect(page.getByText("70+", { exact: true })).toBeVisible();
   expect(externalFontRequests).toEqual([]);
@@ -25,7 +25,7 @@ test("public navigation reaches the contact workflow", async ({ page }) => {
   await page.getByRole("contentinfo").getByRole("link", { name: "Contact Us", exact: true }).click();
 
   await expect(page).toHaveURL(/\/contact$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Contact Us" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Contact MECG." })).toBeVisible();
   await expect(page.getByRole("button", { name: /send/i })).toBeVisible();
 });
 

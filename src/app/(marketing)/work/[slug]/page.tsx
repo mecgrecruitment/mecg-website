@@ -44,7 +44,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   ]);
 
   return (
-    <main id="main-content" className="bg-white text-mecg-navy">
+    <main id="main-content" className="identity-case-study bg-white text-mecg-navy">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
       <PageIntro
         label={`${project.industry} · ${project.semester}`}

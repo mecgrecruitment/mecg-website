@@ -39,11 +39,11 @@ export default async function WorkPage() {
   const publicProjects = await listPublicProjectCards();
 
   return (
-    <main id="main-content" className="bg-white text-mecg-navy">
+    <main id="main-content" className="identity-work bg-white text-mecg-navy">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(BREADCRUMB_JSON_LD) }} />
       <PageIntro
         label="Client services"
-        title="Bring us a decision. We’ll spend a semester on it."
+        title="Consulting for your organization."
         copy="A team of six to eight University of Michigan students researches your question, checks its thinking with your people and hands over a recommendation you can act on."
       >
         <Link href="/contact#message" className="button-primary">Discuss a project <span aria-hidden="true">→</span></Link>
@@ -69,7 +69,7 @@ export default async function WorkPage() {
 
       <MarketingSection aria-labelledby="clients-title" className="pt-24! sm:pt-32!">
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-end lg:gap-16">
-          <h2 id="clients-title" className="display-face text-balance text-[clamp(40px,6vw,76px)] leading-[1.02]">From General Motors to a Midland medical spa.</h2>
+          <h2 id="clients-title" className="display-face text-balance text-[clamp(40px,6vw,76px)] leading-[1.02]">Organizations we’ve worked with</h2>
           <p className="max-w-sm text-lg leading-7 text-muted">An automaker, a distillery, a school, a nonprofit, a law practice and more have brought us their questions.</p>
         </div>
         {publicProjects.length > 0 ? (

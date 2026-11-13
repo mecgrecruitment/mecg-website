@@ -47,7 +47,7 @@ export default function WorkspaceSidebar({ current, groups, cycle, account, swit
   }, [open]);
   return <aside className="workspace-sidebar" data-open={open} aria-label="Workspace navigation">
     <div className="workspace-sidebar-brand">
-      <Link href="/home" aria-label="MECG home" className="workspace-wordmark"><Image src="/logos/mecg-white.svg" alt="MECG" width={128} height={38} style={{ width: 128, height: "auto" }} /></Link>
+      <Link href="/home" aria-label="MECG home" className="workspace-wordmark"><Image src="/logos/mecg-color.svg" alt="MECG" width={128} height={38} style={{ width: 128, height: "auto" }} /></Link>
       <span className="workspace-brand-caption">{switcher ? "Recruitment workspace" : cycle}</span>
       <button ref={toggle} type="button" className="workspace-menu-toggle" aria-expanded={open} aria-controls="workspace-sidebar-content" onClick={() => setOpenPath(open ? null : locationKey)}>{open ? "Close menu" : "Menu"}</button>
     </div>

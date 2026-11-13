@@ -7,6 +7,8 @@ import { serializeJsonLd } from "@/lib/json-ld";
 import { hasClerkFrontendConfiguration } from "@/lib/env";
 import "./globals.css";
 import "./studio.css";
+import "./identity.css";
+import { body, display } from "./fonts/display";
 
 export const metadata: Metadata = ROOT_METADATA;
 
@@ -25,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       data-scroll-behavior="smooth"
       className="h-full scroll-smooth antialiased"
     >
-      <body className="min-h-full flex flex-col">
+      <body className={`${body.variable} ${display.variable} min-h-full flex flex-col`}>
         {clerkConfigured ? <ClerkProvider><SessionKeepalive />{content}</ClerkProvider> : content}
       </body>
     </html>

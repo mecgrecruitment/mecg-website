@@ -29,10 +29,10 @@ export default function PageIntro({
 }) {
   const blue = tone === "blue";
   return (
-    <section className={`px-6 sm:px-10 ${blue ? "bg-mecg-blue text-white" : "bg-public-ground text-mecg-navy"}`}>
-      <div className={`mx-auto max-w-6xl pt-12 sm:pt-16 ${overlap ? "pb-20 sm:pb-24" : "pb-10 sm:pb-14"} ${aside ? "grid gap-y-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-x-12" : ""}`}>
+    <section className={`identity-intro px-6 sm:px-10 ${blue ? "bg-mecg-blue text-white" : "bg-public-ground text-mecg-navy"}`}>
+      <div className={`identity-intro-inner mx-auto max-w-6xl pt-12 sm:pt-16 ${overlap ? "pb-20 sm:pb-24" : "pb-10 sm:pb-14"} ${aside ? "grid gap-y-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-x-12" : ""}`}>
         <div>
-        {label ? <p className={`text-sm font-semibold ${blue ? "text-white" : "text-mecg-blue"}`}>{label}</p> : null}
+        {label ? <p className={`identity-eyebrow text-sm font-semibold ${blue ? "text-white" : "text-mecg-blue"}`}>{label}</p> : null}
         {poster ? (
           <div className={`relative ${label ? "mt-4" : ""} [container-type:inline-size]`}>
             <h1 id={titleId}>

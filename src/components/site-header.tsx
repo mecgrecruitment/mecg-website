@@ -58,7 +58,7 @@ export default function SiteHeader() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-public-rule bg-public-ground/95 px-6 text-mecg-navy backdrop-blur-sm sm:px-10"
+      className="identity-header sticky top-0 z-50 border-b border-public-rule bg-public-ground/95 px-6 text-mecg-navy backdrop-blur-sm sm:px-10"
       onKeyDown={(event) => {
         if (event.key === "Escape" && open) {
           setOpen(false);
@@ -68,7 +68,7 @@ export default function SiteHeader() {
     >
       <div className="mx-auto flex min-h-18 max-w-6xl items-center justify-between">
         <Link href="/home" className="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mecg-blue" aria-label="MECG home">
-          <Image src="/logos/mecg-color.svg" alt="MECG" width={168} height={44} preload className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
+          <Image src="/logos/mecg-color.svg" alt="MECG" width={168} height={40} preload className="h-8 w-auto sm:h-9" style={{ width: "auto" }} />
         </Link>
         <nav aria-label="Main navigation" className="hidden items-center gap-5 text-sm font-medium lg:flex">
           {NAV_LINKS.map(({ href, label }) => (

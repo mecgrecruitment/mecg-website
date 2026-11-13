@@ -43,7 +43,7 @@ export default async function JoinPage() {
   const events = recruitment.events ?? [];
   const status = recruitment.cycle ? applicationCycleStatus(recruitment.cycle) : null;
   const showInterestForm = !unavailable && recruitment.cycle !== null && status?.isOpen !== true;
-  const action = unavailable ? { href: "/apply", label: "Go to the application" } : !recruitment.cycle ? { href: "mailto:mecg-board@umich.edu", label: "Ask about recruitment" } : recruitmentAction(recruitment.cycle, {
+  const action = unavailable ? { href: "/apply", label: "Check application availability" } : !recruitment.cycle ? { href: "mailto:mecg-board@umich.edu", label: "Ask about recruitment" } : recruitmentAction(recruitment.cycle, {
     inactiveHref: "#recruitment-updates",
     inactiveLabel: "Get recruitment updates",
   });
@@ -52,11 +52,10 @@ export default async function JoinPage() {
   const upcomingCycle = recruitment.cycle && isBeforeApplicationOpen(recruitment.cycle) ? recruitment.cycle : null;
 
   return (
-    <main id="main-content" className="bg-white text-mecg-navy">
-      <PageIntro label="Recruitment" title="Join Our Team" copy="MECG is open to University of Michigan students in every major. No previous consulting experience is required." overlap tone="blue" poster posterMedia={
-        <div className="relative aspect-square overflow-hidden rounded-xl shadow-lift"><Image src={JOIN_PHOTOS[4].src} alt={JOIN_PHOTOS[4].alt} fill sizes="280px" className="object-cover object-[60%_50%]" /></div>
-      }>
+    <main id="main-content" className="identity-join bg-white text-mecg-navy">
+      <PageIntro label="Join MECG" title="Join MECG." copy="MECG is open to University of Michigan students in every major. No previous consulting experience is required." overlap tone="blue" aside={<figure className="join-cover-photo"><div className="relative aspect-[4/3]"><Image src="/mecg/chicago-community-2026.jpeg" alt="MECG members together by the Chicago River" fill preload sizes="(min-width: 1024px) 430px, 100vw" className="object-cover" /></div><figcaption>A chapter to learn with, on and off campus.</figcaption></figure>}>
         <Link href={action.href} className="button-primary">{action.label} <span aria-hidden="true">→</span></Link>
+        {unavailable ? <p className="join-availability" role="status">We couldn’t load recruitment dates. <a href="mailto:mecg-board@umich.edu">Email the board</a> to confirm availability.</p> : status ? <p className="join-availability" role="status">{status.label}. {status.detail}</p> : <p className="join-availability" role="status">No recruitment cycle is currently published.</p>}
         <Link href="#how-we-evaluate" className="inline-flex min-h-11 items-center gap-2 text-base font-semibold text-white underline-offset-4 hover:underline">How we evaluate <span aria-hidden="true">↓</span></Link>
       </PageIntro>
 
@@ -99,6 +98,7 @@ export default async function JoinPage() {
       </MarketingSection>
       )}
 
+
       <MarketingSection tone="paper">
           <SectionHeading>Why join MECG?</SectionHeading>
           <div className="mt-8 grid gap-8 md:grid-cols-3">
@@ -128,7 +128,7 @@ export default async function JoinPage() {
           </ol>
         </div>
         <figure className="relative mt-14">
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl sm:aspect-[21/9]"><Image src={JOIN_PHOTOS[3].src} alt={JOIN_PHOTOS[3].alt} fill sizes="(min-width:1152px) 1152px, 100vw" className="object-cover object-[50%_35%]" /></div>
+          <div className="relative aspect-[16/9] overflow-hidden rounded-xl sm:aspect-[21/9]"><Image src={JOIN_PHOTOS[3].src} alt={JOIN_PHOTOS[3].alt} fill loading="eager" sizes="(min-width:1152px) 1152px, 100vw" className="object-cover object-[50%_35%]" /></div>
           <figcaption className="absolute right-3 top-3 rounded-md bg-mecg-navy/75 px-3 py-1 text-sm text-white">Dressed up for a chapter formal.</figcaption>
         </figure>
         <div className="public-lit relative mx-3 -mt-24 rounded-xl p-6 shadow-lift sm:mx-8 sm:-mt-32 sm:p-8 lg:max-w-3xl">

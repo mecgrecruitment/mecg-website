@@ -1,0 +1,176 @@
+/* MECG / A working chapter. Public storytelling and private task surfaces. */
+body {
+  --font-ui: var(--font-body), "Segoe UI", Helvetica, Arial, sans-serif;
+  --identity-radius: 4px;
+  --identity-section-space: clamp(64px, 7vw, 104px);
+  background: var(--color-paper);
+}
+[data-marketing] { color: var(--color-mecg-navy); background: white; }
+[data-marketing] main :is(h1,h2), [data-marketing] .display-face {
+  font-stretch: 100%; font-weight: 560; word-spacing: 0.04em; letter-spacing: var(--tracking-heading);
+}
+[data-marketing] h3 { font-stretch: 100%; word-spacing: normal; }
+.identity-eyebrow { font-size: var(--text-sm); font-weight: 600; line-height: 1.6; letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.identity-header { background: white; backdrop-filter: none; }
+.identity-header > div { min-height: 80px; }
+.identity-header nav { gap: 28px; }
+.identity-header [aria-current="page"] { border-bottom: 2px solid var(--color-mecg-blue); color: var(--color-mecg-blue); }
+:is(.button-primary,.button-secondary,.button-light,.button-dark,.button-ghost-light) { border-radius: var(--identity-radius); padding: 12px 24px; }
+[data-marketing] .button-primary { font-weight: 600; }
+[data-marketing] .public-lit { background: var(--color-mecg-blue); color: white; box-shadow: none; border-radius: var(--identity-radius); }
+[data-marketing] :is(.rounded-xl,.rounded-lg) { border-radius: 4px; }
+[data-marketing] .shadow-lift { box-shadow: none; }
+.identity-intro { position: relative; border-bottom: 1px solid var(--color-public-rule); }
+.identity-intro-inner { padding-top: 64px; }
+.identity-intro h1 { max-width: 18ch; font-size: clamp(40px, 4.8vw, 64px); line-height: 1.06; }
+.identity-intro h1 + p { max-width: 56ch; font-size: 20px; line-height: 1.6; margin-top: 24px; }
+.identity-intro .identity-eyebrow { margin-bottom: 24px; }
+.identity-section { padding-block: var(--identity-section-space); }
+.identity-section-heading { max-width: 24ch; font-size: clamp(32px, 3.8vw, 48px); line-height: 1.12; }
+/* Public footers end with a concrete invitation and a quieter directory. */
+.identity-footer { background: var(--color-mecg-blue); }
+.identity-footer-invitation { display: flex; justify-content: space-between; align-items: end; gap: 32px; padding-bottom: 48px; margin-bottom: 40px; border-bottom: 1px solid var(--color-on-dark-line); }
+.identity-footer-invitation .home-kicker { font-size: var(--text-sm); font-weight: 600; letter-spacing: var(--tracking-label); text-transform: uppercase; margin-bottom: 24px; }
+.identity-footer-title { font-family: var(--font-display), sans-serif; font-size: clamp(36px, 5vw, 60px); font-weight: 560; letter-spacing: var(--tracking-display); line-height: 1.03; }
+/* People: chapter photograph before the board directory, preserving every profile. */
+.identity-team-intro { padding-block: 56px 40px; background: var(--color-paper); }
+.identity-team-intro h1 { font-size: clamp(40px, 5.2vw, 68px); line-height: 1.05; margin-top: 24px; }
+.identity-team-intro h1 span { color: var(--color-mecg-blue); }
+.identity-intro-meta { display: flex; align-items: end; justify-content: space-between; gap: 32px; margin-top: 28px; }
+.identity-intro-meta p { max-width: 48ch; color: var(--color-muted); font-size: 20px; }
+.team-chapter-cover { padding-bottom: 64px; background: linear-gradient(var(--color-paper) 60%, white 60%); }
+.team-chapter-cover img { object-position: 50% 42%; }
+.team-chapter-cover figcaption { position: absolute; bottom: 0; left: 0; background: var(--color-mecg-blue); color: white; padding: 12px 20px; font-size: var(--text-sm); }
+.identity-portraits { padding-top: 0; }
+[data-marketing] .identity-portraits h2 { font-size: var(--text-lg); font-weight: 600; letter-spacing: normal; }
+.identity-portraits article { min-width: 0; }
+.identity-portraits article > a { border-radius: 0; }
+.identity-portraits article > a > div { border-radius: 0; }
+.identity-portraits article > a > p:last-child { display: inline-flex; align-items: center; min-height: 32px; border-bottom: 1px solid var(--color-public-rule); }
+/* Each interior cover has its own job rather than repeating the homepage. */
+.identity-work .identity-intro { background: var(--color-paper); border-bottom: 0; }
+.identity-work > section[aria-label="MECG at a glance"] { background: var(--color-paper); }
+.identity-work > section[aria-label="MECG at a glance"] figure > div { max-height: 440px; }
+.identity-work #capabilities ol > li > a { padding-block: 28px; }
+.identity-work #capabilities ol > li > a:hover { background: var(--color-paper); }
+.identity-case-study .identity-section:nth-of-type(even) { background: var(--color-paper); }
+.identity-contact .identity-intro { background: var(--color-paper); }
+.identity-contact .identity-intro h1 { max-width: 14ch; }
+.identity-contact #message > div > div:first-child { border: 1px solid var(--color-public-rule); border-top: 4px solid var(--color-mecg-blue); }
+.identity-contact #message > div > aside { padding-top: 32px; }
+.identity-contact #message aside > div { border-bottom: 0; }
+.identity-contact #message aside address { border-bottom: 0; }
+.identity-join .identity-intro-inner { padding-bottom: 88px; }
+.identity-join .identity-intro-inner > div:last-child { margin-bottom: 0; }
+.identity-join .identity-intro-inner:has(.join-cover-photo) { align-items: center; grid-template-columns: 1.2fr .8fr; }
+.identity-join .identity-intro h1 { font-size: clamp(44px, 5vw, 68px); max-width: 15ch; }
+.join-cover-photo { position: relative; margin-left: 0; }
+.join-cover-photo figcaption { padding: 12px 16px; background: var(--color-mecg-navy); color: white; font-size: var(--text-sm); }
+[data-marketing] :is(input,textarea,select) { border-radius: var(--identity-radius); }
+/* A restrained working canvas. Persistent navigation stays subordinate to the work. */
+:root { --workspace-radius-inset: 4px; --workspace-radius-control: 4px; --workspace-radius-panel: 8px; }
+.workspace-stack:has(.workspace-sidebar) { background: var(--color-paper); }
+.workspace-sidebar { background: white; color: var(--color-mecg-navy); border-right: 1px solid var(--color-public-rule); }
+.workspace-sidebar :focus-visible { outline-color: var(--color-mecg-blue); }
+.workspace-sidebar-brand { padding-block: 28px 24px; gap: 12px; }
+.workspace-brand-caption { color: var(--color-muted); font-weight: 400; }
+.workspace-sidebar-group > p { color: var(--color-muted); font-weight: 600; padding-top: 8px; }
+.workspace-sidebar-link { color: var(--color-muted); border-radius: 4px; }
+.workspace-sidebar-link:hover { background: var(--color-paper); color: var(--color-mecg-navy); }
+.workspace-sidebar-link[aria-current="page"] { background: var(--color-tint); color: var(--color-mecg-blue); box-shadow: none; }
+.workspace-current-mark { background: var(--color-mecg-blue); width: 4px; height: 16px; border-radius: 2px; }
+.workspace-sidebar-account { border-color: var(--color-public-rule); background: var(--color-paper); }
+.workspace-sidebar-account :is(a,.workspace-sign-out) { color: var(--color-muted); }
+.workspace-sidebar-account p { color: var(--color-mecg-navy); }
+.workspace-account-avatar { background: var(--color-mecg-blue); color: white; }
+.workspace-cohort label { color: var(--color-muted); }
+.workspace-cohort select { background: white; color: var(--color-mecg-navy); border-color: var(--color-public-edge); }
+.workspace-menu-toggle { color: var(--color-mecg-blue); border-color: var(--color-public-edge); }
+.workspace-page-header { padding-bottom: 28px; border-bottom: 1px solid var(--color-public-rule); }
+:is(.workspace-page-header h1,.workspace-title),.workspace-private h1,.applicant-page-heading h1,.identity-portal h1 { font-family: var(--font-display),var(--font-ui); font-weight: 560; font-stretch: 100%; word-spacing: 0.04em; letter-spacing: var(--tracking-heading); }
+:is(.workspace-page-header h1,.workspace-title) { font-size: 36px; line-height: 1.15; }
+.workspace-page-context { font-size: var(--text-sm); margin-bottom: 12px; }
+.workspace-page-description { font-size: var(--text-base); max-width: 62ch; }
+:is(.workspace-stack:has(.workspace-sidebar),.workspace-private) h2:is(.text-lg,.text-xl,.text-2xl) { font-stretch: 100%; word-spacing: normal; font-weight: 600; }
+.recruitment-stages { padding-block: 8px; background: white; border-radius: 4px; border: 1px solid var(--color-public-rule); }
+.recruitment-stage { min-height: 80px; }
+.recruitment-stage strong { font-size: 28px; font-stretch: 100%; font-weight: 560; }
+.recruitment-stage:first-child { padding-left: 16px; }
+.recruitment-stage span { font-size: var(--text-xs); }
+.workspace-panel { box-shadow: none; }
+.applicant-shell { background: var(--color-paper); }
+.applicant-topbar { background: white; }
+.applicant-page-heading { padding-top: 40px; }
+.applicant-page-heading h1 { font-size: clamp(32px, 4vw, 48px); }
+.identity-portal { background: var(--color-paper); }
+.identity-portal > header { background: white; }
+.identity-portal > section { background: var(--color-paper); }
+.identity-portal h1 { line-height: 1.12; }
+.identity-portal .shadow-lift { box-shadow: none; border: 1px solid var(--color-public-rule); border-top: 3px solid var(--color-mecg-blue); border-radius: 8px; }
+.surface-card { border-radius: 8px; }
+.field-control { border-radius: 4px; }
+@media (min-width:1024px) {
+  .workspace-stack:has(.workspace-sidebar) { padding-top: 36px; }
+  .workspace-sidebar { padding-top: 0; }
+}
+@media (max-width:1023px) {
+  .identity-header > div { min-height: 72px; }
+  .workspace-sidebar { border-right: 0; border-bottom: 1px solid var(--color-public-rule); }
+  .workspace-sidebar-brand { padding-block: 16px; }
+  .workspace-sidebar-body { background: white; }
+  .workspace-menu-toggle:hover { color: var(--color-mecg-navy); background: var(--color-paper); }
+  .identity-join .identity-intro-inner:has(.join-cover-photo) { grid-template-columns: 1fr; }
+  .join-cover-photo { max-width: 520px; margin-left: 0; }
+}
+@media (max-width:767px) {
+  .identity-header nav { gap: 0; }
+  .identity-intro-inner { padding-top: 40px; }
+  .identity-intro h1 { font-size: clamp(36px, 9vw, 56px); }
+  .identity-intro h1 + p { font-size: var(--text-lg); }
+  .identity-footer-invitation { flex-direction: column; align-items: start; gap: 28px; padding-bottom: 32px; margin-bottom: 32px; }
+  .identity-team-intro { padding-block: 40px 28px; }
+  .identity-team-intro h1 { font-size: clamp(36px,9vw,56px); }
+  .identity-intro-meta { align-items: start; flex-direction: column; gap: 24px; }
+  .identity-intro-meta p { font-size: var(--text-lg); }
+  .team-chapter-cover { padding-bottom: 48px; }
+  .team-chapter-cover figcaption { position: static; padding: 12px; font-size: var(--text-xs); }
+  .identity-join .identity-intro-inner { padding-bottom: 96px; }
+  .identity-join .identity-intro h1 { font-size: clamp(36px,9vw,56px); }
+  .join-cover-photo { margin-right: 0; }
+  .workspace-page-description { font-size: var(--text-sm); }
+  :is(.workspace-page-header h1,.workspace-title) { font-size: 32px; }
+  .applicant-page-heading { padding-top: 28px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  [data-marketing] *,[data-marketing] *::before,[data-marketing] *::after { scroll-behavior: auto; animation: none; transition: none; }
+}
+/* Raised forms/status cards must paint above the cover they overlap. */
+.identity-contact #message, .identity-join section[aria-label="Recruitment status"] { position: relative; z-index: 1; }
+
+/* Owner rule: public content is present immediately, never revealed by scrolling. */
+[data-marketing] :is([data-reveal], [data-reveal] > *, .recruitment-event, .home-question-content, .home-step-content) {
+  opacity: 1;
+  transform: none;
+  animation: none;
+  transition-delay: 0s;
+}
+
+/* Confirmation batch: readable word shapes, visible availability, task-first phones. */
+.join-availability { flex-basis: 100%; max-width: 48ch; padding-left: 16px; border-left: 2px solid var(--color-mecg-orange); font-size: var(--text-sm); line-height: 1.5; }
+.join-availability a { text-decoration: underline; text-underline-offset: 3px; }
+.identity-work .identity-intro-inner { padding-block: 48px 32px; }
+.identity-work .identity-intro h1 { font-size: clamp(40px,4.5vw,64px); max-width: 24ch; }
+.identity-work .identity-intro h1 + p { font-size: var(--text-lg); max-width: 64ch; }
+.application-editor > .surface-card { border-top: 3px solid var(--color-mecg-blue); }
+@media(max-width:767px) {
+  nav.recruitment-stages { display: flex; overflow-x: auto; width: 100%; max-width: 100%; padding-block: 4px; border-radius: 4px; }
+  .recruitment-stages .recruitment-stage { flex: 0 0 136px; flex-direction: row; align-items: center; min-height: 64px; padding: 8px 12px; gap: 12px; border-top: 0; border-left: 1px solid var(--color-public-rule); }
+  .recruitment-stages .recruitment-stage:first-child { border-left: 0; }
+  .recruitment-stages .recruitment-stage strong { font-size: 24px; }
+  .recruitment-stages .recruitment-stage span { font-size: var(--text-xs); }
+  .applicant-topbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .applicant-topbar .workspace-wordmark { align-self: flex-start; }
+  .applicant-topbar nav { justify-content: flex-start; gap: 4px 20px; }
+  .identity-work .identity-intro-inner { padding-block: 36px 28px; }
+  .identity-work .identity-intro h1 { font-size: clamp(36px,9vw,48px); }
+}
