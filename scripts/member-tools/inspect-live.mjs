@@ -23,3 +23,10 @@ if (!Array.isArray(dependencies) || dependencies.length!==2 || !dependencies.eve
 console.log(JSON.stringify(dependencies,null,2));
 // Keep source loading explicit so a missing migration cannot go unnoticed.
 if(!readFileSync('supabase/migrations/20261112120000_member_operations_tools.sql','utf8').includes('create table rush.member_tool_records')) throw new Error('Tool migration missing');
+
+const markerResponse=await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`,{
+ method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+ body:JSON.stringify({query:`select to_regprocedure('rush.actor_cycles_with_role(rush.member_role[])') is not null as rls_helpers_present, to_regprocedure('rush.member_hash_live(text,text)') is not null as hash_rpc_present`}),
+});
+if(!markerResponse.ok) throw new Error(`Baseline marker inspection failed: HTTP ${markerResponse.status}`);
+console.log(JSON.stringify(await markerResponse.json(),null,2));

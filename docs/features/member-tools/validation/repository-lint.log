@@ -20,4 +20,3 @@
   2:10  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
 
 ✖ 8 problems (4 errors, 4 warnings)
-

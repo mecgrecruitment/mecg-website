@@ -24,8 +24,10 @@ revoke all on rush.member_tool_reviewers, rush.member_tool_records from public, 
 
 create function rush.member_tool_access(c text, k text) returns boolean
 language sql stable security definer set search_path='' as $$
- select rush.has_cycle_role(c,array['MEMBER','BOARD','PANEL','OWNER','RECRUITMENT_COMMITTEE']::rush.member_role[])
- and k in ('pipeline','evidence','lab');
+ select k in ('pipeline','evidence','lab') and (
+ rush.has_cycle_role(c,array['MEMBER','BOARD','PANEL','OWNER']::rush.member_role[])
+ or (rush.has_cycle_role(c,array['RECRUITMENT_COMMITTEE']::rush.member_role[])
+ and exists(select 1 from rush.rush_cycles rc where rc.id=c and rc.status not in ('CLOSED','ARCHIVED'))));
 $$;
 create function rush.member_tool_reviewer(c text,k text) returns boolean
 language sql stable security definer set search_path='' as $$
