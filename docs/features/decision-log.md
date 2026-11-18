@@ -1,6 +1,6 @@
 # Board decision log
 
-`/admin/decisions` (nav: Decisions, under the admin tools next to Projects) is a dated record of board decisions.
+`/admin/decisions` (nav: "Board decisions", under the admin tools next to Projects; the recruitment Hash page already uses "Decisions") is a dated record of board decisions.
 
 ## What works
 

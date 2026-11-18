@@ -16,9 +16,16 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const decision = (id, decidedOn, title, category, outcome, extra) => ({ id, decidedOn, title, category, outcome, summary: '', votes: null, minutesUrl: '', revision: 1, createdAt: `${decidedOn}T23:00:00Z`, updatedAt: `${decidedOn}T23:00:00Z`, createdByName: 'Morgan Member', updatedByName: 'Morgan Member', ...extra });
+const decisionLog = { decisions: [
+  decision('preview-decision-1', '2026-11-12', 'Adopt the spring dues schedule', 'FINANCE', 'APPROVED', { summary: 'Dues stay at $40 for spring. Hardship waivers go to the treasurer and are not discussed at board.', votes: { for: 7, against: 1, abstain: 1 }, minutesUrl: 'https://docs.example.invalid/minutes/2026-11-12-board-meeting-with-a-long-shared-drive-path', revision: 2, updatedAt: '2026-11-13T15:00:00Z', updatedByName: 'Bailey Board' }),
+  decision('preview-decision-2', '2026-11-05', 'Take on the clinic intake redesign', 'CLIENTS', 'DEFERRED', { summary: 'Waiting for the nonprofit to confirm scope and a data contact.', votes: { for: 4, against: 4, abstain: 1 } }),
+  decision('preview-decision-3', '2026-10-01', 'Book the union ballroom for the fall mass meeting', 'RECRUITMENT', 'NOTED'),
+] };
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'board_decision_log': return decisionLog;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];

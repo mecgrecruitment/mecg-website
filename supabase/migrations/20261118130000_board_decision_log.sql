@@ -17,7 +17,7 @@ create table rush.board_decisions (
  title text not null check (char_length(title) between 1 and 200 and title=btrim(title)),
  category text not null check (category in ('MEMBERSHIP','RECRUITMENT','FINANCE','CLIENTS','OPERATIONS','POLICY','OTHER')),
  outcome text not null check (outcome in ('APPROVED','REJECTED','DEFERRED','NOTED','WITHDRAWN')),
- summary text not null default '' check (char_length(summary) <= 2000),
+ summary text not null default '' check (char_length(summary) <= 2000 and summary=btrim(summary)),
  votes_for integer check (votes_for between 0 and 200),
  votes_against integer check (votes_against between 0 and 200),
  votes_abstain integer check (votes_abstain between 0 and 200),
@@ -96,7 +96,8 @@ begin
  votes := payload->'votes';
  if jsonb_typeof(votes)='object' then
   if exists(select 1 from jsonb_object_keys(votes) k where k not in ('for','against','abstain')) or (select count(*) from jsonb_object_keys(votes))<>3
-   or exists(select 1 from jsonb_each(votes) e where jsonb_typeof(e.value) is distinct from 'number' or e.value::text !~ '^[0-9]{1,3}$' or e.value::text::integer>200) then
+   -- CASE keeps the cast behind the shape check; OR does not fix evaluation order.
+   or exists(select 1 from jsonb_each(votes) e where case when jsonb_typeof(e.value)='number' and e.value::text ~ '^[0-9]{1,3}$' then e.value::text::integer>200 else true end) then
    raise exception 'Vote counts must be whole numbers from 0 to 200' using errcode='22023'; end if;
   v_for := (votes->>'for')::integer; v_against := (votes->>'against')::integer; v_abstain := (votes->>'abstain')::integer;
  elsif jsonb_typeof(votes) is distinct from 'null' then

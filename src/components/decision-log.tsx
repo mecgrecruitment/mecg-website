@@ -1,7 +1,7 @@
 "use client";
 // design-owner: client:mecg because the internal workspace follows docs/DESIGN.md tokens and admin patterns
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import StatusPill from "@/components/status-pill";
 import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
@@ -26,11 +26,24 @@ function outcomeTone(outcome: DecisionOutcome): "navy" | "orange" | "neutral" {
   return "neutral";
 }
 
-function DecisionForm({ decision, onSaved }: { decision: Decision | null; onSaved?: () => void }) {
+// Each successful save remounts its form with fresh values (a new create form,
+// or the edit form keyed on the new revision), so the success message and the
+// focus live in a status region the parent owns.
+function SavedNotice({ text, focusRef }: { text: string; focusRef: RefObject<HTMLParagraphElement | null> }) {
+  return <p ref={focusRef} tabIndex={-1} role="status" aria-live="polite" className="min-h-6 text-sm leading-6 text-success">{text}</p>;
+}
+
+function useSavedNotice() {
+  const [text, setText] = useState("");
+  const ref = useRef<HTMLParagraphElement>(null);
+  return { text, ref, announce(message: string) { setText(message); requestAnimationFrame(() => ref.current?.focus()); } };
+}
+
+function DecisionForm({ decision, onSaved }: { decision: Decision | null; onSaved: () => void }) {
   const router = useRouter();
   const id = useId();
   const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState<{ error: boolean; text: string } | null>(null);
+  const [notice, setNotice] = useState<{ text: string } | null>(null);
   const [voted, setVoted] = useState(decision ? decision.votes !== null : true);
   const locked = useRef(false);
 
@@ -56,15 +69,13 @@ function DecisionForm({ decision, onSaved }: { decision: Decision | null; onSave
       const { response, body } = await fetchJsonWithTimeout("/api/board/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, 15_000, authorizedFetch);
       if (!response.ok || !body || typeof body !== "object" || !("ok" in body) || body.ok !== true) {
         const message = body && typeof body === "object" && "error" in body && typeof body.error === "string" ? body.error : "Save could not be confirmed. Reload to check before retrying.";
-        setNotice({ error: true, text: message });
+        setNotice({ text: message });
         return;
       }
-      // A new entry resets the form, which remounts it, so its parent announces the save.
-      if (onSaved) onSaved();
-      else setNotice({ error: false, text: "Decision updated." });
+      onSaved();
       router.refresh();
     } catch {
-      setNotice({ error: true, text: "Save could not be confirmed. Your entry is still here. Reload to check before retrying." });
+      setNotice({ text: "Save could not be confirmed. Your entry is still here. Reload to check before retrying." });
     } finally { locked.current = false; setPending(false); }
   }
 
@@ -114,13 +125,14 @@ function DecisionForm({ decision, onSaved }: { decision: Decision | null; onSave
       <span className="mt-1 block text-xs font-normal text-muted">A link to the minutes where they are kept. Anyone with the link’s own access can open it; this log does not change who can.</span>
     </label>
 
-    <button className="button-primary" aria-disabled={pending}>{pending ? "Saving…" : decision ? "Save changes" : "Record decision"}</button>
-    <p role="status" aria-live="polite" className={`min-h-6 text-sm leading-6 ${notice?.error ? "text-danger" : "text-success"}`}>{notice?.text ?? ""}</p>
+    <button type="submit" className="button-primary" aria-disabled={pending}>{pending ? "Saving…" : decision ? "Save changes" : "Record decision"}</button>
+    <p role="alert" className="text-sm leading-6 text-danger">{notice?.text ?? ""}</p>
   </form>;
 }
 
 function Entry({ decision }: { decision: Decision }) {
   const edited = decision.revision > 1;
+  const saved = useSavedNotice();
   return <article className="space-y-3 rounded-xl bg-paper p-5">
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
@@ -144,9 +156,10 @@ function Entry({ decision }: { decision: Decision }) {
       {edited ? ` · edited ${formatEasternDateTime(decision.updatedAt)}${decision.updatedByName ? ` by ${decision.updatedByName}` : ""}` : ""}
     </p>
     <details className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
-      <summary className="cursor-pointer text-sm font-semibold">Edit<span className="sr-only"> {decision.title}</span></summary>
+      <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Edit<span className="sr-only"> {decision.title}</span></summary>
       <p className="mt-3 text-xs leading-5 text-muted">Entries are never deleted. Correct the record here, or set the outcome to Withdrawn. Every edit is kept in the activity log.</p>
-      <div className="mt-4"><DecisionForm key={decision.revision} decision={decision} /></div>
+      <div className="mt-4"><DecisionForm key={decision.revision} decision={decision} onSaved={() => saved.announce("Decision updated.")} /></div>
+      <SavedNotice text={saved.text} focusRef={saved.ref} />
     </details>
   </article>;
 }
@@ -178,7 +191,7 @@ function Filters({ filter, onChange, shown, total }: { filter: DecisionFilter; o
 export default function DecisionLog({ log }: { log: Log | null }) {
   const [filter, setFilter] = useState<DecisionFilter>({ category: "", outcome: "", query: "" });
   const [formKey, setFormKey] = useState(0);
-  const [created, setCreated] = useState("");
+  const created = useSavedNotice();
   if (!log) return <section className="rounded-xl bg-warning-wash p-6 text-warning" role="alert">
     <h2 className="text-lg font-semibold">The decision log is unavailable</h2>
     <p className="mt-2 text-sm leading-6">We couldn’t load board decisions. Reload to try again. If the log is newly installed, ask the website maintainer to finish its database setup. Nothing is shown while access can’t be checked.</p>
@@ -190,8 +203,8 @@ export default function DecisionLog({ log }: { log: Log | null }) {
         <h2 id="record-heading" className="text-xl font-semibold text-mecg-navy">Record a decision</h2>
         <p className="mt-1 text-sm leading-6 text-muted">Visible to active board members and owners only.</p>
       </div>
-      <DecisionForm key={formKey} decision={null} onSaved={() => { setFormKey((key) => key + 1); setCreated(`Decision recorded at ${formatEasternDateTime(new Date())}.`); }} />
-      <p role="status" aria-live="polite" className="min-h-6 text-sm leading-6 text-success">{created}</p>
+      <DecisionForm key={formKey} decision={null} onSaved={() => { setFormKey((key) => key + 1); created.announce(`Decision recorded at ${formatEasternDateTime(new Date())}. It is in the log below.`); }} />
+      <SavedNotice text={created.text} focusRef={created.ref} />
     </section>
     <section aria-labelledby="log-heading" className="space-y-4">
       <h2 id="log-heading" className="text-xl font-semibold text-mecg-navy">Log</h2>

@@ -57,4 +57,7 @@ test("entries show date, outcome, vote, minutes link and edit history", async (t
   assert.equal((html.match(/<form/g) ?? []).length, 3, "one record form and one edit form per entry");
   assert.match(html, /2 decisions/);
   assert.equal((html.match(/<dt/g) ?? []).length, (html.match(/<dd/g) ?? []).length);
+  assert.equal((html.match(/<summary class="flex min-h-11/g) ?? []).length, 2, "edit disclosures meet the 44px target");
+  assert.equal((html.match(/<button type="submit"/g) ?? []).length, 3);
+  assert.equal((html.match(/tabindex="-1" role="status"/gi) ?? []).length, 3, "one persistent saved-notice region per form, outside the form that remounts");
 });
