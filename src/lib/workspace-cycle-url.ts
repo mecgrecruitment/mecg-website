@@ -44,7 +44,7 @@ export function clonedCycleDestination(receipt: unknown): string | null {
 
 export function workspacePermissionsForPath(href: string): readonly import("@/lib/authorization").Permission[] {
   const path = href.split(/[?#]/, 1)[0];
-  if (path === "/admin/settings") return ["MANAGE_CYCLE"];
+  if (path === "/admin/settings" || path === "/admin/opportunities") return ["MANAGE_CYCLE"];
   if (path === "/admin/provisioning") return ["MANAGE_MEMBERSHIPS"];
   if (path === "/admin/hash" || path.startsWith("/admin/hash/")) return ["HASH_PANEL_ACCESS", "MANAGE_CYCLE"];
   if (path === "/admin") return ["RECRUITMENT_OPERATIONS", "HASH_PANEL_ACCESS"];
