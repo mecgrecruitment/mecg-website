@@ -55,6 +55,24 @@ select pg_temp.assert(rush.client_feedback_form(:'token')->>'projectTitle'='Alph
 select pg_temp.assert(not (rush.client_feedback_form(:'token') ? 'leadName'),'form exposes team');
 select pg_temp.assert(rush.client_feedback_form('not-a-token') is null,'bad token accepted');
 
+-- Whitespace-only quote cannot carry a quote permission.
+select pg_temp.expect_error(format($q$select rush.submit_client_feedback(%L,'{"satisfaction":4,"wouldRehire":"YES","quote":"\n\t","attribution":"","quotePermission":true,"logoPermission":false,"permissionScope":"Website"}')$q$,:'token'),'22023');
+-- Reopening the project makes the link inactive without using it up.
+reset role; set role authenticated;
+select set_config('test.actor','00000000-0000-4000-8000-000000000002',false);
+select rush.save_project_delivery('p1',3,'{"status":"ACTIVE","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
+reset role; set role anon;
+select pg_temp.expect_error(format($q$select rush.submit_client_feedback(%L,'{"satisfaction":4,"wouldRehire":"YES","quote":"","attribution":"","quotePermission":false,"logoPermission":false,"permissionScope":""}')$q$,:'token'),'55000');
+reset role; set role authenticated;
+select rush.save_project_delivery('p1',4,'{"status":"CLOSED","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
+-- A lead who leaves the cycle makes the link inactive too.
+reset role;
+update rush.memberships set active=false where user_id='00000000-0000-4000-8000-000000000001';
+set role anon;
+select pg_temp.expect_error(format($q$select rush.submit_client_feedback(%L,'{"satisfaction":4,"wouldRehire":"YES","quote":"","attribution":"","quotePermission":false,"logoPermission":false,"permissionScope":""}')$q$,:'token'),'55000');
+reset role;
+update rush.memberships set active=true where user_id='00000000-0000-4000-8000-000000000001';
+set role anon;
 -- Validation.
 select pg_temp.expect_error(format($q$select rush.submit_client_feedback(%L,'{"satisfaction":6,"wouldRehire":"YES","quote":"","attribution":"","quotePermission":false,"logoPermission":false,"permissionScope":""}')$q$,:'token'),'22023');
 select pg_temp.expect_error(format($q$select rush.submit_client_feedback(%L,'{"satisfaction":4.5,"wouldRehire":"YES","quote":"","attribution":"","quotePermission":false,"logoPermission":false,"permissionScope":""}')$q$,:'token'),'22023');
@@ -108,6 +126,9 @@ set role authenticated;
 select rush.set_project_lead('p2',1,'00000000-0000-4000-8000-000000000001');
 select rush.save_project_delivery('p2',2,'{"status":"CLOSED","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
 select rush.create_client_feedback_link('p2','test')->>'token' as token2 \gset
+select set_config('test.actor','00000000-0000-4000-8000-000000000004',false);
+select pg_temp.expect_error($q$select rush.revoke_client_feedback_link('p2')$q$,'42501');
+select set_config('test.actor','00000000-0000-4000-8000-000000000002',false);
 select rush.revoke_client_feedback_link('p2');
 do $$begin if rush.client_closeout_overview()->1->>'state'<>'REVOKED' then raise exception 'revoke state wrong';end if;end$$;
 select rush.create_client_feedback_link('p2','test')->>'token' as token3 \gset

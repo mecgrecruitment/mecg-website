@@ -32,11 +32,13 @@ export default function ClientCloseout({ projectId, cycleId, closeout, hasLead }
         setNotice({ error: true, text: errorText(body, "The change could not be confirmed. Reload to check before retrying.") });
         return;
       }
-      if (action === "create" && "link" in body && typeof body.link === "string" && "expiresAt" in body && typeof body.expiresAt === "string") {
-        setLink({ url: body.link, expiresAt: body.expiresAt });
-      } else {
+      if (action === "revoke") {
         setLink(null);
         setNotice({ error: false, text: "Link cancelled. It no longer opens the form." });
+      } else if ("link" in body && typeof body.link === "string" && "expiresAt" in body && typeof body.expiresAt === "string") {
+        setLink({ url: body.link, expiresAt: body.expiresAt });
+      } else {
+        setNotice({ error: true, text: "The link could not be shown. Reload, then create a new one." });
       }
       router.refresh();
     } catch {
@@ -46,7 +48,10 @@ export default function ClientCloseout({ projectId, cycleId, closeout, hasLead }
 
   async function copy() {
     if (!link) return;
-    try { await navigator.clipboard.writeText(link.url); setCopied(true); } catch { setCopied(false); }
+    try { await navigator.clipboard.writeText(link.url); setCopied(true); setNotice(null); } catch {
+      setCopied(false);
+      setNotice({ error: true, text: "Couldn’t copy automatically. Select the link above and copy it." });
+    }
   }
 
   const received = closeout?.state === "RECEIVED" ? closeout : null;

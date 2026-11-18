@@ -15,8 +15,9 @@ Built November 18, 2026, on top of the engagement tracker (PR #18). Routes: the 
   - The link is used up.
   - The board panel shows the answers.
   - A **draft evidence entry** (`member_tool_records`, kind `evidence`) is created. The project lead owns it, in the cycle the board was working in when it made the link. It starts **Pending** verification and **Restricted** sharing. It holds the project title, a result line with the client's feedback, and the requested sharing scope.
+- On submit, the database re-checks what the link was issued under. The project must still be Closed, and the draft goes to the **current** lead, who must still be an active member of that cycle. If the project was reopened or the lead left, the client sees "This feedback link is no longer active" and the link is **not** used up. Re-closing the project or assigning a new lead makes it work again.
 - The draft lacks the required evidence fields (problem, approach, deliverable link, measurement). The evidence page labels it "Draft" and lists what's missing. The lead completes it with the normal form, which still requires every field.
-- An evidence reviewer can't review a draft. The page hides the review form. The database also refuses any verification or sharing state other than Pending/Restricted until the content is complete (`review_member_tool` is redefined with that one extra check).
+- An evidence reviewer can't review a draft. The page hides the review form. The database also refuses to verify or clear a draft until the content is complete. `review_member_tool` is redefined with that one extra check, and its body is otherwise copied from the member-tools migration. A draft can still be marked Withdrawn.
 
 ## Access
 
@@ -28,7 +29,7 @@ Built November 18, 2026, on top of the engagement tracker (PR #18). Routes: the 
 | Anyone holding the token | Sees the project title and client label only | No | No |
 
 - Making a link requires: the project is **Closed**, it has a lead, and that lead is an active MEMBER, BOARD, PANEL or OWNER in the chosen cycle. This means the draft lands where the lead can see it. Once feedback has been received, no new link can be made.
-- The board panel shows the client's answers, including the comment, because the club asked for them. The copy in the evidence library follows member-tools rules (owner and explicit reviewers only).
+- The board panel shows the client's answers, including the comment (see "Defaults" below). The copy in the evidence library follows member-tools rules (owner and explicit reviewers only).
 - No table grants or policies. All access goes through `SECURITY DEFINER` RPCs:
   - Board, actor-checked: `client_closeout_overview`, `create_client_feedback_link`, `revoke_client_feedback_link`.
   - Token-checked, callable by `anon`: `client_feedback_form`, `submit_client_feedback`.
@@ -38,6 +39,8 @@ Built November 18, 2026, on top of the engagement tracker (PR #18). Routes: the 
 
 ## Defaults the owner may want to change
 
+- **Board visibility:** every board member sees the client's full answers in the panel, including the comment, credit and scope. The spec didn't say either way. The narrower option is to show the board only the rating, the rehire answer and the permission flags. If you choose that, the comment would live only in the lead's evidence draft.
+- **Questions:** satisfaction is on a 1 to 5 scale. Would-rehire is Yes, Maybe or No. The comment is optional, but it is required if quote permission is given. Both permissions default to off.
 - The link lasts 30 days. This is set in `create_client_feedback_link`.
 - One response per project. A reopened and re-closed project keeps its first response.
 - The draft goes to the cycle the board member has selected on `/admin/projects`.

@@ -102,7 +102,9 @@ create function rush.revoke_client_feedback_link(target_project_id text) returns
 language plpgsql security definer set search_path='' as $$
 declare f rush.client_feedback%rowtype;
 begin
- if not rush.engagement_is_board() then raise exception 'Board access required' using errcode='42501'; end if;
+ if not rush.engagement_is_board() or not exists(select 1 from rush.client_feedback c where c.project_id=target_project_id
+  and rush.has_cycle_role(c.cycle_id,array['BOARD','OWNER']::rush.member_role[])) then
+  raise exception 'Board access in this cycle required' using errcode='42501'; end if;
  update rush.client_feedback set token_digest=null
   where project_id=target_project_id and submitted_at is null and token_digest is not null returning * into f;
  if not found then raise exception 'No open feedback link for this project' using errcode='55000'; end if;
@@ -121,7 +123,7 @@ $$;
 
 create function rush.submit_client_feedback(raw_token text, payload jsonb) returns boolean
 language plpgsql security definer set search_path='' as $$
-declare f rush.client_feedback%rowtype; title text; record_id uuid := gen_random_uuid();
+declare f rush.client_feedback%rowtype; d rush.project_delivery%rowtype; title text; record_id uuid := gen_random_uuid();
  sat int; rehire text; quote_text text; credit text; scope text; quote_ok boolean; logo_ok boolean; result_text text; use_text text;
 begin
  if jsonb_typeof(payload) is distinct from 'object'
@@ -135,7 +137,8 @@ begin
  if payload->>'satisfaction' !~ '^[1-5]$' then raise exception 'Choose a satisfaction rating from 1 to 5' using errcode='22023'; end if;
  sat := (payload->>'satisfaction')::int;
  rehire := payload->>'wouldRehire';
- quote_text := trim(payload->>'quote'); credit := trim(payload->>'attribution'); scope := trim(payload->>'permissionScope');
+ quote_text := btrim(payload->>'quote',E' \t\r\n\f\v'); credit := btrim(payload->>'attribution',E' \t\r\n\f\v');
+ scope := btrim(payload->>'permissionScope',E' \t\r\n\f\v');
  quote_ok := (payload->>'quotePermission')::boolean; logo_ok := (payload->>'logoPermission')::boolean;
  if rehire not in ('YES','MAYBE','NO') then raise exception 'Say whether you would work with MECG again' using errcode='22023'; end if;
  if char_length(quote_text)>1000 or char_length(credit)>200 or char_length(scope)>1000 then raise exception 'Shorten your answers' using errcode='22023'; end if;
@@ -145,6 +148,12 @@ begin
  select * into f from rush.client_feedback where token_digest=rush.client_feedback_digest(raw_token) for update;
  if not found or f.submitted_at is not null or f.expires_at<=now() then
   raise exception 'This feedback link has expired or was already used' using errcode='P0002'; end if;
+ -- Re-check what the link was issued under: still Closed, and the draft goes
+ -- to the current lead, who must still be an active member of the cycle.
+ select * into d from rush.project_delivery where project_id=f.project_id for update;
+ if not found or d.status<>'CLOSED' or d.lead_id is null or not exists(select 1 from rush.memberships m join rush.profiles p on p.id=m.user_id
+  where m.cycle_id=f.cycle_id and m.user_id=d.lead_id and m.active and p.active and m.role in ('MEMBER','BOARD','PANEL','OWNER')) then
+  raise exception 'This feedback link is no longer active. Ask your MECG contact for a new one.' using errcode='55000'; end if;
  select pr.title into title from rush.projects pr where pr.id=f.project_id;
 
  -- The draft holds only fields the evidence form knows; the lead completes the
@@ -158,20 +167,22 @@ begin
   || case when scope<>'' then ' Scope: ' || scope else '' end
   || ' Confirm the respondent can grant this before clearing.';
  insert into rush.member_tool_records(id,cycle_id,kind,owner_id,content)
- values(record_id,f.cycle_id,'evidence',f.lead_id,jsonb_build_object('title',left(trim(title),1000),'result',result_text,'allowedUse',use_text));
+ values(record_id,f.cycle_id,'evidence',d.lead_id,jsonb_build_object('title',left(trim(title),1000),'result',result_text,'allowedUse',use_text));
 
  update rush.client_feedback set token_digest=null, submitted_at=now(), satisfaction=sat, would_rehire=rehire,
   quote=quote_text, attribution=credit, quote_permission=quote_ok, logo_permission=logo_ok, permission_scope=scope,
-  evidence_record_id=record_id
+  evidence_record_id=record_id, lead_id=d.lead_id
   where project_id=f.project_id;
  insert into rush.audit_events(actor_id,cycle_id,action,resource,resource_id,metadata)
  values(null,f.cycle_id,'CLIENT_FEEDBACK_SUBMITTED','Project',f.project_id,
-  jsonb_build_object('evidenceRecordId',record_id,'leadId',f.lead_id,'quotePermission',quote_ok,'logoPermission',logo_ok,'hasQuote',quote_text<>''));
+  jsonb_build_object('evidenceRecordId',record_id,'leadId',d.lead_id,'quotePermission',quote_ok,'logoPermission',logo_ok,'hasQuote',quote_text<>''));
  return true;
 end; $$;
 
 -- A draft from close-out lacks required evidence fields until the lead
--- completes it. Only a complete record can be marked anything but Pending.
+-- completes it. A draft can't be verified or cleared until it is complete.
+-- Body copied from 20261112120000_member_operations_tools.sql; only the
+-- completeness check before the update is new. Keep the two in step.
 create or replace function rush.review_member_tool(c text,k text,record_id uuid,expected_revision integer,payload jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare r rush.member_tool_records%rowtype; key_name text; verification text:=payload->>'verification'; sharing text:=payload->>'sharing';
@@ -193,7 +204,7 @@ begin
  if not found then raise exception 'Record unavailable' using errcode='42501'; end if;
  if r.owner_id=rush.actor_id() then raise exception 'A different reviewer must verify your work' using errcode='42501'; end if;
  if r.revision<>expected_revision then raise exception 'Record changed. Reload before reviewing.' using errcode='55000'; end if;
- if verification<>'Pending' or sharing<>'Restricted' then
+ if verification<>'Pending' or sharing='Cleared for specified use' then
   begin perform rush.validate_member_tool_content(k,r.content);
   exception when sqlstate '22023' then raise exception 'The owner must complete this draft before review' using errcode='22023'; end;
  end if;

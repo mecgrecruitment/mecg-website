@@ -23,6 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   const { error } = await createPublicClient().rpc("submit_client_feedback", { raw_token: token, payload: parsed.value });
   if (error) {
     if (error.code === "P0002") return NextResponse.json({ error: used }, { status: 410 });
+    if (error.code === "55000" && error.message) return NextResponse.json({ error: error.message }, { status: 410 });
     if (error.code === "22023" && error.message) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("submit_client_feedback failed", error.code);
     return NextResponse.json({ error: "We could not confirm your feedback. Your answers are still here; try again shortly." }, { status: 502 });

@@ -43,3 +43,12 @@ test("a used or expired link says so", async (t) => {
   assert.equal(response.status, 410);
   assert.match((await response.json()).error, /already used/);
 });
+
+test("a link for a reopened project or departed lead says it is no longer active", async (t) => {
+  t.mock.module("@/lib/rate-limit", limiter("allowed"));
+  t.mock.module("@/lib/supabase/public", { namedExports: { createPublicClient: () => ({ rpc: async () => ({ data: null, error: { code: "55000", message: "This feedback link is no longer active. Ask your MECG contact for a new one." } }) }) } });
+  const { POST } = await route("inactive");
+  const response = await POST(request(answers), params());
+  assert.equal(response.status, 410);
+  assert.match((await response.json()).error, /no longer active/);
+});
