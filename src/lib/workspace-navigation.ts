@@ -49,6 +49,7 @@ export function workspaceAdminTools({
       ? [["/admin/audit", "Activity"] as const]
       : []),
     ...(isBoard ? [["/admin/projects", "Projects"] as const] : []),
+    ...(isBoard ? [["/admin/decisions", "Decisions"] as const] : []),
     ...(canManageCycle ? [["/admin/settings", "Settings"] as const] : []),
     ...(isOwner ? [["/admin/operations", "Operations"] as const] : []),
   ];
