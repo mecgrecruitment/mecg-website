@@ -16,9 +16,19 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const budgetRequest = (id, title, extra) => ({ id, kind: 'REIMBURSEMENT', title, category: 'EVENTS', amountCents: 8450, spentOn: '2026-11-10', receiptUrl: '', notes: '', status: 'SUBMITTED', isMine: false, requesterName: 'Jordan Patel', decisionNote: '', decidedAt: null, decidedByName: null, paidOn: null, paymentNote: '', paidRecordedByName: null, revision: 1, createdAt: '2026-11-11T20:00:00Z', updatedAt: '2026-11-11T20:00:00Z', ...extra });
+const budgetRequests = [
+  budgetRequest('preview-budget-1', 'Pizza and drinks for the Thursday case workshop with the sophomore cohort', { receiptUrl: 'https://drive.example.invalid/receipts/2026-11-10-pizza-house-workshop-order-4471.pdf', notes: 'Paid on my own card at Pizza House. 18 people came; receipt includes tip.' }),
+  budgetRequest('preview-budget-2', 'Printer paper and toner', { category: 'OPERATIONS', amountCents: 4299, isMine: true, requesterName: 'Morgan Member', createdAt: '2026-11-15T20:00:00Z' }),
+  budgetRequest('preview-budget-3', 'Banner for the winter mass meeting', { kind: 'PURCHASE', category: 'MARKETING', amountCents: 12000, spentOn: null, status: 'APPROVED', decidedAt: '2026-11-12T20:00:00Z', decidedByName: 'Bailey Board', decisionNote: 'Use the vendor from last term.', revision: 2 }),
+  budgetRequest('preview-budget-4', 'Coffee for interviewers', { category: 'RECRUITMENT', amountCents: 2500, status: 'PAID', decidedAt: '2026-11-12T20:00:00Z', decidedByName: 'Bailey Board', paidOn: '2026-11-14', paymentNote: 'Club Venmo', paidRecordedByName: 'Olivia Owner', revision: 3 }),
+  budgetRequest('preview-budget-5', 'Team hoodies', { category: 'OTHER', amountCents: 64000, status: 'DENIED', decidedAt: '2026-11-12T20:00:00Z', decidedByName: 'Bailey Board', decisionNote: 'Not in this term’s budget. Bring it to the spring budget meeting.', revision: 2 }),
+];
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'budget_request_log': return { requests: budgetRequests };
+    case 'my_budget_requests': return { requests: budgetRequests.map(request => ({ ...request, isMine: true, requesterName: 'Morgan Member' })) };
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
