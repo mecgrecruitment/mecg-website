@@ -48,6 +48,7 @@ test("someone not listed gets an open form prefilled from their profile, and no 
   assert.match(html, /name="gradTerm"[^>]*value="Winter 2027"/);
   assert.match(html, /name="employer"[^>]*value=""/);
   assert.match(html, /List me in the directory/);
+  assert.match(html, /filled in from your profile; clear them/, "prefilled fields are called out");
   assert.doesNotMatch(html, /Take me off/);
   assert.doesNotMatch(html, /Remove on their request/, "members cannot remove others");
   assert.equal((html.match(/<form/g) ?? []).length, 1);
@@ -61,6 +62,7 @@ test("listed members see what they share, can edit and can opt out", async (t) =
   assert.match(html, /You are listed\. Members and the board see your name and your graduation term, major, city, LinkedIn link, note\./);
   assert.match(html, /name="employer"[^>]*value=""/);
   assert.match(html, /Save listing/);
+  assert.doesNotMatch(html, /filled in from your profile/);
   assert.match(html, /Take me off the directory/);
   assert.match(html, /Morgan Member<span[^>]*> · you<\/span>/);
 });
@@ -72,6 +74,8 @@ test("entries show only shared details, safe links and name order from the serve
   assert.match(html, /Analyst, Ford/);
   assert.match(html, /href="https:\/\/www.linkedin.com\/in\/morgan" target="_blank" rel="noopener noreferrer"/);
   assert.match(html, /href="mailto:morgan@example.invalid"/);
+  const nameless = render(AlumniDirectory, directory({ entries: [{ ...morgan, name: null }] }));
+  assert.match(nameless, /profile of Name not set/);
   assert.equal((html.match(/LinkedIn<span/g) ?? []).length, 1, "Alex shared no link");
   assert.match(html, /2 listed/);
   assert.match(html, /never public/);

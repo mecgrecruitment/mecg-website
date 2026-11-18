@@ -42,7 +42,9 @@ function hasExactly(value: Record<string, unknown>, keys: readonly string[]) {
 
 // Same rules as the database: https on linkedin.com or one of its subdomains.
 const linkedin = /^https:\/\/([a-z0-9-]+\.)?linkedin\.com\/\S*$/i;
-const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// No character that changes a mailto: link (?, &, comma, ;, %, quotes,
+// brackets, slashes), so a listing cannot add recipients, a subject or a body.
+const email = /^[^\s@?&,;%"<>()[\]\\/]+@[^\s@?&,;%"<>()[\]\\/]+\.[^\s@?&,;%"<>()[\]\\/]+$/;
 export function isLinkedinUrl(value: string): boolean {
   return value.length <= fieldLimits.linkedinUrl && linkedin.test(value);
 }
@@ -78,7 +80,8 @@ function text(value: unknown): string {
 // and its whitespace and length rules count characters slightly differently
 // from JavaScript, so one stored row must not blank the whole directory. The
 // LinkedIn link becomes an href, so it must be a LinkedIn https link whatever
-// else it holds; anything else is dropped rather than linked.
+// else it holds, and the email must pass the mailto-safe rule; anything else
+// is dropped rather than linked.
 function parseListing(value: unknown): AlumniListing {
   if (!isObject(value)) throw new Error("Invalid alumni response");
   const { id, isMine, name, revision, updatedAt } = value;
@@ -88,6 +91,8 @@ function parseListing(value: unknown): AlumniListing {
   const fields = {} as ListingInput;
   for (const field of listingFields) fields[field] = text(value[field]);
   if (fields.linkedinUrl && !linkedin.test(fields.linkedinUrl)) fields.linkedinUrl = "";
+  // The email becomes a mailto: link, so the same rule applies on the way out.
+  if (fields.contactEmail && !email.test(fields.contactEmail)) fields.contactEmail = "";
   return { id: text(id), isMine, name, ...fields, revision, updatedAt: text(updatedAt) };
 }
 

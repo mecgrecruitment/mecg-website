@@ -27,6 +27,7 @@ test("invalid payloads are refused before the database", async (t) => {
   for (const payload of [
     { revision: -1, listing },
     { revision: 1.5, listing },
+    { revision: 2_147_483_648, listing },
     { revision: "1", listing },
     { revision: 0, listing: { ...listing, linkedinUrl: "https://example.com/x" } },
     { revision: 0, listing: { ...listing, contactEmail: "nope" } },

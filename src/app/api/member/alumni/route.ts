@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (Object.keys(fields).some((key) => !["revision", "listing"].includes(key))) return bad("Invalid form.");
   // A first listing is saved at revision 0; an edit names the revision it was opened at.
   const { revision } = fields;
-  if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0) return bad("Invalid listing revision.");
+  if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision > 2_147_483_647) return bad("Invalid listing revision.");
   const parsed = parseListingInput(fields.listing);
   if (!parsed.ok) return bad(parsed.error);
 

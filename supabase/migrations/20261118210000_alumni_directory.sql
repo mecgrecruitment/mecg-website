@@ -18,6 +18,8 @@
 -- Opting out deletes the row: the shared details are gone, not hidden.
 -- Writes carry an optimistic revision. Audit metadata records which fields
 -- are shared or changed and the revision, never the shared values.
+-- Contact emails may not hold characters that change a mailto: link (? & , ; %
+-- quotes, brackets, slashes), so a listing cannot add recipients or a subject.
 -- Text may not start or end with any whitespace (\s), so stored values match
 -- what the site trims before saving.
 create table rush.alumni_listings (
@@ -29,7 +31,7 @@ create table rush.alumni_listings (
  job_title text not null default '' check (char_length(job_title) <= 120 and job_title !~ '^\s|\s$'),
  location text not null default '' check (char_length(location) <= 120 and location !~ '^\s|\s$'),
  linkedin_url text not null default '' check (linkedin_url='' or (char_length(linkedin_url) <= 300 and linkedin_url ~* '^https://([a-z0-9-]+\.)?linkedin\.com/[^[:space:]]*$')),
- contact_email text not null default '' check (contact_email='' or (char_length(contact_email) <= 254 and contact_email ~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$')),
+ contact_email text not null default '' check (contact_email='' or (char_length(contact_email) <= 254 and contact_email ~ '^[^][:space:]@?&,;%"<>()[\\/]+@[^][:space:]@?&,;%"<>()[\\/]+\.[^][:space:]@?&,;%"<>()[\\/]+$')),
  note text not null default '' check (char_length(note) <= 500 and note !~ '^\s|\s$'),
  revision integer not null default 1 check (revision >= 1),
  created_at timestamptz not null default now(),
@@ -112,7 +114,7 @@ begin
   raise exception 'Shorten the longer fields' using errcode='22023'; end if;
  if payload->>'linkedinUrl'<>'' and (char_length(payload->>'linkedinUrl')>300 or payload->>'linkedinUrl' !~* '^https://([a-z0-9-]+\.)?linkedin\.com/[^[:space:]]*$') then
   raise exception 'The LinkedIn link must be a full https://linkedin.com address' using errcode='22023'; end if;
- if payload->>'contactEmail'<>'' and (char_length(payload->>'contactEmail')>254 or payload->>'contactEmail' !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$') then
+ if payload->>'contactEmail'<>'' and (char_length(payload->>'contactEmail')>254 or payload->>'contactEmail' !~ '^[^][:space:]@?&,;%"<>()[\\/]+@[^][:space:]@?&,;%"<>()[\\/]+\.[^][:space:]@?&,;%"<>()[\\/]+$') then
   raise exception 'Check the email address' using errcode='22023'; end if;
 
  select * into old from rush.alumni_listings where profile_id=actor for update;

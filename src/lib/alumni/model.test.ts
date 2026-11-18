@@ -26,18 +26,19 @@ test("LinkedIn links and emails follow the database rules", () => {
   for (const good of ["https://www.linkedin.com/in/x", "https://LinkedIn.com/in/x", "https://uk.linkedin.com/in/x", "https://linkedin.com/"]) assert.equal(isLinkedinUrl(good), true, good);
   for (const bad of ["http://www.linkedin.com/in/x", "https://linkedin.com.evil.example/in/x", "https://evil.example/linkedin.com/in/x", "javascript:alert(1)", "https://linkedin.com/in/a b", `https://linkedin.com/${"x".repeat(300)}`]) assert.equal(isLinkedinUrl(bad), false, bad);
   assert.equal(isContactEmail("a@b.co"), true);
-  for (const bad of ["a@b", "not an email", "a @b.co", "@b.co"]) assert.equal(isContactEmail(bad), false, bad);
+  for (const bad of ["a@b", "not an email", "a @b.co", "@b.co", "a@b.co?bcc=x@evil.test", "a@b.co,x@evil.test", "a@b.co&subject=x", "a%40b@c.co", "a@b.co;x@y.co", "<a@b.co>"]) assert.equal(isContactEmail(bad), false, bad);
   assert.equal(parseListingInput({ ...form, linkedinUrl: "https://example.com/in/x" }).ok, false);
   assert.equal(parseListingInput({ ...form, contactEmail: "nope" }).ok, false);
 });
 
 test("directory responses parse, and a bad link from storage is never linked", () => {
-  const raw = { canRemoveOthers: true, mine: null, defaults: { gradTerm: "Winter 2027", major: "" }, entries: [listing, { ...listing, id: "l2", name: null, linkedinUrl: "javascript:alert(1)" }] };
+  const raw = { canRemoveOthers: true, mine: null, defaults: { gradTerm: "Winter 2027", major: "" }, entries: [listing, { ...listing, id: "l2", name: null, linkedinUrl: "javascript:alert(1)", contactEmail: "a@b.co?bcc=x@evil.test" }] };
   const parsed = parseAlumniDirectory(raw);
   assert.equal(parsed.canRemoveOthers, true);
   assert.equal(parsed.mine, null);
   assert.deepEqual(parsed.defaults, { gradTerm: "Winter 2027", major: "" });
   assert.equal(parsed.entries[1]!.linkedinUrl, "");
+  assert.equal(parsed.entries[1]!.contactEmail, "", "a stored email that could inject mailto fields is not linked");
   assert.equal(parsed.entries[1]!.name, null);
   assert.deepEqual(parseAlumniDirectory({ ...raw, defaults: null, mine: listing }).defaults, { gradTerm: "", major: "" });
   for (const bad of [null, { ...raw, entries: null }, { ...raw, canRemoveOthers: "yes" }, { ...raw, entries: [{ ...listing, revision: 0 }] }, { ...raw, entries: [{ ...listing, employer: null }] }, { ...raw, mine: { ...listing, isMine: "true" } }]) {

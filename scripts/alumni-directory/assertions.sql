@@ -59,6 +59,10 @@ select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{
 select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"linkedinUrl":"javascript:alert(1)"}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"not an email"}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"a@b"}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"a@b.co?bcc=x@evil.test"}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"a@b.co,x@evil.test"}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"a%40b@c.co"}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_alumni_listing(0,pg_temp.form('{"contactEmail":"a@b.co/x"}'))$q$,'22023');
 -- Nothing was written by the refused saves.
 do $$begin if rush.alumni_directory()->'mine'<>'null'::jsonb then raise exception 'refused save wrote a row';end if;end$$;
 
@@ -150,6 +154,7 @@ end$$;
 -- Table checks hold for direct writes too.
 select pg_temp.expect_error($q$insert into rush.alumni_listings(profile_id,note) values('00000000-0000-4000-8000-000000000001',' padded')$q$,'23514');
 select pg_temp.expect_error($q$insert into rush.alumni_listings(profile_id,linkedin_url) values('00000000-0000-4000-8000-000000000001','https://example.com/x')$q$,'23514');
+select pg_temp.expect_error($q$insert into rush.alumni_listings(profile_id,contact_email) values('00000000-0000-4000-8000-000000000001','a@b.co&subject=x')$q$,'23514');
 -- Deleting a profile removes its listing.
 insert into rush.alumni_listings(profile_id) values('00000000-0000-4000-8000-000000000008');
 delete from rush.profiles where id='00000000-0000-4000-8000-000000000008';

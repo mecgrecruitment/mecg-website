@@ -62,7 +62,7 @@ function ListingForm({ mine, defaults, announce }: { mine: AlumniListing | null;
     void submit.run("/api/member/alumni", { revision: mine?.revision ?? 0, listing });
   }
   return <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); send(event.currentTarget); }}>
-    <p className="text-sm leading-6 text-muted">Fill in only what you want to share. Leave a field empty and it isn’t shown. Your name comes from your profile.</p>
+    <p className="text-sm leading-6 text-muted">Fill in only what you want to share. Leave a field empty and it isn’t shown. Your name comes from your profile.{!mine && (defaults.gradTerm || defaults.major) ? " Graduation term and major are filled in from your profile; clear them to keep them off your listing." : ""}</p>
     <div className="grid gap-4 sm:grid-cols-2">
       {listingFields.map((name) => <label key={name} htmlFor={`${id}-${name}`} className={`block text-sm font-semibold${name === "note" ? " sm:col-span-2" : ""}`}>{fieldLabels[name]}
         {name === "note"
@@ -80,17 +80,18 @@ function ListingForm({ mine, defaults, announce }: { mine: AlumniListing | null;
 function RemoveButton({ listing, label, announce }: { listing: AlumniListing; label: string; announce: Announce }) {
   const submit = useSubmit(() => announce(listing.isMine ? "You are no longer listed. Your shared details were deleted." : `${listing.name ?? "That listing"} removed from the directory.`));
   return <form className="space-y-2" onSubmit={(event) => { event.preventDefault(); void submit.run("/api/member/alumni/remove", { id: listing.isMine ? null : listing.id }); }}>
-    <button type="submit" className="button-secondary" aria-disabled={submit.pending}>{submit.pending ? "Removing…" : label}{listing.isMine ? null : <span className="sr-only"> {listing.name}</span>}</button>
+    <button type="submit" className="button-secondary" aria-disabled={submit.pending}>{submit.pending ? "Removing…" : label}{listing.isMine ? null : <span className="sr-only"> {listing.name ?? "this listing"}</span>}</button>
     <p role="alert" className="text-sm leading-6 text-danger">{submit.error}</p>
   </form>;
 }
 
 function Entry({ listing, canRemove, announce }: { listing: AlumniListing; canRemove: boolean; announce: Announce }) {
+  const name = listing.name ?? "Name not set";
   const headline = [listing.jobTitle, listing.employer].filter(Boolean).join(", ");
   const facts = (["gradTerm", "major", "location"] as const).filter((name) => listing[name]);
   return <article className="min-w-0 space-y-3 rounded-xl bg-paper p-5">
     <header>
-      <h3 className="break-words text-lg font-semibold text-mecg-navy">{listing.name ?? "Name not set"}{listing.isMine ? <span className="text-sm font-normal text-muted"> · you</span> : null}</h3>
+      <h3 className="break-words text-lg font-semibold text-mecg-navy">{name}{listing.isMine ? <span className="text-sm font-normal text-muted"> · you</span> : null}</h3>
       {headline && <p className="mt-1 break-words text-sm">{headline}</p>}
     </header>
     {facts.length > 0 && <dl className="grid gap-3 text-sm sm:grid-cols-3">
@@ -98,11 +99,11 @@ function Entry({ listing, canRemove, announce }: { listing: AlumniListing; canRe
     </dl>}
     {listing.note && <p className="whitespace-pre-line break-words text-sm leading-6"><span className="font-semibold">Happy to talk about:</span> {listing.note}</p>}
     {(listing.linkedinUrl || listing.contactEmail) && <p className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-      {listing.linkedinUrl && <a href={listing.linkedinUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">LinkedIn<span className="sr-only"> profile of {listing.name} (opens in a new tab)</span></a>}
-      {listing.contactEmail && <a href={`mailto:${listing.contactEmail}`} className="inline-flex min-h-11 items-center break-all font-semibold text-mecg-blue underline underline-offset-4">{listing.contactEmail}</a>}
+      {listing.linkedinUrl && <a href={listing.linkedinUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-semibold text-mecg-blue underline underline-offset-4">LinkedIn<span className="sr-only"> profile of {name} (opens in a new tab)</span></a>}
+      {listing.contactEmail && <a href={`mailto:${encodeURIComponent(listing.contactEmail).replace(/%40/g, "@")}`} className="inline-flex min-h-11 items-center break-all font-semibold text-mecg-blue underline underline-offset-4">{listing.contactEmail}</a>}
     </p>}
     {canRemove && !listing.isMine && <details className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
-      <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Remove on their request<span className="sr-only"> {listing.name}</span></summary>
+      <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Remove on their request<span className="sr-only"> {name}</span></summary>
       <div className="mt-3 space-y-3">
         <p className="text-xs leading-5 text-muted">For an alum who asked to come off the directory but can’t sign in any more. This deletes their shared details.</p>
         <RemoveButton listing={listing} label="Remove listing" announce={announce} />
