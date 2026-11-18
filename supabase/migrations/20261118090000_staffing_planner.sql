@@ -72,14 +72,19 @@ begin
  if expected_revision is null or expected_revision<0 then raise exception 'Invalid revision' using errcode='22023'; end if;
  if weekly_hours is null or weekly_hours not between 0 and 40 then
   raise exception 'Weekly hours must be a whole number from 0 to 40.' using errcode='22023'; end if;
- if skills is null or jsonb_typeof(skills)<>'array' or jsonb_array_length(skills)>12
-  or exists(select 1 from jsonb_array_elements(skills) s where jsonb_typeof(s)<>'string' or char_length(btrim(s#>>'{}')) not between 1 and 40) then
+ -- Nested so array functions only run once the value is known to be an array.
+ if skills is null or jsonb_typeof(skills)<>'array' then
+  raise exception 'List up to 12 skills, each 1 to 40 characters.' using errcode='22023'; end if;
+ if jsonb_array_length(skills)>12
+  or exists(select 1 from jsonb_array_elements(skills) s where case when jsonb_typeof(s)<>'string' then true else char_length(btrim(s#>>'{}')) not between 1 and 40 end) then
   raise exception 'List up to 12 skills, each 1 to 40 characters.' using errcode='22023'; end if;
  -- Trim and drop case-insensitive duplicates, keeping the first spelling and order.
  select coalesce(array_agg(v order by first_at),'{}') into clean_skills from (
   select (array_agg(btrim(s.value#>>'{}') order by s.ordinality))[1] as v, min(s.ordinality) as first_at
   from jsonb_array_elements(skills) with ordinality s group by lower(btrim(s.value#>>'{}'))) d;
- if preferred_project_ids is null or jsonb_typeof(preferred_project_ids)<>'array' or jsonb_array_length(preferred_project_ids)>3
+ if preferred_project_ids is null or jsonb_typeof(preferred_project_ids)<>'array' then
+  raise exception 'Choose up to 3 different projects.' using errcode='22023'; end if;
+ if jsonb_array_length(preferred_project_ids)>3
   or exists(select 1 from jsonb_array_elements(preferred_project_ids) p where jsonb_typeof(p)<>'string')
   or (select count(distinct p) from jsonb_array_elements_text(preferred_project_ids) p)<>jsonb_array_length(preferred_project_ids) then
   raise exception 'Choose up to 3 different projects.' using errcode='22023'; end if;

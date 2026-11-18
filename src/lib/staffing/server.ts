@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { parseMyAvailability, parsePlan, type MyAvailability, type PlanProject, type StaffingPlan } from "./model";
+import { parseMyAvailability, parsePlan, type MyAvailability, type ProjectOption, type StaffingPlan } from "./model";
 
 // Each loader returns null when its data cannot be read (RPC missing before the
 // migration, access refused, or a malformed response) so the page shows an
@@ -19,7 +19,7 @@ export async function loadStaffingPlan(cycleId: string): Promise<StaffingPlan | 
   }
 }
 
-export async function loadMyAvailability(cycleId: string): Promise<{ availability: MyAvailability; projects: PlanProject[] } | null> {
+export async function loadMyAvailability(cycleId: string): Promise<{ availability: MyAvailability; projects: ProjectOption[] } | null> {
   try {
     const client = await createClient();
     const [availabilityResult, projectsResult] = await Promise.all([
@@ -31,7 +31,7 @@ export async function loadMyAvailability(cycleId: string): Promise<{ availabilit
     if (projectsResult.error) throw projectsResult.error;
     const availability = parseMyAvailability(availabilityResult.data);
     if (!availability || availability.cycleId !== cycleId) throw new Error("my_staffing_availability returned an unusable payload");
-    const projects = (projectsResult.data ?? []).map((project) => ({ id: project.id, title: project.title, semester: project.semester, staffCount: 0 }));
+    const projects = (projectsResult.data ?? []).map((project) => ({ id: project.id, title: project.title, semester: project.semester }));
     return { availability, projects };
   } catch (error) {
     console.error("my_staffing_availability unavailable", error);

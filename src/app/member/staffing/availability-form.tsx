@@ -7,13 +7,13 @@ import FormField from "@/components/form-field";
 import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 import {
   MAX_NOTES_LENGTH, MAX_PREFERRED_PROJECTS, MAX_SKILLS, MAX_WEEKLY_HOURS,
-  parseAvailabilityInput, parseSkillsText, type MyAvailability, type PlanProject,
+  parseAvailabilityInput, parseSkillsText, type MyAvailability, type ProjectOption,
 } from "@/lib/staffing/model";
 
 const RANKS = ["First choice", "Second choice", "Third choice"].slice(0, MAX_PREFERRED_PROJECTS);
 const unconfirmed = "Save could not be confirmed. Reload to check before retrying.";
 
-export default function AvailabilityForm({ availability, projects }: { availability: MyAvailability; projects: PlanProject[] }) {
+export default function AvailabilityForm({ availability, projects }: { availability: MyAvailability; projects: ProjectOption[] }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState<{ error: boolean; text: string } | null>(null);
@@ -46,6 +46,7 @@ export default function AvailabilityForm({ availability, projects }: { availabil
         return;
       }
       setNotice({ error: false, text: "Availability saved. The board will see it when it staffs projects." });
+      // The form stays mounted (keeping focus); the refresh brings the new revision in through props.
       router.refresh();
     } catch {
       setNotice({ error: true, text: unconfirmed });
@@ -53,9 +54,8 @@ export default function AvailabilityForm({ availability, projects }: { availabil
   }
 
   return (
+    <>
     <form
-      // Remount after a save so the fields show the stored values and revision.
-      key={availability.revision}
       aria-labelledby="availability-title"
       className="workspace-panel grid gap-4 rounded-xl bg-paper p-5 sm:grid-cols-2"
       onSubmit={(event) => { event.preventDefault(); void submit(event.currentTarget); }}
@@ -101,23 +101,27 @@ export default function AvailabilityForm({ availability, projects }: { availabil
         ))}
         {projects.length === 0 && <p className="text-sm text-muted sm:col-span-3">No projects are listed yet.</p>}
       </fieldset>
-      <label className="block text-sm font-semibold text-mecg-navy sm:col-span-2">
-        Notes for the board
+      <div className="text-sm font-semibold text-mecg-navy sm:col-span-2">
+        <label htmlFor="staffing-notes">Notes for the board</label>
         <textarea
+          id="staffing-notes"
+          aria-describedby="staffing-notes-hint"
           name="notes"
           rows={3}
           maxLength={MAX_NOTES_LENGTH}
           defaultValue={availability.notes}
           disabled={pending}
-          className="mt-2 w-full rounded-xl bg-white p-3 text-sm font-normal inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]"
+          className="mt-2 w-full rounded-xl bg-white p-3 text-sm font-normal inset-ring inset-ring-line-strong outline-none focus:inset-ring-2 focus:inset-ring-mecg-navy"
         />
-        <span className="mt-2 block text-xs font-normal leading-5 text-muted">Optional. Exams, travel or anything else the board should plan around.</span>
-      </label>
+        <span id="staffing-notes-hint" className="mt-2 block text-xs font-normal leading-5 text-muted">Optional. Exams, travel or anything else the board should plan around.</span>
+      </div>
       <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
         <button type="submit" className="button-primary" disabled={pending}>{pending ? "Saving…" : "Save availability"}</button>
         {!availability.submitted && <span className="text-sm text-muted">Not submitted yet.</span>}
       </div>
-      {notice && <p role={notice.error ? "alert" : "status"} className={`text-sm leading-6 sm:col-span-2 ${notice.error ? "text-danger" : "text-success"}`}>{notice.text}</p>}
     </form>
+    {/* Always mounted, so screen readers announce the text when it changes. */}
+    <p role="status" aria-live="polite" className={`text-sm leading-6 ${notice?.error ? "text-danger" : "text-success"}`}>{notice?.text ?? ""}</p>
+    </>
   );
 }

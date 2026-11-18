@@ -42,6 +42,8 @@ select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'[3]','[]','')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,$j$["$q$||repeat('x',41)||$q$"]$j$,'[]','')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'{}','[]','')$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'"SQL"','[]','')$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'[]','"p1"','')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'[]','["p1","p2","p3","p4"]','')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'[]','["p1","p1"]','')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_my_staffing_availability('fall',0,5,'[]','["missing"]','')$q$,'22023');

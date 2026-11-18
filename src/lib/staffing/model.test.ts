@@ -29,13 +29,15 @@ test("availability input is validated", () => {
   assert.deepEqual(parseAvailabilityInput({ weeklyHours: 8, skills: ["Excel"], preferredProjectIds: ["p1"], notes: " Free Fridays " }), {
     ok: true, value: { weeklyHours: 8, skills: ["Excel"], preferredProjectIds: ["p1"], notes: "Free Fridays" },
   });
+  assert.deepEqual(parseAvailabilityInput({ weeklyHours: 4, skills: ["SQL", " sql ", "Excel"], preferredProjectIds: [], notes: "" }), {
+    ok: true, value: { weeklyHours: 4, skills: ["SQL", "Excel"], preferredProjectIds: [], notes: "" },
+  });
   for (const bad of [
     { weeklyHours: 41, skills: [], preferredProjectIds: [], notes: "" },
     { weeklyHours: 2.5, skills: [], preferredProjectIds: [], notes: "" },
     { weeklyHours: 4, skills: Array.from({ length: 13 }, (_, i) => `s${i}`), preferredProjectIds: [], notes: "" },
     { weeklyHours: 4, skills: ["x".repeat(41)], preferredProjectIds: [], notes: "" },
     { weeklyHours: 4, skills: [" "], preferredProjectIds: [], notes: "" },
-    { weeklyHours: 4, skills: ["Excel", "excel"], preferredProjectIds: [], notes: "" },
     { weeklyHours: 4, skills: [], preferredProjectIds: ["a", "b", "c", "d"], notes: "" },
     { weeklyHours: 4, skills: [], preferredProjectIds: ["a", "a"], notes: "" },
     { weeklyHours: 4, skills: [], preferredProjectIds: [""], notes: "" },

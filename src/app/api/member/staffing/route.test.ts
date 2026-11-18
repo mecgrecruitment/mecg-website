@@ -34,7 +34,7 @@ test("invalid payloads are refused before the database", async (t) => {
     { ...save, revision: -1 },
     { ...save, revision: "0" },
     { ...save, availability: { ...save.availability, weeklyHours: 41 } },
-    { ...save, availability: { ...save.availability, skills: ["a", "A"] } },
+    { ...save, availability: { ...save.availability, skills: ["  "] } },
     { ...save, availability: { ...save.availability, extra: true } },
     [],
   ]) assert.equal((await POST(request(payload))).status, 400, JSON.stringify(payload));

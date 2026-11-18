@@ -3,7 +3,7 @@ import Link from "next/link";
 import StatusPill from "@/components/status-pill";
 import { memberRoleLabel } from "@/lib/labels";
 import { withWorkspaceCycle } from "@/lib/workspace-cycle-url";
-import { LOAD_LABELS, loadSignal, matchesSkill, sortForPlanning, summarizePlan, type PlanMember, type StaffingPlan } from "@/lib/staffing/model";
+import { LOAD_LABELS, LOAD_TONES, loadSignal, matchesSkill, sortForPlanning, summarizePlan, type PlanMember, type StaffingPlan } from "@/lib/staffing/model";
 
 const GRID = "sm:grid-cols-[minmax(0,1.3fr)_minmax(0,0.6fr)_minmax(0,1.4fr)_minmax(0,1.4fr)_minmax(0,1.1fr)]";
 
@@ -38,7 +38,7 @@ function Row({ member, names }: { member: PlanMember; names: Map<string, string>
       </div>
       <div className="flex flex-col gap-2 sm:items-end">
         <span className="sr-only">Load: </span>
-        <StatusPill tone={signal === "OPEN" ? "navy" : signal === "OVER" ? "orange" : "neutral"}>{LOAD_LABELS[signal]}</StatusPill>
+        <StatusPill tone={LOAD_TONES[signal]}>{LOAD_LABELS[signal]}</StatusPill>
         <span className="text-xs text-muted sm:text-right">
           {staffed.length ? `On ${staffed.join(", ")}` : "No current projects"}
         </span>
@@ -99,7 +99,7 @@ export default function StaffingPlanView({ plan, cycleId, skill }: { plan: Staff
         <input type="hidden" name="cycleId" value={cycleId} />
         <label className="min-w-0 text-sm font-medium">
           Filter by skill
-          <input name="skill" defaultValue={skill} maxLength={40} className="mt-2 block min-h-11 w-64 max-w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:shadow-[inset_0_0_0_2px_var(--color-mecg-orange)]" />
+          <input name="skill" defaultValue={skill} maxLength={40} className="mt-2 block min-h-11 w-64 max-w-full rounded-xl bg-white px-3 text-sm inset-ring inset-ring-line-strong outline-none focus:inset-ring-2 focus:inset-ring-mecg-navy" />
         </label>
         <button type="submit" className="button-secondary min-h-11">Filter</button>
         {skill && <Link className="text-sm font-semibold text-mecg-navy underline underline-offset-4" href={withWorkspaceCycle("/admin/staffing", cycleId)}>Clear</Link>}

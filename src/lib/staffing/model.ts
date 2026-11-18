@@ -1,8 +1,10 @@
 // Staffing planner: members tell the board, per cycle, how many hours a week
 // they can give client work, their skills and the projects they would most
 // like. The board reads that next to each member's current project load
-// before staffing a project. Limits here must match
-// supabase/migrations/20261118090000_staffing_planner.sql.
+// before staffing a project. Limits mirror
+// supabase/migrations/20261118090000_staffing_planner.sql. These checks are
+// slightly stricter (UTF-16 length, all-whitespace trim), so anything they
+// accept the database accepts too.
 
 export const MAX_WEEKLY_HOURS = 40;
 export const MAX_SKILLS = 12;
@@ -38,7 +40,9 @@ export type PlanMember = Availability & {
   staffedProjectIds: string[];
 };
 
-export type PlanProject = { id: string; title: string; semester: string; staffCount: number };
+export type ProjectOption = { id: string; title: string; semester: string };
+
+export type PlanProject = ProjectOption & { staffCount: number };
 
 export type StaffingPlan = { cycleId: string; projects: PlanProject[]; members: PlanMember[] };
 
@@ -50,6 +54,14 @@ export const LOAD_LABELS: Record<LoadSignal, string> = {
   STAFFED: "Staffed",
   OVER: "Staffed, no hours",
   UNAVAILABLE: "No hours this cycle",
+};
+
+export const LOAD_TONES: Record<LoadSignal, "navy" | "orange" | "neutral"> = {
+  NOT_SUBMITTED: "neutral",
+  OPEN: "navy",
+  STAFFED: "neutral",
+  OVER: "orange",
+  UNAVAILABLE: "neutral",
 };
 
 export function loadSignal(member: PlanMember): LoadSignal {
@@ -120,14 +132,13 @@ export function parseAvailabilityInput(value: unknown): { ok: true; value: Avail
   const skillError = `List up to ${MAX_SKILLS} different skills, each 1 to ${MAX_SKILL_LENGTH} characters.`;
   if (!isStringList(skills) || skills.length > MAX_SKILLS) return { ok: false, error: skillError };
   const trimmed = skills.map((skill) => skill.trim());
-  if (trimmed.some((skill) => !skill || skill.length > MAX_SKILL_LENGTH)
-    || new Set(trimmed.map((skill) => skill.toLowerCase())).size !== trimmed.length) return { ok: false, error: skillError };
+  if (trimmed.some((skill) => !skill || skill.length > MAX_SKILL_LENGTH)) return { ok: false, error: skillError };
   if (!isStringList(preferredProjectIds) || preferredProjectIds.length > MAX_PREFERRED_PROJECTS
     || preferredProjectIds.some((id) => !id || id.length > 100) || new Set(preferredProjectIds).size !== preferredProjectIds.length) {
     return { ok: false, error: `Choose up to ${MAX_PREFERRED_PROJECTS} different projects.` };
   }
   if (typeof notes !== "string" || notes.trim().length > MAX_NOTES_LENGTH) return { ok: false, error: `Notes must be ${MAX_NOTES_LENGTH} characters or fewer.` };
-  return { ok: true, value: { weeklyHours, skills: trimmed, preferredProjectIds, notes: notes.trim() } };
+  return { ok: true, value: { weeklyHours, skills: parseSkillsText(trimmed.join("\n")), preferredProjectIds, notes: notes.trim() } };
 }
 
 function parseAvailability(value: Record<string, unknown>): Availability | null {
