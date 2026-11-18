@@ -75,7 +75,7 @@ export default function MemberStanding({ standing, cycleId }: { standing: Standi
         {metrics.map(([label, value]) => (
           <div key={label}>
             <dt className="text-xs text-muted">{label}</dt>
-            <span className="tabular-nums mt-1 text-xl font-semibold text-mecg-navy">{value}</span>
+            <dd className="tabular-nums mt-1 text-xl font-semibold text-mecg-navy">{value}</dd>
           </div>
         ))}
       </dl>

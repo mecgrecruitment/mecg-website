@@ -37,6 +37,7 @@ test("an unavailable rollup shows an alert and no rows", () => {
   const html = renderToStaticMarkup(createElement(MemberStanding, { standing: null, cycleId: "fall" }));
   assert.match(html, /role="alert"/);
   assert.doesNotMatch(html, /<li/);
+  assert.doesNotMatch(html, /<dt/);
 });
 
 test("at-risk members lead with their reasons; untracked onboarding is not flagged", () => {
@@ -47,4 +48,10 @@ test("at-risk members lead with their reasons; untracked onboarding is not flagg
   assert.match(html, /Not tracked/);
   assert.match(html, /These are the default thresholds/);
   assert.match(html, /href="\/admin\/settings\?cycleId=fall#member-standing"/);
+});
+
+test("each summary term is paired with its value", () => {
+  const html = renderToStaticMarkup(createElement(MemberStanding, { standing, cycleId: "fall" }));
+  assert.equal((html.match(/<dt/g) ?? []).length, 5);
+  assert.equal((html.match(/<dd/g) ?? []).length, 5);
 });
