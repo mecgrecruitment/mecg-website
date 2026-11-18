@@ -77,3 +77,10 @@ test("the secondary navigation trigger names the current destination", () => {
   );
   assert.equal(secondaryDestinationLabel("/admin", [["/admin/projects", "Projects"]]), undefined);
 });
+
+test("only current project leads see the projects-I-lead link, after live tasks", () => {
+  const base = { hasSpeedDatingRound: false, hasGroupCaseWork: false, votingOpen: false, isScreeningReviewer: false, openScreeningCount: 0, hasGradingEvent: true };
+  assert.equal(workspaceMemberTools(base).some(([href]) => href === "/member/projects"), false);
+  const links = workspaceMemberTools({ ...base, leadsProject: true });
+  assert.deepEqual(links.slice(0, 2), [["/member/event", "Live event"], ["/member/projects", "Projects I lead"]]);
+});

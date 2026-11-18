@@ -4,6 +4,7 @@ import { hasPermission } from "@/lib/authorization";
 import { canVoteInStage, currentHashStage } from "@/lib/hash-tally";
 import type { CurrentUser } from "@/lib/auth";
 import { loadWorkspaceContext } from "@/lib/workspace-context";
+import { leadsAnyProject } from "@/lib/engagement/lead-nav";
 import { workspaceAdminTools, workspaceMemberTools, type WorkspaceNavLink } from "@/lib/workspace-navigation";
 import { withWorkspaceCycle, workspacePermissionsForPath } from "@/lib/workspace-cycle-url";
 import { cycleStatusLabel } from "@/lib/labels";
@@ -38,7 +39,7 @@ export default async function WorkspaceNav({
   // internal page. Safe defaults preserve role-based navigation if it fails.
   const requestedCycle = await requestedWorkspaceCycleId();
   if (requestedCycle && !hasPermission(user.memberships, requestedCycle, "WORKSPACE_ACCESS")) notFound();
-  const { data: workspaceContext } = await loadWorkspaceContext(cycleId);
+  const [{ data: workspaceContext }, leadsProject] = await Promise.all([loadWorkspaceContext(cycleId), leadsAnyProject()]);
   const currentContext = workspaceContext?.cycleId === cycleId ? workspaceContext : null;
   const isScreeningReviewer = currentContext?.isScreeningReviewer ?? false;
   const openScreening = currentContext?.openScreeningCount ?? 0;
@@ -80,6 +81,7 @@ export default async function WorkspaceNav({
     isScreeningReviewer,
     openScreeningCount: openScreening,
     hasGradingEvent,
+    leadsProject,
   });
 
   const adminTools = workspaceAdminTools({

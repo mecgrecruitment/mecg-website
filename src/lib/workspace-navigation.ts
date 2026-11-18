@@ -7,6 +7,7 @@ export function workspaceMemberTools({
   isScreeningReviewer,
   openScreeningCount,
   hasGradingEvent,
+  leadsProject = false,
 }: {
   hasSpeedDatingRound: boolean;
   hasGroupCaseWork: boolean;
@@ -14,6 +15,7 @@ export function workspaceMemberTools({
   isScreeningReviewer: boolean;
   openScreeningCount: number;
   hasGradingEvent: boolean;
+  leadsProject?: boolean;
 }): WorkspaceNavLink[] {
   return [
     ...(hasSpeedDatingRound ? [["/member/speed-dating", "Speed Dating"] as const] : []),
@@ -23,6 +25,7 @@ export function workspaceMemberTools({
       ? [["/member/screening", `Read applications${openScreeningCount ? ` · ${openScreeningCount}` : ""}`] as const]
       : []),
     ...(hasGradingEvent ? [["/member/event", "Live event"] as const] : []),
+    ...(leadsProject ? [["/member/projects", "Projects I lead"] as const] : []),
     ["/member/refer", "Refer someone"],
     ["/member/benefits", "Benefits"],
     ["/member/tools/pipeline", "Pipeline"],
