@@ -66,9 +66,14 @@ const entry: BudgetRequest = { ...form, id: "00000000-0000-4000-8000-00000000001
 test("the list response parses and malformed responses throw", () => {
   assert.deepEqual(parseBudgetRequestList({ requests: [entry] }), { requests: [entry] });
   for (const bad of [null, {}, { requests: [{ ...entry, status: "OPEN" }] }, { requests: [{ ...entry, revision: 0 }] }, { requests: [{ ...entry, receiptUrl: "javascript:x" }] },
-    { requests: [{ ...entry, isMine: "no" }] }, { requests: [{ ...entry, status: "PAID" }] }, { requests: [{ ...entry, paidOn: "2026-11-14" }] }, { requests: [{ ...entry, title: " padded " }] }]) {
+    { requests: [{ ...entry, isMine: "no" }] }, { requests: [{ ...entry, status: "PAID" }] }, { requests: [{ ...entry, paidOn: "2026-11-14" }] }, { requests: [{ ...entry, receiptUrl: "http://x.invalid/r" }] }]) {
     assert.throws(() => parseBudgetRequestList(bad), JSON.stringify(bad));
   }
+});
+
+test("stored rows the database accepted but JS counts differently still parse", () => {
+  const odd = { ...entry, title: `${"😀".repeat(150)}\t`, notes: " padded ", receiptUrl: "https://drive.example.invalid/a\u00a0b" };
+  assert.deepEqual(parseBudgetRequestList({ requests: [odd] }).requests[0], odd);
 });
 
 test("the summary and board order follow status", () => {

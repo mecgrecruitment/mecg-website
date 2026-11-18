@@ -145,20 +145,25 @@ function nullableText(value: unknown): string | null {
   return value === null ? null : text(value);
 }
 
+// Stored rows are read leniently: the database already enforced its own
+// limits, and its whitespace and length rules count characters slightly
+// differently from JavaScript, so one stored row must not blank the whole
+// list. Only the shape, the enums and a safe receipt link are required here.
 function parseRequest(value: unknown): BudgetRequest {
   if (!isObject(value)) throw new Error("Invalid budget response");
-  const { id, status, isMine, requesterName, decisionNote, decidedAt, decidedByName, paidOn, paymentNote, paidRecordedByName, revision, createdAt, updatedAt, ...rest } = value;
-  const input = parseBudgetRequestInput(rest);
-  if (!input.ok) throw new Error(`Invalid budget response: ${input.error}`);
-  if (input.value.title !== rest.title || input.value.notes !== rest.notes || input.value.receiptUrl !== rest.receiptUrl) throw new Error("Invalid budget response");
-  if (!includes(requestStatuses, status) || typeof isMine !== "boolean") throw new Error("Invalid budget response");
+  const { id, kind, title, category, amountCents, spentOn, receiptUrl, notes, status, isMine, requesterName, decisionNote, decidedAt, decidedByName, paidOn, paymentNote, paidRecordedByName, revision, createdAt, updatedAt } = value;
+  if (!includes(requestKinds, kind) || !includes(budgetCategories, category) || !includes(requestStatuses, status) || typeof isMine !== "boolean") throw new Error("Invalid budget response");
+  if (typeof amountCents !== "number" || !Number.isSafeInteger(amountCents) || amountCents < 1) throw new Error("Invalid budget response");
+  if (spentOn !== null && !isIsoDate(spentOn)) throw new Error("Invalid budget response");
+  // The link becomes an href, so it must be https whatever else it holds.
+  if (typeof receiptUrl !== "string" || (receiptUrl !== "" && !/^https:\/\//.test(receiptUrl))) throw new Error("Invalid budget response");
   if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) throw new Error("Invalid revision");
   if (paidOn !== null && !isIsoDate(paidOn)) throw new Error("Invalid budget response");
   if ((status === "PAID") !== (paidOn !== null)) throw new Error("Invalid budget response");
   return {
-    ...input.value, id: text(id), status, isMine, requesterName: nullableText(requesterName), decisionNote: text(decisionNote),
-    decidedAt: nullableText(decidedAt), decidedByName: nullableText(decidedByName), paidOn: paidOn as string | null, paymentNote: text(paymentNote),
-    paidRecordedByName: nullableText(paidRecordedByName), revision, createdAt: text(createdAt), updatedAt: text(updatedAt),
+    id: text(id), kind, title: text(title), category, amountCents, spentOn, receiptUrl, notes: text(notes), status, isMine,
+    requesterName: nullableText(requesterName), decisionNote: text(decisionNote), decidedAt: nullableText(decidedAt), decidedByName: nullableText(decidedByName),
+    paidOn, paymentNote: text(paymentNote), paidRecordedByName: nullableText(paidRecordedByName), revision, createdAt: text(createdAt), updatedAt: text(updatedAt),
   };
 }
 

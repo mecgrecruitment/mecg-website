@@ -44,8 +44,11 @@ Members ask the board for money, and the board records what it decided and when 
 
 - Who can send requests: every active member except panel-only accounts (same rule as staffing availability). Should it be narrower, for example board and project leads only?
 - No self-approval and no self-recorded payment. With a single active board member, that person's own requests cannot move. Is that the right rule, or should owners be exempt?
+- The same board member may both approve a request and record it paid. Only the requester is excluded. Should approver and payer be different people?
+- A receipt link is optional at every step: a reimbursement can be approved and recorded paid without one, and once paid the request is closed, so a receipt can't be added afterwards. Should recording payment on a reimbursement require a receipt?
 - The $10,000 cap per request, the six budget areas and USD only. Changing any of them needs a migration.
-- The board sees every request in full, including notes and the receipt link. Totals are all-time; there is no per-term budget or spending limit.
-- Dates are not checked against today, so a mistyped future spending or payment date is accepted.
+- The board sees every request in full, including notes and the receipt link. This is deliberately the opposite of the member-tools default, where board rank alone unlocks nothing private: deciding on club money needs the details. Totals are all-time; there is no per-term budget or spending limit.
+- Dates are not checked against today or against each other, so a mistyped future date, or a paid date before the approval, is accepted.
+- Access is org-wide: an active membership in any cycle counts. The board page still needs a workspace cycle for its navigation, like the other board pages.
 - A denied request cannot be reopened; the member sends a new one.
 - There is no retention or deletion.

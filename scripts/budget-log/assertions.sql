@@ -70,6 +70,8 @@ select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.fo
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"category":"PARTY"}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"title":""}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"title":" padded "}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"title":"tab padded\t"}'))$q$,'22023');
+select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"notes":"\nnewline first"}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"amountCents":0}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"amountCents":-5}'))$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_budget_request(null,0,pg_temp.form('{"amountCents":84.5}'))$q$,'22023');

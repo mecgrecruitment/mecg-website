@@ -66,7 +66,7 @@ function useSubmit(onSuccess: () => void) {
       router.refresh();
     } finally { locked.current = false; setPending(false); }
   }
-  return { pending, error, setError, run };
+  return { pending, error, setError, run, busy: () => locked.current };
 }
 
 function RequestForm({ request, onSaved }: { request: BudgetRequest | null; onSaved: () => void }) {
@@ -148,18 +148,22 @@ function DecideForm({ request, announce }: { request: BudgetRequest; announce: A
   const id = useId();
   const step = useRef<"APPROVE" | "DENY">("APPROVE");
   const submit = useSubmit(() => announce(`“${request.title}” ${step.current === "APPROVE" ? "approved" : "denied"}.`));
-  function send(form: HTMLFormElement) {
+  // The step is read from the button that submitted, and only once no save is
+  // in flight, so a second click during a save cannot change the announcement.
+  function send(form: HTMLFormElement, submitter: HTMLElement | null) {
+    if (submit.busy()) return;
+    step.current = submitter?.getAttribute("value") === "DENY" ? "DENY" : "APPROVE";
     const note = String(new FormData(form).get("note") ?? "").trim();
     if (step.current === "DENY" && !note) { submit.setError("Say why the request is denied. The member sees this note."); return; }
     void submit.run("/api/member/budget/actions", { id: request.id, revision: request.revision, action: step.current, payload: { note } });
   }
-  return <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); send(event.currentTarget); }}>
+  return <form className="space-y-3" onSubmit={(event) => { event.preventDefault(); send(event.currentTarget, (event.nativeEvent as SubmitEvent).submitter as HTMLElement | null); }}>
     <label htmlFor={`${id}-note`} className="block text-sm font-semibold">Note to the member · needed to deny
       <textarea id={`${id}-note`} name="note" maxLength={DECISION_NOTE_LIMIT} className="field-control mt-2 min-h-16 py-3 text-sm" />
     </label>
     <div className="flex flex-wrap gap-3">
-      <button type="submit" className="button-primary" aria-disabled={submit.pending} onClick={() => { step.current = "APPROVE"; }}>Approve<span className="sr-only"> {request.title}</span></button>
-      <button type="submit" className="button-secondary" aria-disabled={submit.pending} onClick={() => { step.current = "DENY"; }}>Deny<span className="sr-only"> {request.title}</span></button>
+      <button type="submit" className="button-primary" value="APPROVE" aria-disabled={submit.pending}>Approve<span className="sr-only"> {request.title}</span></button>
+      <button type="submit" className="button-secondary" value="DENY" aria-disabled={submit.pending}>Deny<span className="sr-only"> {request.title}</span></button>
     </div>
     <p role="alert" className="text-sm leading-6 text-danger">{submit.error}</p>
   </form>;

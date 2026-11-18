@@ -16,22 +16,24 @@
 -- Writes carry an optimistic revision. Audit metadata records the kind,
 -- category, amount, status, revision and which fields changed, never the
 -- title, notes, receipt link, decision note or payment note.
+-- Text may not start or end with any whitespace (\s), not only spaces, so
+-- stored values match what the site trims before saving.
 create table rush.budget_requests (
  id uuid primary key default gen_random_uuid(),
  requester_id uuid references rush.profiles(id) on delete set null,
  kind text not null check (kind in ('REIMBURSEMENT','PURCHASE')),
- title text not null check (char_length(title) between 1 and 200 and title=btrim(title)),
+ title text not null check (char_length(title) between 1 and 200 and title !~ '^\s|\s$'),
  category text not null check (category in ('EVENTS','RECRUITMENT','CLIENT_WORK','MARKETING','OPERATIONS','OTHER')),
  amount_cents integer not null check (amount_cents between 1 and 1000000),
  spent_on date,
  receipt_url text not null default '' check (receipt_url='' or (char_length(receipt_url) <= 500 and receipt_url ~ '^https://[^[:space:]]+$')),
- notes text not null default '' check (char_length(notes) <= 2000 and notes=btrim(notes)),
+ notes text not null default '' check (char_length(notes) <= 2000 and notes !~ '^\s|\s$'),
  status text not null default 'SUBMITTED' check (status in ('SUBMITTED','APPROVED','DENIED','PAID','WITHDRAWN')),
- decision_note text not null default '' check (char_length(decision_note) <= 1000 and decision_note=btrim(decision_note)),
+ decision_note text not null default '' check (char_length(decision_note) <= 1000 and decision_note !~ '^\s|\s$'),
  decided_at timestamptz,
  decided_by uuid references rush.profiles(id) on delete set null,
  paid_on date,
- payment_note text not null default '' check (char_length(payment_note) <= 200 and payment_note=btrim(payment_note)),
+ payment_note text not null default '' check (char_length(payment_note) <= 200 and payment_note !~ '^\s|\s$'),
  paid_recorded_at timestamptz,
  paid_recorded_by uuid references rush.profiles(id) on delete set null,
  revision integer not null default 1 check (revision >= 1),
@@ -131,9 +133,9 @@ begin
   raise exception 'Check the date' using errcode='22023';
  end if;
  if coalesce(payload->>'kind','') not in ('REIMBURSEMENT','PURCHASE')
-  or jsonb_typeof(payload->'title') is distinct from 'string' or char_length(payload->>'title') not between 1 and 200 or payload->>'title'<>btrim(payload->>'title')
+  or jsonb_typeof(payload->'title') is distinct from 'string' or char_length(payload->>'title') not between 1 and 200 or payload->>'title' ~ '^\s|\s$'
   or coalesce(payload->>'category','') not in ('EVENTS','RECRUITMENT','CLIENT_WORK','MARKETING','OPERATIONS','OTHER')
-  or jsonb_typeof(payload->'notes') is distinct from 'string' or char_length(payload->>'notes')>2000 or payload->>'notes'<>btrim(payload->>'notes')
+  or jsonb_typeof(payload->'notes') is distinct from 'string' or char_length(payload->>'notes')>2000 or payload->>'notes' ~ '^\s|\s$'
   or jsonb_typeof(payload->'receiptUrl') is distinct from 'string'
   or (payload->>'receiptUrl'<>'' and (char_length(payload->>'receiptUrl')>500 or payload->>'receiptUrl' !~ '^https://[^[:space:]]+$')) then
   raise exception 'Check the request fields' using errcode='22023'; end if;
@@ -201,7 +203,7 @@ begin
   or (select count(*) from jsonb_object_keys(payload))<>cardinality(keys) then
   raise exception 'Invalid form' using errcode='22023'; end if;
  if action in ('APPROVE','DENY') then
-  if jsonb_typeof(payload->'note') is distinct from 'string' or char_length(payload->>'note')>1000 or payload->>'note'<>btrim(payload->>'note') then
+  if jsonb_typeof(payload->'note') is distinct from 'string' or char_length(payload->>'note')>1000 or payload->>'note' ~ '^\s|\s$' then
    raise exception 'Shorten the note to 1,000 characters' using errcode='22023'; end if;
   note := payload->>'note';
   if action='DENY' and note='' then raise exception 'Say why the request is denied' using errcode='22023'; end if;
@@ -210,7 +212,7 @@ begin
    raise exception 'Give the date it was paid' using errcode='22023'; end if;
   begin paid := (payload->>'paidOn')::date;
   exception when others then raise exception 'Give the date it was paid' using errcode='22023'; end;
-  if jsonb_typeof(payload->'paymentNote') is distinct from 'string' or char_length(payload->>'paymentNote')>200 or payload->>'paymentNote'<>btrim(payload->>'paymentNote') then
+  if jsonb_typeof(payload->'paymentNote') is distinct from 'string' or char_length(payload->>'paymentNote')>200 or payload->>'paymentNote' ~ '^\s|\s$' then
    raise exception 'Shorten the payment note to 200 characters' using errcode='22023'; end if;
  end if;
 
