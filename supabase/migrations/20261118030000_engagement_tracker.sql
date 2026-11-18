@@ -187,7 +187,9 @@ begin
  -- Only the current lead writes these fields, and each write is a fresh
  -- weekly stamp, so it does not take or bump the delivery revision.
  update rush.project_delivery set health=flag, health_note=trim(note), health_set_at=now(), health_set_by=actor
-  where project_id=target_project_id;
+  where project_id=target_project_id and lead_id=actor;
+ -- Re-checked under the row lock: a concurrent lead change wins.
+ if not found then raise exception 'Only the project lead sets the weekly health flag' using errcode='42501'; end if;
  insert into rush.audit_events(actor_id,action,resource,resource_id,metadata)
  values(actor,'PROJECT_HEALTH_SET','Project',target_project_id,jsonb_build_object('health',flag));
  return rush.engagement_delivery_json(target_project_id);
