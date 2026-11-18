@@ -2502,6 +2502,7 @@ export type Database = {
       save_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
+      pipeline_rollup: { Args: { target_cycle_id: string }; Returns: Json }
 
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }

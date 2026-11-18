@@ -16,9 +16,21 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const rollupCounts = { Research: [3, 1], Qualified: [2, 1], Conversation: [2, 0], Proposal: [1, 1], Agreed: [1, 0], Dormant: [1, 0], Closed: [0, 2] };
+const rollupOverdue = { 'Research|Client': 1, 'Proposal|Sponsor': 1, 'Qualified|Client': 1 };
+const rollupCells = Object.entries(rollupCounts).flatMap(([stage, [client, sponsor]]) => [['Client', client], ['Sponsor', sponsor]].map(([track, count]) => ({ stage, track, count, overdue: rollupOverdue[`${stage}|${track}`] ?? 0 })));
+// PREVIEW_PIPELINE_REVIEWER=1 previews the view of a board member who is also a pipeline reviewer.
+const pipelineReviewer = process.env.PREVIEW_PIPELINE_REVIEWER === '1';
+const pipelineRollup = { cycleId: cycle.id, asOf: '2026-11-18', total: rollupCells.reduce((sum, cell) => sum + cell.count, 0), overdue: 3, unclassified: 0, canReview: pipelineReviewer, cells: rollupCells,
+  overdueRecords: pipelineReviewer ? [
+    { id: 'preview-opp-1', title: 'Great Lakes Robotics Cooperative of Southeast Michigan', stage: 'Research', track: 'Client', nextDate: '2026-11-04', ownerName: 'Riley Analyst' },
+    { id: 'preview-opp-2', title: 'Huron Valley Manufacturing', stage: 'Qualified', track: 'Client', nextDate: '2026-11-12', ownerName: 'Morgan Member' },
+    { id: 'preview-opp-3', title: 'Arbor Instruments', stage: 'Proposal', track: 'Sponsor', nextDate: '2026-11-17', ownerName: 'Alexandra Montgomery-Vasquez' },
+  ] : null };
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'pipeline_rollup': return pipelineRollup;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
