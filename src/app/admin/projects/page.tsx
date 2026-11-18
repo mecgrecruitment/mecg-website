@@ -5,6 +5,9 @@ import { selectWorkspaceCycle } from "@/lib/workspace-cycle";
 import { createClient } from "@/lib/supabase/server";
 import WorkspaceHeader from "@/components/workspace-header";
 import WorkspaceNav from "@/components/workspace-nav";
+import EngagementTracker from "@/components/engagement-tracker";
+import { detroitToday } from "@/lib/engagement/model";
+import { loadTracker } from "@/lib/engagement/server";
 import ProjectEditor, { type ProjectRow, type StaffOption } from "./project-editor";
 
 export const metadata: Metadata = { title: "Projects" };
@@ -20,7 +23,7 @@ export default async function ProjectsPage() {
   const cycleId = await selectWorkspaceCycle(user.memberships, "WORKSPACE_ACCESS");
   if (!cycleId) redirect("/member");
   const supabase = await createClient();
-  const [projectsResult, staffingResult, membersResult] = await Promise.all([
+  const [projectsResult, staffingResult, membersResult, tracker] = await Promise.all([
     supabase
       .from("projects")
       .select("id,slug,title,client_label,industry,semester,decision,context,handoff,methods,deliverables,constraints,member_work,is_public,sort_order")
@@ -28,6 +31,7 @@ export default async function ProjectsPage() {
       .order("title"),
     supabase.from("project_members").select("project_id,user_id"),
     supabase.from("memberships").select("user_id,profiles!inner(display_name)").eq("cycle_id", cycleId).eq("active", true),
+    loadTracker(),
   ]);
   if (projectsResult.error) throw projectsResult.error;
   if (staffingResult.error) throw staffingResult.error;
@@ -61,14 +65,17 @@ export default async function ProjectsPage() {
     .map(([id, name]) => ({ id, name }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const now = new Date();
   return (
     <main className="workspace-stack mx-auto flex max-w-5xl flex-col">
       <WorkspaceHeader
         eyebrow="Client work"
         title="Projects"
-        description="The engagements this group has run, who worked on them, and which are safe to show publicly."
+        description="How each engagement is going, who works on it, and which are safe to show publicly."
       />
       <WorkspaceNav user={user} cycleId={cycleId} current="/admin/projects" />
+      <EngagementTracker tracker={tracker} now={now.toISOString()} today={detroitToday(now)} />
+      <h2 className="text-xl font-semibold text-mecg-navy">Project details and staffing</h2>
       <ProjectEditor projects={projects} staff={staff} />
     </main>
   );

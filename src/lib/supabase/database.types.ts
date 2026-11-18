@@ -2502,6 +2502,11 @@ export type Database = {
       save_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
+      engagement_tracker: { Args: never; Returns: Json }
+      engagement_leads_any: { Args: never; Returns: boolean }
+      save_project_delivery: { Args: { target_project_id: string; expected_revision: number; payload: Json }; Returns: Json }
+      set_project_health: { Args: { target_project_id: string; expected_revision: number; flag: string; note: string }; Returns: Json }
+      set_project_lead: { Args: { target_project_id: string; expected_revision: number; target_user: string | null }; Returns: Json }
 
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }
