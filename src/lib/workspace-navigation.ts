@@ -28,6 +28,7 @@ export function workspaceMemberTools({
     ["/member/tools/pipeline", "Pipeline"],
     ["/member/tools/evidence", "Evidence library"],
     ["/member/tools/lab", "AI lab"],
+    ["/member/alumni", "Alumni"],
     ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ];

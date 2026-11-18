@@ -2500,6 +2500,9 @@ export type Database = {
     Functions: {
       member_tool_workspace: { Args: { c: string; k: string }; Returns: Json }
       save_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
+      alumni_directory: { Args: never; Returns: Json }
+      save_alumni_listing: { Args: { expected_revision: number; payload: Json }; Returns: Json }
+      remove_alumni_listing: { Args: { target_id: string | null }; Returns: boolean }
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
 

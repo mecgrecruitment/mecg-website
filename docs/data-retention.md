@@ -15,6 +15,7 @@ The Board and the appropriate University privacy office must approve retention p
 | Audit events | Supabase PostgreSQL | Minimum retention period |
 | Rate-limit records | Supabase PostgreSQL | Short operational retention |
 | Notification delivery metadata | Supabase PostgreSQL | Retention after final delivery |
+| Alumni directory listings (opt-in contact details) | Supabase PostgreSQL | Whether listings expire; today they stay until the person or the board removes them |
 
 ## Required controls
 

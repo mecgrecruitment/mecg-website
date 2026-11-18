@@ -16,9 +16,17 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const alumniListing = (id, name, extra) => ({ id, isMine: false, name, gradTerm: '', major: '', employer: '', jobTitle: '', location: '', linkedinUrl: '', contactEmail: '', note: '', revision: 1, updatedAt: '2026-11-18T20:00:00Z', ...extra });
+const alumniEntries = [
+  alumniListing('preview-alum-1', 'Alex Alum', { gradTerm: 'Winter 2025', major: 'Mechanical Engineering', employer: 'Deloitte', jobTitle: 'Consultant', location: 'Chicago, IL', linkedinUrl: 'https://www.linkedin.com/in/alex-alum-example', note: 'Recruiting for strategy consulting, case prep, and moving to Chicago after graduation.' }),
+  alumniListing('preview-alum-2', 'Jordan Patel', { gradTerm: 'Winter 2024', employer: 'Ford Motor Company', jobTitle: 'Manufacturing Engineering Supervisor, Electrified Propulsion', contactEmail: 'jordan.patel.longer-address@example.invalid' }),
+  alumniListing('preview-alum-3', 'Morgan Member', { gradTerm: 'Winter 2027', major: 'Industrial and Operations Engineering', isMine: true }),
+  alumniListing('preview-alum-4', 'Sam Lee', { gradTerm: 'Fall 2023' }),
+];
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'alumni_directory': return process.env.PREVIEW_ALUMNI_UNLISTED ? { canRemoveOthers: true, mine: null, defaults: { gradTerm: 'Winter 2027', major: 'Industrial and Operations Engineering' }, entries: alumniEntries.filter(entry => !entry.isMine) } : { canRemoveOthers: true, mine: alumniEntries[2], defaults: { gradTerm: 'Winter 2027', major: 'Industrial and Operations Engineering' }, entries: alumniEntries };
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
