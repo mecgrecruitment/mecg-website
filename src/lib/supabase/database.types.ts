@@ -2503,6 +2503,7 @@ export type Database = {
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
       member_standing: { Args: { target_cycle_id: string }; Returns: Json }
+      member_standing_thresholds: { Args: { target_cycle_id: string }; Returns: Json }
       save_member_standing_thresholds: { Args: { target_cycle_id: string; expected_revision: number; min_attendance_pct: number; min_projects: number; require_onboarding: boolean }; Returns: Json }
 
       actor_can_read_colleague_profile: {

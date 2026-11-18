@@ -44,7 +44,7 @@ export type Assessment = {
 };
 
 // Owner-adjustable defaults (docs/features/member-standing.md). They must match
-// the column defaults in the member_standing migration.
+// the column defaults and rush.standing_thresholds_json in the member_standing migration.
 export const DEFAULT_THRESHOLDS: StandingThresholds = { minAttendancePct: 50, minProjects: 1, requireOnboarding: true };
 
 export const REASON_LABELS: Record<StandingReason, string> = {
@@ -88,7 +88,7 @@ const isCount = (value: unknown): value is number => typeof value === "number" &
 const isPct = (value: unknown): value is number => isCount(value) && value <= 100;
 const isProjectMin = (value: unknown): value is number => isCount(value) && value <= 10;
 
-function parseThresholds(value: unknown): StoredThresholds | null {
+export function parseThresholds(value: unknown): StoredThresholds | null {
   if (!isRecord(value)) return null;
   const { minAttendancePct, minProjects, requireOnboarding, revision, updatedAt, configured } = value;
   if (!isPct(minAttendancePct) || !isProjectMin(minProjects) || typeof requireOnboarding !== "boolean"

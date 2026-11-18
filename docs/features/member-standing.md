@@ -18,13 +18,13 @@ Built November 18, 2026. Route: `/admin/standing` (board). Thresholds: `/admin/s
   | Minimum projects staffed | 1 | 0–10 | 0 |
   | Onboarding must be complete | Yes | Yes/No | No |
 
-  The defaults are owner-adjustable starting points, not a club policy. The page says when the defaults are still in use. They live in two places that must agree: the column defaults in the migration and `DEFAULT_THRESHOLDS` in `src/lib/standing/model.ts`.
+  The defaults are owner-adjustable starting points, not a club policy. The page says when the defaults are still in use. They live in three places that must agree: the column defaults and `rush.standing_thresholds_json` in the migration, and `DEFAULT_THRESHOLDS` in `src/lib/standing/model.ts`.
 - Definitions:
   - **Members**: active profiles with an active membership in the cycle, in any role except PANEL alone (panelists can be outside judges). Board and Owner members are included.
-  - **Events held**: the cycle's Published or Closed events that have already started. Draft, cancelled and future events don't count. Before any event is held, attendance is not judged.
+  - **Events held**, per member: the cycle's Published or Closed events whose check-in window has closed and was still open when the member joined the cycle (their earliest active membership). Draft, cancelled, future and still-live events don't count, and a member who joins mid-cycle isn't penalised for earlier events. Before any event is held for them, attendance is not judged. If memberships are provisioned after events (for example, a late bulk import), those earlier events won't count for anyone.
   - **Attendance at the threshold passes** (2 of 4 at 50% is active). The exact ratio is compared, so 49.6% doesn't round up to 50%.
   - **Projects**: every project the member is staffed on. Projects are org-wide in this schema, so this isn't limited to the cycle.
-  - **Onboarding**: the checklist from the member's most recently accepted offer. Members with no checklist (for example, they joined before onboarding was tracked) show "Not tracked" and are never flagged for it.
+  - **Onboarding**: the checklist from the member's offer accepted in this cycle. Members with no such checklist (they joined another way, or were accepted in a different cycle) show "Not tracked" and are never flagged for it.
 - Threshold saves use an optimistic revision. A stale save is refused with "Thresholds changed. Reload before saving."
 
 ## Access
@@ -35,7 +35,7 @@ Built November 18, 2026. Route: `/admin/standing` (board). Thresholds: `/admin/s
 | Board or owner of a different cycle only | No | No |
 | Members, panel, recruitment committee | No | No |
 
-- No table grants or policies on `rush.member_standing_settings`. Access is only through the actor-checked `SECURITY DEFINER` RPCs `member_standing(cycle)` and `save_member_standing_thresholds(...)`. The page and the API route also check `MANAGE_CYCLE` (Board or Owner of the cycle) before calling them.
+- No table grants or policies on `rush.member_standing_settings`. Access is only through the actor-checked `SECURITY DEFINER` RPCs `member_standing(cycle)`, `member_standing_thresholds(cycle)` (used by Cycle settings, so it never loads the member rollup) and `save_member_standing_thresholds(...)`. The page and the API route also check `MANAGE_CYCLE` (Board or Owner of the cycle) before calling them.
 - The rollup returns counts only. No event names, check-in times, project titles or onboarding owners leave the database. It reads no member-tool records, so the member-tools rule that board rank alone never unlocks private records still holds.
 - Threshold saves write a `MEMBER_STANDING_THRESHOLDS_SET` audit event with the new values and revision. Reading the rollup isn't audited; it is the same data the board already sees in check-in, staffing and onboarding screens.
 
@@ -62,8 +62,8 @@ Built November 18, 2026. Route: `/admin/standing` (board). Thresholds: `/admin/s
   - the access matrix above, including another cycle's owner, panel-only, inactive and anonymous callers
   - direct table and helper denial
   - the member set (panel-only, inactive profiles and revoked memberships excluded)
-  - events held (draft, cancelled, future and other-cycle events excluded)
-  - onboarding from the latest accepted offer, declined offers ignored, untracked as null
+  - events held (draft, cancelled, future, live and other-cycle events excluded; a late joiner counts only events after joining)
+  - onboarding only from an offer accepted in the cycle, declined offers ignored, untracked as null
   - counts-only output keys
   - threshold validation, stale-revision refusal, per-cycle isolation and audit metadata
 

@@ -12,7 +12,8 @@
 -- values set (they are configuration, not confidential content).
 create table rush.member_standing_settings (
  cycle_id text primary key references rush.rush_cycles(id) on delete cascade,
- -- Keep these defaults in step with DEFAULT_THRESHOLDS in src/lib/standing/model.ts.
+ -- Keep these defaults in step with rush.standing_thresholds_json below and
+ -- DEFAULT_THRESHOLDS in src/lib/standing/model.ts.
  min_attendance_pct integer not null default 50 check (min_attendance_pct between 0 and 100),
  min_projects integer not null default 1 check (min_projects between 0 and 10),
  require_onboarding boolean not null default true,
@@ -34,6 +35,7 @@ $$;
 create function rush.standing_thresholds_json(target_cycle_id text) returns jsonb
 language sql stable security definer set search_path='' as $$
  select jsonb_build_object(
+  -- Defaults for a cycle with no saved row; keep in step with the table defaults.
   'minAttendancePct',coalesce(s.min_attendance_pct,50),
   'minProjects',coalesce(s.min_projects,1),
   'requireOnboarding',coalesce(s.require_onboarding,true),
@@ -45,8 +47,11 @@ $$;
 
 -- Members are active profiles with an active membership in the cycle in any
 -- role except PANEL alone (panelists can be outside judges, not members).
--- Events held: the cycle's PUBLISHED or CLOSED events that have started.
--- Onboarding: the checklist from the member's most recently accepted offer.
+-- Events held for a member: the cycle's PUBLISHED or CLOSED events whose
+-- check-in window has closed and was still open when the member joined the
+-- cycle (their earliest active membership). A live event, or one that ended
+-- before they joined, does not count against them.
+-- Onboarding: the checklist from the member's offer accepted in this cycle.
 create function rush.member_standing(target_cycle_id text) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 begin
@@ -57,10 +62,10 @@ begin
   'thresholds',rush.standing_thresholds_json(target_cycle_id),
   'members',coalesce((
    with held as (
-    select e.id from rush.events e
-    where e.cycle_id=target_cycle_id and e.status in ('PUBLISHED','CLOSED') and e.starts_at<=now()),
+    select e.id, e.checkin_closes_at from rush.events e
+    where e.cycle_id=target_cycle_id and e.status in ('PUBLISHED','CLOSED') and e.checkin_closes_at<=now()),
    people as (
-    select p.id, p.display_name, array_agg(distinct m.role::text order by m.role::text) as roles
+    select p.id, p.display_name, array_agg(distinct m.role::text order by m.role::text) as roles, min(m.created_at) as joined_at
     from rush.memberships m join rush.profiles p on p.id=m.user_id
     where m.cycle_id=target_cycle_id and m.active and p.active
     group by p.id, p.display_name
@@ -68,13 +73,13 @@ begin
    onboarding as (
     select distinct on (pn.auth_user_id) pn.auth_user_id as user_id, a.id as application_id
     from rush.applications a join rush.pnms pn on pn.id=a.pnm_id
-    where a.offer_response='ACCEPTED' and pn.auth_user_id is not null
+    where a.cycle_id=target_cycle_id and a.offer_response='ACCEPTED' and pn.auth_user_id is not null
      and exists(select 1 from rush.member_onboarding_items i where i.application_id=a.id)
     order by pn.auth_user_id, a.offer_responded_at desc nulls last, a.id)
    select jsonb_agg(jsonb_build_object(
     'userId',pe.id,'name',pe.display_name,'roles',to_jsonb(pe.roles),
-    'eventsAttended',(select count(*) from rush.member_checkins mc join held h on h.id=mc.event_id where mc.member_id=pe.id),
-    'eventsHeld',(select count(*) from held),
+    'eventsAttended',(select count(*) from rush.member_checkins mc join held h on h.id=mc.event_id where mc.member_id=pe.id and h.checkin_closes_at>pe.joined_at),
+    'eventsHeld',(select count(*) from held h where h.checkin_closes_at>pe.joined_at),
     'projects',(select count(*) from rush.project_members pm where pm.user_id=pe.id),
     'onboardingDone',case when o.application_id is null then null else ob.done end,
     'onboardingTotal',case when o.application_id is null then null else ob.total end)
@@ -82,6 +87,15 @@ begin
    from people pe left join onboarding o on o.user_id=pe.id
    left join lateral (select count(*) filter (where i.completed_at is not null) as done, count(*) as total
     from rush.member_onboarding_items i where i.application_id=o.application_id) ob on true),'[]'::jsonb));
+end; $$;
+
+-- Cycle settings reads only the thresholds, not the member rollup.
+create function rush.member_standing_thresholds(target_cycle_id text) returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+begin
+ if target_cycle_id is null or not rush.standing_is_board(target_cycle_id) then
+  raise exception 'Board access required' using errcode='42501'; end if;
+ return rush.standing_thresholds_json(target_cycle_id);
 end; $$;
 
 create function rush.save_member_standing_thresholds(target_cycle_id text, expected_revision integer, min_attendance_pct integer, min_projects integer, require_onboarding boolean) returns jsonb
@@ -108,6 +122,6 @@ begin
  return rush.standing_thresholds_json(target_cycle_id);
 end; $$;
 
-revoke all on function rush.standing_is_board(text), rush.standing_thresholds_json(text), rush.member_standing(text),
+revoke all on function rush.standing_is_board(text), rush.standing_thresholds_json(text), rush.member_standing(text), rush.member_standing_thresholds(text),
  rush.save_member_standing_thresholds(text,integer,integer,integer,boolean) from public, anon, authenticated;
-grant execute on function rush.member_standing(text), rush.save_member_standing_thresholds(text,integer,integer,integer,boolean) to authenticated;
+grant execute on function rush.member_standing(text), rush.member_standing_thresholds(text), rush.save_member_standing_thresholds(text,integer,integer,integer,boolean) to authenticated;

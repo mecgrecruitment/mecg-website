@@ -23,27 +23,26 @@ function Row({ member, thresholds }: { member: StandingMember; thresholds: Stand
         <p className="truncate text-sm font-semibold text-mecg-navy">{member.name}</p>
         {roles.length > 0 && <p className="text-xs text-muted">{roles.map(memberRoleLabel).join(", ")}</p>}
       </div>
-      <dl className="contents">
-        <div className="flex items-baseline justify-between gap-2 sm:block">
-          <dt className="text-xs text-muted sm:sr-only">Events</dt>
-          <dd className={`tabular-nums text-sm ${assessment.reasons.includes("ATTENDANCE") ? "font-semibold text-mecg-orange-ink" : ""}`}>
-            {member.eventsHeld ? `${member.eventsAttended} of ${member.eventsHeld} · ${assessment.attendancePct}%` : "No events yet"}
-          </dd>
-        </div>
-        <div className="flex items-baseline justify-between gap-2 sm:block">
-          <dt className="text-xs text-muted sm:sr-only">Projects</dt>
-          <dd className={`tabular-nums text-sm ${assessment.reasons.includes("PROJECTS") ? "font-semibold text-mecg-orange-ink" : ""}`}>
-            {member.projects === 1 ? "1 project" : `${member.projects} projects`}
-          </dd>
-        </div>
-        <div className="flex items-baseline justify-between gap-2 sm:block">
-          <dt className="text-xs text-muted sm:sr-only">Onboarding</dt>
-          <dd className={`tabular-nums text-sm ${assessment.reasons.includes("ONBOARDING") ? "font-semibold text-mecg-orange-ink" : ""}`}>
-            {member.onboardingTotal === null ? <span className="text-muted">Not tracked</span> : `${member.onboardingDone} of ${member.onboardingTotal} done`}
-          </dd>
-        </div>
-      </dl>
-      <div className="flex flex-wrap gap-2 sm:justify-end">
+      <div className="flex items-baseline justify-between gap-2 sm:block">
+        <span className="text-xs text-muted sm:sr-only">Events: </span>
+        <span className={`tabular-nums text-sm ${assessment.reasons.includes("ATTENDANCE") ? "font-semibold text-mecg-orange-ink" : ""}`}>
+          {member.eventsHeld ? `${member.eventsAttended} of ${member.eventsHeld} · ${assessment.attendancePct}%` : "No events yet"}
+        </span>
+      </div>
+      <div className="flex items-baseline justify-between gap-2 sm:block">
+        <span className="text-xs text-muted sm:sr-only">Projects: </span>
+        <span className={`tabular-nums text-sm ${assessment.reasons.includes("PROJECTS") ? "font-semibold text-mecg-orange-ink" : ""}`}>
+          {member.projects === 1 ? "1 project" : `${member.projects} projects`}
+        </span>
+      </div>
+      <div className="flex items-baseline justify-between gap-2 sm:block">
+        <span className="text-xs text-muted sm:sr-only">Onboarding: </span>
+        <span className={`tabular-nums text-sm ${assessment.reasons.includes("ONBOARDING") ? "font-semibold text-mecg-orange-ink" : ""}`}>
+          {member.onboardingTotal === null ? <span className="text-muted">Not tracked</span> : `${member.onboardingDone} of ${member.onboardingTotal} done`}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <span className="sr-only">Standing: </span>
         {assessment.status === "ACTIVE"
           ? <StatusPill tone="neutral">Active</StatusPill>
           : <StatusPill tone="orange">At risk · {assessment.reasons.map((reason) => REASON_LABELS[reason]).join(", ")}</StatusPill>}
@@ -76,7 +75,7 @@ export default function MemberStanding({ standing, cycleId }: { standing: Standi
         {metrics.map(([label, value]) => (
           <div key={label}>
             <dt className="text-xs text-muted">{label}</dt>
-            <dd className="tabular-nums mt-1 text-xl font-semibold text-mecg-navy">{value}</dd>
+            <span className="tabular-nums mt-1 text-xl font-semibold text-mecg-navy">{value}</span>
           </div>
         ))}
       </dl>
@@ -86,7 +85,7 @@ export default function MemberStanding({ standing, cycleId }: { standing: Standi
           {thresholds.configured ? "" : "These are the default thresholds. "}
           <Link className="font-semibold text-mecg-navy underline underline-offset-4" href={withWorkspaceCycle("/admin/settings#member-standing", cycleId)}>Change thresholds</Link>
         </p>
-        <p>Held events are this cycle&apos;s published or closed events that have started. Projects count every project the member is staffed on. Onboarding is the checklist from their accepted offer; members who joined without one are not flagged for it.</p>
+        <p>Held events are this cycle&apos;s published or closed events whose check-in has closed, counted from when the member joined the cycle. Projects count every project the member is staffed on. Onboarding is the checklist from an offer they accepted in this cycle; members without one are not flagged for it.</p>
       </div>
       {members.length === 0 ? (
         <p className="text-sm text-muted">No active members in this cycle.</p>

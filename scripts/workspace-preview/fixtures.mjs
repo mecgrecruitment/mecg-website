@@ -29,6 +29,7 @@ function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
     case 'member_standing': return memberStanding;
+    case 'member_standing_thresholds': return memberStanding.thresholds;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
