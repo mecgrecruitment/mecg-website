@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { clonedCycleDestination, switchedWorkspaceHref, withWorkspaceCycle, workspaceCycleSelection } from "./workspace-cycle-url";
+import { clonedCycleDestination, switchedWorkspaceHref, withWorkspaceCycle, workspaceCycleSelection, workspacePermissionsForPath } from "./workspace-cycle-url";
 
 test("cohort links preserve query, encoded return target and hash while canonicalizing old alias", () => {
   const href = withWorkspaceCycle("/admin?cycle=old&filter=NEEDS_INFO&returnTo=%2Fmember%3Fround%3DGROUP_CASE#applicants", "draft-cycle");
@@ -29,4 +29,9 @@ test("explicit cohort aliases agree or fail closed", () => {
 test("clone navigation requires an actual returned cohort id", () => {
   assert.equal(clonedCycleDestination({ id: "draft-cycle" }), "/admin/settings?cycleId=draft-cycle");
   for (const receipt of [null, { ok: true }, { id: "" }, { id: 12 }, { id: " draft " }]) assert.equal(clonedCycleDestination(receipt), null);
+});
+
+test("the staffing plan offers only cycles the viewer manages; member availability any workspace cycle", () => {
+  assert.deepEqual(workspacePermissionsForPath("/admin/staffing?skill=sql"), ["MANAGE_CYCLE"]);
+  assert.deepEqual(workspacePermissionsForPath("/member/staffing"), ["WORKSPACE_ACCESS"]);
 });

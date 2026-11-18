@@ -28,6 +28,7 @@ export function workspaceMemberTools({
     ["/member/tools/pipeline", "Pipeline"],
     ["/member/tools/evidence", "Evidence library"],
     ["/member/tools/lab", "AI lab"],
+    ["/member/staffing", "Staffing availability"],
     ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ];
@@ -49,6 +50,7 @@ export function workspaceAdminTools({
       ? [["/admin/audit", "Activity"] as const]
       : []),
     ...(isBoard ? [["/admin/projects", "Projects"] as const] : []),
+    ...(canManageCycle ? [["/admin/staffing", "Staffing"] as const] : []),
     ...(canManageCycle ? [["/admin/settings", "Settings"] as const] : []),
     ...(isOwner ? [["/admin/operations", "Operations"] as const] : []),
   ];
