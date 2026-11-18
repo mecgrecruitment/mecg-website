@@ -10,8 +10,10 @@
 -- marks the content withheld. Every export is audited with counts and which
 -- tools were full, never record content.
 --
--- Archive. A CLOSED cycle moves to ARCHIVED here only after an export has
--- been recorded since the cycle was closed, so nothing is archived unread.
+-- Archive. A CLOSED cycle moves to ARCHIVED here only after an export of its
+-- member-tool records (the full JSON or the records CSV, not the projects-only
+-- CSV) has been recorded since the cycle was closed. If the Owner holds no
+-- reviewer grant, that export is metadata only; the page says so.
 -- rush.set_cycle_status still allows the same transition without an export;
 -- this function is the guarded route the Owner page uses.
 --
@@ -53,7 +55,7 @@ $$;
 create function rush.cycle_export_since_close(c text) returns timestamptz
 language sql stable security definer set search_path='' as $$
  select max(e.created_at) from rush.audit_events e
- where e.cycle_id=c and e.action='CYCLE_RECORDS_EXPORTED'
+ where e.cycle_id=c and e.action='CYCLE_RECORDS_EXPORTED' and e.metadata->>'section' in ('all','records')
   and e.created_at >= coalesce((select max(s.created_at) from rush.audit_events s
    where s.cycle_id=c and s.action='CYCLE_STATUS_CHANGED' and s.metadata->>'to'='CLOSED'), '-infinity'::timestamptz);
 $$;
@@ -75,11 +77,12 @@ begin
   'exportedSinceClose', rush.cycle_export_since_close(c));
 end; $$;
 
-create function rush.export_cycle_records(c text) returns jsonb
+create function rush.export_cycle_records(c text, section text) returns jsonb
 language plpgsql volatile security definer set search_path='' as $$
 declare actor uuid:=rush.actor_id(); full_kinds text[]; result jsonb; cycle_row rush.rush_cycles%rowtype;
 begin
  if not rush.has_cycle_role(c,array['OWNER']::rush.member_role[]) then raise exception 'Owner access required' using errcode='42501'; end if;
+ if section is null or section not in ('all','records','projects') then raise exception 'Unknown export' using errcode='22023'; end if;
  select * into cycle_row from rush.rush_cycles where id=c;
  if not found then raise exception 'Cycle not found' using errcode='P0002'; end if;
  select coalesce(array_agg(g.kind order by g.kind),'{}') into full_kinds from rush.member_tool_reviewers g where g.cycle_id=c and g.user_id=actor;
@@ -105,7 +108,7 @@ begin
  values(actor,c,'CYCLE_RECORDS_EXPORTED','RushCycle',c,jsonb_build_object(
   'memberToolRecords',jsonb_array_length(result->'memberToolRecords'),
   'projects',jsonb_array_length(result->'projects'),
-  'fullContentTools',to_jsonb(full_kinds)));
+  'fullContentTools',to_jsonb(full_kinds),'section',section));
  return result;
 end; $$;
 
@@ -162,6 +165,6 @@ begin
 end; $$;
 
 revoke all on function rush.is_any_owner(), rush.cycle_archived_at(text), rush.cycle_export_since_close(text), rush.cycle_records_overview(text),
- rush.export_cycle_records(text), rush.archive_cycle_records(text), rush.retention_report(), rush.save_retention_policy(text,integer,integer) from public, anon, authenticated;
-grant execute on function rush.cycle_records_overview(text), rush.export_cycle_records(text), rush.archive_cycle_records(text),
+ rush.export_cycle_records(text,text), rush.archive_cycle_records(text), rush.retention_report(), rush.save_retention_policy(text,integer,integer) from public, anon, authenticated;
+grant execute on function rush.cycle_records_overview(text), rush.export_cycle_records(text,text), rush.archive_cycle_records(text),
  rush.retention_report(), rush.save_retention_policy(text,integer,integer) to authenticated;

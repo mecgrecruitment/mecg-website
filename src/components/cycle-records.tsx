@@ -111,7 +111,7 @@ function ArchivePanel({ overview }: { overview: Overview }) {
   } else if (status !== "CLOSED") {
     body = <p className="text-sm leading-6 text-muted">Close the cycle in Settings first. A closed cycle can be archived here after its records are exported.</p>;
   } else if (!overview.canArchive) {
-    body = <p className="text-sm leading-6">Download the export above first. Archiving unlocks once an export has been logged since the cycle closed. Reload this page after the download if this message stays.</p>;
+    body = <p className="text-sm leading-6">Download everything (JSON) or the member-tool records CSV first. Archiving unlocks once one of those has been logged since the cycle closed; the projects CSV alone doesn’t count. Reload this page after the download if this message stays.</p>;
   } else {
     body = <div className="space-y-4">
       <p className="text-sm leading-6">Exported {formatEasternDateTime(overview.exportedSinceClose!)}. Archiving marks the cycle read-only history. It deletes nothing and can’t be undone here.</p>

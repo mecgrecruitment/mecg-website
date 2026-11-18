@@ -32,7 +32,7 @@ do $$declare who text; begin
  foreach who in array array['00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000000004','00000000-0000-4000-8000-000000000005'] loop
   perform set_config('test.actor',who,false);
   perform pg_temp.expect_error($q$select rush.cycle_records_overview('test')$q$,'42501');
-  perform pg_temp.expect_error($q$select rush.export_cycle_records('test')$q$,'42501');
+  perform pg_temp.expect_error($q$select rush.export_cycle_records('test','all')$q$,'42501');
   perform pg_temp.expect_error($q$select rush.archive_cycle_records('test')$q$,'42501');
  end loop; end$$;
 -- Members, board and an inactive Owner cannot read or change retention.
@@ -55,7 +55,7 @@ end$$;
 select pg_temp.expect_error($q$select rush.archive_cycle_records('test')$q$,'55000');
 
 -- Export: evidence (reviewer) is full; pipeline content is withheld; other cycles never appear; audit carries no content.
-do $$declare e jsonb := rush.export_cycle_records('test'); r jsonb; a jsonb; begin
+do $$declare e jsonb := rush.export_cycle_records('test','all'); r jsonb; a jsonb; begin
  if e->>'format'<>'mecg-cycle-records/1' or e->'fullContentTools'<>'["evidence"]'::jsonb then raise exception 'header wrong %',e;end if;
  if jsonb_array_length(e->'memberToolRecords')<>2 then raise exception 'record count %',e->'memberToolRecords';end if;
  select x into r from jsonb_array_elements(e->'memberToolRecords') x where x->>'kind'='pipeline';
@@ -67,7 +67,7 @@ do $$declare e jsonb := rush.export_cycle_records('test'); r jsonb; a jsonb; beg
  if jsonb_array_length(e->'reviewerGrants')<>2 then raise exception 'grants wrong %',e->'reviewerGrants';end if;
  reset role;
  select metadata into a from rush.audit_events where action='CYCLE_RECORDS_EXPORTED' and cycle_id='test' and actor_id='00000000-0000-4000-8000-000000000003';
- if a<>'{"memberToolRecords":2,"projects":1,"fullContentTools":["evidence"]}'::jsonb then raise exception 'audit wrong %',a;end if;
+ if a<>'{"memberToolRecords":2,"projects":1,"fullContentTools":["evidence"],"section":"all"}'::jsonb then raise exception 'audit wrong %',a;end if;
  set role authenticated;
 end$$;
 
@@ -80,7 +80,11 @@ set role authenticated;
 select set_config('test.actor','00000000-0000-4000-8000-000000000003',false);
 do $$begin if rush.cycle_records_overview('test')->'exportedSinceClose'<>'null'::jsonb then raise exception 'stale export counted';end if;end$$;
 select pg_temp.expect_error($q$select rush.archive_cycle_records('test')$q$,'55000');
-select rush.export_cycle_records('test') is not null;
+-- An unknown section is refused; a projects-only export does not unlock archiving.
+select pg_temp.expect_error($q$select rush.export_cycle_records('test','secrets')$q$,'22023');
+select rush.export_cycle_records('test','projects') is not null;
+select pg_temp.expect_error($q$select rush.archive_cycle_records('test')$q$,'55000');
+select rush.export_cycle_records('test','records') is not null;
 do $$declare r jsonb := rush.archive_cycle_records('test'); begin
  if r<>'{"status":"ARCHIVED","changed":true}'::jsonb then raise exception 'archive wrong %',r;end if;
  if rush.archive_cycle_records('test')<>'{"status":"ARCHIVED","changed":false}'::jsonb then raise exception 'repeat archive not idempotent';end if;

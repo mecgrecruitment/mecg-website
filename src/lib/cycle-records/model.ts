@@ -146,10 +146,10 @@ export function parseRetentionInput(raw: unknown): { ok: true; value: RetentionI
 export function csvCell(value: unknown): string {
   if (value === null || value === undefined) return "";
   const text = typeof value === "boolean" ? (value ? "yes" : "no") : typeof value === "object" ? JSON.stringify(value) : String(value);
-  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  const safe = /^[=+\-@\t\r\n]/.test(text.trimStart()) || /^[\t\r\n]/.test(text) ? `'${text}` : text;
   return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
-const csvBody = (header: string[], rows: unknown[][]) => `${[header.join(","), ...rows.map((row) => row.map(csvCell).join(","))].join("\n")}\n`;
+const csvBody = (header: string[], rows: unknown[][]) => `${[header.map(csvCell).join(","), ...rows.map((row) => row.map(csvCell).join(","))].join("\n")}\n`;
 
 function keysInOrder(objects: (Record<string, unknown> | null)[]): string[] {
   const keys: string[] = [];

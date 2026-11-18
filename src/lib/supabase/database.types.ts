@@ -2503,7 +2503,7 @@ export type Database = {
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
       cycle_records_overview: { Args: { c: string }; Returns: Json }
-      export_cycle_records: { Args: { c: string }; Returns: Json }
+      export_cycle_records: { Args: { c: string; section: string }; Returns: Json }
       archive_cycle_records: { Args: { c: string }; Returns: Json }
       retention_report: { Args: never; Returns: Json }
       save_retention_policy: { Args: { target_category: string; months: number | null; expected_revision: number }; Returns: Json }

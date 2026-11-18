@@ -18,6 +18,12 @@ function cycleParam(value: string | null) {
 export async function GET(request: Request) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // A download is an audited export that can unlock archiving, so a link on
+  // another site must not trigger one with the Owner's session.
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") {
+    return NextResponse.json({ error: "Start the download from the Cycle records page." }, { status: 403 });
+  }
   const params = new URL(request.url).searchParams;
   const cycleId = cycleParam(params.get("cycleId"));
   if (!cycleId) return NextResponse.json({ error: "Choose a cycle." }, { status: 400 });
@@ -29,7 +35,7 @@ export async function GET(request: Request) {
   }
 
   const client = await createClient();
-  const { data, error } = await client.rpc("export_cycle_records", { c: cycleId });
+  const { data, error } = await client.rpc("export_cycle_records", { c: cycleId, section });
   if (error) {
     console.error("export_cycle_records failed", error);
     const mapped = mapRpcErrorVerbose(error, "The records could not be exported.");

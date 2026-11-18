@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { exportFilename, parseExport, parseOverview, parseRetentionInput, parseRetentionReport, projectsCsv, recordsCsv } from "./model.ts";
+import { csvCell, exportFilename, parseExport, parseOverview, parseRetentionInput, parseRetentionReport, projectsCsv, recordsCsv } from "./model.ts";
 
 const overview = {
   cycle: { id: "c1", name: "Fall 2026", status: "CLOSED", archivedAt: null },
@@ -39,6 +39,11 @@ test("records CSV flattens content, marks withheld rows and neutralises formulas
   assert.equal(lines[1], "r1,pipeline,Ada,u1,2,2026-10-01T00:00:00Z,2026-10-02T00:00:00Z,,,yes,,,,");
   assert.ok(lines[2].startsWith("r2,evidence,'=cmd,u2,1,"));
   assert.ok(lines[2].includes(',"Client, ""win""","Line'));
+});
+
+test("formula guard covers every trigger character and leading whitespace", () => {
+  for (const value of ["+1", "-1", "@x", "\tx", " =1", "\n=1"]) assert.ok(csvCell(value).replace(/^"/, "").startsWith("'"), value);
+  assert.equal(csvCell("plain"), "plain");
 });
 
 test("projects CSV lists staffing on each project", () => {

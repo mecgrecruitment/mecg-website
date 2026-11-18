@@ -42,7 +42,14 @@ test("downloads JSON and CSV as uncached attachments from one audited export", a
   const csv = await GET(new Request("http://x/api/admin/cycle-records?cycleId=c1&format=csv&section=projects"));
   assert.match(csv.headers.get("content-type") ?? "", /text\/csv/);
   assert.equal((await csv.text()).split("\n")[1], "p1,acme,Acme,,no,");
-  assert.deepEqual(calls, [["export_cycle_records", { c: "c1" }], ["export_cycle_records", { c: "c1" }]]);
+  assert.deepEqual(calls, [["export_cycle_records", { c: "c1", section: "all" }], ["export_cycle_records", { c: "c1", section: "projects" }]]);
+});
+
+test("a download started from another site is refused before the database", async (t) => {
+  mock(t, owner, () => { throw new Error("should not call"); });
+  const { GET } = await load("cross-site");
+  const response = await GET(new Request("http://x/api/admin/cycle-records?cycleId=c1", { headers: { "sec-fetch-site": "cross-site" } }));
+  assert.equal(response.status, 403);
 });
 
 test("a response for another cycle or with leaked content is refused", async (t) => {
