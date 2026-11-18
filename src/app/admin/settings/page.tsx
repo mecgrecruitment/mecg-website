@@ -14,6 +14,8 @@ import RecruitmentAnalyticsPanel from "./recruitment-analytics-panel";
 import { parseRecruitmentAnalytics } from "./recruitment-analytics";
 import { cycleStatusLabel } from "@/lib/labels";
 import { screeningRpc } from "@/lib/screening-rpc";
+import { loadStanding } from "@/lib/standing/server";
+import StandingThresholdsForm from "./standing-thresholds-form";
 
 export const metadata: Metadata = { title: "Cycle settings" };
 
@@ -63,13 +65,14 @@ export default async function SettingsPage() {
   const cycleId = await selectWorkspaceCycle(user.memberships, "MANAGE_CYCLE");
   if (!cycleId || !hasPermission(user.memberships, cycleId, "MANAGE_CYCLE")) redirect("/admin");
   const supabase = await createClient();
-  const [cycleResult, questionsResult, submittedResult, analyticsResult] = await Promise.all([
+  const [cycleResult, questionsResult, submittedResult, analyticsResult, standing] = await Promise.all([
     supabase.from("rush_cycles").select("id,name,status,opens_at,closes_at").eq("id", cycleId).single(),
     supabase.rpc("cycle_application_questions", { target_cycle_id: cycleId }),
     // The RPC refuses edits once anyone has submitted; ask the same question up
     // front so the editor renders locked instead of failing on save.
     supabase.from("applications").select("id", { count: "exact", head: true }).eq("cycle_id", cycleId).neq("status", "DRAFT"),
     screeningRpc<unknown>(supabase, "recruitment_analytics", { target_cycle_id: cycleId }),
+    loadStanding(cycleId),
   ]);
   if (cycleResult.error) throw cycleResult.error;
   const cycle = cycleResult.data;
@@ -106,6 +109,7 @@ export default async function SettingsPage() {
         opensAt={cycle.opens_at}
         closesAt={cycle.closes_at}
       />
+      <StandingThresholdsForm cycleId={cycleId} thresholds={standing?.thresholds ?? null} />
       <RecruitmentAnalyticsPanel analytics={analytics} />
     </main>
   );
