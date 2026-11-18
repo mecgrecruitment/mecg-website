@@ -2500,6 +2500,10 @@ export type Database = {
     Functions: {
       member_tool_workspace: { Args: { c: string; k: string }; Returns: Json }
       save_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
+      my_budget_requests: { Args: never; Returns: Json }
+      budget_request_log: { Args: never; Returns: Json }
+      save_budget_request: { Args: { target_id: string | null; expected_revision: number; payload: Json }; Returns: Json }
+      act_on_budget_request: { Args: { target_id: string; expected_revision: number; action: string; payload: Json }; Returns: Json }
       review_member_tool: { Args: { c: string; k: string; record_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_member_tool_reviewer: { Args: { c: string; k: string; target_user: string; enabled: boolean }; Returns: boolean }
 

@@ -20,6 +20,7 @@ test("live member tools expose screening, voting, and event tasks with the open 
     ["/member/tools/pipeline", "Pipeline"],
     ["/member/tools/evidence", "Evidence library"],
     ["/member/tools/lab", "AI lab"],
+    ["/member/budget", "Budget requests"],
     ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ]);
@@ -40,6 +41,7 @@ test("Speed Dating appears for an eligible member without screening access", () 
     ["/member/tools/pipeline", "Pipeline"],
     ["/member/tools/evidence", "Evidence library"],
     ["/member/tools/lab", "AI lab"],
+    ["/member/budget", "Budget requests"],
     ["/member/resources", "Club resources"],
     ["/admin/people", "People"],
   ]);
@@ -65,6 +67,7 @@ test("owners receive every administrative destination", () => {
   }), [
     ["/admin/audit", "Activity"],
     ["/admin/projects", "Projects"],
+    ["/admin/budget", "Budget"],
     ["/admin/settings", "Settings"],
     ["/admin/operations", "Operations"],
   ]);
