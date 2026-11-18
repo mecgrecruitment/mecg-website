@@ -70,7 +70,7 @@ test("Clerk proxy preserves public, protected-page, protected-API, and signed-in
   // independent: check-in is absent from the session-free list, so
   // clerkMiddleware runs and the session is readable, and handleProxy still
   // lets check-in through without a redirect.
-  for (const pathname of ["/checkin/some-token", "/api/checkin/some-token"]) {
+  for (const pathname of ["/checkin/some-token", "/api/checkin/some-token", "/feedback/some-token", "/api/feedback/some-token"]) {
     const response = await handleProxy(signedOut, request(pathname));
     assert.equal(response.headers.get("x-middleware-next"), "1", pathname);
   }

@@ -36,7 +36,8 @@
     "verify:release-config": "node scripts/verify-release-config.mjs",
     "verify:member-tools": "node scripts/verify-member-tools.mjs",
     "verify:member-tools:ui": "node scripts/verify-member-tools-ui.mjs",
-    "verify:engagement-tracker": "node scripts/verify-engagement-tracker.mjs"
+    "verify:engagement-tracker": "node scripts/verify-engagement-tracker.mjs",
+    "verify:client-closeout": "node scripts/verify-client-closeout.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",

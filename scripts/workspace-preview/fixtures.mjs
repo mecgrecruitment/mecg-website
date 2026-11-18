@@ -21,13 +21,20 @@ const engagementTracker = { canManage: true, projects: [
   delivery('preview-project-1', 'Warehouse slotting study', 'Sample logistics client', { health: 'AT_RISK', healthNote: 'Order history export is a week late; analysis start slips unless it lands Friday.', healthSetAt: '2026-11-16T14:00:00Z', healthSetByName: 'Morgan Member', lastContactOn: '2026-11-14', lastContactNote: 'Weekly call. Client IT owns the export.', milestones: [{ id: 'm1', title: 'Kickoff and data request', due: '2026-10-20', done: '2026-10-20' }, { id: 'm2', title: 'Current-state baseline', due: '2026-11-12', done: '' }, { id: 'm3', title: 'Final recommendation deck', due: '2026-12-05', done: '' }], risks: [{ id: 'r1', kind: 'BLOCKER', text: 'Waiting on order history export', status: 'OPEN' }, { id: 'r2', kind: 'RISK', text: 'Two members out for exams the week of Dec 1', status: 'OPEN' }] }),
   delivery('preview-project-2', 'Clinic intake redesign', 'Sample health nonprofit', { status: 'SCOPING', leadId: null, leadName: null, leadStaffed: false, isLead: false, revision: 0, updatedAt: null }),
   delivery('preview-project-3', 'Battery supplier scan', 'Sample automotive startup', { status: 'FINAL', health: 'ON_TRACK', healthSetAt: '2026-11-03T14:00:00Z', healthSetByName: 'Morgan Member', lastContactOn: '2026-11-03', milestones: [{ id: 'm4', title: 'Supplier long list', due: '2026-10-15', done: '2026-10-14' }] }),
+  delivery('preview-project-4', 'Campus dining demand model', 'Sample university office', { status: 'CLOSED', closedAt: '2026-11-07T20:00:00Z', lastContactOn: '2026-11-07', milestones: [{ id: 'm5', title: 'Final readout', due: '2026-11-07', done: '2026-11-07' }] }),
+  delivery('preview-project-5', 'Retail loyalty teardown', 'Sample regional grocer', { status: 'CLOSED', closedAt: '2026-10-30T20:00:00Z', lastContactOn: '2026-10-30' }),
 ] };
+const closeoutOverview = [
+  { projectId: 'preview-project-5', cycleId: cycle.id, leadName: 'Morgan Member', state: 'RECEIVED', requestedAt: '2026-10-31T15:00:00Z', expiresAt: null, submittedAt: '2026-11-04T16:30:00Z', satisfaction: 4, wouldRehire: 'YES', quote: 'The team turned three years of loyalty data into two changes we could make before the holidays.', attribution: 'Marketing director', quotePermission: true, logoPermission: false, permissionScope: 'MECG website and recruiting slides. No paid ads.', evidenceCreated: true },
+];
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'engagement_tracker': return engagementTracker;
     case 'engagement_leads_any': return true;
+    case 'client_closeout_overview': return closeoutOverview;
+    case 'client_feedback_form': return { projectTitle: 'Campus dining demand model', clientLabel: 'Sample university office', expiresAt: '2026-12-07T20:00:00Z' };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
     case 'is_decision_ready': case 'can_start_application': return false;

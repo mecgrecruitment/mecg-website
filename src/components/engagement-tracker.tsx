@@ -4,6 +4,8 @@
 import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import StatusPill from "@/components/status-pill";
+import ClientCloseout from "@/components/client-closeout";
+import type { Closeout } from "@/lib/engagement/closeout";
 import { authorizedFetch, fetchJsonWithTimeout } from "@/lib/client-fetch";
 import { formatEasternDateTime } from "@/lib/date-time";
 import {
@@ -170,7 +172,10 @@ function LeadForm({ project }: { project: ProjectDelivery }) {
   </form>;
 }
 
-function ProjectCard({ project, canManage, now, today }: { project: ProjectDelivery; canManage: boolean; now: Date; today: string }) {
+// Board only: `null` means the close-out read failed, so nothing is shown.
+export type CloseoutView = { cycleId: string; byProject: Record<string, Closeout> | null };
+
+function ProjectCard({ project, canManage, now, today, closeout }: { project: ProjectDelivery; canManage: boolean; now: Date; today: string; closeout?: CloseoutView }) {
   const late = overdueMilestones(project.milestones, today);
   const blockers = openBlockers(project.risks);
   const next = project.milestones.filter((item) => !item.done).sort((a, b) => a.due.localeCompare(b.due))[0];
@@ -189,6 +194,9 @@ function ProjectCard({ project, canManage, now, today }: { project: ProjectDeliv
       <div><dt className="text-xs text-muted">Open blockers</dt><dd>{blockers.length ? blockers.map((item) => item.text).join("; ") : "None"}</dd></div>
       {project.health && <div className="sm:col-span-2"><dt className="text-xs text-muted">Health note</dt><dd>{[project.healthNote, project.healthSetAt ? `Set ${formatEasternDateTime(project.healthSetAt)}${project.healthSetByName ? ` by ${project.healthSetByName}` : ""}` : ""].filter(Boolean).join(" · ")}</dd></div>}
     </dl>
+    {canManage && closeout && (project.status === "CLOSED" || closeout.byProject?.[project.projectId]) && (closeout.byProject
+      ? <ClientCloseout projectId={project.projectId} cycleId={closeout.cycleId} closeout={closeout.byProject[project.projectId]} hasLead={!!project.leadId} />
+      : <p className="rounded-xl bg-warning-wash p-4 text-sm text-warning" role="status">Client close-out is unavailable. Reload to try again.</p>)}
     <details className="rounded-xl bg-white p-4 inset-ring inset-ring-line">
       <summary className="cursor-pointer text-sm font-semibold">Edit delivery</summary>
       <div className="mt-4 space-y-5">
@@ -200,7 +208,7 @@ function ProjectCard({ project, canManage, now, today }: { project: ProjectDeliv
   </article>;
 }
 
-export default function EngagementTracker({ tracker, now, today }: { tracker: Tracker | null; now: string; today: string }) {
+export default function EngagementTracker({ tracker, now, today, closeout }: { tracker: Tracker | null; now: string; today: string; closeout?: CloseoutView }) {
   if (!tracker) return <section className="rounded-xl bg-warning-wash p-6 text-warning" role="status">
     <h2 className="text-lg font-semibold">Delivery tracking is unavailable</h2>
     <p className="mt-2 text-sm leading-6">We couldn’t load delivery records. Reload to try again. If the tracker is newly installed, ask the website maintainer to finish its database setup. Nothing is shown while access can’t be checked.</p>
@@ -214,6 +222,6 @@ export default function EngagementTracker({ tracker, now, today }: { tracker: Tr
     {tracker.canManage && tracker.projects.length > 0 && <Summary projects={tracker.projects} now={clock} today={today} />}
     {tracker.projects.length === 0
       ? <p className="rounded-xl bg-wash p-5 text-sm text-muted">{tracker.canManage ? "No projects yet. Add one below, staff it, then pick a lead." : "You don’t lead a project right now. The board assigns leads from each project’s staff."}</p>
-      : tracker.projects.map((project) => <ProjectCard key={project.projectId} project={project} canManage={tracker.canManage} now={clock} today={today} />)}
+      : tracker.projects.map((project) => <ProjectCard key={project.projectId} project={project} canManage={tracker.canManage} now={clock} today={today} closeout={closeout} />)}
   </section>;
 }

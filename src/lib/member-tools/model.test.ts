@@ -21,3 +21,16 @@ test("persisted records are parsed and malformed records fail closed", () => {
   assert.equal(parseRecords([{ id: "x", kind: "pipeline", owner_id: "member", owner_name: "Synthetic member", revision: 1, content: opportunity, review: pendingReview, updated_at: "2026-11-12" }])[0]?.content.title, "Synthetic Co");
   assert.throws(() => parseRecords([{ id: "x", kind: "pipeline", content: opportunity }]));
 });
+test("a client close-out draft reads as a draft listing its missing required fields", () => {
+  const draft = { title: "Alpha pricing study", result: "Client close-out feedback: satisfaction 5 of 5.", allowedUse: "Client close-out form: quote not permitted." };
+  const [record] = parseRecords([{ id: "d", kind: "evidence", owner_id: "lead", owner_name: "Lead", revision: 1, content: draft, review: pendingReview, updated_at: "2026-11-18" }]);
+  assert.deepEqual(record?.missing, ["Problem and context", "Approach and your contribution", "Original deliverable link", "Measurement method, baseline and limitations"]);
+  assert.equal(record?.content.source, "");
+  // Saving still requires every field.
+  assert.equal(parseContent("evidence", draft).ok, false);
+  // Stored content must still be well formed.
+  assert.throws(() => parseRecords([{ id: "d", kind: "evidence", owner_id: "lead", owner_name: "Lead", revision: 1, content: { ...draft, source: "javascript:alert(1)" }, review: pendingReview, updated_at: "2026-11-18" }]));
+  assert.throws(() => parseRecords([{ id: "d", kind: "evidence", owner_id: "lead", owner_name: "Lead", revision: 1, content: { ...draft, verification: "Verified" }, review: pendingReview, updated_at: "2026-11-18" }]));
+  const complete = parseRecords([{ id: "x", kind: "pipeline", owner_id: "member", owner_name: "Synthetic member", revision: 1, content: opportunity, review: pendingReview, updated_at: "2026-11-12" }]);
+  assert.deepEqual(complete[0]?.missing, []);
+});

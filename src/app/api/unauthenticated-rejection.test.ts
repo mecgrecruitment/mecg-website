@@ -14,7 +14,8 @@ import { NextRequest } from "next/server";
 // Deliberately excluded (not guarded, so nothing to assert):
 //   account/password, admin/login, admin/logout, auth/forgot-password,
 //   auth/login, auth/logout, auth/reset-password, auth/signup, contact,
-//   events/[id]/ics, health, interest  - public or self-authenticating routes
+//   events/[id]/ics, feedback/[token], health, interest
+//                                      - public or self-authenticating routes
 //   webhooks/clerk                     - signature-verified webhook, no session
 // Every route that returns 401/403 from its own source is in the table.
 
@@ -58,6 +59,8 @@ const ROUTES: Array<{ path: string; methods: Method[]; expect: number; guard?: G
   { path: "./maintenance/notifications/route.ts", methods: ["GET", "POST"], expect: 401, guard: "cron" },
   { path: "./maintenance/prune-resumes/route.ts", methods: ["GET", "POST"], expect: 401, guard: "cron" },
   { path: "./maintenance/reminders/route.ts", methods: ["GET", "POST"], expect: 401, guard: "cron" },
+  { path: "./projects/closeout/route.ts", methods: ["POST"], expect: 401 },
+  { path: "./projects/delivery/route.ts", methods: ["POST"], expect: 401 },
   { path: "./member/buddy/route.ts", methods: ["POST"], expect: 401 },
   { path: "./member/conflicts/route.ts", methods: ["POST"], expect: 401 },
   { path: "./member/evaluations/[assignmentId]/draft/route.ts", methods: ["GET", "PUT", "DELETE"], expect: 401 },

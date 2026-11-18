@@ -2507,6 +2507,11 @@ export type Database = {
       save_project_delivery: { Args: { target_project_id: string; expected_revision: number; payload: Json }; Returns: Json }
       set_project_health: { Args: { target_project_id: string; flag: string; note: string }; Returns: Json }
       set_project_lead: { Args: { target_project_id: string; expected_revision: number; target_user: string | null }; Returns: Json }
+      client_closeout_overview: { Args: never; Returns: Json }
+      create_client_feedback_link: { Args: { target_project_id: string; target_cycle_id: string }; Returns: Json }
+      revoke_client_feedback_link: { Args: { target_project_id: string }; Returns: Json }
+      client_feedback_form: { Args: { raw_token: string }; Returns: Json }
+      submit_client_feedback: { Args: { raw_token: string; payload: Json }; Returns: boolean }
 
       actor_can_read_colleague_profile: {
         Args: { target_user_id: string }

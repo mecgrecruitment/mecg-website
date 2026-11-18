@@ -98,11 +98,12 @@ export default function ToolWorkspace({ kind, cycleId, userId, records, canRevie
         <h3 className="mt-2 break-words text-xl font-semibold">{record.content.title}</h3>
         <p className="mt-2 text-sm font-semibold text-mecg-navy">{kind === "pipeline" ? `${record.content.track} · ${record.content.stage}` : `${record.review.verification} · ${record.review.sharing}`}</p>
         {kind === "pipeline" && <p className="mt-3 break-words text-sm leading-6 text-muted">Next: {record.content.nextAction}{record.content.nextDate ? ` · ${record.content.nextDate}` : ""}</p>}
-        <a href={record.content.source} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-semibold text-mecg-blue underline">Open {kind === "pipeline" ? "source" : kind === "evidence" ? "deliverable" : "demo"}</a>
+        {record.missing.length > 0 && <p className="mt-3 rounded-lg bg-warning-wash p-3 text-sm leading-6 text-warning">Draft. {record.ownerId === userId ? "Complete" : "The owner must complete"} {record.missing.join(", ").toLowerCase()} before it can be reviewed.</p>}
+        {record.content.source && <a href={record.content.source} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-semibold text-mecg-blue underline">Open {kind === "pipeline" ? "source" : kind === "evidence" ? "deliverable" : "demo"}</a>}
         {record.review.note && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted">Review: {record.review.note}</p>}
         {record.review.scope && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted">Allowed use: {record.review.scope}</p>}
         <details className="mt-4 border-t border-line pt-4"><summary className="cursor-pointer text-sm font-semibold">View or edit details</summary><div className="mt-5"><RecordForm key={record.revision} kind={kind} cycleId={cycleId} record={record} /></div></details>
-        {canReview && record.ownerId !== userId && kind !== "pipeline" && <details className="mt-4"><summary className="cursor-pointer text-sm font-semibold">Review submission</summary><div className="mt-4"><ReviewForm key={record.revision} record={record} cycleId={cycleId} /></div></details>}
+        {canReview && record.ownerId !== userId && kind !== "pipeline" && record.missing.length === 0 && <details className="mt-4"><summary className="cursor-pointer text-sm font-semibold">Review submission</summary><div className="mt-4"><ReviewForm key={record.revision} record={record} cycleId={cycleId} /></div></details>}
       </article>)}
     </section>
     <p className="break-all text-xs text-muted">Your internal profile ID: {userId}. Share it with the cycle Owner only if you need an agreed reviewer assignment.</p>
