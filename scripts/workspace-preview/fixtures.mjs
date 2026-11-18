@@ -16,9 +16,25 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const handoffItem = (id, kind, label, detail, doneAt) => ({ id, kind, label, detail, done: !!doneAt, doneAt, doneByName: doneAt ? 'Bailey Board' : null });
+const handoffs = { people: [{ id: '00000000-0000-4000-8000-000000000002', name: 'Bailey Board' }, { id: '00000000-0000-4000-8000-000000000006', name: 'Morgan Member' }, { id: '00000000-0000-4000-8000-000000000007', name: 'Riley Recruiter' }], handoffs: [
+  { id: '00000000-0000-4000-8000-0000000000a1', roleTitle: 'Treasurer', outgoingId: '00000000-0000-4000-8000-000000000002', outgoingName: 'Bailey Board', incomingId: '00000000-0000-4000-8000-000000000006', incomingName: 'Morgan Member', dueOn: '2026-12-15', status: 'OPEN', notes: 'The bank needs both officers at the branch to change the signatory.', items: [
+    handoffItem('00000000-0000-4000-8000-0000000000b1', 'ACCOUNT', 'Club bank account signatory', 'Branch appointment on Dec 9', null),
+    handoffItem('00000000-0000-4000-8000-0000000000b2', 'ACCOUNT', 'Shared drive folders and documents owned by the outgoing officer', 'Finance folder ownership moved', '2026-11-16T18:00:00Z'),
+    handoffItem('00000000-0000-4000-8000-0000000000b3', 'ACCESS', 'Cycle roles in Settings (Owner, Board, Recruitment committee)', '', null),
+    handoffItem('00000000-0000-4000-8000-0000000000b4', 'ACCESS', 'Member-tool reviewer grants', '', null),
+    handoffItem('00000000-0000-4000-8000-0000000000b5', 'OPEN_ITEM', 'Pending reimbursements and payments', 'Two receipts from the fall mass meeting', null),
+  ], access: { outgoing: { roles: [{ cycleId: 'preview-cycle', cycleName: 'Fall 2026 recruitment', role: 'OWNER' }, { cycleId: 'preview-cycle', cycleName: 'Fall 2026 recruitment', role: 'BOARD' }], reviewerGrants: [{ cycleId: 'preview-cycle', cycleName: 'Fall 2026 recruitment', tool: 'evidence' }] }, incoming: { roles: [], reviewerGrants: [] } },
+    revision: 3, completedAt: null, createdAt: '2026-11-14T15:00:00Z', updatedAt: '2026-11-16T18:00:00Z', createdByName: 'Bailey Board', updatedByName: 'Bailey Board' },
+  { id: '00000000-0000-4000-8000-0000000000a2', roleTitle: 'Vice President of Recruitment', outgoingId: '00000000-0000-4000-8000-000000000009', outgoingName: 'Casey Graduate', incomingId: '00000000-0000-4000-8000-000000000007', incomingName: 'Riley Recruiter', dueOn: null, status: 'COMPLETE', notes: '', items: [
+    handoffItem('00000000-0000-4000-8000-0000000000b6', 'ACCESS', 'Cycle roles in Settings (Owner, Board, Recruitment committee)', '', '2026-05-02T18:00:00Z'),
+  ], access: { outgoing: { roles: [], reviewerGrants: [] }, incoming: { roles: [{ cycleId: 'preview-cycle', cycleName: 'Fall 2026 recruitment', role: 'RECRUITMENT_COMMITTEE' }], reviewerGrants: [] } },
+    revision: 4, completedAt: '2026-05-02T18:05:00Z', createdAt: '2026-04-20T15:00:00Z', updatedAt: '2026-05-02T18:05:00Z', createdByName: 'Casey Graduate', updatedByName: 'Bailey Board' },
+] };
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'officer_handoffs': return handoffs;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
