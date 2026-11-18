@@ -42,3 +42,6 @@
 - The board sees which member-tool reviewer grants each officer holds (tool and cycle only). Until now only the cycle Owner saw this list. Is that acceptable?
 - The starter checklist is the list in `starterItems` in `src/lib/officer-handoff/model.ts`. Role-specific templates (for example a Treasurer list) are not built.
 - There is no delete and no automatic retention.
+- A Complete handoff can only be saved while every item stays ticked. To add or untick an item, reopen it first; completing it again records a new completion time.
+- A lost response on "Start handoff" can lead to a duplicate if the user retries without reloading (the form says to reload first). There is no idempotency key, the same as the decision log.
+- The incoming officer is not notified. Who tells them, and how, stays with the board.

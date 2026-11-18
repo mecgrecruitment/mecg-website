@@ -105,12 +105,19 @@ select pg_temp.expect_error($q$select rush.save_officer_handoff((select id from 
 select pg_temp.expect_error($q$select rush.save_officer_handoff('00000000-0000-4000-8000-0000000000ff',1,pg_temp.form())$q$,'P0002');
 select pg_temp.expect_error($q$select rush.save_officer_handoff((select id from ids where name='treasurer'),0,pg_temp.form())$q$,'22023');
 
+-- The same item id twice, in different letter case, is refused.
+select pg_temp.expect_error(format('select rush.save_officer_handoff(%L,2,%L)',(select id from ids where name='treasurer'),pg_temp.form(jsonb_build_object('items',jsonb_build_array(
+ jsonb_build_object('id',(select id from item_ids where label='Evidence reviewer grant')::text,'kind','ACCESS','label','a','detail','','done',true),
+ jsonb_build_object('id',upper((select id from item_ids where label='Evidence reviewer grant')::text),'kind','ACCESS','label','b','detail','','done',true))))),'22023');
 -- Saving the same form again is not a new revision.
 create temp table current_form as select jsonb_build_object('roleTitle',h->'roleTitle','outgoingId',h->'outgoingId','incomingId',h->'incomingId','dueOn',h->'dueOn','status',h->'status','notes',h->'notes',
  'items',(select jsonb_agg(jsonb_build_object('id',i->'id','kind',i->'kind','label',i->'label','detail',i->'detail','done',i->'done') order by o) from jsonb_array_elements(h->'items') with ordinality t(i,o))) f
  from jsonb_array_elements(rush.officer_handoffs()->'handoffs') h where h->>'roleTitle'='Treasurer';
 grant all on current_form to authenticated;
 do $$begin if (rush.save_officer_handoff((select id from ids where name='treasurer'),2,(select f from current_form))->>'revision')::int<>2 then raise exception 'no-op bumped revision';end if;end$$;
+do $$declare f jsonb := (select f from current_form); begin
+ f := jsonb_set(f,'{items}',(select jsonb_agg(jsonb_set(i,'{id}',to_jsonb(upper(i->>'id'))) order by o) from jsonb_array_elements(f->'items') with ordinality t(i,o)));
+ if (rush.save_officer_handoff((select id from ids where name='treasurer'),2,f)->>'revision')::int<>2 then raise exception 'upper-case ids bumped revision';end if;end$$;
 
 -- Unticking clears who and when; ticking everything allows Complete, which sets completedAt and moves it after open ones.
 do $$declare f jsonb := (select f from current_form); r jsonb; begin

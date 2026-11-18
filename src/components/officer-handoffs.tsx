@@ -195,11 +195,12 @@ function AccessList({ title, access, empty }: { title: string; access: PersonAcc
   </div>;
 }
 
-function HandoffCard({ handoff, people }: { handoff: Handoff; people: readonly Person[] }) {
-  const saved = useSavedNotice();
+// Saving can move a card between In progress and Finished, which remounts it,
+// so its saved notice lives in the page and not in the card.
+function HandoffCard({ handoff, people, onSaved }: { handoff: Handoff; people: readonly Person[]; onSaved: (status: HandoffStatus) => void }) {
   const { done, total } = progress(handoff.items);
   const open = handoff.status === "OPEN";
-  const form = <HandoffForm key={handoff.revision} handoff={handoff} people={people} onSaved={() => saved.announce("Handoff saved.")} />;
+  const form = <HandoffForm key={handoff.revision} handoff={handoff} people={people} onSaved={onSaved} />;
   return <article className="space-y-4 rounded-xl bg-paper p-5">
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
@@ -229,7 +230,6 @@ function HandoffCard({ handoff, people }: { handoff: Handoff; people: readonly P
         <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Edit<span className="sr-only"> {handoff.roleTitle} handoff</span></summary>
         <div className="mt-4">{form}</div>
       </details>}
-    <SavedNotice text={saved.text} focusRef={saved.ref} />
     <p className="text-xs text-muted">
       Started {formatEasternDateTime(handoff.createdAt)}{handoff.createdByName ? ` by ${handoff.createdByName}` : ""}
       {handoff.revision > 1 ? ` · updated ${formatEasternDateTime(handoff.updatedAt)}${handoff.updatedByName ? ` by ${handoff.updatedByName}` : ""}` : ""}
@@ -240,18 +240,22 @@ function HandoffCard({ handoff, people }: { handoff: Handoff; people: readonly P
 export default function OfficerHandoffs({ board }: { board: HandoffBoard | null }) {
   const [formKey, setFormKey] = useState(0);
   const created = useSavedNotice();
+  const updated = useSavedNotice();
   if (!board) return <section className="rounded-xl bg-warning-wash p-6 text-warning" role="alert">
     <h2 className="text-lg font-semibold">Officer handoffs are unavailable</h2>
     <p className="mt-2 text-sm leading-6">We couldn’t load handoffs. Reload to try again. If this page is newly installed, ask the website maintainer to finish its database setup. Nothing is shown while access can’t be checked.</p>
   </section>;
   const open = board.handoffs.filter((handoff) => handoff.status === "OPEN");
   const finished = board.handoffs.filter((handoff) => handoff.status !== "OPEN");
+  const cardSaved = (role: string) => (status: HandoffStatus) => updated.announce(
+    status === "OPEN" ? `${role} handoff saved.` : `${role} handoff saved as ${statusLabels[status].toLowerCase()}. It is listed under Finished.`);
   return <>
+    <SavedNotice text={updated.text} focusRef={updated.ref} />
     <section aria-labelledby="open-heading" className="space-y-4">
       <h2 id="open-heading" className="text-xl font-semibold text-mecg-navy">In progress</h2>
       {open.length === 0
         ? <p className="rounded-xl bg-wash p-5 text-sm text-muted">No handoffs in progress. Start one below when an officer is changing.</p>
-        : open.map((handoff) => <HandoffCard key={handoff.id} handoff={handoff} people={board.people} />)}
+        : open.map((handoff) => <HandoffCard key={handoff.id} handoff={handoff} people={board.people} onSaved={cardSaved(handoff.roleTitle)} />)}
     </section>
     <section aria-labelledby="start-heading" className="space-y-4 rounded-xl bg-white p-5 inset-ring inset-ring-line">
       <div>
@@ -263,7 +267,7 @@ export default function OfficerHandoffs({ board }: { board: HandoffBoard | null 
     </section>
     {finished.length > 0 && <section aria-labelledby="finished-heading" className="space-y-4">
       <h2 id="finished-heading" className="text-xl font-semibold text-mecg-navy">Finished</h2>
-      {finished.map((handoff) => <HandoffCard key={handoff.id} handoff={handoff} people={board.people} />)}
+      {finished.map((handoff) => <HandoffCard key={handoff.id} handoff={handoff} people={board.people} onSaved={cardSaved(handoff.roleTitle)} />)}
     </section>}
   </>;
 }

@@ -172,7 +172,7 @@ begin
    raise exception 'Check the checklist items' using errcode='22023'; end if;
  end loop;
  if (select count(*) from jsonb_array_elements(items) e where e->>'id' is not null)
-  <>(select count(distinct e->>'id') from jsonb_array_elements(items) e where e->>'id' is not null) then
+  <>(select count(distinct (e->>'id')::uuid) from jsonb_array_elements(items) e where e->>'id' is not null) then
   raise exception 'Check the checklist items' using errcode='22023'; end if;
  total := jsonb_array_length(items);
  done_count := (select count(*) from jsonb_array_elements(items) e where (e->>'done')::boolean);
@@ -213,7 +213,8 @@ begin
 
  old_items := coalesce((select jsonb_agg(jsonb_build_object('id',i.id::text,'kind',i.kind,'label',i.label,'detail',i.detail,'done',i.done_at is not null) order by i.position)
   from rush.officer_handoff_items i where i.handoff_id=target_id),'[]'::jsonb);
- new_items := coalesce((select jsonb_agg(jsonb_build_object('id',e->>'id','kind',e->>'kind','label',e->>'label','detail',e->>'detail','done',(e->>'done')::boolean) order by o)
+ -- Ids compare as uuids, so letter case in the payload is not a change.
+ new_items := coalesce((select jsonb_agg(jsonb_build_object('id',((e->>'id')::uuid)::text,'kind',e->>'kind','label',e->>'label','detail',e->>'detail','done',(e->>'done')::boolean) order by o)
   from jsonb_array_elements(items) with ordinality t(e,o)),'[]'::jsonb);
  if old.role_title<>payload->>'roleTitle' then changed := array_append(changed,'roleTitle'); end if;
  if old.outgoing_id<>outgoing then changed := array_append(changed,'outgoing'); end if;

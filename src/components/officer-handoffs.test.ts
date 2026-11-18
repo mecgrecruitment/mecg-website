@@ -76,6 +76,6 @@ test("handoffs show progress, people, live access and edit history", async (t) =
   assert.equal((html.match(/<form/g) ?? []).length, 3, "the open handoff, the finished one in a disclosure, and the start form");
   assert.equal((html.match(/<summary class="flex min-h-11/g) ?? []).length, 1, "only the finished handoff hides its form");
   assert.equal((html.match(/<dt/g) ?? []).length, (html.match(/<dd/g) ?? []).length);
-  assert.equal((html.match(/tabindex="-1" role="status"/gi) ?? []).length, 3, "one persistent saved-notice region per form, outside the form that remounts");
+  assert.equal((html.match(/tabindex="-1" role="status"/gi) ?? []).length, 2, "one page-level notice for card saves and one for the start form, outside the forms that remount");
   assert.ok(html.indexOf("Treasurer") < html.indexOf("Start a handoff") && html.indexOf("Start a handoff") < html.indexOf("President"));
 });
