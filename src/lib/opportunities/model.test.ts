@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { PIPELINE_STAGES, PIPELINE_TRACKS, formatCalendarDate, parseRollup, rollupGrid } from "./model";
 import { tools } from "@/lib/member-tools/model";
+import { readFileSync } from "node:fs";
 
 const cells = PIPELINE_STAGES.flatMap((stage) => PIPELINE_TRACKS.map((track) => ({ stage, track, count: 0, overdue: 0 })));
 const base = { cycleId: "fall", asOf: "2026-11-18", total: 0, overdue: 0, unclassified: 0, canReview: false, overdueRecords: null, cells };
@@ -10,6 +11,13 @@ test("stage and track lists match the member pipeline form", () => {
   const field = (key: string) => tools.pipeline.fields.find((f) => f.key === key) as { options?: readonly string[] };
   assert.deepEqual([...PIPELINE_STAGES], [...(field("stage").options ?? [])]);
   assert.deepEqual([...PIPELINE_TRACKS], [...(field("track").options ?? [])]);
+});
+
+test("the rollup migration's stage and track arrays match the form", () => {
+  const sql = readFileSync(new URL("../../../supabase/migrations/20261118110000_pipeline_rollup.sql", import.meta.url), "utf8");
+  const array = (name: string) => JSON.parse(`[${sql.match(new RegExp(`${name} text\\[\\] := array\\[([^\\]]*)\\]`))![1]!.replaceAll("'", '"')}]`);
+  assert.deepEqual(array("stages"), [...PIPELINE_STAGES]);
+  assert.deepEqual(array("tracks"), [...PIPELINE_TRACKS]);
 });
 
 test("a non-reviewer rollup parses with counts only", () => {
@@ -31,6 +39,7 @@ test("reviewer overdue records parse with only the listed fields", () => {
   const parsed = parseRollup({ ...base, canReview: true, overdue: 1, total: 1, cells: one, overdueRecords: [record] });
   assert.deepEqual(parsed?.overdueRecords, [record]);
   assert.equal(parseRollup({ ...base, canReview: true, overdue: 1, total: 1, cells: one, overdueRecords: [{ ...record, problem: "Leak" }] }), null);
+  assert.equal(parseRollup({ ...base, canReview: true, overdue: 1, total: 1, cells: one, overdueRecords: [{ ...record, stage: "Won" }] }), null);
   assert.equal(parseRollup({ ...base, canReview: true, overdueRecords: null }), null);
 });
 

@@ -35,6 +35,7 @@ Built November 18, 2026. Route: `/admin/opportunities` (board). Migration: `supa
    - As a member, and as board of another cycle only, confirm `/admin/opportunities` is refused.
 3. Nothing is seeded.
 4. Rollback: roll back the application. Dropping the function has no data impact.
+5. The function uses `pg_input_is_valid`, so it needs PostgreSQL 16 or later. `supabase/config.toml` pins 17. Check the hosted project's version before applying.
 
 ## Owner decisions (defaults in place)
 

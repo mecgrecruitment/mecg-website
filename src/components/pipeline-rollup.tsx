@@ -19,7 +19,7 @@ function OverdueList({ rollup, cycleId }: { rollup: Rollup; cycleId: string }) {
           {records.map((record) => (
             <li key={record.id} className="grid gap-1 border-t border-line py-3 first:border-t-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] sm:items-baseline sm:gap-4">
               <p className="min-w-0 break-words text-sm font-semibold text-mecg-navy">{record.title || "Untitled"}</p>
-              <p className="text-sm text-muted">{record.stage} · {record.track}</p>
+              <p className="text-sm text-muted"><span className="sr-only">Stage and type: </span>{record.stage} · {record.track}</p>
               <p className="tabular-nums text-sm font-semibold text-mecg-orange-ink"><span className="sr-only">Next action was due </span>{formatCalendarDate(record.nextDate)}</p>
               <p className="min-w-0 truncate text-sm text-muted"><span className="sr-only">Owner: </span>{record.ownerName || "Unknown member"}</p>
             </li>
@@ -39,28 +39,28 @@ export default function PipelineRollup({ rollup, cycleId }: { rollup: Rollup | n
     );
   }
   const { rows, trackTotals } = rollupGrid(rollup);
-  const metrics: [string, number][] = [
-    ["Opportunities", rollup.total],
-    ...PIPELINE_TRACKS.map((track): [string, number] => [track, trackTotals[track] ?? 0]),
-    ["Past due", rollup.overdue],
+  const metrics: { label: string; value: number; alert?: boolean }[] = [
+    { label: "Opportunities", value: rollup.total },
+    ...PIPELINE_TRACKS.map((track) => ({ label: track, value: trackTotals[track] ?? 0 })),
+    { label: "Past due", value: rollup.overdue, alert: rollup.overdue > 0 },
   ];
   return (
     <div className="space-y-8">
       <section aria-labelledby="rollup-title" className="space-y-6">
         <h2 id="rollup-title" className="sr-only">Opportunity counts</h2>
         <dl className="grid grid-cols-2 gap-4 border-b border-line pb-6 sm:grid-cols-4">
-          {metrics.map(([label, value]) => (
+          {metrics.map(({ label, value, alert }) => (
             <div key={label}>
               <dt className="text-xs text-muted">{label}</dt>
-              <dd className={`tabular-nums mt-1 text-xl font-semibold ${label === "Past due" && value > 0 ? "text-mecg-orange-ink" : "text-mecg-navy"}`}>{value}</dd>
+              <dd className={`tabular-nums mt-1 text-xl font-semibold ${alert ? "text-mecg-orange-ink" : "text-mecg-navy"}`}>{value}</dd>
             </div>
           ))}
         </dl>
         {rollup.total === 0 ? (
           <p className="text-sm text-muted">No member has added a client or sponsor opportunity in this cycle yet.</p>
         ) : (
-          <div className="workspace-panel rounded-xl bg-white">
-            <table className="w-full text-sm">
+          <div className="workspace-panel overflow-x-auto rounded-xl bg-white">
+            <table className="w-full min-w-[20rem] text-sm">
               <caption className="sr-only">Opportunities by stage and type</caption>
               <thead>
                 <tr className="text-left text-xs font-semibold text-muted">

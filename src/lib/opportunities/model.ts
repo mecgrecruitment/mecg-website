@@ -4,12 +4,16 @@
 // titles come back only when the viewer already holds pipeline reviewer access
 // for the cycle, and only for overdue records.
 
-import { tools } from "@/lib/member-tools/model";
+import { isObject as isRecord, tools } from "@/lib/member-tools/model";
 
-const options = (key: string) => (tools.pipeline.fields.find((field) => field.key === key) as { options?: readonly string[] }).options ?? [];
+function pipelineFieldOptions(key: "stage" | "track"): readonly string[] {
+  const field: { key: string; options?: readonly string[] } | undefined = tools.pipeline.fields.find((candidate) => candidate.key === key);
+  if (!field?.options?.length) throw new Error(`Pipeline field ${key} has no options`);
+  return field.options;
+}
 // Same order as the member pipeline form and the migration's arrays.
-export const PIPELINE_STAGES = options("stage");
-export const PIPELINE_TRACKS = options("track");
+export const PIPELINE_STAGES = pipelineFieldOptions("stage");
+export const PIPELINE_TRACKS = pipelineFieldOptions("track");
 
 export type RollupCell = { stage: string; track: string; count: number; overdue: number };
 export type OverdueRecord = { id: string; title: string; stage: string; track: string; nextDate: string; ownerName: string };
@@ -28,7 +32,6 @@ export type Rollup = {
   cells: RollupCell[];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const isCount = (value: unknown): value is number => typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 const isDate = (value: unknown): value is string => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 const hasOnlyKeys = (value: Record<string, unknown>, keys: readonly string[]) => Object.keys(value).every((key) => keys.includes(key));
@@ -48,8 +51,8 @@ function parseCell(value: unknown): RollupCell | null {
 function parseOverdueRecord(value: unknown): OverdueRecord | null {
   if (!isRecord(value) || !hasOnlyKeys(value, RECORD_KEYS)) return null;
   const { id, title, stage, track, nextDate, ownerName } = value;
-  if (typeof id !== "string" || !id || typeof title !== "string" || typeof stage !== "string" || typeof track !== "string"
-    || !isDate(nextDate) || typeof ownerName !== "string") return null;
+  if (typeof id !== "string" || !id || typeof title !== "string" || typeof stage !== "string" || !PIPELINE_STAGES.includes(stage)
+    || typeof track !== "string" || !PIPELINE_TRACKS.includes(track) || !isDate(nextDate) || typeof ownerName !== "string") return null;
   return { id, title, stage, track, nextDate, ownerName };
 }
 
