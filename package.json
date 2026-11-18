@@ -35,7 +35,8 @@
     "preview:workspaces": "node scripts/preview-workspaces.mjs",
     "verify:release-config": "node scripts/verify-release-config.mjs",
     "verify:member-tools": "node scripts/verify-member-tools.mjs",
-    "verify:member-tools:ui": "node scripts/verify-member-tools-ui.mjs"
+    "verify:member-tools:ui": "node scripts/verify-member-tools-ui.mjs",
+    "verify:staffing-planner": "node scripts/verify-staffing-planner.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.17.0",
