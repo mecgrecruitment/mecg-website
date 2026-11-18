@@ -47,12 +47,13 @@ function HealthBadge({ project, now }: { project: ProjectDelivery; now: Date }) 
 function Summary({ projects, now, today }: { projects: ProjectDelivery[]; now: Date; today: string }) {
   const open = projects.filter((project) => project.status !== "CLOSED");
   const flagged = open.filter((project) => project.health === "AT_RISK" || project.health === "OFF_TRACK").length;
-  const stale = open.filter((project) => healthIsStale(project.healthSetAt, now)).length;
+  // Weekly health matters once work is under way, not while scoping.
+  const stale = open.filter((project) => project.status !== "SCOPING" && healthIsStale(project.healthSetAt, now)).length;
   const blocked = open.filter((project) => openBlockers(project.risks).length > 0).length;
   const late = open.filter((project) => overdueMilestones(project.milestones, today).length > 0).length;
   const items: [string, number][] = [
     ...deliveryStatuses.map((status) => [statusLabels[status], projects.filter((project) => project.status === status).length] as [string, number]),
-    ["At risk or off track", flagged], ["Health not set this week", stale], ["With open blockers", blocked], ["With overdue milestones", late],
+    ["At risk or off track", flagged], ["Active or final, health not set this week", stale], ["With open blockers", blocked], ["With overdue milestones", late],
   ];
   return <dl className="grid grid-cols-2 gap-4 rounded-xl bg-wash p-5 sm:grid-cols-4">
     {items.map(([label, value]) => <div key={label}><dt className="text-xs text-muted">{label}</dt><dd className="tabular mt-1 text-2xl font-semibold text-mecg-navy">{value}</dd></div>)}
@@ -131,7 +132,7 @@ function HealthForm({ project }: { project: ProjectDelivery }) {
   return <form className="space-y-4 border-t border-line pt-5" onSubmit={(event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    void save({ action: "health", projectId: project.projectId, revision: project.revision, health: String(data.get("health") ?? ""), note: String(data.get("note") ?? "") }, "Weekly health recorded.");
+    void save({ action: "health", projectId: project.projectId, health: String(data.get("health") ?? ""), note: String(data.get("note") ?? "") }, "Weekly health recorded.");
   }}>
     <h4 className="text-base font-semibold">Weekly health</h4>
     <p className="text-sm leading-6 text-muted">As lead, confirm this once a week even when nothing changed. The board sees when it was last set.</p>
@@ -177,7 +178,7 @@ function ProjectCard({ project, canManage, now, today }: { project: ProjectDeliv
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h3 className="text-lg font-semibold text-mecg-navy">{project.title}</h3>
-        <p className="text-sm text-muted">{[project.clientLabel, project.semester].filter(Boolean).join(" · ") || "No client label"}</p>
+        <p className="text-sm text-muted">{[project.clientLabel, project.semester, project.closedAt ? `Closed ${formatEasternDateTime(project.closedAt)}` : ""].filter(Boolean).join(" · ") || "No client label"}</p>
       </div>
       <div className="flex flex-wrap gap-2"><StatusPill tone="neutral">{statusLabels[project.status]}</StatusPill><HealthBadge project={project} now={now} /></div>
     </header>
@@ -192,7 +193,7 @@ function ProjectCard({ project, canManage, now, today }: { project: ProjectDeliv
       <summary className="cursor-pointer text-sm font-semibold">Edit delivery</summary>
       <div className="mt-4 space-y-5">
         <DeliveryForm key={project.revision} project={project} />
-        {project.isLead && <HealthForm key={`health-${project.revision}`} project={project} />}
+        {project.isLead && <HealthForm key={`health-${project.healthSetAt ?? "unset"}`} project={project} />}
         {canManage && <LeadForm key={`lead-${project.revision}`} project={project} />}
       </div>
     </details>

@@ -13,6 +13,13 @@ test("signed-out callers cannot reach persistence", async (t) => {
   assert.equal((await POST(request(save))).status, 401);
 });
 
+test("callers without an active membership are refused", async (t) => {
+  t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => ({ ...user, memberships: [{ ...user.memberships[0], active: false }] }) } });
+  t.mock.module("@/lib/supabase/server", unreachable());
+  const { POST } = await route("inactive");
+  assert.equal((await POST(request(save))).status, 403);
+});
+
 test("invalid payloads are refused before the database", async (t) => {
   t.mock.module("@/lib/auth", { namedExports: { currentUser: async () => user } });
   t.mock.module("@/lib/supabase/server", unreachable());
@@ -33,11 +40,12 @@ test("each action calls its own RPC with the parsed values", async (t) => {
   t.mock.module("@/lib/supabase/server", { namedExports: { createClient: async () => ({ rpc: async (name: string, args: Record<string, unknown>) => { calls.push({ name, args }); return { data: {}, error: null }; } }) } });
   const { POST } = await route("actions");
   assert.equal((await POST(request({ ...save, delivery: { ...save.delivery, lastContactNote: "  Call  " } }))).status, 200);
-  assert.equal((await POST(request({ action: "health", projectId: "p1", revision: 1, health: "ON_TRACK", note: "" }))).status, 200);
+  assert.equal((await POST(request({ action: "health", projectId: "p1", health: "ON_TRACK", note: "" }))).status, 200);
   assert.equal((await POST(request({ action: "lead", projectId: "p1", revision: 2, leadId: null }))).status, 200);
   assert.deepEqual(calls.map((call) => call.name), ["save_project_delivery", "set_project_health", "set_project_lead"]);
   assert.equal((calls[0]?.args.payload as { lastContactNote: string }).lastContactNote, "Call");
   assert.equal(calls[2]?.args.target_user, null);
+  assert.equal("expected_revision" in (calls[1]?.args ?? {}), false);
 });
 
 test("database refusals keep their meaning", async (t) => {

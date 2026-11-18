@@ -30,7 +30,7 @@ select rush.set_project_lead('p1',0,'00000000-0000-4000-8000-000000000001');
 -- Stale revision is refused.
 select pg_temp.expect_error($q$select rush.set_project_lead('p1',0,null)$q$,'55000');
 -- Board cannot set health (lead-set only).
-select pg_temp.expect_error($q$select rush.set_project_health('p1',1,'ON_TRACK','')$q$,'42501');
+select pg_temp.expect_error($q$select rush.set_project_health('p1','ON_TRACK','')$q$,'42501');
 
 -- Lead sees only their project, and edits it.
 select set_config('test.actor','00000000-0000-4000-8000-000000000001',false);
@@ -47,28 +47,41 @@ select pg_temp.expect_error($q$select rush.save_project_delivery('p1',2,'{"statu
 select pg_temp.expect_error($q$select rush.save_project_delivery('p1',2,'{"status":"ACTIVE","milestones":[{"id":"m1","title":"","due":"2026-11-20","done":""}],"risks":[],"lastContactOn":"","lastContactNote":""}')$q$,'22023');
 select pg_temp.expect_error($q$select rush.save_project_delivery('p1',2,'{"status":"ACTIVE","milestones":[],"risks":[{"id":"r1","kind":"ISSUE","text":"x","status":"OPEN"}],"lastContactOn":"","lastContactNote":""}')$q$,'22023');
 -- Health: risk flags need a note; lead sets it and it is stamped.
-select pg_temp.expect_error($q$select rush.set_project_health('p1',2,'AT_RISK','  ')$q$,'22023');
-select rush.set_project_health('p1',2,'AT_RISK','Client data is a week late');
+select pg_temp.expect_error($q$select rush.set_project_health('p1','AT_RISK','  ')$q$,'22023');
+select rush.set_project_health('p1','AT_RISK','Client data is a week late');
+-- Duplicate item ids are refused.
+select pg_temp.expect_error($q$select rush.save_project_delivery('p1',2,'{"status":"ACTIVE","milestones":[{"id":"m1","title":"A","due":"2026-11-20","done":""},{"id":"m1","title":"B","due":"2026-11-21","done":""}],"risks":[],"lastContactOn":"","lastContactNote":""}')$q$,'22023');
 do $$declare p jsonb := rush.engagement_tracker()->'projects'->0; begin
- if p->>'health'<>'AT_RISK' or p->>'healthSetAt' is null or p->>'healthSetByName'<>'Lead' or (p->>'revision')::int<>3 or p->>'lastContactOn'<>'2026-11-17'
+ if p->>'health'<>'AT_RISK' or p->>'healthSetAt' is null or p->>'healthSetByName'<>'Lead' or (p->>'revision')::int<>2 or p->>'lastContactOn'<>'2026-11-17'
   or jsonb_array_length(p->'milestones')<>1 then raise exception 'lead save not persisted: %',p;end if;end$$;
 
 -- A staffer who is not lead cannot read or write.
 select set_config('test.actor','00000000-0000-4000-8000-000000000005',false);
 do $$begin if rush.engagement_tracker()->'projects'<>'[]'::jsonb or rush.engagement_leads_any() then raise exception 'staffer saw delivery';end if;end$$;
-select pg_temp.expect_error($q$select rush.set_project_health('p1',3,'ON_TRACK','')$q$,'42501');
+select pg_temp.expect_error($q$select rush.set_project_health('p1','ON_TRACK','')$q$,'42501');
 -- An owner from another cycle counts as board (projects are org-wide).
 select set_config('test.actor','00000000-0000-4000-8000-000000000004',false);
 do $$begin if jsonb_array_length(rush.engagement_tracker()->'projects')<>2 then raise exception 'owner cannot read';end if;end$$;
 -- Board edits status but the health flag is unchanged by its save.
 select set_config('test.actor','00000000-0000-4000-8000-000000000002',false);
-select rush.save_project_delivery('p1',3,'{"status":"FINAL","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
+select rush.save_project_delivery('p1',2,'{"status":"FINAL","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
 do $$begin if rush.engagement_tracker()->'projects'->0->>'health'<>'AT_RISK' or rush.engagement_tracker()->'projects'->0->>'status'<>'FINAL' then raise exception 'board save lost health';end if;end$$;
 
+-- Closing stamps closed_at once; reopening clears it.
+select rush.save_project_delivery('p1',3,'{"status":"CLOSED","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}');
+do $$begin if rush.engagement_tracker()->'projects'->0->>'closedAt' is null then raise exception 'closed_at not stamped';end if;end$$;
+-- Changing the lead clears the previous lead's health flag.
+reset role;
+insert into rush.project_members(project_id,user_id) values('p1','00000000-0000-4000-8000-000000000003');
+set role authenticated;
+select set_config('test.actor','00000000-0000-4000-8000-000000000002',false);
+select rush.set_project_lead('p1',4,'00000000-0000-4000-8000-000000000003');
+do $$begin if rush.engagement_tracker()->'projects'->0->>'health' is not null then raise exception 'health survived lead change';end if;end$$;
+select rush.set_project_lead('p1',5,'00000000-0000-4000-8000-000000000001');
 -- Audit metadata records counts and states, never the free-text notes.
 reset role;
 do $$begin
- if (select count(*) from rush.audit_events where resource_id='p1')<>4 then raise exception 'audit count wrong';end if;
+ if (select count(*) from rush.audit_events where resource_id='p1')<>7 then raise exception 'audit count wrong';end if;
  if exists(select 1 from rush.audit_events where metadata::text ~ '(Weekly call|Waiting on client|week late|Kickoff)') then raise exception 'audit leaked content';end if;
 end$$;
 
@@ -77,7 +90,7 @@ delete from rush.project_members where project_id='p1' and user_id='00000000-000
 set role authenticated;
 select set_config('test.actor','00000000-0000-4000-8000-000000000001',false);
 do $$begin if rush.engagement_tracker()->'projects'<>'[]'::jsonb or rush.engagement_leads_any() then raise exception 'unstaffed lead kept access';end if;end$$;
-select pg_temp.expect_error($q$select rush.save_project_delivery('p1',4,'{"status":"ACTIVE","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}')$q$,'42501');
+select pg_temp.expect_error($q$select rush.save_project_delivery('p1',6,'{"status":"ACTIVE","milestones":[],"risks":[],"lastContactOn":"","lastContactNote":""}')$q$,'42501');
 select set_config('test.actor','00000000-0000-4000-8000-000000000002',false);
 do $$begin if rush.engagement_tracker()->'projects'->0->>'leadStaffed'<>'false' then raise exception 'board not told lead left';end if;end$$;
 -- Deactivated board loses access.

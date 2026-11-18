@@ -24,6 +24,8 @@ test("delivery input rejects injected health, lead and unknown fields", () => {
 
 test("delivery input rejects bad status, impossible dates and empty milestones or risks", () => {
   assert.equal(parseDeliveryInput({ ...delivery, status: "DONE" }).ok, false);
+  assert.equal(parseDeliveryInput({ ...delivery, lastContactOn: "0000-01-01" }).ok, false);
+  assert.equal(parseDeliveryInput({ ...delivery, milestones: [delivery.milestones[0], { ...delivery.milestones[0], title: "Copy" }] }).ok, false);
   assert.equal(parseDeliveryInput({ ...delivery, lastContactOn: "2026-02-30" }).ok, false);
   assert.equal(parseDeliveryInput({ ...delivery, milestones: [{ id: "m1", title: " ", due: "2026-11-20", done: "" }] }).ok, false);
   assert.equal(parseDeliveryInput({ ...delivery, milestones: [{ id: "m1", title: "Kickoff", due: "", done: "" }] }).ok, false);
@@ -56,7 +58,7 @@ test("overdue milestones are past due and not done", () => {
 
 test("tracker responses parse and malformed responses fail closed", () => {
   const row = {
-    projectId: "p1", title: "Alpha", clientLabel: "", semester: "Fall 2026", status: "ACTIVE", leadId: null, leadName: null,
+    projectId: "p1", title: "Alpha", clientLabel: "", semester: "Fall 2026", closedAt: null, status: "ACTIVE", leadId: null, leadName: null,
     leadStaffed: false, health: null, healthNote: "", healthSetAt: null, healthSetByName: null, lastContactOn: "", lastContactNote: "",
     milestones: [], risks: [], revision: 0, updatedAt: null, isLead: false, staff: [{ id: "u1", name: "Synthetic" }],
   };

@@ -9,7 +9,9 @@
 --   * a project lead (assigned by the board, and still staffed on the project)
 --     reads and edits only their own project, and is the only person who sets
 --     the weekly health flag.
--- Writes carry an optimistic revision and are audited with counts and states
+-- Delivery writes carry an optimistic revision; the lead's health flag is a
+-- separate single-writer stamp so recording it never invalidates an open edit.
+-- Writes and are audited with counts and states
 -- only, never the free-text notes.
 create table rush.project_delivery (
  project_id text primary key references rush.projects(id) on delete cascade,
@@ -19,6 +21,7 @@ create table rush.project_delivery (
  health_note text not null default '' check (char_length(health_note) <= 1000),
  health_set_at timestamptz,
  health_set_by uuid references rush.profiles(id) on delete set null,
+ closed_at timestamptz,
  last_contact_on date,
  last_contact_note text not null default '' check (char_length(last_contact_note) <= 1000),
  milestones jsonb not null default '[]'::jsonb,
@@ -73,6 +76,9 @@ begin
  if jsonb_typeof(milestones) is distinct from 'array' or jsonb_array_length(milestones)>30
   or jsonb_typeof(risks) is distinct from 'array' or jsonb_array_length(risks)>30 then
   raise exception 'Invalid milestones or risks' using errcode='22023'; end if;
+ if (select count(distinct value->>'id')<>count(*) from jsonb_array_elements(milestones))
+  or (select count(distinct value->>'id')<>count(*) from jsonb_array_elements(risks)) then
+  raise exception 'Duplicate milestone or risk' using errcode='22023'; end if;
  for item in select value from jsonb_array_elements(milestones) loop
   if jsonb_typeof(item) is distinct from 'object'
    or exists(select 1 from jsonb_object_keys(item) k where k not in ('id','title','due','done'))
@@ -99,7 +105,7 @@ create function rush.engagement_delivery_json(target_project_id text) returns js
 language sql stable security definer set search_path='' as $$
  select jsonb_build_object(
   'projectId',pr.id,'title',pr.title,'clientLabel',pr.client_label,'semester',pr.semester,
-  'status',coalesce(d.status,'SCOPING'),'leadId',d.lead_id,
+  'status',coalesce(d.status,'SCOPING'),'closedAt',d.closed_at,'leadId',d.lead_id,
   'leadName',(select p.display_name from rush.profiles p where p.id=d.lead_id),
   'leadStaffed',d.lead_id is not null and exists(select 1 from rush.project_members pm where pm.project_id=pr.id and pm.user_id=d.lead_id),
   'health',d.health,'healthNote',coalesce(d.health_note,''),'healthSetAt',d.health_set_at,
@@ -158,6 +164,7 @@ begin
  contact := rush.validate_engagement_date(payload->>'lastContactOn');
  perform rush.engagement_lock(target_project_id, expected_revision);
  update rush.project_delivery set status=payload->>'status', milestones=payload->'milestones', risks=payload->'risks',
+  closed_at=case when payload->>'status'<>'CLOSED' then null when status='CLOSED' then closed_at else now() end,
   last_contact_on=contact, last_contact_note=trim(payload->>'lastContactNote'),
   revision=revision+1,
   updated_at=now(), updated_by=actor
@@ -168,20 +175,21 @@ begin
  return rush.engagement_delivery_json(target_project_id);
 end; $$;
 
-create function rush.set_project_health(target_project_id text, expected_revision integer, flag text, note text) returns jsonb
+create function rush.set_project_health(target_project_id text, flag text, note text) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare d rush.project_delivery%rowtype; actor uuid := rush.actor_id();
+declare actor uuid := rush.actor_id();
 begin
  if not rush.engagement_is_lead(target_project_id) then
   raise exception 'Only the project lead sets the weekly health flag' using errcode='42501'; end if;
  if flag is null or flag not in ('ON_TRACK','AT_RISK','OFF_TRACK') or note is null or char_length(note)>1000
   or (flag<>'ON_TRACK' and trim(note)='') then
   raise exception 'Choose a health flag and explain any risk' using errcode='22023'; end if;
- perform rush.engagement_lock(target_project_id, expected_revision);
- update rush.project_delivery set health=flag, health_note=trim(note), health_set_at=now(), health_set_by=actor,
-  revision=revision+1, updated_at=now(), updated_by=actor where project_id=target_project_id returning * into d;
+ -- Only the current lead writes these fields, and each write is a fresh
+ -- weekly stamp, so it does not take or bump the delivery revision.
+ update rush.project_delivery set health=flag, health_note=trim(note), health_set_at=now(), health_set_by=actor
+  where project_id=target_project_id;
  insert into rush.audit_events(actor_id,action,resource,resource_id,metadata)
- values(actor,'PROJECT_HEALTH_SET','Project',target_project_id,jsonb_build_object('health',flag,'revision',d.revision));
+ values(actor,'PROJECT_HEALTH_SET','Project',target_project_id,jsonb_build_object('health',flag));
  return rush.engagement_delivery_json(target_project_id);
 end; $$;
 
@@ -194,7 +202,13 @@ begin
   where pm.project_id=target_project_id and pm.user_id=target_user and p.active) then
   raise exception 'Staff this member on the project before making them lead' using errcode='22023'; end if;
  perform rush.engagement_lock(target_project_id, expected_revision);
- update rush.project_delivery set lead_id=target_user, revision=revision+1, updated_at=now(), updated_by=actor
+ -- The health flag is the outgoing lead's judgement; a new lead starts unset.
+ update rush.project_delivery set
+  health=case when lead_id is distinct from target_user then null else health end,
+  health_note=case when lead_id is distinct from target_user then '' else health_note end,
+  health_set_at=case when lead_id is distinct from target_user then null else health_set_at end,
+  health_set_by=case when lead_id is distinct from target_user then null else health_set_by end,
+  lead_id=target_user, revision=revision+1, updated_at=now(), updated_by=actor
   where project_id=target_project_id returning * into d;
  insert into rush.audit_events(actor_id,action,resource,resource_id,metadata)
  values(actor,'PROJECT_LEAD_SET','Project',target_project_id,jsonb_build_object('leadId',target_user,'revision',d.revision));
@@ -204,6 +218,6 @@ end; $$;
 revoke all on function rush.engagement_is_board(), rush.engagement_is_lead(text), rush.engagement_leads_any(), rush.validate_engagement_date(text),
  rush.validate_engagement_lists(jsonb,jsonb), rush.engagement_delivery_json(text), rush.engagement_tracker(),
  rush.engagement_lock(text,integer), rush.save_project_delivery(text,integer,jsonb),
- rush.set_project_health(text,integer,text,text), rush.set_project_lead(text,integer,uuid) from public, anon, authenticated;
+ rush.set_project_health(text,text,text), rush.set_project_lead(text,integer,uuid) from public, anon, authenticated;
 grant execute on function rush.engagement_tracker(), rush.engagement_leads_any(), rush.save_project_delivery(text,integer,jsonb),
- rush.set_project_health(text,integer,text,text), rush.set_project_lead(text,integer,uuid) to authenticated;
+ rush.set_project_health(text,text,text), rush.set_project_lead(text,integer,uuid) to authenticated;

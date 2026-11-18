@@ -29,6 +29,7 @@ export type ProjectDelivery = DeliveryInput & {
   title: string;
   clientLabel: string;
   semester: string;
+  closedAt: string | null;
   leadId: string | null;
   leadName: string | null;
   leadStaffed: boolean;
@@ -62,7 +63,7 @@ function includes<T extends string>(list: readonly T[], value: unknown): value i
 }
 
 export function isIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value < "0001-01-01") return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
@@ -85,10 +86,11 @@ function parseRisk(value: unknown): Risk | null {
   return { id, kind, text: trimmed, status };
 }
 
-function parseList<T>(value: unknown, parse: (item: unknown) => T | null): T[] | null {
+function parseList<T extends { id: string }>(value: unknown, parse: (item: unknown) => T | null): T[] | null {
   if (!Array.isArray(value) || value.length > LIST_LIMIT) return null;
   const items = value.map(parse);
-  return items.every((item): item is T => item !== null) ? items : null;
+  if (!items.every((item): item is T => item !== null)) return null;
+  return new Set(items.map((item) => item.id)).size === items.length ? items : null;
 }
 
 export function parseDeliveryInput(input: unknown): Parsed<DeliveryInput> {
@@ -153,6 +155,7 @@ function parseProject(value: unknown): ProjectDelivery {
     clientLabel: text(value.clientLabel),
     semester: text(value.semester),
     status: value.status,
+    closedAt: nullableText(value.closedAt),
     leadId: nullableText(value.leadId),
     leadName: nullableText(value.leadName),
     leadStaffed: value.leadStaffed,

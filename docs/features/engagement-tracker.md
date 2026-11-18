@@ -12,7 +12,10 @@ Built November 18, 2026. Routes: `/admin/projects` (board), `/member/projects` (
   - the lead's weekly health flag (On track, At risk, Off track) with a note and when it was set
 - The board view starts with a summary: projects by status, at risk or off track, health not set this week, open blockers, overdue milestones. Each project card shows the lead, next milestone, open blockers and health. "Edit delivery" opens the forms.
 - A health flag older than seven days, or never set, is marked "over a week old" and counted in the summary. Milestone dates use the Detroit calendar day.
-- Saves use optimistic revisions. A stale edit is refused with "Delivery record changed. Reload before saving." and the form keeps its values.
+- Moving a project to Closed stamps `closed_at` once; reopening clears it. The board or the lead may close a project (feature 2, client close-out, keys off this).
+- Changing the lead clears the previous lead's health flag; the new lead starts unset.
+- The health flag is a single-writer stamp by the lead and does not take or bump the delivery revision, so recording health never invalidates an open delivery edit.
+- Delivery saves use optimistic revisions. A stale edit is refused with "Delivery record changed. Reload before saving." and the form keeps its values.
 
 ## Access
 
@@ -26,6 +29,7 @@ Built November 18, 2026. Routes: `/admin/projects` (board), `/member/projects` (
 - A lead must be staffed on the project. If staffing later removes them, they lose access at once. The board card then shows "no longer staffed, reassign".
 - No table grants or policies. All access goes through actor-checked `SECURITY DEFINER` RPCs: `engagement_tracker`, `save_project_delivery`, `set_project_health`, `set_project_lead`, and `engagement_leads_any`, the nav hint that shows "Projects I lead" only to current leads.
 - Audit events (`PROJECT_DELIVERY_SAVED`, `PROJECT_HEALTH_SET`, `PROJECT_LEAD_SET`) record status, health level, revision, milestone count, open-blocker count and the lead ID. Free-text notes are never copied into audit metadata.
+- Delivery records are board operating data, not private member-tool records. The member-tools rule that board rank alone never unlocks those records still holds; the owner's spec for this feature is "Board sees all".
 - Delivery notes are internal. Nothing here reaches the public `/work` pages. `public_projects()` is unchanged.
 
 ## Rollout
@@ -47,6 +51,7 @@ Built November 18, 2026. Routes: `/admin/projects` (board), `/member/projects` (
   - the access matrix above
   - direct table denial
   - stale-revision refusal
+  - closed_at stamping, health cleared on lead change, duplicate item ids refused
   - validation (unknown keys, injected health or lead, bad dates and statuses, empty milestones, bad risk kinds)
   - lead-only health
   - lead loss on unstaffing
