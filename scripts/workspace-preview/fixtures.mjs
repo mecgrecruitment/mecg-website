@@ -16,9 +16,19 @@ const applicationResponses = applications.flatMap(application => [
 ]);
 const tableData = { application_responses: applicationResponses, rush_cycles: [cycle], rounds, applications, memberships: members, profiles: [{ id: 'preview-user', display_name: 'Morgan Member', primary_email: 'preview@example.invalid', grad_term: 'Winter 2028', major: 'Mechanical Engineering', position_title: 'Member', bio: 'Fictional preview profile.' }], evaluation_assignments: assignments, events: [event], event_slots: [{ id: 'preview-slot', event_id: event.id, starts_at: event.starts_at, ends_at: event.ends_at, capacity: 12, slot_rsvps: [{ id: 'rsvp-1' }], events: event }], messages: [{ id: 'preview-message', application_id: 'preview-app-4', cycle_id: cycle.id, kind: 'EMAIL', recipient: 'applicant4@example.invalid', subject: 'Your Group Case invitation', delivered: true, created_at: '2026-10-16T15:00:00Z' }], referrals: [], buddy_slots: [], decisions: [], hash_votes: [], event_impressions: [], conflict_declarations: [], notification_outbox: [], calibration_acknowledgements: [] };
 const context = { cycleId: cycle.id, isScreeningReviewer: false, openScreeningCount: 3, openEvaluationCount: 2, openCalibrationCount: 0, openLiveEventCount: 0, openTaskCount: 2, hasGradingEvent: false, hasSpeedDatingRound: true, hasGroupCaseWork: true };
+const cycleRecordsStatus = process.env.PREVIEW_CYCLE_STATUS ?? 'CLOSED';
+const cycleRecords = { cycle: { id: 'preview-cycle', name: 'Fall recruitment · Sample cycle', status: cycleRecordsStatus, archivedAt: cycleRecordsStatus === 'ARCHIVED' ? '2026-11-18T15:00:00Z' : null },
+  tools: [{ kind: 'pipeline', records: 14, full: false }, { kind: 'evidence', records: 9, full: true }, { kind: 'lab', records: 3, full: false }], projects: 6,
+  lastExportAt: '2026-11-18T14:00:00Z', exportedSinceClose: process.env.PREVIEW_NOT_EXPORTED ? null : '2026-11-18T14:00:00Z' };
+const retentionReport = { generatedAt: '2026-11-18T16:00:00Z', categories: [
+  { category: 'audit_events', keepMonths: null, revision: 1, updatedAt: '2026-11-18T00:00:00Z', eligible: null, byCycle: null },
+  { category: 'member_tool_records', keepMonths: 36, revision: 2, updatedAt: '2026-11-18T00:00:00Z', eligible: 41, byCycle: [{ cycleId: 'fall-2022', cycleName: 'Fall 2022 recruitment', archivedAt: '2023-01-10T15:00:00Z', records: 29 }, { cycleId: 'winter-2023', cycleName: 'Winter 2023 recruitment', archivedAt: '2023-05-02T15:00:00Z', records: 12 }] },
+] };
 function rpc(name) {
   switch (name) {
     case 'workspace_context': return context;
+    case 'cycle_records_overview': return cycleRecords;
+    case 'retention_report': return retentionReport;
     case 'member_tool_workspace': return { canReview: false, canManageAccess: false, records: [] };
     case 'is_active_screening_reviewer': return false;
     case 'my_round_calibrations': case 'my_grading_events': case 'my_calibration_states': case 'calibration_states': case 'hash_notes': case 'cycle_member_onboarding': case 'my_member_onboarding': case 'cycle_application_questions': return [];
