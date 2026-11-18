@@ -53,7 +53,9 @@ export const tools = {
 export function isToolKind(value: unknown): value is ToolKind { return toolKinds.some((kind) => kind === value); }
 export function fieldsFor(kind: ToolKind): readonly Field[] { return tools[kind].fields; }
 export type ToolContent = Readonly<Record<string, string>>;
-export type ToolRecord = { id: string; kind: ToolKind; ownerId: string; ownerName: string; revision: number; content: ToolContent; review: Review; updatedAt: string };
+// `missing` lists required fields a stored draft still lacks (a client close-out
+// draft starts that way); saving always requires every field.
+export type ToolRecord = { id: string; kind: ToolKind; ownerId: string; ownerName: string; revision: number; content: ToolContent; review: Review; updatedAt: string; missing: string[] };
 export const verificationStates = ["Pending", "Needs changes", "Verified"] as const;
 export const sharingStates = ["Restricted", "Cleared for specified use", "Withdrawn"] as const;
 export type Review = { verification: typeof verificationStates[number]; sharing: typeof sharingStates[number]; note: string; source: string; scope: string; reviewerId: string | null };
@@ -63,7 +65,7 @@ export function safeLink(value: string): boolean {
   // Match the database boundary: HTTPS host, no credentials, ports or whitespace.
   return /^https:\/\/[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?:[/?#][^\s]*)?$/.test(value);
 }
-export function parseContent(kind: ToolKind, input: unknown): { ok: true; value: ToolContent } | { ok: false; error: string } {
+export function parseContent(kind: ToolKind, input: unknown, { stored = false }: { stored?: boolean } = {}): { ok: true; value: ToolContent } | { ok: false; error: string } {
   if (!isObject(input)) return { ok: false, error: "Invalid form data." };
   const fields = fieldsFor(kind);
   if (Object.keys(input).some((key) => !fields.some((field) => field.key === key))) return { ok: false, error: "Unknown field." };
@@ -72,13 +74,13 @@ export function parseContent(kind: ToolKind, input: unknown): { ok: true; value:
     const raw = input[field.key] ?? "";
     if (typeof raw !== "string") return { ok: false, error: `${field.label} must be text.` };
     const text = raw.trim();
-    if ((field.required && !text) || text.length > (field.type === "textarea" ? 4000 : 1000)) return { ok: false, error: `Check ${field.label.toLowerCase()}.` };
+    if ((field.required && !text && !stored) || text.length > (field.type === "textarea" ? 4000 : 1000)) return { ok: false, error: `Check ${field.label.toLowerCase()}.` };
     if (text && field.options && !field.options.includes(text)) return { ok: false, error: `Choose a valid ${field.label.toLowerCase()}.` };
     if (text && field.type === "url" && !safeLink(text)) return { ok: false, error: `${field.label} must be an HTTPS link without credentials.` };
     if (text && field.type === "date" && (!/^\d{4}-\d{2}-\d{2}$/.test(text) || !Number.isFinite(Date.parse(text)) || new Date(text).toISOString().slice(0, 10) !== text)) return { ok: false, error: `Check ${field.label.toLowerCase()}.` };
     value[field.key] = text;
   }
-  if (kind === "pipeline" && value.stage !== "Research" && !value.qualification) return { ok: false, error: "Add evidence for this stage." };
+  if (!stored && kind === "pipeline" && value.stage !== "Research" && !value.qualification) return { ok: false, error: "Add evidence for this stage." };
   return { ok: true, value };
 }
 export function parseReview(input: unknown): Review | null {
@@ -96,8 +98,10 @@ export function parseRecords(input: unknown): ToolRecord[] {
   if (!Array.isArray(input)) throw new Error("Invalid tool records");
   return input.map((row: unknown) => {
     if (!isObject(row) || typeof row.id !== "string" || !isToolKind(row.kind) || typeof row.owner_id !== "string" || typeof row.owner_name !== "string" || !Number.isSafeInteger(row.revision) || typeof row.revision !== "number" || typeof row.updated_at !== "string") throw new Error("Invalid tool record");
-    const content = parseContent(row.kind, row.content); const review = parseReview(row.review);
+    const kind = row.kind;
+    const content = parseContent(kind, row.content, { stored: true }); const review = parseReview(row.review);
     if (!content.ok || !review) throw new Error("Invalid tool record content");
-    return { id: row.id, kind: row.kind, ownerId: row.owner_id, ownerName: row.owner_name, revision: row.revision, content: content.value, review, updatedAt: row.updated_at };
+    const missing = fieldsFor(kind).filter((field) => field.required && !content.value[field.key]).map((field) => field.label);
+    return { id: row.id, kind, ownerId: row.owner_id, ownerName: row.owner_name, revision: row.revision, content: content.value, review, updatedAt: row.updated_at, missing };
   });
 }

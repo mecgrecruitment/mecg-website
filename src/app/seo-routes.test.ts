@@ -11,7 +11,7 @@ test("robots permits public crawling and excludes account and token-bearing rout
   assert.equal(rules?.userAgent, "*");
   assert.equal(rules?.allow, "/");
   assert.ok(Array.isArray(rules?.disallow));
-  for (const path of ["/admin", "/member", "/applicant", "/apply", "/checkin", "/auth", "/api", "/login", "/sign-up", "/forgot-password", "/reset-password", "/access-denied"]) {
+  for (const path of ["/admin", "/member", "/applicant", "/apply", "/checkin", "/feedback", "/auth", "/api", "/login", "/sign-up", "/forgot-password", "/reset-password", "/access-denied"]) {
     assert.ok(rules.disallow.includes(path), `missing crawl exclusion: ${path}`);
   }
   for (const path of PUBLIC_MARKETING_PATHS) assert.ok(!rules.disallow.includes(path));
