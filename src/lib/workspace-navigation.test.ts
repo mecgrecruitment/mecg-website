@@ -65,6 +65,7 @@ test("owners receive every administrative destination", () => {
   }), [
     ["/admin/audit", "Activity"],
     ["/admin/projects", "Projects"],
+    ["/admin/consulting", "Consulting hub"],
     ["/admin/settings", "Settings"],
     ["/admin/operations", "Operations"],
   ]);

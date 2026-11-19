@@ -85,6 +85,9 @@ const nextConfig: NextConfig = {
   // otherwise deployments contain pdf.mjs but omit pdf.worker.mjs.
   outputFileTracingIncludes: {
     "/api/apply/resume/finalize": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+    // The board consulting hub reads its encrypted bundle from disk at request time.
+    "/admin/consulting": ["./content/consulting-hub.enc"],
+    "/admin/consulting/**": ["./content/consulting-hub.enc"],
   },
   deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
   poweredByHeader: false,
@@ -105,6 +108,13 @@ const nextConfig: NextConfig = {
     ];
     return [
       { source: "/:path*", headers: securityHeaders },
+      // Standalone HTML from the board consulting hub runs in an opaque sandboxed
+      // origin (the route sets the same policy), so its scripts cannot use the
+      // board session. Listed after the site-wide rule so it wins for these paths.
+      {
+        source: "/admin/consulting/file/:id/:name(.*\\.html)",
+        headers: [{ key: "Content-Security-Policy", value: `${contentSecurityPolicy}; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads` }],
+      },
       {
         source: "/:workspace(admin|member|applicant)/:path*",
         headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
