@@ -48,7 +48,7 @@ export function workspaceAdminTools({
     ...(canRecruitmentOperations
       ? [["/admin/audit", "Activity"] as const]
       : []),
-    ...(isBoard ? [["/admin/projects", "Projects"] as const] : []),
+    ...(isBoard ? [["/admin/projects", "Projects"] as const, ["/admin/consulting", "Consulting hub"] as const] : []),
     ...(canManageCycle ? [["/admin/settings", "Settings"] as const] : []),
     ...(isOwner ? [["/admin/operations", "Operations"] as const] : []),
   ];

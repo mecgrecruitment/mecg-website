@@ -23,6 +23,7 @@ type Guard = "session" | "cron";
 type Handler = (req: NextRequest, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
 
 const ROUTES: Array<{ path: string; methods: Method[]; expect: number; guard?: Guard }> = [
+  { path: "../admin/consulting/file/[id]/[name]/route.ts", methods: ["GET"], expect: 401 },
   { path: "./admin/applications/[id]/headshot/route.ts", methods: ["GET"], expect: 401 },
   { path: "./admin/applications/[id]/resume/route.ts", methods: ["GET"], expect: 401 },
   { path: "./admin/decisions/route.ts", methods: ["POST"], expect: 401 },
